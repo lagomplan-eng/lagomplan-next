@@ -1,0 +1,258 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/**
+ * globals.css — Lagomplan design tokens
+ *
+ * Brand guide corrections applied:
+ *  --pine    #0F3A33   (was --forest #1B4D3E)
+ *  --sage    #6B8F86   (was #C8D9D3 — completely different hue)
+ *  --sand    #EDE7E1   (was --cream #F4F0E8)
+ *  --coral   #E1615B   (CTA accent — was --accent #6EBD9F)
+ *  --fjord   #2D4F6C   (links/info — new)
+ *  --cream   #FFF9F3   (card surface — was --card #FDFCF9)
+ *
+ * Font correction:
+ *  --font-sans     Manrope   (was DM Sans)
+ *  --font-display  Fraunces  (was Playfair Display)
+ *  --font-mono     DM Mono   (kept for utility labels — not in brand guide but functional)
+ */
+
+:root {
+  /* Brand primaries */
+  --pine:    #0F3A33;
+  --sage:    #6B8F86;
+  --sand:    #EDE7E1;
+  --fjord:   #2D4F6C;
+  --coral:   #E1615B;
+  --cream:   #FFF9F3;
+
+  /* Functional */
+  --success: #2F7D46;
+  --warning: #B07D2B;
+  --error:   #B33A3A;
+
+  /* Migration aliases — remove after component color pass */
+  --forest:  #0F3A33;
+  --ink:     #0F3A33;
+  --muted:   #3D6B5C;
+  --mint:    #E4EFEC;
+  --accent:  #E1615B;
+  --card:    #FFF9F3;
+  --border:  #C8BFB5;
+
+  /* Type scale */
+  --text-xs:   0.75rem;
+  --text-sm:   0.875rem;
+  --text-base: 1rem;
+  --text-lg:   1.125rem;
+  --text-xl:   1.375rem;
+  --text-2xl:  1.75rem;
+  --text-3xl:  2.25rem;
+}
+
+/* ── Base ─────────────────────────────────────────────── */
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
+  background: var(--cream);
+  color: var(--pine);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.55;
+}
+
+/* ── Shared section utilities ─────────────────────────── */
+
+/* Section label — e.g. "GUÍAS CURADAS" */
+.sec-label {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.6875rem;    /* 11px */
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  color: var(--sage);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 12px;
+}
+
+/* Page max-width container */
+.page-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* ── Buttons ──────────────────────────────────────────── */
+
+/* Primary CTA — Pine as per brand guide */
+.btn-solid {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background: var(--pine);
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s, transform 0.1s;
+  border: none;
+  cursor: pointer;
+}
+.btn-solid:hover {
+  background: #1a4a42;
+  transform: translateY(-1px);
+}
+
+/* Secondary / outline */
+.btn-outline {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  border: 1.5px solid var(--pine);
+  color: var(--pine);
+  padding: 12px 24px;
+  border-radius: 8px;
+  text-decoration: none;
+  display: inline-block;
+  transition: background 0.15s;
+  background: transparent;
+  cursor: pointer;
+}
+.btn-outline:hover { background: var(--mint); }
+
+/* Ghost — for nav/links */
+.btn-ghost {
+  font-family: var(--font-sans), sans-serif;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--pine);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+.btn-ghost:hover { color: var(--sage); }
+
+/* ── Guide cards ──────────────────────────────────────── */
+.guide-card {
+  background: #FFFFFF;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid rgba(200,191,181,.3);
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.guide-card:hover {
+  box-shadow: 0 8px 28px rgba(15,58,51,.09);
+  transform: translateY(-2px);
+}
+.guide-img-wrap {
+  overflow: hidden;
+  aspect-ratio: 4/5;
+  border-radius: 0;
+}
+.guide-card-body {
+  padding: 16px 18px 20px;
+}
+.guide-img {
+  width: 100%; height: 100%;
+  object-fit: cover; display: block;
+  transition: transform 0.6s ease;
+}
+.guide-card:hover .guide-img { transform: scale(1.04); }
+
+/* ── Date picker cells ────────────────────────────────── */
+.dc {
+  height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px; border-radius: 4px;
+  position: relative; user-select: none; cursor: pointer;
+  color: var(--pine); transition: background 0.08s, color 0.08s;
+}
+.dc.emp, .dc.past { pointer-events: none; color: #bbb; cursor: default; }
+.dc.tod { outline: 1px solid var(--sage); outline-offset: -1px; }
+.dc:not(.past):not(.emp):not(.ss):not(.se):hover { background: var(--mint); color: var(--pine); }
+.dc.ss, .dc.se { background: var(--pine) !important; color: var(--cream) !important; font-weight: 600; z-index: 1; }
+.dc.ir, .dc.hr { background: var(--mint); color: var(--pine); border-radius: 0; }
+.dc.ss.xr::after  { content: ''; position: absolute; top: 0; bottom: 0; left: 50%; right: -1px; background: var(--mint); z-index: -1; }
+.dc.se.xl::before { content: ''; position: absolute; top: 0; bottom: 0; right: 50%; left: -1px; background: var(--mint); z-index: -1; }
+
+/* ── Mobile hamburger ─────────────────────────────────── */
+.nav-hamburger {
+  display: none; flex-direction: column; gap: 5px;
+  cursor: pointer; padding: 4px; background: none; border: none;
+}
+.nav-hamburger span {
+  display: block; width: 22px; height: 1.5px;
+  background: var(--pine); transition: all 0.2s;
+}
+.nav-hamburger.open span:nth-child(1) { transform: rotate(45deg) translate(4.5px, 4.5px); }
+.nav-hamburger.open span:nth-child(2) { opacity: 0; }
+.nav-hamburger.open span:nth-child(3) { transform: rotate(-45deg) translate(4.5px, -4.5px); }
+
+/* ── Responsive ───────────────────────────────────────── */
+@media (max-width: 768px) {
+  .page-inner { padding: 0 20px; }
+  .nav-hamburger { display: flex; }
+  .hide-mobile { display: none !important; }
+}
+@media (min-width: 769px) {
+  .show-mobile-only { display: none !important; }
+}
+
+/* ── Sections ─────────────────────────────────────────── */
+.section {
+  padding: 80px 0;
+}
+
+.section-tight {
+  padding: 60px 0;
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero {
+  padding-top: 120px; /* accounts for fixed nav */
+  padding-bottom: 80px;
+}
+
+.hero-title {
+  font-family: var(--font-display), serif;
+  font-size: 42px;
+  line-height: 1.2;
+  font-weight: 600;
+  font-style: italic;
+  color: var(--pine);
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  color: var(--sage);
+  max-width: 520px;
+}
+
+/* ── Grids ────────────────────────────────────────────── */
+.guides-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+@media (max-width: 768px) {
+  .guides-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Typography helpers ───────────────────────────────── */
+.h2 {
+  font-family: var(--font-display), serif;
+  font-style: italic;
+  font-size: 28px;
+  margin-bottom: 16px;
+}
+
+

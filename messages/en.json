@@ -1,0 +1,194 @@
+{
+  "meta": {
+    "title": "Lagomplan — Travel well. Plan less.",
+    "description": "AI-powered travel planner for those who know what they want. Full itinerary in minutes."
+  },
+  "nav": {
+    "planner": "Planner",
+    "guides": "Guides",
+    "hotels": "Hotels",
+    "login": "Log in",
+    "signup": "Sign up",
+    "myTrips": "My trips",
+    "logout": "Log out"
+  },
+  "hero": {
+    "eyebrow": "AI-powered travel planner",
+    "headline": "Travel well.",
+    "headlineItalic": "Plan less.",
+    "subhead": "Tell us where you want to go. In minutes you have your itinerary, hotel recommendations and budget ready.",
+    "socialProof": "{count}+ plans created this month"
+  },
+  "form": {
+    "title": "Plan your trip",
+    "origin": "From",
+    "originPlaceholder": "Where are you flying from?",
+    "destination": "To",
+    "destinationPlaceholder": "Oaxaca, Barcelona, Tokyo…",
+    "dates": "Dates",
+    "datesPlaceholder": "Select your dates",
+    "whoTravels": "Who's traveling?",
+    "solo": "Solo",
+    "pareja": "Couple",
+    "familia": "Family",
+    "amigos": "Friends",
+    "adults": "Adults",
+    "childrenAges": "Children's ages",
+    "addChild": "+ Add child",
+    "groupCount": "How many traveling?",
+    "interests": "Interests",
+    "interestsPlaceholder": "Anything else? E.g. yoga, surfing, wine bars, local markets…",
+    "pace": "Trip pace",
+    "paceRelax": "Relaxed",
+    "paceBalance": "Balanced",
+    "paceActive": "Active",
+    "budget": "Total trip budget",
+    "budgetPlaceholder": "What's your ballpark?",
+    "budgetCurrency": "MXN",
+    "submit": "Plan my trip →",
+    "freeNote": "✦ First plan free · No card · No signup",
+    "googlePowered": "Powered by Google Maps",
+    "suggestions": "Suggestions",
+    "night": "night",
+    "nights": "nights",
+    "nightSelected": "night selected",
+    "nightsSelected": "nights selected",
+    "selectStart": "Select your departure date",
+    "selectEnd": "Now select your return date",
+    "clear": "Clear",
+    "confirm": "Confirm →",
+    "errorFrom": "Where are you traveling from?",
+    "errorDestination": "Where would you like to go?",
+    "errorDates": "Select your travel dates.",
+    "errorTraveler": "Who is traveling?",
+        "errorPace": "How would you like to travel?"
+  },
+  "interests": {
+    "playa": "🌴 Beach",
+    "gastronomy": "🍽 Food & Drink",
+    "culture": "🏛 Culture",
+    "nature": "🌿 Nature",
+    "adventure": "🧗 Adventure",
+    "art": "🎨 Art",
+    "nightlife": "🌙 Nightlife",
+    "shopping": "🛍 Shopping"
+  },
+  "trust": {
+    "itinerary": "Itinerary in minutes",
+    "hotels": "Hotel recommendations",
+    "budget": "Budget breakdown",
+    "whatsapp": "Share via WhatsApp",
+    "familyMode": "✓ Family mode on"
+  },
+  "howItWorks": {
+    "eyebrow": "02 — How it works",
+    "headline": "From idea to plan,",
+    "headlineItalic": "in minutes.",
+    "step1Title": "Tell us about your trip",
+    "step1Body": "Destination, dates, travel style and budget. Less than two minutes.",
+    "step2Title": "AI plans it for you",
+    "step2Body": "Day-by-day itinerary, hotels, activities and budget breakdown. All in one screen.",
+    "step3Title": "Adjust and share",
+    "step3Body": "Edit, share via WhatsApp or save your plan. Unlock more with Explorer."
+  },
+  "guides": {
+    "eyebrow": "03 — Curated guides",
+    "headline": "Destinations we",
+    "headlineItalic": "know well.",
+    "seeAll": "See all guides →",
+    "affiliateLabel": "Recommended hotels in every guide",
+    "affiliateBody": "Book directly from your plan with our partners Viator and GetYourGuide",
+    "seeHotels": "See hotels →"
+  },
+  "philosophy": {
+    "eyebrow": "04 — Philosophy",
+    "headline": "Lagom — not too much,",
+    "headlineItalic": "not too little. Just right.",
+    "body1": "The Swedish concept lagom has no exact translation, but it describes exactly how a well-planned trip should feel: no impossible itinerary, no decision paralysis.",
+    "body2": "We do the heavy lifting so you can be present wherever you are."
+  },
+  "testimonials": {
+    "eyebrow": "05 — Reviews",
+    "headline": "What people say after",
+    "headlineItalic": "traveling with us."
+  },
+  "explorer": {
+    "eyebrow": "06 — Explorer · Subscription plan",
+    "headline": "Unlimited plans.",
+    "headlineItalic": "Better trips.",
+    "body": "Your first plan is always free. When you want more — trip history, unlimited plans, downloadable PDF and priority support — Explorer delivers.",
+    "price": "$199",
+    "currency": "MXN / month",
+    "cta": "Try Explorer free →",
+    "trial": "14 days free · Cancel anytime",
+    "features": {
+      "unlimited": "Unlimited plans — no limit on destinations or trips per month",
+      "history": "Trip history — all your plans saved and accessible anytime",
+      "pdf": "Downloadable PDF — share your itinerary without internet or account",
+      "whatsapp": "Private WhatsApp link — share with your group without them signing up",
+      "exclusive": "Exclusive guides — content only for Explorer members"
+    }
+  },
+  "cta": {
+    "eyebrow": "07 — Start free",
+    "headline": "Your next trip,",
+    "headlineItalic": "ready in minutes.",
+    "body": "No signup. No card. The first plan is completely free.",
+    "button": "Plan now →"
+  },
+  "newsletter": {
+    "headline": "Travel first from your inbox.",
+    "body": "New ideas and guides — straight to your email.",
+    "placeholder": "Your email address",
+    "button": "Subscribe"
+  },
+  "footer": {
+    "tagline": "AI travel planner for those who travel with purpose.",
+    "email": "hello@lagomplan.com",
+    "explore": "Explore",
+    "connect": "Connect",
+    "links": {
+      "guides": "Travel guides",
+      "hotels": "Hotels",
+      "planner": "Planner",
+      "about": "About us",
+      "contact": "Contact",
+      "instagram": "Instagram"
+    },
+    "copyright": "© {year} Lagomplan — All rights reserved",
+    "privacy": "Privacy policy"
+  },
+  "months": {
+    "0": "January",
+    "1": "February",
+    "2": "March",
+    "3": "April",
+    "4": "May",
+    "5": "June",
+    "6": "July",
+    "7": "August",
+    "8": "September",
+    "9": "October",
+    "10": "November",
+    "11": "December"
+  },
+  "routes": {
+    "home": "Home",
+    "guidesIndex": "Travel guides",
+    "guideDetail": "Guide",
+    "destinationsIndex": "Destinations",
+    "destinationDetail": "Destination",
+    "hotelsIndex": "Hotels",
+    "hotelDetail": "Hotel",
+    "planner": "Planner",
+    "smartFindsIndex": "Smart finds",
+    "smartFindDetail": "Smart find",
+    "about": "About",
+    "contact": "Contact",
+    "myTrips": "My trips",
+    "account": "Account",
+    "signup": "Sign up",
+    "login": "Log in",
+    "privacy": "Privacy"
+  }
+}
