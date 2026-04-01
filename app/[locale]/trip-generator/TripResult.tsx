@@ -5,7 +5,7 @@
 // Right: Estado del Viaje + Budget + Packing + Booking
 
 import { useState, useEffect, useCallback } from 'react'
-import Link from 'next-intl/link'
+import { Link } from '../../../lib/navigation'
 
 // ── Types ──────────────────────────────────────────────
 type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer' | 'relax'
