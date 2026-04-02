@@ -5,7 +5,8 @@
 
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
-import { buildAlternates, type Locale } from '../../../i18n'
+import { type Locale } from '../../../i18n'
+import { buildAlternates } from '../../../lib/seo'
 import TripGeneratorClient from './TripGeneratorClient'
 
 export async function generateMetadata({

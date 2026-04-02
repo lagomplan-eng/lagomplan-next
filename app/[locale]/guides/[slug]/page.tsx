@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = locale === 'es' ? guide.title_es : guide.title_en
   const description = locale === 'es' ? guide.excerpt_es : guide.excerpt_en
-  const alternates = buildGuideAlternates(guide, locale)
+  const alternates = buildGuideAlternates(guide)
 
   return {
     title,
