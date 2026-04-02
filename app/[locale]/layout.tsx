@@ -8,6 +8,7 @@
  *   Fraunces → --font-display (hero emphasis + pull quotes, replaces Playfair Display)
  *   DM Mono  → --font-mono    (utility labels, not in brand guide but kept functionally)
  */
+export const dynamic = 'force-dynamic'
 
 import type { Metadata }              from 'next'
 import { Manrope, Fraunces, DM_Mono } from 'next/font/google'

@@ -12,7 +12,7 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { Loader } from '@googlemaps/js-api-loader'
 
 // ── Singleton loaders by locale ──
-const loaderMap = new Map<string, Promise<typeof google>>()
+const loaderMap = new Map<string, Promise<any>>()
 
 function getLoader(locale: 'es' | 'en') {
   const key = `${locale}-places`
@@ -63,12 +63,12 @@ export default function PlacesInput({
   locationBias = 'MX',
 }: PlacesInputProps) {
 
-  const inputRef   = useRef<HTMLInputElement>(null)
-  const ddRef      = useRef<HTMLDivElement>(null)
-  const acRef      = useRef<google.maps.places.AutocompleteService | null>(null)
-  const sessionRef = useRef<google.maps.places.AutocompleteSessionToken | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+const ddRef = useRef<HTMLDivElement>(null)
+const acRef = useRef<any>(null)
+const sessionRef = useRef<any>(null)
 
-  const [predictions, setPredictions] = useState<google.maps.places.AutocompletePrediction[]>([])
+const [predictions, setPredictions] = useState<any[]>([])
   const [open,        setOpen]        = useState(false)
   const [highlighted, setHighlighted] = useState(-1)
   const [loading,     setLoading]     = useState(false)
@@ -77,8 +77,9 @@ export default function PlacesInput({
   // ── Init Google Places ──────────────────────────────────────────
 useEffect(() => {
   getLoader(locale).then(() => {
-    acRef.current = new google.maps.places.AutocompleteService()
-    sessionRef.current = new google.maps.places.AutocompleteSessionToken()
+    const g = (window as any).google
+    acRef.current = new g.maps.places.AutocompleteService()
+    sessionRef.current = new g.maps.places.AutocompleteSessionToken()
   })
 }, [locale])
 
@@ -94,7 +95,7 @@ useEffect(() => {
     clearTimeout(timerRef.current)
     setLoading(true)
     timerRef.current = setTimeout(() => {
-      const request: google.maps.places.AutocompletionRequest = {
+      const request: any = {
         input,
         sessionToken: sessionRef.current ?? undefined,
         types,
@@ -109,7 +110,8 @@ useEffect(() => {
       }
       acRef.current!.getPlacePredictions(request, (results, status) => {
         setLoading(false)
-        if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+        const g = (window as any).google
+if (status === g.maps.places.PlacesServiceStatus.OK && results) {
           setPredictions(results)
           setOpen(true)
         } else {
@@ -121,40 +123,47 @@ useEffect(() => {
   }, [types, locationBias])
 
   // ── Resolve a prediction to full PlaceResult ────────────────────
-  function selectPrediction(prediction: google.maps.places.AutocompletePrediction) {
-    const service = new google.maps.places.PlacesService(
-      document.createElement('div')
-    )
-    service.getDetails(
-      {
-        placeId: prediction.place_id,
-        sessionToken: sessionRef.current ?? undefined,
-        fields: ['name', 'formatted_address', 'place_id', 'geometry', 'types'],
-      },
-      (place, status) => {
-        // Reset session token after each completed session
-        sessionRef.current = new google.maps.places.AutocompleteSessionToken()
+function selectPrediction(prediction: any) {
+  const g = (window as any).google
+  const service = new g.maps.places.PlacesService(
+    document.createElement('div')
+  )
 
-        if (status === google.maps.places.PlacesServiceStatus.OK && place) {
-          const result: PlaceResult = {
-            displayName:      place.name ?? prediction.structured_formatting.main_text,
-            formattedAddress: place.formatted_address ?? '',
-            placeId:          place.place_id ?? prediction.place_id,
-            location:         place.geometry?.location
-              ? { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
-              : null,
-            types: place.types ?? [],
-          }
-          onChange(result.displayName)
-          onSelect(result)
-          setHasValue(true)
+  service.getDetails(
+    {
+      placeId: prediction.place_id,
+      sessionToken: sessionRef.current ?? undefined,
+      fields: ['name', 'formatted_address', 'place_id', 'geometry', 'types'],
+    },
+    (place: any, status: any) => {
+      sessionRef.current = new g.maps.places.AutocompleteSessionToken()
+
+      if (status === g.maps.places.PlacesServiceStatus.OK && place) {
+        const result: PlaceResult = {
+          displayName:
+            place.name ?? prediction.structured_formatting.main_text,
+          formattedAddress: place.formatted_address ?? '',
+          placeId: place.place_id ?? prediction.place_id,
+          location: place.geometry?.location
+            ? {
+                lat: place.geometry.location.lat(),
+                lng: place.geometry.location.lng(),
+              }
+            : null,
+          types: place.types ?? [],
         }
+
+        onChange(result.displayName)
+        onSelect(result)
+        setHasValue(true)
       }
-    )
-    setPredictions([])
-    setOpen(false)
-    setHighlighted(-1)
-  }
+
+      setPredictions([])
+      setOpen(false)
+      setHighlighted(-1)
+    }
+  )
+}
 
   // ── Keyboard nav ────────────────────────────────────────────────
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
@@ -188,7 +197,7 @@ useEffect(() => {
   }, [])
 
   // ── Highlight matched text ──────────────────────────────────────
-  function renderMain(prediction: google.maps.places.AutocompletePrediction) {
+  function renderMain(prediction: any) {
     const { main_text, main_text_matched_substrings: matches } = prediction.structured_formatting
     if (!matches?.length) return <span>{main_text}</span>
     const parts: React.ReactNode[] = []

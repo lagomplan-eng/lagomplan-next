@@ -57,7 +57,13 @@ function FieldError({ msg }: { msg: string }) {
 }
 
 // ── Component ──────────────────────────────────────────────────────
-export default function HeroForm({ locale = 'es', initialValues }: HeroFormProps) {
+export default function HeroForm({
+  locale = 'es',
+  initialValues,
+}: HeroFormProps) {
+  const router = useRouter()
+  const t = useTranslations('form')
+
 const parsedStart = initialValues?.start ? new Date(initialValues.start) : null
 const parsedEnd = initialValues?.end ? new Date(initialValues.end) : null
 
@@ -413,7 +419,7 @@ function submit(e: React.FormEvent) {
             {generating ? (
               <>
                 <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
-                {t('submitGenerating')}
+                {locale === 'es' ? 'Generando...' : 'Generating...'}
               </>
             ) : (
               t('submit')

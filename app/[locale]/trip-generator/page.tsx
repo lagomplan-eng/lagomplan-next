@@ -16,7 +16,7 @@ export async function generateMetadata({
   return {
     title:      'Planificador de viajes',
     description: t('description'),
-    alternates:  buildAlternates('/trip-generator'),
+    alternates: buildAlternates('planner'),
   }
 }
 

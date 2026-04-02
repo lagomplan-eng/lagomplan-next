@@ -199,7 +199,7 @@ export default function TripResult({ params }: Props) {
                 className="font-mono text-[9px] tracking-[1.2px] uppercase bg-[rgba(255,255,255,.12)] text-[#F4F0E8] px-4 py-2.5 hover:bg-[rgba(255,255,255,.2)] transition-colors rounded-[2px] border border-[rgba(255,255,255,.15)]">
                 Compartir
               </button>
-              <Link href="/trip-generator"
+              <Link href="/planner"
                 className="font-mono text-[9px] tracking-[1.2px] uppercase bg-[#F4F0E8] text-[#1B4D3E] px-4 py-2.5 hover:bg-[#C8D9D3] transition-colors rounded-[2px]">
                 Nuevo plan
               </Link>
@@ -439,7 +439,7 @@ export default function TripResult({ params }: Props) {
               <p className="font-sans text-[12px] text-[#C8D9D3] mb-4 leading-relaxed">
                 Con Explorer guardas todos tus viajes, descargas el PDF y los compartes por WhatsApp.
               </p>
-              <Link href="/precios"
+              <Link href="/account"
                 className="block text-center font-mono text-[9px] tracking-[1.2px] uppercase bg-[#F4F0E8] text-[#1B4D3E] px-4 py-2.5 hover:bg-[#C8D9D3] transition-colors rounded-[2px]">
                 Ver Explorer — $199 MXN/mes
               </Link>

@@ -5,7 +5,6 @@ import type { Locale } from '../i18n'
 
 export default function GuidesPreview({ locale }: { locale: Locale }) {
   const guides = getAllGuides(locale).slice(0, 3)
-  const guidesBase = locale === 'es' ? 'guias' : 'guides'
 
   return (
     <section className="page-inner py-16">
@@ -24,7 +23,7 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
         </div>
 
         <Link
-          href={`/${guidesBase}`}
+          href="/guides"
           className="hidden md:inline-flex text-[13px] font-medium text-[#0F3A33] hover:text-[#6B8F86] transition-colors"
         >
           {locale === 'es' ? 'Ver más guías →' : 'See more guides →'}
@@ -35,7 +34,7 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
         {guides.map((guide) => (
           <Link
             key={guide.slug}
-            href={`/${guidesBase}/${guide.slug}`}
+            href={{ pathname: '/guides/[slug]', params: { slug: guide.slug } }}
             className="group overflow-hidden rounded-[22px] bg-white shadow-sm hover:shadow-md transition"
           >
             <div className="aspect-[4/3] overflow-hidden bg-[#EDE7E1] relative">
@@ -62,7 +61,7 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
 
       <div className="mt-8 md:hidden">
         <Link
-          href={`/${guidesBase}`}
+          href="/guides"
           className="inline-flex text-[13px] font-medium text-[#0F3A33] hover:text-[#6B8F86] transition-colors"
         >
           {locale === 'es' ? 'Ver más guías →' : 'See more guides →'}

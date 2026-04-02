@@ -54,7 +54,7 @@ export default function Nav() {
     }
 
     // Default: let next-intl translate the current path to the target locale
-    router.replace(pathname, { locale: target })
+    router.replace(pathname as any, { locale: target })
   }
 
   // ── Nav links (internal paths → next-intl translates) ─

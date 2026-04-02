@@ -37,7 +37,7 @@ export async function GET(
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
 
-    console.log('[trips/get] found trip:', trip_id, '| title:', data.title)
+    console.log('[trips/get] found trip:', trip_id, '| title:', (data as any)?.title)
     return NextResponse.json(data)
 
   } catch (err) {
