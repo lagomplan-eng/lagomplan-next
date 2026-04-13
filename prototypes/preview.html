@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LagomPlan — Valle de Bravo</title>
+
+<style>
+body {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #eef4f1; /* ✅ Lagom soft green */
+  margin: 0;
+  color: #1f2d2a;
+}
+
+.container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+
+h1 { font-size: 40px; margin-bottom: 8px; }
+h2 { font-size: 22px; }
+h3 { font-size: 16px; margin-bottom: 6px; }
+p { color: #5f6f6a; line-height: 1.6; }
+
+.hero {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.hero img {
+  width: 380px;
+  border-radius: 18px;
+}
+
+.tags {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  background: #e3ebe7;
+  padding: 6px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+}
+
+/* Sticky Nav */
+.nav {
+  position: sticky;
+  top: 0;
+  background: #eef4f1;
+  padding: 12px 0;
+  display: flex;
+  gap: 12px;
+  z-index: 10;
+}
+
+.nav button {
+  border: 1px solid #cfd8d4;
+  background: white;
+  padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+
+.section {
+  background: white;
+  padding: 24px;
+  border-radius: 18px;
+  margin-bottom: 20px;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 14px;
+}
+
+.card {
+  border: 1px solid #e6e6e6;
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.timeline-day {
+  margin-bottom: 18px;
+  cursor: pointer;
+}
+
+.timeline-content {
+  display: none;
+  margin-top: 8px;
+}
+
+.timeline-day.active .timeline-content {
+  display: block;
+}
+
+.timeline-item {
+  margin-left: 10px;
+  margin-bottom: 6px;
+}
+
+/* ✅ NEW Lagom Tips (editorial style) */
+.tips {
+  background: transparent;
+}
+
+.tips-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tip-item {
+  padding-bottom: 14px;
+  border-bottom: 1px solid #dfe7e3;
+}
+
+.tip-item:last-child {
+  border-bottom: none;
+}
+
+.tip-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.small {
+  font-size: 13px;
+  color: #7a8a85;
+}
+
+.cta {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #1f2d2a;
+  color: white;
+  padding: 14px 18px;
+  border-radius: 30px;
+  font-size: 14px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- HERO -->
+<div class="hero">
+  <div>
+    <div class="small">Guía curada · familia & aventura</div>
+    <h1>Valle de Bravo</h1>
+    <p>El refugio donde el bosque se encuentra con el agua. Una escapada diseñada para quemar adrenalina, explorar la naturaleza y disfrutar de la mejor gastronomía de montaña.</p>
+
+    <div class="tags">
+      <div class="tag">👨‍👩‍👧‍👦 Familias</div>
+      <div class="tag">⚡ Energía media-alta</div>
+      <div class="tag">💸 $$–$$$</div>
+      <div class="tag">📅 Oct–May</div>
+      <div class="tag">🚗 2.5h desde CDMX</div>
+    </div>
+  </div>
+
+  <img src="https://images.unsplash.com/photo-1605540436563-5bca919ae766?q=80&w=1200">
+</div>
+
+<!-- NAV -->
+<div class="nav">
+  <button onclick="scrollToSection('itinerario')">Itinerario</button>
+  <button onclick="scrollToSection('hoteles')">Hoteles</button>
+  <button onclick="scrollToSection('experiencias')">Experiencias</button>
+  <button onclick="scrollToSection('logistica')">Logística</button>
+  <button onclick="scrollToSection('tips')">Tips</button>
+</div>
+
+<!-- ITINERARIO -->
+<div id="itinerario" class="section">
+  <h2>🗺️ Itinerario</h2>
+
+  <div class="timeline-day active" onclick="toggleDay(this)">
+    <h3>Día 1 · La llegada</h3>
+    <div class="timeline-content">
+      <div class="timeline-item">14:00 — Comida en Los Girasoles</div>
+      <div class="timeline-item">17:00 — Caminata en Avándaro</div>
+      <div class="timeline-item">20:00 — Pizza en Dipao</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ✅ HOTELES (ADDED) -->
+<div id="hoteles" class="section">
+  <h2>🏨 Hoteles</h2>
+
+  <div class="cards">
+    <div class="card">
+      <h3>Hotel Rodavento ($$$)</h3>
+      <p>Lujo rústico en el bosque con actividades y spa.</p>
+    </div>
+
+    <div class="card">
+      <h3>Avándaro Golf & Spa ($$)</h3>
+      <p>Clásico familiar con alberca y tenis.</p>
+    </div>
+
+    <div class="card">
+      <h3>Wander Cabins ($)</h3>
+      <p>Minimalismo y desconexión total.</p>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIENCIAS -->
+<div id="experiencias" class="section">
+  <h2>🌄 Experiencias</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>Vuelo en parapente</h3>
+      <p>La experiencia insignia con vistas al lago.</p>
+    </div>
+    <div class="card">
+      <h3>Reserva Monte Alto</h3>
+      <p>Senderismo con miradores espectaculares.</p>
+    </div>
+    <div class="card">
+      <h3>Wakeboard</h3>
+      <p>Deportes acuáticos ideales para niños.</p>
+    </div>
+  </div>
+</div>
+
+<!-- LOGISTICA -->
+<div id="logistica" class="section">
+  <h2>🚗 Logística</h2>
+  <div class="cards">
+    <div class="card">
+      <h3>Ruta</h3>
+      <p>Desde CDMX por Toluca-Zitácuaro.</p>
+    </div>
+    <div class="card">
+      <h3>Movilidad</h3>
+      <p>Ideal llevar SUV por calles empedradas.</p>
+    </div>
+    <div class="card">
+      <h3>Tráfico</h3>
+      <p>Evitar 13:00–16:00 en el centro.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ✅ NEW TIPS DESIGN -->
+<div id="tips" class="section tips">
+  <h2>✨ Lagom Tips</h2>
+
+  <div class="tips-list">
+    <div class="tip-item">
+      <div class="tip-title">🧥 Capas de ropa</div>
+      <p>El clima cambia rápido, lleva siempre algo ligero.</p>
+    </div>
+
+    <div class="tip-item">
+      <div class="tip-title">🍽 Reservas</div>
+      <p>Reserva con anticipación en temporada alta.</p>
+    </div>
+
+    <div class="tip-item">
+      <div class="tip-title">🥖 Pan secreto</div>
+      <p>No te vayas sin probar el pan artesanal local.</p>
+    </div>
+  </div>
+</div>
+
+<!-- DATO -->
+<div class="section">
+  <h3>Dato curioso</h3>
+  <p class="small">El lago fue creado artificialmente en 1947 como parte de un sistema hidroeléctrico.</p>
+</div>
+
+</div>
+
+<div class="cta">Guardar guía</div>
+
+<script>
+function toggleDay(el) {
+  el.classList.toggle("active");
+}
+
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: "smooth" });
+}
+</script>
+
+</body>
+</html>

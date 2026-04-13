@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LagomPlan Guides Page Redesign</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&family=Fraunces:opsz,wght@9..144,600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --pine: #0F3A33;
+      --sage: #6B8F86;
+      --cream: #FFF9F3;
+      --border: #D9D3CC;
+      --white: #FFFFFF;
+      --fjord: #2D4F6C;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: "Manrope", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--cream);
+      color: var(--pine);
+      line-height: 1.4;
+    }
+    .page { min-height: 100vh; background: var(--cream); }
+    .container { width: min(1160px, calc(100% - 48px)); margin: 0 auto; }
+
+    .hero {
+      border-bottom: 1px solid var(--border);
+      padding: 68px 0 76px;
+      background: var(--cream);
+    }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 500px;
+      gap: 56px;
+      align-items: center;
+    }
+    .eyebrow {
+      margin: 0 0 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.24em;
+      color: var(--sage);
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(50px, 7vw, 76px);
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      font-weight: 800;
+    }
+    h1 em {
+      font-family: "Fraunces", Georgia, serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+    .hero-copy {
+      margin: 28px 0 0;
+      max-width: 36ch;
+      font-size: 18px;
+      line-height: 1.75;
+      color: rgba(15,58,51,0.72);
+    }
+
+    .featured-card {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      background: var(--white);
+      box-shadow: 0 1px 0 rgba(15,58,51,0.03);
+      align-self: start;
+    }
+    .featured-image {
+      position: relative;
+      height: 250px;
+      background: linear-gradient(160deg, #7ab0be 0%, #2f6c87 35%, #4ca29b 65%, #d7d4be 100%);
+      overflow: hidden;
+    }
+    .featured-image::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(15,58,51,0.35), rgba(15,58,51,0.03) 55%);
+    }
+    .featured-badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 2;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.14);
+      backdrop-filter: blur(8px);
+      color: white;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+    .featured-overlay {
+      position: absolute;
+      left: 24px;
+      right: 24px;
+      bottom: 24px;
+      z-index: 2;
+      color: white;
+    }
+    .featured-overlay .label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: rgba(255,255,255,0.74);
+      font-weight: 700;
+    }
+    .featured-overlay .title {
+      margin-top: 8px;
+      max-width: 10ch;
+      font-size: 38px;
+      line-height: 0.98;
+      font-family: "Fraunces", Georgia, serif;
+      font-style: italic;
+      font-weight: 600;
+    }
+    .featured-body {
+      padding: 20px 24px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .featured-body p {
+      margin: 0;
+      max-width: 34ch;
+      font-size: 13px;
+      line-height: 1.7;
+      color: rgba(15,58,51,0.68);
+    }
+    .primary-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      border: none;
+      border-radius: 999px;
+      background: var(--pine);
+      color: var(--white);
+      padding: 14px 20px;
+      font-size: 14px;
+      font-weight: 700;
+      box-shadow: 0 1px 0 rgba(15,58,51,0.12);
+      cursor: pointer;
+    }
+
+    .filters-wrap {
+      margin-top: 48px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: var(--white);
+      box-shadow: 0 1px 0 rgba(15,58,51,0.03);
+    }
+    .filters-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 16px;
+      align-items: center;
+    }
+    .search-pill {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: #FFFDF9;
+    }
+    .search-pill input {
+      flex: 1;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--pine);
+      font: inherit;
+      font-size: 14px;
+    }
+    .search-pill input::placeholder { color: rgba(15,58,51,0.35); }
+    .filter-row { display: flex; flex-wrap: wrap; gap: 10px; justify-content: flex-end; }
+    .filter-chip {
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--cream);
+      color: rgba(15,58,51,0.8);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .filter-chip.active { background: var(--pine); border-color: var(--pine); color: white; }
+
+    .section { padding: 52px 0 0; }
+    .section-top {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+    }
+    .mini-meta {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--sage);
+      font-weight: 700;
+    }
+    .section-title {
+      margin: 0;
+      font-size: 36px;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .count { font-size: 14px; color: rgba(15,58,51,0.58); }
+
+    .guides-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      align-items: stretch;
+    }
+    .guide-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: var(--white);
+      box-shadow: 0 1px 0 rgba(15,58,51,0.03);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .guide-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 28px rgba(15,58,51,0.06);
+    }
+    .guide-image {
+      width: 100%;
+      height: 280px;
+      flex-shrink: 0;
+      transition: transform .45s ease;
+    }
+    .guide-card:hover .guide-image { transform: scale(1.02); }
+    .guide-body {
+      display: flex;
+      flex: 1;
+      flex-direction: column;
+      padding: 22px 24px 24px;
+    }
+    .guide-region {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--sage);
+      font-weight: 700;
+    }
+    .guide-title {
+      margin: 10px 0 0;
+      font-size: 22px;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .guide-blurb {
+      margin: 12px 0 0;
+      min-height: 50px;
+      font-size: 14px;
+      line-height: 1.75;
+      color: rgba(15,58,51,0.68);
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 20px;
+    }
+    .tag {
+      padding: 6px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--cream);
+      color: rgba(15,58,51,0.72);
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .collections-grid {
+      display: grid;
+      gap: 24px;
+      grid-template-columns: repeat(4, minmax(0,1fr));
+      align-items: stretch;
+    }
+    .collection-card {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 28px;
+      border: 1px solid var(--border);
+      border-radius: 28px;
+      background: var(--white);
+      box-shadow: 0 1px 0 rgba(15,58,51,0.03);
+    }
+    .collection-card h3 {
+      margin: 12px 0 0;
+      font-size: 24px;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .collection-card p {
+      margin: 12px 0 0;
+      font-size: 14px;
+      line-height: 1.9;
+      color: rgba(15,58,51,0.68);
+    }
+    .link-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: auto;
+      padding-top: 24px;
+      color: var(--fjord);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .bridge-wrap { padding: 56px 0 72px; }
+    .bridge-card {
+      padding: 32px;
+      border: 1px solid var(--border);
+      border-radius: 32px;
+      background: var(--white);
+      box-shadow: 0 1px 0 rgba(15,58,51,0.03);
+    }
+    .bridge-grid {
+      display: grid;
+      grid-template-columns: 0.92fr 1.08fr;
+      gap: 32px;
+      align-items: center;
+    }
+    .bridge-card h3 {
+      margin: 12px 0 0;
+      font-size: 30px;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      font-weight: 800;
+    }
+    .bridge-card p {
+      margin: 12px 0 0;
+      font-size: 14px;
+      line-height: 1.9;
+      color: rgba(15,58,51,0.68);
+    }
+    .bridge-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0,1fr));
+      gap: 16px;
+      align-items: stretch;
+    }
+    .bridge-stat {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: var(--cream);
+    }
+    .bridge-icon {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 16px;
+      background: var(--white);
+      color: var(--pine);
+      font-weight: 700;
+    }
+    .bridge-title {
+      margin-top: 14px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .bridge-body {
+      margin-top: 8px;
+      font-size: 14px;
+      line-height: 1.7;
+      color: rgba(15,58,51,0.65);
+    }
+
+    @media (max-width: 1180px) {
+      .hero-grid,
+      .filters-grid,
+      .guides-grid,
+      .collections-grid,
+      .bridge-grid,
+      .bridge-stats {
+        grid-template-columns: 1fr;
+      }
+      .filter-row { justify-content: flex-start; }
+      .featured-card { max-width: 560px; }
+    }
+
+    @media (min-width: 768px) and (max-width: 1180px) {
+      .guides-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+      .collections-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    }
+
+    @media (max-width: 720px) {
+      .container { width: min(100% - 32px, 1160px); }
+      .hero { padding: 52px 0 60px; }
+      .featured-image { height: 220px; }
+      .guide-image { height: 240px; }
+      .filter-row {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+      }
+      .filter-chip { white-space: nowrap; }
+      .bridge-card { padding: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <div class="container">
+        <div class="hero-grid">
+          <div>
+            <p class="eyebrow">Travel guides</p>
+            <h1>Destinations we<br><em>know well</em>.</h1>
+            <p class="hero-copy">Editorial guides with real taste — no generic lists, no filler, and no ads disguised as recommendations.</p>
+          </div>
+
+          <article class="featured-card">
+            <div class="featured-image">
+              <div class="featured-badge">Featured guide</div>
+              <div class="featured-overlay">
+                <div class="label">Jalisco</div>
+                <div class="title">Puerto Vallarta</div>
+              </div>
+            </div>
+            <div class="featured-body">
+              <p>Sea, malecón, and hotels that balance comfort and actual destination feeling much better.</p>
+              <button class="primary-btn">Ver guía destacada <span>→</span></button>
+            </div>
+          </article>
+        </div>
+
+        <div class="filters-wrap">
+          <div class="filters-grid">
+            <label class="search-pill">
+              <span>🔍</span>
+              <input type="text" placeholder="Search destination, region, or style" />
+            </label>
+            <div class="filter-row">
+              <button class="filter-chip active">Todos</button>
+              <button class="filter-chip">Playa</button>
+              <button class="filter-chip">Ciudad</button>
+              <button class="filter-chip">Naturaleza</button>
+              <button class="filter-chip">Escapadas</button>
+              <button class="filter-chip">Familia</button>
+              <button class="filter-chip">Pareja</button>
+              <button class="filter-chip">Foodie</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-top">
+          <div>
+            <div class="mini-meta">Guides</div>
+            <h2 class="section-title">Curated destinations</h2>
+          </div>
+          <div class="count">6 destinations</div>
+        </div>
+
+        <div class="guides-grid">
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#acd0e8 0%,#acd0e8 58%,#bfd1bc 58%,#bfd1bc 74%,#6b856f 74%,#4c6659 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">State of Mexico</div>
+              <h3 class="guide-title">Valle de Bravo / Avándaro</h3>
+              <p class="guide-blurb">Bosque, descanso y planes fáciles a dos horas de CDMX.</p>
+              <div class="tag-row"><span class="tag">Family</span><span class="tag">Nature</span><span class="tag">Weekend</span></div>
+            </div>
+          </article>
+
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#b9dced 0%,#b9dced 18%,#2a6d9c 18%,#2a6d9c 33%,#4a9fb0 33%,#61b9b7 50%,#d6d0b1 50%,#d6d0b1 58%,#72906c 58%,#5d7b57 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">Quintana Roo</div>
+              <h3 class="guide-title">Riviera Maya</h3>
+              <p class="guide-blurb">Playas suaves, road trip y días fáciles de mezclar con cenotes.</p>
+              <div class="tag-row"><span class="tag">Beach</span><span class="tag">Road trip</span><span class="tag">Cenotes</span></div>
+            </div>
+          </article>
+
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#7497a5 0%,#7497a5 45%,#b8c7b1 45%,#b8c7b1 64%,#e5ddcb 64%,#e5ddcb 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">Morelos</div>
+              <h3 class="guide-title">Cuernavaca</h3>
+              <p class="guide-blurb">Primavera constante, historia y una atmósfera más lenta y verde.</p>
+              <div class="tag-row"><span class="tag">Lifestyle</span><span class="tag">Food</span><span class="tag">Architecture</span></div>
+            </div>
+          </article>
+
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#d9c8af 0%,#d9c8af 30%,#c3845f 30%,#c3845f 55%,#7d5c43 55%,#5d4332 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">Oaxaca</div>
+              <h3 class="guide-title">Oaxaca</h3>
+              <p class="guide-blurb">Diseño, comida y cultura en una ciudad que siempre tiene capas nuevas.</p>
+              <div class="tag-row"><span class="tag">Culture</span><span class="tag">Food</span><span class="tag">City</span></div>
+            </div>
+          </article>
+
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#d6d6c8 0%,#d6d6c8 40%,#d7b798 40%,#d7b798 66%,#8b6d58 66%,#6f5647 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">Guanajuato</div>
+              <h3 class="guide-title">San Miguel de Allende</h3>
+              <p class="guide-blurb">Fin de semana bonito, walkable y con buen ritmo entre terrazas y galerías.</p>
+              <div class="tag-row"><span class="tag">Weekend</span><span class="tag">Design</span><span class="tag">Couples</span></div>
+            </div>
+          </article>
+
+          <article class="guide-card">
+            <div class="guide-image" style="background: linear-gradient(180deg,#7ab0be 0%,#7ab0be 30%,#2f6c87 30%,#2f6c87 48%,#4ca29b 48%,#4ca29b 62%,#d6d1b7 62%,#d6d1b7 100%);"></div>
+            <div class="guide-body">
+              <div class="guide-region">Jalisco</div>
+              <h3 class="guide-title">Puerto Vallarta</h3>
+              <p class="guide-blurb">Mar, malecón y hoteles con mejor balance entre comodidad y experiencia.</p>
+              <div class="tag-row"><span class="tag">Beach</span><span class="tag">Hotels</span><span class="tag">Food</span></div>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-top">
+          <div class="mini-meta">Explore by mood</div>
+          <h2 class="section-title">Collections that make browsing easier</h2>
+        </div>
+
+        <div class="collections-grid">
+          <article class="collection-card">
+            <div class="mini-meta">Collection</div>
+            <h3>Escapadas de fin de semana</h3>
+            <p>Destinos donde el valor está en salir rápido, descansar mejor y volver con energía.</p>
+            <a class="link-btn" href="#">Explorar <span>→</span></a>
+          </article>
+          <article class="collection-card">
+            <div class="mini-meta">Collection</div>
+            <h3>Playas tranquilas</h3>
+            <p>Guías para viajar al mar con mejor ritmo, menos ruido y recomendaciones más útiles.</p>
+            <a class="link-btn" href="#">Explorar <span>→</span></a>
+          </article>
+          <article class="collection-card">
+            <div class="mini-meta">Collection</div>
+            <h3>Viajes con niños</h3>
+            <p>Lugares donde la logística importa tanto como el encanto visual del destino.</p>
+            <a class="link-btn" href="#">Explorar <span>→</span></a>
+          </article>
+          <article class="collection-card">
+            <div class="mini-meta">Collection</div>
+            <h3>Food trips</h3>
+            <p>Ciudades y escapadas donde comer bien es parte central del viaje, no un bonus.</p>
+            <a class="link-btn" href="#">Explorar <span>→</span></a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="bridge-wrap">
+      <div class="container">
+        <div class="bridge-card">
+          <div class="bridge-grid">
+            <div>
+              <div class="mini-meta">Lagom pick</div>
+              <h3>Turn a guide into a real plan</h3>
+              <p>Once a destination feels right, LagomPlan should help users move naturally into stays, experiences, and a cleaner itinerary.</p>
+            </div>
+            <div class="bridge-stats">
+              <div class="bridge-stat">
+                <div class="bridge-icon">✦</div>
+                <div class="bridge-title">3 hotels</div>
+                <div class="bridge-body">Closer to your travel style</div>
+              </div>
+              <div class="bridge-stat">
+                <div class="bridge-icon">✦</div>
+                <div class="bridge-title">2 experiences</div>
+                <div class="bridge-body">Good fit for this destination</div>
+              </div>
+              <div class="bridge-stat">
+                <div class="bridge-icon">✦</div>
+                <div class="bridge-title">1 smart find</div>
+                <div class="bridge-body">Useful for this type of trip</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

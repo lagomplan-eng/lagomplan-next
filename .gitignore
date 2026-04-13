@@ -1,0 +1,20 @@
+# dependencies
+node_modules
+
+# next.js
+.next
+out
+
+# env files
+.env.local
+.env
+
+# mac
+.DS_Store
+
+node_modules
+.next
+.env
+.env.local
+.vercel
+

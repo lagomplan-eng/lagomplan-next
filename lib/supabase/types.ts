@@ -1,0 +1,85 @@
+// lib/supabase/types.ts
+// Database type definitions
+// Run `supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/supabase/types.ts`
+// to regenerate from your actual schema
+
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[]
+
+export interface Database {
+  public: {
+    Tables: {
+      // LIVE NOW
+      trips: {
+        Row: {
+          id:           string
+          slug:         string
+          title:        string | null
+          user_id:      string | null
+          trip_data:    Json
+          destination:  string | null
+          origin:       string | null
+          duration_days: number | null
+          travelers:    string | null
+          travel_style: Database['public']['Enums']['travel_style'] | null
+          budget_level: string | null
+          interests:    string[]
+          created_at:   string
+        }
+        Insert: {
+          id?:           string
+          slug:          string
+          title?:        string | null
+          user_id?:      string | null
+          trip_data:     Json
+          destination?:  string | null
+          origin?:       string | null
+          duration_days?: number | null
+          travelers?:    string | null
+          travel_style?: Database['public']['Enums']['travel_style'] | null
+          budget_level?: string | null
+          interests?:    string[]
+          created_at?:   string
+        }
+        Update: Partial<Database['public']['Tables']['trips']['Insert']>
+      }
+      email_leads: {
+        Row: {
+          id:         string
+          email:      string
+          source:     string | null
+          created_at: string
+        }
+        Insert: Omit<Database['public']['Tables']['email_leads']['Row'], 'id' | 'created_at'>
+        Update: Partial<Database['public']['Tables']['email_leads']['Insert']>
+      }
+
+      // E11 — April (auth + user accounts)
+      // users: { ... }
+      // user_preferences: { ... }
+
+      // E12/E13 — April (paywall + Stripe)
+      // subscriptions: { ... }
+      // trip_credits: { ... }
+
+      // CONTENT (ongoing)
+      // guides: { ... }
+      // guide_translations: { ... }
+      // destinations: { ... }
+      // recommendations: { ... }
+    }
+    Views:   {}
+    Functions: {}
+    Enums: {
+      travel_style: 'relajado' | 'equilibrado' | 'activo'
+      traveler_type: 'solo' | 'pareja' | 'familia' | 'amigos'
+      subscription_tier: 'free' | 'per_trip' | 'pack_5' | 'pack_10' | 'explorer'
+    }
+  }
+}
+
+// Convenience type aliases
+export type Trip         = Database['public']['Tables']['trips']['Row']
+export type TripInsert   = Database['public']['Tables']['trips']['Insert']
+export type EmailLead    = Database['public']['Tables']['email_leads']['Row']
+export type TravelStyle  = Database['public']['Enums']['travel_style']
+export type TravelerType = Database['public']['Enums']['traveler_type']
