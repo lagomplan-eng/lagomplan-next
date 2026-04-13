@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valle de Bravo / Avándaro · Guía Curada — Lagomplan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ─────────────────────────────────────────
+   DESIGN TOKENS
+───────────────────────────────────────── */
+:root {
+  --pine:        #0F3A33;
+  --sage:        #6B8F86;
+  --sand:        #EDE7E1;
+  --coral:       #E1615B;
+  --fjord:       #2D4F6C;
+  --green-mid:   #2D6B5A;
+  --green-light: #6EBD9F;
+  --green-faint: #E8F0EE;
+  --cream:       #F4F0E8;
+  --cream-dark:  #EBE6DC;
+  --off-white:   #FDFCF9;
+  --text-primary:#1A1A1A;
+  --text-mid:    #4A4A4A;
+  --text-muted:  #8A8A8A;
+  --text-faint:  #BDBDBD;
+  --border:      #E2DDD5;
+  --border-mid:  #C8C2B8;
+  --shadow-sm:   0 1px 3px rgba(15,58,51,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-md:   0 4px 16px rgba(15,58,51,.08), 0 1px 3px rgba(0,0,0,.05);
+  --radius-sm:   8px;
+  --radius-md:   16px;
+  --radius-lg:   24px;
+  --font-serif:  'Playfair Display', Georgia, serif;
+  --font-sans:   'DM Sans', system-ui, sans-serif;
+  --font-mono:   'DM Mono', 'Courier New', monospace;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  background: var(--off-white);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+a { color: inherit; text-decoration: none; }
+button { font-family: var(--font-sans); cursor: pointer; border: none; background: none; }
+img { display: block; max-width: 100%; }
+
+/* ─────────────────────────────────────────
+   LAYOUT
+───────────────────────────────────────── */
+.container { max-width: 1200px; margin: 0 auto; padding: 0 32px; }
+@media (max-width: 768px) { .container { padding: 0 20px; } }
+
+/* ─────────────────────────────────────────
+   NAV
+───────────────────────────────────────── */
+.site-header {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(253,252,249,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  height: 64px; gap: 32px;
+}
+.logo {
+  font-family: var(--font-serif); font-size: 18px; font-weight: 500;
+  color: var(--pine); letter-spacing: -.01em; white-space: nowrap;
+}
+.logo span { font-style: italic; font-weight: 400; }
+.nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+.nav-links a {
+  font-size: 13px; font-weight: 400; color: var(--text-mid);
+  padding: 6px 12px; border-radius: 6px; transition: background .15s, color .15s;
+}
+.nav-links a:hover { background: var(--cream); color: var(--pine); }
+.nav-links a.active { color: var(--pine); font-weight: 500; }
+.header-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.btn-ghost {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: var(--text-mid);
+  padding: 7px 14px; border: 1px solid var(--border); border-radius: 8px; background: transparent; transition: all .15s;
+}
+.btn-ghost:hover { border-color: var(--pine); color: var(--pine); background: var(--green-faint); }
+.btn-primary {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 13px; font-weight: 500; color: white;
+  padding: 7px 16px; background: var(--pine); border-radius: 8px; transition: all .15s;
+}
+.btn-primary:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,58,51,.25); }
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--pine); color: white;
+  font-size: 13px; font-weight: 500; font-family: var(--font-mono);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+@media (max-width: 768px) { .nav-links { display: none; } }
+
+/* ─────────────────────────────────────────
+   HERO
+───────────────────────────────────────── */
+.hero { padding: 64px 0 48px; border-bottom: 1px solid var(--border); }
+.hero-inner {
+  display: grid; grid-template-columns: 1fr 400px; gap: 64px; align-items: start;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--sage);
+  margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+}
+.hero-eyebrow::before { content: ''; display: block; width: 20px; height: 1px; background: var(--sage); }
+.hero-title {
+  font-family: var(--font-serif); font-size: clamp(32px, 3.8vw, 52px);
+  font-weight: 400; line-height: 1.05; letter-spacing: -0.02em;
+  color: var(--text-primary); margin-bottom: 16px;
+}
+.hero-title em { font-style: italic; color: var(--pine); }
+.hero-subtitle {
+  font-size: 15px; font-weight: 300; line-height: 1.7;
+  color: var(--text-mid); max-width: 400px; margin-bottom: 28px;
+}
+.meta-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+.chip {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 400;
+  letter-spacing: .04em; color: var(--text-mid);
+  padding: 6px 12px; background: var(--cream); border: 1px solid var(--border); border-radius: 100px;
+}
+.chip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--sage); flex-shrink: 0; }
+.hero-actions {
+  display: flex; align-items: center; gap: 0;
+  padding-top: 20px; border-top: 1px solid var(--border);
+}
+.action-link {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 400;
+  letter-spacing: .06em; color: var(--text-muted);
+  padding: 0 14px 0 0; cursor: pointer; background: none; border: none;
+  transition: color .15s; display: flex; align-items: center; gap: 5px;
+}
+.action-link:first-child { padding-left: 0; }
+.action-link:hover { color: var(--pine); }
+.action-sep { color: var(--border-mid); font-size: 10px; padding-right: 14px; user-select: none; }
+.btn-plan-hero {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: white; background: var(--pine);
+  padding: 10px 20px; border-radius: 8px; transition: all .15s; margin-left: auto;
+}
+.btn-plan-hero:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(15,58,51,.25); }
+.hero-image-wrap { position: relative; }
+.hero-image {
+  width: 100%; aspect-ratio: 4/3; border-radius: var(--radius-lg);
+  overflow: hidden; background: var(--cream-dark); position: relative;
+}
+.hero-image-bg {
+  width: 100%; height: 100%;
+  background: linear-gradient(160deg, #0F3A33 0%, #2D6B5A 35%, #6B8F86 65%, #a8c5c0 100%);
+  position: relative;
+}
+.hero-image-bg::after {
+  content: 'Valle de Bravo'; position: absolute; bottom: 24px; left: 24px;
+  font-family: var(--font-serif); font-style: italic;
+  font-size: 26px; font-weight: 400; color: rgba(255,255,255,.85);
+}
+.hero-image-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,58,51,.4) 0%, transparent 60%); }
+.image-tag {
+  position: absolute; top: 20px; right: 20px;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: white; background: rgba(15,58,51,.7); backdrop-filter: blur(6px);
+  padding: 5px 10px; border-radius: 100px;
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; gap: 40px; }
+  .hero-image-wrap { order: -1; }
+}
+
+/* ─────────────────────────────────────────
+   MAIN TWO-COLUMN LAYOUT
+───────────────────────────────────────── */
+.main-layout {
+  display: grid; grid-template-columns: 1fr 320px;
+  gap: 48px; padding: 48px 0 80px; align-items: start;
+}
+@media (max-width: 960px) {
+  .main-layout { grid-template-columns: 1fr; gap: 40px; }
+  .right-column { order: -1; }
+}
+
+/* ─────────────────────────────────────────
+   SECTION HEADERS
+───────────────────────────────────────── */
+.section-header { margin-bottom: 24px; }
+.section-eyebrow {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px;
+}
+.section-title {
+  font-family: var(--font-serif); font-size: 22px; font-weight: 400;
+  letter-spacing: -.01em; color: var(--text-primary);
+}
+.section-desc {
+  font-size: 13px; font-weight: 300; color: var(--text-mid); line-height: 1.6; margin-top: 6px;
+}
+.content-block { margin-bottom: 56px; }
+
+/* ─────────────────────────────────────────
+   ITINERARY (expandable days)
+───────────────────────────────────────── */
+.itinerary-stack { display: flex; flex-direction: column; gap: 16px; }
+.day-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden;
+  box-shadow: var(--shadow-sm); transition: box-shadow .2s;
+}
+.day-card:hover { box-shadow: var(--shadow-md); }
+.day-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 18px; border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none; transition: background .15s;
+}
+.day-header:hover { background: rgba(15,58,51,.02); }
+.day-label {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+}
+.day-title {
+  font-family: var(--font-serif); font-size: 18px; font-weight: 400;
+  letter-spacing: -.01em; color: var(--text-primary);
+}
+.day-meta { display: flex; align-items: center; gap: 12px; }
+.day-count {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  color: var(--sage); background: rgba(107,143,134,.1);
+  padding: 3px 8px; border-radius: 100px; letter-spacing: .04em;
+}
+.day-toggle {
+  width: 24px; height: 24px; border-radius: 6px;
+  background: var(--cream); display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: var(--text-muted);
+  transition: transform .3s, background .15s; flex-shrink: 0;
+}
+.day-card.collapsed .day-toggle { transform: rotate(-90deg); }
+.day-body { overflow: hidden; transition: max-height .4s ease, opacity .3s; }
+.day-card.collapsed .day-body { max-height: 0 !important; opacity: 0; }
+.day-items { padding: 0 24px 8px; }
+.day-item {
+  display: grid; grid-template-columns: 48px 1fr;
+  gap: 16px; align-items: start;
+  padding: 18px 0; border-bottom: 1px solid var(--border);
+}
+.day-item:last-child { border-bottom: none; }
+.item-time {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--pine); letter-spacing: .02em; padding-top: 2px; white-space: nowrap;
+}
+.item-title {
+  font-size: 14px; font-weight: 500; color: var(--text-primary); margin-bottom: 4px; line-height: 1.4;
+}
+.item-desc {
+  font-size: 12.5px; font-weight: 300; color: var(--text-mid); line-height: 1.6;
+}
+.item-badge-row { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+.item-badge-sm {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em;
+  color: var(--text-muted); background: var(--cream);
+  padding: 3px 8px; border-radius: 100px; border: 1px solid var(--border);
+}
+
+/* ─────────────────────────────────────────
+   HOTEL CARDS
+───────────────────────────────────────── */
+.hotel-grid { display: flex; flex-direction: column; gap: 16px; }
+.hotel-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-md); padding: 24px;
+  box-shadow: var(--shadow-sm); display: grid; grid-template-columns: 1fr auto;
+  gap: 16px; align-items: start; transition: box-shadow .2s, border-color .2s;
+}
+.hotel-card:hover { box-shadow: var(--shadow-md); border-color: rgba(15,58,51,.15); }
+.hotel-number {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .1em; color: var(--text-faint); margin-bottom: 8px;
+}
+.hotel-name { font-size: 16px; font-weight: 500; color: var(--text-primary); margin-bottom: 6px; line-height: 1.3; }
+.hotel-name-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.hotel-type { font-family: var(--font-mono); font-size: 10px; color: var(--text-muted); letter-spacing: .06em; }
+.hotel-price-tier {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--pine); background: rgba(15,58,51,.07);
+  padding: 2px 8px; border-radius: 100px; letter-spacing: .04em;
+}
+.hotel-why { font-size: 13px; font-weight: 300; color: var(--text-mid); line-height: 1.6; margin-bottom: 12px; }
+.hotel-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-mono); font-size: 10px;
+  color: var(--sage); background: rgba(107,143,134,.08);
+  border: 1px solid rgba(107,143,134,.25); padding: 4px 10px; border-radius: 100px; letter-spacing: .04em;
+}
+.hotel-pill::before { content: '✦'; font-size: 8px; }
+.hotel-cta { display: flex; flex-direction: column; gap: 8px; flex-shrink: 0; padding-top: 22px; }
+.btn-book-hotel {
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: white; background: var(--pine);
+  padding: 8px 14px; border-radius: 6px; transition: all .15s;
+}
+.btn-book-hotel:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(15,58,51,.25); }
+.btn-ver-mas {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .06em; color: var(--text-muted);
+  padding: 6px 10px; border: 1px solid var(--border);
+  border-radius: 6px; background: transparent; transition: all .15s; text-align: center;
+}
+.btn-ver-mas:hover { color: var(--pine); border-color: var(--pine); }
+@media (max-width: 640px) {
+  .hotel-card { grid-template-columns: 1fr; }
+  .hotel-cta { flex-direction: row; padding-top: 0; }
+}
+
+/* ─────────────────────────────────────────
+   EXPERIENCE ITEMS
+───────────────────────────────────────── */
+.experience-list {
+  display: flex; flex-direction: column; gap: 0;
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.exp-item {
+  display: grid; grid-template-columns: 48px 1fr auto;
+  gap: 16px; align-items: start;
+  padding: 20px 24px; border-bottom: 1px solid var(--border); transition: background .15s;
+}
+.exp-item:last-child { border-bottom: none; }
+.exp-item:hover { background: rgba(15,58,51,.02); }
+.exp-num {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--text-faint); letter-spacing: .06em; padding-top: 2px;
+}
+.exp-name { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 5px; line-height: 1.4; }
+.exp-desc { font-size: 13px; font-weight: 300; color: var(--text-mid); line-height: 1.6; margin-bottom: 10px; }
+.exp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.exp-tag {
+  font-family: var(--font-mono); font-size: 10px; letter-spacing: .04em;
+  color: var(--text-muted); background: var(--cream);
+  padding: 3px 8px; border-radius: 100px; border: 1px solid var(--border);
+}
+.exp-action { flex-shrink: 0; padding-top: 2px; }
+.btn-exp-book {
+  display: flex; align-items: center; gap: 5px; white-space: nowrap;
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: white; background: var(--pine);
+  padding: 7px 12px; border-radius: 6px; transition: all .15s;
+}
+.btn-exp-book:hover { background: var(--green-mid); transform: translateY(-1px); box-shadow: 0 3px 10px rgba(15,58,51,.2); }
+@media (max-width: 640px) {
+  .exp-item { grid-template-columns: 40px 1fr; }
+  .exp-action { display: none; }
+}
+
+/* ─────────────────────────────────────────
+   RIGHT COLUMN
+───────────────────────────────────────── */
+.right-column { display: flex; flex-direction: column; gap: 20px; position: sticky; top: 80px; }
+.module-card {
+  background: white; border: 1px solid var(--border);
+  border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);
+}
+.module-card.pine-bg { background: var(--pine); border-color: transparent; }
+.module-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 14px; border-bottom: 1px solid var(--border);
+}
+.module-card.pine-bg .module-header { border-bottom-color: rgba(255,255,255,.12); }
+.module-eyebrow {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--text-faint); margin-bottom: 2px;
+}
+.module-card.pine-bg .module-eyebrow { color: rgba(255,255,255,.5); }
+.module-title {
+  font-family: var(--font-serif); font-size: 16px; font-weight: 400;
+  letter-spacing: -.01em; color: var(--text-primary);
+}
+.module-card.pine-bg .module-title { color: white; }
+.module-body { padding: 16px 20px 20px; }
+
+/* Lagom tips */
+.tips-list { display: flex; flex-direction: column; gap: 0; }
+.tip-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 11px 0; border-bottom: 1px solid var(--border);
+  font-size: 12.5px; font-weight: 300; color: var(--text-mid); line-height: 1.55;
+}
+.tip-item:last-child { border-bottom: none; }
+.tip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--sage); flex-shrink: 0; margin-top: 7px; }
+.dato-curioso {
+  background: rgba(107,143,134,.06); border: 1px solid rgba(107,143,134,.2);
+  border-radius: var(--radius-sm); padding: 14px 16px; margin-top: 12px;
+}
+.dato-eyebrow {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--sage); margin-bottom: 6px;
+}
+.dato-text { font-size: 12px; font-weight: 300; color: var(--text-mid); line-height: 1.6; font-style: italic; }
+
+/* Plan CTA */
+.plan-cta-desc {
+  font-size: 12.5px; font-weight: 300; color: rgba(255,255,255,.7); line-height: 1.55; margin-bottom: 16px;
+}
+.btn-plan-cta {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase;
+  color: var(--pine); background: var(--cream);
+  padding: 12px 20px; border-radius: 8px; transition: all .15s;
+}
+.btn-plan-cta:hover { background: white; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+
+/* ─────────────────────────────────────────
+   QUÉ LLEVAR — INTERACTIVE CHECKLIST
+───────────────────────────────────────── */
+.checklist-progress {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 14px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.checklist-count {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  color: var(--pine); letter-spacing: .04em;
+}
+.checklist-bar-wrap {
+  flex: 1; height: 3px; background: var(--border); border-radius: 100px; overflow: hidden;
+}
+.checklist-bar-fill {
+  height: 100%; background: var(--green-light); border-radius: 100px;
+  transition: width .4s ease; width: 0%;
+}
+.checklist-reset {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--text-faint);
+  cursor: pointer; transition: color .15s; padding: 3px 0;
+}
+.checklist-reset:hover { color: var(--text-muted); }
+
+.check-list { display: flex; flex-direction: column; gap: 0; }
+.check-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background .1s; user-select: none;
+  border-radius: 4px; margin: 0 -4px; padding-left: 4px; padding-right: 4px;
+}
+.check-row:last-child { border-bottom: none; }
+.check-row:hover { background: rgba(15,58,51,.03); }
+.check-box {
+  width: 17px; height: 17px; border-radius: 4px;
+  border: 1.5px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; transition: all .15s; background: white;
+}
+.check-box.done { background: var(--pine); border-color: var(--pine); }
+.check-box.done::after { content: '✓'; font-size: 9px; color: white; font-weight: 700; }
+.check-icon { font-size: 13px; flex-shrink: 0; width: 18px; text-align: center; }
+.check-label {
+  font-size: 12.5px; font-weight: 300; color: var(--text-mid);
+  flex: 1; line-height: 1.35; transition: color .15s;
+}
+.check-row.done .check-label { color: var(--text-faint); text-decoration: line-through; }
+
+/* ─────────────────────────────────────────
+   CÓMO LLEGAR — RIGHT COLUMN MODULE
+───────────────────────────────────────── */
+.transport-module-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 20px 14px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none;
+}
+.transport-module-header:hover { background: rgba(15,58,51,.02); }
+.transport-toggle {
+  font-family: var(--font-mono); font-size: 10px; font-weight: 500;
+  letter-spacing: .06em; color: var(--text-muted);
+  transition: transform .3s; display: inline-block;
+}
+.transport-body {
+  overflow: hidden; transition: max-height .4s ease, opacity .3s;
+  max-height: 0; opacity: 0;
+}
+.transport-body.open { max-height: 800px; opacity: 1; }
+.transport-option {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+}
+.transport-option:last-child { border-bottom: none; }
+.transport-opt-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+}
+.transport-icon { font-size: 15px; }
+.transport-name {
+  font-size: 13px; font-weight: 500; color: var(--text-primary); flex: 1;
+}
+.transport-opt-badge {
+  font-family: var(--font-mono); font-size: 9px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase;
+  color: var(--text-muted); background: var(--cream);
+  padding: 2px 7px; border-radius: 100px; border: 1px solid var(--border);
+}
+.transport-opt-desc {
+  font-size: 12px; font-weight: 300; color: var(--text-mid); line-height: 1.6;
+}
+.transport-opt-tip {
+  margin-top: 10px; padding: 8px 12px;
+  background: var(--green-faint); border-left: 2px solid var(--sage);
+  border-radius: 0 4px 4px 0;
+  font-size: 11px; font-weight: 400; color: var(--green-mid); line-height: 1.5;
+}
+
+/* ─────────────────────────────────────────
+   FADE-IN
+───────────────────────────────────────── */
+.fade-up { opacity: 0; transform: translateY(16px); animation: fadeUp .5s ease forwards; }
+.fade-up:nth-child(1) { animation-delay: .05s; }
+.fade-up:nth-child(2) { animation-delay: .12s; }
+.fade-up:nth-child(3) { animation-delay: .19s; }
+@keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+/* ─────────────────────────────────────────
+   TOAST
+───────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(12px);
+  background: var(--pine); color: white;
+  font-family: var(--font-mono); font-size: 12px; font-weight: 500; letter-spacing: .06em;
+  padding: 10px 20px; border-radius: 100px;
+  box-shadow: 0 8px 24px rgba(15,58,51,.25);
+  opacity: 0; pointer-events: none; transition: all .25s ease; z-index: 9999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     NAV
+════════════════════════════════════════ -->
+<header class="site-header">
+  <div class="container">
+    <div class="header-inner">
+      <a class="logo" href="/">Lagom<span>plan</span></a>
+      <ul class="nav-links">
+        <li><a href="/planner">Planner</a></li>
+        <li><a href="/guides" class="active">Guides</a></li>
+        <li><a href="/hotels">Hotels</a></li>
+      </ul>
+      <div class="header-actions">
+        <span class="btn-ghost" style="font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;">ES</span>
+        <div class="avatar">E</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════
+     HERO
+════════════════════════════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <div class="hero-eyebrow">Guía curada · Naturaleza &amp; Aventura</div>
+        <h1 class="hero-title">Valle de Bravo<em> / </em>Avándaro</h1>
+        <p class="hero-subtitle">Agua, bosque y ritmo lento a dos horas de la Ciudad de México. La escapada perfecta para familias y parejas que quieren desconectarse sin complicar el plan.</p>
+        <div class="meta-chips">
+          <span class="chip"><span class="chip-dot"></span>Familia</span>
+          <span class="chip"><span class="chip-dot"></span>Naturaleza</span>
+          <span class="chip"><span class="chip-dot"></span>Fin de semana</span>
+          <span class="chip"><span class="chip-dot"></span>Aventura</span>
+          <span class="chip"><span class="chip-dot"></span>2–3 días</span>
+        </div>
+        <div class="hero-actions">
+          <button class="action-link" onclick="showToast('✓ Guía guardada')">✓ Guardar</button>
+          <span class="action-sep">·</span>
+          <button class="action-link" onclick="showToast('Enlace copiado')">⟶ Compartir</button>
+          <a href="/planner?destino=valle-de-bravo" class="btn-plan-hero">✦ Planear mi viaje →</a>
+        </div>
+      </div>
+      <div class="hero-image-wrap">
+        <div class="hero-image">
+          <div class="hero-image-bg"></div>
+          <div class="hero-image-overlay"></div>
+          <span class="image-tag">Estado de México</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════
+     MAIN LAYOUT
+════════════════════════════════════════ -->
+<div class="container">
+  <div class="main-layout">
+
+    <!-- ────────────────────────────────────
+         LEFT COLUMN
+         Order: Itinerario → Alojamientos → Experiencias
+    ─────────────────────────────────────── -->
+    <div class="left-column">
+
+      <!-- ── 1. ITINERARIO ── -->
+      <div class="content-block">
+        <div class="section-header">
+          <div class="section-eyebrow">Itinerario</div>
+          <div class="section-title">3 días de naturaleza y ritmo lento</div>
+          <div class="section-desc">Un highlight por día — sin sobresaturar el plan.</div>
+        </div>
+
+        <div class="itinerary-stack">
+
+          <!-- DÍA 1 -->
+          <div class="day-card fade-up" id="day-1">
+            <div class="day-header" onclick="toggleDay('day-1')">
+              <div>
+                <div class="day-label">Día 01 · Viernes</div>
+                <div class="day-title">Llegada y primer atardecer sobre el lago</div>
+              </div>
+              <div class="day-meta">
+                <span class="day-count">3 momentos</span>
+                <div class="day-toggle">▾</div>
+              </div>
+            </div>
+            <div class="day-body" style="max-height:2000px;opacity:1;">
+              <div class="day-items">
+                <div class="day-item">
+                  <div class="item-time">15:00</div>
+                  <div>
+                    <div class="item-title">Llegada y check-in</div>
+                    <div class="item-desc">Saliendo viernes en la tarde, llegas antes del atardecer con tiempo de acomodarte sin prisa. Elige Los Veleros o el hotel que seleccionaste abajo.</div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">18:00</div>
+                  <div>
+                    <div class="item-title">Paseo por el muelle al atardecer</div>
+                    <div class="item-desc">El embarcadero es el mejor punto de llegada al pueblo. Una cerveza o mezcal en alguna de las terrazas con vista al lago — el viaje ya empezó.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">Sin costo</span>
+                      <span class="item-badge-sm">30 min caminando del centro</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">20:00</div>
+                  <div>
+                    <div class="item-title">Cena en El Santuario o La Michoacana del Lago</div>
+                    <div class="item-desc">El Santuario tiene la mejor terraza para cenar con vista nocturna al lago. Para familias con niños, La Michoacana del Lago es más relajada y tiene helados artesanales.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">Reserva en El Santuario</span>
+                      <span class="item-badge-sm">~$600–1,400 MXN · 2 personas</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DÍA 2 -->
+          <div class="day-card fade-up" id="day-2">
+            <div class="day-header" onclick="toggleDay('day-2')">
+              <div>
+                <div class="day-label">Día 02 · Sábado</div>
+                <div class="day-title">El mejor día — mercado, lago y vuelo</div>
+              </div>
+              <div class="day-meta">
+                <span class="day-count">4 momentos</span>
+                <div class="day-toggle">▾</div>
+              </div>
+            </div>
+            <div class="day-body" style="max-height:2000px;opacity:1;">
+              <div class="day-items">
+                <div class="day-item">
+                  <div class="item-time">08:30</div>
+                  <div>
+                    <div class="item-title">Desayuno en el mercado del sábado</div>
+                    <div class="item-desc">Tlayudas y atole frente a la iglesia. Llega antes de las 10:00 para disfrutarlo sin aglomeraciones.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">~$80 MXN/persona</span>
+                      <span class="item-badge-sm">Sólo sábados</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">10:30</div>
+                  <div>
+                    <div class="item-title">Parapente biplaza desde La Peña</div>
+                    <div class="item-desc">20–40 minutos de vuelo con vista 360° sobre el embalse y el bosque. Sin experiencia previa. Reserva en el sitio la noche anterior — los cupos del sábado se llenan rápido.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">~$1,200 MXN/persona</span>
+                      <span class="item-badge-sm">+12 años</span>
+                      <span class="item-badge-sm">Transfer disponible</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">13:00</div>
+                  <div>
+                    <div class="item-title">Comida en Café Del Valle</div>
+                    <div class="item-desc">El más confiable del centro. Cocina sencilla, porciones generosas y buen café de olla. Evita los restaurantes de la plaza principal en fin de semana — esperas largas y calidad turística.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">~$250 MXN/persona</span>
+                      <span class="item-badge-sm">Sin reserva</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">17:00</div>
+                  <div>
+                    <div class="item-title">Renta de kayak o paseo en lancha</div>
+                    <div class="item-desc">Menos tráfico en el lago a esta hora y la luz de tarde es perfecta. Los kayaks se rentan desde el embarcadero, solos, sin guía.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">~$400 MXN/hora</span>
+                      <span class="item-badge-sm">Apto familias</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- DÍA 3 -->
+          <div class="day-card fade-up collapsed" id="day-3">
+            <div class="day-header" onclick="toggleDay('day-3')">
+              <div>
+                <div class="day-label">Día 03 · Domingo</div>
+                <div class="day-title">Despedida lenta — bosque y regreso</div>
+              </div>
+              <div class="day-meta">
+                <span class="day-count">3 momentos</span>
+                <div class="day-toggle">▾</div>
+              </div>
+            </div>
+            <div class="day-body" style="max-height:0;opacity:0;">
+              <div class="day-items">
+                <div class="day-item">
+                  <div class="item-time">09:00</div>
+                  <div>
+                    <div class="item-title">Desayuno tardío en el hotel</div>
+                    <div class="item-desc">El domingo es para no correr. Desayuno incluido en Los Veleros o Casa Avándaro. Si te quedas en Loto Azul, el desayuno típico del hotel es el punto alto de la estancia.</div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">11:30</div>
+                  <div>
+                    <div class="item-title">Caminata al Mirador La Peña</div>
+                    <div class="item-desc">30 minutos de subida moderada con vistas al lago completo. Apto para familias con niños mayores de 5 años. El mirador tiene zona de descanso — lleva agua y algo de comer.</div>
+                    <div class="item-badge-row">
+                      <span class="item-badge-sm">Sin costo</span>
+                      <span class="item-badge-sm">~1.5 hr ida y vuelta</span>
+                      <span class="item-badge-sm">Zapatos cómodos</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="day-item">
+                  <div class="item-time">13:30</div>
+                  <div>
+                    <div class="item-title">Comida y regreso a CDMX</div>
+                    <div class="item-desc">Última comida antes de salir — la Michoacana del Lago para algo ligero. Sale antes de las 15:00 para llegar a CDMX antes de que el tráfico del domingo se cierre.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── 2. ALOJAMIENTOS ── -->
+      <div class="content-block">
+        <div class="section-header">
+          <div class="section-eyebrow">Dónde quedarte</div>
+          <div class="section-title">Alojamientos ideales para familias</div>
+          <div class="section-desc">3 opciones seleccionadas por su ubicación, comodidad y relación precio–calidad real.</div>
+        </div>
+
+        <div class="hotel-grid">
+          <div class="hotel-card fade-up">
+            <div class="hotel-info">
+              <div class="hotel-number">01</div>
+              <div class="hotel-name">Los Veleros Resort Valle de Bravo</div>
+              <div class="hotel-name-meta">
+                <span class="hotel-type">Hotel boutique · Lago</span>
+                <span class="hotel-price-tier">$$</span>
+              </div>
+              <div class="hotel-why">Vista directa al lago desde casi todas las habitaciones. Las cabañas familiares tienen sala y kitchenette — ideal si vienen con niños pequeños. Piscina y acceso a muelle propio.</div>
+              <span class="hotel-pill">Mejor para familias con niños</span>
+            </div>
+            <div class="hotel-cta">
+              <a href="#" class="btn-book-hotel" onclick="showToast('Abriendo Booking.com…');return false;">Ver en Booking →</a>
+              <button class="btn-ver-mas" onclick="showToast('Pronto: reseñas detalladas')">Más info</button>
+            </div>
+          </div>
+
+          <div class="hotel-card fade-up">
+            <div class="hotel-info">
+              <div class="hotel-number">02</div>
+              <div class="hotel-name">Hotel Loto Azul</div>
+              <div class="hotel-name-meta">
+                <span class="hotel-type">Hotel · Centro histórico</span>
+                <span class="hotel-price-tier">$</span>
+              </div>
+              <div class="hotel-why">El centro de Valle en 5 minutos caminando. Habitaciones sencillas pero limpias, jardín interior con hamacas y desayuno típico incluido. La opción más honesta para presupuesto ajustado sin sacrificar ubicación.</div>
+              <span class="hotel-pill">Relación precio-ubicación</span>
+            </div>
+            <div class="hotel-cta">
+              <a href="#" class="btn-book-hotel" onclick="showToast('Abriendo Booking.com…');return false;">Ver en Booking →</a>
+              <button class="btn-ver-mas" onclick="showToast('Pronto: reseñas detalladas')">Más info</button>
+            </div>
+          </div>
+
+          <div class="hotel-card fade-up">
+            <div class="hotel-info">
+              <div class="hotel-number">03</div>
+              <div class="hotel-name">Casa Avándaro Golf &amp; Spa Resort</div>
+              <div class="hotel-name-meta">
+                <span class="hotel-type">Resort · Avándaro</span>
+                <span class="hotel-price-tier">$$$</span>
+              </div>
+              <div class="hotel-why">Para parejas o familias que quieren más espacio y calma. En Avándaro, lejos del ruido del centro. Campo de golf, spa y suites con jardín propio. La mejor opción si el fin de semana es la excusa para descansar de verdad.</div>
+              <span class="hotel-pill">Descanso y privacidad total</span>
+            </div>
+            <div class="hotel-cta">
+              <a href="#" class="btn-book-hotel" onclick="showToast('Abriendo Booking.com…');return false;">Ver en Booking →</a>
+              <button class="btn-ver-mas" onclick="showToast('Pronto: reseñas detalladas')">Más info</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. EXPERIENCIAS ── -->
+      <div class="content-block">
+        <div class="section-header">
+          <div class="section-eyebrow">Cosas que hacer</div>
+          <div class="section-title">Experiencias en Valle de Bravo</div>
+          <div class="section-desc">Actividades con ritmo Lagom — un highlight por día, sin sobresaturar el plan.</div>
+        </div>
+
+        <div class="experience-list">
+          <div class="exp-item">
+            <div class="exp-num">01</div>
+            <div class="exp-content">
+              <div class="exp-name">Vuelo en parapente sobre el lago</div>
+              <div class="exp-desc">Valle es capital mundial del parapente — los vuelos biplaza salen desde La Peña y duran entre 20 y 40 minutos con vista al embalse y el bosque. Sin experiencia previa. Incluye instructor y fotos.</div>
+              <div class="exp-tags">
+                <span class="exp-tag">Mañana</span>
+                <span class="exp-tag">~$1,200 MXN/persona</span>
+                <span class="exp-tag">+12 años</span>
+                <span class="exp-tag">Reserva en sitio</span>
+              </div>
+            </div>
+            <div class="exp-action">
+              <a href="#" class="btn-exp-book" onclick="showToast('Abriendo Viator…');return false;">Ver en Viator →</a>
+            </div>
+          </div>
+
+          <div class="exp-item">
+            <div class="exp-num">02</div>
+            <div class="exp-content">
+              <div class="exp-name">Paseo en lancha por el embalse</div>
+              <div class="exp-desc">Desde el embarcadero del centro puedes rentar lanchas de motor o kayaks por hora. Por la mañana, antes de las 10:00, el agua está en calma y la niebla aún cubre los pinos. Apto con bebés — el paseo es tranquilo y dura lo que quieras.</div>
+              <div class="exp-tags">
+                <span class="exp-tag">Todo público</span>
+                <span class="exp-tag">~$400–800 MXN/hr</span>
+                <span class="exp-tag">Sin reserva</span>
+              </div>
+            </div>
+            <div class="exp-action">
+              <a href="#" class="btn-exp-book" onclick="showToast('Abriendo Viator…');return false;">Ver en Viator →</a>
+            </div>
+          </div>
+
+          <div class="exp-item">
+            <div class="exp-num">03</div>
+            <div class="exp-content">
+              <div class="exp-name">Mercado del sábado en el centro</div>
+              <div class="exp-desc">El mercado de artesanías y comida local más completo de la zona. Llega antes de las 10:00 para evitar la saturación. Los tlayudas y memelas frente a la iglesia son el mejor desayuno del viaje.</div>
+              <div class="exp-tags">
+                <span class="exp-tag">Sábados</span>
+                <span class="exp-tag">Sin costo</span>
+                <span class="exp-tag">Apto carriola</span>
+              </div>
+            </div>
+            <div class="exp-action">
+              <a href="#" class="btn-exp-book" onclick="showToast('Abriendo GetYourGuide…');return false;">Ver opciones →</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left-column -->
+
+    <!-- ────────────────────────────────────
+         RIGHT COLUMN
+         Order: Tips → CTA → Checklist → Cómo llegar
+    ─────────────────────────────────────── -->
+    <div class="right-column">
+
+      <!-- 1. LAGOM TIPS (builds value and trust before the ask) -->
+      <div class="module-card">
+        <div class="module-header">
+          <div>
+            <div class="module-eyebrow">Consejos curados</div>
+            <div class="module-title">Lagom Tips para Valle</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="tips-list">
+            <div class="tip-item">
+              <span class="tip-dot"></span>
+              Sale viernes a las 15:00 — esquivas el tráfico de Reforma y llegas para el atardecer.
+            </div>
+            <div class="tip-item">
+              <span class="tip-dot"></span>
+              Los mejores hoteles están en el centro o con vista al lago. Evita los que están sobre la carretera — el ruido arruina la experiencia.
+            </div>
+            <div class="tip-item">
+              <span class="tip-dot"></span>
+              Para familias: busca propiedades con jardín o alberca. Los Veleros y Avándaro tienen las mejores opciones con más espacio y calma.
+            </div>
+            <div class="tip-item">
+              <span class="tip-dot"></span>
+              El mercado del sábado tiene las mejores tlayudas y memelas del estado de México.
+            </div>
+            <div class="tip-item">
+              <span class="tip-dot"></span>
+              Regresa el domingo antes de las 15:00 — el tráfico de salida se acumula de golpe a partir de esa hora.
+            </div>
+          </div>
+
+          <div class="dato-curioso">
+            <div class="dato-eyebrow">Dato curioso</div>
+            <p class="dato-text">Valle de Bravo es uno de los cinco mejores sitios de vuelo libre del mundo. La altitud y los vientos térmicos del lago atraen competencias con participantes de más de 30 países cada año.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. PLAN CTA (user has seen the value, now convert) -->
+      <div class="module-card pine-bg">
+        <div class="module-header">
+          <div>
+            <div class="module-eyebrow">AI · Lagomplan</div>
+            <div class="module-title">¿Viajando a Valle de Bravo?</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <p class="plan-cta-desc">Convierte esta guía en un itinerario personalizado con IA — fechas, viajeros y presupuesto exactos para tu viaje en 60 segundos.</p>
+          <a href="/planner?destino=valle-de-bravo" class="btn-plan-cta">Planear mi viaje →</a>
+        </div>
+      </div>
+
+      <!-- 3. QUÉ LLEVAR — interactive checklist -->
+      <div class="module-card">
+        <div class="module-header">
+          <div>
+            <div class="module-eyebrow">Checklist</div>
+            <div class="module-title">Qué llevar</div>
+          </div>
+        </div>
+        <div class="module-body">
+          <div class="checklist-progress">
+            <span class="checklist-count" id="pack-count">0 / 8</span>
+            <div class="checklist-bar-wrap">
+              <div class="checklist-bar-fill" id="pack-bar"></div>
+            </div>
+            <span class="checklist-reset" onclick="resetChecklist()">Reset</span>
+          </div>
+          <div class="check-list" id="pack-list">
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">👟</span>
+              <span class="check-label">Tenis para caminata o senderismo ligero</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">🧥</span>
+              <span class="check-label">Chamarra o suéter — noches frías todo el año</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">🌧</span>
+              <span class="check-label">Impermeable ligero (temporada: may–oct)</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">💊</span>
+              <span class="check-label">Botiquín básico de primeros auxilios</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">💵</span>
+              <span class="check-label">Efectivo — mercado y lanchas no aceptan tarjeta</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">🧴</span>
+              <span class="check-label">Repelente de insectos (zona de lago)</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">♻️</span>
+              <span class="check-label">Botella reutilizable de agua</span>
+            </div>
+            <div class="check-row" onclick="toggleCheck(this)">
+              <div class="check-box"></div>
+              <span class="check-icon">🔋</span>
+              <span class="check-label">Power bank — señal se consume mucho en ruta</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 4. CÓMO LLEGAR — compact collapsed module -->
+      <div class="module-card">
+        <div class="transport-module-header" onclick="toggleTransport()" id="transport-toggle-row">
+          <div>
+            <div class="module-eyebrow">Logística</div>
+            <div class="module-title">Cómo llegar</div>
+          </div>
+          <span class="transport-toggle" id="transport-chevron">▾</span>
+        </div>
+        <div class="transport-body" id="transport-body">
+          <div class="transport-option">
+            <div class="transport-opt-header">
+              <span class="transport-icon">🚗</span>
+              <span class="transport-name">Coche propio</span>
+              <span class="transport-opt-badge">2–2.5 hrs</span>
+            </div>
+            <div class="transport-opt-desc">Autopista México–Toluca (Cuota 15D), luego libramiento a Valle de Bravo. Evita salir viernes después de las 14:00 — el tráfico en Reforma puede doblar el tiempo. Estacionamiento limitado en el centro los sábados: llega antes de las 9:00.</div>
+            <div class="transport-opt-tip">✦ Sale a las 15:00 del viernes — esquivas Reforma y llegas para el atardecer.</div>
+          </div>
+          <div class="transport-option">
+            <div class="transport-opt-header">
+              <span class="transport-icon">🚌</span>
+              <span class="transport-name">Autobús ejecutivo</span>
+              <span class="transport-opt-badge">~$250 MXN ida</span>
+            </div>
+            <div class="transport-opt-desc">Flecha Amarilla y Herradura de Plata salen desde Terminal Poniente (Observatorio) cada hora. Cómodo, con servicio a bordo, te deja directo en el centro. Ideal para dos noches sin necesitar coche.</div>
+            <div class="transport-opt-tip">✦ Compra el boleto de regreso el mismo día que llegas — los domingos se agotan.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right-column -->
+
+  </div><!-- /main-layout -->
+</div><!-- /container -->
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Day toggle ──
+  function toggleDay(id) {
+    const card = document.getElementById(id);
+    const body = card.querySelector('.day-body');
+    const collapsed = card.classList.contains('collapsed');
+    if (collapsed) {
+      card.classList.remove('collapsed');
+      body.style.maxHeight = '2000px';
+      body.style.opacity = '1';
+    } else {
+      card.classList.add('collapsed');
+      body.style.maxHeight = '0';
+      body.style.opacity = '0';
+    }
+  }
+
+  // ── Packing checklist ──
+  const TOTAL = 8;
+  function toggleCheck(row) {
+    const box = row.querySelector('.check-box');
+    const isDone = row.classList.contains('done');
+    row.classList.toggle('done');
+    box.classList.toggle('done');
+    updatePackProgress();
+  }
+  function updatePackProgress() {
+    const done = document.querySelectorAll('#pack-list .check-row.done').length;
+    document.getElementById('pack-count').textContent = done + ' / ' + TOTAL;
+    document.getElementById('pack-bar').style.width = (done / TOTAL * 100) + '%';
+    if (done === TOTAL) showToast('✓ Todo listo para Valle de Bravo');
+  }
+  function resetChecklist() {
+    document.querySelectorAll('#pack-list .check-row').forEach(r => {
+      r.classList.remove('done');
+      r.querySelector('.check-box').classList.remove('done');
+    });
+    updatePackProgress();
+  }
+
+  // ── Transport toggle ──
+  function toggleTransport() {
+    const body = document.getElementById('transport-body');
+    const chevron = document.getElementById('transport-chevron');
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+      body.classList.remove('open');
+      chevron.style.transform = 'rotate(0deg)';
+    } else {
+      body.classList.add('open');
+      chevron.style.transform = 'rotate(180deg)';
+    }
+  }
+
+  // ── Toast ──
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+
+</body>
+</html>

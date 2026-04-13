@@ -1,88 +1,119 @@
 /**
  * components/guides/GuideHero.tsx
  *
- * Guide detail hero — side-by-side layout: text (left) + image (right).
- * Matches the prototype layout from preview.html.
+ * Guide hero — two-column layout: text (left) + image (right).
+ * Matches the prototype exactly. Accepts pre-translated HeroData.
  */
 
 import Image from 'next/image'
-import type { Guide } from '../../lib/guides'
-import type { Locale } from '../../i18n'
+import type { HeroData } from '../../lib/data/guides/types'
 
 interface Props {
-  guide:  Guide
-  locale: Locale
+  data: HeroData
+  slug: string
+  plannerHref: string
+  onSave?: () => void
+  onShare?: () => void
 }
 
-export function GuideHero({ guide, locale }: Props) {
-  const isES        = locale === 'es'
-  const title       = isES ? guide.title_es       : guide.title_en
-  const excerpt     = isES ? guide.excerpt_es     : guide.excerpt_en
-  const destination = isES ? guide.destination_es : guide.destination_en
-  const tags        = isES ? guide.tags_es        : guide.tags_en
-
+export function GuideHero({ data, plannerHref, onSave, onShare }: Props) {
   return (
-    <section
-      className="border-b"
-      style={{ background: '#FAF8F5', borderColor: 'rgba(200,191,181,0.5)' }}
-    >
-      <div className="max-w-[900px] mx-auto px-7 py-12 max-[768px]:py-8">
+    <section className="py-16 pb-12 border-b border-[#E2DDD5] bg-[#FDFCF9]">
+      <div className="max-w-[1200px] mx-auto px-8 max-[768px]:px-5">
+        <div className="grid grid-cols-[1fr_400px] gap-16 items-start max-[900px]:grid-cols-1 max-[900px]:gap-10">
 
-        {/* Two-column grid: text left, image right */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
-
-          {/* Left — text */}
+          {/* ── Left: text ── */}
           <div>
-            {/* Destination eyebrow */}
-            <span className="font-mono text-[9px] font-medium tracking-[.16em] uppercase text-[#6B8F86] block mb-4">
-              {destination}
-            </span>
+            {/* Eyebrow */}
+            <div className="font-mono text-[10px] font-medium tracking-[.14em] uppercase text-[#6B8F86] mb-5 flex items-center gap-2">
+              <span className="block w-5 h-px bg-[#6B8F86] flex-shrink-0" />
+              {data.eyebrow}
+            </div>
 
             {/* Title */}
             <h1
-              className="font-sans font-bold text-[#0F3A33] leading-[1.05] tracking-[-1px] mb-5"
-              style={{ fontSize: 'clamp(28px, 4.5vw, 44px)' }}
+              className="font-display font-normal leading-[1.05] tracking-[-0.02em] text-[#1A1A1A] mb-4"
+              style={{ fontSize: 'clamp(32px, 3.8vw, 52px)' }}
             >
-              {title}
+              {data.title}
             </h1>
 
-            {/* Excerpt */}
-            <p className="font-sans text-[15px] leading-[1.75] text-[#4A4A46] mb-6 max-w-[440px]">
-              {excerpt}
+            {/* Subtitle */}
+            <p className="text-[15px] font-light leading-[1.7] text-[#4A4A4A] max-w-[400px] mb-7">
+              {data.subtitle}
             </p>
 
-            {/* Tags */}
-            <div className="flex flex-wrap gap-2">
-              {tags.slice(0, 5).map(tag => (
+            {/* Meta chips */}
+            <div className="flex flex-wrap gap-2 mb-7">
+              {data.chips.map((chip) => (
                 <span
-                  key={tag}
-                  className="font-sans text-[11px] font-medium px-3 py-1 rounded-full"
-                  style={{ background: 'rgba(107,143,134,.13)', color: '#6B8F86' }}
+                  key={chip}
+                  className="flex items-center gap-1.5 font-mono text-[11px] tracking-[.04em] text-[#4A4A4A] px-3 py-1.5 bg-[#EDE7E1] border border-[#E2DDD5] rounded-full"
                 >
-                  {tag}
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#6B8F86] flex-shrink-0" />
+                  {chip}
                 </span>
               ))}
             </div>
+
+            {/* Actions bar */}
+            <div className="flex items-center pt-5 border-t border-[#E2DDD5]">
+              {onSave && (
+                <button
+                  type="button"
+                  onClick={onSave}
+                  className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  ✓ Guardar
+                </button>
+              )}
+              {onSave && onShare && (
+                <span className="text-[#C8C2B8] text-[10px] pr-3.5 select-none">·</span>
+              )}
+              {onShare && (
+                <button
+                  type="button"
+                  onClick={onShare}
+                  className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
+                >
+                  ⟶ Compartir
+                </button>
+              )}
+              <a
+                href={plannerHref}
+                className="inline-flex items-center gap-2 font-mono text-[11px] font-medium tracking-[.08em] uppercase text-white bg-[#0F3A33] px-5 py-2.5 rounded-lg transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(15,58,51,.25)] ml-auto"
+              >
+                ✦ Planear mi viaje →
+              </a>
+            </div>
           </div>
 
-          {/* Right — image */}
-          <div
-            className="relative w-full overflow-hidden rounded-[22px] border"
-            style={{
-              aspectRatio: '4/3',
-              borderColor: 'rgba(200,191,181,0.5)',
-              boxShadow: '0 2px 12px rgba(15,58,51,.08)',
-            }}
-          >
-            <Image
-              src={guide.cover_img}
-              alt={title}
-              fill
-              className="object-cover"
-              priority
-              sizes="(max-width: 768px) 100vw, 50vw"
-            />
+          {/* ── Right: image ── */}
+          <div className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden max-[900px]:order-[-1]">
+            {data.coverImage ? (
+              <>
+                <Image
+                  src={data.coverImage}
+                  alt={data.title}
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 900px) 100vw, 400px"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,58,51,.4)] to-transparent" />
+              </>
+            ) : (
+              /* Gradient placeholder (matches prototype) */
+              <div className="w-full h-full bg-gradient-to-br from-[#0F3A33] via-[#2D6B5A] to-[#6B8F86]" />
+            )}
+            {/* Floating tag */}
+            {data.imageTag && (
+              <span className="absolute top-5 right-5 font-mono text-[10px] font-medium tracking-[.1em] uppercase text-white bg-[rgba(15,58,51,.7)] backdrop-blur-sm px-2.5 py-[5px] rounded-full">
+                {data.imageTag}
+              </span>
+            )}
           </div>
+
         </div>
       </div>
     </section>

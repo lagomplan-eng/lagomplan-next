@@ -23,8 +23,7 @@
 import { useState, useEffect }       from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 import Image                          from 'next/image'
-import { useParams }                  from 'next/navigation'
-import { Link, usePathname, useRouter } from '../../lib/navigation'
+import { Link, usePathname } from '../../lib/navigation'
 import type { Locale }               from '../../i18n'
 import { getSupabaseBrowser }        from '../../lib/supabase/client'
 import { useUser }                   from '../auth/SupabaseProvider'
@@ -67,8 +66,6 @@ export default function Nav() {
   const t        = useTranslations('nav')
   const locale   = useLocale() as Locale
   const pathname  = usePathname()
-  const router    = useRouter()
-  const params    = useParams()
   const [open, setOpen]               = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
   const user = useUser()
@@ -77,45 +74,27 @@ export default function Nav() {
   useEffect(() => { setOpen(false) }, [pathname])
 
   // ── Language switcher ──────────────────────────────────
+  // Full page reload on locale switch so Google Maps (and other singleton SDKs)
+  // are only ever initialized once per page load.
   function switchLocale(target: Locale) {
     if (target === locale) return
 
-    // 1. Entity detail pages (guides, hotels, destinations) render a hidden input
-    //    with the pre-computed alternate-locale URL. Use it when present so we
-    //    navigate to the correct localized slug rather than the current one.
+    // 1. Entity detail pages render a hidden input with the pre-computed
+    //    alternate-locale URL (different slug per locale). Use it when present.
     if (typeof document !== 'undefined') {
       const altEl = document.getElementById('__alternate_locale_url') as HTMLInputElement | null
       if (altEl?.value) {
-        router.replace(altEl.value as any, { locale: target })
+        window.location.href = altEl.value
         return
       }
     }
 
-    if (!pathname) {
-      router.replace('/' as any, { locale: target })
-      return
-    }
-
-    // 2. Strip the `locale` segment from useParams — next-intl only wants the
-    //    route-specific dynamic params (e.g. { slug } for /guides/[slug]).
-    //    Passing `locale` as a param causes no harm but is semantically wrong.
-    const { locale: _loc, ...segmentParams } = (params ?? {}) as Record<string, string>
-    const hasDynamic = Object.keys(segmentParams).length > 0
-
-    if (hasDynamic) {
-      // Dynamic route — provide segment params so the template can be compiled.
-      // Note: for entity pages with differing slugs per locale, step 1 above
-      // should have already returned the correct URL. Reaching here means the
-      // page did not expose __alternate_locale_url, so we use the current slug
-      // as a best-effort fallback.
-      router.replace(
-        { pathname, params: segmentParams } as any,
-        { locale: target }
-      )
-    } else {
-      // Static route — no dynamic segments, safe to pass pathname string only.
-      router.replace(pathname as any, { locale: target })
-    }
+    // 2. Build the new path, stripping any existing locale prefix as a safeguard.
+    //    usePathname() from next-intl already omits the locale segment, but the
+    //    regex makes this safe regardless of the returned format.
+    const basePath = (pathname ?? '/').replace(/^\/(en|es)/, '')
+    const search   = typeof window !== 'undefined' ? window.location.search : ''
+    window.location.href = `/${target}${basePath || '/'}${search}`
   }
 
   // ── Nav links (internal paths → next-intl translates) ─

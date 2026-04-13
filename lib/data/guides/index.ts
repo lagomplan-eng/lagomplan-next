@@ -1,0 +1,91 @@
+/**
+ * lib/data/guides/index.ts
+ *
+ * Central registry for the new guide data system.
+ * All 14 guides are stored as FlatGuide (docx-sourced) and adapted on lookup.
+ *
+ * Lookup is O(1) — slug + locale → GuidePageData | null.
+ */
+
+import type { FlatGuide, GuidePageData } from './types'
+import { adaptFlatGuide } from './adapter'
+
+// ── Guide imports ──────────────────────────────────────────────────────────────
+
+import { guide as cancunEs } from './cancun/es'
+import { guide as cancunEn } from './cancun/en'
+import { guide as ciudadDeMexicoEs } from './ciudad-de-mexico/es'
+import { guide as ciudadDeMexicoEn } from './ciudad-de-mexico/en'
+import { guide as cuernavacaEs } from './cuernavaca/es'
+import { guide as cuernavacaEn } from './cuernavaca/en'
+import { guide as guadalajaraEs } from './guadalajara/es'
+import { guide as guadalajaraEn } from './guadalajara/en'
+import { guide as losCabosEs } from './los-cabos/es'
+import { guide as losCabosEn } from './los-cabos/en'
+import { guide as meridaEs } from './merida/es'
+import { guide as meridaEn } from './merida/en'
+import { guide as oaxacaEs } from './oaxaca/es'
+import { guide as oaxacaEn } from './oaxaca/en'
+import { guide as puertoVallartaEs } from './puerto-vallarta/es'
+import { guide as puertoVallartaEn } from './puerto-vallarta/en'
+import { guide as querétaroEs } from './queretaro/es'
+import { guide as querétaroEn } from './queretaro/en'
+import { guide as rivieraMayaEs } from './riviera-maya/es'
+import { guide as rivieraMayaEn } from './riviera-maya/en'
+import { guide as sanMiguelDeAllendeEs } from './san-miguel-de-allende/es'
+import { guide as sanMiguelDeAllendeEn } from './san-miguel-de-allende/en'
+import { guide as tepoztlanEs } from './tepoztlan/es'
+import { guide as tepoztlanEn } from './tepoztlan/en'
+import { guide as tulumEs } from './tulum/es'
+import { guide as tulumEn } from './tulum/en'
+import { guide as valledeBravoEs } from './valle-de-bravo/es'
+import { guide as valledeBravoEn } from './valle-de-bravo/en'
+
+// ── Registry ───────────────────────────────────────────────────────────────────
+// { [slug]: { [locale]: FlatGuide } }
+
+const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
+  'cancun': { es: cancunEs, en: cancunEn },
+  'ciudad-de-mexico': { es: ciudadDeMexicoEs, en: ciudadDeMexicoEn },
+  'cuernavaca': { es: cuernavacaEs, en: cuernavacaEn },
+  'guadalajara': { es: guadalajaraEs, en: guadalajaraEn },
+  'los-cabos': { es: losCabosEs, en: losCabosEn },
+  'merida': { es: meridaEs, en: meridaEn },
+  'oaxaca': { es: oaxacaEs, en: oaxacaEn },
+  'puerto-vallarta': { es: puertoVallartaEs, en: puertoVallartaEn },
+  'queretaro': { es: querétaroEs, en: querétaroEn },
+  'riviera-maya': { es: rivieraMayaEs, en: rivieraMayaEn },
+  'san-miguel-de-allende': { es: sanMiguelDeAllendeEs, en: sanMiguelDeAllendeEn },
+  'tepoztlan': { es: tepoztlanEs, en: tepoztlanEn },
+  'tulum': { es: tulumEs, en: tulumEn },
+  'valle-de-bravo': { es: valledeBravoEs, en: valledeBravoEn },
+}
+
+// ── Public helpers ─────────────────────────────────────────────────────────────
+
+/**
+ * Returns guide data for a given slug + locale, or null if not found.
+ * Falls back to 'es' if the requested locale is missing.
+ */
+export function getGuidePageData(slug: string, locale: string): GuidePageData | null {
+  const entry = FLAT_REGISTRY[slug]
+  if (!entry) return null
+  const flat = entry[locale] ?? entry['es'] ?? null
+  if (!flat) return null
+  return adaptFlatGuide(flat)
+}
+
+/**
+ * Returns all { locale, slug } pairs for generateStaticParams().
+ */
+export function getNewGuideParams(): Array<{ locale: string; slug: string }> {
+  const params: Array<{ locale: string; slug: string }> = []
+  for (const slug of Object.keys(FLAT_REGISTRY)) {
+    for (const locale of Object.keys(FLAT_REGISTRY[slug])) {
+      params.push({ locale, slug })
+    }
+  }
+  return params
+}
+
+export type { GuidePageData }
