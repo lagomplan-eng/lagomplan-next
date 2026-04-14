@@ -7,6 +7,8 @@ import { Link } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
 import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import type { Trip } from '../../../lib/supabase/types'
+import type { Locale } from '../../../i18n'
+import GuidesPreview from '../../../components/GuidesPreview'
 
 // ─── Brand cover gradient — single consistent tone ────────────────────────────
 
@@ -34,14 +36,6 @@ function deriveChips(trip: Trip): string[] {
   if (trip.travel_style && STYLE_LABEL[trip.travel_style]) chips.push(STYLE_LABEL[trip.travel_style])
   return chips.slice(0, 3)
 }
-
-// ─── Mock guides (no real guides table yet) ───────────────────────────────────
-
-const MOCK_GUIDES = [
-  'Guía Tokyo con niños',
-  'Itinerario 5 días Oaxaca',
-  'Top barrios CDMX',
-]
 
 // ─── TripCard ─────────────────────────────────────────────────────────────────
 
@@ -272,29 +266,7 @@ export default function MyTripsClient() {
       </div>
 
       {/* GUIDES */}
-      <section className="max-w-7xl mx-auto px-6 pb-24">
-        <div className="flex justify-between items-end mb-8">
-          <h3 className="font-serif text-2xl">Guías</h3>
-          <Link href="/guides" className="text-sm underline">
-            Ver todos
-          </Link>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-6">
-          {MOCK_GUIDES.map((g) => (
-            <div
-              key={g}
-              className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
-            >
-              <div className="h-28 bg-gradient-to-br from-[#2A6352] to-[#1B4D3E]" />
-              <div className="p-4">
-                <p className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-1">Guía</p>
-                <h4 className="font-serif text-sm leading-snug">{g}</h4>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      <GuidesPreview locale={locale as Locale} />
 
     </div>
   )

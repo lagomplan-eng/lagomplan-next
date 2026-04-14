@@ -46,7 +46,7 @@ export default function GuidesIndexPage({ params: { locale } }: Props) {
   const featured = listings.find((g: GuideListing & { featured?: boolean }) => (g as any).featured) ?? listings[0]
 
   return (
-    <main className="pt-[64px]">
+    <main className="pt-[72px]">
       <GuidesClient guides={listings} featured={featured} locale={locale} />
     </main>
   )

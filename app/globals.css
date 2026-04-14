@@ -216,7 +216,7 @@ body {
 
 /* ── Hero ─────────────────────────────────────────────── */
 .hero {
-  padding-top: 120px; /* accounts for fixed nav */
+  padding-top: 128px; /* accounts for fixed nav (72px) + breathing room */
   padding-bottom: 80px;
 }
 
@@ -256,4 +256,542 @@ body {
   margin-bottom: 16px;
 }
 
+/* ─────────────────────────────────────────────────────────
+   PRINT STYLESHEET — Editorial travel guide
+   Designed to feel like a Scandinavian magazine, not a UI export.
+   ──────────────────────────────────────────────────────── */
 
+@media print {
+
+  /* ── Page setup ───────────────────────────────────────── */
+  @page {
+    size: A4 portrait;
+    margin: 22mm 18mm 20mm 18mm;
+  }
+
+  /* ── Global resets ─────────────────────────────────────── */
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  html, body {
+    background: #fff !important;
+    color: #1F1F1F !important;
+    font-size: 9.5pt !important;
+    line-height: 1.65 !important;
+  }
+
+  a { color: inherit; }
+
+  /* ── Force-open all JS accordions ─────────────────────── */
+  /* DayCard + Transport use inline max-height: 0 to collapse */
+  [style*="max-height"] {
+    max-height: none !important;
+    overflow: visible !important;
+    opacity: 1 !important;
+  }
+
+  /* ── Remove positioning artifacts ─────────────────────── */
+  .fixed, .sticky    { position: static !important; }
+  nav                { display: none !important; }
+  [class*="pt-\\[72"] { padding-top: 0 !important; }
+
+  /* ── Remove all UI card chrome ─────────────────────────── */
+  .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-md, .rounded-full {
+    border-radius: 0 !important;
+  }
+  .bg-white { background: transparent !important; }
+
+  /* ══════════════════════════════════════════════════════
+     HERO
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="hero"] {
+    background: white !important;
+    border: none !important;
+    padding: 0 0 22pt !important;
+    margin-bottom: 26pt !important;
+    border-bottom: 1.5pt solid #1F1F1F !important;
+  }
+
+  [data-guide="hero"] > * {
+    max-width: 100% !important;
+    padding: 0 !important;
+  }
+
+  /* Grid → single column in print (Tailwind print:block handles this on the element) */
+  [data-guide="hero"] .grid { display: block !important; }
+
+  /* Eyebrow */
+  [data-hero="eyebrow"] {
+    font-size: 7pt !important;
+    letter-spacing: 0.2em !important;
+    color: #6F6A64 !important;
+    margin-bottom: 9pt !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6pt !important;
+  }
+  /* Hide the decorative horizontal line inside eyebrow */
+  [data-hero="eyebrow"] span { display: none !important; }
+  [data-hero="eyebrow"]::before {
+    content: '—';
+    color: #C0BAB2;
+    margin-right: 4pt;
+    font-style: normal;
+  }
+
+  /* Title */
+  [data-guide="hero"] h1 {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 38pt !important;
+    font-weight: 300 !important;
+    font-style: italic !important;
+    line-height: 1.05 !important;
+    letter-spacing: -0.02em !important;
+    color: #1F1F1F !important;
+    margin: 0 0 10pt !important;
+  }
+
+  /* Subtitle */
+  [data-hero="subtitle"] {
+    font-size: 10.5pt !important;
+    color: #6F6A64 !important;
+    line-height: 1.65 !important;
+    max-width: none !important;
+    margin-bottom: 14pt !important;
+  }
+
+  /* Chips → inline text with · separators, no pill styling */
+  [data-hero="chips"] {
+    display: block !important;
+  }
+  [data-hero="chips"] span {
+    display: inline !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    font-size: 8pt !important;
+    color: #6F6A64 !important;
+    letter-spacing: 0.04em !important;
+  }
+  /* The decorative dot inside each chip */
+  [data-hero="chips"] span > span { display: none !important; }
+  [data-hero="chips"] span + span::before {
+    content: ' · ';
+    color: #B0ACA6;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     SHARED SECTION HEADER
+     ══════════════════════════════════════════════════════ */
+
+  [data-section="eyebrow"] {
+    font-size: 7pt !important;
+    letter-spacing: 0.2em !important;
+    color: #6F6A64 !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    margin-bottom: 3pt !important;
+  }
+
+  [data-section="title"] {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 17pt !important;
+    font-weight: 300 !important;
+    font-style: italic !important;
+    color: #1F1F1F !important;
+    line-height: 1.2 !important;
+    margin: 0 0 14pt !important;
+    padding-bottom: 8pt !important;
+    border-bottom: 1pt solid #1F1F1F !important;
+    display: block !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     ITINERARY — Editorial 2-column day layout
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="itinerary"] { margin-bottom: 0 !important; }
+
+  /* Day card: strip chrome, add top rule */
+  [data-day="card"] {
+    background: transparent !important;
+    border: none !important;
+    border-top: 0.5pt solid #EAE7E2 !important;
+    overflow: visible !important;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  /* Day header button → non-interactive plain heading */
+  [data-day="header"] {
+    display: block !important;
+    padding: 10pt 0 6pt !important;
+    border: none !important;
+    background: none !important;
+    pointer-events: none !important;
+    cursor: default !important;
+    width: 100% !important;
+    text-align: left !important;
+  }
+
+  [data-day="ordinal"] {
+    font-size: 7pt !important;
+    letter-spacing: 0.16em !important;
+    color: #6F6A64 !important;
+    display: block !important;
+    margin-bottom: 2pt !important;
+    text-transform: uppercase !important;
+  }
+
+  [data-day="title"] {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 13pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    color: #1F1F1F !important;
+    display: block !important;
+  }
+
+  /* Day body */
+  [data-day="body"] {
+    padding: 0 !important;
+  }
+
+  /* Each activity row */
+  [data-day="item"] {
+    display: grid !important;
+    grid-template-columns: 38pt 1fr !important;
+    gap: 8pt !important;
+    align-items: start !important;
+    padding: 5pt 0 !important;
+    border-bottom: 0.5pt solid #EAE7E2 !important;
+    border-top: none !important;
+  }
+  [data-day="item"]:last-child { border-bottom: none !important; }
+
+  [data-day="time"] {
+    font-size: 7.5pt !important;
+    color: #2F5D50 !important;
+    font-weight: 500 !important;
+    padding-top: 1.5pt !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  [data-day="item-title"] {
+    font-size: 9.5pt !important;
+    font-weight: 600 !important;
+    color: #1F1F1F !important;
+    line-height: 1.4 !important;
+    margin-bottom: 2pt !important;
+  }
+
+  [data-day="item-desc"] {
+    font-size: 8.5pt !important;
+    color: #6F6A64 !important;
+    line-height: 1.55 !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     HOTELS
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="hotels"] { margin-bottom: 0 !important; }
+
+  [data-hotel="card"] {
+    background: transparent !important;
+    border: none !important;
+    border-top: 0.5pt solid #EAE7E2 !important;
+    padding: 11pt 0 !important;
+    overflow: visible !important;
+    display: block !important;
+  }
+
+  [data-hotel="number"] {
+    font-size: 7pt !important;
+    letter-spacing: 0.1em !important;
+    color: #B0ACA6 !important;
+    display: block !important;
+    margin-bottom: 2pt !important;
+  }
+
+  [data-hotel="name"] {
+    font-size: 11pt !important;
+    font-weight: 600 !important;
+    color: #1F1F1F !important;
+  }
+
+  [data-hotel="price"] {
+    font-size: 8.5pt !important;
+    font-weight: 600 !important;
+    color: #2F5D50 !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin-left: 6pt !important;
+  }
+
+  [data-hotel="type"] {
+    font-size: 7.5pt !important;
+    color: #6F6A64 !important;
+    letter-spacing: 0.04em !important;
+    display: block !important;
+    margin: 2pt 0 6pt !important;
+  }
+
+  [data-hotel="description"] {
+    font-size: 9pt !important;
+    color: #4A4A4A !important;
+    line-height: 1.6 !important;
+    margin-bottom: 5pt !important;
+  }
+
+  /* Booking link: strip button styling, show as plain editorial link */
+  [data-hotel="book-link"] {
+    font-size: 7.5pt !important;
+    color: #2F5D50 !important;
+    text-decoration: none !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    display: inline !important;
+    font-weight: 400 !important;
+    letter-spacing: 0 !important;
+  }
+  [data-hotel="book-link"]::before { content: '→ '; }
+
+  /* ══════════════════════════════════════════════════════
+     EXPERIENCES
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="experiences"] { margin-bottom: 0 !important; }
+
+  /* Remove the outer bordered container */
+  [data-exp="list"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+  }
+
+  [data-exp="item"] {
+    display: grid !important;
+    grid-template-columns: 24pt 1fr !important;
+    gap: 8pt !important;
+    border: none !important;
+    border-top: 0.5pt solid #EAE7E2 !important;
+    padding: 9pt 0 !important;
+    background: transparent !important;
+  }
+
+  [data-exp="number"] {
+    font-size: 7pt !important;
+    color: #B0ACA6 !important;
+    letter-spacing: 0.06em !important;
+    padding-top: 1pt !important;
+  }
+
+  [data-exp="name"] {
+    font-size: 10pt !important;
+    font-weight: 600 !important;
+    color: #1F1F1F !important;
+    margin-bottom: 3pt !important;
+    display: block !important;
+  }
+
+  [data-exp="description"] {
+    font-size: 8.5pt !important;
+    color: #6F6A64 !important;
+    line-height: 1.6 !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TIPS
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="tips"] {
+    background: transparent !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  [data-tip="item"] {
+    padding: 5pt 0 !important;
+    border-bottom: 0.5pt solid #EAE7E2 !important;
+    font-size: 9pt !important;
+    color: #4A4A4A !important;
+    line-height: 1.6 !important;
+  }
+  [data-tip="item"]:last-child { border-bottom: none !important; }
+
+  /* Dot bullet */
+  [data-tip="bullet"] { display: none !important; }
+  [data-tip="item"]::before {
+    content: '·  ';
+    color: #2F5D50;
+    font-weight: 700;
+    font-size: 10pt;
+  }
+
+  /* Fun fact — subtle editorial callout */
+  [data-tip="funfact"] {
+    background: #F6F4F1 !important;
+    border: none !important;
+    border-left: 2pt solid #2F5D50 !important;
+    padding: 10pt 12pt !important;
+    margin-top: 12pt !important;
+    border-radius: 0 !important;
+  }
+
+  [data-tip="funfact-eyebrow"] {
+    font-size: 7pt !important;
+    letter-spacing: 0.18em !important;
+    color: #2F5D50 !important;
+    text-transform: uppercase !important;
+    display: block !important;
+    margin-bottom: 4pt !important;
+  }
+
+  [data-tip="funfact-text"] {
+    font-size: 8.5pt !important;
+    color: #4A4A4A !important;
+    font-style: italic !important;
+    line-height: 1.6 !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     CHECKLIST
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="checklist"] {
+    background: transparent !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  /* Each row: replace interactive checkbox with □ */
+  [data-check="item"] {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 6pt !important;
+    padding: 4pt 0 !important;
+    border-bottom: 0.5pt solid #EAE7E2 !important;
+    cursor: default !important;
+    pointer-events: none !important;
+    background: none !important;
+    margin: 0 !important;
+  }
+  [data-check="item"]:last-child { border-bottom: none !important; }
+
+  /* Hide the interactive checkbox widget */
+  [data-check="box"] { display: none !important; }
+
+  /* Prepend □ */
+  [data-check="item"]::before {
+    content: '□';
+    font-size: 10pt !important;
+    color: #6F6A64 !important;
+    flex-shrink: 0 !important;
+    line-height: 1.2 !important;
+    margin-right: 2pt !important;
+  }
+
+  [data-check="emoji"] { font-size: 9pt !important; }
+
+  [data-check="label"] {
+    font-size: 9pt !important;
+    color: #1F1F1F !important;
+    text-decoration: none !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     TRANSPORT
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="transport"] {
+    background: transparent !important;
+    border: none !important;
+    overflow: visible !important;
+  }
+
+  [data-transport="option"] {
+    border: none !important;
+    border-top: 0.5pt solid #EAE7E2 !important;
+    padding: 8pt 0 !important;
+    background: transparent !important;
+  }
+
+  [data-transport="header"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 5pt !important;
+    margin-bottom: 3pt !important;
+  }
+
+  [data-transport="icon"] { font-size: 9pt !important; }
+
+  [data-transport="name"] {
+    font-size: 9.5pt !important;
+    font-weight: 600 !important;
+    color: #1F1F1F !important;
+  }
+
+  [data-transport="badge"] {
+    font-size: 7pt !important;
+    color: #6F6A64 !important;
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    letter-spacing: 0.06em !important;
+  }
+  [data-transport="badge"]::before { content: '— '; color: #C0BAB2; }
+
+  [data-transport="description"] {
+    font-size: 8.5pt !important;
+    color: #6F6A64 !important;
+    line-height: 1.6 !important;
+  }
+
+  [data-transport="tip"] {
+    margin-top: 5pt !important;
+    border: none !important;
+    border-left: 1.5pt solid #2F5D50 !important;
+    padding: 4pt 0 4pt 8pt !important;
+    font-size: 8pt !important;
+    color: #2F5D50 !important;
+    background: none !important;
+    border-radius: 0 !important;
+    line-height: 1.5 !important;
+  }
+
+  /* ══════════════════════════════════════════════════════
+     PAGE BREAKS
+     ══════════════════════════════════════════════════════ */
+
+  [data-guide="itinerary"],
+  [data-guide="hotels"],
+  [data-guide="experiences"],
+  [data-guide="tips"],
+  [data-guide="checklist"],
+  [data-guide="transport"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  [data-section="title"] {
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+
+  [data-day="card"] {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+} /* end @media print */

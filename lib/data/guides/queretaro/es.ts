@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Querétaro',
     subtitle: 'Arquitectura barroca, viñedos cercanos y una escena gastronómica que sorprende. La ciudad perfecta para caminar de día y brindar de noche.',
+    eyebrow: 'Guía curada · Grupo de amigos',
     tags: ['Amigos', 'Gastronomía', 'Cultura', 'Vinos'],
     image: '',
   },
@@ -157,6 +158,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 opciones ideales para grupos que valoran el diseño y la ubicación.',
+  experiencesDescription: 'Seleccionadas para disfrutar en grupo.',
 
   tips: [
     'El clima engaña: Querétaro es semicálido de día pero refresca mucho en cuanto cae el sol. Una chamarra ligera o blazer es indispensable para las terrazas de noche.',

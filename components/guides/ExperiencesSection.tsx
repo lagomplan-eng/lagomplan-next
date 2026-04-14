@@ -69,10 +69,10 @@ export function ExperiencesSection({ data, onToast }: Props) {
                 href={withRef(exp.bookingUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => onToast?.(`Abriendo ${exp.bookingLabel.split(' ')[2] ?? ''}…`)}
-                className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] font-medium tracking-[.08em] uppercase text-white bg-[#0F3A33] px-3 py-[7px] rounded-md transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_3px_10px_rgba(15,58,51,.2)]"
+                onClick={() => onToast?.('Abriendo reserva…')}
+                className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] font-medium tracking-[.08em] text-white bg-[#0F3A33] px-3 py-[7px] rounded-md transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_3px_10px_rgba(15,58,51,.2)]"
               >
-                {exp.bookingLabel}
+                Reservar
               </a>
             </div>
           </div>

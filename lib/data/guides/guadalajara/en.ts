@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Guadalajara',
     subtitle: 'Land of tequila, architecture, and bold flavors. A pause designed to explore markets, toast at distilleries, and discover why this is the capital of Tapatío style.',
+    eyebrow: 'Curated guide · Adventure friends',
     tags: ['Friends', 'Gastronomy', 'Adventure', 'Culture'],
     image: '',
   },
@@ -133,6 +134,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three options to be in the heart of the action.',
 
   tips: [
     'The hangover is real: Artisan tequila shows no mercy without hydration. Tejuino (fermented corn drink with lime sorbet) is the best local remedy — don\'t leave without trying it at the market.',

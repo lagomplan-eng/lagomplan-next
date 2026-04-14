@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Tepoztlán',
     subtitle: 'A mystical pause in the shadow of the Tepozteco. The perfect balance between subtle luxury and time to connect.',
+    eyebrow: "Curated guide · Couple's getaway",
     tags: ['Couple', 'Romance', 'Wellness', 'Nature'],
     image: '',
   },
@@ -139,6 +140,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 options selected for atmosphere and seclusion.',
+  experiencesDescription: 'Activities with a Lagom rhythm: one highlight per day.',
 
   tips: [
     'Shoes: A sprained ankle is the end of romance. Tepoztlán is very cobblestoned. Leave heels or smooth-soled shoes at home — you need sneakers with good grip or boots, even for dinner.',

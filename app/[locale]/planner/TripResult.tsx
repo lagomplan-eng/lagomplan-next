@@ -1139,7 +1139,7 @@ export default function TripResult({ params }: Props) {
   // ── Early returns ────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <main className="pt-[64px] min-h-screen bg-[#FAF8F5]">
+      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
         <div className="page-inner"><LoadingState locale={locale} /></div>
       </main>
     )
@@ -1147,7 +1147,7 @@ export default function TripResult({ params }: Props) {
 
   if (error) {
     return (
-      <main className="pt-[64px] min-h-screen bg-[#F4F0E8]">
+      <main className="pt-[72px] min-h-screen bg-[#F4F0E8]">
         <div className="page-inner py-10">
           <div className="max-w-[900px] mx-auto bg-white border border-[rgba(15,58,51,.12)] rounded-[12px] p-6">
             <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#B33A3A] mb-3">Generation error</p>
@@ -1181,7 +1181,7 @@ export default function TripResult({ params }: Props) {
 
   // ── Happy path ───────────────────────────────────────────────────────────────
   return (
-    <main className="pt-[64px] min-h-screen bg-[#FAF8F5]">
+    <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section className="border-b border-[#E4DFD8] pt-12 pb-9">

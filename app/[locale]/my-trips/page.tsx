@@ -21,7 +21,7 @@ export async function generateMetadata({
 
 export default function Page() {
   return (
-    <main className="pt-[64px]">
+    <main className="pt-[72px]">
       <MyTripsClient />
     </main>
   )

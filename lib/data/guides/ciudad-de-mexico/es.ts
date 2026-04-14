@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Ciudad de México',
     subtitle: 'Una metrópoli que respira creatividad en cada esquina. El pulso perfecto entre museos de clase mundial y una de las escenas gastronómicas más excitantes del planeta.',
+    eyebrow: 'Guía curada · Parejas',
     tags: ['Pareja', 'Arte', 'Gastronomía', 'Cultura'],
     image: '',
   },
@@ -133,6 +134,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres opciones para vivir la ciudad desde su arquitectura.',
 
   tips: [
     'El hack de la barra para dos: Si no consiguieron reservación en los top de la Roma, lleguen a la hora de apertura y pregunten por espacio en barra. Casi siempre guardan un par de asientos para walk-ins que viajan en pareja.',

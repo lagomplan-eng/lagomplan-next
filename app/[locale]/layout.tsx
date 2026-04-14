@@ -85,7 +85,7 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
-            {/* Nav is position:fixed — every first section needs pt-[64px] */}
+            {/* Nav is position:fixed — every first section needs pt-[72px] */}
             <Nav />
             {children}
             <Footer />

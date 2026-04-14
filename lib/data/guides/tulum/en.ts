@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Tulum',
     subtitle: 'Jungle, turquoise sea, and the nightlife beat. A pause designed to reconnect with yourself without giving up the most iconic party in the Caribbean.',
+    eyebrow: 'Curated guide · Solo trip',
     tags: ['Solo', 'Social', 'Wellness', 'Adventure'],
     image: '',
   },
@@ -169,6 +170,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three safe, social options for a woman traveling solo.',
 
   tips: [
     'Cash in hand: Many beachside spots "lose signal" on their card terminal or only accept cash. Bring Mexican pesos — the dollar exchange rate at local shops will always work against you.',

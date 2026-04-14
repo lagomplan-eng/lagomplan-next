@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Riviera Maya',
     subtitle: 'A seven-day journey designed to find the luxury of privacy during the most vibrant time of year. The exact balance between Caribbean energy and jungle sanctuary.',
+    eyebrow: 'Curated guide · Family holiday road trip',
     tags: ['Family', 'Adventure', 'Luxury', 'Nature'],
     image: '',
   },
@@ -211,6 +212,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three strategic bases to avoid the crowds.',
 
   tips: [
     'Book EVERYTHING now: During peak season, there\'s no such thing as "showing up to see if there\'s a table." Restaurants like Hartwood or Arca require immediate reservations.',

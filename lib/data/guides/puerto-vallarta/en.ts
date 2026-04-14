@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Puerto Vallarta',
     subtitle: 'Where the Sierra Madre meets the Pacific. An escape designed to rediscover the charm of Old Vallarta, with the perfect balance between contemporary luxury and colonial soul.',
+    eyebrow: 'Curated guide · couple & sophistication',
     tags: ['Couple', 'Romance', 'Relaxation', 'Gastronomy'],
     image: '',
   },
@@ -169,6 +170,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three moods for your stay.',
 
   tips: [
     'Book ahead: During peak season, restaurants with a view (like Le Kliff or The Iguana) fill up months in advance. Leave nothing to chance if you want that specific table facing the sea.',

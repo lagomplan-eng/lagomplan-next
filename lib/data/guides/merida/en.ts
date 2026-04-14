@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Mérida',
     subtitle: 'The vibrant heart of Yucatán. An expedition designed to explore hidden cenotes, climb pyramids, and connect with wild nature — without losing the comfort of the White City.',
+    eyebrow: 'Curated guide · Adventure family',
     tags: ['Family', 'Adventure', 'Archaeology', 'Nature'],
     image: '',
   },
@@ -175,6 +176,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three moods for your family.',
 
   tips: [
     'The "peak heat" rule: Between 1:00 PM and 4:00 PM, the Yucatán sun is relentless. Do what the locals do: schedule heavy activities early, return to the pool at midday, and head out again when the sun drops.',

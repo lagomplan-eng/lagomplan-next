@@ -121,8 +121,8 @@ export default async function HomePage({
 
   return (
     <main>
-      {/* ① HERO — pt-[64px] because Nav is fixed */}
-      <section className="pt-[64px]" style={{ background: '#fff9f3' }}>
+      {/* ① HERO — pt-[72px] because Nav is fixed */}
+      <section className="pt-[72px]" style={{ background: '#fff9f3' }}>
         <div className="page-inner">
           <div className="grid md:grid-cols-2 gap-14 items-start py-[72px] max-[768px]:grid-cols-1 max-[768px]:py-10 max-[768px]:gap-10">
             <div>

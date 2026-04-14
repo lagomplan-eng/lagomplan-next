@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Valle de Bravo',
     subtitle: 'The retreat where the forest meets the water. An escape designed to burn adrenaline, explore nature, and enjoy the best mountain cuisine.',
+    eyebrow: 'Curated guide · Family & adventure',
     tags: ['Family', 'Adventure', 'Nature', 'Gastronomy'],
     image: '',
   },
@@ -159,7 +160,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Rustic-contemporary luxury hidden in the forest. A paradise for kids with its zip-line, archery, and private lake, while parents relax at a world-class spa integrated into nature.',
       tag: 'Adventure chic and deep forest',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/yFZ__sDAyk',
     },
     {
       name: 'Hotel Avándaro Golf & Spa',
@@ -167,7 +168,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'The social heart of Avándaro. A classic family experience with a heated pool, tennis courts, and proximity to the commercial area — ideal for those seeking comfort and activity.',
       tag: 'Classic comfort and family atmosphere',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/1NmV5gYKKD?aid=lagomplan&campaign=lagomplan-valledebravoavandaroaventuraenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=51200+Valle+de+Bravo%2C+State+of+Mexico%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fvalle-de-bravo-avandaro-aventura-en-familia',
     },
     {
       name: 'Wander Cabins',
@@ -175,7 +176,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Total disconnection in contemporary alpine-design tiny cabins. Set on spacious grounds guaranteeing complete privacy. The ideal retreat for experiencing the forest without tech distractions (little signal, no Wi-Fi).',
       tag: 'Minimalism and radical disconnection',
-      affiliateUrl: '',
+      affiliateUrl: 'https://wandercabins.mx/?gad_source=1&gad_campaignid=20288114866&gbraid=0AAAAApzYwZUG4U-9xcZdEQZ41e0-Nrp-6&gclid=Cj0KCQjwgr_NBhDFARIsAHiUWr4ZqROancXAQqxLm_8ZsFDTJJlIqoLP80piOYr2atp5_-hoFcOGFOEaAuRGEALw_wcB',
     },
   ],
 
@@ -184,7 +185,7 @@ export const guide: FlatGuide = {
       name: 'Paragliding flight',
       description: "Valle's signature activity. Flying in tandem over the lake at sunset is an experience that kids (ages 6-7+) and adults will always remember for the absolute sense of freedom.",
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/SIyPiBZ8-2',
     },
     {
       name: 'Monte Alto Reserve',
@@ -196,9 +197,11 @@ export const guide: FlatGuide = {
       name: 'Morning of water skiing or wakeboarding',
       description: 'Rent a private boat for water sports. The lake is the ideal setting for kids to learn to ski in a controlled environment, finishing with a picnic on board.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ILOlIwzoK7',
     },
   ],
+
+  hotelsDescription: 'Three moods for your family.',
 
   tips: [
     "Layer up: Valle's weather is incredibly deceptive. The sun burns by day, but as soon as it dips, the forest temperature drops dramatically. Pack vests or light jackets always, even in spring.",

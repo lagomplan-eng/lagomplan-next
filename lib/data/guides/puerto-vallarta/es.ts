@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Puerto Vallarta',
     subtitle: 'Donde la Sierra Madre se funde con el Pacífico. Una escapada diseñada para redescubrir el encanto del Viejo Vallarta, con el equilibrio perfecto entre lujo contemporáneo y alma colonial.',
+    eyebrow: 'Guía curada · pareja & sofisticación',
     tags: ['Pareja', 'Romance', 'Relax', 'Gastronomía'],
     image: '',
   },
@@ -169,6 +170,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres estados de ánimo para tu estancia.',
 
   tips: [
     'Reserva con antelación: En temporada alta, los restaurantes con vista (como Le Kliff o The Iguana) se llenan meses antes. No dejes nada al azar si buscas esa mesa específica frente al mar.',

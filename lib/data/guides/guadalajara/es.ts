@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Guadalajara',
     subtitle: 'Tierra de tequila, arquitectura y sabores audaces. Una pausa diseñada para explorar mercados, brindar en destilerías y descubrir por qué es la capital del estilo tapatío.',
+    eyebrow: 'Guía curada · Amigos aventureros',
     tags: ['Amigos', 'Gastronomía', 'Aventura', 'Cultura'],
     image: '',
   },
@@ -133,6 +134,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres opciones para estar en el centro de la acción.',
 
   tips: [
     'La cruda es real: El tequila artesanal no perdona si no te hidratas. El tejuino (bebida de maíz fermentado con nieve de limón) es el mejor remedio local; no se vayan sin probarlo en el mercado.',

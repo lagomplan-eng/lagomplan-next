@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Riviera Maya',
     subtitle: 'Una travesía de siete días diseñada para encontrar el lujo de la privacidad en la época más vibrante del año. El equilibrio exacto entre la energía del Caribe y el refugio de la selva.',
+    eyebrow: 'Guía curada · Roadtrip familiar de temporada alta',
     tags: ['Familia', 'Aventura', 'Lujo', 'Naturaleza'],
     image: '',
   },
@@ -211,6 +212,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres paradas estratégicas para esquivar el bullicio.',
 
   tips: [
     'Reserva TODO ahora: En temporada alta, no existe el "llegar a ver si hay mesa". Restaurantes como Hartwood o Arca requieren reserva inmediata.',

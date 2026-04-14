@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Los Cabos',
     subtitle: 'Donde el desierto abraza al mar. Una escapada diseñada para renovar cuerpo y mente, con el equilibrio perfecto entre misticismo y sofisticación.',
+    eyebrow: 'Guía curada · Relax entre amigas',
     tags: ['Amigas', 'Relax', 'Spa', 'Lujo'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres estados de ánimo para tu grupo de amigas.',
 
   tips: [
     'El "dry look" de la Baja: El aire aquí es muy seco. Empaca un buen aceite facial y capilar. El sol y la brisa del Pacífico pueden resecar más de lo que imaginas.',

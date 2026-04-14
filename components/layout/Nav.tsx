@@ -115,9 +115,9 @@ export default function Nav() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50"
+      className="fixed top-0 left-0 right-0 z-50 print:hidden"
       style={{
-        height:             64,
+        height:             72,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
@@ -131,9 +131,9 @@ export default function Nav() {
           <Image
             src="/images/logo.png"
             alt="Lagomplan"
-            width={140}
-            height={28}
-            className="h-7 w-auto"
+            width={180}
+            height={36}
+            className="h-9 w-auto"
             priority
             onError={e => {
               const img = e.currentTarget as HTMLImageElement
@@ -145,7 +145,7 @@ export default function Nav() {
           {/* Text fallback until logo.png is placed in /public/images/ */}
           <span
             style={{ display: 'none' }}
-            className="font-display italic text-[20px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
+            className="font-display italic text-[24px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
           >
             lagomplan
           </span>

@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Valle de Bravo',
     subtitle: 'El refugio donde el bosque se encuentra con el agua. Una escapada diseñada para quemar adrenalina, explorar la naturaleza y disfrutar de la mejor gastronomía de montaña.',
+    eyebrow: 'Guía curada · familia & aventura',
     tags: ['Familia', 'Aventura', 'Naturaleza', 'Gastronomía'],
     image: '',
   },
@@ -159,7 +160,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Lujo rústico-contemporáneo escondido en el bosque. El paraíso para los niños por su tirolesa, tiro con arco y lago propio, permitiendo a los padres relajarse en un spa de primer nivel integrado a la naturaleza.',
       tag: 'Aventura chic y bosque profundo',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/yFZ__sDAyk',
     },
     {
       name: 'Hotel Avándaro Golf & Spa',
@@ -167,7 +168,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'El corazón social de Avándaro. Ofrece una experiencia clásica familiar con alberca climatizada, canchas de tenis y cercanía a la zona comercial, ideal para quienes buscan comodidad y movimiento.',
       tag: 'Confort clásico y atmósfera familiar',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/1NmV5gYKKD?aid=lagomplan&campaign=lagomplan-valledebravoavandaroaventuraenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=51200+Valle+de+Bravo%2C+State+of+Mexico%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fvalle-de-bravo-avandaro-aventura-en-familia',
     },
     {
       name: 'Wander Cabins',
@@ -175,7 +176,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Desconexión absoluta en "tiny cabins" de diseño alpino-contemporáneo. Ubicadas en terrenos amplios para garantizar privacidad total. El refugio ideal para vivir el bosque sin distracciones tecnológicas (poca señal y sin Wi-Fi).',
       tag: 'Minimalismo y desconexión radical',
-      affiliateUrl: '',
+      affiliateUrl: 'https://wandercabins.mx/?gad_source=1&gad_campaignid=20288114866&gbraid=0AAAAApzYwZUG4U-9xcZdEQZ41e0-Nrp-6&gclid=Cj0KCQjwgr_NBhDFARIsAHiUWr4ZqROancXAQqxLm_8ZsFDTJJlIqoLP80piOYr2atp5_-hoFcOGFOEaAuRGEALw_wcB',
     },
   ],
 
@@ -184,7 +185,7 @@ export const guide: FlatGuide = {
       name: 'Vuelo en parapente',
       description: 'La actividad insignia de Valle. Volar en tándem sobre el lago al atardecer es una experiencia que los niños (mayores de 6-7 años) y adultos recordarán siempre por la sensación de libertad absoluta.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/SIyPiBZ8-2',
     },
     {
       name: 'Reserva Monte Alto',
@@ -196,9 +197,11 @@ export const guide: FlatGuide = {
       name: 'Mañana de esquí o wakeboard en el lago',
       description: 'Rentar una lancha privada para practicar deportes acuáticos. El lago es el escenario ideal para que los peques aprendan a esquiar en un ambiente controlado antes de disfrutar de un picnic a bordo.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ILOlIwzoK7',
     },
   ],
+
+  hotelsDescription: 'Tres estados de ánimo para tu familia.',
 
   tips: [
     'Capas de Ropa: En Valle el clima es súper engañoso. De día el sol quema, pero en cuanto baja, la temperatura en el bosque cae drásticamente. Empaca chalecos o chamarras ligeras siempre, incluso en primavera.',

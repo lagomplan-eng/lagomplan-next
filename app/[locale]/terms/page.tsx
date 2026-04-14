@@ -25,7 +25,7 @@ export default function TermsPage({
 }) {
   if (locale === 'en') {
     return (
-      <section className="bg-[#F7F4EF] min-h-screen pt-[64px]">
+      <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
         <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
           <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">
             Terms and Conditions of Use
@@ -47,7 +47,7 @@ export default function TermsPage({
   }
 
   return (
-    <section className="bg-[#F7F4EF] min-h-screen pt-[64px]">
+    <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
       <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
 
         <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">

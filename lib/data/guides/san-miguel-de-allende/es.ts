@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'San Miguel de Allende',
     subtitle: 'Estética colonial, viñedos de altura y los mejores atardeceres de México. Una pausa diseñada para caminar, brindar y reconectar en el corazón del país.',
+    eyebrow: 'Guía curada · Viaje de parejas',
     tags: ['Pareja', 'Romance', 'Gastronomía', 'Cultura'],
     image: '',
   },
@@ -169,6 +170,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 opciones que ofrecen el equilibrio perfecto entre privacidad y áreas comunes.',
+  experiencesDescription: 'Seleccionadas para disfrutar de la conversación y el entorno.',
 
   tips: [
     'La regla de las puertas: No juzgues por la fachada; los mejores spots no tienen letreros. Asómate a los patios interiores tras las puertas pesadas de madera para encontrar el San Miguel auténtico, silencioso y sin multitudes.',

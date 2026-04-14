@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Los Cabos',
     subtitle: 'Where the desert embraces the sea. A getaway designed to renew body and mind, with the perfect balance between mysticism and sophistication.',
+    eyebrow: 'Curated guide · Relax with friends',
     tags: ['Friends', 'Relaxation', 'Spa', 'Luxury'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three moods for your group of friends.',
 
   tips: [
     "The Baja dry look: The air here is very dry. Pack a good facial oil and hair oil. The Baja sun and Pacific breeze can dehydrate more than you expect.",

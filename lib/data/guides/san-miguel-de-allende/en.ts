@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'San Miguel de Allende',
     subtitle: 'Colonial aesthetics, high-altitude vineyards, and the best sunsets in Mexico. A pause designed for walking, toasting, and reconnecting in the heart of the country.',
+    eyebrow: 'Curated guide · Couples trip',
     tags: ['Couple', 'Romance', 'Gastronomy', 'Culture'],
     image: '',
   },
@@ -169,6 +170,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 options offering the perfect balance between privacy and shared spaces.',
+  experiencesDescription: 'Selected to enjoy conversation and surroundings.',
 
   tips: [
     'The door rule: Don\'t judge by the façade — the best spots have no signs. Peek into interior courtyards through the heavy wooden doors to find the authentic, quiet San Miguel, free of crowds.',

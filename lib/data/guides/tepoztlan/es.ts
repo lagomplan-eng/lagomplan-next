@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Tepoztlán',
     subtitle: 'Una pausa mística bajo la sombra del Tepozteco. El equilibrio perfecto entre lujo sutil y tiempo para conectar.',
+    eyebrow: 'Guía curada · Escapada en pareja',
     tags: ['Pareja', 'Romance', 'Bienestar', 'Naturaleza'],
     image: '',
   },
@@ -139,6 +140,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 opciones seleccionadas por su atmósfera y capacidad de aislamiento.',
+  experiencesDescription: 'Actividades con "ritmo Lagom": un highlight por día.',
 
   tips: [
     'Zapatos: El fin del romance es un esguince. Tepoztlán es súper empedrado. Deja los tacones o zapatos de suela lisa; necesitas tenis con buen agarre o botas, incluso para ir a cenar.',

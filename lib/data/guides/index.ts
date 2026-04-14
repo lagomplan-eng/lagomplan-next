@@ -61,14 +61,65 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'valle-de-bravo': { es: valledeBravoEs, en: valledeBravoEn },
 }
 
+// ── Slug aliases ───────────────────────────────────────────────────────────────
+// Maps locale-specific URL slugs (from lib/guides.ts) → canonical registry key.
+// Add new entries here whenever a guide gets a new descriptive URL slug.
+
+const SLUG_ALIASES: Record<string, string> = {
+  // Valle de Bravo
+  'valle-de-bravo-avandaro-aventura-en-familia': 'valle-de-bravo',
+  'valle-de-bravo-avandaro-family-adventure':    'valle-de-bravo',
+  // Riviera Maya
+  'riviera-maya-roadtrip-de-semana-santa': 'riviera-maya',
+  'riviera-maya-easter-road-trip':         'riviera-maya',
+  // Oaxaca
+  'oaxaca-guia-esencial':  'oaxaca',
+  'oaxaca-essential-guide': 'oaxaca',
+  // Cuernavaca
+  'cuernavaca-refugio-de-primavera-estilo': 'cuernavaca',
+  'cuernavaca-spring-getaway-and-style':    'cuernavaca',
+  // Cancún
+  'cancun-guia-familiar': 'cancun',
+  'cancun-family-guide':  'cancun',
+  // Ciudad de México
+  'ciudad-de-mexico-guia-de-parejas': 'ciudad-de-mexico',
+  'mexico-city-couples-guide':        'ciudad-de-mexico',
+  // Guadalajara
+  'guadalajara-guia-de-amigos': 'guadalajara',
+  'guadalajara-friends-guide':  'guadalajara',
+  // Los Cabos
+  'los-cabos-relax-entre-amigas': 'los-cabos',
+  'los-cabos-girls-getaway':      'los-cabos',
+  // Mérida
+  'merida-familia-aventurera': 'merida',
+  'merida-adventurous-family': 'merida',
+  // Querétaro
+  'queretaro-guia-de-amigos': 'queretaro',
+  'queretaro-friends-guide':  'queretaro',
+  // Puerto Vallarta
+  'puerto-vallarta-guia-romantica': 'puerto-vallarta',
+  'puerto-vallarta-romantic-guide': 'puerto-vallarta',
+  // San Miguel de Allende
+  'san-miguel-de-allende-viaje-de-parejas': 'san-miguel-de-allende',
+  'san-miguel-de-allende-couples-trip':     'san-miguel-de-allende',
+  // Tepoztlán
+  'tepoztlan-escapada-en-pareja': 'tepoztlan',
+  'tepoztlan-couple-escape':      'tepoztlan',
+  // Tulum
+  'tulum-guia-viaje-solo':  'tulum',
+  'tulum-solo-trip-guide':  'tulum',
+}
+
 // ── Public helpers ─────────────────────────────────────────────────────────────
 
 /**
  * Returns guide data for a given slug + locale, or null if not found.
- * Falls back to 'es' if the requested locale is missing.
+ * Accepts both canonical short slugs and locale-specific descriptive slugs
+ * (via SLUG_ALIASES). Falls back to 'es' if the requested locale is missing.
  */
 export function getGuidePageData(slug: string, locale: string): GuidePageData | null {
-  const entry = FLAT_REGISTRY[slug]
+  const key = SLUG_ALIASES[slug] ?? slug
+  const entry = FLAT_REGISTRY[key]
   if (!entry) return null
   const flat = entry[locale] ?? entry['es'] ?? null
   if (!flat) return null

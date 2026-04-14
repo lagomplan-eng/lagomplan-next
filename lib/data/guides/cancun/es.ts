@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Cancún',
     subtitle: 'El azul más famoso del mundo para todas las edades. Una pausa equilibrada entre el confort del resort, la aventura natural y el valor inteligente.',
+    eyebrow: 'Guía curada · Viaje familiar',
     tags: ['Familia', 'Playa', 'Resort', 'Valor inteligente'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres opciones que entienden la dinámica familiar y el valor del dinero.',
 
   tips: [
     'El supermercado es tu aliado: El Chedraui Selecto de la Zona Hotelera tiene comida gourmet preparada, bloqueadores y bebidas a precios de ciudad. Es el mejor lugar para armar un picnic de playa y ahorrar mucho dinero.',

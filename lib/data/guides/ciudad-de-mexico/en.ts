@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Mexico City',
     subtitle: 'A metropolis that breathes creativity at every corner. The perfect pulse between world-class museums and one of the most exciting dining scenes on the planet.',
+    eyebrow: 'Curated guide · Couples',
     tags: ['Couple', 'Art', 'Gastronomy', 'Culture'],
     image: '',
   },
@@ -133,6 +134,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three options to experience the city through its architecture.',
 
   tips: [
     "The bar-for-two hack: If you couldn't get a reservation at the top Roma spots, arrive at opening time and ask for bar seating. They almost always save a couple of seats for walk-in couples.",

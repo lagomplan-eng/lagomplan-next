@@ -16,14 +16,16 @@
 
 import { useState, useCallback, useEffect } from 'react'
 
-import { GuideHero }          from './GuideHero'
-import { Itinerary }          from './Itinerary'
-import { HotelsSection }      from './HotelsSection'
-import { ExperiencesSection } from './ExperiencesSection'
-import { Tips }               from './RightColumn/Tips'
-import { PlanCTA }            from './RightColumn/PlanCTA'
-import { Checklist }          from './RightColumn/Checklist'
-import { Transport }          from './RightColumn/Transport'
+import { GuideHero }               from './GuideHero'
+import { Itinerary }               from './Itinerary'
+import { HotelsSection }           from './HotelsSection'
+import { ExperiencesSection }      from './ExperiencesSection'
+import { Tips }                    from './RightColumn/Tips'
+import { PlanCTA }                 from './RightColumn/PlanCTA'
+import { Checklist }               from './RightColumn/Checklist'
+import { Transport }               from './RightColumn/Transport'
+import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
+import type { GuideShare }         from './CuratedGuideShareModal'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -72,6 +74,7 @@ function useToast() {
 export function GuidePageClientV2({ data, locale }: Props) {
   const toast       = useToast()
   const plannerHref = buildPlannerHref(data.slug, locale)
+  const [shareOpen, setShareOpen] = useState(false)
 
   // Analytics: fire on mount
   useEffect(() => {
@@ -82,12 +85,20 @@ export function GuidePageClientV2({ data, locale }: Props) {
     toast.show(locale === 'en' ? '✓ Guide saved' : '✓ Guía guardada')
   }
 
-  const handleShare = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(window.location.href).then(() => {
-        toast.show(locale === 'en' ? 'Link copied' : 'Enlace copiado')
-      })
-    }
+  const handleShare = () => setShareOpen(true)
+
+  // Build the GuideShare object from GuidePageData
+  const guideShare: GuideShare = {
+    title:    data.hero.title,
+    subtitle: data.hero.subtitle,
+    tags:     data.hero.chips,
+    days:     data.itinerary.days.map(d => ({ day: d.dayNumber, title: d.title })),
+    shareUrl: typeof window !== 'undefined' ? window.location.href : '',
+  }
+
+  const handlePdf = () => {
+    toast.show(locale === 'en' ? '📄 Generating PDF…' : '📄 Generando PDF…')
+    setTimeout(() => window.print(), 300)
   }
 
   const checklistDone =
@@ -96,7 +107,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
       : `✓ Todo listo para ${data.hero.title}`
 
   return (
-    <div className="bg-[#FFF9F3] min-h-screen">
+    <div className="bg-[#FFF9F3] min-h-screen pt-[72px]">
 
       {/* ── Hero ── */}
       <GuideHero
@@ -105,6 +116,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
         plannerHref={plannerHref}
         onSave={handleSave}
         onShare={handleShare}
+        onPdf={handlePdf}
       />
 
       {/* ── Main two-column layout ── */}
@@ -119,7 +131,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
           </div>
 
           {/* ── Right column (sticky) ── */}
-          <div className="flex flex-col gap-5 sticky top-20 max-[960px]:static max-[960px]:order-[-1]">
+          <div className="flex flex-col gap-5 sticky top-20 max-[960px]:static">
             <Tips data={data.tips} />
             <PlanCTA data={data.planCta} plannerHref={plannerHref} />
             <Checklist
@@ -145,6 +157,13 @@ export function GuidePageClientV2({ data, locale }: Props) {
       >
         {toast.message}
       </div>
+
+      {/* ── Share modal ── */}
+      <CuratedGuideShareModal
+        guide={guideShare}
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+      />
 
     </div>
   )

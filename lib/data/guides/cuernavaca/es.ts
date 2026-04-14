@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Cuernavaca',
     subtitle: 'La ciudad de la eterna primavera. Un retiro diseñado para disfrutar de jardines exuberantes, gastronomía de altura y el lujo del tiempo lento en la cercanía de la capital.',
+    eyebrow: 'Guía curada · Escape de fin de semana largo',
     tags: ['Amigos', 'Gastronomía', 'Relax', 'Lujo'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres estados de ánimo para tu grupo.',
 
   tips: [
     'El "Dress Code" Cuerna: Es el lugar para lucir el lino en su máxima expresión. Para las cenas, un estilo Resort Chic es perfecto: vestidos vaporosos para ellas y guayaberas o camisas de lino para ellos.',

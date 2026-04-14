@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Cuernavaca',
     subtitle: 'The city of eternal spring. A retreat designed to enjoy lush gardens, elevated cuisine, and the luxury of slow time, just a short drive from the capital.',
+    eyebrow: 'Curated guide · Long weekend escape',
     tags: ['Friends', 'Gastronomy', 'Relaxation', 'Luxury'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three moods for your group.',
 
   tips: [
     'The Cuernavaca dress code: This is the place to wear linen at its finest. For dinners, Resort Chic is perfect: flowy dresses for the ladies and linen guayaberas or shirts for the men.',

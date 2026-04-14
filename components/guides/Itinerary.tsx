@@ -23,13 +23,13 @@ function dayLabel(n: number, locale: string): string {
 
 export function Itinerary({ data, locale }: Props) {
   return (
-    <div className="mb-14">
+    <div data-guide="itinerary" className="mb-14">
       {/* Section header */}
       <div className="mb-6">
-        <div className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5">
+        <div data-section="eyebrow" className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5">
           {data.eyebrow}
         </div>
-        <div className="font-display text-[22px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
+        <div data-section="title" className="font-display text-[22px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
           {data.title}
         </div>
         {data.description && (

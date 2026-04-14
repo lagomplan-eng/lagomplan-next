@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Querétaro',
     subtitle: 'Baroque architecture, nearby vineyards, and a food scene that surprises. The perfect city to walk by day and toast by night.',
+    eyebrow: 'Curated guide · Friends group',
     tags: ['Friends', 'Gastronomy', 'Culture', 'Wine'],
     image: '',
   },
@@ -157,6 +158,9 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: '3 options ideal for groups who value design and location.',
+  experiencesDescription: 'Selected for enjoying in a group.',
 
   tips: [
     'The weather deceives: Querétaro is pleasantly warm by day but cools down sharply after sunset. A light jacket or blazer is essential for rooftop evenings.',

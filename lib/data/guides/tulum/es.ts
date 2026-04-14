@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Tulum',
     subtitle: 'Selva, mar turquesa y el beat de la noche. Una pausa diseñada para reconectar contigo misma sin renunciar a la fiesta más icónica del Caribe.',
+    eyebrow: 'Guía curada · Solo Trip',
     tags: ['Solo', 'Social', 'Bienestar', 'Aventura'],
     image: '',
   },
@@ -169,6 +170,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres opciones seguras y sociales para una mujer que viaja sola.',
 
   tips: [
     'Efectivo en mano: Muchos lugares en la playa "pierden la señal" de la terminal o solo aceptan efectivo. Lleva pesos mexicanos; el tipo de cambio en dólares dentro de los comercios siempre te perjudicará.',

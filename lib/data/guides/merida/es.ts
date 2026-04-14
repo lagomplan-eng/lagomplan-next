@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Mérida',
     subtitle: 'El corazón vibrante de Yucatán. Una expedición diseñada para explorar cenotes ocultos, escalar pirámides y conectar con la naturaleza salvaje, sin perder el confort de la Ciudad Blanca.',
+    eyebrow: 'Guía curada · Familia Aventurera',
     tags: ['Familia', 'Aventura', 'Arqueología', 'Naturaleza'],
     image: '',
   },
@@ -175,6 +176,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Tres estados de ánimo para tu familia.',
 
   tips: [
     'La regla del "pico de calor": Entre las 13:00 y las 16:00, el sol de Yucatán es implacable. Hagan como los locales: programen las actividades pesadas temprano, regresen a la alberca a mediodía y salgan de nuevo cuando baje el sol.',

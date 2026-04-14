@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Cancún',
     subtitle: "The world's most famous blue for all ages. A balanced pause between resort comfort, natural adventure, and smart value.",
+    eyebrow: 'Curated guide · Family travel',
     tags: ['Family', 'Beach', 'Resort', 'Smart value'],
     image: '',
   },
@@ -139,6 +140,8 @@ export const guide: FlatGuide = {
       affiliateUrl: '',
     },
   ],
+
+  hotelsDescription: 'Three options that understand family dynamics and value for money.',
 
   tips: [
     'The supermarket is your best ally: Chedraui Selecto in the Hotel Zone carries prepared gourmet food, sunscreen, and drinks at city prices. Best place to build a beach picnic and save money.',

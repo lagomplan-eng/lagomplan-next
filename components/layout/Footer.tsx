@@ -99,7 +99,7 @@ export default async function Footer() {
                 <FacebookIcon className="w-[18px] h-[18px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors" />
               </a>
               <a
-                href="https://www.linkedin.com/company/111959597/admin/dashboard/"
+                href="https://www.linkedin.com/company/lagomplan/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"

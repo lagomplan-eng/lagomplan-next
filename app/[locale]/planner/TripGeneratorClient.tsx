@@ -36,7 +36,7 @@ function FormPage() {
   const locale = useLocale() as 'es' | 'en'
 
   return (
-    <main className="pt-[64px] min-h-screen bg-[#FFF9F3]">
+    <main className="pt-[72px] min-h-screen bg-[#FFF9F3]">
       <div className="page-inner py-16 max-[768px]:py-10">
         
         {/* Tighter container for premium feel */}
