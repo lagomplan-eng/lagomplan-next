@@ -230,11 +230,6 @@ function submit(e: React.FormEvent) {
                         : 'border-[rgba(107,143,134,.22)] hover:border-[rgba(15,58,51,.24)] hover:bg-[#F7F3EE]',
                     ].join(' ')}
                   >
-                    {count && (
-                      <span className="absolute top-1.5 right-2 font-mono text-[8px] bg-[#0F3A33] text-[#EDE7E1] px-1.5 py-[1px] rounded-full leading-tight">
-                        {count}
-                      </span>
-                    )}
                     <span className="text-[18px] leading-none">{icon}</span>
                     <span className={`font-sans text-[11px] font-medium ${traveler === id ? 'text-[#0F3A33]' : 'text-[#6B8F86]'}`}>
                       {label}
@@ -414,7 +409,7 @@ function submit(e: React.FormEvent) {
           <button
             type="submit"
             disabled={generating}
-            className="w-full flex items-center justify-center gap-2 font-sans text-[12px] font-semibold tracking-[1.5px] uppercase bg-[#0F3A33] text-white py-3.5 rounded-[8px] hover:bg-[#1a4a42] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 font-sans text-[12px] font-semibold tracking-[1.5px] bg-[#0F3A33] text-white py-3.5 rounded-[8px] hover:bg-[#1a4a42] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {generating ? (
               <>
