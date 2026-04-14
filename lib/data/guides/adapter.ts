@@ -107,7 +107,7 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
     locale: flat.locale,
 
     hero: {
-      eyebrow:    l.guideEyebrow,
+      eyebrow:    flat.hero.eyebrow ?? l.guideEyebrow,
       title:      flat.hero.title,
       subtitle:   flat.hero.subtitle,
       chips:      flat.hero.tags,
@@ -135,7 +135,7 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
     hotels: {
       eyebrow:     l.hotelsEyebrow,
       title:       l.hotelsTitle,
-      description: l.hotelsDesc,
+      description: flat.hotelsDescription ?? l.hotelsDesc,
       items: flat.hotels.map((h, i) => ({
         number:     String(i + 1).padStart(2, '0'),
         name:       h.name,
@@ -150,7 +150,7 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
     experiences: {
       eyebrow:     l.expEyebrow,
       title:       l.expTitle,
-      description: l.expDesc,
+      description: flat.experiencesDescription ?? l.expDesc,
       items: flat.experiences.map((e, i) => ({
         number:      String(i + 1).padStart(2, '0'),
         name:        e.name,

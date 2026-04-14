@@ -24,7 +24,7 @@ interface GuideCardProps {
 export function GuideCard({ slug, title, tag, img, href }: GuideCardProps) {
   return (
     <a href={href} className="group block">
-      <div className="aspect-[4/3] bg-[#C8D9D3] overflow-hidden mb-3 rounded-[2px] relative">
+      <div className="aspect-[4/3] bg-[#FFFFF] overflow-hidden mb-3 rounded-[2px] relative">
         <img
           src={img}
           alt={title}
@@ -117,7 +117,7 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 export function Button({ variant = 'primary', children, className = '', ...props }: ButtonProps) {
-  const base = 'font-mono text-[12px] tracking-[1.5px] uppercase px-6 py-3 transition-colors inline-block text-center'
+  const base = 'font-mono text-[12px] tracking-[1.5px] px-6 py-3 transition-colors inline-block text-center'
 
   const variants: Record<ButtonVariant, string> = {
     primary:   'bg-[#1B4D3E] text-[#F4F0E8] hover:bg-[#2D6B57]',

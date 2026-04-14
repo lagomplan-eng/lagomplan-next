@@ -8,24 +8,9 @@ import { useUser } from '../../../components/auth/SupabaseProvider'
 import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import type { Trip } from '../../../lib/supabase/types'
 
-// ─── Gradient palette — deterministic by destination name ─────────────────────
+// ─── Brand cover gradient — single consistent tone ────────────────────────────
 
-const GRADIENTS = [
-  'linear-gradient(135deg, #2E5E4E 0%, #6E9F8F 100%)',
-  'linear-gradient(135deg, #A67C52 0%, #E6C7A3 100%)',
-  'linear-gradient(135deg, #2C3E50 0%, #6C8EA4 100%)',
-  'linear-gradient(135deg, #4A3560 0%, #8B6FAA 100%)',
-  'linear-gradient(135deg, #5C4033 0%, #A07060 100%)',
-  'linear-gradient(135deg, #1A4A4A 0%, #4A8A7A 100%)',
-]
-
-function getGradient(name: string): string {
-  let hash = 0
-  for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) & 0x7fffffff
-  }
-  return GRADIENTS[hash % GRADIENTS.length]
-}
+const COVER_GRADIENT = 'linear-gradient(160deg, #2A6352 0%, #1B4D3E 55%, #0F3328 100%)'
 
 // ─── Chip derivation ──────────────────────────────────────────────────────────
 
@@ -71,14 +56,15 @@ function TripCard({ trip, isActive, onClick }: TripCardProps) {
   const days     = trip.duration_days ? `${trip.duration_days} días` : ''
   const tagline  = isActive ? 'En progreso' : 'Itinerario guardado'
   const chips    = deriveChips(trip)
-  const gradient = getGradient(name)
   const initials = name.substring(0, 2).toUpperCase()
 
   return (
     <div
       onClick={onClick}
-      className={`group flex flex-col rounded-2xl overflow-hidden bg-white transition cursor-pointer ${
-        isActive ? 'shadow-md' : 'hover:shadow-lg'
+      className={`group flex flex-col rounded-2xl overflow-hidden bg-[#FDFCF9] border transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:border-[#A8C4BB] ${
+        isActive
+          ? 'border-[#1B4D3E]/30 shadow-sm'
+          : 'border-[#C8D9D3] shadow-sm'
       }`}
     >
       {/* TOP LINE — active only */}
@@ -86,7 +72,7 @@ function TripCard({ trip, isActive, onClick }: TripCardProps) {
 
       {/* COVER */}
       <div className="relative h-44 overflow-hidden">
-        <div className="w-full h-full" style={{ background: gradient }} />
+        <div className="w-full h-full" style={{ background: COVER_GRADIENT }} />
 
         {/* Dot texture overlay */}
         <div
@@ -300,7 +286,7 @@ export default function MyTripsClient() {
               key={g}
               className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition cursor-pointer"
             >
-              <div className="h-28 bg-gradient-to-br from-[#C7D2FE] to-[#A5B4FC]" />
+              <div className="h-28 bg-gradient-to-br from-[#2A6352] to-[#1B4D3E]" />
               <div className="p-4">
                 <p className="text-[10px] text-[#6B7280] uppercase tracking-wide mb-1">Guía</p>
                 <h4 className="font-serif text-sm leading-snug">{g}</h4>

@@ -58,14 +58,14 @@ function FeaturedGuideCard({ guide, isES }: { guide: GuideListing; isES: boolean
         overflow: 'hidden',
         border: '1px solid var(--border)',
         borderRadius: '30px',
-        background: 'var(--cream)',
-        boxShadow: '0 1px 0 rgba(15,58,51,0.03)',
+        background: '#FFFFFF',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
       }}>
         {/* Image */}
         <div style={{
           position: 'relative',
           height: '250px',
-          background: 'linear-gradient(160deg, #7ab0be 0%, #2f6c87 35%, #4ca29b 65%, #d7d4be 100%)',
+          background: 'linear-gradient(160deg, #7ab0be 0%, #2f6c87 35%, #4ca29b 65%, #fffff 100%)',
           overflow: 'hidden',
         }}>
           <Image
@@ -135,8 +135,8 @@ function GuideCard({ guide }: { guide: GuideListing }) {
       <article style={{
         display: 'flex', flexDirection: 'column', height: '100%',
         overflow: 'hidden', border: '1px solid var(--border)',
-        borderRadius: '28px', background: 'var(--cream)',
-        boxShadow: '0 1px 0 rgba(15,58,51,0.03)',
+        borderRadius: '28px', background: '#FFFFFF',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'transform .2s ease, box-shadow .2s ease',
       }}
         className="hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(15,58,51,0.06)]"
@@ -225,8 +225,8 @@ function CollectionsSection({ isES }: { isES: boolean }) {
             <article key={col.title} style={{
               display: 'flex', flexDirection: 'column', height: '100%',
               padding: '28px', border: '1px solid var(--border)',
-              borderRadius: '28px', background: 'var(--cream)',
-              boxShadow: '0 1px 0 rgba(15,58,51,0.03)',
+              borderRadius: '28px', background: '#FFFFFF',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             }}>
               <p className="sec-label" style={{ margin: 0 }}>
                 {isES ? 'Colección' : 'Collection'}
@@ -280,8 +280,8 @@ function BridgeCTA({ isES }: { isES: boolean }) {
       <div className="page-inner">
         <div style={{
           padding: '32px', border: '1px solid var(--border)',
-          borderRadius: '32px', background: 'var(--cream)',
-          boxShadow: '0 1px 0 rgba(15,58,51,0.03)',
+          borderRadius: '32px', background: '#FFFFFF',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Left */}
@@ -319,7 +319,7 @@ function BridgeCTA({ isES }: { isES: boolean }) {
                   <div style={{
                     width: '40px', height: '40px', display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    borderRadius: '16px', background: 'var(--cream)',
+                    borderRadius: '16px', background: '#FFFFFF',
                     color: 'var(--pine)', fontWeight: 700,
                   }}>
                     {stat.icon}
@@ -384,7 +384,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
   }, [guides, search, activeFilterDef, isES])
 
   return (
-    <div style={{ background: 'var(--sand)', minHeight: '100vh' }}>
+    <div className="bg-[#F7F4EF] min-h-screen">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section style={{ borderBottom: '1px solid var(--border)', paddingTop: '68px', paddingBottom: '76px' }}>
@@ -421,7 +421,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
           <div style={{
             marginTop: '48px', padding: '20px',
             border: '1px solid var(--border)', borderRadius: '26px',
-            background: 'var(--cream)', boxShadow: '0 1px 0 rgba(15,58,51,0.03)',
+            background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}>
             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
               {/* Search */}

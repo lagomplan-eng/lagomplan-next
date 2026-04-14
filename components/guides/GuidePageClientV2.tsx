@@ -96,7 +96,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
       : `✓ Todo listo para ${data.hero.title}`
 
   return (
-    <div className="bg-[#FDFCF9] min-h-screen">
+    <div className="bg-[#FFF9F3] min-h-screen">
 
       {/* ── Hero ── */}
       <GuideHero

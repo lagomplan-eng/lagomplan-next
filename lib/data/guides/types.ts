@@ -168,12 +168,18 @@ export interface FlatGuide {
   hero: {
     title: string
     subtitle: string
+    /** Kicker from source doc, e.g. "Guía curada · Viaje familiar" */
+    eyebrow?: string
     tags: string[]
     image: string
   }
   itinerary: FlatDay[]
   hotels: FlatHotel[]
+  /** Guide-specific hotels section description (from source doc) */
+  hotelsDescription?: string
   experiences: FlatExperience[]
+  /** Guide-specific experiences section description (from source doc) */
+  experiencesDescription?: string
   tips: string[]
   funFact?: string
   checklist: string[]

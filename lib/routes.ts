@@ -35,6 +35,7 @@ export const ROUTE_MAP = {
   signup:             { es: 'crear-cuenta',      en: 'signup'        },
   login:              { es: 'login',             en: 'login'         },
   privacy:            { es: 'privacidad',        en: 'privacy'       },
+  terms:              { es: 'terminos',          en: 'terms'         },
 } as const
 
 export type RouteKey = keyof typeof ROUTE_MAP
@@ -206,6 +207,7 @@ export const INTERNAL_PATHS: Record<RouteKey, string> = {
   signup:             '/signup',
   login:              '/login',
   privacy:            '/privacy',
+  terms:              '/terms',
 }
 
 export function internalPath(key: RouteKey): string {

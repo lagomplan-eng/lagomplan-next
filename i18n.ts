@@ -44,6 +44,7 @@ export const pathnames = {
   '/signup': { es: '/crear-cuenta', en: '/signup' },
   '/login': '/login',
   '/privacy': { es: '/privacidad', en: '/privacy' },
+  '/terms':   { es: '/terminos',   en: '/terms'   },
 } as const
 
 export type AppPathnames = typeof pathnames

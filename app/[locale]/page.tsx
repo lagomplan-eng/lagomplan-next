@@ -6,11 +6,11 @@ import type { Metadata } from 'next'
 import Image from 'next/image'
 import { getTranslations } from 'next-intl/server'
 import { Link } from '../../lib/navigation'
-import { getGuideUrl } from '../../lib/routes'
 import { buildAlternates, buildOpenGraph } from '../../lib/seo'
-import { getAllGuides } from '../../lib/guides'
 import type { Locale } from '../../i18n'
 import HeroForm from '../../components/forms/HeroForm'
+import NewsletterForm from '../../components/forms/NewsletterForm'
+import GuidesPreview from '../../components/GuidesPreview'
 import { BookOpen, ListChecks, Sparkles, Focus } from 'lucide-react'
 
 // ── Metadata ───────────────────────────────────────────────
@@ -118,7 +118,6 @@ export default async function HomePage({
   params: { locale: Locale }
 }) {
   const isES = locale === 'es'
-  const GUIDES = getAllGuides(locale)
 
   return (
     <main>
@@ -276,16 +275,16 @@ export default async function HomePage({
                 <Link href="/guides" className="btn-solid">
                   {isES ? 'Guías de viaje' : 'Travel guides'}
                 </Link>
-                <Link href="/about" className="btn-outline">
-                  {isES ? 'Nosotras' : 'About us'}
-                </Link>
+                <a href="#nosotras" className="btn-outline">
+  {isES ? 'Nosotras' : 'About us'}
+</a>
               </div>
             </div>
 
             <div className="max-[768px]:-order-1 flex justify-end">
               <div className="w-full max-w-[420px]">
                 <Image
-                  src="/images/teotihuacan.jpg"
+                  src="/images/guides/teotihuacan.jpg"
                   alt={isES ? 'Teotihuacán, México' : 'Teotihuacan, Mexico'}
                   width={580}
                   height={725}
@@ -298,60 +297,7 @@ export default async function HomePage({
       </section>
 
       {/* ④ GUIDES */}
-      <section
-        className="py-24 max-[768px]:py-16"
-        style={{
-          background: '#FFFFFF',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
-        <div className="page-inner">
-          <div className="flex items-end justify-between mb-10 max-[768px]:flex-col max-[768px]:items-start max-[768px]:gap-3">
-            <div>
-              <span className="sec-label">
-                {isES ? 'Guías curadas' : 'Curated guides'}
-              </span>
-              <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1]">
-                {isES ? 'Descubre nuestras guías.' : 'Discover our guides.'}
-              </h2>
-            </div>
-            <Link
-              href="/guides"
-              className="font-sans text-[13px] font-medium text-[#0F3A33] border-b border-[#0F3A33] pb-[2px] hover:text-[#6B8F86] hover:border-[#6B8F86] transition-colors whitespace-nowrap"
-            >
-              {isES ? 'Ver más guías' : 'See all guides'}
-            </Link>
-          </div>
-
-          <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
-            {GUIDES.map((g) => (
-              <a
-                key={g.slug_es}
-                href={getGuideUrl(locale, g)}
-                className="guide-card block text-[#0F3A33] no-underline"
-              >
-                <div className="guide-img-wrap">
-                  <Image
-                    src={g.cover_img}
-                    alt={isES ? g.title_es : g.title_en}
-                    width={480}
-                    height={360}
-                    className="guide-img"
-                  />
-                </div>
-                <div className="guide-card-body">
-                  <span className="font-sans text-[10px] font-medium tracking-[0.1em] text-[#3E5F58] uppercase block mb-1.5">
-                    {isES ? g.tags_es?.[0] : g.tags_en?.[0]}
-                  </span>
-                  <p className="font-sans text-[16px] font-semibold text-[#0F3A33] leading-[1.35]">
-                    {isES ? g.title_es : g.title_en}
-                  </p>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      </section>
+      <GuidesPreview locale={locale} />
 
       {/* ⑤ NOSOTRAS */}
       <section
@@ -547,45 +493,7 @@ export default async function HomePage({
             </p>
           </div>
 
-          <form
-            action="https://elenaferre.us13.list-manage.com/subscribe/post?u=6926f5f508747ce3ab9253cc3&id=71a26fbc9a&f_id=00c661e1f0"
-            method="POST"
-            target="_blank"
-            noValidate
-            className="flex w-full max-[640px]:flex-col"
-          >
-            <input
-              type="email"
-              name="EMAIL"
-              required
-              placeholder={isES ? 'Tu correo electrónico' : 'Your email address'}
-              className="flex-1 font-sans text-[15px] px-5 py-4 text-[#FFF9F3] placeholder-[rgba(255,249,243,0.58)] focus:outline-none"
-              style={{
-                border: '1px solid rgba(255,249,243,0.18)',
-                background: 'rgba(255,255,255,0.10)',
-              }}
-            />
-
-            <input type="hidden" name="FNAME" value="-" />
-            <input type="hidden" name="tags" value="7069222" />
-
-            <button
-              type="submit"
-              className="font-sans text-[15px] font-semibold px-6 py-4 whitespace-nowrap border-none cursor-pointer transition-colors max-[640px]:mt-3"
-              style={{ background: '#FFF9F3', color: '#0F3A33' }}
-            >
-              {isES ? 'Suscribirme' : 'Subscribe'}
-            </button>
-
-            <div style={{ position: 'absolute', left: '-5000px' }} aria-hidden="true">
-              <input
-                type="text"
-                name="b_6926f5f508747ce3ab9253cc3_71a26fbc9a"
-                tabIndex={-1}
-                defaultValue=""
-              />
-            </div>
-          </form>
+          <NewsletterForm locale={locale} />
         </div>
       </div>
     </main>

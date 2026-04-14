@@ -39,10 +39,10 @@ export default function PlacesInput({
   locationBias = 'MX',
 }: PlacesInputProps) {
 
-  const inputRef  = useRef<HTMLInputElement>(null)
-  const ddRef     = useRef<HTMLDivElement>(null)
-  const acRef     = useRef<any>(null)
-  const sessionRef = useRef<any>(null)
+  const inputRef     = useRef<HTMLInputElement>(null)
+  const ddRef        = useRef<HTMLDivElement>(null)
+  const mapsReadyRef = useRef<boolean>(false)
+  const sessionRef   = useRef<any>(null)
 
   const [predictions, setPredictions] = useState<any[]>([])
   const [open,        setOpen]        = useState(false)
@@ -54,8 +54,8 @@ export default function PlacesInput({
   useEffect(() => {
     loadGoogleMaps().then(() => {
       const g = (window as any).google
-      acRef.current     = new g.maps.places.AutocompleteService()
-      sessionRef.current = new g.maps.places.AutocompleteSessionToken()
+      mapsReadyRef.current = true
+      sessionRef.current   = new g.maps.places.AutocompleteSessionToken()
     }).catch((err) => {
       console.error('PlacesInput: Google Maps failed to load', err)
     })
@@ -65,73 +65,72 @@ export default function PlacesInput({
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const fetchPredictions = useCallback((input: string) => {
-    if (!acRef.current || input.length < 2) {
+    if (!mapsReadyRef.current || input.length < 2) {
       setPredictions([])
       setOpen(false)
       return
     }
     clearTimeout(timerRef.current)
     setLoading(true)
-    timerRef.current = setTimeout(() => {
+    timerRef.current = setTimeout(async () => {
+      const g = (window as any).google
       const request: any = {
         input,
         sessionToken: sessionRef.current ?? undefined,
-        types,
+        includedPrimaryTypes: types,
         ...(locationBias === 'MX' && {
-          locationBias: {
-            center: { lat: 23.6345, lng: -102.5528 },
-            radius: 2_000_000,
-          } as any,
+          includedRegionCodes: ['mx'],
         }),
       }
-      acRef.current!.getPlacePredictions(request, (results: any, status: any) => {
+      try {
+        const { suggestions } = await g.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request)
         setLoading(false)
-        const g = (window as any).google
-        if (status === g.maps.places.PlacesServiceStatus.OK && results) {
-          setPredictions(results)
+        if (suggestions?.length) {
+          setPredictions(suggestions)
           setOpen(true)
         } else {
           setPredictions([])
           setOpen(false)
         }
-      })
+      } catch (err) {
+        console.error('PlacesInput: fetchAutocompleteSuggestions failed', err)
+        setLoading(false)
+        setPredictions([])
+        setOpen(false)
+      }
     }, 200)
   }, [types, locationBias])
 
   // ── Resolve a prediction to full PlaceResult ────────────────────
-  function selectPrediction(prediction: any) {
+  async function selectPrediction(suggestion: any) {
     const g = (window as any).google
-    const service = new g.maps.places.PlacesService(document.createElement('div'))
+    const placePrediction = suggestion.placePrediction
 
-    service.getDetails(
-      {
-        placeId: prediction.place_id,
-        sessionToken: sessionRef.current ?? undefined,
-        fields: ['name', 'formatted_address', 'place_id', 'geometry', 'types'],
-      },
-      (place: any, status: any) => {
-        sessionRef.current = new g.maps.places.AutocompleteSessionToken()
+    try {
+      const place = placePrediction.toPlace()
+      await place.fetchFields({ fields: ['displayName', 'formattedAddress', 'location', 'types', 'id'] })
 
-        if (status === g.maps.places.PlacesServiceStatus.OK && place) {
-          const result: PlaceResult = {
-            displayName:      place.name ?? prediction.structured_formatting.main_text,
-            formattedAddress: place.formatted_address ?? '',
-            placeId:          place.place_id ?? prediction.place_id,
-            location: place.geometry?.location
-              ? { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() }
-              : null,
-            types: place.types ?? [],
-          }
-          onChange(result.displayName)
-          onSelect(result)
-          setHasValue(true)
-        }
+      sessionRef.current = new g.maps.places.AutocompleteSessionToken()
 
-        setPredictions([])
-        setOpen(false)
-        setHighlighted(-1)
+      const result: PlaceResult = {
+        displayName:      place.displayName ?? placePrediction.mainText.text,
+        formattedAddress: place.formattedAddress ?? '',
+        placeId:          place.id ?? placePrediction.placeId,
+        location: place.location
+          ? { lat: place.location.lat(), lng: place.location.lng() }
+          : null,
+        types: place.types ?? [],
       }
-    )
+      onChange(result.displayName)
+      onSelect(result)
+      setHasValue(true)
+    } catch (err) {
+      console.error('PlacesInput: fetchFields failed', err)
+    }
+
+    setPredictions([])
+    setOpen(false)
+    setHighlighted(-1)
   }
 
   // ── Keyboard nav ────────────────────────────────────────────────
@@ -166,17 +165,17 @@ export default function PlacesInput({
   }, [])
 
   // ── Highlight matched text ──────────────────────────────────────
-  function renderMain(prediction: any) {
-    const { main_text, main_text_matched_substrings: matches } = prediction.structured_formatting
-    if (!matches?.length) return <span>{main_text}</span>
+  function renderMain(suggestion: any) {
+    const { text, matches } = suggestion.placePrediction.mainText
+    if (!matches?.length) return <span>{text}</span>
     const parts: React.ReactNode[] = []
     let cursor = 0
-    matches.forEach(({ offset, length }: { offset: number; length: number }, i: number) => {
-      if (offset > cursor) parts.push(<span key={`pre-${i}`}>{main_text.slice(cursor, offset)}</span>)
-      parts.push(<strong key={`match-${i}`} className="text-[#1B4D3E] font-semibold">{main_text.slice(offset, offset + length)}</strong>)
-      cursor = offset + length
+    matches.forEach(({ startOffset, endOffset }: { startOffset: number; endOffset: number }, i: number) => {
+      if (startOffset > cursor) parts.push(<span key={`pre-${i}`}>{text.slice(cursor, startOffset)}</span>)
+      parts.push(<strong key={`match-${i}`} className="text-[#1B4D3E] font-semibold">{text.slice(startOffset, endOffset)}</strong>)
+      cursor = endOffset
     })
-    if (cursor < main_text.length) parts.push(<span key="post">{main_text.slice(cursor)}</span>)
+    if (cursor < text.length) parts.push(<span key="post">{text.slice(cursor)}</span>)
     return <>{parts}</>
   }
 
@@ -262,10 +261,10 @@ export default function PlacesInput({
             Sugerencias
           </div>
 
-          {predictions.map((p, i) => (
+          {predictions.map((s, i) => (
             <div
-              key={p.place_id}
-              onMouseDown={() => selectPrediction(p)}
+              key={s.placePrediction.placeId}
+              onMouseDown={() => selectPrediction(s)}
               onMouseEnter={() => setHighlighted(i)}
               className={[
                 'flex items-start gap-2.5 px-3 py-2.5 cursor-pointer border-b border-[#F0EDE6] last:border-0 transition-colors',
@@ -273,20 +272,20 @@ export default function PlacesInput({
               ].join(' ')}
             >
               <div className="w-7 h-7 rounded-[2px] bg-[#E8F0EE] flex items-center justify-center flex-shrink-0 mt-0.5 text-[13px]">
-                {iconForTypes(p.types ?? [])}
+                {iconForTypes(s.placePrediction.types ?? [])}
               </div>
 
               <div className="flex-1 min-w-0">
                 <div className="font-sans text-[13px] text-[#0F1A16] truncate">
-                  {renderMain(p)}
+                  {renderMain(s)}
                 </div>
                 <div className="font-mono text-[10px] text-[#8A8A8A] mt-0.5 tracking-[0.3px]">
-                  {p.structured_formatting.secondary_text}
+                  {s.placePrediction.secondaryText?.text}
                 </div>
               </div>
 
               <span className="font-mono text-[8px] tracking-[1px] uppercase text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(27,77,62,0.15)] px-1.5 py-0.5 rounded-full self-center flex-shrink-0">
-                {labelForTypes(p.types ?? [])}
+                {labelForTypes(s.placePrediction.types ?? [])}
               </span>
             </div>
           ))}

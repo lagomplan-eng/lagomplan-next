@@ -52,6 +52,32 @@ export interface Database {
         Insert: Omit<Database['public']['Tables']['email_leads']['Row'], 'id' | 'created_at'>
         Update: Partial<Database['public']['Tables']['email_leads']['Insert']>
       }
+      contact_messages: {
+        Row: {
+          id:         string
+          name:       string
+          email:      string
+          subject:    string | null
+          message:    string
+          created_at: string
+        }
+        Insert: {
+          id?:         string
+          name:        string
+          email:       string
+          subject?:    string | null
+          message:     string
+          created_at?: string
+        }
+        Update: {
+          name?:       string
+          email?:      string
+          subject?:    string | null
+          message?:    string
+          created_at?: string
+        }
+        Relationships: []
+      }
 
       // E11 — April (auth + user accounts)
       // users: { ... }
@@ -82,4 +108,6 @@ export type Trip         = Database['public']['Tables']['trips']['Row']
 export type TripInsert   = Database['public']['Tables']['trips']['Insert']
 export type EmailLead    = Database['public']['Tables']['email_leads']['Row']
 export type TravelStyle  = Database['public']['Enums']['travel_style']
-export type TravelerType = Database['public']['Enums']['traveler_type']
+export type TravelerType     = Database['public']['Enums']['traveler_type']
+export type ContactMessage   = Database['public']['Tables']['contact_messages']['Row']
+export type ContactMessageInsert = Database['public']['Tables']['contact_messages']['Insert']

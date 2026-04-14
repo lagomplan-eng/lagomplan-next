@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Oaxaca de Juárez',
     subtitle: 'A feast of colors, flavors, and textures. A city to explore on foot, learn from artisans, and enjoy the unhurried rhythm of the south.',
+    eyebrow: 'Curated guide · Family travel',
     tags: ['Family', 'Culture', 'Gastronomy', 'Crafts'],
     image: '',
   },
@@ -67,7 +68,7 @@ export const guide: FlatGuide = {
         {
           time: '8:30 AM',
           title: 'Hierve el Agua',
-          description: 'Early departure is key — fewer people and comfortable temperature for swimming in the pools.',
+          description: 'Early departure is key.',
           tags: [],
         },
         {
@@ -102,7 +103,7 @@ export const guide: FlatGuide = {
         },
         {
           time: '5:00 PM',
-          title: 'Free afternoon: pool time or design shopping on Macedonio Alcalá',
+          title: 'Free afternoon: pool time or design shopping on Macedonio Alcalá street',
           description: '',
           tags: [],
         },
@@ -120,8 +121,8 @@ export const guide: FlatGuide = {
         },
         {
           time: '12:00 PM',
-          title: 'Buy quesillo and mezcal to take home and head to the airport',
-          description: '',
+          title: 'Buy quesillo and mezcal to take home',
+          description: 'Head to the airport.',
           tags: [],
         },
       ],
@@ -176,6 +177,9 @@ export const guide: FlatGuide = {
     },
   ],
 
+  hotelsDescription: '3 options with open spaces, ideal for kids to move freely.',
+  experiencesDescription: 'Hands-on activities that keep kids genuinely engaged.',
+
   tips: [
     'The Oaxacan snack: Always keep a bag of chapulines (grasshoppers) with lime on hand. They\'re the perfect healthy snack and kids are usually very curious to try them (and love them). They say it\'s the food of the future!',
     'Midday sun: There\'s no shade at archaeological sites. Bring wide-brim hats and sunscreen. In Oaxaca, the sun "bites" more than it seems.',
@@ -198,7 +202,7 @@ export const guide: FlatGuide = {
   transport: [
     {
       mode: 'Flight',
-      description: 'Arrival at Oaxaca Airport (OAX), just 20–30 minutes from the city center. Book a private transfer in advance to avoid fighting over taxis on arrival.',
+      description: 'The most sensible option for families. The airport (OAX) is just 20–30 min from the city center. Book a private transfer in advance to avoid fighting over taxis on arrival.',
     },
     {
       mode: 'Drive from Mexico City',

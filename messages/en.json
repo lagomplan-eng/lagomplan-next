@@ -61,7 +61,7 @@
     "errorDestination": "Where would you like to go?",
     "errorDates": "Select your travel dates.",
     "errorTraveler": "Who is traveling?",
-        "errorPace": "How would you like to travel?"
+    "errorPace": "How would you like to travel?"
   },
   "interests": {
     "playa": "🌴 Beach",
@@ -156,7 +156,8 @@
       "instagram": "Instagram"
     },
     "copyright": "© {year} Lagomplan — All rights reserved",
-    "privacy": "Privacy policy"
+    "privacy": "Privacy policy",
+    "terms": "Terms & Conditions"
   },
   "months": {
     "0": "January",

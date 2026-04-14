@@ -7,6 +7,7 @@ export const guide: FlatGuide = {
   hero: {
     title: 'Oaxaca de Juárez',
     subtitle: 'Un festín de colores, sabores y texturas. Una ciudad para explorar a pie, aprender de artesanos y disfrutar del ritmo pausado del sur.',
+    eyebrow: 'Guía curada · Viaje familiar',
     tags: ['Familia', 'Cultura', 'Gastronomía', 'Artesanía'],
     image: '',
   },
@@ -67,7 +68,7 @@ export const guide: FlatGuide = {
         {
           time: '08:30',
           title: 'Hierve el Agua',
-          description: 'Salida temprana es clave para fotos sin gente y temperatura agradable para nadar en las pozas.',
+          description: 'Salida temprana es clave.',
           tags: [],
         },
         {
@@ -102,7 +103,7 @@ export const guide: FlatGuide = {
         },
         {
           time: '17:00',
-          title: 'Tarde libre de alberca o compras en Macedonio Alcalá',
+          title: 'Tarde libre de alberca o compras de diseño en la calle de Macedonio Alcalá',
           description: '',
           tags: [],
         },
@@ -120,8 +121,8 @@ export const guide: FlatGuide = {
         },
         {
           time: '12:00',
-          title: 'Compra de quesillo y mezcal y salida al aeropuerto',
-          description: '',
+          title: 'Compra de quesillo y mezcal para llevar a casa',
+          description: 'Salida al aeropuerto.',
           tags: [],
         },
       ],
@@ -176,6 +177,9 @@ export const guide: FlatGuide = {
     },
   ],
 
+  hotelsDescription: '3 opciones con espacios abiertos, ideales para que los niños se sientan libres.',
+  experiencesDescription: 'Actividades interactivas que mantienen a los niños comprometidos.',
+
   tips: [
     'El snack oaxaqueño: Siempre ten a la mano una bolsa de chapulines con limón. Son la botana perfecta, saludable y a los niños les suele dar mucha curiosidad probarlos (y les encantan). ¡Dicen que es la comida del futuro!',
     'Sol de mediodía: En las zonas arqueológicas no hay sombra. Lleva sombreros de ala ancha y bloqueador. En Oaxaca el sol "pica" más de lo que parece.',
@@ -198,7 +202,7 @@ export const guide: FlatGuide = {
   transport: [
     {
       mode: 'Vuelo',
-      description: 'Llegada al Aeropuerto de Oaxaca (OAX), a solo 20-30 minutos del centro. Reserva un transporte privado con antelación para no pelear por taxis a la llegada.',
+      description: 'La opción más sensata para familias. El aeropuerto (OAX) está a solo 20-30 min del centro. Reserva un transporte privado con antelación para no pelear por taxis a la llegada.',
     },
     {
       mode: 'Coche desde CDMX',
