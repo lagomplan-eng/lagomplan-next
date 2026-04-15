@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A metropolis that breathes creativity at every corner. The perfect pulse between world-class museums and one of the most exciting dining scenes on the planet.',
     eyebrow: 'Curated guide · Couples',
     tags: ['Couple', 'Art', 'Gastronomy', 'Culture'],
-    image: '',
+    image: '/images/guides/guides-headers/Bellas%20Artes.png',
   },
 
   itinerary: [
@@ -94,7 +94,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Luxury in the sky. Located on the upper floors of a Reforma skyscraper, it offers the most romantic views of Chapultepec Castle from your bed.',
       tag: 'Luxury in the clouds',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/2oeHmjK31f?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
     },
     {
       name: 'Brick Hotel',
@@ -102,7 +102,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'A gem in Roma Norte. Combines an early 20th-century façade with a modern, minimalist interior. The ideal starting point for exploring galleries on foot.',
       tag: 'Modern Heritage',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/4GOkOu55mT?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
     },
     {
       name: 'Casa Cuenca',
@@ -110,7 +110,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'A contemporary retreat that prioritizes rest and strategic location. Rooms designed for comfortable longer stays, complemented by a romantic restaurant.',
       tag: 'Unbeatable location and comfort',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/UifOIGl3dG?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
     },
   ],
 
@@ -119,7 +119,7 @@ export const guide: FlatGuide = {
       name: 'Casa Luis Barragán',
       description: 'Essential to book months in advance. A lesson in light, color, and silence — the most intimate architectural experience you can have as a couple.',
       tags: ['Book months in advance'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
     },
     {
       name: 'Gallery route in La San Rafael',
@@ -131,7 +131,7 @@ export const guide: FlatGuide = {
       name: 'Dinner at a chef\'s counter',
       description: 'Look for places like Expendio de Maíz or the counter at Máximo. Watching the chefs\' precision just inches away while sharing a natural wine is the epitome of relaxed luxury.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/',
     },
   ],
 

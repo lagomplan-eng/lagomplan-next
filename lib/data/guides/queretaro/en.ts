@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Baroque architecture, nearby vineyards, and a food scene that surprises. The perfect city to walk by day and toast by night.',
     eyebrow: 'Curated guide · Friends group',
     tags: ['Friends', 'Gastronomy', 'Culture', 'Wine'],
-    image: '',
+    image: '/images/guides/guides-headers/Quer%C3%A9taro.png',
   },
 
   itinerary: [
@@ -118,7 +118,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'A gem across from the Temple of San Agustín. Eclectic rooms filled with art. The central courtyard is the perfect place for that first morning coffee.',
       tag: 'Art and sophistication',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/717u9iT-_f?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
     {
       name: 'Hotel Danza del Sol',
@@ -126,7 +126,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Spacious, with the feel of a renovated hacienda and excellent service. Ideal for larger groups looking for comfort without complications.',
       tag: 'Classic comfort',
-      affiliateUrl: '',
+      affiliateUrl: 'https://expedia.stay22.com/lagomplan/1im52898y3?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
     {
       name: 'Morazul Hotel Boutique',
@@ -134,7 +134,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'A retreat designed for those who value attention to detail, steps from the most iconic temples. Outdoor areas provide a calm respite to decompress after a day of exploration.',
       tag: 'Curated service and unbeatable location',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/_fF6NqiDqC?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
   ],
 
@@ -143,7 +143,7 @@ export const guide: FlatGuide = {
       name: 'Wine and Cheese Route',
       description: 'A getaway just 45 minutes away to Tequisquiapan or Ezequiel Montes. Visit Freixenet or De Cote for a tasting with views of the Peña de Bernal.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/?ranking_uuid=9eab0807-6e3c-4a0f-b173-2fb752f7e2ca&adults=1',
     },
     {
       name: 'Rooftop bar hopping',

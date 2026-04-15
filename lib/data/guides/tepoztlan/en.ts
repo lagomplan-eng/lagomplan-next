@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A mystical pause in the shadow of the Tepozteco. The perfect balance between subtle luxury and time to connect.',
     eyebrow: "Curated guide · Couple's getaway",
     tags: ['Couple', 'Romance', 'Wellness', 'Nature'],
-    image: '',
+    image: '/images/guides/guides-headers/Tepoztlan.png',
   },
 
   itinerary: [
@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'The gold standard of romance in Tepoztlán. Impeccable gardens and one of the best pools in Mexico. Zero noise, maximum luxury.',
       tag: 'Zero noise, maximum luxury',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/Vz3HyMwMOc?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
     },
     {
       name: 'Posada del Tepozteco',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Historic location with the best view of the hill from the terrace. Ideal for long breakfasts with the Tepozteco as a backdrop.',
       tag: 'The heart of the village',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/vBJnnsMdHA?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
     },
     {
       name: 'Hotel Boutique Casa Fernanda',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Impeccable service and a world-class couples spa. Their restaurant, La Veladora, is unmissable.',
       tag: 'Wellness and gastronomy',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/s0Fk2Y3dyy?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
     },
   ],
 
@@ -137,7 +137,7 @@ export const guide: FlatGuide = {
       name: 'Terrace dinner at sunset',
       description: 'Contemporary Morelos cuisine tasting with views of the illuminated mountains.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/neighborhood/mx/morelos/tepoztlan-restaurants',
     },
   ],
 

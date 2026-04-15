@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El refugio donde el bosque se encuentra con el agua. Una escapada diseñada para quemar adrenalina, explorar la naturaleza y disfrutar de la mejor gastronomía de montaña.',
     eyebrow: 'Guía curada · familia & aventura',
     tags: ['Familia', 'Aventura', 'Naturaleza', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/guides-headers/Valle%20de%20Bravo.png',
   },
 
   itinerary: [

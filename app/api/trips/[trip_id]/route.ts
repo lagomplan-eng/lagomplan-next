@@ -1,5 +1,6 @@
 // app/api/trips/[trip_id]/route.ts
-// Fetches a saved trip from Supabase by ID
+// GET  — fetch a saved trip by ID
+// PATCH — update title / trip_data (autosave)
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '../../../../lib/supabase/server'
@@ -52,37 +53,40 @@ export async function PATCH(
   { params }: { params: { trip_id: string } },
 ) {
   const { trip_id } = params
-
-  if (!trip_id) {
-    return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
-  }
+  if (!trip_id) return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
 
   try {
     const body = await req.json()
-    const updatePayload: Record<string, unknown> = body
+    const { title, trip_data } = body
 
     const supabase = getSupabaseServer()
-
-    const { data, error } = await supabase
-      .from('trips')
-      // Double assertion required: Supabase generated types collapse the update
-      // parameter to `never` when the table type is strict. `as any` alone is still
-      // rejected; going through `unknown` first satisfies the compiler without
-      // changing runtime behavior.
-      .update(updatePayload as unknown as never)
-      .eq('id', trip_id)
-      .select()
-      .single()
-
-    if (error) {
-      console.error('[trips/patch] Supabase error:', error.message, error.code)
-      return NextResponse.json(
-        { error: error.message, code: error.code },
-        { status: error.code === 'PGRST116' ? 404 : 500 },
-      )
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    return NextResponse.json(data)
+    const updatePayload: Record<string, unknown> = {}
+    if (title !== undefined) updatePayload.title = title || null
+    if (trip_data !== undefined) updatePayload.trip_data = trip_data
+
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('trips')
+      .update(updatePayload as unknown as never)
+      .eq('id', trip_id)
+      .eq('user_id', user.id)   // ownership guard
+
+    if (error) {
+      console.error('[trips/patch] update error:', error.message)
+      return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
+    }
+
+    console.log('[trips/patch] updated trip:', trip_id)
+    return NextResponse.json({ success: true })
+
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[trips/patch] error:', message)

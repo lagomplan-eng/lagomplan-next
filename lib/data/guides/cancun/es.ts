@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El azul más famoso del mundo para todas las edades. Una pausa equilibrada entre el confort del resort, la aventura natural y el valor inteligente.',
     eyebrow: 'Guía curada · Viaje familiar',
     tags: ['Familia', 'Playa', 'Resort', 'Valor inteligente'],
-    image: '',
+    image: '/images/guides/guides-headers/Canc%C3%BAn.png',
   },
 
   itinerary: [
@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'El refugio de lujo más exclusivo al final de la Zona Hotelera. Ideal para familias que buscan paz, una playa sin sargazo (por su ubicación) y un Kids\' Club de primer nivel.',
       tag: 'Lujo zen y privacidad',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/PlmvNbFRph?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
     {
       name: 'Grand Fiesta Americana Coral Beach',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'El mejor deal de lujo familiar. Recientemente se volvió All-Inclusive, pero mantiene una calidad gastronómica superior. Su club de niños es de los mejores de México.',
       tag: 'Resort de alta gama todo incluido',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/8ezclsJ3wa?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
     {
       name: 'Aloft Cancun',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'La opción smart value. No es un resort frente al mar, pero está a pasos de la playa pública y rodeado de servicios. Perfecto para familias que prefieren invertir su presupuesto en parques y excursiones.',
       tag: 'Ubicación estratégica y ahorro',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/WSZq7xX49s?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
   ],
 
@@ -125,13 +125,13 @@ export const guide: FlatGuide = {
       name: 'Día en Isla Mujeres',
       description: 'Tomen el ferry de UltraMar (un plan económico y divertido). Al llegar, renten un carrito de golf y pasen el día en Playa Norte; el agua es tan baja y tranquila que parece una alberca gigante.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/UGkuXdeIfI',
     },
     {
       name: 'Parque Xcaret',
       description: 'Es una inversión, pero es el parque más completo. El show nocturno está lleno de cultura: una experiencia que los niños recordarán toda la vida.',
       tags: ['Reservar 21 días antes para 15% de descuento'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
     },
     {
       name: 'Cenote Azul',

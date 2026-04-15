@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El corazón vibrante de Yucatán. Una expedición diseñada para explorar cenotes ocultos, escalar pirámides y conectar con la naturaleza salvaje, sin perder el confort de la Ciudad Blanca.',
     eyebrow: 'Guía curada · Familia Aventurera',
     tags: ['Familia', 'Aventura', 'Arqueología', 'Naturaleza'],
-    image: '',
+    image: '/images/guides/guides-headers/M%C3%A9rida.png',
   },
 
   itinerary: [
@@ -136,7 +136,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Lujo absoluto integrado en la selva. Ubicado en una antigua hacienda, cuenta con su propio cenote, casitas con alberca privada y un programa para niños enfocado en la naturaleza y la cocina maya.',
       tag: 'El máximo santuario maya',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/psvzagFavR?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
     {
       name: 'Hacienda Xcanatun by Angsana',
@@ -144,7 +144,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'La elegancia histórica de una hacienda con amenidades modernas. Sus amplios jardines y piscinas son perfectos para que los peques corran libremente tras un día de exploración arqueológica.',
       tag: 'Confort clásico y jardines',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/GfhbF1Jslc?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
     {
       name: 'Las Brisas',
@@ -152,7 +152,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'El balance perfecto entre lujo tradicional y practicidad urbana. Su alberca es de las mejores de la ciudad y su ubicación a pasos de Paseo de Montejo te permite disfrutar sin complicaciones.',
       tag: 'Confort icónico y ubicación',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/RPdo5xiEcV?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
   ],
 
@@ -167,7 +167,7 @@ export const guide: FlatGuide = {
       name: 'Uxmal y Choco-Story',
       description: 'Exploren la zona arqueológica de Uxmal (menos saturada que Chichén Itzá) y crucen la calle hacia el museo del chocolate. Los niños pueden ver animales rescatados y aprender cómo los mayas hacían cacao.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/MfDnM-RL5D',
     },
     {
       name: 'Reserva de El Corchito',

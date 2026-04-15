@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Donde la Sierra Madre se funde con el Pacífico. Una escapada diseñada para redescubrir el encanto del Viejo Vallarta, con el equilibrio perfecto entre lujo contemporáneo y alma colonial.',
     eyebrow: 'Guía curada · pareja & sofisticación',
     tags: ['Pareja', 'Romance', 'Relax', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/guides-headers/Puerto%20Vallarta.png',
   },
 
   itinerary: [
@@ -130,7 +130,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'El epítome del romance histórico. Fue el refugio de Elizabeth Taylor y Richard Burton; hoy es una joya boutique con puentes de mármol, tinas al aire libre y un servicio que te transporta a la época dorada de Hollywood.',
       tag: 'Lujo legendario y elegancia clásica',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/HW6l2Lk3x8?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
     },
     {
       name: 'Hotel Mousai',
@@ -138,7 +138,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Vanguardia y diseño exclusivo en la Zona Sur. Un hotel "Adults Only" con una de las albercas infinity más espectaculares del mundo. El lugar para quienes buscan tecnología, vistas infinitas y una atmósfera vibrante y moderna.',
       tag: 'Modernidad audaz y vistas panorámicas',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/g_5prIqCps?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
     },
     {
       name: 'Hotel Amapa',
@@ -146,7 +146,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Minimalismo contemporáneo en el corazón de la Zona Romántica. Un hotel boutique "Adults Only" que celebra el diseño mexicano con una estética limpia, textiles locales y una terraza perfecta para ver el atardecer sin pretensiones.',
       tag: 'Diseño "smart" y pulso local',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/iOevGf3QhC?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
     },
   ],
 
@@ -155,13 +155,13 @@ export const guide: FlatGuide = {
       name: 'Navegación privada a Majahuitas',
       description: 'Evita los barcos turísticos masivos. Renta una panga de lujo o un yate pequeño para ir a las calas del sur. El agua es más clara, el entorno es selvático y la privacidad es el verdadero lujo de la jornada.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/pFK0IfOG3p',
     },
     {
       name: 'Atardecer en The Iguana',
       description: 'Cenar o tomar un coctel en el restaurante de Casa Kimberly. La vista de las cúpulas de la Iglesia de Guadalupe bajo el cielo rosado es, probablemente, el momento más romántico de todo el Pacífico mexicano.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&latitude=20.6516335&longitude=-105.2487681&term=kimberly%20puerto%20vallarta&shouldUseLatLongSearch=true&originCorrelationId=f18ba663-55a3-4747-8807-49a5713c0263&corrid=e08b4372-b84f-4f1c-8374-8bc07cc41ed1&intentModifiedTerm=kimberly&metroId=328&originalTerm=kimberly%20puerto%20vallarta&queryUnderstandingType=location&showMap=true&sortBy=web_conversion',
     },
     {
       name: 'Visita al mercado y clase de cocina mexicana',

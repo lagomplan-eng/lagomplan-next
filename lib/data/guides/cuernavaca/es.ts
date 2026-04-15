@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'La ciudad de la eterna primavera. Un retiro diseñado para disfrutar de jardines exuberantes, gastronomía de altura y el lujo del tiempo lento en la cercanía de la capital.',
     eyebrow: 'Guía curada · Escape de fin de semana largo',
     tags: ['Amigos', 'Gastronomía', 'Relax', 'Lujo'],
-    image: '',
+    image: '/images/guides/guides-headers/Cuernavaca.png',
   },
 
   itinerary: [
@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'El encuentro perfecto entre una villa italiana y el modernismo mexicano. Ubicado en una propiedad histórica con un jardín impecable y una alberca de diseño, es ideal para grupos que aprecian el arte, la exclusividad y un spa de clase mundial.',
       tag: 'Lujo contemporáneo y herencia histórica',
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A7eNLw3xb2?aid=lagomplan&campaign=lagomplan-cuernavacarefugiodeprimaveraestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Cuernavaca%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcuernavaca-refugio-de-primavera-estilo',
     },
     {
       name: 'Hacienda de Cortés',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Dormir entre muros de piedra del siglo XVI y jardines que parecen sacados de una novela. Es la experiencia clásica de lujo en Morelos, con techos altos y una atmósfera señorial que transporta a otra época.',
       tag: 'Elegancia colonial y jardines épicos',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/P9ggStKMTY',
     },
     {
       name: 'Las Casas B+B',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Un hotel boutique con alma de casa particular en el corazón del centro. Diseño minimalista, textiles locales y una cocina de autor excelente. Ideal si el grupo prefiere una atmósfera más íntima y moderna.',
       tag: 'Diseño sofisticado y atmósfera chic',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/G43l9Zatec?aid=lagomplan&campaign=lagomplan-cuernavacarefugiodeprimaveraestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Cuernavaca%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcuernavaca-refugio-de-primavera-estilo',
     },
   ],
 
@@ -131,7 +131,7 @@ export const guide: FlatGuide = {
       name: 'Jardines de México',
       description: 'A unos minutos de la ciudad, es el jardín floral más grande del mundo. Recorrer el jardín japonés o el italiano al atardecer es una experiencia visualmente impactante y muy instagrameable.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://jardinesdemexico.com/',
     },
     {
       name: 'Cata de mezcal o tequila en el jardín',

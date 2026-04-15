@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Donde el desierto abraza al mar. Una escapada diseñada para renovar cuerpo y mente, con el equilibrio perfecto entre misticismo y sofisticación.',
     eyebrow: 'Guía curada · Relax entre amigas',
     tags: ['Amigas', 'Relax', 'Spa', 'Lujo'],
-    image: '',
+    image: '/images/guides/guides-headers/Los%20Cabos.png',
   },
 
   itinerary: [
@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Arquitectura impactante y estética mid-century modern. Es el lugar para ver y ser visto, con vistas frontales al Arco desde cada tina de baño.',
       tag: 'Lujo icónico y diseño',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/uB2_au9uci?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
     {
       name: 'Hacienda Encantada Resort & Residences',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'La experiencia clásica de la Baja. Arquitectura tipo hacienda con vistas espectaculares al Mar de Cortés. Ideal para grupos que buscan amplitud (suites y villas enormes) y un spa tradicional y completo.',
       tag: 'Confort clásico y amplitud',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/tGFeKKQIrw?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
     {
       name: 'Drift San José',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Minimalismo industrial en el corazón del Distrito del Arte. Un refugio smart para quienes prefieren la vida de barrio, las fogatas nocturnas y una estética limpia sin el costo de un gran resort.',
       tag: 'Smart value y estilo local',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/oWKB_Zby-Q?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
   ],
 
@@ -131,13 +131,13 @@ export const guide: FlatGuide = {
       name: 'Sunset sail privado',
       description: 'Un catamarán solo para ustedes hacia el Arco. Ver el atardecer con una copa de vino desde el mar es el momento cumbre de la desconexión.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
     },
     {
       name: 'Cena en el huerto: Flora Farms o Acre',
       description: 'Gastronomía farm-to-table en San José rodeadas de flores y coctelería botánica.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/',
     },
   ],
 

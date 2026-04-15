@@ -1,15 +1,17 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
-import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import PaywallModal from '../../../components/PaywallModal'
+import { TripShareModal } from '../../../components/trips/TripShareModal'
+import Image from 'next/image'
+import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer' | 'relax'
+type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
 
 type BookingOption = {
   id: string
@@ -114,13 +116,12 @@ const TYPE_INFO: Record<ItemType, { icon: string; label: string }> = {
   tour:       { icon: '🌊', label: 'Tour' },
   restaurant: { icon: '🍽', label: 'Restaurante' },
   free:       { icon: '🚶', label: 'Libre' },
-  relax:      { icon: '💆', label: 'Relax' },
   transfer:   { icon: '🚗', label: 'Transfer' },
 }
 
 const TYPE_BORDER: Record<ItemType, string> = {
   hotel: '#0F3A33', tour: '#0891B2', restaurant: '#D97706',
-  free: '#CEC8C0', relax: '#6B8F86', transfer: '#2D4F6C',
+  free: '#CEC8C0', transfer: '#2D4F6C',
 }
 
 const TYPE_ROW_BG: Record<ItemType, string> = {
@@ -128,7 +129,6 @@ const TYPE_ROW_BG: Record<ItemType, string> = {
   tour:       'rgba(8,145,178,.06)',
   restaurant: 'rgba(217,119,6,.07)',
   free:       'transparent',
-  relax:      'rgba(107,143,134,.06)',
   transfer:   'rgba(45,79,108,.06)',
 }
 
@@ -137,18 +137,23 @@ const TYPE_BADGE: Record<ItemType, { color: string; bg: string }> = {
   tour:       { color: '#0E7490', bg: '#ECFEFF' },
   restaurant: { color: '#92400E', bg: '#FFFBEB' },
   free:       { color: '#7A7A76', bg: '#EDE7E1' },
-  relax:      { color: '#065F46', bg: '#ECFDF5' },
   transfer:   { color: '#2D4F6C', bg: '#EBF4FF' },
 }
 
 // ─── Booking providers ────────────────────────────────────────────────────────
 
 const LOGO_STYLE: Record<string, { bg: string; color: string; text: string }> = {
-  viator:  { bg: '#F7F3EE', color: '#1B3A2D', text: 'VIATOR' },
-  gyg:     { bg: '#FFF0E6', color: '#C04020', text: 'GYG' },
-  hotels:  { bg: '#EBF4FF', color: '#004A96', text: 'Hotels\n.com' },
-  booking: { bg: '#F0F4FF', color: '#003580', text: 'book\ning' },
-  manual:  { bg: '#EDE7E1', color: '#3D3D3A', text: '✓' },
+  viator:     { bg: '#F7F3EE', color: '#1B3A2D', text: 'VIATOR' },
+  gyg:        { bg: '#FFF0E6', color: '#C04020', text: 'GYG' },
+  hotels:     { bg: '#EBF4FF', color: '#004A96', text: 'Hotels\n.com' },
+  booking:    { bg: '#F0F4FF', color: '#003580', text: 'book\ning' },
+  expedia:    { bg: '#EEF4FF', color: '#1A4FBA', text: 'EXPE\nDIA' },
+  opentable:  { bg: '#FFF0F0', color: '#DA3743', text: 'OPEN\nTABLE' },
+  resy:       { bg: '#FFF5F0', color: '#C94A23', text: 'RESY' },
+  thefork:    { bg: '#F0FBF7', color: '#007E5D', text: 'THE\nFORK' },
+  googlemaps: { bg: '#F5F5F5', color: '#444444', text: 'G\nMaps' },
+  uber:       { bg: '#1C1C1C', color: '#FFFFFF', text: 'UBER' },
+  manual:     { bg: '#EDE7E1', color: '#3D3D3A', text: '✓' },
 }
 
 const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
@@ -156,8 +161,6 @@ const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
   tour:       'Reservar experiencia',
   restaurant: 'Reservar mesa',
   transfer:   'Reservar transfer',
-  relax:      'Reservar experiencia',
-  free:       'Reservar',
 }
 
 // Default provider options per item type — used when item has no affiliate/bookingOptions
@@ -273,7 +276,7 @@ function normalizeItemType(raw: unknown): ItemType {
   if (t === 'restaurant' || t.includes('restaur') || t.includes('comida') || t.includes('cena') || t.includes('almuerz') || t.includes('desayun') || t.includes('food') || t.includes('eat') || t.includes('gastro')) return 'restaurant'
   if (t === 'tour' || t.includes('tour') || t.includes('excurs') || t.includes('activid') || t.includes('atraccion') || t.includes('activity') || t.includes('visita') || t.includes('aventura')) return 'tour'
   if (t === 'transfer' || t.includes('transfer') || t.includes('transport') || t.includes('traslad') || t.includes('vuelo') || t.includes('flight') || t.includes('bus') || t.includes('taxi') || t.includes('auto')) return 'transfer'
-  if (t === 'relax' || t.includes('relax') || t.includes('descanso') || t.includes('spa') || t.includes('libre') || t.includes('playa') || t.includes('beach')) return 'relax'
+  if (t === 'relax' || t.includes('relax') || t.includes('descanso') || t.includes('spa') || t.includes('libre') || t.includes('playa') || t.includes('beach')) return 'free'
   return 'free'
 }
 
@@ -497,7 +500,8 @@ export default function TripResult({ params }: Props) {
     interests = '',
     pace = '',
     budget = '',
-    trip_id: savedTripId = '',
+    trip_id:  savedTripId = '',
+    checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
   } = params
 
   // ── Data state ──────────────────────────────────────────────────────────────
@@ -558,7 +562,17 @@ export default function TripResult({ params }: Props) {
 
   // ── Paywall state ─────────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]   = useState(false)
+  const [shareOpen,   setShareOpen]     = useState(false)
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
+
+  // ── Autosave status ───────────────────────────────────────────────────────────
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const autoSaveTimerRef  = useRef<ReturnType<typeof setTimeout>>()
+  const hasInitializedRef = useRef(false)   // prevents autosave on initial mount
+
+  // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
+  type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
+  const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
 
   // ── DB load effect — fires when trip_id param is present ─────────────────────
   useEffect(() => {
@@ -570,7 +584,7 @@ export default function TripResult({ params }: Props) {
         const res = await fetch(`/api/trips/${savedTripId}`)
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          throw new Error(err.error || 'No se pudo cargar el viaje')
+          throw new Error(err.error || (locale === 'es' ? 'No se pudo cargar el viaje' : 'Failed to load trip'))
         }
         const data = await res.json()
         const dest      = data.destination || ''
@@ -606,6 +620,38 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedTripId])
 
+  // ── Plan credits fetch ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (authedUser === undefined) return  // still loading auth
+    if (authedUser === null) {
+      setPlanCredits(null)               // anonymous — no DB state
+      return
+    }
+    fetch('/api/me/plan')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 3, is_subscriber: false }))
+      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 3, is_subscriber: false }))
+  }, [authedUser])
+
+  // ── Post-checkout success handler ────────────────────────────────────────────
+  // When Stripe redirects back with ?checkout=success, refresh plan state and
+  // retrigger generation so the user doesn't have to click anything.
+  useEffect(() => {
+    if (checkoutStatus !== 'success') return
+    showToast(locale === 'es' ? '🎉 ¡Pago exitoso! Ya puedes generar más viajes.' : '🎉 Payment successful! You can now generate more trips.')
+    fetch('/api/me/plan')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setPlanCredits(data)
+          setGenerateKey(k => k + 1)  // retrigger generation with fresh credits
+        }
+      })
+      .catch(() => {})
+  // Run once on mount when checkoutStatus==='success'. showToast is stable.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // ── Generate effect ──────────────────────────────────────────────────────────
   // Cache key: serialized inputs. On match, restore from sessionStorage and skip AI.
   // This prevents regeneration after login redirect (trip continuity, no token waste).
@@ -618,20 +664,12 @@ export default function TripResult({ params }: Props) {
       // authedUser is undefined while the session is still loading; wait for it.
       if (authedUser === undefined) return
 
-      if (authedUser === null) {
-        const count = Number(localStorage.getItem('generationCount') || 0)
-        if (count >= 1) {
-          router.push('/login')
-          return
-        }
-      }
-
-      // ── Paywall guard ──────────────────────────────────────────────────
-      // Only applies to logged-in users (anonymous users are handled above).
+      // ── Paywall guard (logged-in users) ───────────────────────────────
+      // Wait until we've fetched plan state from the DB.
       if (authedUser !== null) {
-        const planType      = localStorage.getItem('planType') ?? 'free'
-        const remainingTrips = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-        if (planType !== 'subscription' && remainingTrips <= 0) {
+        if (planCredits === 'loading') return  // not ready yet
+        const plan = planCredits as PlanState | null
+        if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
           setPaywallOpen(true)
           return
         }
@@ -672,12 +710,6 @@ export default function TripResult({ params }: Props) {
         }
 
         // ── 2. Fresh AI generation ──────────────────────────────────────
-        // Increment the logged-out generation counter right before calling the API.
-        if (authedUser === null) {
-          const count = Number(localStorage.getItem('generationCount') || 0)
-          localStorage.setItem('generationCount', String(count + 1))
-        }
-
         const parsedInterests = interests
           ? interests.split(',').map((i) => i.trim()).filter(Boolean)
           : []
@@ -693,6 +725,16 @@ export default function TripResult({ params }: Props) {
         console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
         setRawResponse(genData)
         if (!genRes.ok) {
+          // 401 = anonymous over-limit → redirect to login
+          if (genRes.status === 401) {
+            router.push({ pathname: '/login' })
+            return
+          }
+          // 402 = authenticated user out of credits → open paywall
+          if (genRes.status === 402) {
+            setPaywallOpen(true)
+            return
+          }
           const base   = typeof genData?.error === 'string' ? genData.error : 'Generation failed'
           const detail = genData?.detail ? `\n\n${JSON.stringify(genData.detail, null, 2)}` : ''
           throw new Error(base + detail)
@@ -715,14 +757,13 @@ export default function TripResult({ params }: Props) {
         setActiveVersionIdx(0)
         setHasUserEdits(false)
 
-        // ── Decrement remaining trips after successful generation ──────────
+        // Credits are decremented server-side in /api/generate-trip.
+        // Refresh plan state so the next guard check reflects the new balance.
         if (authedUser !== null) {
-          const planType = localStorage.getItem('planType') ?? 'free'
-          if (planType !== 'subscription') {
-            const remaining = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-            const next = Math.max(0, remaining - 1)
-            localStorage.setItem('remainingTrips', String(next))
-          }
+          fetch('/api/me/plan')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setPlanCredits(data) })
+            .catch(() => {})
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
@@ -732,7 +773,7 @@ export default function TripResult({ params }: Props) {
     }
     generate()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, generateKey])
+  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, planCredits, generateKey])
 
   // ── Auto-save after login (pending save) ────────────────────────────────────
   useEffect(() => {
@@ -746,33 +787,72 @@ export default function TripResult({ params }: Props) {
     const raw = sessionStorage.getItem('pendingSave')
     if (!raw) return
     sessionStorage.removeItem('pendingSave')
-    ;(async () => {
-      const { data: { session } } = await getSupabaseBrowser().auth.getSession()
-      if (session) saveTrip(authedUser.id)
-    })()
+    // authedUser being non-null already guarantees a valid session exists —
+    // calling getSession() here would race with SupabaseProvider's lock.
+    saveTrip(authedUser.id)
   }, [authedUser, rawTripData])
 
-  // ── Paywall selection ─────────────────────────────────────────────────────────
-  function handlePaywallSelect(choice: 'trip-1' | 'trip-5' | 'trip-10' | 'subscription') {
-    if (choice === 'subscription') {
-      localStorage.setItem('planType', 'subscription')
-      localStorage.removeItem('remainingTrips')
-    } else {
-      const counts = { 'trip-1': 1, 'trip-5': 5, 'trip-10': 10 } as const
-      localStorage.setItem('planType', 'free')
-      localStorage.setItem('remainingTrips', String(counts[choice]))
+  // ── Autosave — fires on any content change AFTER trip is in DB ──────────────
+  useEffect(() => {
+    // Skip the very first run (initial mount / initial data load).
+    // hasInitializedRef resets to false on every mount so we don't autosave
+    // the state that was just set by the generate or DB-load effects.
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true
+      return
     }
+
+    // Gate: both conditions must be true for autosave to run.
+    // Read tripId / authedUser at effect time — they don't need to be deps
+    // because we only want content changes to trigger autosave, not auth changes.
+    if (!tripId || !authedUser || loading) return
+
+    clearTimeout(autoSaveTimerRef.current)
+    setSaveStatus('saving')
+
+    // Capture a snapshot of the current content at the moment the effect fires.
+    // The timeout reads from this snapshot, not from a stale closure.
+    const savedId = tripId
+    const snapshot = { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows }
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        console.log('[autosave] patching trip:', savedId)
+        const res = await fetch(`/api/trips/${savedId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ title: snapshot.title, trip_data: snapshot }),
+        })
+        if (res.ok) {
+          console.log('[autosave] saved')
+          setSaveStatus('saved')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+        } else {
+          console.warn('[autosave] failed:', res.status)
+          setSaveStatus('idle')
+        }
+      } catch (err) {
+        console.warn('[autosave] error:', err)
+        setSaveStatus('idle')
+      }
+    }, 1500)
+
+    return () => clearTimeout(autoSaveTimerRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle])
+
+  // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
+  function handlePaywallClose() {
     setPaywallOpen(false)
-    setGenerateKey(k => k + 1)  // retrigger generate()
   }
 
   // ── Regenerate from pref drawer ──────────────────────────────────────────────
   async function regenerate() {
-    // ── Paywall guard ────────────────────────────────────────────────────
+    // ── Paywall guard (DB-backed) ────────────────────────────────────────
     if (authedUser !== null) {
-      const planType       = localStorage.getItem('planType') ?? 'free'
-      const remainingTrips = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-      if (planType !== 'subscription' && remainingTrips <= 0) {
+      const plan = planCredits as PlanState | null
+      if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
         setPrefOpen(false)
         setRegenConfirmOpen(false)
         setPaywallOpen(true)
@@ -845,7 +925,7 @@ export default function TripResult({ params }: Props) {
   // ── Save / auth gate ─────────────────────────────────────────────────────────
   async function saveTrip(userId: string) {
     console.log('[SAVE TRIP CALLED]', { userId })
-    if (!rawTripData) { showToast('No hay viaje para guardar'); return }
+    if (!rawTripData) { showToast(locale === 'es' ? 'No hay viaje para guardar' : 'No trip to save'); return }
     try {
       const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
       const parsedInterests = prefInterests
@@ -873,18 +953,18 @@ export default function TripResult({ params }: Props) {
       if (data.success) {
         setTripId(data.trip_id)
         sessionStorage.removeItem('tripCache')
-        showToast('🔖 Guardado en mis viajes')
+        showToast(locale === 'es' ? '🔖 Guardado en mis viajes' : '🔖 Saved to my trips')
       } else {
-        showToast('No se pudo guardar. Intenta de nuevo.')
+        showToast(locale === 'es' ? 'No se pudo guardar. Intenta de nuevo.' : 'Could not save. Try again.')
       }
     } catch {
-      showToast('Error al guardar')
+      showToast(locale === 'es' ? 'Error al guardar' : 'Save error')
     }
   }
 
   function handleSave() {
     if (tripId) {
-      showToast('✨ Ya está en Mis viajes')
+      showToast(locale === 'es' ? '✨ Ya está en Mis viajes' : '✨ Already in My trips')
       return
     }
     console.log('[HANDLE SAVE]', {
@@ -933,7 +1013,7 @@ export default function TripResult({ params }: Props) {
       day.n !== dayN ? day : { ...day, items: day.items.filter(it => it.id !== itemId) }
     ))
     setHasUserEdits(true)
-    showToast('✓ Actividad eliminada')
+    showToast(locale === 'es' ? '✓ Actividad eliminada' : '✓ Activity removed')
   }
 
   function loadVersion(idx: number) {
@@ -1011,39 +1091,34 @@ export default function TripResult({ params }: Props) {
   }
 
   function openBookingModal(item: ItineraryItem) {
-    const q = encodeURIComponent(item.name)
-
-    // 1. Item carries explicit booking options
+    // 1. Item carries explicit hand-authored booking options
     if (item.bookingOptions && item.bookingOptions.length > 0) {
       setBookingModal({ itemName: item.name, itemType: item.type, options: item.bookingOptions })
       return
     }
 
-    // 2. Item has a single affiliate URL — wrap as one provider option
+    // 2. Item has a single affiliate URL — wrap as one provider row
     if (item.affiliate) {
       const prov = providerFromUrl(item.affiliate)
       const meta = LOGO_STYLE[prov] ?? LOGO_STYLE.manual
       setBookingModal({
         itemName: item.name,
         itemType: item.type,
-        options: [{
-          id: 'aff-0',
-          provider: prov,
-          name: meta.text.replace('\n', '.'),
-          desc: '',
-          url: item.affiliate,
-        }],
+        options: [{ id: 'aff-0', provider: prov, name: meta.text.replace('\n', '.'), desc: '', url: item.affiliate }],
       })
       return
     }
 
-    // 3. Fallback: default providers for item type, with query injected
-    const base = DEFAULT_PROVIDERS[item.type] ?? DEFAULT_PROVIDERS.tour ?? []
-    setBookingModal({
-      itemName: item.name,
-      itemType: item.type,
-      options: base.map(p => ({ ...p, url: p.url.replace('{query}', q) })),
+    // 3. Dynamic affiliate links based on category
+    const options = getBookingOptions(item, {
+      city:      destination,
+      country:   detectCountryGroup(destination),
+      startDate: prefStart || start,
+      endDate:   prefEnd   || end,
     })
+    if (options.length > 0) {
+      setBookingModal({ itemName: item.name, itemType: item.type, options })
+    }
   }
 
   function togglePacked(idx: number) {
@@ -1084,21 +1159,21 @@ export default function TripResult({ params }: Props) {
     }))
     setHasUserEdits(true)
     closeEditModal()
-    showToast('✓ Cambios guardados')
+    showToast(locale === 'es' ? '✓ Cambios guardados' : '✓ Changes saved')
   }
 
   function addDay() {
     const newN = days.length > 0 ? Math.max(...days.map(d => d.n)) + 1 : 1
     const newDay: Day = {
       n:        newN,
-      label:    `Día ${String(newN).padStart(2, '0')}`,
-      title:    'Nuevo día',
+      label:    locale === 'es' ? `Día ${String(newN).padStart(2, '0')}` : `Day ${String(newN).padStart(2, '0')}`,
+      title:    locale === 'es' ? 'Nuevo día' : 'New day',
       progress: 0,
       items:    [],
     }
     setDays(prev => [...prev, newDay])
     setHasUserEdits(true)
-    showToast(`✓ Día ${newN} añadido`)
+    showToast(locale === 'es' ? `✓ Día ${newN} añadido` : `✓ Day ${newN} added`)
   }
 
   function addItem(dayN: number) {
@@ -1184,31 +1259,31 @@ export default function TripResult({ params }: Props) {
     <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-[#E4DFD8] pt-12 pb-9">
+      <section data-trip="hero" className="border-b border-[#E4DFD8] pt-12 pb-9">
         <div className="max-w-[1160px] mx-auto px-7">
           <div className="grid grid-cols-[1fr_360px] gap-[52px] items-start max-[860px]:grid-cols-1">
 
             {/* Hero left */}
             <div>
               {/* Eyebrow — uses pref state so it updates after regeneration */}
-              <div className="font-mono text-[10px] tracking-[.16em] uppercase text-[#6B8F86] mb-4 flex items-center gap-2.5">
+              <div data-trip-hero="eyebrow" className="font-mono text-[10px] tracking-[.16em] uppercase text-[#6B8F86] mb-4 flex items-center gap-2.5">
                 <span className="w-[22px] h-px bg-[#6B8F86] shrink-0" />
                 {prefOrigin ? `${prefOrigin} → ${prefDest}` : 'Resultado del plan'}
               </div>
 
               {/* Title */}
-              <h1 className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
+              <h1 data-trip-hero="title" className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
                 {tripTitle || `Tu viaje a`}<br />
                 <em className="italic text-[#0F3A33]">{prefDest}</em>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-[14px] font-light leading-[1.75] text-[#7A7A76] max-w-[420px] mb-6">
+              <p data-trip-hero="subtitle" className="text-[14px] font-light leading-[1.75] text-[#7A7A76] max-w-[420px] mb-6">
                 {tripSubtitle}
               </p>
 
               {/* Meta pills — all from pref state so they reflect regeneration */}
-              <div className="flex flex-wrap gap-1.5 mb-7">
+              <div data-trip-hero="chips" className="flex flex-wrap gap-1.5 mb-7">
                 <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
                   <span>📅</span> {dateRange}
                 </span>
@@ -1235,24 +1310,36 @@ export default function TripResult({ params }: Props) {
               </div>
 
               {/* Action row */}
-              <div className="flex items-center pt-[18px] border-t border-[#E4DFD8]">
+              <div data-trip="action-row" className="flex items-center pt-[18px] border-t border-[#E4DFD8]">
                 <button
                   className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${tripId ? 'text-[#2D6B57] cursor-default' : 'text-[#7A7A76] hover:text-[#0F3A33]'}`}
                   onClick={handleSave}
+                  disabled={saveStatus === 'saving'}
                 >
-                  {tripId ? <><span>✔</span> Guardado</> : <><span>🔖</span> Guardar</>}
+                  {!tripId && <><span>🔖</span> {locale === 'es' ? 'Guardar' : 'Save'}</>}
+                  {tripId && saveStatus === 'saving' && <><span className="animate-pulse">💾</span> {locale === 'es' ? 'Guardando…' : 'Saving…'}</>}
+                  {tripId && saveStatus !== 'saving' && <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>}
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] pr-[15px] hover:text-[#0F3A33] transition-colors"
-                  onClick={() => showToast('↗ Generando enlace para compartir…')}
+                  onClick={() => {
+                    if (!tripId) {
+                      showToast(locale === 'es' ? '🔖 Guarda el viaje primero para compartirlo' : '🔖 Save the trip first to share it')
+                      return
+                    }
+                    setShareOpen(true)
+                  }}
                 >
-                  <span>↗</span> Compartir
+                  <span>↗</span> {locale === 'es' ? 'Compartir' : 'Share'}
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] hover:text-[#0F3A33] transition-colors"
-                  onClick={() => showToast('📄 Generando PDF…')}
+                  onClick={() => {
+                    showToast(locale === 'es' ? '📄 Generando PDF…' : '📄 Generating PDF…')
+                    setTimeout(() => window.print(), 300)
+                  }}
                 >
                   <span>⬇</span> PDF
                 </button>
@@ -1262,14 +1349,19 @@ export default function TripResult({ params }: Props) {
             {/* Hero right — image card */}
             <div className="max-[860px]:order-first">
               <div className="w-full aspect-[4/3] rounded-[26px] overflow-hidden relative bg-[#0F3A33]">
-                <div
-                  className="w-full h-full flex items-end p-[22px]"
-                  style={{ background: 'linear-gradient(145deg, #0F3A33 0%, #1A5247 45%, #6B8F86 80%, #A8C4BE 100%)' }}
-                >
-                  <span className="font-display italic text-[24px] font-light text-white/85 tracking-[-0.01em]">
-                    {prefDest || 'Tu destino'}
-                  </span>
-                </div>
+                <Image
+                  src="/images/guides/guides-headers/lagomplan-worldmap.jpg"
+                  alt="Lagomplan world map"
+                  fill
+                  className="object-cover"
+                  priority
+                  sizes="(max-width: 860px) 100vw, 360px"
+                />
+                {/* Gradient overlay so the destination label stays readable */}
+                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,58,51,.55)] via-transparent to-transparent" />
+                <span className="absolute bottom-[22px] left-[22px] font-display italic text-[24px] font-light text-white/90 tracking-[-0.01em]">
+                  {prefDest || 'Tu destino'}
+                </span>
                 {prefOrigin && (
                   <span className="absolute top-3.5 right-3.5 font-mono text-[9px] font-medium tracking-[.12em] uppercase text-white bg-[rgba(15,58,51,.65)] backdrop-blur-sm px-2.5 py-[3px] rounded-full">
                     desde {prefOrigin}
@@ -1297,7 +1389,7 @@ export default function TripResult({ params }: Props) {
       </section>
 
       {/* ── PREF DRAWER ───────────────────────────────────────────────────── */}
-      <div className="border-b border-[#E4DFD8]">
+      <div data-trip="pref-drawer" className="border-b border-[#E4DFD8]">
         <div
           style={{
             maxHeight: prefOpen ? '900px' : '0',
@@ -1520,14 +1612,16 @@ export default function TripResult({ params }: Props) {
                   onClick={() => setPrefOpen(false)}
                   className="text-[13px] text-[#7A7A76] px-[15px] py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
                 >
-                  Cancelar
+                  {locale === 'es' ? 'Cancelar' : 'Cancel'}
                 </button>
                 <button
                   onClick={handleRegenClick}
                   disabled={loading}
                   className="text-[13px] font-medium text-white px-[17px] py-[7px] bg-[#0F3A33] rounded-[6px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Generando...' : 'Actualizar plan'}
+                  {loading
+                    ? (locale === 'es' ? 'Generando...' : 'Generating...')
+                    : (locale === 'es' ? 'Actualizar plan' : 'Update plan')}
                 </button>
               </div>
 
@@ -1537,7 +1631,7 @@ export default function TripResult({ params }: Props) {
       </div>
 
       {/* ── CONTROL BAR ───────────────────────────────────────────────────── */}
-      <div className="bg-[#0F3A33]">
+      <div data-trip="control-bar" className="bg-[#0F3A33]">
         <div className="max-w-[1160px] mx-auto px-7">
           <div className="flex items-center h-[50px]">
 
@@ -1582,7 +1676,7 @@ export default function TripResult({ params }: Props) {
         <div className="grid grid-cols-[1fr_310px] gap-8 items-start max-[900px]:grid-cols-1">
 
           {/* ── LEFT: Itinerary ─────────────────────────────────────────── */}
-          <div>
+          <div data-trip="itinerary">
             {/* Version switcher — only shown when multiple versions exist */}
             {versions.length > 1 && (
               <div className="flex items-center gap-[5px] flex-wrap mb-4">
@@ -1642,18 +1736,20 @@ export default function TripResult({ params }: Props) {
                   return (
                     <div
                       key={day.n}
+                      data-trip-day="card"
                       className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
                     >
                       {/* Day header */}
                       <div
+                        data-trip-day="header"
                         className="flex items-center justify-between px-[18px] py-3.5 cursor-pointer select-none border-b border-[#E4DFD8]"
                         onClick={() => toggleDay(day.n)}
                       >
                         <div>
-                          <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-[3px]">
+                          <div data-trip-day="label" className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-[3px]">
                             {day.label}
                           </div>
-                          <div className="font-display text-[15px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
+                          <div data-trip-day="title" className="font-display text-[15px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
                             {day.title}
                           </div>
                         </div>
@@ -1674,6 +1770,7 @@ export default function TripResult({ params }: Props) {
 
                       {/* Day body */}
                       <div
+                        data-trip-day="body"
                         style={{
                           maxHeight: isCollapsed ? '0' : '3000px',
                           opacity: isCollapsed ? 0 : 1,
@@ -1692,6 +1789,7 @@ export default function TripResult({ params }: Props) {
                             return (
                               <div
                                 key={item.id}
+                                data-trip-item="row"
                                 className="grid grid-cols-[28px_1fr_auto] gap-3 items-start py-3.5 border-b border-[#E4DFD8] last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
                                 style={{ borderLeftColor: tborder, background: trowbg }}
                               >
@@ -1704,16 +1802,17 @@ export default function TripResult({ params }: Props) {
                                 </div>
 
                                 {/* Content */}
-                                <div>
+                                <div data-trip-item="content">
                                   <div className="flex items-center gap-[5px] flex-wrap mb-1">
                                     <span
+                                      data-trip-item="type"
                                       className="font-mono text-[9px] font-medium tracking-[.08em] uppercase px-[6px] py-[2px] rounded-[3px]"
                                       style={{ color: tbadge.color, background: tbadge.bg }}
                                     >
                                       {tinfo.icon} {tinfo.label}
                                     </span>
                                     {item.time && (
-                                      <span className="font-mono text-[9px] text-[#0F3A33] border border-[rgba(15,58,51,.18)] px-[5px] py-px rounded-[3px]">
+                                      <span data-trip-item="time" className="font-mono text-[9px] text-[#0F3A33] border border-[rgba(15,58,51,.18)] px-[5px] py-px rounded-[3px]">
                                         {item.time}
                                       </span>
                                     )}
@@ -1724,10 +1823,10 @@ export default function TripResult({ params }: Props) {
                                       title="Pendiente"
                                     />
                                   </div>
-                                  <div className="text-[13px] font-medium text-[#1C1C1A] leading-[1.3] mb-[3px]">
+                                  <div data-trip-item="name" className="text-[13px] font-medium text-[#1C1C1A] leading-[1.3] mb-[3px]">
                                     {item.name}
                                   </div>
-                                  <div className="text-[11.5px] font-light text-[#7A7A76] leading-[1.6]">
+                                  <div data-trip-item="desc" className="text-[11.5px] font-light text-[#7A7A76] leading-[1.6]">
                                     {item.desc}
                                   </div>
                                 </div>
@@ -1740,13 +1839,15 @@ export default function TripResult({ params }: Props) {
                                     </div>
                                   )}
                                   <div className="flex flex-col gap-[3px] items-end">
-                                    {/* Opens booking modal — user chooses provider before leaving */}
+                                    {/* Opens booking modal — hidden for libre/free items */}
+                                    {item.type !== 'free' && (
                                     <button
                                       onClick={() => openBookingModal(item)}
                                       className="flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase text-white bg-[#0F3A33] px-2.5 py-[5px] rounded-[4px] hover:bg-[#1A5247] hover:-translate-y-px transition-all whitespace-nowrap"
                                     >
                                       {item.affiliate || item.bookingOptions ? 'Ver opciones' : 'Reservar'}
                                     </button>
+                                    )}
                                     <button
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#0F3A33] hover:bg-[rgba(15,58,51,.05)] transition-all"
                                       onClick={() => openEditModal(item, day.n)}
@@ -1795,11 +1896,11 @@ export default function TripResult({ params }: Props) {
           </div>
 
           {/* ── RIGHT: Sidebar cards ─────────────────────────────────────── */}
-          <aside className="flex flex-col gap-2.5 max-[900px]:order-first">
+          <aside data-trip="sidebar" className="flex flex-col gap-2.5 max-[900px]:order-first">
             <div className="sticky top-[76px] flex flex-col gap-2.5">
 
               {/* Planea tu viaje — checks */}
-              <div className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="planning" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors gap-2.5"
                   onClick={() => toggleCard('planning')}
@@ -1911,7 +2012,7 @@ export default function TripResult({ params }: Props) {
               </div>
 
               {/* Qué llevar — always rendered, empty state when no packing data */}
-              <div className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="packing" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors gap-2.5"
                   onClick={() => toggleCard('packing')}
@@ -1935,6 +2036,7 @@ export default function TripResult({ params }: Props) {
                 </div>
 
                 <div
+                  data-trip-card="packing-body"
                   style={{
                     maxHeight: collapsedCards.has('packing') ? '0' : '800px',
                     opacity: collapsedCards.has('packing') ? 0 : 1,
@@ -1981,7 +2083,7 @@ export default function TripResult({ params }: Props) {
               </div>
 
               {/* Presupuesto — always rendered, empty state when no budget data */}
-              <div className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="budget" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors"
                   onClick={() => toggleCard('budget')}
@@ -2005,6 +2107,7 @@ export default function TripResult({ params }: Props) {
                 </div>
 
                 <div
+                  data-trip-card="budget-body"
                   style={{
                     maxHeight: collapsedCards.has('budget') ? '0' : '900px',
                     opacity: collapsedCards.has('budget') ? 0 : 1,
@@ -2098,7 +2201,7 @@ export default function TripResult({ params }: Props) {
                 Tipo
               </label>
               <div className="flex flex-wrap gap-[5px]">
-                {(['hotel', 'tour', 'restaurant', 'transfer', 'relax', 'free'] as ItemType[]).map(t => {
+                {(['hotel', 'tour', 'restaurant', 'transfer', 'free'] as ItemType[]).map(t => {
                   const info  = TYPE_INFO[t]
                   const badge = TYPE_BADGE[t]
                   const sel   = editType === t
@@ -2174,13 +2277,13 @@ export default function TripResult({ params }: Props) {
                 onClick={closeEditModal}
                 className="text-[13px] text-[#7A7A76] px-3.5 py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
               >
-                Cancelar
+                {locale === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
               <button
                 onClick={saveEditModal}
                 className="text-[13px] font-medium text-white px-4 py-[7px] bg-[#0F3A33] rounded-[6px]"
               >
-                Guardar
+                {locale === 'es' ? 'Guardar' : 'Save'}
               </button>
             </div>
           </div>
@@ -2200,11 +2303,12 @@ export default function TripResult({ params }: Props) {
           >
             <div className="mb-5">
               <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-3">
-                Vas a perder tus cambios
+                {locale === 'es' ? 'Vas a perder tus cambios' : 'You\u2019ll lose your changes'}
               </h2>
               <p className="text-[13px] font-light text-[#7A7A76] leading-[1.65]">
-                Si continúas, se sobrescribirá este itinerario y se eliminarán todos los cambios que hiciste.<br /><br />
-                ¿Quieres continuar o crear un nuevo viaje?
+                {locale === 'es'
+                  ? <>Si continúas, se sobrescribirá este itinerario y se eliminarán todos los cambios que hiciste.<br /><br />¿Quieres continuar o crear un nuevo viaje?</>
+                  : <>If you continue, this itinerary will be overwritten and all your edits will be lost.<br /><br />Do you want to continue or start a new trip?</>}
               </p>
             </div>
             <div className="flex flex-col gap-2">
@@ -2213,19 +2317,21 @@ export default function TripResult({ params }: Props) {
                 disabled={loading}
                 className="text-[13px] font-medium text-white px-4 py-[9px] bg-[#B91C1C] rounded-[8px] w-full hover:bg-[#991B1B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Generando...' : 'Reemplazar viaje'}
+                {loading
+                  ? (locale === 'es' ? 'Generando...' : 'Generating...')
+                  : (locale === 'es' ? 'Reemplazar viaje' : 'Replace trip')}
               </button>
               <button
                 onClick={() => { setRegenConfirmOpen(false); router.push({ pathname: '/planner' }) }}
                 className="text-[13px] font-medium text-[#0F3A33] px-4 py-[9px] bg-white border border-[#CEC8C0] rounded-[8px] w-full hover:bg-[#EDE7E1] transition-colors"
               >
-                Crear nuevo viaje
+                {locale === 'es' ? 'Crear nuevo viaje' : 'Start a new trip'}
               </button>
               <button
                 onClick={() => setRegenConfirmOpen(false)}
                 className="text-[13px] text-[#7A7A76] px-4 py-[7px] rounded-[8px] w-full hover:bg-[#EDE7E1] transition-colors"
               >
-                Cancelar
+                {locale === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
             </div>
           </div>
@@ -2267,7 +2373,10 @@ export default function TripResult({ params }: Props) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
-                    onClick={() => setBookingModal(null)}
+                    onClick={() => {
+                      trackAffiliateClick(bookingModal.itemType, opt.provider, destination)
+                      setBookingModal(null)
+                    }}
                   >
                     <div
                       className="w-[38px] h-[38px] rounded-[6px] flex items-center justify-center shrink-0 font-mono font-bold text-[9px] text-center leading-[1.2] whitespace-pre"
@@ -2312,7 +2421,18 @@ export default function TripResult({ params }: Props) {
       <style>{`@keyframes mIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
 
       {/* ── PAYWALL ──────────────────────────────────────────────────────── */}
-      <PaywallModal open={paywallOpen} onSelect={handlePaywallSelect} />
+      <PaywallModal open={paywallOpen} locale={locale} onClose={handlePaywallClose} />
+
+      {/* ── SHARE TRIP ───────────────────────────────────────────────────── */}
+      {tripId && (
+        <TripShareModal
+          tripId={tripId}
+          destination={destination}
+          duration={Number(nights) || null}
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
 
     </main>
   )

@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Tierra de tequila, arquitectura y sabores audaces. Una pausa diseñada para explorar mercados, brindar en destilerías y descubrir por qué es la capital del estilo tapatío.',
     eyebrow: 'Guía curada · Amigos aventureros',
     tags: ['Amigos', 'Gastronomía', 'Aventura', 'Cultura'],
-    image: '',
+    image: '/images/guides/guides-headers/Guadalajara.png',
   },
 
   itinerary: [
@@ -94,7 +94,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Ubicado en la Colonia Americana (el barrio más cool). Diseño retro-moderno con una alberca en la terraza ideal para el pre con los amigos.',
       tag: 'Estilo puro y vida nocturna',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/Fa7ydor9Ks?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
     {
       name: 'Villa Ganz',
@@ -102,7 +102,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Una casona antigua restaurada con un gusto impecable. Se siente como la casa de un amigo sofisticado. Perfecta para quienes buscan confort clásico en el corazón de la zona foodie.',
       tag: 'Calidez y sofisticación',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/xtCO1IKwvn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
     {
       name: 'Hilton DoubleTree Centro Histórico',
@@ -110,7 +110,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'El equilibrio ideal entre la eficiencia de una gran cadena y el alma vibrante del centro tapatío. Habitaciones insonorizadas y terraza con vistas del skyline histórico a pasos de la Catedral.',
       tag: 'Fiabilidad y ubicación premium',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/PvecFbkHpn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
   ],
 
@@ -119,7 +119,7 @@ export const guide: FlatGuide = {
       name: 'Tour de tequila artesanal',
       description: 'Eviten el tren turístico masivo. Renten un conductor privado hacia la zona de Tequila para visitar destilerías boutique como Cascahuín o Fortaleza. Es aventura líquida para conocedores.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/mcSDi9xF38',
     },
     {
       name: 'Safari de tortas ahogadas',

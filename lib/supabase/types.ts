@@ -24,6 +24,8 @@ export interface Database {
           budget_level: string | null
           interests:    string[]
           created_at:   string
+          share_id:     string | null   // UUID — non-guessable share token
+          is_shared:    boolean         // false until owner explicitly shares
         }
         Insert: {
           id?:           string
@@ -39,6 +41,8 @@ export interface Database {
           budget_level?: string | null
           interests?:    string[]
           created_at?:   string
+          share_id?:     string | null
+          is_shared?:    boolean
         }
         Update: Partial<Database['public']['Tables']['trips']['Insert']>
       }
@@ -84,8 +88,31 @@ export interface Database {
       // user_preferences: { ... }
 
       // E12/E13 — April (paywall + Stripe)
-      // subscriptions: { ... }
-      // trip_credits: { ... }
+      user_entitlements: {
+        Row: {
+          user_id:                string
+          tier:                   'free' | 'per_trip' | 'pack_5' | 'pack_10' | 'explorer'
+          trips_remaining:        number
+          trips_used:             number
+          stripe_customer_id:     string | null
+          stripe_subscription_id: string | null
+          current_period_end:     string | null
+          created_at:             string
+          updated_at:             string
+        }
+        Insert: {
+          user_id:                string
+          tier?:                  'free' | 'per_trip' | 'pack_5' | 'pack_10' | 'explorer'
+          trips_remaining?:       number
+          trips_used?:            number
+          stripe_customer_id?:    string | null
+          stripe_subscription_id?: string | null
+          current_period_end?:    string | null
+          created_at?:            string
+          updated_at?:            string
+        }
+        Update: Partial<Database['public']['Tables']['user_entitlements']['Insert']>
+      }
 
       // CONTENT (ongoing)
       // guides: { ... }

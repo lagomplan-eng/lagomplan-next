@@ -36,7 +36,7 @@ export default function PlacesInput({
   onChange,
   onSelect,
   types = ['(cities)'],
-  locationBias = 'MX',
+  locationBias = 'global',
 }: PlacesInputProps) {
 
   const inputRef     = useRef<HTMLInputElement>(null)
@@ -74,13 +74,21 @@ export default function PlacesInput({
     setLoading(true)
     timerRef.current = setTimeout(async () => {
       const g = (window as any).google
+      // Mexico bounding box — used as a soft bias, NOT a restriction.
+      // includedRegionCodes would hard-filter to one country; locationBias just
+      // ranks local results higher while still returning global matches.
+      const MX_BOUNDS = {
+        rectangle: {
+          low:  { latitude: 14.5, longitude: -118.4 },
+          high: { latitude: 32.7, longitude:  -86.7 },
+        },
+      }
+
       const request: any = {
         input,
         sessionToken: sessionRef.current ?? undefined,
         includedPrimaryTypes: types,
-        ...(locationBias === 'MX' && {
-          includedRegionCodes: ['mx'],
-        }),
+        ...(locationBias === 'MX' && { locationBias: MX_BOUNDS }),
       }
       try {
         const { suggestions } = await g.maps.places.AutocompleteSuggestion.fetchAutocompleteSuggestions(request)

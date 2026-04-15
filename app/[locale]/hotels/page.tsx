@@ -1,37 +1,37 @@
 /**
- * app/[locale]/hotels/page.tsx — Stub
- * Route ES: /hotelsIndex  (see i18n.ts pathnames for full localized segment)
- * TODO: implement full page UI
+ * app/[locale]/hotels/page.tsx
+ * Hotels index — /es/hoteles | /en/hotels
+ *
+ * Server component: extracts hotel data from guides, passes it to
+ * HotelsClient (client component) which handles search, filtering, and layout.
  */
-import type { Metadata }              from 'next'
-import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
-import type { Locale }               from '../../../i18n'
 
-export async function generateMetadata({
-  params: { locale },
-}: {
-  params: { locale: Locale }
-}): Promise<Metadata> {
+import type { Metadata }                    from 'next'
+import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
+import type { Locale }                      from '../../../i18n'
+import { getAllHotelsFromGuides }            from '../../../lib/hotels'
+import HotelsClient                         from '../../../components/hotels/HotelsClient'
+
+type Props = { params: { locale: Locale } }
+
+export async function generateMetadata({ params: { locale } }: Props): Promise<Metadata> {
   return {
-    title:       locale === 'es' ? 'Hoteles' : 'Hotels',
-    alternates:  buildAlternates('hotelsIndex'),
-    openGraph:   buildOpenGraph(locale),
+    title: locale === 'es' ? 'Hoteles curados' : 'Curated hotels',
+    description:
+      locale === 'es'
+        ? 'Hoteles seleccionados con criterio editorial — por carácter, ubicación y valor real, no por comisión.'
+        : 'Hotels selected with editorial taste — for character, location, and honest value, not commission.',
+    alternates: buildAlternates('hotelsIndex'),
+    openGraph:  buildOpenGraph(locale),
   }
 }
 
-export default function Page({
-  params: { locale },
-}: {
-  params: { locale: Locale }
-}) {
+export default function HotelsIndexPage({ params: { locale } }: Props) {
+  const hotels = getAllHotelsFromGuides(locale)
+
   return (
-    <main className="pt-[72px] min-h-screen" style={{ background: '#EDE7E1' }}>
-      <div className="page-inner py-24">
-        <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
-          {locale === 'es' ? 'Hoteles' : 'Hotels'}
-        </h1>
-        <p className="font-sans text-[15px] text-[#6B8F86] mt-4">Coming soon.</p>
-      </div>
+    <main className="pt-[72px]">
+      <HotelsClient hotels={hotels} locale={locale} />
     </main>
   )
 }
