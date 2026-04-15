@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Una pausa mística bajo la sombra del Tepozteco. El equilibrio perfecto entre lujo sutil y tiempo para conectar.',
     eyebrow: 'Guía curada · Escapada en pareja',
     tags: ['Pareja', 'Romance', 'Bienestar', 'Naturaleza'],
-    image: '',
+    image: '/images/guides/guides-headers/Tepoztlan.png',
   },
 
   itinerary: [

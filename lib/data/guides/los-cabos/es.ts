@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Donde el desierto abraza al mar. Una escapada diseñada para renovar cuerpo y mente, con el equilibrio perfecto entre misticismo y sofisticación.',
     eyebrow: 'Guía curada · Relax entre amigas',
     tags: ['Amigas', 'Relax', 'Spa', 'Lujo'],
-    image: '',
+    image: '/images/guides/guides-headers/Los%20Cabos.png',
   },
 
   itinerary: [

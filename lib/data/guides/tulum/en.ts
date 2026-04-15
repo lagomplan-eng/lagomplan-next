@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Jungle, turquoise sea, and the nightlife beat. A pause designed to reconnect with yourself without giving up the most iconic party in the Caribbean.',
     eyebrow: 'Curated guide · Solo trip',
     tags: ['Solo', 'Social', 'Wellness', 'Adventure'],
-    image: '',
+    image: '/images/guides/guides-headers/Tulum.png',
   },
 
   itinerary: [

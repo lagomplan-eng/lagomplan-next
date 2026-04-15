@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Colonial aesthetics, high-altitude vineyards, and the best sunsets in Mexico. A pause designed for walking, toasting, and reconnecting in the heart of the country.',
     eyebrow: 'Curated guide · Couples trip',
     tags: ['Couple', 'Romance', 'Gastronomy', 'Culture'],
-    image: '',
+    image: '/images/guides/guides-headers/San%20Miguel.png',
   },
 
   itinerary: [

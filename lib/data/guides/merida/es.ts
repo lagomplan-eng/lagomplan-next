@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El corazón vibrante de Yucatán. Una expedición diseñada para explorar cenotes ocultos, escalar pirámides y conectar con la naturaleza salvaje, sin perder el confort de la Ciudad Blanca.',
     eyebrow: 'Guía curada · Familia Aventurera',
     tags: ['Familia', 'Aventura', 'Arqueología', 'Naturaleza'],
-    image: '',
+    image: '/images/guides/guides-headers/M%C3%A9rida.png',
   },
 
   itinerary: [

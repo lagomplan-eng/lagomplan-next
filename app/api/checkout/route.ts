@@ -78,6 +78,7 @@ export async function POST(req: NextRequest) {
       customer_email: user.email,
       client_reference_id: user.id,   // fallback for webhook user lookup
       metadata: { user_id: user.id, plan },
+      allow_promotion_codes: true,     // shows promo code field in Stripe Checkout
       ...(isSubscription && {
         subscription_data: {
           metadata: { user_id: user.id },  // also on subscription for cancellation events

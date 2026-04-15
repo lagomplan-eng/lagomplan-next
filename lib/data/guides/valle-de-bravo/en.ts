@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The retreat where the forest meets the water. An escape designed to burn adrenaline, explore nature, and enjoy the best mountain cuisine.',
     eyebrow: 'Curated guide · Family & adventure',
     tags: ['Family', 'Adventure', 'Nature', 'Gastronomy'],
-    image: '',
+    image: '/images/guides/guides-headers/Valle%20de%20Bravo.png',
   },
 
   itinerary: [

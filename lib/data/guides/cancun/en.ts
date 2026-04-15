@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: "The world's most famous blue for all ages. A balanced pause between resort comfort, natural adventure, and smart value.",
     eyebrow: 'Curated guide · Family travel',
     tags: ['Family', 'Beach', 'Resort', 'Smart value'],
-    image: '',
+    image: '/images/guides/guides-headers/Canc%C3%BAn.png',
   },
 
   itinerary: [

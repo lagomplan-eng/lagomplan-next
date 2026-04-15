@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Land of tequila, architecture, and bold flavors. A pause designed to explore markets, toast at distilleries, and discover why this is the capital of Tapatío style.',
     eyebrow: 'Curated guide · Adventure friends',
     tags: ['Friends', 'Gastronomy', 'Adventure', 'Culture'],
-    image: '',
+    image: '/images/guides/guides-headers/Guadalajara.png',
   },
 
   itinerary: [

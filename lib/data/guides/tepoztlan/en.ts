@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A mystical pause in the shadow of the Tepozteco. The perfect balance between subtle luxury and time to connect.',
     eyebrow: "Curated guide · Couple's getaway",
     tags: ['Couple', 'Romance', 'Wellness', 'Nature'],
-    image: '',
+    image: '/images/guides/guides-headers/Tepoztlan.png',
   },
 
   itinerary: [

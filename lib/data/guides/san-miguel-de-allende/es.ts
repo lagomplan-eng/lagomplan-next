@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Estética colonial, viñedos de altura y los mejores atardeceres de México. Una pausa diseñada para caminar, brindar y reconectar en el corazón del país.',
     eyebrow: 'Guía curada · Viaje de parejas',
     tags: ['Pareja', 'Romance', 'Gastronomía', 'Cultura'],
-    image: '',
+    image: '/images/guides/guides-headers/San%20Miguel.png',
   },
 
   itinerary: [

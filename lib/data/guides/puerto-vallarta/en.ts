@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Where the Sierra Madre meets the Pacific. An escape designed to rediscover the charm of Old Vallarta, with the perfect balance between contemporary luxury and colonial soul.',
     eyebrow: 'Curated guide · couple & sophistication',
     tags: ['Couple', 'Romance', 'Relaxation', 'Gastronomy'],
-    image: '',
+    image: '/images/guides/guides-headers/Puerto%20Vallarta.png',
   },
 
   itinerary: [

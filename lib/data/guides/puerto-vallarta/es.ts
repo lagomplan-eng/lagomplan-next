@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Donde la Sierra Madre se funde con el Pacífico. Una escapada diseñada para redescubrir el encanto del Viejo Vallarta, con el equilibrio perfecto entre lujo contemporáneo y alma colonial.',
     eyebrow: 'Guía curada · pareja & sofisticación',
     tags: ['Pareja', 'Romance', 'Relax', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/guides-headers/Puerto%20Vallarta.png',
   },
 
   itinerary: [

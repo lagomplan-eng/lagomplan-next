@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A seven-day journey designed to find the luxury of privacy during the most vibrant time of year. The exact balance between Caribbean energy and jungle sanctuary.',
     eyebrow: 'Curated guide · Family holiday road trip',
     tags: ['Family', 'Adventure', 'Luxury', 'Nature'],
-    image: '',
+    image: '/images/guides/guides-headers/Riviera%20Maya.png',
   },
 
   itinerary: [

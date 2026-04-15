@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Una travesía de siete días diseñada para encontrar el lujo de la privacidad en la época más vibrante del año. El equilibrio exacto entre la energía del Caribe y el refugio de la selva.',
     eyebrow: 'Guía curada · Roadtrip familiar de temporada alta',
     tags: ['Familia', 'Aventura', 'Lujo', 'Naturaleza'],
-    image: '',
+    image: '/images/guides/guides-headers/Riviera%20Maya.png',
   },
 
   itinerary: [

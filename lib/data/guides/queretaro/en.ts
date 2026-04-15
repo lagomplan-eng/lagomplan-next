@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Baroque architecture, nearby vineyards, and a food scene that surprises. The perfect city to walk by day and toast by night.',
     eyebrow: 'Curated guide · Friends group',
     tags: ['Friends', 'Gastronomy', 'Culture', 'Wine'],
-    image: '',
+    image: '/images/guides/guides-headers/Quer%C3%A9taro.png',
   },
 
   itinerary: [

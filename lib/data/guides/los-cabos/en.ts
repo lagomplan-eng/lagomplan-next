@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Where the desert embraces the sea. A getaway designed to renew body and mind, with the perfect balance between mysticism and sophistication.',
     eyebrow: 'Curated guide · Relax with friends',
     tags: ['Friends', 'Relaxation', 'Spa', 'Luxury'],
-    image: '',
+    image: '/images/guides/guides-headers/Los%20Cabos.png',
   },
 
   itinerary: [

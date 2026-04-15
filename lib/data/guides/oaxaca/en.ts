@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A feast of colors, flavors, and textures. A city to explore on foot, learn from artisans, and enjoy the unhurried rhythm of the south.',
     eyebrow: 'Curated guide · Family travel',
     tags: ['Family', 'Culture', 'Gastronomy', 'Crafts'],
-    image: '',
+    image: '/images/guides/guides-headers/Oaxaca.png',
   },
 
   itinerary: [

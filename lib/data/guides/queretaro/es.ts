@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Arquitectura barroca, viñedos cercanos y una escena gastronómica que sorprende. La ciudad perfecta para caminar de día y brindar de noche.',
     eyebrow: 'Guía curada · Grupo de amigos',
     tags: ['Amigos', 'Gastronomía', 'Cultura', 'Vinos'],
-    image: '',
+    image: '/images/guides/guides-headers/Quer%C3%A9taro.png',
   },
 
   itinerary: [

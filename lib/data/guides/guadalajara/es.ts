@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Tierra de tequila, arquitectura y sabores audaces. Una pausa diseñada para explorar mercados, brindar en destilerías y descubrir por qué es la capital del estilo tapatío.',
     eyebrow: 'Guía curada · Amigos aventureros',
     tags: ['Amigos', 'Gastronomía', 'Aventura', 'Cultura'],
-    image: '',
+    image: '/images/guides/guides-headers/Guadalajara.png',
   },
 
   itinerary: [

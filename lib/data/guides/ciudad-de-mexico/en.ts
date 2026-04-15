@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'A metropolis that breathes creativity at every corner. The perfect pulse between world-class museums and one of the most exciting dining scenes on the planet.',
     eyebrow: 'Curated guide · Couples',
     tags: ['Couple', 'Art', 'Gastronomy', 'Culture'],
-    image: '',
+    image: '/images/guides/guides-headers/Bellas%20Artes.png',
   },
 
   itinerary: [

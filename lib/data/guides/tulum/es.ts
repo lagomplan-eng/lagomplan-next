@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Selva, mar turquesa y el beat de la noche. Una pausa diseñada para reconectar contigo misma sin renunciar a la fiesta más icónica del Caribe.',
     eyebrow: 'Guía curada · Solo Trip',
     tags: ['Solo', 'Social', 'Bienestar', 'Aventura'],
-    image: '',
+    image: '/images/guides/guides-headers/Tulum.png',
   },
 
   itinerary: [

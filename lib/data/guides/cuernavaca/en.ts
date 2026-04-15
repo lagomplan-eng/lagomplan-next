@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The city of eternal spring. A retreat designed to enjoy lush gardens, elevated cuisine, and the luxury of slow time, just a short drive from the capital.',
     eyebrow: 'Curated guide · Long weekend escape',
     tags: ['Friends', 'Gastronomy', 'Relaxation', 'Luxury'],
-    image: '',
+    image: '/images/guides/guides-headers/Cuernavaca.png',
   },
 
   itinerary: [

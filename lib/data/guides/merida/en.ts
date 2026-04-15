@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The vibrant heart of Yucatán. An expedition designed to explore hidden cenotes, climb pyramids, and connect with wild nature — without losing the comfort of the White City.',
     eyebrow: 'Curated guide · Adventure family',
     tags: ['Family', 'Adventure', 'Archaeology', 'Nature'],
-    image: '',
+    image: '/images/guides/guides-headers/M%C3%A9rida.png',
   },
 
   itinerary: [

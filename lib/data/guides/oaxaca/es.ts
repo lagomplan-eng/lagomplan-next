@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Un festín de colores, sabores y texturas. Una ciudad para explorar a pie, aprender de artesanos y disfrutar del ritmo pausado del sur.',
     eyebrow: 'Guía curada · Viaje familiar',
     tags: ['Familia', 'Cultura', 'Gastronomía', 'Artesanía'],
-    image: '',
+    image: '/images/guides/guides-headers/Oaxaca.png',
   },
 
   itinerary: [

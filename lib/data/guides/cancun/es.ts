@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El azul más famoso del mundo para todas las edades. Una pausa equilibrada entre el confort del resort, la aventura natural y el valor inteligente.',
     eyebrow: 'Guía curada · Viaje familiar',
     tags: ['Familia', 'Playa', 'Resort', 'Valor inteligente'],
-    image: '',
+    image: '/images/guides/guides-headers/Canc%C3%BAn.png',
   },
 
   itinerary: [

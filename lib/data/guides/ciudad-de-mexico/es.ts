@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Una metrópoli que respira creatividad en cada esquina. El pulso perfecto entre museos de clase mundial y una de las escenas gastronómicas más excitantes del planeta.',
     eyebrow: 'Guía curada · Parejas',
     tags: ['Pareja', 'Arte', 'Gastronomía', 'Cultura'],
-    image: '',
+    image: '/images/guides/guides-headers/Bellas%20Artes.png',
   },
 
   itinerary: [

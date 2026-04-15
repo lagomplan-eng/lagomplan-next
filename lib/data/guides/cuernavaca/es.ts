@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'La ciudad de la eterna primavera. Un retiro diseñado para disfrutar de jardines exuberantes, gastronomía de altura y el lujo del tiempo lento en la cercanía de la capital.',
     eyebrow: 'Guía curada · Escape de fin de semana largo',
     tags: ['Amigos', 'Gastronomía', 'Relax', 'Lujo'],
-    image: '',
+    image: '/images/guides/guides-headers/Cuernavaca.png',
   },
 
   itinerary: [
