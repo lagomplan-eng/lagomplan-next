@@ -65,11 +65,12 @@ export async function PATCH(
 
     const { data, error } = await supabase
       .from('trips')
-      // Type assertion: Supabase generated types may infer 'never' for the update
-      // payload when the table row type is strict. Casting to `any` is safe here
-      // because we're forwarding the validated request body — runtime shape is unchanged.
+      // Double assertion required: Supabase generated types collapse the update
+      // parameter to `never` when the table type is strict. `as any` alone is still
+      // rejected; going through `unknown` first satisfies the compiler without
+      // changing runtime behavior.
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updatePayload as any)
+      .update(updatePayload as unknown as any)
       .eq('id', trip_id)
       .select()
       .single()
