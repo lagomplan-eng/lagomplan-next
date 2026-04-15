@@ -46,3 +46,46 @@ export async function GET(
     return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
   }
 }
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { trip_id: string } },
+) {
+  const { trip_id } = params
+
+  if (!trip_id) {
+    return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
+  }
+
+  try {
+    const body = await req.json()
+    const updatePayload: Record<string, unknown> = body
+
+    const supabase = getSupabaseServer()
+
+    const { data, error } = await supabase
+      .from('trips')
+      // Type assertion: Supabase generated types may infer 'never' for the update
+      // payload when the table row type is strict. Casting to `any` is safe here
+      // because we're forwarding the validated request body — runtime shape is unchanged.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(updatePayload as any)
+      .eq('id', trip_id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[trips/patch] Supabase error:', error.message, error.code)
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.code === 'PGRST116' ? 404 : 500 },
+      )
+    }
+
+    return NextResponse.json(data)
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[trips/patch] error:', message)
+    return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
+  }
+}
