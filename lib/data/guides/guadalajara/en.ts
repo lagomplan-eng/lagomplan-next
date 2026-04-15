@@ -94,7 +94,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Located in La Colonia Americana (the coolest neighborhood). Retro-modern design with a rooftop pool perfect for pre-drinks with friends.',
       tag: 'Pure style and nightlife',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/Fa7ydor9Ks?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
     {
       name: 'Villa Ganz',
@@ -102,7 +102,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'An ancient mansion restored with impeccable taste. It feels like staying at a sophisticated friend\'s home. Perfect for those seeking classic comfort in the heart of the foodie zone.',
       tag: 'Warmth and sophistication',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/xtCO1IKwvn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
     {
       name: 'Hilton DoubleTree Centro Histórico',
@@ -110,7 +110,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'The ideal balance between big-chain efficiency and the vibrant soul of the Tapatío center. Soundproofed rooms and a terrace with historic skyline views steps from the Cathedral.',
       tag: 'Reliability and premium location',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/PvecFbkHpn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
     },
   ],
 
@@ -119,7 +119,7 @@ export const guide: FlatGuide = {
       name: 'Artisan tequila tour',
       description: 'Skip the mass tourist train. Hire a private driver to the Tequila region to visit boutique distilleries like Cascahuín or Fortaleza. Liquid adventure for connoisseurs.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/mcSDi9xF38',
     },
     {
       name: 'Torta ahogada safari',

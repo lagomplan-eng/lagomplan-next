@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Striking architecture and mid-century modern aesthetic. The place to see and be seen, with front-row views of the Arch from every bathtub.',
       tag: 'Iconic luxury and design',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/uB2_au9uci?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
     {
       name: 'Hacienda Encantada Resort & Residences',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'The classic Baja experience. Hacienda-style architecture with spectacular Sea of Cortez views. Ideal for groups seeking spacious suites and villas, and a full traditional spa.',
       tag: 'Classic comfort and spaciousness',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/tGFeKKQIrw?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
     {
       name: 'Drift San José',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Industrial minimalism in the heart of the Art District. A smart retreat for those who prefer neighborhood life, evening bonfires, and clean aesthetics without the cost of a large resort.',
       tag: 'Smart value and local style',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/oWKB_Zby-Q?aid=lagomplan&campaign=lagomplan-loscabosrelaxspaedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Los+Cabos%2C+Dolores+Hidalgo%2C+Dolores+Hidalgo%2C+Guanajuato%2C+37807%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Flos-cabos-relax-spa-edition',
     },
   ],
 
@@ -131,13 +131,13 @@ export const guide: FlatGuide = {
       name: 'Private sunset sail',
       description: 'A catamaran just for your group heading to the Arch. Watching the sunset with a glass of wine from the sea is the peak moment of the entire stay.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
     },
     {
       name: 'Garden dinner: Flora Farms or Acre',
       description: 'Farm-to-table gastronomy in San José surrounded by flowers and botanical cocktails.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/',
     },
   ],
 

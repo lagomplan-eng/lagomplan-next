@@ -130,7 +130,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Sustainable luxury in high-design tents on the beach. Ideal for a solo traveler for its communal atmosphere, shared dinners, and welcome rituals.',
       tag: 'Eco-chic and connection',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/KVQtrW7le8?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
     {
       name: 'Dune Boutique Hotel',
@@ -138,7 +138,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'A wellness sanctuary where you can start the day with beachfront yoga and explore by bicycle, then retreat to a Mediterranean design atmosphere that blends jungle and Caribbean.',
       tag: 'Wellness and beachfront luxury',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
     {
       name: 'Astral Tulum',
@@ -146,7 +146,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Directly on the beach, offering stylish private suites. The perfect retreat for those seeking Caribbean aesthetics without sacrificing full-service comfort.',
       tag: 'Beachfront and versatile',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
   ],
 
@@ -155,19 +155,19 @@ export const guide: FlatGuide = {
       name: 'Cenotes at dawn',
       description: 'Visit Cenote Dos Ojos or Gran Cenote at 8:00 AM. Being alone in the crystal-clear water before tour groups arrive is the definition of absolute peace.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/?ranking_uuid=0a7034f0-a336-4254-ae29-a13110c59460&adults=1',
     },
     {
       name: 'Beach Club Day at Papaya Playa Project',
       description: 'Spend the afternoon at Papaya Playa Project. The perfect balance: world-class DJ music, great cocktails, and an atmosphere where being solo feels completely natural.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&ridsAddons%5B%5D=1070665&metroId=346&regionIds%5B%5D=2557&shouldUseLatLongSearch=false&originCorrelationId=0d8fc157-9a52-4653-8126-3c6c62f2d9db',
     },
     {
       name: 'Sound healing ceremony',
       description: 'Take part in a jungle ceremony. The essential mystical experience to rebalance your energy after a night of dancing.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.viator.com/tours/Tulum/Sunset-floating-sound-bath-meditation-with-mindful-bites/d23012-5575705P2?gclsrc=aw.ds&&m=63845&supag=157612424879&supca=20987506069&supsc=dsa-1583450326707&supai=698438660399&supdv=c&supnt=g&suplp=9047093&supli=&supti=dsa-1583450326707&tsem=true&supci=dsa-1583450326707&supap1=&supap2=&synthetic_keyword=&suppmas=&gad_source=1&gad_campaignid=20987506069&gbraid=0AAAAAD-gbd7O1RmmPDRCT5M2ktkY7dOpf&gclid=Cj0KCQjwy_fOBhC6ARIsAHKFB78igLfudmxujQGBg2rIIqvWm_D-q3hPmK7eVyP9iSMimp0g2hGUm40aAkAgEALw_wcB',
     },
   ],
 

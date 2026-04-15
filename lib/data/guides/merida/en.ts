@@ -136,7 +136,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: "Absolute luxury integrated into the jungle. Set in a historic hacienda, it features its own cenote, casitas with private pools, and a kids' program focused on nature and Mayan cuisine.",
       tag: 'The ultimate Mayan sanctuary',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/psvzagFavR?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
     {
       name: 'Hacienda Xcanatun by Angsana',
@@ -144,7 +144,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'The historic elegance of a hacienda with modern amenities. Its spacious gardens and pools are perfect for kids to run freely after a day of archaeological exploration.',
       tag: 'Classic comfort and gardens',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/GfhbF1Jslc?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
     {
       name: 'Las Brisas',
@@ -152,7 +152,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'The perfect balance between traditional luxury and urban practicality. Its pool is one of the best in the city and its location steps from Paseo de Montejo lets you enjoy without complications.',
       tag: 'Iconic comfort and location',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/RPdo5xiEcV?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
     },
   ],
 
@@ -167,7 +167,7 @@ export const guide: FlatGuide = {
       name: 'Uxmal and Choco-Story',
       description: 'Explore the Uxmal archaeological zone (less crowded than Chichén Itzá) and cross the street to the chocolate museum. Kids can see rescued animals and learn how the Mayans made cacao.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/MfDnM-RL5D',
     },
     {
       name: 'El Corchito Reserve',

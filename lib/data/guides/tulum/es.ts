@@ -130,7 +130,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Lujo sustentable en tiendas de campaña de alto diseño frente al mar. Ideal para una mujer sola por su ambiente comunitario, cenas compartidas y rituales de bienvenida.',
       tag: 'Eco-chic y conexión',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/KVQtrW7le8?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
     {
       name: 'Dune Boutique Hotel',
@@ -138,7 +138,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Un santuario diseñado para el bienestar, donde puedes empezar el día con yoga frente al mar y explorarlo en bicicleta, para luego refugiarte en una atmósfera de diseño mediterráneo que se funde con la selva y el Caribe.',
       tag: 'Bienestar y lujo frente al mar',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
     {
       name: 'Astral Tulum',
@@ -146,7 +146,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Ubicado directamente en la zona hotelera (playa), ofrece suites privadas con estilo. Refugio perfecto para quienes buscan la estética del Caribe sin sacrificar la comodidad de servicios completos.',
       tag: 'Beachfront y versátil',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
     },
   ],
 
@@ -155,19 +155,19 @@ export const guide: FlatGuide = {
       name: 'Cenotes al amanecer',
       description: 'Visita el Cenote Dos Ojos o Gran Cenote a las 8:00 AM. Estar sola en el agua cristalina antes de que lleguen los tours es la definición de paz absoluta.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/?ranking_uuid=0a7034f0-a336-4254-ae29-a13110c59460&adults=1',
     },
     {
       name: 'Beach Club Day en Papaya Playa Project',
       description: 'Pasa la tarde en Papaya Playa Project. Es el equilibrio perfecto: música de DJ de clase mundial, buenos cocteles y una atmósfera donde estar sola se siente totalmente natural.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&ridsAddons%5B%5D=1070665&metroId=346&regionIds%5B%5D=2557&shouldUseLatLongSearch=false&originCorrelationId=0d8fc157-9a52-4653-8126-3c6c62f2d9db',
     },
     {
       name: 'Sanación de sonido (sound healing)',
       description: 'Participa en una ceremonia en la selva. Es la experiencia mística obligatoria para equilibrar la energía después de una noche de fiesta.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.viator.com/tours/Tulum/Sunset-floating-sound-bath-meditation-with-mindful-bites/d23012-5575705P2?gclsrc=aw.ds&&m=63845&supag=157612424879&supca=20987506069&supsc=dsa-1583450326707&supai=698438660399&supdv=c&supnt=g&suplp=9047093&supli=&supti=dsa-1583450326707&tsem=true&supci=dsa-1583450326707&supap1=&supap2=&synthetic_keyword=&suppmas=&gad_source=1&gad_campaignid=20987506069&gbraid=0AAAAAD-gbd7O1RmmPDRCT5M2ktkY7dOpf&gclid=Cj0KCQjwy_fOBhC6ARIsAHKFB78igLfudmxujQGBg2rIIqvWm_D-q3hPmK7eVyP9iSMimp0g2hGUm40aAkAgEALw_wcB',
     },
   ],
 

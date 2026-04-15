@@ -34,28 +34,31 @@ export default function TripGeneratorClient({ searchParams }: Props) {
 // ── Full-page form ────────────────────────────────────
 function FormPage() {
   const locale = useLocale() as 'es' | 'en'
+  const isES   = locale === 'es'
 
   return (
     <main className="pt-[72px] min-h-screen bg-[#FFF9F3]">
       <div className="page-inner py-16 max-[768px]:py-10">
-        
+
         {/* Tighter container for premium feel */}
         <div className="max-w-[1080px] mx-auto">
 
           {/* TEXT (narrower for readability) */}
           <div className="max-w-[640px]">
             <span className="sec-label mb-4">
-              Planificador de viajes con IA
+              {isES ? 'Planificador de viajes con IA' : 'AI-powered trip planner'}
             </span>
 
             <h1 className="font-playfair text-[48px] max-[768px]:text-[36px] font-bold text-[#0F1A16] leading-[1.05] tracking-[-1.5px] mb-3">
-              Genera tu viaje
+              {isES ? 'Genera tu viaje' : 'Build your trip'}
               <br />
-              <em>personalizado.</em>
+              <em>{isES ? 'personalizado.' : 'your way.'}</em>
             </h1>
 
             <p className="font-sans text-[15px] text-[#2D6B57] leading-[1.7] mb-12 md:mb-14">
-              Cuéntanos sobre el destino de tus sueños y nuestra IA creará un itinerario solo para ti.
+              {isES
+                ? 'Cuéntanos sobre el destino de tus sueños y nuestra IA creará un itinerario solo para ti.'
+                : 'Tell us about your dream destination and our AI will craft a personalised itinerary just for you.'}
             </p>
           </div>
 
@@ -66,9 +69,9 @@ function FormPage() {
 
           {/* SECTIONS */}
           <div className="mt-16 md:mt-20 space-y-16 md:space-y-20">
-            <QuickStartSection />
+            <QuickStartSection locale={locale} />
             <GuidesPreview locale={locale} />
-            <TrustStrip />
+            <TrustStrip locale={locale} />
           </div>
 
         </div>
@@ -77,45 +80,26 @@ function FormPage() {
   )
 }
 
-function QuickStartSection() {
-  const chips = [
-    'Escapada romántica',
-    'Viaje en familia',
-    'Fin de semana largo',
-    'Playa tranquila',
-    'Ciudad cultural',
-    'Naturaleza y descanso',
-  ]
+function QuickStartSection({ locale }: { locale: 'es' | 'en' }) {
+  const chips = locale === 'es'
+    ? ['Escapada romántica', 'Viaje en familia', 'Fin de semana largo', 'Playa tranquila', 'Ciudad cultural', 'Naturaleza y descanso']
+    : ['Romantic getaway', 'Family trip', 'Long weekend', 'Quiet beach', 'Cultural city', 'Nature & rest']
 
   return (
     <section aria-labelledby="quick-start-title">
-      {/*
-<div className="mb-5">
-  <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B8F86] mb-2">
-    Empieza más rápido
-  </p>
-  <h2
-    id="quick-start-title"
-    className="text-[28px] md:text-[34px] leading-tight tracking-[-0.03em] text-[#0F3A33]"
-  >
-    Ideas para empezar sin pensarlo demasiado
-  </h2>
-</div>
-*/}
-
       {SHOW_CHIPS && (
-  <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-    {chips.map((chip) => (
-      <button
-        key={chip}
-        type="button"
-        className="shrink-0 rounded-full border border-[#6B8F86]/35 bg-white px-4 py-2.5 text-sm text-[#0F3A33] shadow-sm transition hover:bg-[#EDE7E1] hover:shadow-md"
-      >
-        {chip}
-      </button>
-    ))}
-  </div>
-)}
+        <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {chips.map((chip) => (
+            <button
+              key={chip}
+              type="button"
+              className="shrink-0 rounded-full border border-[#6B8F86]/35 bg-white px-4 py-2.5 text-sm text-[#0F3A33] shadow-sm transition hover:bg-[#EDE7E1] hover:shadow-md"
+            >
+              {chip}
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
@@ -191,25 +175,23 @@ function InspirationSection({ locale }: { locale: 'es' | 'en' }) {
   )
 }
 
-function TrustStrip() {
-  const stats = [
-    {
-      title: '+10,000 viajes generados',
-      text: 'Ideas personalizadas para empezar más rápido.',
-    },
-    {
-      title: 'Itinerarios en menos de 30 segundos',
-      text: 'Un primer borrador útil sin fricción innecesaria.',
-    },
-    {
-      title: 'Recomendaciones curadas',
-      text: 'Pensadas para que el viaje se sienta más simple y mejor armado.',
-    },
-  ]
+function TrustStrip({ locale }: { locale: 'es' | 'en' }) {
+  const isES  = locale === 'es'
+  const stats = isES
+    ? [
+        { title: '+10,000 viajes generados',           text: 'Ideas personalizadas para empezar más rápido.' },
+        { title: 'Itinerarios en menos de 30 segundos', text: 'Un primer borrador útil sin fricción innecesaria.' },
+        { title: 'Recomendaciones curadas',             text: 'Pensadas para que el viaje se sienta más simple y mejor armado.' },
+      ]
+    : [
+        { title: '+10,000 trips generated',             text: 'Personalised ideas to get you started faster.' },
+        { title: 'Itineraries in under 30 seconds',     text: 'A useful first draft with zero unnecessary friction.' },
+        { title: 'Curated recommendations',             text: 'Designed to make your trip feel simpler and better put together.' },
+      ]
 
   return (
     <section
-      aria-label="Indicadores de confianza"
+      aria-label={isES ? 'Indicadores de confianza' : 'Trust indicators'}
       className="rounded-[24px] bg-[#EEE8DF] px-6 py-8 md:px-10 md:py-10"
     >
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 text-center">

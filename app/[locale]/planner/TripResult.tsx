@@ -6,6 +6,7 @@ import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
 import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import PaywallModal from '../../../components/PaywallModal'
+import { TripShareModal } from '../../../components/trips/TripShareModal'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -497,7 +498,8 @@ export default function TripResult({ params }: Props) {
     interests = '',
     pace = '',
     budget = '',
-    trip_id: savedTripId = '',
+    trip_id:  savedTripId = '',
+    checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
   } = params
 
   // ── Data state ──────────────────────────────────────────────────────────────
@@ -558,7 +560,12 @@ export default function TripResult({ params }: Props) {
 
   // ── Paywall state ─────────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]   = useState(false)
+  const [shareOpen,   setShareOpen]     = useState(false)
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
+
+  // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
+  type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
+  const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
 
   // ── DB load effect — fires when trip_id param is present ─────────────────────
   useEffect(() => {
@@ -570,7 +577,7 @@ export default function TripResult({ params }: Props) {
         const res = await fetch(`/api/trips/${savedTripId}`)
         if (!res.ok) {
           const err = await res.json().catch(() => ({}))
-          throw new Error(err.error || 'No se pudo cargar el viaje')
+          throw new Error(err.error || (locale === 'es' ? 'No se pudo cargar el viaje' : 'Failed to load trip'))
         }
         const data = await res.json()
         const dest      = data.destination || ''
@@ -606,6 +613,38 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedTripId])
 
+  // ── Plan credits fetch ────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (authedUser === undefined) return  // still loading auth
+    if (authedUser === null) {
+      setPlanCredits(null)               // anonymous — no DB state
+      return
+    }
+    fetch('/api/me/plan')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 3, is_subscriber: false }))
+      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 3, is_subscriber: false }))
+  }, [authedUser])
+
+  // ── Post-checkout success handler ────────────────────────────────────────────
+  // When Stripe redirects back with ?checkout=success, refresh plan state and
+  // retrigger generation so the user doesn't have to click anything.
+  useEffect(() => {
+    if (checkoutStatus !== 'success') return
+    showToast(locale === 'es' ? '🎉 ¡Pago exitoso! Ya puedes generar más viajes.' : '🎉 Payment successful! You can now generate more trips.')
+    fetch('/api/me/plan')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (data) {
+          setPlanCredits(data)
+          setGenerateKey(k => k + 1)  // retrigger generation with fresh credits
+        }
+      })
+      .catch(() => {})
+  // Run once on mount when checkoutStatus==='success'. showToast is stable.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // ── Generate effect ──────────────────────────────────────────────────────────
   // Cache key: serialized inputs. On match, restore from sessionStorage and skip AI.
   // This prevents regeneration after login redirect (trip continuity, no token waste).
@@ -618,20 +657,12 @@ export default function TripResult({ params }: Props) {
       // authedUser is undefined while the session is still loading; wait for it.
       if (authedUser === undefined) return
 
-      if (authedUser === null) {
-        const count = Number(localStorage.getItem('generationCount') || 0)
-        if (count >= 1) {
-          router.push('/login')
-          return
-        }
-      }
-
-      // ── Paywall guard ──────────────────────────────────────────────────
-      // Only applies to logged-in users (anonymous users are handled above).
+      // ── Paywall guard (logged-in users) ───────────────────────────────
+      // Wait until we've fetched plan state from the DB.
       if (authedUser !== null) {
-        const planType      = localStorage.getItem('planType') ?? 'free'
-        const remainingTrips = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-        if (planType !== 'subscription' && remainingTrips <= 0) {
+        if (planCredits === 'loading') return  // not ready yet
+        const plan = planCredits as PlanState | null
+        if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
           setPaywallOpen(true)
           return
         }
@@ -672,12 +703,6 @@ export default function TripResult({ params }: Props) {
         }
 
         // ── 2. Fresh AI generation ──────────────────────────────────────
-        // Increment the logged-out generation counter right before calling the API.
-        if (authedUser === null) {
-          const count = Number(localStorage.getItem('generationCount') || 0)
-          localStorage.setItem('generationCount', String(count + 1))
-        }
-
         const parsedInterests = interests
           ? interests.split(',').map((i) => i.trim()).filter(Boolean)
           : []
@@ -693,6 +718,16 @@ export default function TripResult({ params }: Props) {
         console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
         setRawResponse(genData)
         if (!genRes.ok) {
+          // 401 = anonymous over-limit → redirect to login
+          if (genRes.status === 401) {
+            router.push({ pathname: '/login' })
+            return
+          }
+          // 402 = authenticated user out of credits → open paywall
+          if (genRes.status === 402) {
+            setPaywallOpen(true)
+            return
+          }
           const base   = typeof genData?.error === 'string' ? genData.error : 'Generation failed'
           const detail = genData?.detail ? `\n\n${JSON.stringify(genData.detail, null, 2)}` : ''
           throw new Error(base + detail)
@@ -715,14 +750,13 @@ export default function TripResult({ params }: Props) {
         setActiveVersionIdx(0)
         setHasUserEdits(false)
 
-        // ── Decrement remaining trips after successful generation ──────────
+        // Credits are decremented server-side in /api/generate-trip.
+        // Refresh plan state so the next guard check reflects the new balance.
         if (authedUser !== null) {
-          const planType = localStorage.getItem('planType') ?? 'free'
-          if (planType !== 'subscription') {
-            const remaining = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-            const next = Math.max(0, remaining - 1)
-            localStorage.setItem('remainingTrips', String(next))
-          }
+          fetch('/api/me/plan')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setPlanCredits(data) })
+            .catch(() => {})
         }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error')
@@ -732,7 +766,7 @@ export default function TripResult({ params }: Props) {
     }
     generate()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, generateKey])
+  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, planCredits, generateKey])
 
   // ── Auto-save after login (pending save) ────────────────────────────────────
   useEffect(() => {
@@ -752,27 +786,17 @@ export default function TripResult({ params }: Props) {
     })()
   }, [authedUser, rawTripData])
 
-  // ── Paywall selection ─────────────────────────────────────────────────────────
-  function handlePaywallSelect(choice: 'trip-1' | 'trip-5' | 'trip-10' | 'subscription') {
-    if (choice === 'subscription') {
-      localStorage.setItem('planType', 'subscription')
-      localStorage.removeItem('remainingTrips')
-    } else {
-      const counts = { 'trip-1': 1, 'trip-5': 5, 'trip-10': 10 } as const
-      localStorage.setItem('planType', 'free')
-      localStorage.setItem('remainingTrips', String(counts[choice]))
-    }
+  // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
+  function handlePaywallClose() {
     setPaywallOpen(false)
-    setGenerateKey(k => k + 1)  // retrigger generate()
   }
 
   // ── Regenerate from pref drawer ──────────────────────────────────────────────
   async function regenerate() {
-    // ── Paywall guard ────────────────────────────────────────────────────
+    // ── Paywall guard (DB-backed) ────────────────────────────────────────
     if (authedUser !== null) {
-      const planType       = localStorage.getItem('planType') ?? 'free'
-      const remainingTrips = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-      if (planType !== 'subscription' && remainingTrips <= 0) {
+      const plan = planCredits as PlanState | null
+      if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
         setPrefOpen(false)
         setRegenConfirmOpen(false)
         setPaywallOpen(true)
@@ -845,7 +869,7 @@ export default function TripResult({ params }: Props) {
   // ── Save / auth gate ─────────────────────────────────────────────────────────
   async function saveTrip(userId: string) {
     console.log('[SAVE TRIP CALLED]', { userId })
-    if (!rawTripData) { showToast('No hay viaje para guardar'); return }
+    if (!rawTripData) { showToast(locale === 'es' ? 'No hay viaje para guardar' : 'No trip to save'); return }
     try {
       const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
       const parsedInterests = prefInterests
@@ -873,18 +897,18 @@ export default function TripResult({ params }: Props) {
       if (data.success) {
         setTripId(data.trip_id)
         sessionStorage.removeItem('tripCache')
-        showToast('🔖 Guardado en mis viajes')
+        showToast(locale === 'es' ? '🔖 Guardado en mis viajes' : '🔖 Saved to my trips')
       } else {
-        showToast('No se pudo guardar. Intenta de nuevo.')
+        showToast(locale === 'es' ? 'No se pudo guardar. Intenta de nuevo.' : 'Could not save. Try again.')
       }
     } catch {
-      showToast('Error al guardar')
+      showToast(locale === 'es' ? 'Error al guardar' : 'Save error')
     }
   }
 
   function handleSave() {
     if (tripId) {
-      showToast('✨ Ya está en Mis viajes')
+      showToast(locale === 'es' ? '✨ Ya está en Mis viajes' : '✨ Already in My trips')
       return
     }
     console.log('[HANDLE SAVE]', {
@@ -933,7 +957,7 @@ export default function TripResult({ params }: Props) {
       day.n !== dayN ? day : { ...day, items: day.items.filter(it => it.id !== itemId) }
     ))
     setHasUserEdits(true)
-    showToast('✓ Actividad eliminada')
+    showToast(locale === 'es' ? '✓ Actividad eliminada' : '✓ Activity removed')
   }
 
   function loadVersion(idx: number) {
@@ -1084,21 +1108,21 @@ export default function TripResult({ params }: Props) {
     }))
     setHasUserEdits(true)
     closeEditModal()
-    showToast('✓ Cambios guardados')
+    showToast(locale === 'es' ? '✓ Cambios guardados' : '✓ Changes saved')
   }
 
   function addDay() {
     const newN = days.length > 0 ? Math.max(...days.map(d => d.n)) + 1 : 1
     const newDay: Day = {
       n:        newN,
-      label:    `Día ${String(newN).padStart(2, '0')}`,
-      title:    'Nuevo día',
+      label:    locale === 'es' ? `Día ${String(newN).padStart(2, '0')}` : `Day ${String(newN).padStart(2, '0')}`,
+      title:    locale === 'es' ? 'Nuevo día' : 'New day',
       progress: 0,
       items:    [],
     }
     setDays(prev => [...prev, newDay])
     setHasUserEdits(true)
-    showToast(`✓ Día ${newN} añadido`)
+    showToast(locale === 'es' ? `✓ Día ${newN} añadido` : `✓ Day ${newN} added`)
   }
 
   function addItem(dayN: number) {
@@ -1240,14 +1264,23 @@ export default function TripResult({ params }: Props) {
                   className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${tripId ? 'text-[#2D6B57] cursor-default' : 'text-[#7A7A76] hover:text-[#0F3A33]'}`}
                   onClick={handleSave}
                 >
-                  {tripId ? <><span>✔</span> Guardado</> : <><span>🔖</span> Guardar</>}
+                  {tripId
+                    ? <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>
+                    : <><span>🔖</span> {locale === 'es' ? 'Guardar' : 'Save'}</>
+                  }
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] pr-[15px] hover:text-[#0F3A33] transition-colors"
-                  onClick={() => showToast('↗ Generando enlace para compartir…')}
+                  onClick={() => {
+                    if (!tripId) {
+                      showToast(locale === 'es' ? '🔖 Guarda el viaje primero para compartirlo' : '🔖 Save the trip first to share it')
+                      return
+                    }
+                    setShareOpen(true)
+                  }}
                 >
-                  <span>↗</span> Compartir
+                  <span>↗</span> {locale === 'es' ? 'Compartir' : 'Share'}
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
@@ -1520,14 +1553,16 @@ export default function TripResult({ params }: Props) {
                   onClick={() => setPrefOpen(false)}
                   className="text-[13px] text-[#7A7A76] px-[15px] py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
                 >
-                  Cancelar
+                  {locale === 'es' ? 'Cancelar' : 'Cancel'}
                 </button>
                 <button
                   onClick={handleRegenClick}
                   disabled={loading}
                   className="text-[13px] font-medium text-white px-[17px] py-[7px] bg-[#0F3A33] rounded-[6px] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? 'Generando...' : 'Actualizar plan'}
+                  {loading
+                    ? (locale === 'es' ? 'Generando...' : 'Generating...')
+                    : (locale === 'es' ? 'Actualizar plan' : 'Update plan')}
                 </button>
               </div>
 
@@ -2174,13 +2209,13 @@ export default function TripResult({ params }: Props) {
                 onClick={closeEditModal}
                 className="text-[13px] text-[#7A7A76] px-3.5 py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
               >
-                Cancelar
+                {locale === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
               <button
                 onClick={saveEditModal}
                 className="text-[13px] font-medium text-white px-4 py-[7px] bg-[#0F3A33] rounded-[6px]"
               >
-                Guardar
+                {locale === 'es' ? 'Guardar' : 'Save'}
               </button>
             </div>
           </div>
@@ -2200,11 +2235,12 @@ export default function TripResult({ params }: Props) {
           >
             <div className="mb-5">
               <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-3">
-                Vas a perder tus cambios
+                {locale === 'es' ? 'Vas a perder tus cambios' : 'You\u2019ll lose your changes'}
               </h2>
               <p className="text-[13px] font-light text-[#7A7A76] leading-[1.65]">
-                Si continúas, se sobrescribirá este itinerario y se eliminarán todos los cambios que hiciste.<br /><br />
-                ¿Quieres continuar o crear un nuevo viaje?
+                {locale === 'es'
+                  ? <>Si continúas, se sobrescribirá este itinerario y se eliminarán todos los cambios que hiciste.<br /><br />¿Quieres continuar o crear un nuevo viaje?</>
+                  : <>If you continue, this itinerary will be overwritten and all your edits will be lost.<br /><br />Do you want to continue or start a new trip?</>}
               </p>
             </div>
             <div className="flex flex-col gap-2">
@@ -2213,19 +2249,21 @@ export default function TripResult({ params }: Props) {
                 disabled={loading}
                 className="text-[13px] font-medium text-white px-4 py-[9px] bg-[#B91C1C] rounded-[8px] w-full hover:bg-[#991B1B] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Generando...' : 'Reemplazar viaje'}
+                {loading
+                  ? (locale === 'es' ? 'Generando...' : 'Generating...')
+                  : (locale === 'es' ? 'Reemplazar viaje' : 'Replace trip')}
               </button>
               <button
                 onClick={() => { setRegenConfirmOpen(false); router.push({ pathname: '/planner' }) }}
                 className="text-[13px] font-medium text-[#0F3A33] px-4 py-[9px] bg-white border border-[#CEC8C0] rounded-[8px] w-full hover:bg-[#EDE7E1] transition-colors"
               >
-                Crear nuevo viaje
+                {locale === 'es' ? 'Crear nuevo viaje' : 'Start a new trip'}
               </button>
               <button
                 onClick={() => setRegenConfirmOpen(false)}
                 className="text-[13px] text-[#7A7A76] px-4 py-[7px] rounded-[8px] w-full hover:bg-[#EDE7E1] transition-colors"
               >
-                Cancelar
+                {locale === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
             </div>
           </div>
@@ -2312,7 +2350,18 @@ export default function TripResult({ params }: Props) {
       <style>{`@keyframes mIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
 
       {/* ── PAYWALL ──────────────────────────────────────────────────────── */}
-      <PaywallModal open={paywallOpen} onSelect={handlePaywallSelect} />
+      <PaywallModal open={paywallOpen} locale={locale} onClose={handlePaywallClose} />
+
+      {/* ── SHARE TRIP ───────────────────────────────────────────────────── */}
+      {tripId && (
+        <TripShareModal
+          tripId={tripId}
+          destination={destination}
+          duration={Number(nights) || null}
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
 
     </main>
   )

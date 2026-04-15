@@ -100,7 +100,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: "The most exclusive luxury retreat at the end of the Hotel Zone. Ideal for families seeking peace, a sargassum-free beach (due to its location), and a world-class Kids' Club.",
       tag: 'Zen luxury and privacy',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/PlmvNbFRph?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
     {
       name: 'Grand Fiesta Americana Coral Beach',
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: "The best family luxury deal. Recently turned All-Inclusive but maintains superior dining quality. Its kids' club is one of the best in Mexico.",
       tag: 'Premium all-inclusive resort',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/8ezclsJ3wa?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
     {
       name: 'Aloft Cancun',
@@ -116,7 +116,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'The smart value option. Not a beachfront resort, but steps from a public beach and surrounded by services. Perfect for families who prefer to invest their budget in parks and excursions.',
       tag: 'Strategic location and savings',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/WSZq7xX49s?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
     },
   ],
 
@@ -125,13 +125,13 @@ export const guide: FlatGuide = {
       name: 'Day trip to Isla Mujeres',
       description: 'Take the UltraMar ferry (an affordable and fun plan). Once there, rent a golf cart and spend the day at Playa Norte; the water is so shallow and calm it feels like a giant swimming pool.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/UGkuXdeIfI',
     },
     {
       name: 'Xcaret Park',
       description: 'An investment, but the most complete park. The evening show is packed with culture — an experience kids will remember their whole lives.',
       tags: ['Book 21 days ahead for 15% off'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
     },
     {
       name: 'Cenote Azul',

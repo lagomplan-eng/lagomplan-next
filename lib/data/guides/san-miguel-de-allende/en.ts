@@ -130,7 +130,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'The gold standard of luxury in the city. Spacious suites and impeccable service. The Luna Rooftop bar is the unmissable gathering point for watching San Miguel come alive at dusk.',
       tag: 'The gold standard',
-      affiliateUrl: '',
+      affiliateUrl: 'https://expedia.stay22.com/lagomplan/Lsgi-5VOmE?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
     },
     {
       name: 'Hotel Casa Blanca 7',
@@ -138,7 +138,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'A Mediterranean luxury retreat in the heart of San Miguel. The 5-star atmosphere blends the serenity of internal gardens with wellness amenities that invite total pause.',
       tag: 'Sophistication and absolute calm',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/ZdY-QecWVB?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
     },
     {
       name: 'Selina San Miguel de Allende',
@@ -146,7 +146,7 @@ export const guide: FlatGuide = {
       priceTier: '$',
       description: 'Don\'t be fooled by the name — the "Private Suites" in the historic mansion are spacious, very stylish, and a fraction of the cost of larger luxury hotels. Unbeatable location (steps from the Parroquia).',
       tag: 'Smart Value in the center',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/ElNfHFUOaY?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
     },
   ],
 
@@ -155,7 +155,7 @@ export const guide: FlatGuide = {
       name: 'Vineyard day at Cuna de Tierra',
       description: 'Just 40 minutes away. The most award-winning winery in the region. A pairing tasting among the vines is the perfect activity for two or four adults.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.opentable.com/r/raigal-en-vinedo-cuna-de-tierra-guanajuato?corrid=523da62e-91b2-45e9-a52b-d53476d0d209&avt=eyJ2IjoyLCJtIjowLCJwIjowLCJzIjoxLCJuIjowfQ&p=2&sd=2026-04-14T19%3A00%3A00',
     },
     {
       name: 'Fábrica La Aurora',

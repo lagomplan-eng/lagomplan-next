@@ -118,7 +118,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Una joya frente al Templo de San Agustín. Sus habitaciones son eclécticas y llenas de arte. El patio central es el lugar perfecto para el primer café del día.',
       tag: 'Arte y sofisticación',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/717u9iT-_f?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
     {
       name: 'Hotel Danza del Sol',
@@ -126,7 +126,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Amplio, con un aire de hacienda renovada y excelente servicio. Ideal si el grupo es grande y buscan comodidad sin complicaciones.',
       tag: 'Confort clásico',
-      affiliateUrl: '',
+      affiliateUrl: 'https://expedia.stay22.com/lagomplan/1im52898y3?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
     {
       name: 'Morazul Hotel Boutique',
@@ -134,7 +134,7 @@ export const guide: FlatGuide = {
       priceTier: '$$',
       description: 'Un refugio diseñado para quienes valoran la atención al detalle, a pasos de los templos más icónicos. Sus áreas exteriores ofrecen ese respiro de calma necesario para procesar la ciudad.',
       tag: 'Servicio curado y ubicación imbatible',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/_fF6NqiDqC?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
     },
   ],
 
@@ -143,7 +143,7 @@ export const guide: FlatGuide = {
       name: 'Ruta del Queso y Vino',
       description: 'Escapada a solo 45 minutos hacia Tequisquiapan o Ezequiel Montes. Visita a Freixenet o De Cote para una cata con vista a la Peña de Bernal.',
       tags: [],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/?ranking_uuid=9eab0807-6e3c-4a0f-b173-2fb752f7e2ca&adults=1',
     },
     {
       name: 'Bar Hopping de Terrazas',
