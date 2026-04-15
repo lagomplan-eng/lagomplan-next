@@ -69,8 +69,7 @@ export async function PATCH(
       // parameter to `never` when the table type is strict. `as any` alone is still
       // rejected; going through `unknown` first satisfies the compiler without
       // changing runtime behavior.
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .update(updatePayload as unknown as any)
+      .update(updatePayload as unknown as never)
       .eq('id', trip_id)
       .select()
       .single()
