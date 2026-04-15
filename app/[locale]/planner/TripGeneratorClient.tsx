@@ -44,7 +44,7 @@ function FormPage() {
         <div className="max-w-[1080px] mx-auto">
 
           {/* TEXT (narrower for readability) */}
-          <div className="max-w-[640px]">
+          <div className="max-w-[640px] md:ml-6">
             <span className="sec-label mb-4">
               {isES ? 'Planificador de viajes con IA' : 'AI-powered trip planner'}
             </span>
