@@ -46,6 +46,8 @@ export default function PaywallModal({ open, locale, onClose }: PaywallModalProp
         return
       }
 
+      // Save current trip URL so we can restore it after Stripe redirects back
+      sessionStorage.setItem('plannerReturnUrl', window.location.pathname + window.location.search)
       // Redirect to Stripe Checkout (full page navigation)
       window.location.href = data.url
 

@@ -10,13 +10,19 @@ import { getPlanState } from '../../../../lib/entitlements'
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
-  const supabase = getSupabaseServer()
-  const { data: { user }, error } = await supabase.auth.getUser()
+  try {
+    const supabase = getSupabaseServer()
+    const { data: { user }, error } = await supabase.auth.getUser()
 
-  if (error || !user) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    if (error || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    const plan = await getPlanState(user.id)
+    return NextResponse.json(plan)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error('[me/plan] unhandled error:', msg)
+    return NextResponse.json({ error: 'plan_unavailable', detail: msg }, { status: 500 })
   }
-
-  const plan = await getPlanState(user.id)
-  return NextResponse.json(plan)
 }

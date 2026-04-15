@@ -8,6 +8,8 @@ import PaywallModal from '../../../components/PaywallModal'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
+import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
+import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -51,8 +53,13 @@ interface CheckItem {
 interface BudgetRow {
   id: string
   label: string
-  amount: number
   category: string
+  icon?: string
+  note?: string
+  itemId?: string         // links back to ItineraryItem.id for sync
+  aiEst: number           // AI-estimated cost (immutable baseline)
+  userEst: number | null  // user's manual estimate override
+  actual: number | null   // confirmed/actual amount paid
 }
 
 interface TripData {
@@ -163,23 +170,37 @@ const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
   transfer:   'Reservar transfer',
 }
 
-// Default provider options per item type — used when item has no affiliate/bookingOptions
-const DEFAULT_PROVIDERS: Partial<Record<ItemType, BookingOption[]>> = {
-  hotel: [
-    { id: 'dp-hotels', provider: 'hotels', name: 'Hotels.com', desc: 'Mayor selección de hoteles. Precio garantizado.', url: 'https://www.hotels.com/search/properties?q={query}' },
-    { id: 'dp-booking', provider: 'booking', name: 'Booking.com', desc: 'Cancelación gratis en la mayoría de propiedades.', url: 'https://www.booking.com/search.html?ss={query}&aid=LAGOMPLAN' },
-  ],
-  tour: [
-    { id: 'dp-viator', provider: 'viator', name: 'Viator', desc: 'Tours verificados. Cancelación gratis hasta 24 hrs.', url: 'https://www.viator.com/search/tours?q={query}&pid=P00165894&mcid=42383' },
-    { id: 'dp-gyg', provider: 'gyg', name: 'GetYourGuide', desc: 'Experiencias curadas. Reserva instantánea, soporte 24/7.', url: 'https://www.getyourguide.com/s/?q={query}&partner_id=YOUR_GYG_ID' },
-  ],
-  restaurant: [
-    { id: 'dp-viator-r', provider: 'viator', name: 'Viator Experiencias', desc: 'Cenas con chef local, maridaje y vistas.', url: 'https://www.viator.com/search/tours?q=cena+restaurante+{query}&pid=P00165894' },
-  ],
-  transfer: [
-    { id: 'dp-viator-t', provider: 'viator', name: 'Viator Transfers', desc: 'Transfers privados y compartidos. Sin sorpresas.', url: 'https://www.viator.com/search/tours?q=transfer+{query}&pid=P00165894' },
-  ],
+// ── Canonical budget categories ───────────────────────────────────────────────
+// Five fixed groups — everything from the AI or edit modal maps into one of these.
+const BUDGET_ICON: Record<string, string> = {
+  Alojamiento: '🏨',
+  Actividades: '🌊',
+  Gastronomía: '🍽',
+  Traslados:   '🚗',
+  Otros:       '🛍',
 }
+
+// ── Item type → canonical category ───────────────────────────────────────────
+const TYPE_TO_CATEGORY: Record<ItemType, string> = {
+  hotel:      'Alojamiento',
+  tour:       'Actividades',
+  restaurant: 'Gastronomía',
+  transfer:   'Traslados',
+  free:       'Otros',
+}
+
+// ── Normalize any AI / DB category string → canonical category ────────────────
+// Handles whatever the AI returns (Spanish, English, mixed case, plural, etc.)
+function normalizeCategory(raw: string | undefined | null): string {
+  const s = (raw ?? '').toLowerCase().trim()
+  if (!s) return 'Otros'
+  if (/hotel|hospedaje|alojamiento|accomod|lodg|habitaci/.test(s)) return 'Alojamiento'
+  if (/tour|actividad|excursi|experiencia|activ|entrad|ticket/.test(s)) return 'Actividades'
+  if (/restaur|gastro|comida|food|cena|almuerz|desayun|drink|bar/.test(s)) return 'Gastronomía'
+  if (/transfer|traslado|transport|taxi|uber|vuelo|flight|avion|aeropuerto/.test(s)) return 'Traslados'
+  return 'Otros'
+}
+
 
 function providerFromUrl(url: string): string {
   if (url.includes('viator'))       return 'viator'
@@ -306,15 +327,32 @@ function normalizeCheckItem(raw: any, index: number): CheckItem {
 }
 
 function normalizeBudgetRow(raw: any, index: number): BudgetRow {
+  // Already-normalized rows loaded from DB (autosave round-trip)
+  if (typeof raw?.aiEst === 'number') {
+    return {
+      id:       raw.id       ?? `budget-${index}`,
+      label:    raw.label    ?? `Item ${index + 1}`,
+      category: normalizeCategory(raw.category),
+      icon:     raw.icon,
+      note:     raw.note,
+      itemId:   raw.itemId,
+      aiEst:    raw.aiEst,
+      userEst:  typeof raw.userEst === 'number' ? raw.userEst : null,
+      actual:   typeof raw.actual  === 'number' ? raw.actual  : null,
+    }
+  }
+  // Raw AI response format
   const rawAmount = raw?.amount ?? raw?.cost ?? raw?.price ?? raw?.total ?? 0
-  const amount = typeof rawAmount === 'number'
+  const aiEst = typeof rawAmount === 'number'
     ? rawAmount
     : parseFloat(String(rawAmount).replace(/[^0-9.]/g, '')) || 0
   return {
     id:       raw?.id       ?? `budget-${index}`,
     label:    raw?.label    ?? raw?.name ?? raw?.title ?? raw?.item ?? `Item ${index + 1}`,
-    amount,
-    category: raw?.category ?? raw?.type ?? raw?.cat ?? 'Otros',
+    category: normalizeCategory(raw?.category ?? raw?.type ?? raw?.cat),
+    aiEst,
+    userEst:  null,
+    actual:   null,
   }
 }
 
@@ -325,18 +363,25 @@ function deriveBudgetFromDays(days: Day[]): BudgetRow[] {
       if (!item.price) return
       // Strip currency symbols and thousands separators, keep first numeric block
       const cleaned = String(item.price).replace(/[^0-9.,]/g, '').replace(/,/g, '')
-      const amount  = parseFloat(cleaned)
-      if (!isNaN(amount) && amount > 0) {
+      const aiEst   = parseFloat(cleaned)
+      if (!isNaN(aiEst) && aiEst > 0) {
         rows.push({
-          id:       `budget-${day.n}-${ii}`,
+          id:       `budget-item-${item.id}`,
           label:    item.name || `Día ${day.n}`,
-          amount,
-          category: item.type.charAt(0).toUpperCase() + item.type.slice(1),
+          category: TYPE_TO_CATEGORY[item.type] ?? 'Otros',
+          itemId:   item.id,
+          aiEst,
+          userEst:  null,
+          actual:   null,
         })
       }
     })
   })
   return rows
+}
+
+function activeAmount(row: BudgetRow): number {
+  return row.actual ?? row.userEst ?? row.aiEst
 }
 
 function deriveChecksFromDays(days: Day[]): CheckItem[] {
@@ -474,6 +519,13 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
     normalizedBudget = deriveBudgetFromDays(normalizedDays)
   }
 
+  // Strip aggregate "Total" rows the AI sometimes appends — they're recomputed in UI
+  normalizedBudget = normalizedBudget.filter(r => {
+    const lbl = r.label.toLowerCase().trim()
+    const cat = r.category.toLowerCase().trim()
+    return lbl !== 'total' && cat !== 'total'
+  })
+
   return {
     title:      row?.title ?? source.title ?? `${destination} · ${parseInt(nights || '0', 10) || 3} nights`,
     subtitle:   source.subtitle ?? 'AI-generated trip plan',
@@ -482,6 +534,77 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
     budgetRows: normalizedBudget,
     packing:    normalizedPacking,
   }
+}
+
+// ─── Budget inline edit panel ─────────────────────────────────────────────────
+
+function BudgetEditPanel({
+  row,
+  onSave,
+  onClose,
+}: {
+  row: BudgetRow
+  onSave: (userEst: string, actual: string) => void
+  onClose: () => void
+}) {
+  const [uv, setUv] = useState(row.userEst != null ? String(row.userEst) : '')
+  const [av, setAv] = useState(row.actual  != null ? String(row.actual)  : '')
+  return (
+    <div
+      className="px-4 py-[9px] bg-[#EDE7E1] border-b border-[#E4DFD8]"
+      style={{ borderLeft: '2px solid #0F3A33' }}
+    >
+      {row.note && (
+        <p className="text-[10px] font-light italic text-[#7A7A76] mb-[9px] leading-relaxed">
+          {row.note}
+        </p>
+      )}
+      <div className="grid grid-cols-2 gap-[7px] mb-[7px]">
+        <div>
+          <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-[3px]">
+            Tu estimado
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="w-full font-mono text-[12px] font-medium text-[#0F3A33] bg-white border border-[#E4DFD8] rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
+            placeholder={String(row.aiEst)}
+            value={uv}
+            onChange={e => setUv(e.target.value)}
+          />
+        </div>
+        <div>
+          <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-[3px]">
+            Gastado real
+          </label>
+          <input
+            type="number"
+            min="0"
+            className="w-full font-mono text-[12px] font-medium text-[#2D6B57] bg-white border border-[#E4DFD8] rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
+            placeholder="0"
+            value={av}
+            onChange={e => setAv(e.target.value)}
+          />
+        </div>
+      </div>
+      <div className="flex gap-[5px] justify-end">
+        <button
+          type="button"
+          onClick={() => onSave(uv, av)}
+          className="font-mono text-[10px] font-medium tracking-[.04em] text-white bg-[#0F3A33] border-none rounded-[4px] px-[10px] py-[4px] cursor-pointer hover:bg-[#1a4a42] transition-colors"
+        >
+          Guardar
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="font-mono text-[10px] text-[#7A7A76] bg-transparent border border-[#E4DFD8] rounded-[4px] px-2 py-[4px] cursor-pointer hover:border-[#0F3A33] transition-colors"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )
 }
 
 // ─── Main component ────────────────────────────────────────────────────────────
@@ -531,7 +654,12 @@ export default function TripResult({ params }: Props) {
   const [collapsedDiaGroups, setCollapsedDiaGroups] = useState<Set<number>>(new Set())
   const [toast, setToast]     = useState<string | null>(null)
   const [packedSet, setPackedSet] = useState<Set<number>>(new Set())
+  const [newPackingItem, setNewPackingItem] = useState('')
   const [bookingModal, setBookingModal] = useState<{ itemName: string; itemType: ItemType; options: BookingOption[] } | null>(null)
+
+  // ── Budget inline edit state ──────────────────────────────────────────────────
+  const [openBudgetEditId, setOpenBudgetEditId] = useState<string | null>(null)
+  const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
 
   // ── Edit modal state ─────────────────────────────────────────────────────────
   const [editModalItem, setEditModalItem] = useState<ItineraryItem | null>(null)
@@ -554,6 +682,15 @@ export default function TripResult({ params }: Props) {
   const [prefBudget, setPrefBudget]       = useState(budget)
   const [prefInterests, setPrefInterests] = useState(interests)
 
+  // Date range picker state — kept in sync with prefStart / prefEnd strings
+  const parsePrefDate = (s: string) => { const d = new Date(s); return isNaN(d.getTime()) ? null : d }
+  const [prefDateRange, setPrefDateRange] = useState<DateRange>(() => {
+    const s = parsePrefDate(start)
+    const e = parsePrefDate(end)
+    const nights = s && e ? Math.round(Math.abs(e.getTime() - s.getTime()) / 86_400_000) : 0
+    return { start: s, end: e, nights }
+  })
+
   // ── Traveler detail state ────────────────────────────────────────────────────
   const [prefAdults, setPrefAdults]           = useState(2)
   const [prefChildren, setPrefChildren]       = useState<Child[]>([])
@@ -567,12 +704,28 @@ export default function TripResult({ params }: Props) {
 
   // ── Autosave status ───────────────────────────────────────────────────────────
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
-  const autoSaveTimerRef  = useRef<ReturnType<typeof setTimeout>>()
-  const hasInitializedRef = useRef(false)   // prevents autosave on initial mount
+  const autoSaveTimerRef    = useRef<ReturnType<typeof setTimeout>>()
+  // Stores a JSON fingerprint of the last content written to (or loaded from) DB.
+  // The autosave effect compares against this to skip no-op saves and to detect
+  // edits that were made before tripId was available (fixing the main race condition).
+  const lastSavedContentRef = useRef<string | null>(null)
 
   // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
   type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
   const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
+  // Ref so the generate effect always reads the current value without re-running on every credit update
+  const planCreditsRef = useRef<PlanState | null | 'loading'>('loading')
+  useEffect(() => { planCreditsRef.current = planCredits }, [planCredits])
+
+  // ── Access resolution gate ────────────────────────────────────────────────────
+  // True once we know whether the user can generate (auth resolved + credits loaded).
+  // Prevents the itinerary from rendering before the access check completes.
+  const [isAccessResolved, setIsAccessResolved] = useState(false)
+  useEffect(() => {
+    if (authedUser === undefined) return                         // auth still initialising
+    if (authedUser === null)      { setIsAccessResolved(true); return } // anonymous — no credit check needed
+    if (planCredits !== 'loading') setIsAccessResolved(true)    // authenticated — credits loaded
+  }, [authedUser, planCredits])
 
   // ── DB load effect — fires when trip_id param is present ─────────────────────
   useEffect(() => {
@@ -610,6 +763,11 @@ export default function TripResult({ params }: Props) {
         setPrefDest(dest)
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
+        // Baseline: marks this as already-in-DB so autosave only fires on real edits
+        lastSavedContentRef.current = JSON.stringify({
+          title: normalized.title, subtitle: normalized.subtitle,
+          days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+        })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido')
       } finally {
@@ -629,8 +787,8 @@ export default function TripResult({ params }: Props) {
     }
     fetch('/api/me/plan')
       .then(r => r.ok ? r.json() : null)
-      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 3, is_subscriber: false }))
-      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 3, is_subscriber: false }))
+      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 0, is_subscriber: false }))
+      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 0, is_subscriber: false }))
   }, [authedUser])
 
   // ── Post-checkout success handler ────────────────────────────────────────────
@@ -665,13 +823,14 @@ export default function TripResult({ params }: Props) {
       if (authedUser === undefined) return
 
       // ── Paywall guard (logged-in users) ───────────────────────────────
-      // Wait until we've fetched plan state from the DB.
+      // isAccessResolved gates this block: the effect re-runs once credits are loaded.
+      // planCreditsRef always holds the current value without adding it to deps.
       if (authedUser !== null) {
-        if (planCredits === 'loading') return  // not ready yet
-        const plan = planCredits as PlanState | null
+        if (!isAccessResolved) return  // credits not yet loaded — wait for re-run
+        const plan = planCreditsRef.current as PlanState | null
         if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
           setPaywallOpen(true)
-          return
+          return  // render is gated by the paywall early return below — no setLoading needed
         }
       }
 
@@ -727,6 +886,7 @@ export default function TripResult({ params }: Props) {
         if (!genRes.ok) {
           // 401 = anonymous over-limit → redirect to login
           if (genRes.status === 401) {
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
             router.push({ pathname: '/login' })
             return
           }
@@ -757,6 +917,50 @@ export default function TripResult({ params }: Props) {
         setActiveVersionIdx(0)
         setHasUserEdits(false)
 
+        // Auto-save to DB for authenticated users so tripId is set immediately.
+        // This enables autosave for any subsequent edits and ensures a browser
+        // refresh loads from DB instead of triggering a new AI generation.
+        if (authedUser !== null) {
+          try {
+            const autoSaveRes = await fetch('/api/trips', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({
+                title:        normalized.title || null,
+                destination,
+                origin,
+                duration_days,
+                travelers:    traveler,
+                travel_style: pace,
+                budget_level: budget,
+                interests:    parsedInterests,
+                trip_data:    tripDataRaw,
+              }),
+            })
+            if (autoSaveRes.ok) {
+              const autoSaveData = await autoSaveRes.json().catch(() => null)
+              if (autoSaveData?.success) {
+                setTripId(autoSaveData.trip_id)
+                // Baseline: now that the DB entry exists, mark current content as saved
+                // so autosave only fires if the user edited during the POST window
+                lastSavedContentRef.current = JSON.stringify({
+                  title: normalized.title, subtitle: normalized.subtitle,
+                  days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                })
+                sessionStorage.removeItem('tripCache')
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href)
+                  url.searchParams.set('trip_id', autoSaveData.trip_id)
+                  window.history.replaceState({}, '', url.toString())
+                }
+              }
+            }
+          } catch {
+            // Auto-save is best-effort — don't block or show an error to the user
+          }
+        }
+
         // Credits are decremented server-side in /api/generate-trip.
         // Refresh plan state so the next guard check reflects the new balance.
         if (authedUser !== null) {
@@ -773,7 +977,7 @@ export default function TripResult({ params }: Props) {
     }
     generate()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, planCredits, generateKey])
+  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, isAccessResolved, generateKey])
 
   // ── Auto-save after login (pending save) ────────────────────────────────────
   useEffect(() => {
@@ -792,40 +996,35 @@ export default function TripResult({ params }: Props) {
     saveTrip(authedUser.id)
   }, [authedUser, rawTripData])
 
-  // ── Autosave — fires on any content change AFTER trip is in DB ──────────────
+  // ── Autosave — fires whenever content OR tripId changes ─────────────────────
+  // tripId is intentionally in the deps: if the user edits before the initial
+  // auto-save POST completes (tripId was null), those edits would have been
+  // skipped by the gate. Adding tripId here ensures the effect re-runs once
+  // tripId becomes available, catching any edits made during that window.
+  //
+  // Spurious saves (identical content) are prevented by lastSavedContentRef,
+  // which is set to the loaded/generated content baseline before tripId is set.
   useEffect(() => {
-    // Skip the very first run (initial mount / initial data load).
-    // hasInitializedRef resets to false on every mount so we don't autosave
-    // the state that was just set by the generate or DB-load effects.
-    if (!hasInitializedRef.current) {
-      hasInitializedRef.current = true
-      return
-    }
-
-    // Gate: both conditions must be true for autosave to run.
-    // Read tripId / authedUser at effect time — they don't need to be deps
-    // because we only want content changes to trigger autosave, not auth changes.
     if (!tripId || !authedUser || loading) return
+
+    const content = JSON.stringify({ title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows })
+    if (content === lastSavedContentRef.current) return   // nothing changed
 
     clearTimeout(autoSaveTimerRef.current)
     setSaveStatus('saving')
 
-    // Capture a snapshot of the current content at the moment the effect fires.
-    // The timeout reads from this snapshot, not from a stale closure.
-    const savedId = tripId
-    const snapshot = { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows }
-
     autoSaveTimerRef.current = setTimeout(async () => {
       try {
-        console.log('[autosave] patching trip:', savedId)
-        const res = await fetch(`/api/trips/${savedId}`, {
+        console.log('[autosave] patching trip:', tripId)
+        const res = await fetch(`/api/trips/${tripId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ title: snapshot.title, trip_data: snapshot }),
+          body: JSON.stringify({ title: tripTitle, trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows } }),
         })
         if (res.ok) {
           console.log('[autosave] saved')
+          lastSavedContentRef.current = content   // advance baseline
           setSaveStatus('saved')
           setTimeout(() => setSaveStatus('idle'), 2000)
         } else {
@@ -840,7 +1039,7 @@ export default function TripResult({ params }: Props) {
 
     return () => clearTimeout(autoSaveTimerRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days, packing, budgetRows, tripTitle, tripSubtitle])
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId])
 
   // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
   function handlePaywallClose() {
@@ -884,7 +1083,18 @@ export default function TripResult({ params }: Props) {
       })
       const genData = await genRes.json().catch(() => null)
       setRawResponse(genData)
-      if (!genRes.ok) throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+      if (!genRes.ok) {
+        if (genRes.status === 402) {
+          fetch('/api/me/plan')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setPlanCredits(data) })
+            .catch(() => {})
+          setPrefOpen(false)
+          setPaywallOpen(true)
+          return
+        }
+        throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+      }
       const tripDataRaw = genData?.trip_data
       if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       setRawTripData(tripDataRaw)
@@ -906,14 +1116,13 @@ export default function TripResult({ params }: Props) {
       setActiveVersionIdx(nextIdx)
       setHasUserEdits(false)
 
-      // ── Decrement remaining trips after successful regeneration ────────
+      // Credits are decremented server-side in /api/generate-trip.
+      // Refresh DB state so the next guard check reflects the real balance.
       if (authedUser !== null) {
-        const planType = localStorage.getItem('planType') ?? 'free'
-        if (planType !== 'subscription') {
-          const remaining = parseInt(localStorage.getItem('remainingTrips') ?? '2', 10)
-          const next = Math.max(0, remaining - 1)
-          localStorage.setItem('remainingTrips', String(next))
-        }
+        fetch('/api/me/plan')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (data) setPlanCredits(data) })
+          .catch(() => {})
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
@@ -953,6 +1162,12 @@ export default function TripResult({ params }: Props) {
       if (data.success) {
         setTripId(data.trip_id)
         sessionStorage.removeItem('tripCache')
+        // Update URL so a browser refresh loads from DB instead of re-generating
+        if (typeof window !== 'undefined') {
+          const url = new URL(window.location.href)
+          url.searchParams.set('trip_id', data.trip_id)
+          window.history.replaceState({}, '', url.toString())
+        }
         showToast(locale === 'es' ? '🔖 Guardado en mis viajes' : '🔖 Saved to my trips')
       } else {
         showToast(locale === 'es' ? 'No se pudo guardar. Intenta de nuevo.' : 'Could not save. Try again.')
@@ -980,6 +1195,17 @@ export default function TripResult({ params }: Props) {
       return
     }
     saveTrip(authedUser.id)
+  }
+
+  // ── Budget row edit ──────────────────────────────────────────────────────────
+  function saveBudgetRow(id: string, userEstStr: string, actualStr: string) {
+    setBudgetRows(prev => prev.map(row => {
+      if (row.id !== id) return row
+      const userEst = userEstStr.trim() === '' ? null : (Number(userEstStr) >= 0 ? Math.round(Number(userEstStr)) : row.userEst)
+      const actual  = actualStr.trim()  === '' ? null : (Number(actualStr)  >= 0 ? Math.round(Number(actualStr))  : row.actual)
+      return { ...row, userEst, actual }
+    }))
+    setOpenBudgetEditId(null)
   }
 
   // ── UI helpers ───────────────────────────────────────────────────────────────
@@ -1033,6 +1259,14 @@ export default function TripResult({ params }: Props) {
   async function replaceTrip() {
     console.log('CONFIRM REGENERATE CLICKED')
     setRegenConfirmOpen(false)
+    // ── Paywall guard (DB-backed) ────────────────────────────────────────────
+    if (authedUser !== null) {
+      const plan = planCredits as PlanState | null
+      if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
+        setPaywallOpen(true)
+        return
+      }
+    }
     // Clear ALL cache keys before generating so the generate effect cannot restore old data
     sessionStorage.removeItem('tripCache')
     sessionStorage.removeItem('tripCache_key')
@@ -1055,7 +1289,17 @@ export default function TripResult({ params }: Props) {
       })
       const genData = await genRes.json().catch(() => null)
       setRawResponse(genData)
-      if (!genRes.ok) throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+      if (!genRes.ok) {
+        if (genRes.status === 402) {
+          fetch('/api/me/plan')
+            .then(r => r.ok ? r.json() : null)
+            .then(data => { if (data) setPlanCredits(data) })
+            .catch(() => {})
+          setPaywallOpen(true)
+          return
+        }
+        throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+      }
       const tripDataRaw = genData?.trip_data
       if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       setRawTripData(tripDataRaw)
@@ -1073,6 +1317,59 @@ export default function TripResult({ params }: Props) {
         nights, traveler: prefTraveler, interests: prefInterests, pace: prefPace, budget: prefBudget,
       }}))
       setHasUserEdits(false)
+      // Auto-save regenerated trip so subsequent edits can be autosaved
+      if (authedUser !== null) {
+        try {
+          const regenDuration = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+          const regenSaveRes = await fetch('/api/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+              title:        normalized.title || null,
+              destination:  prefDest,
+              origin:       prefOrigin,
+              duration_days: regenDuration,
+              travelers:    prefTraveler,
+              travel_style: prefPace,
+              budget_level: prefBudget,
+              interests:    parsedInterests,
+              trip_data:    tripDataRaw,
+            }),
+          })
+          if (regenSaveRes.ok) {
+            const regenData = await regenSaveRes.json().catch(() => null)
+            if (regenData?.success) {
+              setTripId(regenData.trip_id)
+              // Baseline: mark current content as the DB baseline
+              lastSavedContentRef.current = JSON.stringify({
+                title: normalized.title, subtitle: normalized.subtitle,
+                days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+              })
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href)
+                url.searchParams.set('trip_id', regenData.trip_id)
+                window.history.replaceState({}, '', url.toString())
+              }
+            }
+          }
+        } catch {
+          // best-effort
+        }
+      } else {
+        // Anonymous: just reset baseline so autosave comparison works if they log in
+        lastSavedContentRef.current = JSON.stringify({
+          title: normalized.title, subtitle: normalized.subtitle,
+          days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+        })
+      }
+      // Credits decremented server-side — refresh so the next guard reflects real balance
+      if (authedUser !== null) {
+        fetch('/api/me/plan')
+          .then(r => r.ok ? r.json() : null)
+          .then(data => { if (data) setPlanCredits(data) })
+          .catch(() => {})
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -1091,13 +1388,35 @@ export default function TripResult({ params }: Props) {
   }
 
   function openBookingModal(item: ItineraryItem) {
-    // 1. Item carries explicit hand-authored booking options
+    // 1. Hand-authored booking options (from guide system) — always trusted
     if (item.bookingOptions && item.bookingOptions.length > 0) {
       setBookingModal({ itemName: item.name, itemType: item.type, options: item.bookingOptions })
       return
     }
 
-    // 2. Item has a single affiliate URL — wrap as one provider row
+    // Resolve city: prefDest is always the current value (updated by pref drawer
+    // and loaded from DB). destination (URL param) may be empty when the trip
+    // was opened via trip_id. prefDest || destination covers both cases.
+    const city = prefDest || destination
+
+    // 2. For hotel and tour types: always use getBookingOptions so our Stay22
+    //    affiliate links are used. The AI frequently generates raw platform URLs
+    //    in item.affiliate (e.g. getyourguide.com/s?q=&partner_id=...) that
+    //    bypass affiliate tracking — ignore them for these types.
+    if (item.type === 'hotel' || item.type === 'tour') {
+      const options = getBookingOptions(item, {
+        city,
+        country:   detectCountryGroup(city),
+        startDate: prefStart || start,
+        endDate:   prefEnd   || end,
+      })
+      if (options.length > 0) {
+        setBookingModal({ itemName: item.name, itemType: item.type, options })
+      }
+      return
+    }
+
+    // 3. For other types (restaurant, transfer): honour item.affiliate if present
     if (item.affiliate) {
       const prov = providerFromUrl(item.affiliate)
       const meta = LOGO_STYLE[prov] ?? LOGO_STYLE.manual
@@ -1109,10 +1428,10 @@ export default function TripResult({ params }: Props) {
       return
     }
 
-    // 3. Dynamic affiliate links based on category
+    // 4. Dynamic affiliate links for remaining types
     const options = getBookingOptions(item, {
-      city:      destination,
-      country:   detectCountryGroup(destination),
+      city,
+      country:   detectCountryGroup(city),
       startDate: prefStart || start,
       endDate:   prefEnd   || end,
     })
@@ -1123,6 +1442,26 @@ export default function TripResult({ params }: Props) {
 
   function togglePacked(idx: number) {
     setPackedSet(prev => { const s = new Set(prev); s.has(idx) ? s.delete(idx) : s.add(idx); return s })
+  }
+
+  function removePackingItem(index: number) {
+    setPacking(prev => prev.filter((_, i) => i !== index))
+    // Re-index packedSet: drop the removed index, shift all higher indices down
+    setPackedSet(prev => {
+      const next = new Set<number>()
+      prev.forEach(i => {
+        if (i < index) next.add(i)
+        else if (i > index) next.add(i - 1)
+      })
+      return next
+    })
+  }
+
+  function addPackingItem() {
+    const trimmed = newPackingItem.trim()
+    if (!trimmed) return
+    setPacking(prev => [...prev, trimmed])
+    setNewPackingItem('')
   }
 
   function openEditModal(item: ItineraryItem, dayN: number, isNew = false) {
@@ -1157,6 +1496,35 @@ export default function TripResult({ params }: Props) {
       if (editIsNew) return { ...day, items: [...day.items, updated] }
       return { ...day, items: day.items.map(it => it.id === updated.id ? updated : it) }
     }))
+
+    // Sync budget rows — parse the price string to a number
+    const parsedPrice = editPrice
+      ? parseFloat(String(editPrice).replace(/[^0-9.]/g, ''))
+      : NaN
+    setBudgetRows(prev => {
+      const existingIdx = prev.findIndex(r => r.itemId === updated.id)
+      if (!isNaN(parsedPrice) && parsedPrice > 0) {
+        const category = TYPE_TO_CATEGORY[updated.type] ?? 'Otros'
+        const existing = existingIdx >= 0 ? prev[existingIdx] : null
+        const newRow: BudgetRow = {
+          id:       existing ? existing.id : `budget-item-${updated.id}`,
+          label:    updated.name || 'Ítem',
+          category,
+          itemId:   updated.id,
+          aiEst:    parsedPrice,
+          userEst:  existing?.userEst ?? null,
+          actual:   existing?.actual ?? null,
+        }
+        if (existingIdx >= 0) {
+          const next = [...prev]; next[existingIdx] = newRow; return next
+        }
+        return [...prev, newRow]
+      }
+      // Price cleared — remove the linked row if it existed
+      if (existingIdx >= 0) return prev.filter((_, i) => i !== existingIdx)
+      return prev
+    })
+
     setHasUserEdits(true)
     closeEditModal()
     showToast(locale === 'es' ? '✓ Cambios guardados' : '✓ Changes saved')
@@ -1194,7 +1562,18 @@ export default function TripResult({ params }: Props) {
   )
 
   // ── Computed values ──────────────────────────────────────────────────────────
-  const totalBudget = budgetRows.reduce((sum, row) => sum + row.amount, 0)
+  // Currency formatting — no conversion, toggle only changes the label shown
+  function fmtAmt(n: number | null): string {
+    if (n === null || isNaN(n)) return '—'
+    return `$${Math.round(n).toLocaleString('es-MX')}`
+  }
+
+  // Budget totals — priority: actual > userEst > aiEst per row
+  const totalBudget   = budgetRows.reduce((s, r) => s + activeAmount(r), 0)
+  const userTotal     = budgetRows.reduce((s, r) => s + (r.userEst ?? r.aiEst), 0)
+  const hasActual     = budgetRows.some(r => r.actual !== null)
+  const actualTotal   = budgetRows.reduce((s, r) => r.actual !== null ? s + r.actual : s, 0)
+
   const nightsNum   = parseInt(nights || '0', 10) || 3
   // dateRange uses pref state so it reflects the most-recently-regenerated trip
   const dateRange   = prefStart && prefEnd ? `${prefStart} — ${prefEnd}` : `${nightsNum} noches`
@@ -1212,7 +1591,19 @@ export default function TripResult({ params }: Props) {
   }, {})
 
   // ── Early returns ────────────────────────────────────────────────────────────
-  if (loading) {
+
+  // Paywall gate — must come before the loading check so that a user with 0 credits
+  // never sees even a frame of the empty itinerary before the modal appears.
+  if (paywallOpen && !rawTripData) {
+    return (
+      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+        <PaywallModal open={true} locale={locale} onClose={handlePaywallClose} />
+      </main>
+    )
+  }
+
+  // Loading gate — covers both "access check in progress" and "AI generation in progress".
+  if (!isAccessResolved || loading) {
     return (
       <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
         <div className="page-inner"><LoadingState locale={locale} /></div>
@@ -1401,55 +1792,52 @@ export default function TripResult({ params }: Props) {
           <div className="max-w-[1160px] mx-auto px-7 py-6">
             <div className="grid grid-cols-3 gap-4 max-[600px]:grid-cols-1">
 
-              {/* Origin */}
+              {/* Origin — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
                   Ciudad de origen
                 </label>
-                <input
-                  type="text"
-                  value={prefOrigin}
-                  onChange={e => setPrefOrigin(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33] appearance-none"
+                <PlacesInput
+                  id="pref-origin"
+                  locale="es"
                   placeholder="Ej. Ciudad de México"
+                  value={prefOrigin}
+                  onChange={setPrefOrigin}
+                  onSelect={(p: PlaceResult) => setPrefOrigin(p.displayName)}
+                  locationBias="MX"
                 />
               </div>
 
-              {/* Destination */}
+              {/* Destination — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
                   Destino
                 </label>
-                <input
-                  type="text"
-                  value={prefDest}
-                  onChange={e => setPrefDest(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
+                <PlacesInput
+                  id="pref-dest"
+                  locale="es"
                   placeholder="Ej. Puerto Vallarta"
+                  value={prefDest}
+                  onChange={setPrefDest}
+                  onSelect={(p: PlaceResult) => setPrefDest(p.displayName)}
+                  locationBias="global"
                 />
               </div>
 
-              {/* Dates */}
+              {/* Dates — calendar picker */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
                   Fechas
                 </label>
-                <div className="flex gap-1.5">
-                  <input
-                    type="text"
-                    value={prefStart}
-                    onChange={e => setPrefStart(e.target.value)}
-                    className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
-                    placeholder="Inicio"
-                  />
-                  <input
-                    type="text"
-                    value={prefEnd}
-                    onChange={e => setPrefEnd(e.target.value)}
-                    className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
-                    placeholder="Fin"
-                  />
-                </div>
+                <DateRangePicker
+                  value={prefDateRange}
+                  onChange={r => {
+                    setPrefDateRange(r)
+                    const fmt = (d: Date) => d.toISOString().slice(0, 10)
+                    setPrefStart(r.start ? fmt(r.start) : '')
+                    setPrefEnd(r.end   ? fmt(r.end)   : '')
+                  }}
+                />
               </div>
 
               {/* Pace */}
@@ -1457,15 +1845,20 @@ export default function TripResult({ params }: Props) {
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
                   Ritmo
                 </label>
-                <select
-                  value={prefPace}
-                  onChange={e => setPrefPace(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33] appearance-none"
-                >
-                  <option value="Relajado">Relajado · Pocas actividades</option>
-                  <option value="Equilibrado">Equilibrado</option>
-                  <option value="Activo">Activo · Máx. experiencias</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={prefPace}
+                    onChange={e => setPrefPace(e.target.value)}
+                    className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#C8D9D3] rounded-[2px] px-3 py-2 pr-8 outline-none focus:border-[#0F3A33] focus:shadow-[0_0_0_3px_rgba(15,58,51,.06)] appearance-none transition-all"
+                  >
+                    <option value="Relajado">Relajado · Pocas actividades</option>
+                    <option value="Equilibrado">Equilibrado</option>
+                    <option value="Activo">Activo · Máx. experiencias</option>
+                  </select>
+                  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#6B8F86]" viewBox="0 0 10 6" fill="none">
+                    <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
 
               {/* Budget */}
@@ -1473,16 +1866,21 @@ export default function TripResult({ params }: Props) {
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
                   Presupuesto
                 </label>
-                <select
-                  value={prefBudget}
-                  onChange={e => setPrefBudget(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33] appearance-none"
-                >
-                  <option value="$10k–$15k">$10k–$15k</option>
-                  <option value="$15k–$25k">$15k–$25k</option>
-                  <option value="$25k–$40k">$25k–$40k</option>
-                  <option value="$40k+">$40k+</option>
-                </select>
+                <div className="relative">
+                  <select
+                    value={prefBudget}
+                    onChange={e => setPrefBudget(e.target.value)}
+                    className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#C8D9D3] rounded-[2px] px-3 py-2 pr-8 outline-none focus:border-[#0F3A33] focus:shadow-[0_0_0_3px_rgba(15,58,51,.06)] appearance-none transition-all"
+                  >
+                    <option value="$10k–$15k">$10k–$15k MXN</option>
+                    <option value="$15k–$25k">$15k–$25k MXN</option>
+                    <option value="$25k–$40k">$25k–$40k MXN</option>
+                    <option value="$40k+">$40k+ MXN</option>
+                  </select>
+                  <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#6B8F86]" viewBox="0 0 10 6" fill="none">
+                    <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
               </div>
 
               {/* Interests */}
@@ -1835,7 +2233,7 @@ export default function TripResult({ params }: Props) {
                                 <div className="flex flex-col items-end gap-[5px] shrink-0 pt-3">
                                   {item.price && (
                                     <div className="font-mono text-[13px] font-medium text-[#1C1C1A] text-right">
-                                      {item.price}
+                                      {item.price} {budgetCurrency}
                                     </div>
                                   )}
                                   <div className="flex flex-col gap-[3px] items-end">
@@ -2038,79 +2436,121 @@ export default function TripResult({ params }: Props) {
                 <div
                   data-trip-card="packing-body"
                   style={{
-                    maxHeight: collapsedCards.has('packing') ? '0' : '800px',
+                    maxHeight: collapsedCards.has('packing') ? '0' : '900px',
                     opacity: collapsedCards.has('packing') ? 0 : 1,
                     overflow: 'hidden',
                     transition: 'max-height 0.4s ease, opacity 0.3s',
                   }}
                 >
-                  <div className="border-t border-[#E4DFD8] px-4 py-3">
-                    {packing.length === 0 ? (
-                      <p className="text-[11px] text-[#7A7A76] italic py-1">
-                        El plan no incluye lista de equipaje.
-                      </p>
-                    ) : (
-                      <div className="flex flex-col gap-[5px]">
-                        {packing.map((item, i) => (
-                          <div key={`${item}-${i}`} className="flex items-center gap-[7px]">
-                            <button
-                              className="w-3.5 h-3.5 rounded-[3px] border-[1.5px] flex items-center justify-center shrink-0 transition-all"
-                              style={packedSet.has(i)
-                                ? { background: '#0F3A33', borderColor: '#0F3A33' }
-                                : { background: '#fff', borderColor: '#CEC8C0' }
-                              }
-                              onClick={() => togglePacked(i)}
-                            >
-                              {packedSet.has(i) && (
-                                <span className="text-[9px] text-white font-semibold leading-none">✓</span>
-                              )}
-                            </button>
-                            <span
-                              className="text-[11.5px] font-normal flex-1 leading-[1.3]"
-                              style={packedSet.has(i)
-                                ? { textDecoration: 'line-through', color: '#B8B5AF' }
-                                : { color: '#3D3D3A' }
-                              }
-                            >
-                              {item}
-                            </span>
-                          </div>
-                        ))}
+                  <div className="border-t border-[#E4DFD8]">
+                    {/* Item list */}
+                    <div className="px-4 pt-3 pb-2 flex flex-col gap-[5px]">
+                      {packing.length === 0 && (
+                        <p className="text-[11px] text-[#7A7A76] italic py-1">
+                          Sin items aún. Añade el primero abajo.
+                        </p>
+                      )}
+                      {packing.map((item, i) => (
+                        <div key={`${item}-${i}`} className="flex items-center gap-[7px] group">
+                          {/* Checkbox */}
+                          <button
+                            className="w-3.5 h-3.5 rounded-[3px] border-[1.5px] flex items-center justify-center shrink-0 transition-all"
+                            style={packedSet.has(i)
+                              ? { background: '#0F3A33', borderColor: '#0F3A33' }
+                              : { background: '#fff', borderColor: '#CEC8C0' }
+                            }
+                            onClick={() => togglePacked(i)}
+                            aria-label="Marcar como empacado"
+                          >
+                            {packedSet.has(i) && (
+                              <span className="text-[9px] text-white font-semibold leading-none">✓</span>
+                            )}
+                          </button>
+
+                          {/* Label */}
+                          <span
+                            className="text-[11.5px] font-normal flex-1 leading-[1.3]"
+                            style={packedSet.has(i)
+                              ? { textDecoration: 'line-through', color: '#B8B5AF' }
+                              : { color: '#3D3D3A' }
+                            }
+                          >
+                            {item}
+                          </span>
+
+                          {/* Remove */}
+                          <button
+                            type="button"
+                            onClick={() => removePackingItem(i)}
+                            aria-label="Eliminar item"
+                            className="w-4 h-4 rounded-[3px] flex items-center justify-center text-[9px] text-[#B8B5AF] hover:bg-[#E4DFD8] hover:text-[#A32D2D] transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Add item row */}
+                    <div className="px-4 pb-3 pt-1 border-t border-dashed border-[#E4DFD8]">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="text"
+                          value={newPackingItem}
+                          onChange={e => setNewPackingItem(e.target.value)}
+                          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addPackingItem() } }}
+                          placeholder="Añadir ítem…"
+                          className="flex-1 font-sans text-[11.5px] text-[#1C1C1A] bg-transparent border-none outline-none placeholder:text-[#B8B5AF]"
+                        />
+                        <button
+                          type="button"
+                          onClick={addPackingItem}
+                          disabled={!newPackingItem.trim()}
+                          className="font-mono text-[9px] font-medium tracking-[.04em] text-[#0F3A33] bg-[#EDE7E1] hover:bg-[#E0D9D1] disabled:opacity-40 disabled:cursor-not-allowed rounded-[4px] px-[8px] py-[4px] transition-colors shrink-0"
+                        >
+                          + Añadir
+                        </button>
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Presupuesto — always rendered, empty state when no budget data */}
+              {/* Presupuesto — planned vs actual budget tracker */}
               <div data-trip="budget" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+
+                {/* Header */}
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors"
                   onClick={() => toggleCard('budget')}
                 >
                   <div className="flex items-center gap-2">
+                    <span>💰</span>
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
                       Presupuesto
                     </span>
+                  </div>
+                  <div className="flex items-center gap-2">
                     {totalBudget > 0 && (
                       <span className="font-mono text-[12px] font-medium text-[#3D3D3A]">
-                        ${totalBudget.toLocaleString()}
+                        ~{fmtAmt(totalBudget)} {budgetCurrency}
                       </span>
                     )}
-                  </div>
-                  <div
-                    className="text-[9px] text-[#7A7A76] transition-transform duration-300 inline-block"
-                    style={{ transform: collapsedCards.has('budget') ? 'rotate(-90deg)' : 'none' }}
-                  >
-                    ▾
+                    <div
+                      className="text-[9px] text-[#7A7A76] transition-transform duration-300 inline-block"
+                      style={{ transform: collapsedCards.has('budget') ? 'rotate(-90deg)' : 'none' }}
+                    >
+                      ▾
+                    </div>
                   </div>
                 </div>
 
+                {/* Body */}
                 <div
                   data-trip-card="budget-body"
                   style={{
-                    maxHeight: collapsedCards.has('budget') ? '0' : '900px',
-                    opacity: collapsedCards.has('budget') ? 0 : 1,
+                    maxHeight: collapsedCards.has('budget') ? '0' : '1400px',
+                    opacity:   collapsedCards.has('budget') ? 0 : 1,
                     overflow: 'hidden',
                     transition: 'max-height 0.4s ease, opacity 0.3s',
                   }}
@@ -2124,41 +2564,176 @@ export default function TripResult({ params }: Props) {
                       </div>
                     ) : (
                       <>
+                        {/* ── Currency toggle ── */}
+                        <div className="flex items-center justify-between px-4 py-[7px] border-b border-[#E4DFD8]">
+                          <span className="font-mono text-[9px] text-[#B8B5AF]">
+                            Montos en {budgetCurrency} · sin conversión
+                          </span>
+                          <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
+                            {(['MXN', 'USD'] as const).map(c => (
+                              <button
+                                key={c}
+                                type="button"
+                                onClick={e => { e.stopPropagation(); setBudgetCurrency(c) }}
+                                className={[
+                                  'font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] border-none cursor-pointer transition-all',
+                                  budgetCurrency === c
+                                    ? 'bg-[#0F3A33] text-white'
+                                    : 'bg-transparent text-[#7A7A76] hover:text-[#0F3A33]',
+                                ].join(' ')}
+                              >
+                                {c}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* ── Summary bar ── */}
+                        <div className="grid grid-cols-2 border-b border-[#E4DFD8]">
+                          {[
+                            { label: 'Estimado',   value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
+                            { label: 'Confirmado', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
+                          ].map((col, ci) => (
+                            <div
+                              key={col.label}
+                              className={`px-[7px] py-[9px] text-center ${ci < 1 ? 'border-r border-[#E4DFD8]' : ''}`}
+                            >
+                              <span className="font-mono text-[8px] font-medium tracking-[.1em] uppercase text-[#B8B5AF] block mb-[4px]">
+                                {col.label}
+                              </span>
+                              <span className={`font-display text-[12px] block ${col.color}`}>
+                                {col.value}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* ── Category groups ── */}
                         {Object.entries(budgetByCategory).map(([cat, rows]) => {
-                          const catTotal = rows.reduce((s, r) => s + r.amount, 0)
+                          const catTotal = rows.reduce((s, r) => s + activeAmount(r), 0)
                           return (
                             <div key={cat} className="border-b border-[#E4DFD8] last:border-b-0">
+
+                              {/* Category header */}
                               <div className="flex items-center justify-between px-4 py-[5px] bg-[#EDE7E1]">
                                 <span className="font-mono text-[8px] font-medium tracking-[.12em] uppercase text-[#7A7A76]">
                                   {cat}
                                 </span>
                                 <span className="font-mono text-[10px] font-medium text-[#3D3D3A]">
-                                  ${catTotal.toLocaleString()}
+                                  {fmtAmt(catTotal)}
                                 </span>
                               </div>
-                              {rows.map(row => (
-                                <div
-                                  key={row.id}
-                                  className="flex items-center justify-between px-4 py-2 border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors"
-                                >
-                                  <span className="text-[11px] font-normal text-[#1C1C1A] truncate flex-1">
-                                    {row.label}
-                                  </span>
-                                  <span className="font-mono text-[11.5px] font-medium text-[#1C1C1A] ml-2 shrink-0">
-                                    ${row.amount.toLocaleString()}
-                                  </span>
-                                </div>
-                              ))}
+
+                              {/* Row items */}
+                              {rows.map(row => {
+                                const isActual  = row.actual  !== null
+                                const isUserEst = row.userEst !== null && !isActual
+                                const primary   = activeAmount(row)
+                                const isOpen    = openBudgetEditId === row.id
+
+                                const amtCls = isActual  ? 'text-[#2D6B57] font-semibold'
+                                             : isUserEst ? 'text-[#0F3A33] font-medium'
+                                             : 'text-[#7A7A76]'
+                                const dotCls = isActual  ? 'bg-[#6B8F86]'
+                                             : isUserEst ? 'bg-[#0F3A33]'
+                                             : 'bg-[#CEC8C0]'
+                                const statusLbl = isActual  ? 'Real'
+                                               : isUserEst ? 'Ajustado'
+                                               : null
+
+                                const showGhost = (isActual || isUserEst) && row.aiEst > 0 && primary !== row.aiEst
+                                const delta     = isActual ? row.actual! - row.aiEst : null
+                                const rowIcon   = row.icon ?? BUDGET_ICON[cat] ?? '🛍'
+
+                                return (
+                                  <div key={row.id}>
+                                    {/* Row */}
+                                    <div
+                                      className="grid px-4 py-[8px] border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors cursor-pointer"
+                                      style={{ gridTemplateColumns: '17px 1fr auto', gap: '7px', alignItems: 'start' }}
+                                      onClick={() => setOpenBudgetEditId(isOpen ? null : row.id)}
+                                    >
+                                      <span className="text-[12px] pt-[1px]">{rowIcon}</span>
+
+                                      <div className="min-w-0">
+                                        <div className="text-[11px] font-normal text-[#1C1C1A] truncate">
+                                          {row.label}
+                                        </div>
+                                        <div className="flex items-center gap-[3px] mt-[1px]">
+                                          <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${dotCls}`} />
+                                          {statusLbl && (
+                                            <span className="font-mono text-[9px] text-[#B8B5AF]">{statusLbl}</span>
+                                          )}
+                                          {row.note && (
+                                            <span className="font-mono text-[9px] text-[#B8B5AF] truncate">
+                                              · {row.note}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      <div className="flex flex-col items-end gap-[1px] min-w-[72px]">
+                                        <span className={`font-mono text-[11.5px] ${amtCls}`}>
+                                          {fmtAmt(primary)}
+                                        </span>
+                                        {showGhost && (
+                                          <span className="font-mono text-[9px] text-[#B8B5AF] line-through">
+                                            {fmtAmt(row.aiEst)}
+                                          </span>
+                                        )}
+                                        {delta !== null && delta !== 0 && (
+                                          <span className={`font-mono text-[9px] font-medium ${delta > 0 ? 'text-[#A32D2D]' : 'text-[#2D6B57]'}`}>
+                                            {delta > 0 ? '+' : ''}{fmtAmt(delta)}
+                                          </span>
+                                        )}
+                                      </div>
+                                    </div>
+
+                                    {/* Inline edit panel */}
+                                    {isOpen && (
+                                      <BudgetEditPanel
+                                        row={row}
+                                        onSave={(uv, av) => saveBudgetRow(row.id, uv, av)}
+                                        onClose={() => setOpenBudgetEditId(null)}
+                                      />
+                                    )}
+                                  </div>
+                                )
+                              })}
                             </div>
                           )
                         })}
-                        <div className="px-4 pt-2.5 pb-3 border-t-[1.5px] border-[#CEC8C0]">
-                          <div className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-1.5">
-                            Total estimado
+
+                        {/* ── Footer totals ── */}
+                        <div className="px-4 pt-[10px] pb-[13px] border-t-[1.5px] border-[#CEC8C0]">
+                          <div className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-[7px]">
+                            Resumen total · {budgetCurrency}
                           </div>
-                          <div className="font-display text-[14px] font-normal text-[#0F3A33]">
-                            ${totalBudget.toLocaleString()} MXN
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Estimado</span>
+                              <span className="font-display text-[13px] text-[#0F3A33]">
+                                {fmtAmt(userTotal)}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Confirmado</span>
+                              <span className={`font-display ${hasActual ? 'text-[13px] text-[#2D6B57]' : 'text-[12px] text-[#B8B5AF]'}`}>
+                                {hasActual ? fmtAmt(actualTotal) : '—'}
+                              </span>
+                            </div>
                           </div>
+                          {hasActual && (
+                            <div className="mt-[8px] pt-[7px] border-t border-dashed border-[#E4DFD8]">
+                              <span className="font-mono text-[9px] text-[#B8B5AF]">
+                                {actualTotal > userTotal
+                                  ? `+${fmtAmt(actualTotal - userTotal)} sobre lo estimado`
+                                  : actualTotal < userTotal
+                                  ? `${fmtAmt(userTotal - actualTotal)} bajo el estimado`
+                                  : 'Exactamente en el estimado'}
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </>
                     )}
@@ -2261,13 +2836,15 @@ export default function TripResult({ params }: Props) {
               </div>
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-1.5">
-                  Precio estimado
+                  Precio · {budgetCurrency}
                 </label>
                 <input
+                  type="number"
+                  min="0"
                   value={editPrice}
                   onChange={e => setEditPrice(e.target.value)}
                   className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
-                  placeholder="$1,200 MXN"
+                  placeholder="0"
                 />
               </div>
             </div>

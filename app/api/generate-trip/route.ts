@@ -33,6 +33,13 @@ export async function POST(req: NextRequest) {
 
       if (!check.allowed) {
         const reason = (check as { allowed: false; reason: string }).reason
+        // 'error' means infra/config failure — don't show paywall for a broken service
+        if (reason === 'error') {
+          return NextResponse.json(
+            { error: 'service_unavailable', reason: 'entitlement_check_failed' },
+            { status: 503 },
+          )
+        }
         return NextResponse.json(
           { error: 'no_credits', reason },
           { status: 402 },

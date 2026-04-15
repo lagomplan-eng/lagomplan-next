@@ -4,8 +4,10 @@
 //   1. Empty form (no searchParams.destination)
 //   2. Result view with AI-generated itinerary
 
+import { useEffect } from 'react'
 import Link from 'next/link'
 import { useLocale } from 'next-intl'
+import { useRouter } from '../../../lib/navigation'
 import HeroForm from '../../../components/forms/HeroForm'
 import TripResult from './TripResult'
 import GuidesPreview from '../../../components/GuidesPreview'
@@ -20,9 +22,26 @@ interface Props {
 }
 
 export default function TripGeneratorClient({ searchParams }: Props) {
-  const destination = searchParams.destination || ''
-  const trip_id     = searchParams.trip_id     || ''
-  const hasResult   = !!(destination || trip_id)
+  const destination    = searchParams.destination || ''
+  const trip_id        = searchParams.trip_id     || ''
+  const checkoutStatus = searchParams.checkout    || ''
+  const hasResult      = !!(destination || trip_id)
+  const router         = useRouter()
+
+  // After Stripe redirects to ?checkout=success (no trip params), restore the
+  // original trip URL that was saved before the redirect. This brings back
+  // all planner params so TripResult can re-render and show the success toast.
+  useEffect(() => {
+    if (checkoutStatus !== 'success') return
+    const returnUrl = sessionStorage.getItem('plannerReturnUrl')
+    if (!returnUrl) return
+    sessionStorage.removeItem('plannerReturnUrl')
+    const sep       = returnUrl.includes('?') ? '&' : '?'
+    const cleanPath = returnUrl.replace(/^\/(en|es)(?=\/|$)/, '')
+    router.replace(`${cleanPath}${sep}checkout=success` as any)
+  // Run once on mount — checkout status won't change within the same render
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   if (!hasResult) {
     return <FormPage />
