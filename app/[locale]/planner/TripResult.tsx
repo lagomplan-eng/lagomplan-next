@@ -12,7 +12,7 @@ import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../.
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer' | 'relax'
+type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
 
 type BookingOption = {
   id: string
@@ -117,13 +117,12 @@ const TYPE_INFO: Record<ItemType, { icon: string; label: string }> = {
   tour:       { icon: '🌊', label: 'Tour' },
   restaurant: { icon: '🍽', label: 'Restaurante' },
   free:       { icon: '🚶', label: 'Libre' },
-  relax:      { icon: '💆', label: 'Relax' },
   transfer:   { icon: '🚗', label: 'Transfer' },
 }
 
 const TYPE_BORDER: Record<ItemType, string> = {
   hotel: '#0F3A33', tour: '#0891B2', restaurant: '#D97706',
-  free: '#CEC8C0', relax: '#6B8F86', transfer: '#2D4F6C',
+  free: '#CEC8C0', transfer: '#2D4F6C',
 }
 
 const TYPE_ROW_BG: Record<ItemType, string> = {
@@ -131,7 +130,6 @@ const TYPE_ROW_BG: Record<ItemType, string> = {
   tour:       'rgba(8,145,178,.06)',
   restaurant: 'rgba(217,119,6,.07)',
   free:       'transparent',
-  relax:      'rgba(107,143,134,.06)',
   transfer:   'rgba(45,79,108,.06)',
 }
 
@@ -140,7 +138,6 @@ const TYPE_BADGE: Record<ItemType, { color: string; bg: string }> = {
   tour:       { color: '#0E7490', bg: '#ECFEFF' },
   restaurant: { color: '#92400E', bg: '#FFFBEB' },
   free:       { color: '#7A7A76', bg: '#EDE7E1' },
-  relax:      { color: '#065F46', bg: '#ECFDF5' },
   transfer:   { color: '#2D4F6C', bg: '#EBF4FF' },
 }
 
@@ -165,8 +162,6 @@ const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
   tour:       'Reservar experiencia',
   restaurant: 'Reservar mesa',
   transfer:   'Reservar transfer',
-  relax:      'Reservar experiencia',
-  free:       'Reservar',
 }
 
 // Default provider options per item type — used when item has no affiliate/bookingOptions
@@ -282,7 +277,7 @@ function normalizeItemType(raw: unknown): ItemType {
   if (t === 'restaurant' || t.includes('restaur') || t.includes('comida') || t.includes('cena') || t.includes('almuerz') || t.includes('desayun') || t.includes('food') || t.includes('eat') || t.includes('gastro')) return 'restaurant'
   if (t === 'tour' || t.includes('tour') || t.includes('excurs') || t.includes('activid') || t.includes('atraccion') || t.includes('activity') || t.includes('visita') || t.includes('aventura')) return 'tour'
   if (t === 'transfer' || t.includes('transfer') || t.includes('transport') || t.includes('traslad') || t.includes('vuelo') || t.includes('flight') || t.includes('bus') || t.includes('taxi') || t.includes('auto')) return 'transfer'
-  if (t === 'relax' || t.includes('relax') || t.includes('descanso') || t.includes('spa') || t.includes('libre') || t.includes('playa') || t.includes('beach')) return 'relax'
+  if (t === 'relax' || t.includes('relax') || t.includes('descanso') || t.includes('spa') || t.includes('libre') || t.includes('playa') || t.includes('beach')) return 'free'
   return 'free'
 }
 
@@ -1791,8 +1786,8 @@ export default function TripResult({ params }: Props) {
                                     </div>
                                   )}
                                   <div className="flex flex-col gap-[3px] items-end">
-                                    {/* Opens booking modal — hidden for free/relax items */}
-                                    {item.type !== 'free' && item.type !== 'relax' && (
+                                    {/* Opens booking modal — hidden for libre/free items */}
+                                    {item.type !== 'free' && (
                                     <button
                                       onClick={() => openBookingModal(item)}
                                       className="flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase text-white bg-[#0F3A33] px-2.5 py-[5px] rounded-[4px] hover:bg-[#1A5247] hover:-translate-y-px transition-all whitespace-nowrap"
@@ -2153,7 +2148,7 @@ export default function TripResult({ params }: Props) {
                 Tipo
               </label>
               <div className="flex flex-wrap gap-[5px]">
-                {(['hotel', 'tour', 'restaurant', 'transfer', 'relax', 'free'] as ItemType[]).map(t => {
+                {(['hotel', 'tour', 'restaurant', 'transfer', 'free'] as ItemType[]).map(t => {
                   const info  = TYPE_INFO[t]
                   const badge = TYPE_BADGE[t]
                   const sel   = editType === t

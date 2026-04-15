@@ -2,7 +2,7 @@
 // Affiliate link generation and click tracking for itinerary items.
 // Used by the booking modal in TripResult.tsx.
 
-export type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer' | 'relax'
+export type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
 
 export interface BookingOption {
   id: string
@@ -21,9 +21,24 @@ export interface BookingContext {
 
 // ── Stay22 ───────────────────────────────────────────────────────────────────
 
-function stay22Link(city: string, keyword: string, start: string, end: string): string {
-  const destination = `${city} ${keyword}`
-  return `https://www.stay22.com/embed/gm?aid=lagomplan&destination=${encodeURIComponent(destination)}&checkin=${start}&checkout=${end}`
+function generateStay22Link({ city, keyword, dates }: {
+  city: string
+  keyword: string
+  dates?: { start?: string; end?: string }
+}): string {
+  const base  = 'https://www.stay22.com/embed/gm'
+  const query = `${city} ${keyword}`
+  return `${base}?aid=lagomplan&address=${encodeURIComponent(query)}${
+    dates?.start ? `&checkin=${dates.start}`   : ''
+  }${
+    dates?.end   ? `&checkout=${dates.end}` : ''
+  }`
+}
+
+const STAY22_COMMON_PARAMS = 'aid=lagomplan&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&source=direct'
+
+function generateActivityLink(base: string, city: string): string {
+  return `${base}?${STAY22_COMMON_PARAMS}&address=${encodeURIComponent(city)}`
 }
 
 // ── Country detection ─────────────────────────────────────────────────────────
@@ -52,8 +67,10 @@ export function getBookingOptions(
   item: { type: ItemType; name: string },
   ctx: BookingContext,
 ): BookingOption[] {
-  const { city, country, startDate, endDate } = ctx
+  const { city, startDate, endDate } = ctx
   const encoded = encodeURIComponent(item.name)
+
+  const dates = { start: startDate, end: endDate }
 
   switch (item.type) {
     case 'tour':
@@ -63,14 +80,14 @@ export function getBookingOptions(
           provider: 'gyg',
           name:     'GetYourGuide',
           desc:     'Experiencias verificadas. Cancelación gratis hasta 24 hrs.',
-          url:      stay22Link(city, 'tours', startDate, endDate),
+          url:      generateActivityLink('https://getyourguide.stay22.com/lagomplan/vP_T4j_a5L', city),
         },
         {
           id:       'expedia',
           provider: 'expedia',
           name:     'Expedia',
           desc:     'Tours y actividades con soporte 24/7.',
-          url:      stay22Link(city, 'tours', startDate, endDate),
+          url:      generateActivityLink('https://expedia.stay22.com/lagomplan/B03L4axuky', city),
         },
       ]
 
@@ -81,58 +98,41 @@ export function getBookingOptions(
           provider: 'hotels',
           name:     'Hotels.com',
           desc:     'Mayor selección de hoteles. Precio garantizado.',
-          url:      stay22Link(city, 'hotels', startDate, endDate),
+          url:      generateStay22Link({ city, keyword: 'hotels', dates }),
         },
         {
           id:       'stay22-b',
           provider: 'booking',
           name:     'Booking.com',
           desc:     'Cancelación gratis en la mayoría de propiedades.',
-          url:      stay22Link(city, 'hotels', startDate, endDate),
+          url:      generateStay22Link({ city, keyword: 'hotels', dates }),
         },
       ]
 
-    case 'restaurant': {
-      if (country === 'US') {
-        return [
-          {
-            id:       'opentable',
-            provider: 'opentable',
-            name:     'OpenTable',
-            desc:     'Reserva de mesa online. Confirmación inmediata.',
-            url:      `https://www.opentable.com/s/?term=${encoded}`,
-          },
-          {
-            id:       'resy',
-            provider: 'resy',
-            name:     'Resy',
-            desc:     'Restaurantes exclusivos. Reserva en segundos.',
-            url:      `https://resy.com/cities/${encodeURIComponent(city.toLowerCase())}`,
-          },
-        ]
-      }
-      if (country === 'europe') {
-        return [
-          {
-            id:       'thefork',
-            provider: 'thefork',
-            name:     'TheFork',
-            desc:     'El líder en reservas de restaurantes en Europa.',
-            url:      `https://www.thefork.com/search?text=${encoded}`,
-          },
-        ]
-      }
-      // Default (Mexico + rest of world)
+    case 'restaurant':
       return [
+        {
+          id:       'opentable',
+          provider: 'opentable',
+          name:     'OpenTable',
+          desc:     'Reserva de mesa online. Confirmación inmediata.',
+          url:      `https://www.opentable.com/s/?term=${encoded}`,
+        },
+        {
+          id:       'thefork',
+          provider: 'thefork',
+          name:     'TheFork',
+          desc:     'Reserva tu mesa en segundos.',
+          url:      `https://www.thefork.com/search?text=${encoded}`,
+        },
         {
           id:       'googlemaps',
           provider: 'googlemaps',
           name:     'Google Maps',
           desc:     'Busca el restaurante y reserva directo.',
-          url:      `https://www.google.com/maps/search/?api=1&query=${encoded}`,
+          url:      `https://www.google.com/maps/search/?api=1&query=${encoded}+${encodeURIComponent(city)}`,
         },
       ]
-    }
 
     case 'transfer': {
       const loc = encodeURIComponent(item.name)
@@ -155,7 +155,6 @@ export function getBookingOptions(
     }
 
     case 'free':
-    case 'relax':
       return []
   }
 }
