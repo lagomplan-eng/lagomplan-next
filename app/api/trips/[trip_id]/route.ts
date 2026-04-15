@@ -1,5 +1,6 @@
 // app/api/trips/[trip_id]/route.ts
-// Fetches a saved trip from Supabase by ID
+// GET  — fetch a saved trip by ID
+// PATCH — update title / trip_data (autosave)
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '../../../../lib/supabase/server'
@@ -43,6 +44,52 @@ export async function GET(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[trips/get] error:', message)
+    return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { trip_id: string } },
+) {
+  const { trip_id } = params
+  if (!trip_id) return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
+
+  try {
+    const body = await req.json()
+    const { title, trip_data } = body
+
+    const supabase = getSupabaseServer()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    const updatePayload: Record<string, unknown> = {}
+    if (title !== undefined) updatePayload.title = title || null
+    if (trip_data !== undefined) updatePayload.trip_data = trip_data
+
+    if (Object.keys(updatePayload).length === 0) {
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
+    }
+
+    const { error } = await supabase
+      .from('trips')
+      .update(updatePayload)
+      .eq('id', trip_id)
+      .eq('user_id', user.id)   // ownership guard
+
+    if (error) {
+      console.error('[trips/patch] update error:', error.message)
+      return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
+    }
+
+    console.log('[trips/patch] updated trip:', trip_id)
+    return NextResponse.json({ success: true })
+
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[trips/patch] error:', message)
     return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
   }
 }

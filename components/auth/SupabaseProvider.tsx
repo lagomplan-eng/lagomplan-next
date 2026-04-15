@@ -12,13 +12,9 @@ export function SupabaseProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const supabase = getSupabaseBrowser()
 
-    // Initial session — fast, no network
-    supabase.auth.getSession().then(({ data }) => {
-      console.log('[Auth] initial session:', data.session?.user ?? null)
-      setUser(data.session?.user ?? null)
-    })
-
-    // Real-time auth changes
+    // onAuthStateChange fires INITIAL_SESSION automatically on subscribe,
+    // so we do NOT call getSession() separately — doing both causes concurrent
+    // navigator lock acquisitions that produce "lock stolen" errors.
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('[Auth] state change:', event, session?.user ?? null)
       setUser(session?.user ?? null)

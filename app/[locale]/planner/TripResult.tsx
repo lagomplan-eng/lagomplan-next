@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
-import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import PaywallModal from '../../../components/PaywallModal'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
@@ -566,6 +565,11 @@ export default function TripResult({ params }: Props) {
   const [shareOpen,   setShareOpen]     = useState(false)
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
 
+  // ── Autosave status ───────────────────────────────────────────────────────────
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const autoSaveTimerRef  = useRef<ReturnType<typeof setTimeout>>()
+  const hasInitializedRef = useRef(false)   // prevents autosave on initial mount
+
   // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
   type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
   const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
@@ -783,11 +787,60 @@ export default function TripResult({ params }: Props) {
     const raw = sessionStorage.getItem('pendingSave')
     if (!raw) return
     sessionStorage.removeItem('pendingSave')
-    ;(async () => {
-      const { data: { session } } = await getSupabaseBrowser().auth.getSession()
-      if (session) saveTrip(authedUser.id)
-    })()
+    // authedUser being non-null already guarantees a valid session exists —
+    // calling getSession() here would race with SupabaseProvider's lock.
+    saveTrip(authedUser.id)
   }, [authedUser, rawTripData])
+
+  // ── Autosave — fires on any content change AFTER trip is in DB ──────────────
+  useEffect(() => {
+    // Skip the very first run (initial mount / initial data load).
+    // hasInitializedRef resets to false on every mount so we don't autosave
+    // the state that was just set by the generate or DB-load effects.
+    if (!hasInitializedRef.current) {
+      hasInitializedRef.current = true
+      return
+    }
+
+    // Gate: both conditions must be true for autosave to run.
+    // Read tripId / authedUser at effect time — they don't need to be deps
+    // because we only want content changes to trigger autosave, not auth changes.
+    if (!tripId || !authedUser || loading) return
+
+    clearTimeout(autoSaveTimerRef.current)
+    setSaveStatus('saving')
+
+    // Capture a snapshot of the current content at the moment the effect fires.
+    // The timeout reads from this snapshot, not from a stale closure.
+    const savedId = tripId
+    const snapshot = { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows }
+
+    autoSaveTimerRef.current = setTimeout(async () => {
+      try {
+        console.log('[autosave] patching trip:', savedId)
+        const res = await fetch(`/api/trips/${savedId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ title: snapshot.title, trip_data: snapshot }),
+        })
+        if (res.ok) {
+          console.log('[autosave] saved')
+          setSaveStatus('saved')
+          setTimeout(() => setSaveStatus('idle'), 2000)
+        } else {
+          console.warn('[autosave] failed:', res.status)
+          setSaveStatus('idle')
+        }
+      } catch (err) {
+        console.warn('[autosave] error:', err)
+        setSaveStatus('idle')
+      }
+    }, 1500)
+
+    return () => clearTimeout(autoSaveTimerRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle])
 
   // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
   function handlePaywallClose() {
@@ -1261,11 +1314,11 @@ export default function TripResult({ params }: Props) {
                 <button
                   className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${tripId ? 'text-[#2D6B57] cursor-default' : 'text-[#7A7A76] hover:text-[#0F3A33]'}`}
                   onClick={handleSave}
+                  disabled={saveStatus === 'saving'}
                 >
-                  {tripId
-                    ? <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>
-                    : <><span>🔖</span> {locale === 'es' ? 'Guardar' : 'Save'}</>
-                  }
+                  {!tripId && <><span>🔖</span> {locale === 'es' ? 'Guardar' : 'Save'}</>}
+                  {tripId && saveStatus === 'saving' && <><span className="animate-pulse">💾</span> {locale === 'es' ? 'Guardando…' : 'Saving…'}</>}
+                  {tripId && saveStatus !== 'saving' && <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>}
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
