@@ -71,20 +71,27 @@ export async function POST(req: NextRequest) {
 
   try {
     const session = await stripe.checkout.sessions.create({
-      mode: isSubscription ? 'subscription' : 'payment',
-      line_items: [{ price: priceId, quantity: 1 }],
-      success_url: successUrl,
-      cancel_url:  cancelUrl,
-      customer_email: user.email,
-      client_reference_id: user.id,   // fallback for webhook user lookup
-      metadata: { user_id: user.id, plan },
-      allow_promotion_codes: true,     // shows promo code field in Stripe Checkout
-      ...(isSubscription && {
-        subscription_data: {
-          metadata: { user_id: user.id },  // also on subscription for cancellation events
-        },
-      }),
-    })
+  mode: isSubscription ? 'subscription' : 'payment',
+
+  line_items: [{ price: priceId, quantity: 1 }],
+
+  payment_method_types: ['card'], // 👈 ADD THIS (removes Link)
+
+  success_url: successUrl,
+  cancel_url: cancelUrl,
+
+  customer_email: user.email,
+  client_reference_id: user.id,
+  metadata: { user_id: user.id, plan },
+
+  allow_promotion_codes: true,
+
+  ...(isSubscription && {
+    subscription_data: {
+      metadata: { user_id: user.id },
+    },
+  }),
+})
 
     console.log('[checkout] created session:', session.id, 'for user:', user.id, 'plan:', plan)
     return NextResponse.json({ url: session.url })
