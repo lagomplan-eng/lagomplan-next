@@ -18,7 +18,7 @@ export function Transport({ data }: Props) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <div className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+    <div data-guide="transport" className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
       {/* Toggle header */}
       <button
         type="button"
@@ -56,25 +56,26 @@ export function Transport({ data }: Props) {
         {data.options.map((opt, i) => (
           <div
             key={i}
+            data-transport="option"
             className="px-5 py-4 border-b border-[#E2DDD5] last:border-0"
           >
             {/* Option header */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-[15px]">{opt.icon}</span>
-              <span className="text-[13px] font-medium text-[#1A1A1A] flex-1">
+            <div data-transport="header" className="flex items-center gap-2 mb-2">
+              <span data-transport="icon" className="text-[15px]">{opt.icon}</span>
+              <span data-transport="name" className="text-[13px] font-medium text-[#1A1A1A] flex-1">
                 {opt.name}
               </span>
-              <span className="font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#8A8A8A] bg-[#EDE7E1] px-[7px] py-[2px] rounded-full border border-[#E2DDD5]">
+              <span data-transport="badge" className="font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#8A8A8A] bg-[#EDE7E1] px-[7px] py-[2px] rounded-full border border-[#E2DDD5]">
                 {opt.badge}
               </span>
             </div>
             {/* Description */}
-            <p className="text-[12px] font-light text-[#4A4A4A] leading-[1.6]">
+            <p data-transport="description" className="text-[12px] font-light text-[#4A4A4A] leading-[1.6]">
               {opt.description}
             </p>
             {/* Tip callout */}
             {opt.tip && (
-              <div className="mt-2.5 p-[8px_12px] bg-[#E8F0EE] border-l-2 border-[#6B8F86] rounded-r-[4px] text-[11px] font-normal text-[#2D6B5A] leading-[1.5]">
+              <div data-transport="tip" className="mt-2.5 p-[8px_12px] bg-[#E8F0EE] border-l-2 border-[#6B8F86] rounded-r-[4px] text-[11px] font-normal text-[#2D6B5A] leading-[1.5]">
                 {opt.tip}
               </div>
             )}

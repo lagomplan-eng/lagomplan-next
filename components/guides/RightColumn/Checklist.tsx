@@ -43,7 +43,7 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
   const progress = total > 0 ? (doneCount / total) * 100 : 0
 
   return (
-    <div className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+    <div data-guide="checklist" className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 pb-[14px] border-b border-[#E2DDD5]">
         <div>
@@ -85,6 +85,7 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
             return (
               <div
                 key={i}
+                data-check="item"
                 role="checkbox"
                 aria-checked={done}
                 tabIndex={0}
@@ -94,6 +95,7 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
               >
                 {/* Checkbox */}
                 <div
+                  data-check="box"
                   className="w-[17px] h-[17px] rounded-[4px] border border-[#C8C2B8] flex items-center justify-center flex-shrink-0 transition-all"
                   style={done ? { background: '#0F3A33', borderColor: '#0F3A33' } : { background: 'white' }}
                 >
@@ -102,11 +104,12 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
                   )}
                 </div>
                 {/* Emoji */}
-                <span className="text-[13px] flex-shrink-0 w-[18px] text-center">
+                <span data-check="emoji" className="text-[13px] flex-shrink-0 w-[18px] text-center">
                   {item.emoji}
                 </span>
                 {/* Label */}
                 <span
+                  data-check="label"
                   className="text-[12.5px] font-light flex-1 leading-[1.35] transition-colors"
                   style={done ? { color: '#BDBDBD', textDecoration: 'line-through' } : { color: '#4A4A4A' }}
                 >

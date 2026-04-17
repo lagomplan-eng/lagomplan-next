@@ -2761,6 +2761,12 @@ export default function TripResult({ params }: Props) {
         </div>
       </div>
 
+      {/* ── PRINT FOOTER — logo, shown only in PDF/print ─────────────────── */}
+      <div className="hidden print:flex items-center justify-center gap-3 mt-10 pt-6 border-t border-[#E4DFD8]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/images/logo.png" alt="Lagomplan" className="h-8 w-auto opacity-75" />
+      </div>
+
       {/* ── ITEM EDIT / ADD MODAL ─────────────────────────────────────────── */}
       {editModalItem && (
         <div

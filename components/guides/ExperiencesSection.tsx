@@ -15,7 +15,7 @@ interface Props {
 
 export function ExperiencesSection({ data, onToast }: Props) {
   return (
-    <div className="mb-14">
+    <div data-guide="experiences" className="mb-14">
       {/* Section header */}
       <div className="mb-6">
         <div className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5">
@@ -32,23 +32,24 @@ export function ExperiencesSection({ data, onToast }: Props) {
       </div>
 
       {/* Experience list */}
-      <div className="flex flex-col bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+      <div data-exp="list" className="flex flex-col bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
         {data.items.map((exp) => (
           <div
             key={exp.number}
+            data-exp="item"
             className="grid grid-cols-[48px_1fr_auto] gap-4 items-start p-5 px-6 border-b border-[#E2DDD5] last:border-0 hover:bg-[rgba(15,58,51,.02)] transition-colors max-[640px]:grid-cols-[40px_1fr]"
           >
             {/* Number */}
-            <div className="font-mono text-[11px] font-medium text-[#BDBDBD] tracking-[.06em] pt-0.5">
+            <div data-exp="number" className="font-mono text-[11px] font-medium text-[#BDBDBD] tracking-[.06em] pt-0.5">
               {exp.number}
             </div>
 
             {/* Content */}
             <div>
-              <div className="text-[15px] font-medium text-[#1A1A1A] mb-1.5 leading-[1.4]">
+              <div data-exp="name" className="text-[15px] font-medium text-[#1A1A1A] mb-1.5 leading-[1.4]">
                 {exp.name}
               </div>
-              <p className="text-[13px] font-light text-[#4A4A4A] leading-[1.6] mb-2.5">
+              <p data-exp="description" className="text-[13px] font-light text-[#4A4A4A] leading-[1.6] mb-2.5">
                 {exp.description}
               </p>
               <div className="flex flex-wrap gap-1.5">

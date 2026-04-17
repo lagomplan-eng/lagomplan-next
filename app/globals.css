@@ -258,18 +258,19 @@ body {
 
 /* ─────────────────────────────────────────────────────────
    PRINT STYLESHEET — Editorial travel guide
-   Designed to feel like a Scandinavian magazine, not a UI export.
+   Magazine-quality · Monocle / Kinfolk aesthetic
+   Scoped to pages containing [data-guide="hero"]
    ──────────────────────────────────────────────────────── */
 
 @media print {
 
-  /* ── Page setup ───────────────────────────────────────── */
+  /* ── Page setup ─────────────────────────────────────────── */
   @page {
     size: A4 portrait;
     margin: 22mm 18mm 20mm 18mm;
   }
 
-  /* ── Global resets ─────────────────────────────────────── */
+  /* ── Universal resets (guide + planner pages) ────────────── */
   *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
@@ -288,89 +289,119 @@ body {
 
   a { color: inherit; }
 
-  /* ── Force-open all JS accordions ─────────────────────── */
-  /* DayCard + Transport use inline max-height: 0 to collapse */
+  /* Force-open JS accordions (DayCard, Transport use inline max-height: 0) */
   [style*="max-height"] {
     max-height: none !important;
     overflow: visible !important;
     opacity: 1 !important;
   }
 
-  /* ── Remove positioning artifacts ─────────────────────── */
-  .fixed, .sticky    { position: static !important; }
-  nav                { display: none !important; }
-  [class*="pt-\\[72"] { padding-top: 0 !important; }
+  /* ─────────────────────────────────────────────────────────
+     GUIDE-PAGE SCOPED RULES
+     ─────────────────────────────────────────────────────────  */
 
-  /* ── Remove all UI card chrome ─────────────────────────── */
-  .rounded-2xl, .rounded-xl, .rounded-lg, .rounded-md, .rounded-full {
-    border-radius: 0 !important;
-  }
-  .bg-white { background: transparent !important; }
+  /* Kill chrome, nav, toast, sticky right column */
+  body:has([data-guide="hero"]) nav                      { display: none !important; }
+  body:has([data-guide="hero"]) .fixed                   { display: none !important; }
+  body:has([data-guide="hero"]) .sticky                  { position: static !important; }
+  body:has([data-guide="hero"]) [class*="pt-\\[72"]      { padding-top: 0 !important; }
+  body:has([data-guide="hero"]) .min-h-screen            { min-height: 0 !important; }
 
-  /* ══════════════════════════════════════════════════════
-     HERO
-     ══════════════════════════════════════════════════════ */
+  /* Strip card chrome + cream/beige page backgrounds */
+  body:has([data-guide="hero"]) .rounded-2xl,
+  body:has([data-guide="hero"]) .rounded-xl,
+  body:has([data-guide="hero"]) .rounded-lg,
+  body:has([data-guide="hero"]) .rounded-full            { border-radius: 0 !important; }
+  body:has([data-guide="hero"]) .bg-white                { background: transparent !important; }
+  body:has([data-guide="hero"]) .bg-\[\#FFF9F3\]         { background: white !important; }
+  body:has([data-guide="hero"]) .bg-\[\#FDFCF9\]         { background: white !important; }
+
+  /* Collapse two-column grids to single column */
+  body:has([data-guide="hero"]) .grid                    { display: block !important; }
+
+  /* Hide PlanCTA (dark pine block) */
+  [data-guide="plan-cta"]                                { display: none !important; }
+
+  /* Suppress footer ::after on guide pages */
+  body:has([data-guide="hero"])::after                   { content: none !important; }
+
+  /* ══════════════════════════════════════════════════════════
+     COVER PAGE — hero fills the first A4 sheet
+     ════════════════════════════════════════════════════════ */
 
   [data-guide="hero"] {
+    page-break-after: always !important;
+    break-after: always !important;
+    min-height: 220mm !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
     background: white !important;
     border: none !important;
-    padding: 0 0 22pt !important;
-    margin-bottom: 26pt !important;
-    border-bottom: 1.5pt solid #1F1F1F !important;
-  }
-
-  [data-guide="hero"] > * {
-    max-width: 100% !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Grid → single column in print (Tailwind print:block handles this on the element) */
-  [data-guide="hero"] .grid { display: block !important; }
+  /* Logotype — same pattern as trip planner cover */
+  [data-guide="hero"]::before {
+    content: "lagomplan";
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 8pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    color: #6B8F86 !important;
+    letter-spacing: 0.06em !important;
+    display: block !important;
+    padding-bottom: 14pt !important;
+    border-bottom: 0.75pt solid #E4DFD8 !important;
+    margin-bottom: 36pt !important;
+  }
+
+  /* Strip max-width wrapper and inner grid */
+  [data-guide="hero"] > div          { padding: 0 !important; max-width: 100% !important; }
+  [data-guide="hero"] > div > div    { display: block !important; }
 
   /* Eyebrow */
   [data-hero="eyebrow"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     letter-spacing: 0.2em !important;
     color: #6F6A64 !important;
-    margin-bottom: 9pt !important;
+    margin-bottom: 12pt !important;
     display: flex !important;
     align-items: center !important;
-    gap: 6pt !important;
   }
-  /* Hide the decorative horizontal line inside eyebrow */
   [data-hero="eyebrow"] span { display: none !important; }
   [data-hero="eyebrow"]::before {
-    content: '—';
-    color: #C0BAB2;
-    margin-right: 4pt;
-    font-style: normal;
+    content: '—' !important;
+    color: #C0BAB2 !important;
+    margin-right: 6pt !important;
+    font-style: normal !important;
   }
 
   /* Title */
   [data-guide="hero"] h1 {
     font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
-    font-size: 38pt !important;
+    font-size: 42pt !important;
     font-weight: 300 !important;
     font-style: italic !important;
     line-height: 1.05 !important;
     letter-spacing: -0.02em !important;
     color: #1F1F1F !important;
-    margin: 0 0 10pt !important;
+    margin: 0 0 14pt !important;
   }
 
   /* Subtitle */
   [data-hero="subtitle"] {
-    font-size: 10.5pt !important;
+    font-size: 11pt !important;
     color: #6F6A64 !important;
     line-height: 1.65 !important;
     max-width: none !important;
-    margin-bottom: 14pt !important;
+    margin-bottom: 18pt !important;
   }
 
-  /* Chips → inline text with · separators, no pill styling */
-  [data-hero="chips"] {
-    display: block !important;
-  }
+  /* Chips → inline separated by · */
+  [data-hero="chips"]               { display: block !important; margin-bottom: 0 !important; }
   [data-hero="chips"] span {
     display: inline !important;
     background: none !important;
@@ -380,18 +411,18 @@ body {
     color: #6F6A64 !important;
     letter-spacing: 0.04em !important;
   }
-  /* The decorative dot inside each chip */
-  [data-hero="chips"] span > span { display: none !important; }
+  [data-hero="chips"] span > span   { display: none !important; }
   [data-hero="chips"] span + span::before {
-    content: ' · ';
-    color: #B0ACA6;
+    content: ' · ' !important;
+    color: #B0ACA6 !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     SHARED SECTION HEADER
-     ══════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     SHARED SECTION HEADERS (Itinerary, Hotels, Experiences)
+     ════════════════════════════════════════════════════════ */
 
   [data-section="eyebrow"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     letter-spacing: 0.2em !important;
     color: #6F6A64 !important;
@@ -411,25 +442,83 @@ body {
     padding-bottom: 8pt !important;
     border-bottom: 1pt solid #1F1F1F !important;
     display: block !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     ITINERARY — Editorial 2-column day layout
-     ══════════════════════════════════════════════════════ */
+  /* ── Right-column module headers (Tips / Checklist / Transport) ── */
+  [data-guide="tips"]      > div:first-child,
+  [data-guide="checklist"] > div:first-child,
+  [data-guide="transport"] > button {
+    padding: 0 0 8pt !important;
+    border: none !important;
+    border-bottom: 1pt solid #1F1F1F !important;
+    margin-bottom: 6pt !important;
+    background: none !important;
+    width: 100% !important;
+    text-align: left !important;
+    cursor: default !important;
+    pointer-events: none !important;
+  }
 
-  [data-guide="itinerary"] { margin-bottom: 0 !important; }
+  /* Eyebrow inside module headers */
+  [data-guide="tips"]      > div:first-child > div > div:first-child,
+  [data-guide="checklist"] > div:first-child > div > div:first-child {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
+    font-size: 7pt !important;
+    letter-spacing: 0.18em !important;
+    color: #6F6A64 !important;
+    margin-bottom: 2pt !important;
+  }
 
-  /* Day card: strip chrome, add top rule */
+  /* Title inside module headers */
+  [data-guide="tips"]      > div:first-child > div > div:last-child,
+  [data-guide="checklist"] > div:first-child > div > div:last-child {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 15pt !important;
+    font-weight: 300 !important;
+    font-style: italic !important;
+    color: #1F1F1F !important;
+    line-height: 1.2 !important;
+  }
+
+  /* Eyebrow + title inside transport toggle button */
+  [data-guide="transport"] > button > div > div:first-child {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
+    font-size: 7pt !important;
+    letter-spacing: 0.18em !important;
+    color: #6F6A64 !important;
+    margin-bottom: 2pt !important;
+  }
+  [data-guide="transport"] > button > div > div:last-child {
+    font-family: 'Fraunces', 'Playfair Display', Georgia, serif !important;
+    font-size: 15pt !important;
+    font-weight: 300 !important;
+    font-style: italic !important;
+    color: #1F1F1F !important;
+  }
+  /* Hide transport chevron */
+  [data-guide="transport"] > button > span:last-child { display: none !important; }
+
+  /* ══════════════════════════════════════════════════════════
+     ITINERARY — starts on a new page after cover
+     ════════════════════════════════════════════════════════ */
+
+  [data-guide="itinerary"] {
+    margin-bottom: 0 !important;
+    page-break-before: always !important;
+    break-before: always !important;
+  }
+
   [data-day="card"] {
     background: transparent !important;
     border: none !important;
     border-top: 0.5pt solid #EAE7E2 !important;
     overflow: visible !important;
-    page-break-inside: avoid;
-    break-inside: avoid;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
-  /* Day header button → non-interactive plain heading */
   [data-day="header"] {
     display: block !important;
     padding: 10pt 0 6pt !important;
@@ -442,6 +531,7 @@ body {
   }
 
   [data-day="ordinal"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     letter-spacing: 0.16em !important;
     color: #6F6A64 !important;
@@ -459,12 +549,8 @@ body {
     display: block !important;
   }
 
-  /* Day body */
-  [data-day="body"] {
-    padding: 0 !important;
-  }
+  [data-day="body"]                 { padding: 0 !important; }
 
-  /* Each activity row */
   [data-day="item"] {
     display: grid !important;
     grid-template-columns: 38pt 1fr !important;
@@ -474,9 +560,10 @@ body {
     border-bottom: 0.5pt solid #EAE7E2 !important;
     border-top: none !important;
   }
-  [data-day="item"]:last-child { border-bottom: none !important; }
+  [data-day="item"]:last-child      { border-bottom: none !important; }
 
   [data-day="time"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7.5pt !important;
     color: #2F5D50 !important;
     font-weight: 500 !important;
@@ -498,11 +585,18 @@ body {
     line-height: 1.55 !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     HOTELS
-     ══════════════════════════════════════════════════════ */
+  /* Hide activity badges / pills */
+  [data-day="item"] .rounded-full   { display: none !important; }
 
-  [data-guide="hotels"] { margin-bottom: 0 !important; }
+  /* ══════════════════════════════════════════════════════════
+     HOTELS — new page
+     ════════════════════════════════════════════════════════ */
+
+  [data-guide="hotels"] {
+    margin-bottom: 0 !important;
+    page-break-before: always !important;
+    break-before: always !important;
+  }
 
   [data-hotel="card"] {
     background: transparent !important;
@@ -511,9 +605,12 @@ body {
     padding: 11pt 0 !important;
     overflow: visible !important;
     display: block !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   [data-hotel="number"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     letter-spacing: 0.1em !important;
     color: #B0ACA6 !important;
@@ -552,7 +649,7 @@ body {
     margin-bottom: 5pt !important;
   }
 
-  /* Booking link: strip button styling, show as plain editorial link */
+  /* Booking link: editorial → text, clickable */
   [data-hotel="book-link"] {
     font-size: 7.5pt !important;
     color: #2F5D50 !important;
@@ -564,15 +661,18 @@ body {
     font-weight: 400 !important;
     letter-spacing: 0 !important;
   }
-  [data-hotel="book-link"]::before { content: '→ '; }
+  [data-hotel="book-link"]::before  { content: '→ '; }
 
-  /* ══════════════════════════════════════════════════════
-     EXPERIENCES
-     ══════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     EXPERIENCES — new page
+     ════════════════════════════════════════════════════════ */
 
-  [data-guide="experiences"] { margin-bottom: 0 !important; }
+  [data-guide="experiences"] {
+    margin-bottom: 0 !important;
+    page-break-before: always !important;
+    break-before: always !important;
+  }
 
-  /* Remove the outer bordered container */
   [data-exp="list"] {
     background: transparent !important;
     border: none !important;
@@ -588,9 +688,18 @@ body {
     border-top: 0.5pt solid #EAE7E2 !important;
     padding: 9pt 0 !important;
     background: transparent !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
+  /* Hide the "Reservar" button column (3rd column) */
+  [data-exp="item"] > div:last-child { display: none !important; }
+
+  /* Hide tag pills */
+  [data-exp="item"] .rounded-full   { display: none !important; }
+
   [data-exp="number"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     color: #B0ACA6 !important;
     letter-spacing: 0.06em !important;
@@ -611,35 +720,42 @@ body {
     line-height: 1.6 !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     TIPS
-     ══════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     TIPS — new page (first right-column section)
+     ════════════════════════════════════════════════════════ */
 
   [data-guide="tips"] {
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
+    page-break-before: always !important;
+    break-before: always !important;
   }
 
+  /* Body wrapper */
+  [data-guide="tips"] > div:last-child { padding: 0 !important; }
+
   [data-tip="item"] {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 5pt !important;
     padding: 5pt 0 !important;
     border-bottom: 0.5pt solid #EAE7E2 !important;
     font-size: 9pt !important;
     color: #4A4A4A !important;
     line-height: 1.6 !important;
   }
-  [data-tip="item"]:last-child { border-bottom: none !important; }
+  [data-tip="item"]:last-child       { border-bottom: none !important; }
 
-  /* Dot bullet */
-  [data-tip="bullet"] { display: none !important; }
+  [data-tip="bullet"]                { display: none !important; }
   [data-tip="item"]::before {
-    content: '·  ';
-    color: #2F5D50;
-    font-weight: 700;
-    font-size: 10pt;
+    content: '·' !important;
+    color: #2F5D50 !important;
+    font-weight: 700 !important;
+    font-size: 10pt !important;
+    flex-shrink: 0 !important;
   }
 
-  /* Fun fact — subtle editorial callout */
   [data-tip="funfact"] {
     background: #F6F4F1 !important;
     border: none !important;
@@ -650,6 +766,7 @@ body {
   }
 
   [data-tip="funfact-eyebrow"] {
+    font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
     letter-spacing: 0.18em !important;
     color: #2F5D50 !important;
@@ -665,17 +782,23 @@ body {
     line-height: 1.6 !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     CHECKLIST
-     ══════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     CHECKLIST — flows after Tips on the same page
+     ════════════════════════════════════════════════════════ */
 
   [data-guide="checklist"] {
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
+    margin-top: 22pt !important;
   }
 
-  /* Each row: replace interactive checkbox with □ */
+  /* Hide progress bar row (first child of body div) */
+  [data-guide="checklist"] > div:last-child > div:first-child { display: none !important; }
+
+  /* Body wrapper */
+  [data-guide="checklist"] > div:last-child { padding: 0 !important; }
+
   [data-check="item"] {
     display: flex !important;
     align-items: baseline !important;
@@ -687,14 +810,12 @@ body {
     background: none !important;
     margin: 0 !important;
   }
-  [data-check="item"]:last-child { border-bottom: none !important; }
+  [data-check="item"]:last-child     { border-bottom: none !important; }
 
-  /* Hide the interactive checkbox widget */
-  [data-check="box"] { display: none !important; }
+  [data-check="box"]                 { display: none !important; }
 
-  /* Prepend □ */
   [data-check="item"]::before {
-    content: '□';
+    content: '□' !important;
     font-size: 10pt !important;
     color: #6F6A64 !important;
     flex-shrink: 0 !important;
@@ -702,7 +823,7 @@ body {
     margin-right: 2pt !important;
   }
 
-  [data-check="emoji"] { font-size: 9pt !important; }
+  [data-check="emoji"]               { font-size: 9pt !important; }
 
   [data-check="label"] {
     font-size: 9pt !important;
@@ -710,14 +831,15 @@ body {
     text-decoration: none !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     TRANSPORT
-     ══════════════════════════════════════════════════════ */
+  /* ══════════════════════════════════════════════════════════
+     TRANSPORT — flows after Checklist
+     ════════════════════════════════════════════════════════ */
 
   [data-guide="transport"] {
     background: transparent !important;
     border: none !important;
     overflow: visible !important;
+    margin-top: 22pt !important;
   }
 
   [data-transport="option"] {
@@ -725,6 +847,8 @@ body {
     border-top: 0.5pt solid #EAE7E2 !important;
     padding: 8pt 0 !important;
     background: transparent !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   [data-transport="header"] {
@@ -734,7 +858,7 @@ body {
     margin-bottom: 3pt !important;
   }
 
-  [data-transport="icon"] { font-size: 9pt !important; }
+  [data-transport="icon"]            { font-size: 9pt !important; }
 
   [data-transport="name"] {
     font-size: 9.5pt !important;
@@ -750,7 +874,7 @@ body {
     padding: 0 !important;
     letter-spacing: 0.06em !important;
   }
-  [data-transport="badge"]::before { content: '— '; color: #C0BAB2; }
+  [data-transport="badge"]::before   { content: '— '; color: #C0BAB2 !important; }
 
   [data-transport="description"] {
     font-size: 8.5pt !important;
@@ -770,196 +894,377 @@ body {
     line-height: 1.5 !important;
   }
 
-  /* ══════════════════════════════════════════════════════
-     PAGE BREAKS
-     ══════════════════════════════════════════════════════ */
-
-  [data-guide="itinerary"],
-  [data-guide="hotels"],
-  [data-guide="experiences"],
-  [data-guide="tips"],
-  [data-guide="checklist"],
-  [data-guide="transport"] {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-  [data-section="title"] {
-    page-break-after: avoid;
-    break-after: avoid;
-  }
-
-  [data-day="card"] {
-    page-break-inside: avoid;
-    break-inside: avoid;
-  }
-
-} /* end @media print */
+} /* end @media print — guide */
 
 /* ══════════════════════════════════════════════════════════════════════
-   TRIP PLANNER — PDF / PRINT STYLES
-   Uses data-trip="..." and data-trip-*="..." attributes as CSS hooks.
-   Mirrors the editorial approach used for curated guide pages.
+   TRIP PLANNER — MAGAZINE-QUALITY PDF STYLESHEET
+   Editorial design system · Monocle / Kinfolk aesthetic
+   Scoped exclusively to pages containing [data-trip="hero"]
    ══════════════════════════════════════════════════════════════════════ */
 @media print {
 
-  /* ── 1. GLOBAL RESET FOR PLANNER PRINT ─────────────────────────────── */
+  /* ─────────────────────────────────────────────────────────────────────
+     0. PAGE SETUP
+     ───────────────────────────────────────────────────────────────────── */
 
-  /* Scope: only apply when a [data-trip] element is present in the DOM */
+  @page {
+    size: A4 portrait;
+    margin: 20mm 18mm 22mm 18mm;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     1. DOCUMENT RESET (trip planner only)
+     ───────────────────────────────────────────────────────────────────── */
+
   body:has([data-trip="hero"]) {
     background: #fff !important;
     color: #1C1C1A !important;
-    font-size: 10pt !important;
+    font-size: 9.5pt !important;
+    line-height: 1.6 !important;
+    -webkit-font-smoothing: antialiased !important;
   }
 
-  /* ── 2. HIDE CHROME ─────────────────────────────────────────────────── */
+  body:has([data-trip="hero"]) *,
+  body:has([data-trip="hero"]) *::before,
+  body:has([data-trip="hero"]) *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
 
-  /* Navigation, top bar, footer */
+  body:has([data-trip="hero"]) main {
+    padding-top: 0 !important;
+    background: #fff !important;
+    min-height: 0 !important;
+  }
+
+  body:has([data-trip="hero"]) a {
+    color: inherit !important;
+    text-decoration: none !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     2. HIDE ALL UI CHROME
+     ───────────────────────────────────────────────────────────────────── */
+
   header,
   nav,
   footer,
   [data-trip="action-row"],
   [data-trip="pref-drawer"],
   [data-trip="control-bar"],
-  [data-trip="planning"] {
+  [role="dialog"] {
     display: none !important;
   }
 
-  /* All interactive buttons inside the itinerary: edit, delete, add, booking */
-  [data-trip="itinerary"] button,
-  [data-trip-day="header"] button,
+  /* Collapse/expand arrows on day cards */
+  [data-trip-day="header"] > div:last-child {
+    display: none !important;
+  }
+
+  /* All interactive buttons inside day bodies (edit, delete, booking, add item) */
   [data-trip-day="body"] button {
     display: none !important;
   }
 
-  /* Version switcher / any floating UI that rides above the layout */
-  [data-trip="sidebar"] > div > div:first-child {
-    position: static !important;
+  /* Packing: checkboxes, remove buttons, add-item input row */
+  [data-trip="packing"] button,
+  [data-trip-card="packing-body"] input {
+    display: none !important;
   }
 
-  /* ── 3. LAYOUT ──────────────────────────────────────────────────────── */
+  /* Budget: currency toggle, collapse arrow, edit panels, all interactive buttons */
+  [data-trip="budget"] button {
+    display: none !important;
+  }
 
-  /* Remove sticky positioning from sidebar wrapper */
+  /* Planning: collapse arrow, checkbox buttons */
+  [data-trip="planning"] button {
+    display: none !important;
+  }
+
+  /* Version switcher row */
+  [data-trip="itinerary"] > div > div:first-child > div:first-child {
+    display: none !important;
+  }
+
+  /* "Ajustar preferencias" button inside hero */
+  [data-trip="hero"] button {
+    display: none !important;
+  }
+
+  /* Toast + modals — fixed-position elements render on the last page in Chrome print.
+     The PDF button shows a toast 300ms before window.print() fires, producing a dark
+     rectangle at the bottom of the last page. Suppress all fixed elements. */
+  body:has([data-trip="hero"]) .fixed {
+    display: none !important;
+  }
+
+  /* Progress + "next step" bar inside control-bar (already hidden above, belt + suspenders) */
+  [data-trip="control-bar"] {
+    display: none !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     3. LAYOUT — single-column, full-width
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Remove max-width containers and horizontal padding */
+  body:has([data-trip="hero"]) .max-w-\[1160px\] {
+    max-width: 100% !important;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+  }
+
+  /* Unstick sidebar */
   [data-trip="sidebar"] > div {
     position: static !important;
+    display: block !important;
   }
 
-  /* Switch main two-column layout to single column: itinerary first, sidebar below */
-  [data-trip="hero"] ~ div,
+  /* Collapse the two-column main grid → single column */
+  body:has([data-trip="hero"]) .grid {
+    display: block !important;
+  }
+
   [data-trip="itinerary"],
   [data-trip="sidebar"] {
     display: block !important;
     width: 100% !important;
     max-width: 100% !important;
     float: none !important;
-    margin: 0 !important;
     padding: 0 !important;
+    margin: 0 !important;
   }
 
-  /* Wrapper that holds itinerary + sidebar side-by-side */
-  [data-trip="itinerary"] ~ [data-trip="sidebar"],
-  [data-trip="sidebar"] {
-    margin-top: 12pt !important;
-  }
-
-  /* ── 4. HERO ────────────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────────────────────────────
+     4. COVER PAGE  (data-trip="hero")
+     Full-page editorial treatment: branding → title → image
+     ───────────────────────────────────────────────────────────────────── */
 
   [data-trip="hero"] {
-    border-bottom: 1.5pt solid #CEC8C0 !important;
-    padding: 18pt 0 12pt !important;
-    page-break-after: avoid !important;
-    break-after: avoid !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 230mm !important;        /* fill most of A4 */
+    padding: 0 !important;
+    border: none !important;
+    page-break-after: always !important;
+    break-after: always !important;
   }
 
-  /* Hide the decorative image card that sits to the right in the hero */
-  [data-trip="hero"] > div > div:last-child:not(:first-child) {
+  /* Inject "lagomplan" logotype at top of cover */
+  [data-trip="hero"]::before {
+    content: "lagomplan";
+    display: block !important;
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 8pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    letter-spacing: 0.18em !important;
+    text-transform: lowercase !important;
+    color: #6B8F86 !important;
+    padding-bottom: 14pt !important;
+    border-bottom: 0.75pt solid #E4DFD8 !important;
+    margin-bottom: 28pt !important;
+  }
+
+  /* Strip padding from hero inner wrapper */
+  [data-trip="hero"] > div {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    flex: 1 !important;
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  /* Hero inner grid: stack text column above image column */
+  [data-trip="hero"] > div > div {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0 !important;
+    flex: 1 !important;
+  }
+
+  /* Eyebrow — origin → destination route label */
+  [data-trip-hero="eyebrow"] {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6pt !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 7pt !important;
+    letter-spacing: 0.18em !important;
+    color: #6B8F86 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 10pt !important;
+  }
+
+  /* Hide decorative horizontal rule in eyebrow */
+  [data-trip-hero="eyebrow"] > span:first-child {
     display: none !important;
   }
 
-  [data-trip-hero="eyebrow"] {
-    font-size: 7pt !important;
-    letter-spacing: 0.14em !important;
-    color: #6B8F86 !important;
-    text-transform: uppercase !important;
-    margin-bottom: 6pt !important;
-  }
-
+  /* H1 — large italic editorial title */
   [data-trip-hero="title"] {
-    font-size: 28pt !important;
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 42pt !important;
     font-style: italic !important;
-    font-weight: 400 !important;
-    line-height: 1.05 !important;
-    letter-spacing: -0.02em !important;
-    color: #1C1C1A !important;
-    margin-bottom: 5pt !important;
-  }
-
-  [data-trip-hero="subtitle"] {
-    font-size: 9pt !important;
     font-weight: 300 !important;
-    line-height: 1.6 !important;
-    color: #7A7A76 !important;
-    margin-bottom: 8pt !important;
+    line-height: 1.0 !important;
+    letter-spacing: -0.03em !important;
+    color: #0F3A33 !important;
+    margin-bottom: 12pt !important;
+    margin-top: 0 !important;
   }
 
-  /* Chips: render inline as pill-like text labels */
+  [data-trip-hero="title"] em {
+    font-style: italic !important;
+    color: #0F3A33 !important;
+  }
+
+  /* Subtitle */
+  [data-trip-hero="subtitle"] {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
+    font-size: 10pt !important;
+    font-weight: 300 !important;
+    line-height: 1.7 !important;
+    color: #7A7A76 !important;
+    max-width: 380pt !important;
+    margin-bottom: 16pt !important;
+  }
+
+  /* Meta chips — render as inline pills */
   [data-trip-hero="chips"] {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 4pt !important;
-    margin-bottom: 0 !important;
+    gap: 5pt !important;
+    margin-bottom: 24pt !important;
   }
 
-  [data-trip-hero="chips"] > * {
-    font-size: 7pt !important;
+  [data-trip-hero="chips"] > span {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    letter-spacing: 0.06em !important;
     border: 0.75pt solid #CEC8C0 !important;
-    border-radius: 20pt !important;
-    padding: 1pt 6pt !important;
+    border-radius: 40pt !important;
+    padding: 2pt 8pt !important;
     background: none !important;
     color: #3D3D3A !important;
   }
 
-  /* ── 5. ITINERARY ───────────────────────────────────────────────────── */
-
-  [data-trip="itinerary"] {
-    padding-top: 10pt !important;
+  /* Hero image — show it large as editorial cover image */
+  [data-trip="hero"] > div > div > div:last-child:not(:first-child) {
+    display: block !important;
+    flex: 1 !important;
+    min-height: 0 !important;
   }
 
-  /* Day card */
+  /* Image container: fill remaining cover height */
+  [data-trip="hero"] > div > div > div:last-child:not(:first-child) > div:first-child {
+    width: 100% !important;
+    height: 220pt !important;
+    aspect-ratio: unset !important;
+    border-radius: 4pt !important;
+    overflow: hidden !important;
+    position: relative !important;
+    background: transparent !important;
+  }
+
+  /* Destination label on image */
+  [data-trip="hero"] > div > div > div:last-child:not(:first-child) > div:first-child > span {
+    position: absolute !important;
+    bottom: 18pt !important;
+    left: 18pt !important;
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 22pt !important;
+    font-style: italic !important;
+    font-weight: 300 !important;
+    color: rgba(255,255,255,0.92) !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     5. ITINERARY SECTION
+     Starts on page 2. Days as editorial blocks — never split.
+     ───────────────────────────────────────────────────────────────────── */
+
+  [data-trip="itinerary"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* Section title row ("Tu itinerario / N días en X") */
+  [data-trip="itinerary"] > div > div:nth-child(2) {
+    padding-top: 0 !important;
+    margin-bottom: 16pt !important;
+  }
+
+  [data-trip="itinerary"] > div > div:nth-child(2) > div > div:first-child {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: #B8B5AF !important;
+    margin-bottom: 3pt !important;
+  }
+
+  [data-trip="itinerary"] > div > div:nth-child(2) > div > div:last-child {
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 15pt !important;
+    font-weight: 400 !important;
+    color: #1C1C1A !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Day card — editorial flat block, never split across pages */
   [data-trip-day="card"] {
     border: none !important;
-    border-top: 1.5pt solid #E4DFD8 !important;
+    border-top: 1pt solid #E4DFD8 !important;
     border-radius: 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     margin-bottom: 0 !important;
-    padding: 6pt 0 4pt !important;
+    padding: 14pt 0 10pt !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    overflow: visible !important;
   }
 
   /* Day header */
   [data-trip-day="header"] {
     background: transparent !important;
     border: none !important;
-    padding: 0 0 4pt !important;
+    padding: 0 0 8pt !important;
     cursor: default !important;
+    display: block !important;
+    page-break-after: avoid !important;
+    break-after: avoid !important;
   }
 
   [data-trip-day="label"] {
-    font-size: 7pt !important;
-    letter-spacing: 0.12em !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    letter-spacing: 0.18em !important;
     text-transform: uppercase !important;
     color: #B8B5AF !important;
-    margin-bottom: 1pt !important;
+    margin-bottom: 3pt !important;
+    display: block !important;
   }
 
   [data-trip-day="title"] {
-    font-size: 13pt !important;
-    font-weight: 400 !important;
-    letter-spacing: -0.01em !important;
-    color: #1C1C1A !important;
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 16pt !important;
     font-style: italic !important;
+    font-weight: 400 !important;
+    letter-spacing: -0.02em !important;
+    color: #0F3A33 !important;
+    line-height: 1.15 !important;
+    display: block !important;
   }
 
   /* Force-open collapsed day bodies */
@@ -969,164 +1274,511 @@ body {
     overflow: visible !important;
   }
 
-  /* Item rows: two-column grid (type+time | name+desc) */
+  /* Item rows — block layout, index + actions hidden */
   [data-trip-item="row"] {
-    display: grid !important;
-    grid-template-columns: 60pt 1fr !important;
-    gap: 0 8pt !important;
+    display: block !important;
     border-top: 0.5pt solid #EDE9E4 !important;
-    padding: 4pt 0 !important;
+    border-bottom: none !important;
+    border-left: none !important;
+    padding: 7pt 0 6pt !important;
     background: transparent !important;
+    margin-left: 0 !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
   }
 
   [data-trip-item="row"]:first-child {
     border-top: none !important;
   }
 
-  [data-trip-item="content"] {
-    display: contents !important;
+  /* Hide index number ("01") */
+  [data-trip-item="row"] > div:first-child {
+    display: none !important;
   }
 
-  /* Left column: type badge + time */
+  /* Hide actions column (booking btn, edit, delete, price) */
+  [data-trip-item="row"] > div:last-child:not([data-trip-item="content"]) {
+    display: none !important;
+  }
+
+  [data-trip-item="content"] {
+    display: block !important;
+  }
+
+  /* Type + time header line */
+  [data-trip-item="content"] > div:first-child {
+    display: flex !important;
+    align-items: center !important;
+    flex-wrap: wrap !important;
+    gap: 6pt !important;
+    margin-bottom: 3pt !important;
+  }
+
+  /* Hide status dot (small colored circle) */
+  [data-trip-item="content"] > div:first-child > span:last-child {
+    display: none !important;
+  }
+
+  /* Activity type badge — clean label, no background box */
   [data-trip-item="type"] {
-    font-size: 7pt !important;
-    font-weight: 600 !important;
-    letter-spacing: 0.08em !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
     color: #6B8F86 !important;
     background: none !important;
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
-    display: block !important;
   }
 
+  /* Time — understated, reads cleanly after type */
   [data-trip-item="time"] {
-    font-size: 7.5pt !important;
+    font-family: 'Space Mono', monospace !important;
+    font-size: 7pt !important;
     color: #0F3A33 !important;
     border: none !important;
     padding: 0 !important;
-    margin-top: 2pt !important;
-    display: block !important;
     background: none !important;
+    letter-spacing: 0.04em !important;
   }
 
-  /* Right column: name + desc */
+  /* Activity name — H3 equivalent */
   [data-trip-item="name"] {
-    font-size: 10pt !important;
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
+    font-size: 10.5pt !important;
     font-weight: 500 !important;
     color: #1C1C1A !important;
     line-height: 1.3 !important;
-    margin-bottom: 2pt !important;
+    margin-bottom: 3pt !important;
+    letter-spacing: -0.01em !important;
   }
 
+  /* Activity description — body text, light */
   [data-trip-item="desc"] {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
     font-size: 8.5pt !important;
     font-weight: 300 !important;
     color: #7A7A76 !important;
-    line-height: 1.55 !important;
+    line-height: 1.6 !important;
   }
 
-  /* ── 6. SIDEBAR CARDS ───────────────────────────────────────────────── */
+  /* Hide "Añadir ítem" row at the bottom of each day body */
+  [data-trip-day="body"] > div > div:last-child {
+    display: none !important;
+  }
 
-  [data-trip="packing"],
-  [data-trip="budget"] {
+  /* ─────────────────────────────────────────────────────────────────────
+     6. PLANNING SECTION  (Planea tu viaje)
+     Always starts on a new page. Clean checklist layout.
+     ───────────────────────────────────────────────────────────────────── */
+
+  [data-trip="planning"] {
+    display: block !important;
     border: none !important;
-    border-top: 1.5pt solid #E4DFD8 !important;
     border-radius: 0 !important;
     box-shadow: none !important;
     background: transparent !important;
-    margin-top: 8pt !important;
+    overflow: visible !important;
+    page-break-before: always !important;
+    break-before: always !important;
+  }
+
+  /* Planning header */
+  [data-trip="planning"] > div:first-child {
+    padding: 0 0 12pt !important;
+    background: transparent !important;
+    cursor: default !important;
+    border-bottom: 1.5pt solid #0F3A33 !important;
+    margin-bottom: 16pt !important;
+  }
+
+  /* Planning section title */
+  [data-trip="planning"] > div:first-child > div:first-child > span:first-child {
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 20pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    color: #0F3A33 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Count badge in planning header */
+  [data-trip="planning"] > div:first-child > div:first-child > span:last-child {
+    display: none !important;
+  }
+
+  /* Planning body — force open */
+  [data-trip="planning"] > div:last-child {
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  /* Section labels ("Antes del viaje", "Por día") */
+  [data-trip="planning"] .border-t.border-\[\#E4DFD8\] > div:first-child,
+  [data-trip="planning"] .border-b.border-\[\#E4DFD8\].mt-1\.5 {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: #B8B5AF !important;
+    padding: 8pt 0 6pt !important;
+    border-color: #E4DFD8 !important;
+  }
+
+  /* CheckRow: hide button (checkbox) and icon span, show text as clean line */
+  [data-trip="planning"] .flex.items-center.gap-\[7px\].py-\[7px\] {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 8pt !important;
+    padding: 4pt 0 !important;
+    border-bottom: 0.5pt solid #F0EDE9 !important;
+  }
+
+  [data-trip="planning"] .flex.items-center.gap-\[7px\].py-\[7px\] > button {
+    display: none !important;
+  }
+
+  /* Hide the emoji icon span in each check row */
+  [data-trip="planning"] .flex.items-center.gap-\[7px\].py-\[7px\] > span:first-of-type {
+    display: none !important;
+  }
+
+  /* Check text */
+  [data-trip="planning"] .flex.items-center.gap-\[7px\].py-\[7px\] > span:last-of-type {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
+    font-size: 9pt !important;
+    font-weight: 400 !important;
+    color: #1C1C1A !important;
+    text-decoration: none !important;
+  }
+
+  /* Add a □ checkbox before each check row text */
+  [data-trip="planning"] .flex.items-center.gap-\[7px\].py-\[7px\]::before {
+    content: "□" !important;
+    font-size: 9pt !important;
+    color: #CEC8C0 !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+    position: relative !important;
+    top: 1pt !important;
+  }
+
+  /* Day sub-group rows (Día 01, Día 02 ...) */
+  [data-trip="planning"] .border-b.border-\[\#E4DFD8\]:not(:first-child) > div:first-child {
+    padding: 6pt 0 4pt !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     7. PACKING SECTION  (Qué llevar)
+     Always starts on a new page. Two-column checklist.
+     ───────────────────────────────────────────────────────────────────── */
+
+  [data-trip="packing"] {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    page-break-before: always !important;
+    break-before: always !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
   }
 
-  /* Card headers */
-  [data-trip="packing"] > div:first-child,
-  [data-trip="budget"] > div:first-child {
+  /* Packing header */
+  [data-trip="packing"] > div:first-child {
+    padding: 0 0 12pt !important;
+    background: transparent !important;
     cursor: default !important;
-    padding: 6pt 0 4pt !important;
+    border-bottom: 1.5pt solid #0F3A33 !important;
+    margin-bottom: 16pt !important;
+  }
+
+  [data-trip="packing"] > div:first-child > div:first-child > span:first-child {
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 20pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    color: #0F3A33 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Count badge */
+  [data-trip="packing"] > div:first-child > div:first-child > span:last-child {
+    display: none !important;
+  }
+
+  /* Force-open packing body */
+  [data-trip-card="packing-body"] {
+    max-height: none !important;
+    opacity: 1 !important;
+    overflow: visible !important;
+  }
+
+  /* Strip border and background from packing body inner wrapper */
+  [data-trip-card="packing-body"] > div {
+    border: none !important;
     background: transparent !important;
   }
 
-  /* Force-open collapsed packing / budget bodies */
-  [data-trip-card="packing-body"],
+  /* Items list → two-column grid */
+  [data-trip-card="packing-body"] > div > div:first-child {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    gap: 1pt 24pt !important;
+  }
+
+  /* Each packing item row */
+  [data-trip-card="packing-body"] > div > div:first-child > div {
+    display: flex !important;
+    align-items: baseline !important;
+    gap: 6pt !important;
+    padding: 4pt 0 !important;
+    border-bottom: 0.5pt solid #F0EDE9 !important;
+  }
+
+  /* Hide checkbox button */
+  [data-trip-card="packing-body"] > div > div:first-child > div > button {
+    display: none !important;
+  }
+
+  /* Add □ before each packing item */
+  [data-trip-card="packing-body"] > div > div:first-child > div::before {
+    content: "□" !important;
+    font-size: 9pt !important;
+    color: #CEC8C0 !important;
+    flex-shrink: 0 !important;
+    line-height: 1 !important;
+  }
+
+  /* Item text */
+  [data-trip-card="packing-body"] > div > div:first-child > div > span {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
+    font-size: 9pt !important;
+    font-weight: 400 !important;
+    color: #1C1C1A !important;
+    text-decoration: none !important;
+    flex: 1 !important;
+  }
+
+  /* Hide "Añadir ítem" input row */
+  [data-trip-card="packing-body"] > div > div:last-child {
+    display: none !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     8. BUDGET SECTION  (Presupuesto)
+     Always starts on a new page. Clean financial summary.
+     ───────────────────────────────────────────────────────────────────── */
+
+  [data-trip="budget"] {
+    border: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    page-break-before: always !important;
+    break-before: always !important;
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Budget header */
+  [data-trip="budget"] > div:first-child {
+    padding: 0 0 12pt !important;
+    background: transparent !important;
+    cursor: default !important;
+    border-bottom: 1.5pt solid #0F3A33 !important;
+    margin-bottom: 16pt !important;
+  }
+
+  /* Budget title (contains emoji + span "Presupuesto") */
+  [data-trip="budget"] > div:first-child > div:first-child > span:nth-child(2) {
+    font-family: 'Fraunces', 'Georgia', serif !important;
+    font-size: 20pt !important;
+    font-style: italic !important;
+    font-weight: 400 !important;
+    color: #0F3A33 !important;
+    letter-spacing: -0.01em !important;
+  }
+
+  /* Hide budget emoji icon in header */
+  [data-trip="budget"] > div:first-child > div:first-child > span:first-child {
+    display: none !important;
+  }
+
+  /* Total amount shown in header — keep it, style cleanly */
+  [data-trip="budget"] > div:first-child > div:last-child {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 10pt !important;
+    color: #0F3A33 !important;
+  }
+
+  /* Force-open budget body */
   [data-trip-card="budget-body"] {
     max-height: none !important;
     opacity: 1 !important;
     overflow: visible !important;
   }
 
-  /* Packing list: simple two-column grid */
-  [data-trip="packing"] .flex.flex-col.gap-\[5px\] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    gap: 3pt 12pt !important;
+  /* Strip border from body outer wrapper */
+  [data-trip-card="budget-body"] > div {
+    border: none !important;
   }
 
-  /* Hide packing checkboxes (not meaningful on paper) */
-  [data-trip="packing"] button {
+  /* Hide currency toggle row */
+  [data-trip-card="budget-body"] > div > div:first-child {
     display: none !important;
   }
 
-  /* Packing item text */
-  [data-trip="packing"] span {
-    font-size: 8.5pt !important;
-    color: #1C1C1A !important;
-    text-decoration: none !important;
+  /* Summary bar (Estimado / Confirmado) */
+  [data-trip-card="budget-body"] > div > div:nth-child(2) {
+    display: flex !important;
+    gap: 24pt !important;
+    padding: 0 0 10pt !important;
+    margin-bottom: 12pt !important;
+    border-bottom: 0.75pt solid #E4DFD8 !important;
+    border-top: none !important;
   }
 
-  /* Budget table category rows */
+  [data-trip-card="budget-body"] > div > div:nth-child(2) > div {
+    flex: 1 !important;
+    text-align: left !important;
+    padding: 0 !important;
+    border: none !important;
+  }
+
+  [data-trip-card="budget-body"] > div > div:nth-child(2) span {
+    display: block !important;
+  }
+
+  /* Category groups */
+  [data-trip="budget"] .border-b.border-\[\#E4DFD8\].last\:border-b-0 {
+    border-bottom: 0.5pt solid #F0EDE9 !important;
+  }
+
+  /* Category header row */
   [data-trip="budget"] .bg-\[\#EDE7E1\] {
-    background: #F7F3EE !important;
+    background: transparent !important;
+    border-bottom: 0.5pt solid #E4DFD8 !important;
+    padding: 5pt 0 !important;
+    margin-top: 8pt !important;
+  }
+
+  [data-trip="budget"] .bg-\[\#EDE7E1\] span {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 6.5pt !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    color: #7A7A76 !important;
+  }
+
+  [data-trip="budget"] .bg-\[\#EDE7E1\] span:last-child {
+    font-size: 9pt !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+    color: #1C1C1A !important;
+  }
+
+  /* Budget row items */
+  [data-trip="budget"] .grid[style*="17px"] {
+    display: grid !important;
+    grid-template-columns: 1fr auto !important;
+    gap: 4pt !important;
+    padding: 5pt 0 !important;
+    background: transparent !important;
+    cursor: default !important;
+    border-bottom: 0.5pt solid #F0EDE9 !important;
+  }
+
+  /* Hide emoji icon in budget rows */
+  [data-trip="budget"] .grid[style*="17px"] > span:first-child {
+    display: none !important;
+  }
+
+  /* Budget row label */
+  [data-trip="budget"] .grid[style*="17px"] > div:nth-child(2) > div:first-child {
+    font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
+    font-size: 9pt !important;
+    font-weight: 400 !important;
+    color: #1C1C1A !important;
+  }
+
+  /* Budget row amount */
+  [data-trip="budget"] .grid[style*="17px"] > div:last-child {
+    font-family: 'Space Mono', monospace !important;
+    font-size: 9pt !important;
+    color: #1C1C1A !important;
+  }
+
+  /* Footer totals row */
+  [data-trip="budget"] .border-t-\[1\.5px\] {
+    border-top: 1.5pt solid #CEC8C0 !important;
+    padding-top: 10pt !important;
   }
 
   [data-trip="budget"] .font-mono {
     font-size: 8pt !important;
-  }
-
-  /* Budget total row */
-  [data-trip="budget"] .border-t-\[1\.5px\] {
-    border-top: 1.5pt solid #CEC8C0 !important;
-  }
-
-  /* ── 7. BRAND FOOTER ────────────────────────────────────────────────── */
-
-  body:has([data-trip="hero"])::after {
-    content: "lagomplan.com";
-    display: block !important;
-    margin-top: 20pt !important;
-    padding-top: 8pt !important;
-    border-top: 0.75pt solid #E4DFD8 !important;
-    text-align: center !important;
     font-family: 'Space Mono', monospace !important;
-    font-size: 7pt !important;
-    letter-spacing: 0.12em !important;
-    color: #B8B5AF !important;
-    text-transform: lowercase !important;
   }
 
-  /* ── 8. PAGE BREAKS ─────────────────────────────────────────────────── */
+  /* ─────────────────────────────────────────────────────────────────────
+     9. BRAND FOOTER
+     Injected after the last element on each page via body::after
+     ───────────────────────────────────────────────────────────────────── */
 
+  /* Logo footer handled by the .print:flex element in TripResult.tsx */
+  body:has([data-trip="hero"])::after {
+    content: none !important;
+  }
+
+  /* ─────────────────────────────────────────────────────────────────────
+     10. PAGE-BREAK RULES
+     ───────────────────────────────────────────────────────────────────── */
+
+  /* Cover page: always break after hero */
   [data-trip="hero"] {
-    page-break-after: avoid !important;
-    break-after: avoid !important;
+    page-break-after: always !important;
+    break-after: always !important;
   }
 
-  [data-trip-day="card"] {
-    page-break-inside: avoid !important;
-    break-inside: avoid !important;
-  }
-
+  /* Keep day title with its body */
   [data-trip-day="header"] {
     page-break-after: avoid !important;
     break-after: avoid !important;
   }
 
-  [data-trip="packing"],
-  [data-trip="budget"] {
+  /* Never split a day card across pages */
+  [data-trip-day="card"] {
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+  }
+
+  /* Never split an activity block */
+  [data-trip-item="row"] {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* Planning / packing / budget: each starts on a fresh page */
+  [data-trip="planning"] {
+    page-break-before: always !important;
+    break-before: always !important;
+  }
+
+  [data-trip="packing"] {
+    page-break-before: always !important;
+    break-before: always !important;
+  }
+
+  [data-trip="budget"] {
+    page-break-before: always !important;
+    break-before: always !important;
   }
 
 } /* end trip planner @media print */

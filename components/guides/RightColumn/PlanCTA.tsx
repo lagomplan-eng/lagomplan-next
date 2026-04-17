@@ -14,7 +14,7 @@ interface Props {
 
 export function PlanCTA({ data, plannerHref }: Props) {
   return (
-    <div className="bg-[#0F3A33] border-transparent rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+    <div data-guide="plan-cta" className="bg-[#0F3A33] border-transparent rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 pb-[14px] border-b border-[rgba(255,255,255,.12)]">
         <div>
