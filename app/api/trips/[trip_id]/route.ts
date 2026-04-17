@@ -3,7 +3,7 @@
 // PATCH — update title / trip_data (autosave)
 
 import { NextRequest, NextResponse } from 'next/server'
-import { getSupabaseServer } from '../../../../lib/supabase/server'
+import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/server'
 
 export async function GET(
   _req: NextRequest,
@@ -73,15 +73,24 @@ export async function PATCH(
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
     }
 
-    const { error } = await supabase
+    // Use admin client for the write so RLS policies don't silently block the
+    // UPDATE. Ownership is already verified above via getUser() + eq('user_id').
+    const admin = getSupabaseAdmin()
+    const { data: updated, error } = await admin
       .from('trips')
       .update(updatePayload as unknown as never)
       .eq('id', trip_id)
       .eq('user_id', user.id)   // ownership guard
+      .select('id')
 
     if (error) {
       console.error('[trips/patch] update error:', error.message)
       return NextResponse.json({ error: `Update failed: ${error.message}` }, { status: 500 })
+    }
+
+    if (!updated || updated.length === 0) {
+      console.warn('[trips/patch] no rows updated — trip_id:', trip_id, 'user_id:', user.id)
+      return NextResponse.json({ error: 'Trip not found or not owned by user' }, { status: 404 })
     }
 
     console.log('[trips/patch] updated trip:', trip_id)

@@ -117,7 +117,7 @@ export default function Nav() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 print:hidden"
       style={{
-        height:             72,
+        height:             88,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
@@ -127,13 +127,13 @@ export default function Nav() {
       <div className="page-inner h-full flex items-center justify-between gap-6">
 
         {/* ── Logo ──────────────────────────────────────── */}
-        <Link href="/" className="flex-shrink-0 flex items-center">
+        <Link href="/" className="flex-shrink-0 flex items-center py-3">
           <Image
             src="/images/logo.png"
             alt="Lagomplan"
-            width={180}
-            height={36}
-            className="h-9 w-auto"
+            width={252}
+            height={56}
+            className="h-14 w-auto"
             priority
             onError={e => {
               const img = e.currentTarget as HTMLImageElement
@@ -145,7 +145,7 @@ export default function Nav() {
           {/* Text fallback until logo.png is placed in /public/images/ */}
           <span
             style={{ display: 'none' }}
-            className="font-display italic text-[24px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
+            className="font-display italic text-[28px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
           >
             lagomplan
           </span>

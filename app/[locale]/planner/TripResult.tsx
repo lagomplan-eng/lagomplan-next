@@ -705,6 +705,7 @@ export default function TripResult({ params }: Props) {
   // ── Autosave status ───────────────────────────────────────────────────────────
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const autoSaveTimerRef    = useRef<ReturnType<typeof setTimeout>>()
+  const abortControllerRef  = useRef<AbortController | null>(null)
   // Stores a JSON fingerprint of the last content written to (or loaded from) DB.
   // The autosave effect compares against this to skip no-op saves and to detect
   // edits that were made before tripId was available (fixing the main race condition).
@@ -747,7 +748,8 @@ export default function TripResult({ params }: Props) {
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
         setDays(normalized.days)
-        setDoneCheckIds(new Set())
+        const doneChecksArr: string[] = Array.isArray(data.trip_data?.doneChecks) ? data.trip_data.doneChecks : []
+        setDoneCheckIds(new Set(doneChecksArr))
         setBudgetRows(normalized.budgetRows)
         setPacking(normalized.packing)
         setVersions([{
@@ -767,6 +769,7 @@ export default function TripResult({ params }: Props) {
         lastSavedContentRef.current = JSON.stringify({
           title: normalized.title, subtitle: normalized.subtitle,
           days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+          doneChecks: doneChecksArr,
         })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido')
@@ -947,6 +950,7 @@ export default function TripResult({ params }: Props) {
                 lastSavedContentRef.current = JSON.stringify({
                   title: normalized.title, subtitle: normalized.subtitle,
                   days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                  doneChecks: [],
                 })
                 sessionStorage.removeItem('tripCache')
                 if (typeof window !== 'undefined') {
@@ -1005,22 +1009,29 @@ export default function TripResult({ params }: Props) {
   // Spurious saves (identical content) are prevented by lastSavedContentRef,
   // which is set to the loaded/generated content baseline before tripId is set.
   useEffect(() => {
-    if (!tripId || !authedUser || loading) return
+    if (!tripId)      { console.log('[autosave] skipped: no tripId');      return }
+    if (!authedUser)  { console.log('[autosave] skipped: no authedUser');  return }
+    if (loading)      { console.log('[autosave] skipped: loading=true');   return }
 
-    const content = JSON.stringify({ title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows })
+    const doneChecksArr = Array.from(doneCheckIds).sort()
+    const content = JSON.stringify({ title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr })
     if (content === lastSavedContentRef.current) return   // nothing changed
 
     clearTimeout(autoSaveTimerRef.current)
+    abortControllerRef.current?.abort()
     setSaveStatus('saving')
 
     autoSaveTimerRef.current = setTimeout(async () => {
+      const controller = new AbortController()
+      abortControllerRef.current = controller
       try {
         console.log('[autosave] patching trip:', tripId)
         const res = await fetch(`/api/trips/${tripId}`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
-          body: JSON.stringify({ title: tripTitle, trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows } }),
+          signal: controller.signal,
+          body: JSON.stringify({ title: tripTitle, trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr } }),
         })
         if (res.ok) {
           console.log('[autosave] saved')
@@ -1032,6 +1043,7 @@ export default function TripResult({ params }: Props) {
           setSaveStatus('idle')
         }
       } catch (err) {
+        if (err instanceof Error && err.name === 'AbortError') return
         console.warn('[autosave] error:', err)
         setSaveStatus('idle')
       }
@@ -1039,7 +1051,7 @@ export default function TripResult({ params }: Props) {
 
     return () => clearTimeout(autoSaveTimerRef.current)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId])
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading])
 
   // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
   function handlePaywallClose() {
@@ -1345,6 +1357,7 @@ export default function TripResult({ params }: Props) {
               lastSavedContentRef.current = JSON.stringify({
                 title: normalized.title, subtitle: normalized.subtitle,
                 days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                doneChecks: [],
               })
               if (typeof window !== 'undefined') {
                 const url = new URL(window.location.href)
@@ -1361,6 +1374,7 @@ export default function TripResult({ params }: Props) {
         lastSavedContentRef.current = JSON.stringify({
           title: normalized.title, subtitle: normalized.subtitle,
           days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+          doneChecks: [],
         })
       }
       // Credits decremented server-side — refresh so the next guard reflects real balance
@@ -2294,7 +2308,7 @@ export default function TripResult({ params }: Props) {
           </div>
 
           {/* ── RIGHT: Sidebar cards ─────────────────────────────────────── */}
-          <aside data-trip="sidebar" className="flex flex-col gap-2.5 max-[900px]:order-first">
+          <aside data-trip="sidebar" className="flex flex-col gap-2.5">
             <div className="sticky top-[76px] flex flex-col gap-2.5">
 
               {/* Planea tu viaje — checks */}
