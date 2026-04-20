@@ -30,7 +30,7 @@ const L = {
     transportEyebrow:    'Logística',
     transportTitle:      'Cómo llegar',
     planCtaEyebrow:      'AI · Lagomplan',
-    planCtaDesc:         'Convierte esta guía en un itinerario personalizado con IA — fechas, viajeros y presupuesto exactos para tu viaje en 60 segundos.',
+    planCtaDesc:         'Convierte una guía en tu plan personalizado, fechas, viajeros y presupuesto exactos para tu viaje en 60 segundos.',
     planCtaButton:       'Planear mi viaje →',
     bookingLabel:        'Ver opciones →',
   },

@@ -84,13 +84,21 @@ export default function LoginForm() {
     setResetLoading(true)
     setResetError(null)
 
+    const accountSegment = locale === 'es' ? 'cuenta' : 'account'
     const { error: resetErr } = await getSupabaseBrowser().auth.resetPasswordForEmail(resetEmail, {
-      redirectTo: `${window.location.origin}/${locale}/cuenta`,
+      redirectTo: `${window.location.origin}/${locale}/${accountSegment}`,
     })
+    console.log('[Reset] result:', resetErr ?? 'ok')
 
     setResetLoading(false)
     if (resetErr) {
-      setResetError(resetErr.message)
+      const raw = resetErr.message || ''
+      const isJsonBlob = raw.trim().startsWith('{') || raw.trim().startsWith('[')
+      setResetError(
+        isJsonBlob || !raw
+          ? (locale === 'es' ? 'Algo salió mal. Inténtalo de nuevo.' : 'Something went wrong. Please try again.')
+          : raw
+      )
       return
     }
     setResetSent(true)

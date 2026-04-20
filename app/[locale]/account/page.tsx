@@ -6,6 +6,7 @@
 import type { Metadata }              from 'next'
 import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
 import type { Locale }               from '../../../i18n'
+import { PasswordResetForm }         from '../../../components/auth/PasswordResetForm'
 
 export async function generateMetadata({
   params: { locale },
@@ -31,6 +32,7 @@ export default function Page({
           {locale === 'es' ? 'Mi cuenta' : 'Account'}
         </h1>
         <p className="font-sans text-[15px] text-[#6B8F86] mt-4">Coming soon.</p>
+        <PasswordResetForm locale={locale as 'es' | 'en'} />
       </div>
     </main>
   )

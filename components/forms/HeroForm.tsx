@@ -19,8 +19,8 @@ const INTERESTS = [
   'Compras',
 ]
 
-const BABY_AGES = ['0-11 m', '1 ano', '2 anos']
-const KID_AGES = Array.from({ length: 12 }, (_, i) => `${i + 3} anos`)
+const BABY_AGES = ['0-11 m', '1 año', '2 años']
+const KID_AGES = Array.from({ length: 12 }, (_, i) => `${i + 3} años`)
 
 interface Child {
   id: number
@@ -62,7 +62,18 @@ export default function HeroForm({
   initialValues,
 }: HeroFormProps) {
   const router = useRouter()
-  const t = useTranslations('form')
+  const t  = useTranslations('form')
+  const tI = useTranslations('interests')
+  const interestLabel: Record<string, string> = {
+    Playa:           tI('playa'),
+    Gastronomia:     tI('gastronomy'),
+    Cultura:         tI('culture'),
+    Naturaleza:      tI('nature'),
+    Aventura:        tI('adventure'),
+    Arte:            tI('art'),
+    'Vida nocturna': tI('nightlife'),
+    Compras:         tI('shopping'),
+  }
 
 const parsedStart = initialValues?.start ? new Date(initialValues.start) : null
 const parsedEnd = initialValues?.end ? new Date(initialValues.end) : null
@@ -224,10 +235,10 @@ function submit(e: React.FormEvent) {
                     type="button"
                     onClick={() => setTraveler(id)}
                     className={[
-                      'relative flex flex-col items-center gap-1.5 py-2 px-2 border rounded-[12px] transition-all bg-white min-h-[68px]',
+                      'relative flex flex-col items-center gap-1.5 py-2 px-2 border rounded-[12px] transition-all min-h-[68px]',
                       traveler === id
-                        ? 'border-[rgba(15,58,51,.28)] bg-[#E4EFEC]'
-                        : 'border-[rgba(107,143,134,.22)] hover:border-[rgba(15,58,51,.24)] hover:bg-[#F7F3EE]',
+                        ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.2)] text-[#0F3A33]'
+                        : 'bg-white border-[rgba(107,143,134,.22)] hover:border-[rgba(15,58,51,.24)] hover:bg-[#F7F3EE]',
                     ].join(' ')}
                   >
                     <span className="text-[18px] leading-none">{icon}</span>
@@ -334,7 +345,7 @@ function submit(e: React.FormEvent) {
                       : 'bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)]',
                   ].join(' ')}
                 >
-                  {item}
+                  {interestLabel[item] ?? item}
                 </button>
               ))}
             </div>

@@ -55,8 +55,9 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const session: any = event.data.object
 
-    if (session.payment_status !== 'paid' && session.mode !== 'subscription') {
-      // Subscription sessions don't set payment_status='paid' immediately
+    // payment_status is 'no_payment_required' when a 100% coupon is applied
+    const isSettled = session.payment_status === 'paid' || session.payment_status === 'no_payment_required'
+    if (!isSettled && session.mode !== 'subscription') {
       return NextResponse.json({ received: true })
     }
 
