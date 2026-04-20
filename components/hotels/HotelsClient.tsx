@@ -23,21 +23,23 @@ const PRICE_FILTERS: PriceFilter[] = [
 // ── HotelCard ──────────────────────────────────────────────────────────────────
 
 function HotelCard({ hotel, isES }: { hotel: HotelListing; isES: boolean }) {
+  const bookingHref = hotel.bookingUrl ?? '#'
+
   return (
-    <a href={hotel.guideUrl} className="block no-underline group" style={{ color: 'var(--pine)', height: '100%' }}>
-      <article
-        style={{
-          display: 'flex', flexDirection: 'column', height: '100%',
-          overflow: 'hidden', border: '1px solid var(--border)',
-          borderRadius: '28px', background: '#FFFFFF',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          transition: 'transform .2s ease, box-shadow .2s ease',
-        }}
-        className="hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(15,58,51,0.06)]"
-      >
-        {/* Image */}
+    <article
+      style={{
+        display: 'flex', flexDirection: 'column', height: '100%',
+        overflow: 'hidden', border: '1px solid var(--border)',
+        borderRadius: '28px', background: '#FFFFFF',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+        transition: 'transform .2s ease, box-shadow .2s ease',
+      }}
+      className="group hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(15,58,51,0.06)]"
+    >
+      {/* Image — links to guide */}
+      <a href={hotel.guideUrl} className="block no-underline" style={{ flexShrink: 0 }}>
         <div style={{
-          position: 'relative', width: '100%', height: '220px', flexShrink: 0,
+          position: 'relative', width: '100%', height: '220px',
           background: 'linear-gradient(180deg, #acd0e8 0%, #bfd1bc 58%, #4c6659 100%)',
           overflow: 'hidden',
         }}>
@@ -59,59 +61,90 @@ function HotelCard({ hotel, isES }: { hotel: HotelListing; isES: boolean }) {
             {hotel.priceLevel}
           </div>
         </div>
+      </a>
 
-        {/* Body */}
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', padding: '22px 24px 24px' }}>
-          {/* Destination label */}
-          <div style={{
-            fontSize: '10px', textTransform: 'uppercase',
-            letterSpacing: '0.16em', color: 'var(--sage)', fontWeight: 700,
-          }}>
-            {hotel.destination}
-          </div>
-
-          {/* Hotel name */}
-          <h3 style={{
-            margin: '10px 0 0', fontSize: '20px', lineHeight: 1.2,
-            letterSpacing: '-0.02em', fontWeight: 800,
-          }}>
-            {hotel.name}
-          </h3>
-
-          {/* Description */}
-          <p style={{
-            margin: '12px 0 0', minHeight: '50px',
-            fontSize: '14px', lineHeight: 1.75, color: 'rgba(15,58,51,0.68)',
-          }}>
-            {hotel.description}
-          </p>
-
-          {/* Tags + guide CTA */}
-          <div style={{
-            display: 'flex', flexWrap: 'wrap', gap: '8px',
-            alignItems: 'center', marginTop: 'auto', paddingTop: '20px',
-          }}>
-            {hotel.tags.map(tag => (
-              <span key={tag} style={{
-                padding: '6px 10px', border: '1px solid var(--border)',
-                borderRadius: '999px', background: 'var(--sand)',
-                color: 'rgba(15,58,51,0.72)', fontSize: '11px', fontWeight: 500,
-              }}>
-                {tag}
-              </span>
-            ))}
-            <span style={{
-              marginLeft: 'auto', padding: '6px 12px', borderRadius: '999px',
-              background: 'rgba(15,58,51,0.06)',
-              color: 'var(--pine)', fontSize: '11px', fontWeight: 700,
-              whiteSpace: 'nowrap',
-            }}>
-              {isES ? 'Ver guía →' : 'View guide →'}
-            </span>
-          </div>
+      {/* Body */}
+      <div style={{ display: 'flex', flex: 1, flexDirection: 'column', padding: '22px 24px 24px' }}>
+        {/* Destination label */}
+        <div style={{
+          fontSize: '10px', textTransform: 'uppercase',
+          letterSpacing: '0.16em', color: 'var(--sage)', fontWeight: 700,
+        }}>
+          {hotel.destination}
         </div>
-      </article>
-    </a>
+
+        {/* Hotel name */}
+        <h3 style={{
+          margin: '10px 0 0', fontSize: '20px', lineHeight: 1.2,
+          letterSpacing: '-0.02em', fontWeight: 800,
+        }}>
+          {hotel.name}
+        </h3>
+
+        {/* Description */}
+        <p style={{
+          margin: '12px 0 0', minHeight: '50px',
+          fontSize: '14px', lineHeight: 1.75, color: 'rgba(15,58,51,0.68)',
+        }}>
+          {hotel.description}
+        </p>
+
+        {/* Tags */}
+        <div style={{
+          display: 'flex', flexWrap: 'wrap', gap: '8px',
+          marginTop: '16px',
+        }}>
+          {hotel.tags.map(tag => (
+            <span key={tag} style={{
+              padding: '6px 10px', border: '1px solid var(--border)',
+              borderRadius: '999px', background: 'var(--sand)',
+              color: 'rgba(15,58,51,0.72)', fontSize: '11px', fontWeight: 500,
+            }}>
+              {tag}
+            </span>
+          ))}
+        </div>
+
+        {/* CTAs */}
+        <div style={{
+          display: 'flex', gap: '8px', alignItems: 'center',
+          marginTop: 'auto', paddingTop: '20px',
+        }}>
+          {/* Primary: Ver disponibilidad */}
+          <a
+            href={bookingHref}
+            {...(hotel.bookingUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+            style={{
+              flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              padding: '10px 16px', borderRadius: '999px',
+              background: 'var(--pine)', color: '#FFFFFF',
+              fontSize: '12px', fontWeight: 700, textDecoration: 'none',
+              whiteSpace: 'nowrap', transition: 'opacity .15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
+            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+          >
+            {isES ? 'Ver disponibilidad' : 'Check availability'}
+          </a>
+
+          {/* Secondary: Ver guía */}
+          <a
+            href={hotel.guideUrl}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              padding: '10px 14px', borderRadius: '999px',
+              border: '1px solid var(--border)', background: 'var(--white)',
+              color: 'var(--pine)', fontSize: '12px', fontWeight: 700,
+              textDecoration: 'none', whiteSpace: 'nowrap', transition: 'background .15s',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(15,58,51,0.08)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'var(--white)')}
+          >
+            {isES ? 'Ver guía →' : 'View guide →'}
+          </a>
+        </div>
+      </div>
+    </article>
   )
 }
 

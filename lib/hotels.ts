@@ -48,6 +48,7 @@ export type HotelListing = {
   destination: string            // localised city/state label
   cover_img:   string            // borrowed from source guide
   guideUrl:    string            // link to the parent guide detail page
+  bookingUrl?: string            // direct booking link (affiliate URL)
 }
 
 // ── Utility ────────────────────────────────────────────────────────────────────
