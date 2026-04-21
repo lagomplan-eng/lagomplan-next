@@ -25,6 +25,7 @@ export default function TripGeneratorClient({ searchParams }: Props) {
   const destination    = searchParams.destination || ''
   const trip_id        = searchParams.trip_id     || ''
   const checkoutStatus = searchParams.checkout    || ''
+  const sessionId      = searchParams.session_id  || ''
   const hasResult      = !!(destination || trip_id)
   const router         = useRouter()
 
@@ -38,7 +39,8 @@ export default function TripGeneratorClient({ searchParams }: Props) {
     sessionStorage.removeItem('plannerReturnUrl')
     const sep       = returnUrl.includes('?') ? '&' : '?'
     const cleanPath = returnUrl.replace(/^\/(en|es)(?=\/|$)/, '')
-    router.replace(`${cleanPath}${sep}checkout=success` as any)
+    const sidParam  = sessionId ? `&session_id=${sessionId}` : ''
+    router.replace(`${cleanPath}${sep}checkout=success${sidParam}` as any)
   // Run once on mount — checkout status won't change within the same render
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])

@@ -71,6 +71,17 @@ export async function POST(req: NextRequest) {
 
     const admin = getSupabaseAdmin()
 
+    // Idempotency: skip if this session was already fulfilled
+    const { data: existing0 } = await (admin as any)
+      .from('user_entitlements')
+      .select('last_session_id')
+      .eq('user_id', userId)
+      .single()
+    if ((existing0 as any)?.last_session_id === session.id) {
+      console.log('[stripe-webhook] already processed session:', session.id)
+      return NextResponse.json({ received: true })
+    }
+
     if (session.mode === 'subscription') {
       // ── Upgrade to Explorer (unlimited) ──────────────────────────────────────
       const stripeSubId = typeof session.subscription === 'string'
@@ -82,9 +93,10 @@ export async function POST(req: NextRequest) {
         .upsert({
           user_id:                userId,
           tier:                   'explorer',
-          trips_remaining:        0,         // not used for explorer tier
+          trips_remaining:        0,
           stripe_customer_id:     session.customer as string | null,
           stripe_subscription_id: stripeSubId,
+          last_session_id:        session.id,
           updated_at:             new Date().toISOString(),
         }, { onConflict: 'user_id' })
 
@@ -114,11 +126,12 @@ export async function POST(req: NextRequest) {
       const { error } = await (admin as any)
         .from('user_entitlements')
         .upsert({
-          user_id:          userId,
-          tier:             newTier,
-          trips_remaining:  newRemaining,
+          user_id:            userId,
+          tier:               newTier,
+          trips_remaining:    newRemaining,
           stripe_customer_id: session.customer as string | null,
-          updated_at:       new Date().toISOString(),
+          last_session_id:    session.id,
+          updated_at:         new Date().toISOString(),
         }, { onConflict: 'user_id' })
 
       if (error) console.error('[stripe-webhook] upsert credits error:', error.message)

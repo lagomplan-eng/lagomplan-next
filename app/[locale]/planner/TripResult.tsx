@@ -800,18 +800,27 @@ export default function TripResult({ params }: Props) {
   useEffect(() => {
     if (checkoutStatus !== 'success') return
     showToast(locale === 'es' ? '🎉 ¡Pago exitoso! Ya puedes generar más viajes.' : '🎉 Payment successful! You can now generate more trips.')
-    // Delay to let the Stripe webhook update the DB before we read plan state
-    setTimeout(() => {
-      fetch('/api/me/plan')
-        .then(r => r.ok ? r.json() : null)
-        .then(data => {
-          if (data) {
-            setPlanCredits(data)
-            setGenerateKey(k => k + 1)  // retrigger generation with fresh credits
-          }
-        })
-        .catch(() => {})
-    }, 2500)
+
+    const sessionId = params.session_id ?? ''
+
+    async function fulfillThenRefresh() {
+      // Fallback fulfillment: ensures credits are granted even if the webhook
+      // didn't fire (e.g. not configured in production or $0 coupon edge case).
+      if (sessionId) {
+        await fetch('/api/checkout/fulfill', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ session_id: sessionId }),
+        }).catch(() => {})
+      }
+      const data = await fetch('/api/me/plan').then(r => r.ok ? r.json() : null).catch(() => null)
+      if (data) {
+        setPlanCredits(data)
+        setGenerateKey(k => k + 1)
+      }
+    }
+
+    fulfillThenRefresh()
   // Run once on mount when checkoutStatus==='success'. showToast is stable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
