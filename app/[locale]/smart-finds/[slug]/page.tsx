@@ -8,11 +8,11 @@ import { buildAlternates, buildOpenGraph } from '../../../../lib/seo'
 import type { Locale }               from '../../../../i18n'
 
 type Props = {
-  params: { locale: Locale; slug: string }
+  params: Promise<{ locale: Locale; slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, slug } = params
+  const { locale, slug } = await params
   return {
     title:       `${locale === 'es' ? 'Producto' : 'Smart find'} — ${slug}`,
     alternates:  buildAlternates('smartFindDetail'),
@@ -20,8 +20,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function Page({ params }: Props) {
-  const { locale, slug } = params
+export default async function Page({ params }: Props) {
+  const { locale, slug } = await params
   return (
     <main className="pt-[72px] min-h-screen" style={{ background: '#EDE7E1' }}>
       <div className="page-inner py-24">

@@ -45,6 +45,7 @@ export const pathnames = {
   '/login': '/login',
   '/privacy': { es: '/privacidad', en: '/privacy' },
   '/terms':   { es: '/terminos',   en: '/terms'   },
+  '/cookies': '/cookies',
   '/worldcup':        { es: '/mundial',         en: '/worldcup'         },
   '/worldcup/[slug]': { es: '/mundial/[slug]',  en: '/worldcup/[slug]'  },
 } as const

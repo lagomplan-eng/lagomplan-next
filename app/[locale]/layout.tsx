@@ -9,7 +9,9 @@ import { locales, type Locale }       from '../../i18n'
 import { buildAlternates, buildOpenGraph } from '../../lib/seo'
 import Nav    from '../../components/layout/Nav'
 import Footer from '../../components/layout/Footer'
-import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
+import { SupabaseProvider }   from '../../components/auth/SupabaseProvider'
+import { ConsentProvider }    from '../../components/consent/ConsentProvider'
+import { Analytics }          from '../../components/consent/Analytics'
 import '../globals.css'
 
 // ── Fonts ──────────────────────────────────────────────────
@@ -80,9 +82,12 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
-            <Nav />
-            {children}
-            <Footer />
+            <ConsentProvider>
+              <Nav />
+              {children}
+              <Footer />
+              <Analytics />
+            </ConsentProvider>
           </SupabaseProvider>
         </NextIntlClientProvider>
       </body>

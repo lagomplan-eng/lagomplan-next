@@ -153,6 +153,7 @@ const DAL = {
       tags:["Arte contemporáneo","Piscina rooftop","Acceso DART"],
       note:"El hotel más distinguido del downtown histórico: arte contemporáneo en cada piso, piscina en el rooftop con extensión sobre la fachada y CBD Provisions — una de las mejores mesas del centro. Acceso al DART desde la estación West End.",
       best_for:"Hotel boutique",
+      url:"",
     },
     {
       name:"Rosewood Mansion on Turtle Creek",
@@ -162,6 +163,7 @@ const DAL = {
       tags:["Mansión restaurada","143 habitaciones","Jardines"],
       note:"La mejor relación calidad-atmósfera de Uptown: 143 habitaciones en una mansión restaurada con jardines y restaurante propio. Más íntimo que los grandes hoteles de cadena.",
       best_for:"Pareja",
+      url:"",
     },
     {
       name:"W Dallas — Victory",
@@ -171,6 +173,7 @@ const DAL = {
       tags:["Piscina","Spa","DART Victory Station"],
       note:"En el complejo de entretenimiento de Victory Park, a pasos del American Airlines Center. Piscina, spa y servicio Whatever/Whenever. Acceso al DART desde la estación Victory — misma línea que lleva al aeropuerto DFW.",
       best_for:"Lujo",
+      url:"",
     },
   ],
 
@@ -435,7 +438,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span>
       <div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} />
     </div>
-    <h2 style={{ ...df(27,700,"italic"), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
+    <h2 style={{ ...uf(27, 700), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}
   </div>
 );
@@ -536,10 +539,11 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"14px 22px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{ width:"100%", padding:"11px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -571,7 +575,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <Card style={{ padding:"22px", background:T.sandLight, borderColor:T.sandDark }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(16,700,"italic"), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
+        <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
           {guide.plannerCTA} →
@@ -636,7 +640,7 @@ const GuideHero = ({ guide }) => (
         <span style={{ color:T.sandDark, fontSize:12 }}>·</span>
         <Label color={T.inkFaint}>{guide.stadium.capacity}</Label>
       </div>
-      <h1 style={{ ...df("clamp(44px,5.5vw,72px)",900,"italic"), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
+      <h1 style={{ ...uf("clamp(44px,5.5vw,72px)", 900), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
       <p style={{ ...uf(15,400), color:T.inkMid, lineHeight:1.85, maxWidth:500, marginBottom:32 }}>{guide.description}</p>
       <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:36 }}>
         {guide.tags.map(tag => <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>)}
@@ -669,7 +673,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
   <div style={{ position:"sticky", top:0, zIndex:40, background:`${T.bg}F5`, backdropFilter:"blur(18px)", borderBottom:`1px solid ${T.sandDark}`, height:52, display:"flex", alignItems:"center", padding:"0 40px", gap:0, overflowX:"auto" }}>
     <button onClick={onBack} style={{ ...uf(11,500), color:T.inkFaint, background:"none", border:"none", cursor:"pointer", padding:"0 14px 0 0", marginRight:14, borderRight:`1px solid ${T.sandDark}`, whiteSpace:"nowrap", letterSpacing:"0.06em", transition:"color 0.15s" }}
       onMouseEnter={e => e.currentTarget.style.color=T.pine} onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>← Guías</button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Dallas</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Dallas</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10, active===item.id ? 700 : 500), letterSpacing:"0.08em", textTransform:"uppercase", color: active===item.id ? T.pine : T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id ? T.coral : "transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>

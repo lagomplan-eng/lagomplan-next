@@ -506,7 +506,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(10,700), letterSpacing:"0.18em", textTransform:"uppercase", color:T.coral }}>{number}</span>
       <div style={{ flex:1, height:1, background:T.sandDark }} />
     </div>
-    <h2 style={{ ...df(26,700,"italic"), color:T.pine, lineHeight:1.1, marginBottom:subtitle?6:0 }}>{title}</h2>
+    <h2 style={{ ...uf(26, 700), color:T.pine, lineHeight:1.1, marginBottom:subtitle?6:0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.6, margin:0, maxWidth:520 }}>{subtitle}</p>}
   </div>
 );
@@ -679,12 +679,17 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.6 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"12px 18px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{ width:"100%", padding:"9px", background:T.pine, border:"none", borderRadius:RADIUS-2,
-        ...uf(9,700), letterSpacing:"0.1em", textTransform:"uppercase", color:T.white, cursor:"pointer" }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.85"}
-        onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{
+        display:"block", textAlign:"center", width:"100%", padding:"9px", borderRadius:RADIUS-2,
+        background: stay.url ? T.pine : T.sandDark,
+        ...uf(9,700), letterSpacing:"0.1em", textTransform:"uppercase", color:T.white,
+        textDecoration:"none", transition:"opacity 0.18s",
+        pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45,
+      }}
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.85"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -738,7 +743,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
       {/* CTA primario */}
       <Card style={{ padding:"22px", background:T.pine, border:"none" }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(17,700,"italic"), color:T.sand, lineHeight:1.3, marginBottom:14 }}>
+        <p style={{ ...uf(17, 700), color:T.sand, lineHeight:1.3, marginBottom:14 }}>
           Arma tu ruta alrededor de los partidos.
         </p>
         <button onClick={onPlan} style={{ width:"100%", padding:"12px", background:T.coral, border:"none",
@@ -840,7 +845,7 @@ const GuideHero = ({ guide }) => (
         <span style={{ color:T.sandDark }}>·</span>
         <Label color={T.inkFaint}>{guide.stadium.capacity}</Label>
       </div>
-      <h1 style={{ ...df("clamp(40px,5.5vw,68px)",900,"italic"), color:T.pine, lineHeight:0.95,
+      <h1 style={{ ...uf("clamp(40px,5.5vw,68px)", 900), color:T.pine, lineHeight:0.95,
         letterSpacing:"-0.03em", marginBottom:18 }}>
         {guide.city}
       </h1>
@@ -901,7 +906,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
       borderRight:`1px solid ${T.sandDark}`, whiteSpace:"nowrap", letterSpacing:"0.06em" }}>
       ← Guías
     </button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:18, whiteSpace:"nowrap" }}>Houston</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:18, whiteSpace:"nowrap" }}>Houston</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{
@@ -1166,7 +1171,7 @@ const GuideDetail = ({ guide, onBack }) => {
             {/* 09 — CIERRE */}
             <section style={{ paddingBottom:0 }}>
               <div style={{ width:36, height:3, background:T.coral, marginBottom:22 }} />
-              <blockquote style={{ ...df(21,400,"italic"), color:T.pine, lineHeight:1.65,
+              <blockquote style={{ ...uf(21, 400), color:T.pine, lineHeight:1.65,
                 margin:"0 0 14px", maxWidth:560, borderLeft:`3px solid ${T.coral}`, paddingLeft:22 }}>
                 "{guide.closingNote}"
               </blockquote>

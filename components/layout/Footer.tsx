@@ -11,6 +11,7 @@ import Image                        from 'next/image'
 import NextLink                    from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { Link }                    from '../../lib/navigation'
+import { CookieSettingsButton }    from '../consent/CookieSettingsButton'
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -169,6 +170,15 @@ export default async function Footer() {
             >
               {t('privacy')}
             </Link>
+            <Link
+              href="/cookies"
+              className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors"
+            >
+              {t('cookies')}
+            </Link>
+            <CookieSettingsButton
+              label={locale === 'es' ? 'Configuración de cookies' : 'Cookie settings'}
+            />
           </div>
         </div>
       </div>

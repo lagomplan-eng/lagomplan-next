@@ -177,6 +177,7 @@ const VANCOUVER = {
       tags:["Diseño honesto","Boutique","Robson cerca"],
       note:"Hotel de mediados del siglo XX con reforma contemporánea inteligente. Piscina en el techo, habitaciones con diseño honesto y ubicación a cuatro cuadras de Robson Street. A quince minutos caminando del estadio.",
       best_for:"Hotel boutique",
+      url:"",
     },
     {
       name:"HI Vancouver Central",
@@ -186,6 +187,7 @@ const VANCOUVER = {
       tags:["Presupuesto","Habitaciones privadas","SkyTrain cerca"],
       note:"El hostal de referencia en Vancouver para el viajero con presupuesto ajustado. Instalaciones actualizadas, habitaciones privadas disponibles y conexión directa al SkyTrain a dos cuadras.",
       best_for:"Presupuesto / hostal",
+      url:"",
     },
     {
       name:"Fairmont Pacific Rim",
@@ -195,6 +197,7 @@ const VANCOUVER = {
       tags:["Vistas a las montañas","Spa","Piscina en techo"],
       note:"Vistas directas a las montañas y a la bahía de Coal Harbour desde el mismo hotel. Spa, piscina en el techo, restaurante de referencia. La dirección más impresionante de Vancouver para el viajero que también puede pagarlo.",
       best_for:"Lujo de cadena",
+      url:"",
     },
   ],
 
@@ -493,7 +496,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span>
       <div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} />
     </div>
-    <h2 style={{ ...df(27,700,"italic"), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
+    <h2 style={{ ...uf(27, 700), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}
   </div>
 );
@@ -677,15 +680,17 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"14px 22px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{
-        width:"100%", padding:"11px", background:T.pine, border:"none", borderRadius:RADIUS-2,
-        ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer",
-        transition:"opacity 0.18s",
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{
+        display:"block", textAlign:"center",
+        width:"100%", padding:"11px", background: stay.url ? T.pine : T.sandDark, borderRadius:RADIUS-2,
+        ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white,
+        textDecoration:"none", transition:"opacity 0.18s",
+        pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45,
       }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
-        onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -767,7 +772,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
       {/* CTA primario */}
       <Card style={{ padding:"22px 22px", background:T.sandLight, borderColor:T.sandDark }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(16,700,"italic"), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
+        <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
           ¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.
         </p>
         <button onClick={onPlan} style={{
@@ -886,7 +891,7 @@ const GuideHero = ({ guide }) => (
 
       {/* City name */}
       <h1 style={{
-        ...df("clamp(44px,5.5vw,72px)", 900, "italic"),
+        ...uf("clamp(44px,5.5vw,72px)", 900),
         color:T.pine, lineHeight:0.92,
         letterSpacing:"-0.03em", marginBottom:22,
       }}>
@@ -972,7 +977,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
       onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
       ← Guías
     </button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Vancouver</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Vancouver</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{

@@ -19,10 +19,11 @@ import type { Locale }       from '../../../../../i18n'
 import TripShareWall         from '../../../../../components/trips/TripShareWall'
 
 type Props = {
-  params: { locale: Locale; shareId: string }
+  params: Promise<{ locale: Locale; shareId: string }>
 }
 
-export default async function TripSharePage({ params: { locale, shareId } }: Props) {
+export default async function TripSharePage({ params }: Props) {
+  const { locale, shareId } = await params
 
   // ── 1. Fetch public trip preview ─────────────────────────────────────────────
   // Use admin client to bypass RLS and look up by share_id.
@@ -47,7 +48,7 @@ export default async function TripSharePage({ params: { locale, shareId } }: Pro
   }
 
   // ── 2. Check authentication ──────────────────────────────────────────────────
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (user) {

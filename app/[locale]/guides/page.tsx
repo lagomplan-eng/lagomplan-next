@@ -13,9 +13,10 @@ import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
 import type { Locale }    from '../../../i18n'
 import GuidesClient, { type GuideListing } from '../../../components/guides/GuidesClient'
 
-type Props = { params: { locale: Locale } }
+type Props = { params: Promise<{ locale: Locale }> }
 
-export async function generateMetadata({ params: { locale } }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
   return {
     title: locale === 'es' ? 'Guías de viaje' : 'Travel guides',
     description:

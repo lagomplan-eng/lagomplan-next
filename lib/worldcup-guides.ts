@@ -1,3 +1,5 @@
+import { url } from "inspector"
+
 export interface WorldcupGuide {
   id: string
   city: string
@@ -12,7 +14,7 @@ export interface WorldcupGuide {
   manifesto: { headline: string; body: string; lagomNote: string }
   vibe: { body: string; zones: Array<{ name: string; type: string; desc: string }>; lagomNote: string }
   neighborhoods: Array<{ name: string; vibe: string; best_for: string; walk_to_stadium: string }>
-  hotels: Array<{ name: string; price: string; area: string; note: string }>
+  hotels: Array<{ name: string; price: string; area: string; note: string; url: string }>
   logistics: { arrival: string; airport_to_city: string; stadium_transport: string; visa: string; lagomNote: string }
   meetingPoints: Array<{ name: string; area: string; desc: string }>
   food: Array<{ dish: string; where: string; price: string; type: string }>
@@ -60,11 +62,11 @@ const CDMX: WorldcupGuide = {
     { name:"Centro Histórico", vibe:"Historia masiva, muy turístico. Atención de noche.", best_for:"Fan WC",  walk_to_stadium:"40 min (Metro)" },
   ],
   hotels:[
-    { name:"Condesa DF",          price:"$$$", area:"Condesa",    note:"El hotel de la ciudad para parejas. Azotea, diseño excepcional, terraza icónica." },
-    { name:"Hotel Carlota",       price:"$$",  area:"Roma Norte", note:"Diseño, ubicación perfecta, desayuno que vale la noche." },
-    { name:"Casa Comtesse",       price:"$$",  area:"Roma Norte", note:"Boutique, íntimo, estética editorial." },
-    { name:"NH Collection Reforma", price:"$$", area:"Reforma",  note:"Familiar, bien ubicado, alberca en el piso 14." },
-    { name:"Freehand CDMX",       price:"$",   area:"Roma Norte", note:"Social, económico, bar en el rooftop." },
+    { name:"Condesa DF",          price:"$$$", area:"Condesa",    note:"El hotel de la ciudad para parejas. Azotea, diseño excepcional, terraza icónica.", url:"" },
+    { name:"Hotel Carlota",       price:"$$",  area:"Roma Norte", note:"Diseño, ubicación perfecta, desayuno que vale la noche.", url:"" },
+    { name:"Casa Comtesse",       price:"$$",  area:"Roma Norte", note:"Boutique, íntimo, estética editorial.", url:"" },
+    { name:"NH Collection Reforma", price:"$$", area:"Reforma",  note:"Familiar, bien ubicado, alberca en el piso 14.", url:"" },
+    { name:"Freehand CDMX",       price:"$",   area:"Roma Norte", note:"Social, económico, bar en el rooftop.", url:"" },
   ],
   logistics:{
     arrival:"Para visitantes de otras ciudades de México: vuelo doméstico o CDMX ya es tu sede. Para internacionales: AICM o NAICM con conexiones directas desde toda Latinoamérica.",
@@ -130,11 +132,11 @@ const GDL: WorldcupGuide = {
     { name:"Zapopan",           vibe:"Tranquilo, moderno, cerca del Akron.",                                   best_for:"Familia", walk_to_stadium:"10 min (Uber)" },
   ],
   hotels:[
-    { name:"Quinta Real Guadalajara", price:"$$$", area:"López Mateos",  note:"En una antigua plaza de toros. Arquitectura excepcional." },
-    { name:"Casa Fayette",            price:"$$",  area:"Col. Americana", note:"Boutique, jardín, desayuno incluido. El favorito de la pareja con criterio." },
-    { name:"Demetria Hotel",          price:"$$",  area:"Col. Americana", note:"Diseño contemporáneo, bar en planta baja, en el mejor barrio." },
-    { name:"Hilton Garden Inn GDL",   price:"$$",  area:"Zapopan",        note:"Familiar, con alberca, a 10 min del Akron." },
-    { name:"Hotel Morales",           price:"$",   area:"Centro",         note:"Histórico, económico, bien ubicado para el transporte." },
+    { name:"Quinta Real Guadalajara", price:"$$$", area:"López Mateos",  note:"En una antigua plaza de toros. Arquitectura excepcional.", url:"" },
+    { name:"Casa Fayette",            price:"$$",  area:"Col. Americana", note:"Boutique, jardín, desayuno incluido. El favorito de la pareja con criterio.", url:"" },
+    { name:"Demetria Hotel",          price:"$$",  area:"Col. Americana", note:"Diseño contemporáneo, bar en planta baja, en el mejor barrio.", url:"" },
+    { name:"Hilton Garden Inn GDL",   price:"$$",  area:"Zapopan",        note:"Familiar, con alberca, a 10 min del Akron.", url:"" },
+    { name:"Hotel Morales",           price:"$",   area:"Centro",         note:"Histórico, económico, bien ubicado para el transporte.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo directo CDMX–GDL: 1h10min. Desde EE.UU.: vuelos directos desde LAX, SFO, ORD.",
@@ -197,10 +199,10 @@ const MTY: WorldcupGuide = {
     { name:"San Pedro Garza García",  vibe:"Seguro, moderno, suburbano. Muy tranquilo.",                          best_for:"Familia", walk_to_stadium:"25 min (Uber)" },
   ],
   hotels:[
-    { name:"Fiesta Americana Monterrey",    price:"$$$", area:"Valle",          note:"Diseño, ubicación en Valle, rooftop bar." },
-    { name:"Krystal Grand Monterrey",       price:"$$",  area:"Centro",         note:"Confiable, bien ubicado, precio razonable." },
-    { name:"Hilton Garden Inn MTY",         price:"$$",  area:"Valle",          note:"Familiar, alberca, desayuno incluido." },
-    { name:"City Express Plus San Jerónimo", price:"$", area:"San Jerónimo",   note:"Cerca del BBVA, funcional." },
+    { name:"Fiesta Americana Monterrey",    price:"$$$", area:"Valle",          note:"Diseño, ubicación en Valle, rooftop bar.", url:"" },
+    { name:"Krystal Grand Monterrey",       price:"$$",  area:"Centro",         note:"Confiable, bien ubicado, precio razonable.", url:"" },
+    { name:"Hilton Garden Inn MTY",         price:"$$",  area:"Valle",          note:"Familiar, alberca, desayuno incluido.", url:"" },
+    { name:"City Express Plus San Jerónimo", price:"$", area:"San Jerónimo",   note:"Cerca del BBVA, funcional.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–MTY: 1h30min, desde $1,800 pesos ida. El aeropuerto Mariano Escobedo está bien conectado.",
@@ -264,10 +266,10 @@ const LA: WorldcupGuide = {
     { name:"Santa Monica", vibe:"Caro pero cómodo. Playa, bares, restaurantes.",     best_for:"Pareja",  walk_to_stadium:"35 min (Uber)" },
   ],
   hotels:[
-    { name:"Ace Hotel DTLA",     price:"$$$", area:"Downtown",  note:"Rooftop, diseño, restaurante de referencia." },
-    { name:"The LINE Koreatown", price:"$$",  area:"Koreatown", note:"Diseño coreano-americano, acceso al metro." },
-    { name:"Freehand LA",        price:"$$",  area:"Koreatown", note:"Social, rooftop, bien ubicado para el metro." },
-    { name:"citizenM DTLA",      price:"$",   area:"Downtown",  note:"Eficiente, moderno, precio competitivo." },
+    { name:"Ace Hotel DTLA",     price:"$$$", area:"Downtown",  note:"Rooftop, diseño, restaurante de referencia.", url:"" },
+    { name:"The LINE Koreatown", price:"$$",  area:"Koreatown", note:"Diseño coreano-americano, acceso al metro.", url:"" },
+    { name:"Freehand LA",        price:"$$",  area:"Koreatown", note:"Social, rooftop, bien ubicado para el metro.", url:"" },
+    { name:"citizenM DTLA",      price:"$",   area:"Downtown",  note:"Eficiente, moderno, precio competitivo.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–LAX: 4 horas directas. Reserva con 3 meses de anticipación para días de partido de México.",
@@ -330,10 +332,10 @@ const MIA: WorldcupGuide = {
     { name:"Coral Gables",  vibe:"Elegante, histórico.",                                      best_for:"Pareja / Familia", walk_to_stadium:"30 min (Uber)" },
   ],
   hotels:[
-    { name:"SLS Brickell",          price:"$$$",  area:"Brickell",     note:"Bazaar de José Andrés abajo, rooftop bar." },
-    { name:"The Elser Hotel",       price:"$$",   area:"Downtown",     note:"Nuevo, con cocina en el cuarto, acceso a Brickell." },
-    { name:"Hyatt Centric Brickell", price:"$$",  area:"Brickell",     note:"Confiable, rooftop, bien ubicado." },
-    { name:"Courtyard Coconut Grove", price:"$$", area:"Coconut Grove", note:"Familiar, alberca, zona tranquila." },
+    { name:"SLS Brickell",          price:"$$$",  area:"Brickell",     note:"Bazaar de José Andrés abajo, rooftop bar.", url:"" },
+    { name:"The Elser Hotel",       price:"$$",   area:"Downtown",     note:"Nuevo, con cocina en el cuarto, acceso a Brickell.", url:"" },
+    { name:"Hyatt Centric Brickell", price:"$$",  area:"Brickell",     note:"Confiable, rooftop, bien ubicado.", url:"" },
+    { name:"Courtyard Coconut Grove", price:"$$", area:"Coconut Grove", note:"Familiar, alberca, zona tranquila.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–MIA: 3h15min directo. Reserva con 3 meses de anticipación.",
@@ -395,10 +397,10 @@ const NYC: WorldcupGuide = {
     { name:"Hoboken, NJ",           vibe:"Cerca del estadio, más barato, ferry a Manhattan.",     best_for:"Familia",         walk_to_stadium:"NJ Transit 15 min" },
   ],
   hotels:[
-    { name:"The Hoxton Williamsburg", price:"$$$",  area:"Brooklyn",  note:"El hotel más interesante de NY. Restaurante hasta las 2am." },
-    { name:"Arlo Midtown",            price:"$$$",  area:"Midtown",   note:"Rooftop con vista a Midtown. Penn Station a 10 min caminando." },
-    { name:"Freehand New York",       price:"$$",   area:"Midtown",   note:"Social, bien ubicado, bar en el lobby." },
-    { name:"Paper Factory Hotel",     price:"$",    area:"Queens LIC", note:"Diseño industrial, acceso al metro." },
+    { name:"The Hoxton Williamsburg", price:"$$$",  area:"Brooklyn",  note:"El hotel más interesante de NY. Restaurante hasta las 2am.", url:"" },
+    { name:"Arlo Midtown",            price:"$$$",  area:"Midtown",   note:"Rooftop con vista a Midtown. Penn Station a 10 min caminando.", url:"" },
+    { name:"Freehand New York",       price:"$$",   area:"Midtown",   note:"Social, bien ubicado, bar en el lobby.", url:"" },
+    { name:"Paper Factory Hotel",     price:"$",    area:"Queens LIC", note:"Diseño industrial, acceso al metro.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–JFK o EWR: 5 horas directas. Reserva con 4 meses de anticipación.",
@@ -461,10 +463,10 @@ const DAL: WorldcupGuide = {
     { name:"Frisco",        vibe:"Suburbio tranquilo, familiar, cerca del estadio.",          best_for:"Familia",         walk_to_stadium:"20 min (Uber)" },
   ],
   hotels:[
-    { name:"The Joule Dallas",        price:"$$$", area:"Downtown",     note:"Edificio de 1927. Alberca en rooftop sobre Main Street." },
-    { name:"Omni Dallas Hotel",       price:"$$",  area:"Downtown",     note:"Confiable, bien ubicado, bar activo durante el torneo." },
-    { name:"Hotel Lumen",             price:"$$",  area:"Highland Park", note:"Boutique, bar con terraza, el favorito de los locales." },
-    { name:"Hyatt House Dallas Uptown", price:"$", area:"Uptown",       note:"Cocina en el cuarto, desayuno incluido." },
+    { name:"The Joule Dallas",        price:"$$$", area:"Downtown",     note:"Edificio de 1927. Alberca en rooftop sobre Main Street.", url:"" },
+    { name:"Omni Dallas Hotel",       price:"$$",  area:"Downtown",     note:"Confiable, bien ubicado, bar activo durante el torneo.", url:"" },
+    { name:"Hotel Lumen",             price:"$$",  area:"Highland Park", note:"Boutique, bar con terraza, el favorito de los locales.", url:"" },
+    { name:"Hyatt House Dallas Uptown", price:"$", area:"Uptown",       note:"Cocina en el cuarto, desayuno incluido.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–DFW: 2h30min directo. El aeropuerto DFW es enorme — 90 min de conexión mínimo.",
@@ -527,10 +529,10 @@ const SF: WorldcupGuide = {
     { name:"Noe Valley",       vibe:"Tranquilo, familiar, verde.", best_for:"Familia", walk_to_stadium:"Caltrain 55 min" },
   ],
   hotels:[
-    { name:"Proper Hotel SF",     price:"$$$",  area:"Civic Center", note:"Diseño de Kelly Wearstler en edificio de 1909." },
-    { name:"Hotel Zetta",         price:"$$",   area:"SOMA",         note:"Acceso al Caltrain, diseño jovial, bar decente." },
-    { name:"Inn at the Opera",    price:"$$",   area:"Civic Center", note:"Tranquilo, bien ubicado, desayuno incluido." },
-    { name:"Marriott Marquis SF", price:"$$$",  area:"Downtown",     note:"Familiar, alberca, habitaciones amplias." },
+    { name:"Proper Hotel SF",     price:"$$$",  area:"Civic Center", note:"Diseño de Kelly Wearstler en edificio de 1909.", url:"" },
+    { name:"Hotel Zetta",         price:"$$",   area:"SOMA",         note:"Acceso al Caltrain, diseño jovial, bar decente.", url:"" },
+    { name:"Inn at the Opera",    price:"$$",   area:"Civic Center", note:"Tranquilo, bien ubicado, desayuno incluido.", url:"" },
+    { name:"Marriott Marquis SF", price:"$$$",  area:"Downtown",     note:"Familiar, alberca, habitaciones amplias.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–SFO: 4 horas directas.",
@@ -592,10 +594,10 @@ const HOU: WorldcupGuide = {
     { name:"Museum District", vibe:"Tranquilo, verde, cerca del zoo y Hermann Park.",          best_for:"Familia", walk_to_stadium:"15 min (Uber)" },
   ],
   hotels:[
-    { name:"Hotel Alessandra",    price:"$$$", area:"Downtown",       note:"El más bello de Houston ahora. Restaurante Lucienne de referencia." },
-    { name:"Hotel ZaZa Houston",  price:"$$$", area:"Museum District", note:"Habitaciones temáticas, junto al Hermann Park." },
-    { name:"The Lancaster",       price:"$$",  area:"Theater District", note:"Histórico 1926. Bar de jazz los viernes." },
-    { name:"Hyatt House Galleria", price:"$",  area:"Galleria",        note:"Cocina en el cuarto, desayuno incluido." },
+    { name:"Hotel Alessandra",    price:"$$$", area:"Downtown",       note:"El más bello de Houston ahora. Restaurante Lucienne de referencia.", url:"" },
+    { name:"Hotel ZaZa Houston",  price:"$$$", area:"Museum District", note:"Habitaciones temáticas, junto al Hermann Park.", url:"" },
+    { name:"The Lancaster",       price:"$$",  area:"Theater District", note:"Histórico 1926. Bar de jazz los viernes.", url:"" },
+    { name:"Hyatt House Galleria", price:"$",  area:"Galleria",        note:"Cocina en el cuarto, desayuno incluido.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–IAH: 2 horas directas. Uno de los vuelos más accesibles del torneo.",
@@ -658,10 +660,10 @@ const SEA: WorldcupGuide = {
     { name:"Fremont",        vibe:"Bohemio, tranquilo, cafés.",                              best_for:"Pareja",          walk_to_stadium:"30 min" },
   ],
   hotels:[
-    { name:"Hotel Theodore",    price:"$$$", area:"Downtown",   note:"Boutique, art deco, a 10 min caminando del estadio." },
-    { name:"Fairmont Olympic",  price:"$$$", area:"Downtown",   note:"El clásico. Lobby de mármol, bar de whisky, historia." },
-    { name:"Inn at the Market", price:"$$$", area:"Pike Place", note:"Vista al Puget Sound desde las habitaciones." },
-    { name:"Hyatt at Olive 8",  price:"$$",  area:"Downtown",   note:"Familiar, alberca en el piso 8, cuna disponible." },
+    { name:"Hotel Theodore",    price:"$$$", area:"Downtown",   note:"Boutique, art deco, a 10 min caminando del estadio.", url:"" },
+    { name:"Fairmont Olympic",  price:"$$$", area:"Downtown",   note:"El clásico. Lobby de mármol, bar de whisky, historia.", url:"" },
+    { name:"Inn at the Market", price:"$$$", area:"Pike Place", note:"Vista al Puget Sound desde las habitaciones.", url:"" },
+    { name:"Hyatt at Olive 8",  price:"$$",  area:"Downtown",   note:"Familiar, alberca en el piso 8, cuna disponible.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–SEA: escala en LAX o SFO, 7-9 horas total.",
@@ -722,10 +724,10 @@ const KC: WorldcupGuide = {
     { name:"Power & Light",            vibe:"Central, animado, bares y restaurantes.",                        best_for:"Fan WC",          walk_to_stadium:"10 min (Uber)" },
   ],
   hotels:[
-    { name:"21c Museum Hotel",    price:"$$$", area:"Crossroads", note:"Galería de arte contemporáneo + hotel. El concepto más original del torneo." },
-    { name:"The Raphael Hotel",   price:"$$",  area:"Plaza",      note:"Boutique europeo desde 1927." },
-    { name:"Loews Kansas City",   price:"$$",  area:"Downtown",   note:"Familiar, alberca cubierta grande." },
-    { name:"Hyatt Place KC Downtown", price:"$", area:"Downtown", note:"Funcional, desayuno incluido." },
+    { name:"21c Museum Hotel",    price:"$$$", area:"Crossroads", note:"Galería de arte contemporáneo + hotel. El concepto más original del torneo.", url:"" },
+    { name:"The Raphael Hotel",   price:"$$",  area:"Plaza",      note:"Boutique europeo desde 1927.", url:"" },
+    { name:"Loews Kansas City",   price:"$$",  area:"Downtown",   note:"Familiar, alberca cubierta grande.", url:"" },
+    { name:"Hyatt Place KC Downtown", price:"$", area:"Downtown", note:"Funcional, desayuno incluido.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–MCI: escala en DAL o HOU, 5-6 horas total.",
@@ -786,10 +788,10 @@ const ATL: WorldcupGuide = {
     { name:"Old Fourth Ward", vibe:"Histórico, Ponce City Market, BeltLine.",                       best_for:"Pareja",           walk_to_stadium:"MARTA 15 min" },
   ],
   hotels:[
-    { name:"The Whitley",        price:"$$$", area:"Buckhead",   note:"Mejor hotel de Buckhead. Spa, rooftop bar." },
-    { name:"Hotel Clermont",     price:"$$",  area:"Ponce City", note:"Edificio de 1924. Historia de cabaret en las paredes." },
-    { name:"Hotel Artmore",      price:"$$",  area:"Midtown",    note:"Boutique, piscina al aire libre, a 10 min del estadio en MARTA." },
-    { name:"Loews Atlanta Hotel", price:"$$", area:"Midtown",    note:"Familiar, alberca grande, cuna disponible." },
+    { name:"The Whitley",        price:"$$$", area:"Buckhead",   note:"Mejor hotel de Buckhead. Spa, rooftop bar.", url:"" },
+    { name:"Hotel Clermont",     price:"$$",  area:"Ponce City", note:"Edificio de 1924. Historia de cabaret en las paredes.", url:"" },
+    { name:"Hotel Artmore",      price:"$$",  area:"Midtown",    note:"Boutique, piscina al aire libre, a 10 min del estadio en MARTA.", url:"" },
+    { name:"Loews Atlanta Hotel", price:"$$", area:"Midtown",    note:"Familiar, alberca grande, cuna disponible.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–ATL: escala en HOU o DAL, 5-6 horas. El aeropuerto Hartsfield-Jackson es el más transitado del mundo.",
@@ -851,10 +853,10 @@ const PHI: WorldcupGuide = {
     { name:"South Philadelphia", vibe:"El barrio más auténtico. Italian Market, comunidad latina.",  best_for:"Fan WC",          walk_to_stadium:"SEPTA 15 min" },
   ],
   hotels:[
-    { name:"The Rittenhouse Hotel",    price:"$$$$", area:"Rittenhouse", note:"El más elegante de la ciudad. Spa." },
-    { name:"Hotel Monaco Philadelphia", price:"$$$", area:"Old City",    note:"Kimpton en edificio histórico de 1907." },
-    { name:"Loews Philadelphia Hotel", price:"$$",   area:"Downtown",    note:"En rascacielos de 1929. Bien ubicado para SEPTA." },
-    { name:"Homewood Suites Rittenhouse", price:"$$", area:"Rittenhouse", note:"Suites con cocina, desayuno incluido." },
+    { name:"The Rittenhouse Hotel",    price:"$$$$", area:"Rittenhouse", note:"El más elegante de la ciudad. Spa.", url:"" },
+    { name:"Hotel Monaco Philadelphia", price:"$$$", area:"Old City",    note:"Kimpton en edificio histórico de 1907.", url:"" },
+    { name:"Loews Philadelphia Hotel", price:"$$",   area:"Downtown",    note:"En rascacielos de 1929. Bien ubicado para SEPTA.", url:"" },
+    { name:"Homewood Suites Rittenhouse", price:"$$", area:"Rittenhouse", note:"Suites con cocina, desayuno incluido.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–PHL: escala en MIA o HOU, 6-7 horas. Filadelfia está a 1.5 horas en tren de Nueva York.",
@@ -917,10 +919,10 @@ const BOS: WorldcupGuide = {
     { name:"South End",   vibe:"Restaurantes de autor, galería de arte, vida de barrio.",      best_for:"Pareja",  walk_to_stadium:"South Station 40 min" },
   ],
   hotels:[
-    { name:"The Liberty Hotel",  price:"$$$",  area:"Beacon Hill", note:"Prisión del condado de 1851 convertida en hotel." },
-    { name:"The Newbury",        price:"$$$$", area:"Back Bay",     note:"En mansión de 1927. El más elegante de la ciudad." },
-    { name:"The Boxer Boston",   price:"$$",   area:"North Station", note:"Acceso directo al commuter rail para Gillette." },
-    { name:"Westin Copley Place", price:"$$$", area:"Back Bay",     note:"Familiar, alberca grande, cuna disponible." },
+    { name:"The Liberty Hotel",  price:"$$$",  area:"Beacon Hill", note:"Prisión del condado de 1851 convertida en hotel.", url:"" },
+    { name:"The Newbury",        price:"$$$$", area:"Back Bay",     note:"En mansión de 1927. El más elegante de la ciudad.", url:"" },
+    { name:"The Boxer Boston",   price:"$$",   area:"North Station", note:"Acceso directo al commuter rail para Gillette.", url:"" },
+    { name:"Westin Copley Place", price:"$$$", area:"Back Bay",     note:"Familiar, alberca grande, cuna disponible.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–BOS: escala en HOU, MIA o NYC, 6-8 horas. Boston está a 1h en Amtrak de Nueva York.",
@@ -983,10 +985,10 @@ const TOR: WorldcupGuide = {
     { name:"Harbourfront",        vibe:"Junto al lago Ontario, parques, accesible.",                          best_for:"Familia",         walk_to_stadium:"20 min" },
   ],
   hotels:[
-    { name:"The Hazelton Hotel",         price:"$$$$", area:"Yorkville",    note:"El hotel del TIFF. El más fotografiado de la ciudad." },
-    { name:"Hotel Le Germain Maple Leaf", price:"$$$", area:"Downtown",     note:"Boutique canadiense con criterio europeo." },
-    { name:"Fairmont Royal York",        price:"$$$",  area:"Union Station", note:"El histórico. Alberca en el sótano. Frente a Union Station." },
-    { name:"Anndore House",              price:"$$",   area:"Church Street", note:"Boutique, bar activo, a pasos del subway." },
+    { name:"The Hazelton Hotel",         price:"$$$$", area:"Yorkville",    note:"El hotel del TIFF. El más fotografiado de la ciudad.", url:"" },
+    { name:"Hotel Le Germain Maple Leaf", price:"$$$", area:"Downtown",     note:"Boutique canadiense con criterio europeo.", url:"" },
+    { name:"Fairmont Royal York",        price:"$$$",  area:"Union Station", note:"El histórico. Alberca en el sótano. Frente a Union Station.", url:"" },
+    { name:"Anndore House",              price:"$$",   area:"Church Street", note:"Boutique, bar activo, a pasos del subway.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–YYZ: directo con Air Canada o Aeroméxico, 4.5 horas.",
@@ -1049,10 +1051,10 @@ const VAN: WorldcupGuide = {
     { name:"West End",    vibe:"Residencial, verde, acceso a Stanley Park.",    best_for:"Pareja / Familia", walk_to_stadium:"30 min" },
   ],
   hotels:[
-    { name:"Rosewood Hotel Georgia", price:"$$$$", area:"Downtown",     note:"El hotel histórico de Vancouver desde 1927." },
-    { name:"Loden Hotel",            price:"$$$",  area:"Coal Harbour", note:"Boutique con criterio europeo. Servicio de bicicletas." },
-    { name:"Westin Bayshore",        price:"$$$",  area:"Coal Harbour", note:"Junto a Stanley Park. Mejor alberca del torneo." },
-    { name:"Sutton Place Hotel",     price:"$$",   area:"West End",     note:"Confiable, bien ubicado, bar activo en noches de partido." },
+    { name:"Rosewood Hotel Georgia", price:"$$$$", area:"Downtown",     note:"El hotel histórico de Vancouver desde 1927.", url:"" },
+    { name:"Loden Hotel",            price:"$$$",  area:"Coal Harbour", note:"Boutique con criterio europeo. Servicio de bicicletas.", url:"" },
+    { name:"Westin Bayshore",        price:"$$$",  area:"Coal Harbour", note:"Junto a Stanley Park. Mejor alberca del torneo.", url:"" },
+    { name:"Sutton Place Hotel",     price:"$$",   area:"West End",     note:"Confiable, bien ubicado, bar activo en noches de partido.", url:"" },
   ],
   logistics:{
     arrival:"Vuelo CDMX–YVR: escala en LAX o SFO. 7–9 horas. eTA canadiense obligatoria ($7 CAD).",

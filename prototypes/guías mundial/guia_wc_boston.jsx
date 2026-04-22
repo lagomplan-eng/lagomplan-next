@@ -56,9 +56,9 @@ const BOS = {
     lagomNote:"El 26 de junio (Noruega vs. Francia), el 23 de junio (Inglaterra vs. Ghana) y el 9 de julio (Cuartos de Final) son las tres fechas de mayor demanda en Boston. Compra el tren y reserva hotel con la misma seriedad que el boleto del partido.",
   },
   stays:[
-    { name:"The Newbury Boston", area:"Back Bay / Newbury Street", price:"$$$$", priceCAD:"$380–650 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Back Bay"], note:"El hotel más elegante de Newbury Street, inaugurado en 2021 en la histórica sede del Ritz-Carlton de Boston. Rooftop con vistas a toda la ciudad, restaurante de nivel y la dirección más conveniente de Back Bay para tomar el Orange Line hacia South Station.", best_for:"Carácter" },
-    { name:"HI Boston", area:"Back Bay / Stuart Street", price:"$", priceCAD:"$60–140 USD/noche según tipo de habitación", tags:["Presupuesto","Habitaciones privadas","Internacional"], note:"El hostal oficial de Hostelling International en Boston, bien ubicado a cuatro cuadras de Back Bay Station. Habitaciones privadas y compartidas disponibles, cocina comunitaria y ambiente de mezcla internacional que encaja perfectamente con el perfil del torneo.", best_for:"Presupuesto" },
-    { name:"Mandarin Oriental Boston", area:"Back Bay / Boylston Street", price:"$$$$", priceCAD:"$650–1,200 USD/noche (periodo mundialista)", tags:["Lujo","Spa","Copley Station cerca"], note:"La dirección de lujo más conveniente de Boston para el perfil mundialista: a dos cuadras de Copley Station (Green Line) y a diez minutos de South Station. Spa, restaurante de referencia y habitaciones que no necesitan disculpa la mañana del partido.", best_for:"Lujo" },
+    { name:"The Newbury Boston", area:"Back Bay / Newbury Street", price:"$$$$", priceCAD:"$380–650 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Back Bay"], note:"El hotel más elegante de Newbury Street, inaugurado en 2021 en la histórica sede del Ritz-Carlton de Boston. Rooftop con vistas a toda la ciudad, restaurante de nivel y la dirección más conveniente de Back Bay para tomar el Orange Line hacia South Station.", best_for:"Carácter", url:"" },
+    { name:"HI Boston", area:"Back Bay / Stuart Street", price:"$", priceCAD:"$60–140 USD/noche según tipo de habitación", tags:["Presupuesto","Habitaciones privadas","Internacional"], note:"El hostal oficial de Hostelling International en Boston, bien ubicado a cuatro cuadras de Back Bay Station. Habitaciones privadas y compartidas disponibles, cocina comunitaria y ambiente de mezcla internacional que encaja perfectamente con el perfil del torneo.", best_for:"Presupuesto", url:"" },
+    { name:"Mandarin Oriental Boston", area:"Back Bay / Boylston Street", price:"$$$$", priceCAD:"$650–1,200 USD/noche (periodo mundialista)", tags:["Lujo","Spa","Copley Station cerca"], note:"La dirección de lujo más conveniente de Boston para el perfil mundialista: a dos cuadras de Copley Station (Green Line) y a diez minutos de South Station. Spa, restaurante de referencia y habitaciones que no necesitan disculpa la mañana del partido.", best_for:"Lujo", url:"" },
   ],
   logistics:{
     transport:[
@@ -165,7 +165,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span>
       <div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} />
     </div>
-    <h2 style={{ ...df(27,700,"italic"), color:T.pine, lineHeight:1.05, marginBottom:subtitle?8:0 }}>{title}</h2>
+    <h2 style={{ ...uf(27, 700), color:T.pine, lineHeight:1.05, marginBottom:subtitle?8:0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}
   </div>
 );
@@ -215,10 +215,11 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"14px 22px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{ width:"100%", padding:"11px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -247,7 +248,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <Card style={{ padding:"22px", background:T.sandLight, borderColor:T.sandDark }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(16,700,"italic"), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
+        <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
           {guide.plannerCTA} →
@@ -311,7 +312,7 @@ const GuideHero = ({ guide }) => (
         <span style={{ color:T.sandDark, fontSize:12 }}>·</span>
         <Label color={T.inkFaint}>{guide.stadium.capacity}</Label>
       </div>
-      <h1 style={{ ...df("clamp(44px,5.5vw,72px)",900,"italic"), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
+      <h1 style={{ ...uf("clamp(44px,5.5vw,72px)", 900), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
       <p style={{ ...uf(15,400), color:T.inkMid, lineHeight:1.85, maxWidth:500, marginBottom:32 }}>{guide.description}</p>
       <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:36 }}>
         {guide.tags.map(tag => <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>)}
@@ -390,7 +391,7 @@ const StickyNav = ({ active, onNavigate, onBack, city }) => (
       onMouseEnter={e => e.currentTarget.style.color=T.pine} onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
       ← Guías
     </button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{city}</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{city}</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10,active===item.id?700:500), letterSpacing:"0.08em", textTransform:"uppercase", color:active===item.id?T.pine:T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id?T.coral:"transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>

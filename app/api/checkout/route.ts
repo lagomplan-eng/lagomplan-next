@@ -26,7 +26,7 @@ const PLAN_PRICE_ENV: Record<string, string> = {
 
 export async function POST(req: NextRequest) {
   // ── Auth ─────────────────────────────────────────────────────────────────────
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {

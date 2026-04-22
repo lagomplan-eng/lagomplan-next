@@ -8,10 +8,11 @@ import type { Locale } from '../../../i18n'
 import ContactForm from '../../../components/forms/ContactForm'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   return {
     title:      locale === 'es' ? 'Contacto' : 'Contact',
     description:
@@ -38,11 +39,12 @@ const copy = {
   },
 }
 
-export default function ContactPage({
-  params: { locale },
+export default async function ContactPage({
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   const isES = locale === 'es'
   const t = copy[isES ? 'es' : 'en']
 

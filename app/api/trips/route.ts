@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Auth ──────────────────────────────────────────────────────────────────
-    const supabase = getSupabaseServer()
+    const supabase = await getSupabaseServer()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     console.log('[trips/post] getUser result:', { userId: user?.id ?? null, authError: authError?.message ?? null })
 

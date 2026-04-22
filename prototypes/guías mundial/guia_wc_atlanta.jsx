@@ -57,9 +57,9 @@ const ATL = {
     lagomNote:"Más accesible que las sedes de la Costa Este. Los precios suben en las fechas de España y la Semifinal, pero el margen de aumento es manejable comparado con Nueva York o Miami.",
   },
   stays:[
-    { name:"Hotel Clermont", area:"Ponce de Leon / Midtown-Inman Park", price:"$$$", priceCAD:"$220–380 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Ponce City Market cerca"], note:"El hotel que revivió el Ponce de Leon corridor de Atlanta: rooftop bar con vistas al skyline, restaurante propio y habitaciones con diseño deliberado en un edificio de los años 20. A dos cuadras del Ponce City Market y a quince minutos del estadio en MARTA.", best_for:"Carácter" },
-    { name:"Loews Atlanta Hotel", area:"Midtown", price:"$$$", priceCAD:"$190–320 USD/noche (periodo mundialista)", tags:["Valor","MARTA cerca","Habitaciones amplias"], note:"La mejor relación posición-precio-servicio de Midtown: habitaciones amplias, gimnasio, pool y acceso caminando a la estación de MARTA Midtown. Cuatro cuadras de Peachtree Street.", best_for:"Fan WC" },
-    { name:"Four Seasons Atlanta", area:"Midtown / 14th Street", price:"$$$$", priceCAD:"$480–850 USD/noche (periodo mundialista)", tags:["Lujo","Piedmont Park","Spa"], note:"La dirección de referencia en Atlanta: vistas al parque Piedmont, restaurante Park 75 y spa de piso completo. A tres cuadras de la estación de MARTA Arts Center.", best_for:"Lujo" },
+    { name:"Hotel Clermont", area:"Ponce de Leon / Midtown-Inman Park", price:"$$$", priceCAD:"$220–380 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Ponce City Market cerca"], note:"El hotel que revivió el Ponce de Leon corridor de Atlanta: rooftop bar con vistas al skyline, restaurante propio y habitaciones con diseño deliberado en un edificio de los años 20. A dos cuadras del Ponce City Market y a quince minutos del estadio en MARTA.", best_for:"Carácter", url:"" },
+    { name:"Loews Atlanta Hotel", area:"Midtown", price:"$$$", priceCAD:"$190–320 USD/noche (periodo mundialista)", tags:["Valor","MARTA cerca","Habitaciones amplias"], note:"La mejor relación posición-precio-servicio de Midtown: habitaciones amplias, gimnasio, pool y acceso caminando a la estación de MARTA Midtown. Cuatro cuadras de Peachtree Street.", best_for:"Fan WC", url:"" },
+    { name:"Four Seasons Atlanta", area:"Midtown / 14th Street", price:"$$$$", priceCAD:"$480–850 USD/noche (periodo mundialista)", tags:["Lujo","Piedmont Park","Spa"], note:"La dirección de referencia en Atlanta: vistas al parque Piedmont, restaurante Park 75 y spa de piso completo. A tres cuadras de la estación de MARTA Arts Center.", best_for:"Lujo", url:"" },
   ],
   logistics:{
     transport:[
@@ -167,7 +167,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span>
       <div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} />
     </div>
-    <h2 style={{ ...df(27,700,"italic"), color:T.pine, lineHeight:1.05, marginBottom:subtitle?8:0 }}>{title}</h2>
+    <h2 style={{ ...uf(27, 700), color:T.pine, lineHeight:1.05, marginBottom:subtitle?8:0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}
   </div>
 );
@@ -217,10 +217,11 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"14px 22px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{ width:"100%", padding:"11px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -249,7 +250,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
       <Card style={{ padding:"22px", background:T.sandLight, borderColor:T.sandDark }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(16,700,"italic"), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
+        <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.</p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"} onMouseLeave={e => e.currentTarget.style.opacity="1"}>
           {guide.plannerCTA} →
@@ -313,7 +314,7 @@ const GuideHero = ({ guide }) => (
         <span style={{ color:T.sandDark, fontSize:12 }}>·</span>
         <Label color={T.inkFaint}>{guide.stadium.capacity}</Label>
       </div>
-      <h1 style={{ ...df("clamp(44px,5.5vw,72px)",900,"italic"), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
+      <h1 style={{ ...uf("clamp(44px,5.5vw,72px)", 900), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>{guide.city}</h1>
       <p style={{ ...uf(15,400), color:T.inkMid, lineHeight:1.85, maxWidth:500, marginBottom:32 }}>{guide.description}</p>
       <div style={{ display:"flex", flexWrap:"wrap", gap:8, marginBottom:36 }}>
         {guide.tags.map(tag => <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>)}
@@ -392,7 +393,7 @@ const StickyNav = ({ active, onNavigate, onBack, city }) => (
       onMouseEnter={e => e.currentTarget.style.color=T.pine} onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
       ← Guías
     </button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{city}</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{city}</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10,active===item.id?700:500), letterSpacing:"0.08em", textTransform:"uppercase", color:active===item.id?T.pine:T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id?T.coral:"transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>

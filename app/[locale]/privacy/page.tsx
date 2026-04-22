@@ -7,10 +7,11 @@ import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
 import type { Locale } from '../../../i18n'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   return {
     title:      locale === 'es' ? 'Política de Privacidad' : 'Privacy Policy',
     alternates: buildAlternates('privacy'),
@@ -18,11 +19,12 @@ export async function generateMetadata({
   }
 }
 
-export default function PrivacyPage({
-  params: { locale },
+export default async function PrivacyPage({
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   if (locale === 'en') {
     return (
       <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">

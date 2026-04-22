@@ -147,6 +147,7 @@ const CDMX = {
       tags:["Boutique","Casona porfiriana","11 habitaciones"],
       note:"Once habitaciones en una casona porfiriana restaurada. Sin lobby monumental, sin conserje corporativo: diseño serio, jardín interior y una ubicación que pone al huésped a una cuadra de los mejores restaurantes de la ciudad.",
       best_for:"Hotel boutique",
+      url:"",
     },
     {
       name:"Hostel Home",
@@ -156,6 +157,7 @@ const CDMX = {
       tags:["Presupuesto","Habitaciones privadas","Terraza comunitaria"],
       note:"Una de las pocas opciones de calidad real para viajeros con presupuesto ajustado en CDMX. Camas en dormitorio y habitaciones privadas, terraza comunitaria y conexión de metro a dos cuadras.",
       best_for:"Presupuesto",
+      url:"",
     },
     {
       name:"St. Regis Mexico City",
@@ -165,6 +167,7 @@ const CDMX = {
       tags:["Vista a Chapultepec","Metro Insurgentes","Reforma"],
       note:"Vista directa al Bosque de Chapultepec y a la Columna de la Independencia. Acceso rápido al Metro Insurgentes. Uno de los hoteles con mejor relación posición-servicio de la ciudad.",
       best_for:"Lujo",
+      url:"",
     },
   ],
 
@@ -466,7 +469,7 @@ const SectionHeader = ({ number, title, subtitle }) => (
       <span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span>
       <div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} />
     </div>
-    <h2 style={{ ...df(27,700,"italic"), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
+    <h2 style={{ ...uf(27, 700), color:T.pine, lineHeight:1.05, marginBottom:subtitle ? 8 : 0 }}>{title}</h2>
     {subtitle && <p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}
   </div>
 );
@@ -592,11 +595,11 @@ const StayCard = ({ stay }) => (
       <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7 }}>{stay.note}</p>
     </div>
     <div style={{ marginTop:"auto", padding:"14px 22px", borderTop:`1px solid ${T.sandDark}` }}>
-      <button style={{ width:"100%", padding:"11px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
-        onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
-        onMouseLeave={e => e.currentTarget.style.opacity="1"}>
+      <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
+        onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
+        onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
         Ver opciones →
-      </button>
+      </a>
     </div>
   </Card>
 );
@@ -642,7 +645,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
 
       <Card style={{ padding:"22px 22px", background:T.sandLight, borderColor:T.sandDark }}>
         <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
-        <p style={{ ...df(16,700,"italic"), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
+        <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
           ¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.
         </p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
@@ -723,7 +726,7 @@ const GuideHero = ({ guide }) => (
         <span style={{ color:T.sandDark, fontSize:12 }}>·</span>
         <Label color={T.inkFaint}>{guide.stadium.capacity}</Label>
       </div>
-      <h1 style={{ ...df("clamp(44px,5.5vw,72px)",900,"italic"), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>
+      <h1 style={{ ...uf("clamp(44px,5.5vw,72px)", 900), color:T.pine, lineHeight:0.92, letterSpacing:"-0.03em", marginBottom:22 }}>
         {guide.city}
       </h1>
       <p style={{ ...uf(15,400), color:T.inkMid, lineHeight:1.85, maxWidth:500, marginBottom:32 }}>
@@ -774,7 +777,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
       onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
       ← Guías
     </button>
-    <span style={{ ...df(14,700,"italic"), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Ciudad de México</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Ciudad de México</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
     {NAV_ITEMS.map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10, active===item.id ? 700 : 500), letterSpacing:"0.08em", textTransform:"uppercase", color: active===item.id ? T.pine : T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id ? T.coral : "transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>

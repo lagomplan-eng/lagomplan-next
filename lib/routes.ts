@@ -36,6 +36,7 @@ export const ROUTE_MAP = {
   login:              { es: 'login',             en: 'login'         },
   privacy:            { es: 'privacidad',        en: 'privacy'       },
   terms:              { es: 'terminos',          en: 'terms'         },
+  cookies:            { es: 'cookies',           en: 'cookies'       },
   worldcupIndex:      { es: 'mundial',           en: 'worldcup'      },
   worldcupDetail:     { es: 'mundial',           en: 'worldcup'      },
 } as const
@@ -220,6 +221,7 @@ export const INTERNAL_PATHS: Record<RouteKey, string> = {
   login:              '/login',
   privacy:            '/privacy',
   terms:              '/terms',
+  cookies:            '/cookies',
   worldcupIndex:      '/worldcup',
   worldcupDetail:     '/worldcup/[slug]',
 }

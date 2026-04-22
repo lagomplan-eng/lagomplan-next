@@ -41,7 +41,7 @@ export async function checkGenerationAllowed(): Promise<
   | { allowed: true;  userId: string; tier: string; remaining: number | null }
   | { allowed: false; reason: 'not_authenticated' | 'no_credits' | 'error'; tier?: string }
 > {
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
