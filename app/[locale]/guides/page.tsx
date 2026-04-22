@@ -27,7 +27,10 @@ export async function generateMetadata({ params: { locale } }: Props): Promise<M
   }
 }
 
-export default function GuidesIndexPage({ params: { locale } }: Props) {
+type PageProps = { params: Promise<{ locale: Locale }> }
+
+export default async function GuidesIndexPage({ params }: PageProps) {
+  const { locale } = await params
   const isES   = locale === 'es'
   const guides = getAllGuides(locale)
 

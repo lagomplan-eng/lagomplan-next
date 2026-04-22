@@ -73,7 +73,7 @@ function FormPage() {
             <h1 className="font-playfair text-[48px] max-[768px]:text-[36px] font-bold text-[#0F1A16] leading-[1.05] tracking-[-1.5px] mb-3">
               {isES ? 'Genera tu viaje' : 'Build your trip'}
               <br />
-              <em>{isES ? 'personalizado.' : 'your way.'}</em>
+              {isES ? 'personalizado' : 'your way'}
             </h1>
 
             <p className="font-sans text-[15px] text-[#2D6B57] leading-[1.7] mb-12 md:mb-14">

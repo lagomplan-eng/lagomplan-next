@@ -21,7 +21,7 @@ export function PlanCTA({ data, plannerHref }: Props) {
           <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[rgba(255,255,255,.5)] mb-0.5">
             {data.eyebrow}
           </div>
-          <div className="font-display text-[16px] font-normal tracking-[-0.01em] text-white">
+          <div className="font-sans text-[16px] font-semibold tracking-[-0.01em] text-white">
             {data.title}
           </div>
         </div>

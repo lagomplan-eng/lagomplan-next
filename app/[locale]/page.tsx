@@ -15,10 +15,11 @@ import { BookOpen, ListChecks, Sparkles, Focus } from 'lucide-react'
 
 // ── Metadata ───────────────────────────────────────────────
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
 
   return {
@@ -113,10 +114,12 @@ const FeatureIcon = ({ children }: { children: React.ReactNode }) => (
 
 // ── Page ───────────────────────────────────────────────────
 export default async function HomePage({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
+
   const isES = locale === 'es'
 
   return (
@@ -192,8 +195,8 @@ export default async function HomePage({
           </span>
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4">
             {isES
-              ? 'Tu guía y tu plan en una sola vista.'
-              : 'Your guide and plan in one view.'}
+              ? 'Tu guía y tu plan en una sola vista'
+              : 'Your guide and plan in one view'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14">
             {isES
@@ -255,7 +258,7 @@ export default async function HomePage({
           <div className="grid md:grid-cols-2 gap-20 items-center max-[768px]:grid-cols-1 max-[768px]:gap-9">
             <div>
               <h2 className="font-sans text-[42px] max-[768px]:text-[32px] font-bold text-[#0F3A33] leading-[1.12] mb-6">
-                {isES ? 'Equilibrio en cada viaje.' : 'Balance in every trip.'}
+                {isES ? 'Equilibrio en cada viaje' : 'Balance in every trip'}
               </h2>
               <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4">
                 {isES
@@ -310,7 +313,7 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9">
-            {isES ? 'Nosotras.' : 'About us.'}
+            {isES ? 'Nosotras' : 'About us'}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-14 max-[768px]:grid-cols-1 max-[768px]:gap-10">
@@ -386,7 +389,7 @@ export default async function HomePage({
         <div className="page-inner relative z-10">
           <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-12 max-[768px]:mb-8">
-            {isES ? 'Lo que dicen los viajeros.' : 'What travelers say.'}
+            {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
           </h2>
           <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
             {REVIEWS.map((r) => (
@@ -438,9 +441,7 @@ export default async function HomePage({
           <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4">
             {isES ? 'Empieza a planificar' : 'Start planning'}
             <br />
-            <em className="font-display" style={{ fontStyle: 'italic' }}>
-              {isES ? 'tu próxima aventura.' : 'your next adventure.'}
-            </em>
+            {isES ? 'tu próxima aventura' : 'your next adventure'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10">
             {isES
@@ -469,21 +470,7 @@ export default async function HomePage({
         <div className="page-inner grid grid-cols-[1.1fr_1fr] gap-10 items-center max-[900px]:grid-cols-1 max-[900px]:gap-6">
           <div>
             <h3 className="font-sans text-[30px] max-[768px]:text-[24px] font-bold text-[#FFF9F3] leading-[1.2] mb-3">
-              {isES ? (
-                <>
-                  Tu escapada,{' '}
-                  <em className="font-display" style={{ fontStyle: 'italic' }}>
-                    lista en minutos.
-                  </em>
-                </>
-              ) : (
-                <>
-                  Your getaway,{' '}
-                  <em className="font-display" style={{ fontStyle: 'italic' }}>
-                    ready in minutes.
-                  </em>
-                </>
-              )}
+              {isES ? 'Tu escapada, lista en minutos' : 'Your getaway, ready in minutes'}
             </h3>
 
             <p className="font-sans text-[15px] text-[rgba(255,249,243,0.78)] leading-[1.7] max-w-[520px]">

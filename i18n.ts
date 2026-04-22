@@ -45,6 +45,8 @@ export const pathnames = {
   '/login': '/login',
   '/privacy': { es: '/privacidad', en: '/privacy' },
   '/terms':   { es: '/terminos',   en: '/terms'   },
+  '/worldcup':        { es: '/mundial',         en: '/worldcup'         },
+  '/worldcup/[slug]': { es: '/mundial/[slug]',  en: '/worldcup/[slug]'  },
 } as const
 
 export type AppPathnames = typeof pathnames
@@ -52,7 +54,7 @@ export type AppPathnames = typeof pathnames
 export default getRequestConfig(async (request) => {
   const locale = await request.requestLocale
 
-  if (!locale || !locales.includes(locale as Locale)) notFound()
+  // if (!locale || !locales.includes(locale as Locale)) notFound()
 
   return {
     locale,

@@ -146,7 +146,7 @@ function SectionHeader({ eyebrow, title }: { eyebrow: string; title: string }) {
         {eyebrow}
       </div>
       <h2
-        className="font-display font-normal text-[#0F3A33] leading-[1.1] tracking-[-0.5px]"
+        className="font-sans font-bold text-[#0F3A33] leading-[1.1] tracking-[-0.5px]"
         style={{ fontSize: 'clamp(18px, 2.2vw, 22px)' }}
       >
         {title}
@@ -232,7 +232,7 @@ function ItinerarioSection({
                 <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-[3px]">
                   {label}
                 </div>
-                <div className="font-display text-[15px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
+                <div className="font-sans text-[15px] font-semibold tracking-[-0.01em] text-[#0F3A33]">
                   {dayTitle}
                 </div>
               </div>
@@ -725,7 +725,7 @@ export function GuidePageClient({ guide, locale }: Props) {
 
               {/* Title */}
               <h1
-                className="font-display font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5"
+                className="font-sans font-bold leading-[1.06] tracking-[-0.03em] text-[#0F3A33] mb-3.5"
                 style={{ fontSize: 'clamp(34px, 4vw, 52px)' }}
               >
                 {title}

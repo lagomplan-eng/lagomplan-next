@@ -885,9 +885,12 @@ export function getAllGuides(locale: Locale) {
  * /es/guias/valle-de-bravo-...    → looks up slug_es
  * /en/guides/valle-de-bravo-...   → looks up slug_en
  */
-export function getGuideBySlug(locale: Locale, slug: string): Guide | undefined {
-  const field = locale === 'es' ? 'slug_es' : 'slug_en'
-  return GUIDES.find(g => g[field] === slug)
+export function getGuideBySlug(locale: string, slug: string) {
+  return GUIDES.find(g =>
+    locale === 'es'
+      ? g.slug_es === slug
+      : g.slug_en === slug
+  )
 }
 
 

@@ -29,7 +29,7 @@ export function HotelsSection({ data, onToast, locale }: Props) {
         <div data-section="eyebrow" className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5">
           {data.eyebrow}
         </div>
-        <div data-section="title" className="font-display text-[22px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
+        <div data-section="title" className="font-sans text-[22px] font-semibold tracking-[-0.01em] text-[#0F3A33]">
           {data.title}
         </div>
         {data.description && (

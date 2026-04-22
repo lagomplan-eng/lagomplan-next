@@ -36,6 +36,8 @@ export const ROUTE_MAP = {
   login:              { es: 'login',             en: 'login'         },
   privacy:            { es: 'privacidad',        en: 'privacy'       },
   terms:              { es: 'terminos',          en: 'terms'         },
+  worldcupIndex:      { es: 'mundial',           en: 'worldcup'      },
+  worldcupDetail:     { es: 'mundial',           en: 'worldcup'      },
 } as const
 
 export type RouteKey = keyof typeof ROUTE_MAP
@@ -112,9 +114,19 @@ export function resolveEntityBySlug<T extends LocalizedEntity>(
  * getGuideUrl('es', guide)    → '/es/guias/valle-de-bravo'
  * getGuideUrl('en', guide)    → '/en/guides/valley-of-bravo'
  */
-export function getGuideUrl(locale: Locale, entity: LocalizedEntity): string {
-  const segment = ROUTE_MAP.guideDetail[locale]
-  const slug    = getLocalizedSlug(entity, locale)
+export function getGuideUrl(locale: Locale, guide: any): string {
+  const segment = ROUTE_MAP.guideDetail?.[locale]
+
+  const slug =
+    locale === 'es'
+      ? guide.slug_es || guide.slug
+      : guide.slug_en || guide.slug
+
+  if (!segment || !slug) {
+    console.warn('⚠️ Broken guide URL', { locale, guide })
+    return '#'
+  }
+
   return `/${locale}/${segment}/${slug}`
 }
 
@@ -208,8 +220,11 @@ export const INTERNAL_PATHS: Record<RouteKey, string> = {
   login:              '/login',
   privacy:            '/privacy',
   terms:              '/terms',
+  worldcupIndex:      '/worldcup',
+  worldcupDetail:     '/worldcup/[slug]',
 }
 
 export function internalPath(key: RouteKey): string {
   return INTERNAL_PATHS[key]
 }
+

@@ -20,7 +20,7 @@ export function Tips({ data }: Props) {
           <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#BDBDBD] mb-0.5">
             {data.eyebrow}
           </div>
-          <div className="font-display text-[16px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
+          <div className="font-sans text-[16px] font-semibold tracking-[-0.01em] text-[#0F3A33]">
             {data.title}
           </div>
         </div>

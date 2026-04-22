@@ -114,6 +114,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
         data={data.hero}
         slug={data.slug}
         plannerHref={plannerHref}
+        locale={locale}
         onSave={handleSave}
         onShare={handleShare}
         onPdf={handlePdf}

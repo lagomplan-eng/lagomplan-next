@@ -23,8 +23,6 @@ const PRICE_FILTERS: PriceFilter[] = [
 // ── HotelCard ──────────────────────────────────────────────────────────────────
 
 function HotelCard({ hotel, isES }: { hotel: HotelListing; isES: boolean }) {
-  const bookingHref = hotel.bookingUrl ?? '#'
-
   return (
     <article
       style={{
@@ -110,22 +108,25 @@ function HotelCard({ hotel, isES }: { hotel: HotelListing; isES: boolean }) {
           display: 'flex', gap: '8px', alignItems: 'center',
           marginTop: 'auto', paddingTop: '20px',
         }}>
-          {/* Primary: Ver disponibilidad */}
-          <a
-            href={bookingHref}
-            {...(hotel.bookingUrl ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-            style={{
-              flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              padding: '10px 16px', borderRadius: '999px',
-              background: 'var(--pine)', color: '#FFFFFF',
-              fontSize: '12px', fontWeight: 700, textDecoration: 'none',
-              whiteSpace: 'nowrap', transition: 'opacity .15s',
-            }}
-            onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
-            onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
-          >
-            {isES ? 'Ver disponibilidad' : 'Check availability'}
-          </a>
+          {/* Primary: Ver disponibilidad — only rendered when bookingUrl is present */}
+          {hotel.bookingUrl && (
+            <a
+              href={hotel.bookingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                flex: 1, display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                padding: '10px 16px', borderRadius: '999px',
+                background: 'var(--pine)', color: '#FFFFFF',
+                fontSize: '12px', fontWeight: 700, textDecoration: 'none',
+                whiteSpace: 'nowrap', transition: 'opacity .15s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+            >
+              {isES ? 'Ver disponibilidad' : 'Check availability'}
+            </a>
+          )}
 
           {/* Secondary: Ver guía */}
           <a
@@ -283,9 +284,7 @@ export default function HotelsClient({ hotels, locale }: Props) {
               letterSpacing: '-0.04em', fontWeight: 800,
               fontSize: 'clamp(44px, 7vw, 72px)',
             }}>
-              {isES
-                ? <>Hoteles que<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>elegimos bien.</em></>
-                : <>Hotels we<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>choose well.</em></>}
+              {isES ? 'Hoteles que elegimos bien' : 'Hotels we choose well'}
             </h1>
             <p style={{ margin: '28px 0 0', maxWidth: '38ch', fontSize: '18px', lineHeight: 1.75, color: 'rgba(15,58,51,0.72)' }}>
               {isES

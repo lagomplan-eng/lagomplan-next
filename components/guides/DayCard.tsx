@@ -37,7 +37,7 @@ export function DayCard({ day, dayOrdinalLabel, defaultOpen = false }: Props) {
           <div data-day="ordinal" className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1">
             {dayOrdinalLabel} · {day.dayLabel}
           </div>
-          <div data-day="title" className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
+          <div data-day="title" className="font-sans text-[18px] font-semibold tracking-[-0.01em] text-[#0F3A33]">
             {day.title}
           </div>
         </div>

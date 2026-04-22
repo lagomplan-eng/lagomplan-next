@@ -1,13 +1,3 @@
-/**
- * app/[locale]/layout.tsx
- *
- * Root layout for all locales.
- *
- * Font corrections (brand guide):
- *   Manrope  → --font-sans    (UI body + headings, replaces DM Sans)
- *   Fraunces → --font-display (hero emphasis + pull quotes, replaces Playfair Display)
- *   DM Mono  → --font-mono    (utility labels, not in brand guide but kept functionally)
- */
 export const dynamic = 'force-dynamic'
 
 import type { Metadata }              from 'next'
@@ -52,11 +42,14 @@ export function generateStaticParams() {
 
 // ── Metadata ───────────────────────────────────────────────
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
+
   const t = await getTranslations({ locale, namespace: 'meta' })
+
   return {
     title:       { default: t('title'), template: `%s — Lagomplan` },
     description: t('description'),
@@ -68,11 +61,13 @@ export async function generateMetadata({
 // ── Layout ─────────────────────────────────────────────────
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
+
   if (!locales.includes(locale)) notFound()
 
   const messages = await getMessages()
@@ -85,7 +80,6 @@ export default async function RootLayout({
       <body>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
-            {/* Nav is position:fixed — every first section needs pt-[72px] */}
             <Nav />
             {children}
             <Footer />
