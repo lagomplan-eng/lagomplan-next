@@ -27,7 +27,7 @@ export default async function Page({
 }) {
   const { locale } = await params
   return (
-    <main className="pt-[72px] min-h-screen" style={{ background: '#EDE7E1' }}>
+    <main className="pt-[120px] min-h-screen" style={{ background: '#EDE7E1' }}>
       <div className="page-inner py-24">
         <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
           {locale === 'es' ? 'Nosotras' : 'About'}

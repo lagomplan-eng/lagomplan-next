@@ -36,9 +36,9 @@ const CDMX: WorldcupGuide = {
   short:"CDMX", flag:"🇲🇽", accent:"#6B8F86",
   stadium:{ name:"Estadio Azteca", capacity:"87,523" },
   matches:[
-    { date:"14 Jun", day:"Sáb", teams:["México","vs","Portugal"],   highlight:true  },
-    { date:"20 Jun", day:"Vie", teams:["Portugal","vs","Alemania"], highlight:false },
-    { date:"26 Jun", day:"Jue", teams:["México","vs","Argentina"],  highlight:true  },
+    { date:"11 Jun", day:"Jue", teams:["México","vs","Sudáfrica"],   highlight:true  },
+    { date:"17 Jun", day:"Mié", teams:["Portugal","vs","Alemania"], highlight:false },
+    { date:"24 Jun", day:"Mié", teams:["México","vs","Argentina"],  highlight:true  },
   ],
   scores:{ ambiente:{value:5,label:"Ambiente"}, cultura:{value:5,label:"Cultura"}, gastronomia:{value:5,label:"Gastronomía"}, transporte:{value:4,label:"Transporte"}, seguridad:{value:3,label:"Seguridad"}, costo:{value:5,label:"Costo"} },
   manifesto:{
@@ -62,10 +62,10 @@ const CDMX: WorldcupGuide = {
     { name:"Centro Histórico", vibe:"Historia masiva, muy turístico. Atención de noche.", best_for:"Fan WC",  walk_to_stadium:"40 min (Metro)" },
   ],
   hotels:[
-    { name:"Condesa DF",          price:"$$$", area:"Condesa",    note:"El hotel de la ciudad para parejas. Azotea, diseño excepcional, terraza icónica.", url:"" },
-    { name:"Hotel Carlota",       price:"$$",  area:"Roma Norte", note:"Diseño, ubicación perfecta, desayuno que vale la noche.", url:"" },
-    { name:"Casa Comtesse",       price:"$$",  area:"Roma Norte", note:"Boutique, íntimo, estética editorial.", url:"" },
-    { name:"NH Collection Reforma", price:"$$", area:"Reforma",  note:"Familiar, bien ubicado, alberca en el piso 14.", url:"" },
+    { name:"Condesa DF",          price:"$$$", area:"Condesa",    note:"El hotel de la ciudad para parejas. Azotea, diseño excepcional, terraza icónica.", url:"https://booking.stay22.com/lagomplan/o4UKtBz68_" },
+    { name:"Hotel Carlota",       price:"$$",  area:"Roma Norte", note:"Diseño, ubicación perfecta, desayuno que vale la noche.", url:"https://booking.stay22.com/lagomplan/o3dW4TZ9vy" },
+    { name:"Casa Comtesse",       price:"$$",  area:"Roma Norte", note:"Boutique, íntimo, estética editorial.", url:"https://hotelscom.stay22.com/lagomplan/MYxA88F_WA" },
+    { name:"NH Collection Reforma", price:"$$", area:"Reforma",  note:"Familiar, bien ubicado, alberca en el piso 14.", url:"https://hotelscom.stay22.com/lagomplan/3la99RrZLl" },
     { name:"Freehand CDMX",       price:"$",   area:"Roma Norte", note:"Social, económico, bar en el rooftop.", url:"" },
   ],
   logistics:{

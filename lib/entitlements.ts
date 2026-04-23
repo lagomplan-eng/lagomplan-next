@@ -8,10 +8,22 @@ export type EntitlementCheck =
   | { allowed: true;  tier: string; remaining: number | null }
   | { allowed: false; reason: 'no_credits' | 'error'; tier: string }
 
+// Unified entitlement object — single source of truth for frontend
+export type Entitlement = {
+  plan_type: 'free' | 'pack' | 'subscription'
+  credits_remaining: number
+  credits_total: number
+  subscription_active: boolean
+  subscription_ends_at: string | null
+  last_updated: string
+}
+
 type EntitlementRow = {
   tier: string
   trips_remaining: number
   trips_used: number
+  current_period_end?: string | null
+  updated_at?: string
 }
 
 async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
@@ -19,7 +31,7 @@ async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
 
   const { data } = await (admin as any)
     .from('user_entitlements')
-    .select('tier, trips_remaining, trips_used')
+    .select('tier, trips_remaining, trips_used, current_period_end, updated_at')
     .eq('user_id', userId)
     .single()
 
@@ -30,7 +42,24 @@ async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
     .from('user_entitlements')
     .upsert({ user_id: userId, tier: 'free', trips_remaining: 3, trips_used: 0 })
 
-  return { tier: 'free', trips_remaining: 3, trips_used: 0 }
+  return { tier: 'free', trips_remaining: 3, trips_used: 0, current_period_end: null, updated_at: new Date().toISOString() }
+}
+
+/**
+ * Get unified entitlement object for a user — used by GET /api/entitlements.
+ * Returns the canonical single source of truth for frontend access checks.
+ */
+export async function getEntitlement(userId: string): Promise<Entitlement> {
+  const ent = await getOrCreateEntitlement(userId)
+  const isSubscriber = ent.tier === 'explorer'
+  return {
+    plan_type:            isSubscriber ? 'subscription' : ent.tier === 'free' ? 'free' : 'pack',
+    credits_remaining:    ent.trips_remaining,
+    credits_total:        ent.trips_remaining + ent.trips_used,
+    subscription_active:  isSubscriber,
+    subscription_ends_at: ent.current_period_end ?? null,
+    last_updated:         ent.updated_at ?? new Date().toISOString(),
+  }
 }
 
 /**

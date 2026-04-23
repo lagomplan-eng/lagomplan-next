@@ -50,7 +50,7 @@ export default async function GuidesIndexPage({ params }: PageProps) {
   const featured = listings.find((g: GuideListing & { featured?: boolean }) => (g as any).featured) ?? listings[0]
 
   return (
-    <main className="pt-[72px]">
+    <main className="pt-[120px]">
       <GuidesClient guides={listings} featured={featured} locale={locale} />
     </main>
   )

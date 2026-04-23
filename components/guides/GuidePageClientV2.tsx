@@ -107,7 +107,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
       : `✓ Todo listo para ${data.hero.title}`
 
   return (
-    <div className="bg-[#FFF9F3] min-h-screen pt-[72px]">
+    <div className="bg-[#FFF9F3] min-h-screen pt-[120px]">
 
       {/* ── Hero ── */}
       <GuideHero
@@ -132,7 +132,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
           </div>
 
           {/* ── Right column (sticky) ── */}
-          <div className="flex flex-col gap-5 sticky top-20 max-[960px]:static">
+          <div className="flex flex-col gap-5 sticky top-[132px] max-[960px]:static">
             <Tips data={data.tips} />
             <PlanCTA data={data.planCta} plannerHref={plannerHref} />
             <Checklist
@@ -148,7 +148,7 @@ export function GuidePageClientV2({ data, locale }: Props) {
         {/* ── PRINT FOOTER — logo, shown only in PDF/print ─── */}
         <div className="hidden print:flex items-center justify-center gap-3 mt-10 pt-6 border-t border-[#E4DFD8]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/images/logo.png" alt="Lagomplan" className="h-8 w-auto opacity-75" />
+          <img src="/images/logo-lagomplan.svg" alt="Lagomplan" className="h-8 w-auto opacity-75" />
         </div>
       </div>
 

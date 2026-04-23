@@ -32,7 +32,7 @@ export default async function HotelsIndexPage({ params }: Props) {
   const hotels = getAllHotelsFromGuides(locale)
 
   return (
-    <main className="pt-[72px]">
+    <main className="pt-[120px]">
       <HotelsClient hotels={hotels} locale={locale} />
     </main>
   )

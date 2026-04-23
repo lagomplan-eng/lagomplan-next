@@ -102,7 +102,6 @@ export default function Nav() {
     { key: 'planner' as const,      label: t('planner')  },
     { key: 'guidesIndex' as const,  label: t('guides')   },
     { key: 'hotelsIndex' as const,  label: t('hotels')   },
-    { key: 'worldcupIndex' as const, label: t('worldcup') },
   ]
 
   // Internal paths for Link href (must match pathnames keys in i18n.ts)
@@ -119,7 +118,7 @@ export default function Nav() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 print:hidden"
       style={{
-        height:             88,
+        height:             120,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
@@ -131,26 +130,13 @@ export default function Nav() {
         {/* ── Logo ──────────────────────────────────────── */}
         <Link href="/" className="flex-shrink-0 flex items-center py-3">
           <Image
-            src="/images/logo.png"
+            src="/images/logo-lagomplan.svg"
             alt="Lagomplan"
             width={252}
-            height={56}
-            className="h-14 w-auto"
+            height={100}
+            className="h-[100px] w-auto"
             priority
-            onError={e => {
-              const img = e.currentTarget as HTMLImageElement
-              img.style.display = 'none'
-              const fallback = img.nextSibling as HTMLElement | null
-              if (fallback) fallback.style.display = 'block'
-            }}
           />
-          {/* Text fallback until logo.png is placed in /public/images/ */}
-          <span
-            style={{ display: 'none' }}
-            className="font-display italic text-[28px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
-          >
-            lagomplan
-          </span>
         </Link>
 
         {/* ── Desktop links ─────────────────────────────── */}

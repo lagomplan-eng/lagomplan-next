@@ -88,6 +88,15 @@ export async function POST(req: NextRequest) {
         ? session.subscription
         : session.subscription?.id ?? null
 
+      // Fetch subscription to get current_period_end
+      let periodEnd: string | null = null
+      if (stripeSubId) {
+        try {
+          const sub = await stripe.subscriptions.retrieve(stripeSubId)
+          periodEnd = new Date((sub as any).current_period_end * 1000).toISOString()
+        } catch {}
+      }
+
       const { error } = await (admin as any)
         .from('user_entitlements')
         .upsert({
@@ -96,6 +105,7 @@ export async function POST(req: NextRequest) {
           trips_remaining:        0,
           stripe_customer_id:     session.customer as string | null,
           stripe_subscription_id: stripeSubId,
+          current_period_end:     periodEnd,
           last_session_id:        session.id,
           updated_at:             new Date().toISOString(),
         }, { onConflict: 'user_id' })

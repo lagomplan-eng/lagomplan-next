@@ -27,7 +27,7 @@ export default async function PrivacyPage({
   const { locale } = await params
   if (locale === 'en') {
     return (
-      <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
+      <section className="bg-[#F7F4EF] min-h-screen pt-[120px]">
         <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
           <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">
             Privacy Policy
@@ -49,7 +49,7 @@ export default async function PrivacyPage({
   }
 
   return (
-    <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
+    <section className="bg-[#F7F4EF] min-h-screen pt-[120px]">
       <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
 
         <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">

@@ -23,7 +23,7 @@ export default async function Page({
 }) {
   const { locale } = await params
   return (
-    <main className="pt-[72px] min-h-screen bg-[#FFF9F3]">
+    <main className="pt-[120px] min-h-screen bg-[#FFF9F3]">
       <div className="max-w-[420px] mx-auto px-6 py-24">
         <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
           {locale === 'es' ? 'Crear cuenta' : 'Sign up'}

@@ -70,10 +70,10 @@ export default async function Footer() {
           <div>
             <Link href="/">
               <Image
-                src="/images/logo.png"
+                src="/images/logo-lagomplan.svg"
                 alt="Lagomplan"
                 width={120} height={22}
-                className="h-[22px] w-auto mb-3"
+                className="h-[60px] w-auto mb-3"
               />
             </Link>
             <p className="font-sans text-[13px] text-[#6B8F86] leading-[1.65] max-w-[220px] mb-3">

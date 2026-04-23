@@ -7,6 +7,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/server'
+import { getEntitlement } from '../../../../lib/entitlements'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,7 +79,8 @@ const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if ((row as any)?.last_session_id === session_id) {
     console.log('[fulfill] already processed:', session_id)
-    return NextResponse.json({ fulfilled: true, already: true })
+    const entitlement = await getEntitlement(user.id)
+    return NextResponse.json({ fulfilled: true, already: true, entitlement })
   }
 
   const plan = session.metadata?.plan ?? ''
@@ -106,6 +108,8 @@ const { data: { user }, error: authError } = await supabase.auth.getUser()
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     console.log('[fulfill] explorer granted for user:', user.id)
+    const entitlement = await getEntitlement(user.id)
+    return NextResponse.json({ fulfilled: true, entitlement })
 
   } else {
     const toAdd = PLAN_CREDITS[plan] ?? 0
@@ -134,7 +138,7 @@ const { data: { user }, error: authError } = await supabase.auth.getUser()
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
     console.log(`[fulfill] +${toAdd} credits for user:`, user.id, '→', newRemaining)
+    const entitlement = await getEntitlement(user.id)
+    return NextResponse.json({ fulfilled: true, entitlement })
   }
-
-  return NextResponse.json({ fulfilled: true })
 }

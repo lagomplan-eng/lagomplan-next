@@ -3,29 +3,45 @@
  * components/PaywallModal.tsx
  *
  * Shown when a user runs out of trip credits.
- * Calls POST /api/checkout internally and redirects to Stripe Checkout.
+ * Supports:
+ *   - Stripe Checkout (POST /api/checkout)
+ *   - Custom coupon codes (POST /api/apply-coupon)
  *
  * Props:
- *   open    — controls visibility
- *   locale  — 'es' | 'en'
- *   onClose — called when user dismisses without purchasing
+ *   open        — controls visibility
+ *   locale      — 'es' | 'en'
+ *   onClose     — called when user dismisses without purchasing
+ *   onCouponApplied — called with updated entitlement when coupon succeeds
  */
 
 import { useState } from 'react'
 
 type Plan = 'trip-1' | 'trip-5' | 'trip-10' | 'subscription'
 
+type Entitlement = {
+  plan_type: 'free' | 'pack' | 'subscription'
+  credits_remaining: number
+  subscription_active: boolean
+}
+
 interface PaywallModalProps {
   open:    boolean
   locale:  string
   onClose: () => void
+  onCouponApplied?: (entitlement: Entitlement) => void
 }
 
-export default function PaywallModal({ open, locale, onClose }: PaywallModalProps) {
+export default function PaywallModal({ open, locale, onClose, onCouponApplied }: PaywallModalProps) {
   const isES = locale !== 'en'
 
   const [loadingPlan, setLoadingPlan] = useState<Plan | null>(null)
   const [apiError,    setApiError]    = useState<string | null>(null)
+
+  // Coupon state
+  const [couponCode,    setCouponCode]    = useState('')
+  const [couponLoading, setCouponLoading] = useState(false)
+  const [couponError,   setCouponError]   = useState<string | null>(null)
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null)
 
   if (!open) return null
 
@@ -54,6 +70,46 @@ export default function PaywallModal({ open, locale, onClose }: PaywallModalProp
     } catch {
       setApiError(isES ? 'Error de red. Intenta de nuevo.' : 'Network error. Please try again.')
       setLoadingPlan(null)
+    }
+  }
+
+  async function applyCoupon() {
+    if (!couponCode.trim()) return
+    setCouponLoading(true)
+    setCouponError(null)
+    setCouponSuccess(null)
+    try {
+      const res  = await fetch('/api/apply-coupon', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ code: couponCode }),
+      })
+      const data = await res.json()
+
+      if (!res.ok) {
+        const errorMap: Record<string, string> = {
+          invalid_coupon:    isES ? 'Código inválido' : 'Invalid coupon code',
+          coupon_expired:    isES ? 'Este cupón ha expirado' : 'This coupon has expired',
+          coupon_exhausted:  isES ? 'Este cupón ya no tiene usos disponibles' : 'This coupon has no uses remaining',
+          already_redeemed:  isES ? 'Ya usaste este cupón' : 'You have already used this coupon',
+        }
+        setCouponError(errorMap[data.error] ?? (isES ? 'Error al aplicar el cupón' : 'Error applying coupon'))
+        return
+      }
+
+      const entitlement: Entitlement = data.entitlement
+      const msg = entitlement.subscription_active
+        ? (isES ? '¡Suscripción activada! Viajes ilimitados.' : 'Subscription activated! Unlimited trips.')
+        : (isES
+            ? `¡Cupón aplicado! Tienes ${entitlement.credits_remaining} viaje${entitlement.credits_remaining !== 1 ? 's' : ''} disponible${entitlement.credits_remaining !== 1 ? 's' : ''}.`
+            : `Coupon applied! You have ${entitlement.credits_remaining} trip${entitlement.credits_remaining !== 1 ? 's' : ''} available.`)
+      setCouponSuccess(msg)
+      if (onCouponApplied) onCouponApplied(entitlement)
+
+    } catch {
+      setCouponError(isES ? 'Error de red. Intenta de nuevo.' : 'Network error. Please try again.')
+    } finally {
+      setCouponLoading(false)
     }
   }
 
@@ -197,6 +253,42 @@ export default function PaywallModal({ open, locale, onClose }: PaywallModalProp
             <p className="text-[12px] text-center text-red-600 mt-1">{apiError}</p>
           )}
 
+        </div>
+
+        {/* Coupon code section */}
+        <div className="px-5 pb-2">
+          {couponSuccess ? (
+            <div className="flex items-center gap-2 px-3 py-2.5 bg-[#E4EFEC] border border-[#0F3A33]/20 rounded-[8px]">
+              <span className="text-[14px]">✓</span>
+              <p className="font-sans text-[12px] text-[#0F3A33] font-medium">{couponSuccess}</p>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder={isES ? 'Código de cupón' : 'Coupon code'}
+                value={couponCode}
+                onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                onKeyDown={e => e.key === 'Enter' && applyCoupon()}
+                disabled={couponLoading || isAnyLoading}
+                className="flex-1 font-mono text-[12px] px-3 py-2 border border-[rgba(107,143,134,.3)] rounded-[8px] bg-white placeholder-[#C0C0BA] text-[#0F3A33] focus:outline-none focus:border-[#0F3A33] disabled:opacity-50 uppercase"
+              />
+              <button
+                type="button"
+                onClick={applyCoupon}
+                disabled={!couponCode.trim() || couponLoading || isAnyLoading}
+                className="font-mono text-[11px] tracking-[.04em] px-3 py-2 bg-[#F7F3EE] border border-[rgba(107,143,134,.3)] rounded-[8px] text-[#0F3A33] hover:bg-[#E4EFEC] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {couponLoading
+                  ? <span className="w-3 h-3 border border-[#6B8F86] border-t-[#0F3A33] rounded-full animate-spin inline-block" />
+                  : (isES ? 'Aplicar' : 'Apply')
+                }
+              </button>
+            </div>
+          )}
+          {couponError && (
+            <p className="text-[11px] text-red-600 mt-1.5 text-center">{couponError}</p>
+          )}
         </div>
 
         {/* Footer */}

@@ -711,12 +711,21 @@ export default function TripResult({ params }: Props) {
   // edits that were made before tripId was available (fixing the main race condition).
   const lastSavedContentRef = useRef<string | null>(null)
 
-  // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
-  type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
+  // ── Plan credits (DB-backed, single source of truth) ─────────────────────────
+  type PlanState = {
+    plan_type: 'free' | 'pack' | 'subscription'
+    credits_remaining: number
+    credits_total: number
+    subscription_active: boolean
+    subscription_ends_at: string | null
+  }
   const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
   // Ref so the generate effect always reads the current value without re-running on every credit update
   const planCreditsRef = useRef<PlanState | null | 'loading'>('loading')
   useEffect(() => { planCreditsRef.current = planCredits }, [planCredits])
+
+  // ── Payment success state ─────────────────────────────────────────────────────
+  const [paymentSuccess, setPaymentSuccess] = useState<{ credits: number; isSubscription: boolean } | null>(null)
 
   // ── Access resolution gate ────────────────────────────────────────────────────
   // True once we know whether the user can generate (auth resolved + credits loaded).
@@ -788,10 +797,10 @@ export default function TripResult({ params }: Props) {
       setPlanCredits(null)               // anonymous — no DB state
       return
     }
-    fetch('/api/me/plan')
+    fetch('/api/entitlements')
       .then(r => r.ok ? r.json() : null)
-      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 0, is_subscriber: false }))
-      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 0, is_subscriber: false }))
+      .then(data => setPlanCredits(data ?? { plan_type: 'free', credits_remaining: 0, credits_total: 0, subscription_active: false, subscription_ends_at: null }))
+      .catch(() => setPlanCredits({ plan_type: 'free', credits_remaining: 0, credits_total: 0, subscription_active: false, subscription_ends_at: null }))
   }, [authedUser])
 
   // ── Post-checkout success handler ────────────────────────────────────────────
@@ -806,16 +815,33 @@ export default function TripResult({ params }: Props) {
     async function fulfillThenRefresh() {
       // Fallback fulfillment: ensures credits are granted even if the webhook
       // didn't fire (e.g. not configured in production or $0 coupon edge case).
+      // Prefer the entitlement returned directly from fulfill (avoids a second round-trip).
+      let entitlement = null
       if (sessionId) {
-        await fetch('/api/checkout/fulfill', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ session_id: sessionId }),
-        }).catch(() => {})
+        try {
+          const res = await fetch('/api/checkout/fulfill', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ session_id: sessionId }),
+          })
+          const fulfillData = res.ok ? await res.json() : null
+          entitlement = fulfillData?.entitlement ?? null
+        } catch {}
       }
-      const data = await fetch('/api/me/plan').then(r => r.ok ? r.json() : null).catch(() => null)
-      if (data) {
-        setPlanCredits(data)
+      // Fall back to a fresh entitlement fetch if fulfill didn't return one
+      if (!entitlement) {
+        entitlement = await fetch('/api/entitlements').then(r => r.ok ? r.json() : null).catch(() => null)
+      }
+      if (entitlement) {
+        setPlanCredits(entitlement)
+        // Critical: close paywall immediately when credits or subscription are confirmed
+        if (entitlement.credits_remaining > 0 || entitlement.subscription_active) {
+          setPaywallOpen(false)
+          setPaymentSuccess({
+            credits:        entitlement.credits_remaining,
+            isSubscription: entitlement.subscription_active,
+          })
+        }
         setGenerateKey(k => k + 1)
       }
     }
@@ -843,7 +869,7 @@ export default function TripResult({ params }: Props) {
       if (authedUser !== null) {
         if (!isAccessResolved) return  // credits not yet loaded — wait for re-run
         const plan = planCreditsRef.current as PlanState | null
-        if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
+        if (plan && !plan.subscription_active && plan.credits_remaining <= 0) {
           setPaywallOpen(true)
           return  // render is gated by the paywall early return below — no setLoading needed
         }
@@ -978,9 +1004,9 @@ export default function TripResult({ params }: Props) {
         }
 
         // Credits are decremented server-side in /api/generate-trip.
-        // Refresh plan state so the next guard check reflects the new balance.
+        // Refresh entitlements so the next guard check reflects the real balance.
         if (authedUser !== null) {
-          fetch('/api/me/plan')
+          fetch('/api/entitlements')
             .then(r => r.ok ? r.json() : null)
             .then(data => { if (data) setPlanCredits(data) })
             .catch(() => {})
@@ -1075,7 +1101,7 @@ export default function TripResult({ params }: Props) {
     // ── Paywall guard (DB-backed) ────────────────────────────────────────
     if (authedUser !== null) {
       const plan = planCredits as PlanState | null
-      if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
+      if (plan && !plan.subscription_active && plan.credits_remaining <= 0) {
         setPrefOpen(false)
         setRegenConfirmOpen(false)
         setPaywallOpen(true)
@@ -1109,7 +1135,7 @@ export default function TripResult({ params }: Props) {
       setRawResponse(genData)
       if (!genRes.ok) {
         if (genRes.status === 402) {
-          fetch('/api/me/plan')
+          fetch('/api/entitlements')
             .then(r => r.ok ? r.json() : null)
             .then(data => { if (data) setPlanCredits(data) })
             .catch(() => {})
@@ -1141,9 +1167,9 @@ export default function TripResult({ params }: Props) {
       setHasUserEdits(false)
 
       // Credits are decremented server-side in /api/generate-trip.
-      // Refresh DB state so the next guard check reflects the real balance.
+      // Refresh entitlements so the next guard check reflects the real balance.
       if (authedUser !== null) {
-        fetch('/api/me/plan')
+        fetch('/api/entitlements')
           .then(r => r.ok ? r.json() : null)
           .then(data => { if (data) setPlanCredits(data) })
           .catch(() => {})
@@ -1286,7 +1312,7 @@ export default function TripResult({ params }: Props) {
     // ── Paywall guard (DB-backed) ────────────────────────────────────────────
     if (authedUser !== null) {
       const plan = planCredits as PlanState | null
-      if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
+      if (plan && !plan.subscription_active && plan.credits_remaining <= 0) {
         setPaywallOpen(true)
         return
       }
@@ -1315,7 +1341,7 @@ export default function TripResult({ params }: Props) {
       setRawResponse(genData)
       if (!genRes.ok) {
         if (genRes.status === 402) {
-          fetch('/api/me/plan')
+          fetch('/api/entitlements')
             .then(r => r.ok ? r.json() : null)
             .then(data => { if (data) setPlanCredits(data) })
             .catch(() => {})
@@ -1391,7 +1417,7 @@ export default function TripResult({ params }: Props) {
       }
       // Credits decremented server-side — refresh so the next guard reflects real balance
       if (authedUser !== null) {
-        fetch('/api/me/plan')
+        fetch('/api/entitlements')
           .then(r => r.ok ? r.json() : null)
           .then(data => { if (data) setPlanCredits(data) })
           .catch(() => {})
@@ -1622,7 +1648,7 @@ export default function TripResult({ params }: Props) {
   // never sees even a frame of the empty itinerary before the modal appears.
   if (paywallOpen && !rawTripData) {
     return (
-      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+      <main className="pt-[120px] min-h-screen bg-[#FAF8F5]">
         <PaywallModal open={true} locale={locale} onClose={handlePaywallClose} />
       </main>
     )
@@ -1631,7 +1657,7 @@ export default function TripResult({ params }: Props) {
   // Loading gate — covers both "access check in progress" and "AI generation in progress".
   if (!isAccessResolved || loading) {
     return (
-      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+      <main className="pt-[120px] min-h-screen bg-[#FAF8F5]">
         <div className="page-inner"><LoadingState locale={locale} /></div>
       </main>
     )
@@ -1639,7 +1665,7 @@ export default function TripResult({ params }: Props) {
 
   if (error) {
     return (
-      <main className="pt-[72px] min-h-screen bg-[#F4F0E8]">
+      <main className="pt-[120px] min-h-screen bg-[#F4F0E8]">
         <div className="page-inner py-10">
           <div className="max-w-[900px] mx-auto bg-white border border-[rgba(15,58,51,.12)] rounded-[12px] p-6">
             <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#B33A3A] mb-3">Generation error</p>
@@ -1673,7 +1699,36 @@ export default function TripResult({ params }: Props) {
 
   // ── Happy path ───────────────────────────────────────────────────────────────
   return (
-    <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+    <main className="pt-[120px] min-h-screen bg-[#FAF8F5]">
+
+      {/* ── PAYMENT SUCCESS BANNER ────────────────────────────────────────── */}
+      {paymentSuccess && (
+        <div className="bg-[#0F3A33] text-white px-6 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="text-[18px]">✓</span>
+            <div>
+              <p className="font-sans text-[13px] font-semibold leading-tight">
+                {locale === 'es' ? '¡Listo! Ya tienes acceso.' : "You're all set!"}
+              </p>
+              <p className="font-sans text-[12px] text-[#A8C5BE] mt-0.5">
+                {paymentSuccess.isSubscription
+                  ? (locale === 'es' ? 'Explorer activo · Viajes ilimitados' : 'Explorer active · Unlimited trips')
+                  : (locale === 'es'
+                      ? `Tienes ${paymentSuccess.credits} viaje${paymentSuccess.credits !== 1 ? 's' : ''} disponible${paymentSuccess.credits !== 1 ? 's' : ''}`
+                      : `You have ${paymentSuccess.credits} trip${paymentSuccess.credits !== 1 ? 's' : ''} available`)
+                }
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setPaymentSuccess(null)}
+            className="font-mono text-[11px] text-[#6B9E94] hover:text-white transition-colors shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section data-trip="hero" className="border-b border-[#E4DFD8] pt-12 pb-9">
@@ -1760,6 +1815,22 @@ export default function TripResult({ params }: Props) {
                 >
                   <span>⬇</span> PDF
                 </button>
+
+                {/* Credit badge */}
+                {authedUser && planCredits && planCredits !== 'loading' && (
+                  <div className="ml-auto flex items-center gap-1.5 font-mono text-[10px] tracking-[.04em] text-[#6B8F86]">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#2D6B57] shrink-0" />
+                    {planCredits.subscription_active
+                      ? (locale === 'es' ? 'Ilimitado · Explorer' : 'Unlimited · Explorer')
+                      : (planCredits.credits_remaining === 0
+                          ? (locale === 'es' ? 'Sin viajes disponibles' : 'No trips remaining')
+                          : (locale === 'es'
+                              ? `${planCredits.credits_remaining} viaje${planCredits.credits_remaining !== 1 ? 's' : ''} restante${planCredits.credits_remaining !== 1 ? 's' : ''}`
+                              : `${planCredits.credits_remaining} trip${planCredits.credits_remaining !== 1 ? 's' : ''} remaining`)
+                        )
+                    }
+                  </div>
+                )}
               </div>
             </div>
 
@@ -2776,7 +2847,7 @@ export default function TripResult({ params }: Props) {
       {/* ── PRINT FOOTER — logo, shown only in PDF/print ─────────────────── */}
       <div className="hidden print:flex items-center justify-center gap-3 mt-10 pt-6 border-t border-[#E4DFD8]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/images/logo.png" alt="Lagomplan" className="h-8 w-auto opacity-75" />
+        <img src="/images/logo-lagomplan.svg" alt="Lagomplan" className="h-8 w-auto opacity-75" />
       </div>
 
       {/* ── ITEM EDIT / ADD MODAL ─────────────────────────────────────────── */}
@@ -3030,7 +3101,22 @@ export default function TripResult({ params }: Props) {
       <style>{`@keyframes mIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
 
       {/* ── PAYWALL ──────────────────────────────────────────────────────── */}
-      <PaywallModal open={paywallOpen} locale={locale} onClose={handlePaywallClose} />
+      <PaywallModal
+        open={paywallOpen}
+        locale={locale}
+        onClose={handlePaywallClose}
+        onCouponApplied={(entitlement) => {
+          setPlanCredits(entitlement as any)
+          setPaywallOpen(false)
+          setPaymentSuccess({
+            credits:        entitlement.credits_remaining,
+            isSubscription: entitlement.subscription_active,
+          })
+          if (entitlement.credits_remaining > 0 || entitlement.subscription_active) {
+            setGenerateKey(k => k + 1)
+          }
+        }}
+      />
 
       {/* ── SHARE TRIP ───────────────────────────────────────────────────── */}
       {tripId && (

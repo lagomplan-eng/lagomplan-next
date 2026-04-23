@@ -50,7 +50,7 @@ export default async function ContactPage({
 
   return (
     <main
-      className="pt-[72px] min-h-screen"
+      className="pt-[120px] min-h-screen"
       style={{ background: '#F7F4EF' }}
     >
       <div className="max-w-[560px] mx-auto px-6 py-16 md:py-24">

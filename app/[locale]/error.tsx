@@ -8,7 +8,7 @@ export default function LocaleError({
   reset: () => void
 }) {
   return (
-    <main className="pt-[72px] min-h-screen bg-[#F4F0E8] flex items-center justify-center">
+    <main className="pt-[120px] min-h-screen bg-[#F4F0E8] flex items-center justify-center">
       <div className="max-w-[480px] mx-auto px-6 py-16 text-center">
         <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#B33A3A] mb-3">
           Something went wrong

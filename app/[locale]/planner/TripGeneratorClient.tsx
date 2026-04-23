@@ -58,7 +58,7 @@ function FormPage() {
   const isES   = locale === 'es'
 
   return (
-    <main className="pt-[72px] min-h-screen bg-[#FFF9F3]">
+    <main className="pt-[120px] min-h-screen bg-[#FFF9F3]">
       <div className="page-inner py-16 max-[768px]:py-10">
 
         {/* Tighter container for premium feel */}
@@ -200,12 +200,12 @@ function TrustStrip({ locale }: { locale: 'es' | 'en' }) {
   const isES  = locale === 'es'
   const stats = isES
     ? [
-        { title: '+10,000 viajes generados',           text: 'Ideas personalizadas para empezar más rápido.' },
+        { title: '+400 viajes generados',               text: 'Ideas personalizadas para empezar más rápido.' },
         { title: 'Itinerarios en menos de 30 segundos', text: 'Un primer borrador útil sin fricción innecesaria.' },
         { title: 'Recomendaciones curadas',             text: 'Pensadas para que el viaje se sienta más simple y mejor armado.' },
       ]
     : [
-        { title: '+10,000 trips generated',             text: 'Personalised ideas to get you started faster.' },
+        { title: '+400 trips generated',                text: 'Personalised ideas to get you started faster.' },
         { title: 'Itineraries in under 30 seconds',     text: 'A useful first draft with zero unnecessary friction.' },
         { title: 'Curated recommendations',             text: 'Designed to make your trip feel simpler and better put together.' },
       ]
