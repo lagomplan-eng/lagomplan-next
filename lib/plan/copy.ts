@@ -1,4 +1,5 @@
 import type { PlanState } from '../../components/plan/PlanProvider'
+import { FREE_TRIPS_LIMIT } from './limits'
 
 export type PlanUiState = 'subscriber' | 'plenty' | 'last' | 'empty'
 export type PlanTone = 'celebratory' | 'neutral' | 'soft-warn' | 'action'
@@ -16,6 +17,7 @@ export function resolvePlanCopy(
   if (!plan || plan === 'loading') return null
   const isES = locale === 'es'
 
+  // Unlimited subscribers — ambient celebratory pill.
   if (plan.is_subscriber) {
     return {
       state: 'subscriber',
@@ -24,9 +26,10 @@ export function resolvePlanCopy(
     }
   }
 
-  const n = plan.trips_remaining
+  const remaining = plan.trips_remaining
 
-  if (n === 0) {
+  // Out of trips — call-to-action (clickable badge opens paywall).
+  if (remaining === 0) {
     return {
       state: 'empty',
       label: isES ? '🔒 Sin viajes — desbloquea más' : '🔒 No trips — get more',
@@ -34,7 +37,34 @@ export function resolvePlanCopy(
     }
   }
 
-  if (n === 1) {
+  // Free tier shows progressive "used / limit" so the user always sees how
+  // much of their free allowance they've burned. Paid per-trip users see a
+  // remaining-countdown since they don't have a fixed cap.
+  const isFreeTier = plan.tier === 'free'
+
+  if (isFreeTier) {
+    const used = Math.max(0, FREE_TRIPS_LIMIT - remaining)
+    // Last free trip: keep soft-warn tone so it stands out visually.
+    if (remaining === 1) {
+      return {
+        state: 'last',
+        label: isES
+          ? `🎒 ${used} / ${FREE_TRIPS_LIMIT} · último viaje gratis`
+          : `🎒 ${used} / ${FREE_TRIPS_LIMIT} · last free trip`,
+        tone: 'soft-warn',
+      }
+    }
+    return {
+      state: 'plenty',
+      label: isES
+        ? `🎒 ${used} / ${FREE_TRIPS_LIMIT} viajes usados`
+        : `🎒 ${used} / ${FREE_TRIPS_LIMIT} trips used`,
+      tone: 'neutral',
+    }
+  }
+
+  // Paid per-trip balance (no fixed cap) — countdown format.
+  if (remaining === 1) {
     return {
       state: 'last',
       label: isES ? '🎒 Te queda 1 viaje' : '🎒 1 trip left',
@@ -44,7 +74,7 @@ export function resolvePlanCopy(
 
   return {
     state: 'plenty',
-    label: isES ? `🎒 ${n} viajes disponibles` : `🎒 ${n} trips available`,
+    label: isES ? `🎒 ${remaining} viajes disponibles` : `🎒 ${remaining} trips available`,
     tone: 'neutral',
   }
 }
@@ -75,15 +105,15 @@ export function buildPostGenerateToast(
   const n = plan.trips_remaining
   if (n === 0) {
     return isES
-      ? '✨ Viaje creado — fue tu último viaje. Recarga para seguir explorando.'
-      : '✨ Trip created — that was your last trip. Top up to keep exploring.'
+      ? '✨ Viaje creado — fue tu último viaje gratis. Desbloquea viajes ilimitados para seguir.'
+      : '✨ Trip created — that was your last free trip. Unlock unlimited trips to keep going.'
   }
   if (n === 1) {
     return isES
-      ? '✨ Viaje creado — te queda 1 viaje. Recarga cuando quieras.'
-      : '✨ Trip created — 1 trip left. Top up anytime.'
+      ? '✨ Viaje creado — te queda 1 viaje gratis.'
+      : '✨ Trip created — 1 free trip left.'
   }
   return isES
-    ? `✨ Viaje creado — te quedan ${n} viajes`
-    : `✨ Trip created — ${n} trips left`
+    ? `✨ Viaje creado — te quedan ${n} viajes gratis`
+    : `✨ Trip created — ${n} free trips remaining`
 }

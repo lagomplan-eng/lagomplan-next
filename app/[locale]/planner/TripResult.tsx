@@ -6,6 +6,8 @@ import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
 import { usePlan, type PlanState } from '../../../components/plan/PlanProvider'
 import { PaymentPendingOverlay } from '../../../components/plan/PaymentPendingOverlay'
+import { TripLimitReachedModal } from '../../../components/plan/TripLimitReachedModal'
+import { buildPostGenerateToast } from '../../../lib/plan/copy'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
@@ -715,6 +717,19 @@ export default function TripResult({ params }: Props) {
 
   // ── Plan credits + paywall (both owned by global PlanProvider) ────────────────
   const { planCredits, refreshPlanCredits, paywallOpen, openPaywall, closePaywall } = usePlan()
+
+  // ── Post-generation "limit reached" transition modal ────────────────────────
+  // Shown exactly once per session, right after a free-tier user generates
+  // their final free trip. Doesn't block the result — the trip renders behind.
+  const [limitReachedOpen, setLimitReachedOpen] = useState(false)
+  const limitReachedShownRef = useRef(false)
+  function maybeShowLimitReached(fresh: PlanState | null) {
+    if (!fresh || limitReachedShownRef.current) return
+    if (fresh.tier === 'free' && fresh.trips_remaining === 0) {
+      limitReachedShownRef.current = true
+      setLimitReachedOpen(true)
+    }
+  }
   // Ref so the generate effect always reads the current value without re-running on every credit update
   const planCreditsRef = useRef<PlanState | null | 'loading'>(planCredits)
   useEffect(() => { planCreditsRef.current = planCredits }, [planCredits])
@@ -997,7 +1012,13 @@ export default function TripResult({ params }: Props) {
 
         // Credits are decremented server-side in /api/generate-trip.
         // Refresh plan state so the next guard check reflects the new balance.
-        if (authedUser !== null) refreshPlanCredits().catch(() => {})
+        // Also fire the transition modal if this was the user's last free trip.
+        if (authedUser !== null) {
+          refreshPlanCredits().then(fresh => {
+          if (fresh) showToast(buildPostGenerateToast(fresh, locale === 'es' ? 'es' : 'en'))
+          maybeShowLimitReached(fresh)
+        }).catch(() => {})
+        }
       } catch (err) {
         const msg = err instanceof Error ? err.message : 'Unknown error'
         const duration = genStartedAt ? Math.round(performance.now() - genStartedAt) : null
@@ -1151,7 +1172,12 @@ export default function TripResult({ params }: Props) {
 
       // Credits are decremented server-side in /api/generate-trip.
       // Refresh DB state so the next guard check reflects the real balance.
-      if (authedUser !== null) refreshPlanCredits().catch(() => {})
+      if (authedUser !== null) {
+        refreshPlanCredits().then(fresh => {
+          if (fresh) showToast(buildPostGenerateToast(fresh, locale === 'es' ? 'es' : 'en'))
+          maybeShowLimitReached(fresh)
+        }).catch(() => {})
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -1391,7 +1417,12 @@ export default function TripResult({ params }: Props) {
         })
       }
       // Credits decremented server-side — refresh so the next guard reflects real balance
-      if (authedUser !== null) refreshPlanCredits().catch(() => {})
+      if (authedUser !== null) {
+        refreshPlanCredits().then(fresh => {
+          if (fresh) showToast(buildPostGenerateToast(fresh, locale === 'es' ? 'es' : 'en'))
+          maybeShowLimitReached(fresh)
+        }).catch(() => {})
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -3111,6 +3142,14 @@ export default function TripResult({ params }: Props) {
 
       {/* PaywallModal is rendered globally by <PlanProvider> so the nav credits
           badge (and any other page) can open it too. No local render here. */}
+
+      {/* Transition modal — fires once per session when a free-tier user
+          completes their final free trip. Doesn't block the result. */}
+      <TripLimitReachedModal
+        open={limitReachedOpen}
+        onClose={() => setLimitReachedOpen(false)}
+        onUpgrade={() => { setLimitReachedOpen(false); openPaywall() }}
+      />
 
       {/* ── SHARE TRIP ───────────────────────────────────────────────────── */}
       {tripId && (

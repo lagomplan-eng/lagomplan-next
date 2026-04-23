@@ -7,6 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../lib/entitlements'
 import { getSupabaseServer } from '../../../lib/supabase/server'
+import { ANON_TRIP_LIMIT } from '../../../lib/plan/limits'
 
 // Vercel Pro allows up to 300 s for serverless functions.
 // AI generation takes 60–90 s — the old 60 s limit guaranteed a timeout.
@@ -14,8 +15,7 @@ import { getSupabaseServer } from '../../../lib/supabase/server'
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
-const ANON_COOKIE   = 'anon_gen_count'
-const ANON_LIMIT    = 1   // anonymous users get 1 free generation, then must sign up
+const ANON_COOKIE = 'anon_gen_count'
 
 export async function POST(req: NextRequest) {
   try {
@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
       const cookieStore = await cookies()
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
-      if (anonCount >= ANON_LIMIT) {
+      if (anonCount >= ANON_TRIP_LIMIT) {
         return NextResponse.json(
           { error: 'not_authenticated', reason: 'Please sign up to continue generating trips' },
           { status: 401 },

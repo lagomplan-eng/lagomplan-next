@@ -26,6 +26,7 @@ import { Checklist }               from './RightColumn/Checklist'
 import { Transport }               from './RightColumn/Transport'
 import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
+import { GuideFreeIndicator }      from './GuideFreeIndicator'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -109,6 +110,9 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
 
   return (
     <div className="bg-[#FFF9F3] min-h-screen pt-[100px]">
+
+      {/* Freemium transparency banner — anonymous users only */}
+      <GuideFreeIndicator slug={data.slug} />
 
       {/* Hidden input consumed by Nav locale switcher */}
       {alternateLocaleUrl && (

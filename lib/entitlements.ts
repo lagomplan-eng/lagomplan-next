@@ -3,6 +3,7 @@
 // Always call from API routes — never from client components.
 
 import { getSupabaseAdmin, getSupabaseServer } from './supabase/server'
+import { FREE_TRIPS_LIMIT } from './plan/limits'
 
 export type EntitlementCheck =
   | { allowed: true;  tier: string; remaining: number | null }
@@ -29,9 +30,9 @@ async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
   // Race condition: signup trigger may not have fired yet — create the row now
   await (admin as any)
     .from('user_entitlements')
-    .upsert({ user_id: userId, tier: 'free', trips_remaining: 3, trips_used: 0 })
+    .upsert({ user_id: userId, tier: 'free', trips_remaining: FREE_TRIPS_LIMIT, trips_used: 0 })
 
-  return { tier: 'free', trips_remaining: 3, trips_used: 0, last_session_id: null }
+  return { tier: 'free', trips_remaining: FREE_TRIPS_LIMIT, trips_used: 0, last_session_id: null }
 }
 
 /**
