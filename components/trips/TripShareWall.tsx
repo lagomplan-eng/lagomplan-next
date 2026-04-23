@@ -66,8 +66,8 @@ export default function TripShareWall({ locale, destination, duration, currentPa
             {/* Watermark */}
             <span
               aria-hidden
-              className="absolute right-1 bottom-[-28px] font-display italic select-none pointer-events-none leading-none"
-              style={{ fontSize: 112, color: 'rgba(255,255,255,.04)' }}
+              className="absolute right-1 bottom-[-28px] font-sans select-none pointer-events-none leading-none"
+              style={{ fontSize: 112, fontWeight: 800, color: 'rgba(255,255,255,.04)' }}
             >
               {destination.split(' ').filter(Boolean).slice(0, 2).map(w => w[0]?.toUpperCase() ?? '').join('')}
             </span>
@@ -80,7 +80,7 @@ export default function TripShareWall({ locale, destination, duration, currentPa
             </p>
 
             <h1
-              className="font-display italic font-normal leading-[1.05] tracking-[-0.02em] text-white mb-3"
+              className="font-sans font-bold leading-[1.05] tracking-[-0.02em] text-white mb-3"
               style={{ fontSize: 'clamp(26px, 6.5vw, 34px)' }}
             >
               {destination}

@@ -284,8 +284,8 @@ export default function HotelsClient({ hotels, locale }: Props) {
               fontSize: 'clamp(44px, 7vw, 72px)',
             }}>
               {isES
-                ? <>Hoteles que<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>elegimos bien.</em></>
-                : <>Hotels we<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>choose well.</em></>}
+                ? <>Hoteles que<br /><span style={{ fontWeight: 800 }}>elegimos bien</span></>
+                : <>Hotels we<br /><span style={{ fontWeight: 800 }}>choose well</span></>}
             </h1>
             <p style={{ margin: '28px 0 0', maxWidth: '38ch', fontSize: '18px', lineHeight: 1.75, color: 'rgba(15,58,51,0.72)' }}>
               {isES

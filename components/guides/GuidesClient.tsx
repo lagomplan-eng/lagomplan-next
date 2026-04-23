@@ -100,8 +100,7 @@ function FeaturedGuideCard({ guide, isES }: { guide: GuideListing; isES: boolean
             </div>
             <div style={{
               marginTop: '8px', fontSize: '38px', lineHeight: 0.98,
-              fontFamily: 'var(--font-display), Georgia, serif',
-              fontStyle: 'italic', fontWeight: 600, maxWidth: '10ch',
+              fontWeight: 800, maxWidth: '10ch',
             }}>
               {guide.title}
             </div>
@@ -401,8 +400,8 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
                 fontSize: 'clamp(44px, 7vw, 72px)',
               }}>
                 {isES
-                  ? <>Destinos que<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>conocemos bien.</em></>
-                  : <>Destinations we<br /><em style={{ fontFamily: 'var(--font-display), Georgia, serif', fontStyle: 'italic', fontWeight: 600 }}>know well.</em></>}
+                  ? <>Destinos que<br /><span style={{ fontWeight: 800 }}>conocemos bien</span></>
+                  : <>Destinations we<br /><span style={{ fontWeight: 800 }}>know well</span></>}
               </h1>
               <p style={{ margin: '28px 0 0', maxWidth: '36ch', fontSize: '18px', lineHeight: 1.75, color: 'rgba(15,58,51,0.72)' }}>
                 {isES

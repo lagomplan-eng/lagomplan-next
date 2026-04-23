@@ -7,10 +7,11 @@ import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
 import type { Locale } from '../../../i18n'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   return {
     title:      locale === 'es' ? 'Política de Privacidad' : 'Privacy Policy',
     alternates: buildAlternates('privacy'),
@@ -18,14 +19,15 @@ export async function generateMetadata({
   }
 }
 
-export default function PrivacyPage({
-  params: { locale },
+export default async function PrivacyPage({
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   if (locale === 'en') {
     return (
-      <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
+      <section className="bg-[#F7F4EF] min-h-screen pt-[100px]">
         <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
           <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">
             Privacy Policy
@@ -47,7 +49,7 @@ export default function PrivacyPage({
   }
 
   return (
-    <section className="bg-[#F7F4EF] min-h-screen pt-[72px]">
+    <section className="bg-[#F7F4EF] min-h-screen pt-[100px]">
       <div className="max-w-4xl mx-auto px-6 py-16 md:py-24">
 
         <h1 className="text-3xl md:text-4xl font-semibold text-[#1F3D37] mb-2">

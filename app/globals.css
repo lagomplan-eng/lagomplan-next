@@ -63,6 +63,36 @@ body {
   line-height: 1.55;
 }
 
+/* ── Headings: design-system enforcement ───────────────────────────
+   All titles/subtitles must be sans-serif and upright. Uses !important
+   so this beats Tailwind utilities (font-display, font-serif, italic)
+   and inline style attributes that historically leaked serif/italic
+   treatments onto headings. Non-heading elements are untouched, so
+   em/i inside body copy still italicise.
+*/
+h1, h2, h3, h4, h5, h6,
+h1 em, h1 i, h2 em, h2 i, h3 em, h3 i,
+h4 em, h4 i, h5 em, h5 i, h6 em, h6 i {
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif !important;
+  font-style: normal !important;
+}
+
+/* Strip any injected pseudo-element content (leading dots, bullets,
+   decorative punctuation) from headings. */
+h1::before, h1::after,
+h2::before, h2::after,
+h3::before, h3::after,
+h4::before, h4::after,
+h5::before, h5::after,
+h6::before, h6::after {
+  content: none !important;
+}
+
+/* Kill list-markers if a heading ever ends up inside a list context. */
+h1, h2, h3, h4, h5, h6 { list-style: none; }
+h1::marker, h2::marker, h3::marker,
+h4::marker, h5::marker, h6::marker { content: none !important; }
+
 /* ── Shared section utilities ─────────────────────────── */
 
 /* Section label — e.g. "GUÍAS CURADAS" */
@@ -221,11 +251,11 @@ body {
 }
 
 .hero-title {
-  font-family: var(--font-display), serif;
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
   font-size: 42px;
   line-height: 1.2;
-  font-weight: 600;
-  font-style: italic;
+  font-weight: 700;
+  font-style: normal;
   color: var(--pine);
 }
 
@@ -250,8 +280,9 @@ body {
 
 /* ── Typography helpers ───────────────────────────────── */
 .h2 {
-  font-family: var(--font-display), serif;
-  font-style: italic;
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
+  font-style: normal;
+  font-weight: 700;
   font-size: 28px;
   margin-bottom: 16px;
 }

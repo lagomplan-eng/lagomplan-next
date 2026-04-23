@@ -4,11 +4,11 @@ import { cookies } from 'next/headers'
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { trip_id: string } },
+  { params }: { params: Promise<{ trip_id: string }> },
 ) {
-  const { trip_id } = params
+  const { trip_id } = await params
 
-  const cookieStore = cookies()
+  const cookieStore = await cookies()
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,

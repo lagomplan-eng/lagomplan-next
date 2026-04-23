@@ -27,6 +27,7 @@ import { Link, usePathname } from '../../lib/navigation'
 import type { Locale }               from '../../i18n'
 import { getSupabaseBrowser }        from '../../lib/supabase/client'
 import { useUser }                   from '../auth/SupabaseProvider'
+import { CreditsBadge }              from './CreditsBadge'
 
 // ── LangToggle — defined at module level so its reference is stable ──────────
 // Inline component definitions (inside a render function) create a new type on
@@ -89,10 +90,10 @@ export default function Nav() {
       }
     }
 
-    // 2. Build the new path, stripping any existing locale prefix as a safeguard.
-    //    usePathname() from next-intl already omits the locale segment, but the
-    //    regex makes this safe regardless of the returned format.
-    const basePath = (pathname ?? '/').replace(/^\/(en|es)/, '')
+    // 2. Use the real browser URL (not usePathname which returns the route template
+    //    e.g. "/guides/[slug]" for parameterized routes), strip the locale prefix.
+    const realPath = typeof window !== 'undefined' ? window.location.pathname : `/${locale}`
+    const basePath = realPath.replace(/^\/(en|es)/, '')
     const search   = typeof window !== 'undefined' ? window.location.search : ''
     window.location.href = `/${target}${basePath || '/'}${search}`
   }
@@ -117,7 +118,7 @@ export default function Nav() {
     <nav
       className="fixed top-0 left-0 right-0 z-50 print:hidden"
       style={{
-        height:             88,
+        height:             100,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
@@ -131,9 +132,9 @@ export default function Nav() {
           <Image
             src="/images/logo.png"
             alt="Lagomplan"
-            width={252}
-            height={56}
-            className="h-14 w-auto"
+            width={200}
+            height={150}
+            className="h-[70px] w-auto"
             priority
             onError={e => {
               const img = e.currentTarget as HTMLImageElement
@@ -145,7 +146,7 @@ export default function Nav() {
           {/* Text fallback until logo.png is placed in /public/images/ */}
           <span
             style={{ display: 'none' }}
-            className="font-display italic text-[28px] font-semibold text-[#0F3A33] tracking-[-0.5px]"
+            className="font-sans text-[28px] font-bold text-[#0F3A33] tracking-[-0.5px]"
           >
             lagomplan
           </span>
@@ -167,6 +168,7 @@ export default function Nav() {
         {/* ── Desktop right ─────────────────────────────── */}
         <div className="hide-mobile flex items-center gap-3 flex-shrink-0">
           <LangToggle locale={locale} onSwitch={switchLocale} />
+          <CreditsBadge />
           {user ? (
             <div className="relative">
               <button
@@ -247,6 +249,7 @@ export default function Nav() {
           {user ? (
             <div className="mt-5 flex flex-col gap-1">
               <p className="text-[11px] text-[#6B8F86] px-1 truncate">{user.email}</p>
+              <div className="px-1 py-2"><CreditsBadge /></div>
               <Link
                 href="/my-trips"
                 className="font-sans text-[14px] font-medium text-[#0F3A33] py-2.5 border-b border-[rgba(107,143,134,.2)]"

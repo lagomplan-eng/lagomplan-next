@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   try {
-    const supabase = getSupabaseServer()
+    const supabase = await getSupabaseServer()
     const { data: { user }, error } = await supabase.auth.getUser()
 
     if (error || !user) {

@@ -12,7 +12,7 @@ import type { Metadata } from 'next'
 import { notFound }      from 'next/navigation'
 
 import { getAllGuideParams, getGuideBySlug } from '../../../../lib/guides'
-import { getGuidePageData, getNewGuideParams } from '../../../../lib/data/guides/index'
+import { getGuidePageData, getNewGuideParams, resolveCanonicalSlug } from '../../../../lib/data/guides/index'
 import { buildGuideAlternates, buildOpenGraph } from '../../../../lib/seo'
 import type { Locale }              from '../../../../i18n'
 import { GuidePageClient }          from '../../../../components/guides/GuidePageClient'
@@ -20,7 +20,7 @@ import { GuidePageClientV2 }        from '../../../../components/guides/GuidePag
 
 // ── Static generation ─────────────────────────────────────────────────────────
 
-type Props = { params: { locale: Locale; slug: string } }
+type Props = { params: Promise<{ locale: Locale; slug: string }> }
 
 export function generateStaticParams() {
   // Merge params from both data systems (deduplicated by slug+locale)
@@ -43,7 +43,7 @@ export function generateStaticParams() {
 // ── Metadata ──────────────────────────────────────────────────────────────────
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, slug } = params
+  const { locale, slug } = await params
 
   // Try new data system first
   const newData = getGuidePageData(slug, locale)
@@ -86,13 +86,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 
-export default function GuideDetailPage({ params }: Props) {
-  const { locale, slug } = params
+export default async function GuideDetailPage({ params }: Props) {
+  const { locale, slug } = await params
 
   // 1. Try new guide data system
   const newData = getGuidePageData(slug, locale)
   if (newData) {
-    return <GuidePageClientV2 data={newData} locale={locale} />
+    const canonical   = resolveCanonicalSlug(slug)
+    const otherLocale = locale === 'es' ? 'en' : 'es'
+    const guidePrefix = otherLocale === 'es' ? 'guias' : 'guides'
+    const alternateLocaleUrl = `/${otherLocale}/${guidePrefix}/${canonical}`
+    return <GuidePageClientV2 data={newData} locale={locale} alternateLocaleUrl={alternateLocaleUrl} />
   }
 
   // 2. Fall back to legacy system

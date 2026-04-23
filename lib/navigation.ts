@@ -24,8 +24,8 @@
  *   router.replace(pathname, { locale: 'en' })  // → /en/planner
  */
 
-import { createLocalizedPathnamesNavigation } from 'next-intl/navigation'
-import { locales, pathnames }                  from '../i18n'
+import { createNavigation } from 'next-intl/navigation'
+import { locales, pathnames } from '../i18n'
 
 export const { Link, redirect, usePathname, useRouter } =
-  createLocalizedPathnamesNavigation({ locales, pathnames })
+  createNavigation({ locales, pathnames })

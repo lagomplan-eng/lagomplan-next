@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Lagomplan — Viaja bien. Planea menos.",
+    "title": "Lagomplan — Viaja bien. Planea menos",
     "description": "Planificador de viajes con IA para quienes saben lo que quieren. Itinerario completo en minutos."
   },
   "nav": {
@@ -14,8 +14,8 @@
   },
   "hero": {
     "eyebrow": "Planificador de viajes con IA",
-    "headline": "Viaja bien.",
-    "headlineItalic": "Planea menos.",
+    "headline": "Viaja bien",
+    "headlineItalic": "Planea menos",
     "subhead": "Dile a dónde quieres ir. En minutos tienes tu itinerario, hoteles recomendados y presupuesto listo.",
     "socialProof": "{count}+ planes creados este mes"
   },
@@ -83,7 +83,7 @@
   "howItWorks": {
     "eyebrow": "02 — Cómo funciona",
     "headline": "De la idea al plan,",
-    "headlineItalic": "en minutos.",
+    "headlineItalic": "en minutos",
     "step1Title": "Cuéntanos tu viaje",
     "step1Body": "Destino, fechas, tipo de viajero y presupuesto. Menos de dos minutos.",
     "step2Title": "La IA planifica por ti",
@@ -94,7 +94,7 @@
   "guides": {
     "eyebrow": "03 — Guías curadas",
     "headline": "Destinos que ya",
-    "headlineItalic": "conocemos bien.",
+    "headlineItalic": "conocemos bien",
     "seeAll": "Ver todas las guías →",
     "affiliateLabel": "Hoteles recomendados en cada guía",
     "affiliateBody": "Reserva directo desde tu plan con nuestros socios Viator y GetYourGuide",
@@ -103,19 +103,19 @@
   "philosophy": {
     "eyebrow": "04 — Filosofía",
     "headline": "Lagom — ni mucho,",
-    "headlineItalic": "ni poco. Lo justo.",
+    "headlineItalic": "ni poco. Lo justo",
     "body1": "El concepto sueco lagom no tiene traducción exacta, pero describe exactamente cómo debería sentirse un viaje bien planeado: sin itinerario imposible, sin parálisis de opciones.",
     "body2": "Hacemos el trabajo pesado para que puedas estar presente donde estás."
   },
   "testimonials": {
     "eyebrow": "05 — Reseñas",
     "headline": "Lo que dicen quienes",
-    "headlineItalic": "ya viajaron con nosotros."
+    "headlineItalic": "ya viajaron con nosotros"
   },
   "explorer": {
     "eyebrow": "06 — Explorer · Plan de suscripción",
-    "headline": "Planes sin límite.",
-    "headlineItalic": "Viajes mejores.",
+    "headline": "Planes sin límite",
+    "headlineItalic": "Viajes mejores",
     "body": "Tu primer plan siempre es gratis. Cuando quieras más — historial de viajes, planes ilimitados, PDF y soporte prioritario — Explorer te lo da.",
     "price": "$199",
     "currency": "MXN / mes",
@@ -132,12 +132,12 @@
   "cta": {
     "eyebrow": "07 — Empieza gratis",
     "headline": "Tu próximo viaje,",
-    "headlineItalic": "listo en minutos.",
+    "headlineItalic": "listo en minutos",
     "body": "Sin registro. Sin tarjeta. El primer plan es completamente gratis.",
     "button": "Planificar ahora →"
   },
   "newsletter": {
-    "headline": "Viaja primero desde tu bandeja de entrada.",
+    "headline": "Viaja primero desde tu bandeja de entrada",
     "body": "Ideas y guías nuevas — directo a tu correo.",
     "placeholder": "Tu correo electrónico",
     "button": "Suscribirme"

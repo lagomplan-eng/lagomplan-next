@@ -95,7 +95,7 @@ export default function PaywallModal({ open, locale, onClose }: PaywallModalProp
 
         {/* Header */}
         <div className="bg-[#0F3A33] px-6 pt-8 pb-6 text-center">
-          <h2 className="font-playfair text-[26px] font-bold text-white leading-tight tracking-[-0.5px]">
+          <h2 className="font-sans text-[26px] font-bold text-white leading-tight tracking-[-0.5px]">
             {isES ? 'Tu siguiente viaje está listo ✨' : 'Your next trip awaits ✨'}
           </h2>
           <p className="font-sans text-[13px] text-[#A8C5BE] mt-2 leading-relaxed">

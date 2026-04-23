@@ -7,9 +7,9 @@ import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/se
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { trip_id: string } },
+  { params }: { params: Promise<{ trip_id: string }> },
 ) {
-  const { trip_id } = params
+  const { trip_id } = await params
 
   if (!trip_id) {
     return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
@@ -18,7 +18,7 @@ export async function GET(
   console.log('[trips/get] fetching trip_id:', trip_id)
 
   try {
-    const supabase = getSupabaseServer()
+    const supabase = await getSupabaseServer()
 
     const { data, error } = await supabase
       .from('trips')
@@ -50,16 +50,16 @@ export async function GET(
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { trip_id: string } },
+  { params }: { params: Promise<{ trip_id: string }> },
 ) {
-  const { trip_id } = params
+  const { trip_id } = await params
   if (!trip_id) return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
 
   try {
     const body = await req.json()
     const { title, trip_data } = body
 
-    const supabase = getSupabaseServer()
+    const supabase = await getSupabaseServer()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) {
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })

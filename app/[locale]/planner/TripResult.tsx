@@ -4,7 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
-import PaywallModal from '../../../components/PaywallModal'
+import { usePlan, type PlanState } from '../../../components/plan/PlanProvider'
+import { PaymentPendingOverlay } from '../../../components/plan/PaymentPendingOverlay'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
@@ -555,7 +556,7 @@ function BudgetEditPanel({
       style={{ borderLeft: '2px solid #0F3A33' }}
     >
       {row.note && (
-        <p className="text-[10px] font-light italic text-[#7A7A76] mb-[9px] leading-relaxed">
+        <p className="text-[10px] font-light text-[#7A7A76] mb-[9px] leading-relaxed">
           {row.note}
         </p>
       )}
@@ -630,6 +631,8 @@ export default function TripResult({ params }: Props) {
   // ── Data state ──────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
   const [error, setError]     = useState<string | null>(null)
+  const [errorStatus, setErrorStatus] = useState<number | null>(null)
+  const [errorDurationMs, setErrorDurationMs] = useState<number | null>(null)
   const [rawResponse, setRawResponse] = useState<any>(null)
   const [tripId, setTripId]         = useState<string | null>(null)
   const [rawTripData, setRawTripData] = useState<any>(null)
@@ -697,8 +700,7 @@ export default function TripResult({ params }: Props) {
   const [prefNextKidId, setPrefNextKidId]     = useState(0)
   const [prefGroupCount, setPrefGroupCount]   = useState(2)
 
-  // ── Paywall state ─────────────────────────────────────────────────────────────
-  const [paywallOpen, setPaywallOpen]   = useState(false)
+  // ── Paywall state (paywallOpen now in PlanProvider) ──────────────────────────
   const [shareOpen,   setShareOpen]     = useState(false)
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
 
@@ -711,12 +713,16 @@ export default function TripResult({ params }: Props) {
   // edits that were made before tripId was available (fixing the main race condition).
   const lastSavedContentRef = useRef<string | null>(null)
 
-  // ── Plan credits (DB-backed, replaces localStorage) ───────────────────────────
-  type PlanState = { tier: string; trips_remaining: number; is_subscriber: boolean }
-  const [planCredits, setPlanCredits] = useState<PlanState | null | 'loading'>('loading')
+  // ── Plan credits + paywall (both owned by global PlanProvider) ────────────────
+  const { planCredits, refreshPlanCredits, paywallOpen, openPaywall, closePaywall } = usePlan()
   // Ref so the generate effect always reads the current value without re-running on every credit update
-  const planCreditsRef = useRef<PlanState | null | 'loading'>('loading')
+  const planCreditsRef = useRef<PlanState | null | 'loading'>(planCredits)
   useEffect(() => { planCreditsRef.current = planCredits }, [planCredits])
+
+  // Ref mirror of rawTripData so the generate effect can bail out when a trip
+  // is already displayed without having to depend on rawTripData (which would
+  // cause the effect to re-run on every regeneration).
+  const rawTripDataRef = useRef<any>(null)
 
   // ── Access resolution gate ────────────────────────────────────────────────────
   // True once we know whether the user can generate (auth resolved + credits loaded).
@@ -781,47 +787,46 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [savedTripId])
 
-  // ── Plan credits fetch ────────────────────────────────────────────────────────
+  // Plan credits load + refresh is now owned by <PlanProvider>. Post-checkout
+  // confirmation is handled by <PaymentPendingOverlay /> rendered below.
+
+  // Credits-based auto-close is owned by PlanProvider. Here we only handle the
+  // TripResult-specific case: close paywall the moment a trip becomes visible.
+  // User-intent reopens (regenerate / replaceTrip) don't change rawTripData, so
+  // this effect leaves them alone.
   useEffect(() => {
-    if (authedUser === undefined) return  // still loading auth
-    if (authedUser === null) {
-      setPlanCredits(null)               // anonymous — no DB state
-      return
-    }
-    fetch('/api/me/plan')
-      .then(r => r.ok ? r.json() : null)
-      .then(data => setPlanCredits(data ?? { tier: 'free', trips_remaining: 0, is_subscriber: false }))
-      .catch(() => setPlanCredits({ tier: 'free', trips_remaining: 0, is_subscriber: false }))
-  }, [authedUser])
+    rawTripDataRef.current = rawTripData
+    if (rawTripData) closePaywall()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rawTripData])
 
-  // ── Post-checkout success handler ────────────────────────────────────────────
-  // When Stripe redirects back with ?checkout=success, refresh plan state and
-  // retrigger generation so the user doesn't have to click anything.
+  // ── Post-checkout confirmation state ─────────────────────────────────────────
+  // The overlay polls /api/me/plan until the webhook-written last_session_id
+  // matches our session. Only once confirmed do we show the success toast
+  // (with the real credit count) and let generation proceed.
+  const pendingSessionId = params.session_id ?? ''
+  const [checkoutConfirmed, setCheckoutConfirmed] = useState(checkoutStatus !== 'success')
+
+  async function handleCheckoutCredited() {
+    const fresh = await refreshPlanCredits()
+    const msg = fresh?.is_subscriber
+      ? (locale === 'es'
+          ? '🎉 ¡Pago confirmado! Tienes viajes ilimitados este mes'
+          : '🎉 Payment confirmed! Unlimited trips this month')
+      : (locale === 'es'
+          ? `🎉 ¡Pago confirmado! Ahora tienes ${fresh?.trips_remaining ?? 0} viajes disponibles`
+          : `🎉 Payment confirmed! You now have ${fresh?.trips_remaining ?? 0} trips available`)
+    showToast(msg)
+    setCheckoutConfirmed(true)
+    setGenerateKey(k => k + 1)
+  }
+
+  // Fallback for checkout=success without session_id (shouldn't happen, but if
+  // the success_url was hit manually): refresh credits once and move on.
   useEffect(() => {
-    if (checkoutStatus !== 'success') return
-    showToast(locale === 'es' ? '🎉 ¡Pago exitoso! Ya puedes generar más viajes.' : '🎉 Payment successful! You can now generate more trips.')
-
-    const sessionId = params.session_id ?? ''
-
-    async function fulfillThenRefresh() {
-      // Fallback fulfillment: ensures credits are granted even if the webhook
-      // didn't fire (e.g. not configured in production or $0 coupon edge case).
-      if (sessionId) {
-        await fetch('/api/checkout/fulfill', {
-          method:  'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body:    JSON.stringify({ session_id: sessionId }),
-        }).catch(() => {})
-      }
-      const data = await fetch('/api/me/plan').then(r => r.ok ? r.json() : null).catch(() => null)
-      if (data) {
-        setPlanCredits(data)
-        setGenerateKey(k => k + 1)
-      }
+    if (checkoutStatus === 'success' && !pendingSessionId && !checkoutConfirmed) {
+      refreshPlanCredits().finally(() => setCheckoutConfirmed(true))
     }
-
-    fulfillThenRefresh()
-  // Run once on mount when checkoutStatus==='success'. showToast is stable.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -832,6 +837,11 @@ export default function TripResult({ params }: Props) {
     async function generate() {
       // Skip AI generation when loading an existing trip from DB
       if (savedTripId) return
+
+      // Skip if a trip is already displayed (post-generation URL update via
+      // history.replaceState doesn't flip savedTripId, so guard on state ref).
+      // Regenerations go through their own handlers, not this effect.
+      if (rawTripDataRef.current) return
 
       // ── Auth / generation-count guard ─────────────────────────────────
       // authedUser is undefined while the session is still loading; wait for it.
@@ -844,13 +854,19 @@ export default function TripResult({ params }: Props) {
         if (!isAccessResolved) return  // credits not yet loaded — wait for re-run
         const plan = planCreditsRef.current as PlanState | null
         if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
-          setPaywallOpen(true)
+          openPaywall()
           return  // render is gated by the paywall early return below — no setLoading needed
         }
       }
 
       setLoading(true)
       setError(null)
+      setErrorStatus(null)
+      setErrorDurationMs(null)
+      // Tracked so the error panel can show how long the request ran and what
+      // status came back (if any). Mutated in the fetch block below.
+      let genStartedAt = 0
+      let genStatus: number | null = null
       try {
         const currentInputs = { destination, origin, start, end, nights, traveler, interests, pace, budget }
 
@@ -890,11 +906,13 @@ export default function TripResult({ params }: Props) {
         const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
         const payload = { destination, origin, start, end, nights, duration_days, traveler, interests: parsedInterests, pace, budget }
         console.log('[TripResult] POST payload:', JSON.stringify(payload))
+        genStartedAt = performance.now()
         const genRes = await fetch('/api/generate-trip', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
         })
+        genStatus = genRes.status
         const genData = await genRes.json().catch(() => null)
         console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
         setRawResponse(genData)
@@ -907,7 +925,7 @@ export default function TripResult({ params }: Props) {
           }
           // 402 = authenticated user out of credits → open paywall
           if (genRes.status === 402) {
-            setPaywallOpen(true)
+            openPaywall()
             return
           }
           const base   = typeof genData?.error === 'string' ? genData.error : 'Generation failed'
@@ -979,14 +997,13 @@ export default function TripResult({ params }: Props) {
 
         // Credits are decremented server-side in /api/generate-trip.
         // Refresh plan state so the next guard check reflects the new balance.
-        if (authedUser !== null) {
-          fetch('/api/me/plan')
-            .then(r => r.ok ? r.json() : null)
-            .then(data => { if (data) setPlanCredits(data) })
-            .catch(() => {})
-        }
+        if (authedUser !== null) refreshPlanCredits().catch(() => {})
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        const msg = err instanceof Error ? err.message : 'Unknown error'
+        const duration = genStartedAt ? Math.round(performance.now() - genStartedAt) : null
+        setError(msg)
+        setErrorStatus(genStatus)
+        setErrorDurationMs(duration)
       } finally {
         setLoading(false)
       }
@@ -1065,11 +1082,6 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading])
 
-  // ── Paywall close (checkout is handled inside PaywallModal) ──────────────────
-  function handlePaywallClose() {
-    setPaywallOpen(false)
-  }
-
   // ── Regenerate from pref drawer ──────────────────────────────────────────────
   async function regenerate() {
     // ── Paywall guard (DB-backed) ────────────────────────────────────────
@@ -1078,7 +1090,7 @@ export default function TripResult({ params }: Props) {
       if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
         setPrefOpen(false)
         setRegenConfirmOpen(false)
-        setPaywallOpen(true)
+        openPaywall()
         return
       }
     }
@@ -1109,12 +1121,9 @@ export default function TripResult({ params }: Props) {
       setRawResponse(genData)
       if (!genRes.ok) {
         if (genRes.status === 402) {
-          fetch('/api/me/plan')
-            .then(r => r.ok ? r.json() : null)
-            .then(data => { if (data) setPlanCredits(data) })
-            .catch(() => {})
+          refreshPlanCredits().catch(() => {})
           setPrefOpen(false)
-          setPaywallOpen(true)
+          openPaywall()
           return
         }
         throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
@@ -1142,12 +1151,7 @@ export default function TripResult({ params }: Props) {
 
       // Credits are decremented server-side in /api/generate-trip.
       // Refresh DB state so the next guard check reflects the real balance.
-      if (authedUser !== null) {
-        fetch('/api/me/plan')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => { if (data) setPlanCredits(data) })
-          .catch(() => {})
-      }
+      if (authedUser !== null) refreshPlanCredits().catch(() => {})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -1287,7 +1291,7 @@ export default function TripResult({ params }: Props) {
     if (authedUser !== null) {
       const plan = planCredits as PlanState | null
       if (plan && !plan.is_subscriber && plan.trips_remaining <= 0) {
-        setPaywallOpen(true)
+        openPaywall()
         return
       }
     }
@@ -1315,11 +1319,8 @@ export default function TripResult({ params }: Props) {
       setRawResponse(genData)
       if (!genRes.ok) {
         if (genRes.status === 402) {
-          fetch('/api/me/plan')
-            .then(r => r.ok ? r.json() : null)
-            .then(data => { if (data) setPlanCredits(data) })
-            .catch(() => {})
-          setPaywallOpen(true)
+          refreshPlanCredits().catch(() => {})
+          openPaywall()
           return
         }
         throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
@@ -1390,12 +1391,7 @@ export default function TripResult({ params }: Props) {
         })
       }
       // Credits decremented server-side — refresh so the next guard reflects real balance
-      if (authedUser !== null) {
-        fetch('/api/me/plan')
-          .then(r => r.ok ? r.json() : null)
-          .then(data => { if (data) setPlanCredits(data) })
-          .catch(() => {})
-      }
+      if (authedUser !== null) refreshPlanCredits().catch(() => {})
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
@@ -1618,53 +1614,137 @@ export default function TripResult({ params }: Props) {
 
   // ── Early returns ────────────────────────────────────────────────────────────
 
-  // Paywall gate — must come before the loading check so that a user with 0 credits
-  // never sees even a frame of the empty itinerary before the modal appears.
-  if (paywallOpen && !rawTripData) {
+  // Payment pending — blocks everything else (paywall, loading, itinerary) until
+  // the webhook confirms the purchase via last_session_id match.
+  if (checkoutStatus === 'success' && !checkoutConfirmed && pendingSessionId) {
     return (
-      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
-        <PaywallModal open={true} locale={locale} onClose={handlePaywallClose} />
+      <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
+        <PaymentPendingOverlay sessionId={pendingSessionId} onCredited={handleCheckoutCredited} />
       </main>
     )
+  }
+
+  // Paywall gate — hides the empty itinerary frame while the paywall is up.
+  // PaywallModal itself is rendered globally by PlanProvider.
+  if (paywallOpen && !rawTripData) {
+    return <main className="pt-[100px] min-h-screen bg-[#FAF8F5]" />
   }
 
   // Loading gate — covers both "access check in progress" and "AI generation in progress".
   if (!isAccessResolved || loading) {
     return (
-      <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+      <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
         <div className="page-inner"><LoadingState locale={locale} /></div>
       </main>
     )
   }
 
   if (error) {
+    const isES = locale === 'es'
+    const errMsgLower = error.toLowerCase()
+    const kind: 'network' | 'timeout' | 'server' | 'unknown' =
+      errMsgLower.includes('failed to fetch') || errMsgLower.includes('networkerror')
+        ? 'network'
+        : errMsgLower.includes('abort') || errMsgLower.includes('timeout') || errorStatus === 504
+        ? 'timeout'
+        : (errorStatus ?? 0) >= 500
+        ? 'server'
+        : 'unknown'
+
+    const headline = isES
+      ? (kind === 'network'
+          ? 'La conexión se interrumpió'
+          : kind === 'timeout'
+          ? 'La generación tardó demasiado'
+          : kind === 'server'
+          ? 'Hubo un problema en el servidor'
+          : 'No pudimos generar tu viaje')
+      : (kind === 'network'
+          ? 'The connection was interrupted'
+          : kind === 'timeout'
+          ? 'Generation took too long'
+          : kind === 'server'
+          ? 'Something went wrong on our side'
+          : 'We couldn’t generate your trip')
+
+    const hint = isES
+      ? (kind === 'network'
+          ? 'Revisa tu conexión e intenta de nuevo.'
+          : kind === 'timeout'
+          ? 'A veces las IA tardan más de la cuenta. Reintentar suele funcionar.'
+          : 'Intenta de nuevo en un momento. Si el problema persiste, escríbenos.')
+      : (kind === 'network'
+          ? 'Check your connection and try again.'
+          : kind === 'timeout'
+          ? 'AI models occasionally run slow. A retry usually works.'
+          : 'Please try again in a moment. If this persists, let us know.')
+
+    const metaBits: string[] = []
+    if (errorStatus != null) metaBits.push(isES ? `estado ${errorStatus}` : `status ${errorStatus}`)
+    if (errorDurationMs != null) metaBits.push(isES ? `${(errorDurationMs / 1000).toFixed(1)} s` : `${(errorDurationMs / 1000).toFixed(1)}s`)
+    const metaLine = metaBits.join(' · ')
+
+    function retryGenerate() {
+      setError(null)
+      setErrorStatus(null)
+      setErrorDurationMs(null)
+      setRawResponse(null)
+      setGenerateKey(k => k + 1)
+    }
+
     return (
-      <main className="pt-[72px] min-h-screen bg-[#F4F0E8]">
+      <main className="pt-[100px] min-h-screen bg-[#F4F0E8]">
         <div className="page-inner py-10">
-          <div className="max-w-[900px] mx-auto bg-white border border-[rgba(15,58,51,.12)] rounded-[12px] p-6">
-            <p className="font-mono text-[10px] tracking-[2px] uppercase text-[#B33A3A] mb-3">Generation error</p>
-            <h1 className="font-sans text-[24px] font-semibold text-[#0F3A33] mb-3">
-              The planner reached the API, but the response is not ready for the UI yet.
+          <div className="max-w-[560px] mx-auto bg-white border border-[rgba(15,58,51,.12)] rounded-[16px] p-8">
+            <div className="text-[40px] mb-3">🌱</div>
+            <h1 className="font-display text-[24px] font-semibold text-[#0F3A33] mb-3 leading-tight">
+              {headline}
             </h1>
-            <p className="font-sans text-[14px] text-[#4F6F68] mb-4">
-              This is progress. We are past the original submit issue and now inspecting the real backend response.
+            <p className="font-sans text-[14px] text-[#4F6F68] leading-relaxed mb-6">
+              {hint}
             </p>
-            <div className="mb-4">
-              <p className="font-mono text-[10px] tracking-[1px] uppercase text-[#6B8F86] mb-2">Error</p>
-              <pre className="bg-[#F7F3EE] text-[#0F3A33] text-[12px] p-4 rounded-[8px] overflow-auto whitespace-pre-wrap">{error}</pre>
+
+            {metaLine && (
+              <p className="font-mono text-[10px] tracking-[1px] uppercase text-[#A8A29E] mb-6">
+                {metaLine}
+              </p>
+            )}
+
+            <div className="flex flex-col gap-2 mb-6">
+              <button
+                type="button"
+                onClick={retryGenerate}
+                className="w-full font-sans text-[13px] font-semibold bg-[#0F3A33] text-white py-3 rounded-[8px] hover:bg-[#12453d] transition-colors"
+              >
+                {isES ? 'Intentar de nuevo' : 'Try again'}
+              </button>
+              <Link
+                href="/planner"
+                className="w-full text-center font-sans text-[13px] font-medium text-[#0F3A33] bg-white border border-[#CEC8C0] py-3 rounded-[8px] hover:bg-[#EDE7E1] transition-colors"
+              >
+                {isES ? 'Volver al planificador' : 'Back to planner'}
+              </Link>
             </div>
-            <div className="mb-4">
-              <p className="font-mono text-[10px] tracking-[1px] uppercase text-[#6B8F86] mb-2">Raw response</p>
-              <pre className="bg-[#F7F3EE] text-[#0F3A33] text-[12px] p-4 rounded-[8px] overflow-auto whitespace-pre-wrap">
-                {JSON.stringify(rawResponse, null, 2)}
-              </pre>
-            </div>
-            <Link
-              href="/planner"
-              className="inline-block font-mono text-[10px] tracking-[1.2px] uppercase bg-[#0F3A33] text-[#FFF9F3] px-4 py-3 rounded-[4px]"
-            >
-              Back to planner
-            </Link>
+
+            <details className="group">
+              <summary className="font-mono text-[10px] tracking-[1.5px] uppercase text-[#6B8F86] cursor-pointer select-none hover:text-[#0F3A33]">
+                {isES ? 'Detalles técnicos' : 'Technical details'}
+              </summary>
+              <div className="mt-3 space-y-3">
+                <div>
+                  <p className="font-mono text-[9px] tracking-[1px] uppercase text-[#A8A29E] mb-1">Error</p>
+                  <pre className="bg-[#F7F3EE] text-[#0F3A33] text-[11px] p-3 rounded-[6px] overflow-auto whitespace-pre-wrap max-h-[200px]">{error}</pre>
+                </div>
+                {rawResponse !== null && (
+                  <div>
+                    <p className="font-mono text-[9px] tracking-[1px] uppercase text-[#A8A29E] mb-1">Raw response</p>
+                    <pre className="bg-[#F7F3EE] text-[#0F3A33] text-[11px] p-3 rounded-[6px] overflow-auto whitespace-pre-wrap max-h-[200px]">
+                      {JSON.stringify(rawResponse, null, 2)}
+                    </pre>
+                  </div>
+                )}
+              </div>
+            </details>
           </div>
         </div>
       </main>
@@ -1673,7 +1753,7 @@ export default function TripResult({ params }: Props) {
 
   // ── Happy path ───────────────────────────────────────────────────────────────
   return (
-    <main className="pt-[72px] min-h-screen bg-[#FAF8F5]">
+    <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section data-trip="hero" className="border-b border-[#E4DFD8] pt-12 pb-9">
@@ -1691,7 +1771,7 @@ export default function TripResult({ params }: Props) {
               {/* Title */}
               <h1 data-trip-hero="title" className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
                 {tripTitle || `Tu viaje a`}<br />
-                <em className="italic text-[#0F3A33]">{prefDest}</em>
+                <span className="text-[#0F3A33]">{prefDest}</span>
               </h1>
 
               {/* Subtitle */}
@@ -1776,7 +1856,7 @@ export default function TripResult({ params }: Props) {
                 />
                 {/* Gradient overlay so the destination label stays readable */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,58,51,.55)] via-transparent to-transparent" />
-                <span className="absolute bottom-[22px] left-[22px] font-display italic text-[24px] font-light text-white/90 tracking-[-0.01em]">
+                <span className="absolute bottom-[22px] left-[22px] font-display text-[24px] font-light text-white/90 tracking-[-0.01em]">
                   {prefDest || 'Tu destino'}
                 </span>
                 {prefOrigin && (
@@ -2427,7 +2507,7 @@ export default function TripResult({ params }: Props) {
                     )}
 
                     {totalChecks === 0 && (
-                      <p className="text-[11px] text-[#7A7A76] italic py-2">
+                      <p className="text-[11px] text-[#7A7A76] py-2">
                         No hay elementos de planificación.
                       </p>
                     )}
@@ -2472,7 +2552,7 @@ export default function TripResult({ params }: Props) {
                     {/* Item list */}
                     <div className="px-4 pt-3 pb-2 flex flex-col gap-[5px]">
                       {packing.length === 0 && (
-                        <p className="text-[11px] text-[#7A7A76] italic py-1">
+                        <p className="text-[11px] text-[#7A7A76] py-1">
                           Sin items aún. Añade el primero abajo.
                         </p>
                       )}
@@ -2584,7 +2664,7 @@ export default function TripResult({ params }: Props) {
                   <div className="border-t border-[#E4DFD8]">
                     {budgetRows.length === 0 ? (
                       <div className="px-4 py-3">
-                        <p className="text-[11px] text-[#7A7A76] italic">
+                        <p className="text-[11px] text-[#7A7A76]">
                           El plan no incluye desglose de presupuesto.
                         </p>
                       </div>
@@ -3007,7 +3087,7 @@ export default function TripResult({ params }: Props) {
 
             {/* Footer */}
             <div className="px-[22px] pt-[11px] pb-[16px] border-t border-[#E4DFD8] flex items-center justify-between">
-              <span className="text-[11px] font-light text-[#B8B5AF] italic">Sin costo extra para ti</span>
+              <span className="text-[11px] font-light text-[#B8B5AF]">Sin costo extra para ti</span>
               <button
                 className="font-mono text-[10px] font-medium tracking-[.04em] text-[#7A7A76] bg-none border-none cursor-pointer px-[7px] py-[3px] hover:text-[#0F3A33] transition-colors"
                 onClick={() => setBookingModal(null)}
@@ -3029,8 +3109,8 @@ export default function TripResult({ params }: Props) {
       {/* Modal animation */}
       <style>{`@keyframes mIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
 
-      {/* ── PAYWALL ──────────────────────────────────────────────────────── */}
-      <PaywallModal open={paywallOpen} locale={locale} onClose={handlePaywallClose} />
+      {/* PaywallModal is rendered globally by <PlanProvider> so the nav credits
+          badge (and any other page) can open it too. No local render here. */}
 
       {/* ── SHARE TRIP ───────────────────────────────────────────────────── */}
       {tripId && (

@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Lagomplan — Travel well. Plan less.",
+    "title": "Lagomplan — Travel well. Plan less",
     "description": "AI-powered travel planner for those who know what they want. Full itinerary in minutes."
   },
   "nav": {
@@ -14,8 +14,8 @@
   },
   "hero": {
     "eyebrow": "AI-powered travel planner",
-    "headline": "Travel well.",
-    "headlineItalic": "Plan less.",
+    "headline": "Travel well",
+    "headlineItalic": "Plan less",
     "subhead": "Tell us where you want to go. In minutes you have your itinerary, hotel recommendations and budget ready.",
     "socialProof": "{count}+ plans created this month"
   },
@@ -83,7 +83,7 @@
   "howItWorks": {
     "eyebrow": "02 — How it works",
     "headline": "From idea to plan,",
-    "headlineItalic": "in minutes.",
+    "headlineItalic": "in minutes",
     "step1Title": "Tell us about your trip",
     "step1Body": "Destination, dates, travel style and budget. Less than two minutes.",
     "step2Title": "AI plans it for you",
@@ -94,7 +94,7 @@
   "guides": {
     "eyebrow": "03 — Curated guides",
     "headline": "Destinations we",
-    "headlineItalic": "know well.",
+    "headlineItalic": "know well",
     "seeAll": "See all guides →",
     "affiliateLabel": "Recommended hotels in every guide",
     "affiliateBody": "Book directly from your plan with our partners Viator and GetYourGuide",
@@ -103,19 +103,19 @@
   "philosophy": {
     "eyebrow": "04 — Philosophy",
     "headline": "Lagom — not too much,",
-    "headlineItalic": "not too little. Just right.",
+    "headlineItalic": "not too little. Just right",
     "body1": "The Swedish concept lagom has no exact translation, but it describes exactly how a well-planned trip should feel: no impossible itinerary, no decision paralysis.",
     "body2": "We do the heavy lifting so you can be present wherever you are."
   },
   "testimonials": {
     "eyebrow": "05 — Reviews",
     "headline": "What people say after",
-    "headlineItalic": "traveling with us."
+    "headlineItalic": "traveling with us"
   },
   "explorer": {
     "eyebrow": "06 — Explorer · Subscription plan",
-    "headline": "Unlimited plans.",
-    "headlineItalic": "Better trips.",
+    "headline": "Unlimited plans",
+    "headlineItalic": "Better trips",
     "body": "Your first plan is always free. When you want more — trip history, unlimited plans, downloadable PDF and priority support — Explorer delivers.",
     "price": "$199",
     "currency": "MXN / month",
@@ -132,12 +132,12 @@
   "cta": {
     "eyebrow": "07 — Start free",
     "headline": "Your next trip,",
-    "headlineItalic": "ready in minutes.",
+    "headlineItalic": "ready in minutes",
     "body": "No signup. No card. The first plan is completely free.",
     "button": "Plan now →"
   },
   "newsletter": {
-    "headline": "Travel first from your inbox.",
+    "headline": "Travel first from your inbox",
     "body": "New ideas and guides — straight to your email.",
     "placeholder": "Your email address",
     "button": "Subscribe"

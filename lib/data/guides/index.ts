@@ -139,4 +139,32 @@ export function getNewGuideParams(): Array<{ locale: string; slug: string }> {
   return params
 }
 
+/**
+ * Given any slug (descriptive or canonical), returns the canonical registry key.
+ * Used by guide pages to compute the alternate-locale URL.
+ *
+ * resolveCanonicalSlug('oaxaca-guia-esencial') → 'oaxaca'
+ * resolveCanonicalSlug('oaxaca')               → 'oaxaca'
+ */
+export function resolveCanonicalSlug(slug: string): string {
+  return SLUG_ALIASES[slug] ?? slug
+}
+
+/**
+ * Returns every FlatGuide for the given locale, each tagged with its canonical
+ * registry key (e.g. 'cancun', 'oaxaca'). Falls back to 'es' when the locale
+ * is missing for a given guide.
+ *
+ * Used by the Hotels index to enumerate all curated hotels + their affiliate
+ * booking URLs, which only exist on the FlatGuide data source.
+ */
+export function getAllFlatGuides(locale: string): Array<{ canonical: string; flat: FlatGuide }> {
+  const out: Array<{ canonical: string; flat: FlatGuide }> = []
+  for (const [canonical, entry] of Object.entries(FLAT_REGISTRY)) {
+    const flat = entry[locale] ?? entry['es']
+    if (flat) out.push({ canonical, flat })
+  }
+  return out
+}
+
 export type { GuidePageData }

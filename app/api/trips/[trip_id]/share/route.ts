@@ -7,15 +7,15 @@ import { getSupabaseServer } from '../../../../../lib/supabase/server'
 
 export async function POST(
   _req: NextRequest,
-  { params }: { params: { trip_id: string } },
+  { params }: { params: Promise<{ trip_id: string }> },
 ) {
-  const { trip_id } = params
+  const { trip_id } = await params
 
   if (!trip_id) {
     return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
   }
 
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
 
   // ── Auth ────────────────────────────────────────────────────────────────────
   const { data: { user }, error: authError } = await supabase.auth.getUser()

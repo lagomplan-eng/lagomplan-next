@@ -58,7 +58,7 @@ function FormPage() {
   const isES   = locale === 'es'
 
   return (
-    <main className="pt-[72px] min-h-screen bg-[#FFF9F3]">
+    <main className="pt-[100px] min-h-screen bg-[#FFF9F3]">
       <div className="page-inner py-16 max-[768px]:py-10">
 
         {/* Tighter container for premium feel */}
@@ -70,10 +70,10 @@ function FormPage() {
               {isES ? 'Planificador de viajes con IA' : 'AI-powered trip planner'}
             </span>
 
-            <h1 className="font-playfair text-[48px] max-[768px]:text-[36px] font-bold text-[#0F1A16] leading-[1.05] tracking-[-1.5px] mb-3">
+            <h1 className="font-sans text-[48px] max-[768px]:text-[36px] font-bold text-[#0F1A16] leading-[1.05] tracking-[-1.5px] mb-3">
               {isES ? 'Genera tu viaje' : 'Build your trip'}
               <br />
-              <em>{isES ? 'personalizado.' : 'your way.'}</em>
+              <span>{isES ? 'personalizado' : 'your way'}</span>
             </h1>
 
             <p className="font-sans text-[15px] text-[#2D6B57] leading-[1.7] mb-12 md:mb-14">

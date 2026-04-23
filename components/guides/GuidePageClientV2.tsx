@@ -43,6 +43,7 @@ function trackGuideView(slug: string, locale: string) {
 interface Props {
   data: GuidePageData
   locale: string
+  alternateLocaleUrl?: string
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -71,7 +72,7 @@ function useToast() {
 
 // ── Component ──────────────────────────────────────────────────────────────────
 
-export function GuidePageClientV2({ data, locale }: Props) {
+export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
   const toast       = useToast()
   const plannerHref = buildPlannerHref(data.slug, locale)
   const [shareOpen, setShareOpen] = useState(false)
@@ -107,7 +108,12 @@ export function GuidePageClientV2({ data, locale }: Props) {
       : `✓ Todo listo para ${data.hero.title}`
 
   return (
-    <div className="bg-[#FFF9F3] min-h-screen pt-[72px]">
+    <div className="bg-[#FFF9F3] min-h-screen pt-[100px]">
+
+      {/* Hidden input consumed by Nav locale switcher */}
+      {alternateLocaleUrl && (
+        <input type="hidden" id="__alternate_locale_url" value={alternateLocaleUrl} />
+      )}
 
       {/* ── Hero ── */}
       <GuideHero

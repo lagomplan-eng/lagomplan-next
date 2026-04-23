@@ -8,10 +8,11 @@ import type { Locale }               from '../../../i18n'
 import MyTripsClient                 from './MyTripsClient'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   return {
     title:       locale === 'es' ? 'Mis viajes' : 'My trips',
     alternates:  buildAlternates('myTrips'),
@@ -21,7 +22,7 @@ export async function generateMetadata({
 
 export default function Page() {
   return (
-    <main className="pt-[72px]">
+    <main className="pt-[100px]">
       <MyTripsClient />
     </main>
   )

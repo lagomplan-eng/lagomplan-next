@@ -15,8 +15,9 @@ import type { Locale }        from '../../../i18n'
 import TripGeneratorClient    from './TripGeneratorClient'
 
 export async function generateMetadata({
-  params: { locale },
-}: { params: { locale: Locale } }): Promise<Metadata> {
+  params,
+}: { params: Promise<{ locale: Locale }> }): Promise<Metadata> {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
   return {
     title:       locale === 'es' ? 'Planificador de viajes' : 'Trip planner',
@@ -26,10 +27,11 @@ export async function generateMetadata({
   }
 }
 
-export default function PlannerPage({
+export default async function PlannerPage({
   searchParams,
 }: {
-  searchParams: Record<string, string>
+  searchParams: Promise<Record<string, string>>
 }) {
-  return <TripGeneratorClient searchParams={searchParams} />
+  const resolvedParams = await searchParams
+  return <TripGeneratorClient searchParams={resolvedParams} />
 }

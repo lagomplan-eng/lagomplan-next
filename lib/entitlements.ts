@@ -12,6 +12,7 @@ type EntitlementRow = {
   tier: string
   trips_remaining: number
   trips_used: number
+  last_session_id: string | null
 }
 
 async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
@@ -19,7 +20,7 @@ async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
 
   const { data } = await (admin as any)
     .from('user_entitlements')
-    .select('tier, trips_remaining, trips_used')
+    .select('tier, trips_remaining, trips_used, last_session_id')
     .eq('user_id', userId)
     .single()
 
@@ -30,7 +31,7 @@ async function getOrCreateEntitlement(userId: string): Promise<EntitlementRow> {
     .from('user_entitlements')
     .upsert({ user_id: userId, tier: 'free', trips_remaining: 3, trips_used: 0 })
 
-  return { tier: 'free', trips_remaining: 3, trips_used: 0 }
+  return { tier: 'free', trips_remaining: 3, trips_used: 0, last_session_id: null }
 }
 
 /**
@@ -41,7 +42,7 @@ export async function checkGenerationAllowed(): Promise<
   | { allowed: true;  userId: string; tier: string; remaining: number | null }
   | { allowed: false; reason: 'not_authenticated' | 'no_credits' | 'error'; tier?: string }
 > {
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
 
   if (authError || !user) {
@@ -99,6 +100,7 @@ export async function getPlanState(userId: string): Promise<{
   trips_remaining: number
   trips_used: number
   is_subscriber: boolean
+  last_session_id: string | null
 }> {
   const ent = await getOrCreateEntitlement(userId)
   return {
@@ -106,5 +108,6 @@ export async function getPlanState(userId: string): Promise<{
     trips_remaining:  ent.trips_remaining,
     trips_used:       ent.trips_used,
     is_subscriber:    ent.tier === 'explorer',
+    last_session_id:  ent.last_session_id,
   }
 }

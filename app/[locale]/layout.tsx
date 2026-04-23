@@ -20,6 +20,7 @@ import { buildAlternates, buildOpenGraph } from '../../lib/seo'
 import Nav    from '../../components/layout/Nav'
 import Footer from '../../components/layout/Footer'
 import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
+import { PlanProvider } from '../../components/plan/PlanProvider'
 import '../globals.css'
 
 // ── Fonts ──────────────────────────────────────────────────
@@ -34,8 +35,8 @@ const fraunces = Fraunces({
   subsets:  ['latin'],
   variable: '--font-display',
   display:  'swap',
-  weight:   ['600'],
-  style:    ['italic'],
+  weight:   ['500', '600'],
+  style:    ['normal', 'italic'],
 })
 
 const dmMono = DM_Mono({
@@ -52,10 +53,11 @@ export function generateStaticParams() {
 
 // ── Metadata ───────────────────────────────────────────────
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
   return {
     title:       { default: t('title'), template: `%s — Lagomplan` },
@@ -68,11 +70,12 @@ export async function generateMetadata({
 // ── Layout ─────────────────────────────────────────────────
 export default async function RootLayout({
   children,
-  params: { locale },
+  params,
 }: {
   children: React.ReactNode
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   if (!locales.includes(locale)) notFound()
 
   const messages = await getMessages()
@@ -81,14 +84,17 @@ export default async function RootLayout({
     <html
       lang={locale}
       className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}
+      suppressHydrationWarning
     >
       <body>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
-            {/* Nav is position:fixed — every first section needs pt-[72px] */}
-            <Nav />
-            {children}
-            <Footer />
+            <PlanProvider>
+              {/* Nav is position:fixed — every first section needs pt-[100px] */}
+              <Nav />
+              {children}
+              <Footer />
+            </PlanProvider>
           </SupabaseProvider>
         </NextIntlClientProvider>
       </body>

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
 
     // ── Entitlement check ────────────────────────────────────────────────────────
-    const supabase  = getSupabaseServer()
+    const supabase  = await getSupabaseServer()
     const { data: { user } } = await supabase.auth.getUser()
 
     let authorizedUserId: string | null = null
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
 
     } else {
       // Anonymous — enforce via cookie
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
       if (anonCount >= ANON_LIMIT) {
@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
 
     if (!authorizedUserId) {
       // Anonymous: set cookie so the next attempt is blocked server-side
-      const cookieStore = cookies()
+      const cookieStore = await cookies()
       const prev = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
       response.cookies.set(ANON_COOKIE, String(prev + 1), {
         maxAge:   60 * 60 * 24 * 30,  // 30 days

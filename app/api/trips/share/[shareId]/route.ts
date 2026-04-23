@@ -8,9 +8,9 @@ import { getSupabaseAdmin } from '../../../../../lib/supabase/server'
 
 export async function GET(
   _req: NextRequest,
-  { params }: { params: { shareId: string } },
+  { params }: { params: Promise<{ shareId: string }> },
 ) {
-  const { shareId } = params
+  const { shareId } = await params
 
   if (!shareId) {
     return NextResponse.json({ error: 'Missing shareId' }, { status: 400 })

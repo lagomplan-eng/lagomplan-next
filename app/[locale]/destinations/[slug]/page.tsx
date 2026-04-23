@@ -8,11 +8,11 @@ import { buildAlternates, buildOpenGraph } from '../../../../lib/seo'
 import type { Locale }               from '../../../../i18n'
 
 type Props = {
-  params: { locale: Locale; slug: string }
+  params: Promise<{ locale: Locale; slug: string }>
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale, slug } = params
+  const { locale, slug } = await params
   return {
     title:       `${locale === 'es' ? 'Destino' : 'Destination'} — ${slug}`,
     alternates:  buildAlternates('destinationDetail'),
@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default function Page({ params }: Props) {
-  const { locale, slug } = params
+export default async function Page({ params }: Props) {
+  const { locale, slug } = await params
   return (
-    <main className="pt-[72px] min-h-screen" style={{ background: '#EDE7E1' }}>
+    <main className="pt-[100px] min-h-screen" style={{ background: '#EDE7E1' }}>
       <div className="page-inner py-24">
         <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
           {locale === 'es' ? 'Destino' : 'Destination'}: {slug}

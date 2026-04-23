@@ -81,7 +81,7 @@ function TripCard({ trip, isActive, onClick }: TripCardProps) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
 
         {/* Initials */}
-        <div className="absolute bottom-4 left-5 text-white/90 font-serif text-3xl">
+        <div className="absolute bottom-4 left-5 text-white/90 font-sans text-3xl">
           {initials}
         </div>
 
@@ -95,7 +95,7 @@ function TripCard({ trip, isActive, onClick }: TripCardProps) {
 
       {/* CONTENT */}
       <div className="p-5 flex flex-col gap-2">
-        <h3 className="font-serif text-lg">{name}</h3>
+        <h3 className="font-sans text-lg">{name}</h3>
         <p className="text-sm text-[#6B7280]">Ver itinerario →</p>
         {(days || tagline) && (
           <p className="text-xs text-[#1B4D3E]/70">
@@ -194,7 +194,7 @@ export default function MyTripsClient() {
 
       {/* HEADER */}
       <div className="max-w-7xl mx-auto px-6 py-12">
-        <h1 className="text-4xl font-serif mb-2">
+        <h1 className="text-4xl font-sans mb-2">
           Hola, {displayName} 👋
         </h1>
         <p className="text-[#6B7280]">Tus viajes y todo lo que necesitas para mejorarlos</p>
@@ -203,7 +203,7 @@ export default function MyTripsClient() {
       {/* YOUR TRIPS */}
       <section className="max-w-7xl mx-auto px-6 mb-16">
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-serif">Tus viajes</h2>
+          <h2 className="text-2xl font-sans">Tus viajes</h2>
           <button
             onClick={goToNewTrip}
             className="text-sm underline cursor-pointer"

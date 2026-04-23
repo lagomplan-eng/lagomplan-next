@@ -204,18 +204,16 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
       if (cell.isEmpty || cell.isPast) return
 
       cell.el.addEventListener('click', () => {
+        const { value: lv, phase: lp } = latestRef.current
         setHover(null)
-        setPhase(prev => {
-          const { value: lv } = latestRef.current
-          if (prev === 'start' || (lv.start && cell.date <= lv.start)) {
-            onChange({ start: cell.date, end: null, nights: 0 })
-            return 'end'
-          } else {
-            const nights = lv.start ? nightsBetween(lv.start, cell.date) : 0
-            onChange({ start: lv.start, end: cell.date, nights })
-            return 'start'
-          }
-        })
+        if (lp === 'start' || (lv.start && cell.date <= lv.start)) {
+          onChange({ start: cell.date, end: null, nights: 0 })
+          setPhase('end')
+        } else {
+          const nights = lv.start ? nightsBetween(lv.start, cell.date) : 0
+          onChange({ start: lv.start, end: cell.date, nights })
+          setPhase('start')
+        }
       })
 
       cell.el.addEventListener('mouseenter', () => {
@@ -249,12 +247,10 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
   }, [open])
 
   function navMonth(dir: number) {
-    setVm(m => {
-      let nm = m + dir, ny = vy
-      if (nm > 11) { nm = 0;  setVy(vy + 1) }
-      if (nm < 0)  { nm = 11; setVy(vy - 1) }
-      return nm
-    })
+    const nm = vm + dir
+    if (nm > 11) { setVm(0);  setVy(y => y + 1) }
+    else if (nm < 0) { setVm(11); setVy(y => y - 1) }
+    else setVm(nm)
   }
 
   function clearDates() {
@@ -312,8 +308,8 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
               className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-[#1B4D3E] hover:text-[#1B4D3E] transition-colors"
             >‹</button>
             <div className="flex gap-6">
-              <span className="font-['Playfair_Display'] text-[14px] text-[#0F1A16]">{MONTHS[vm]} {vy}</span>
-              <span className="font-['Playfair_Display'] text-[14px] text-[#0F1A16] max-md:hidden">{MONTHS[vm2]} {vy2}</span>
+              <span className="font-sans text-[14px] font-semibold text-[#0F1A16]">{MONTHS[vm]} {vy}</span>
+              <span className="font-sans text-[14px] font-semibold text-[#0F1A16] max-md:hidden">{MONTHS[vm2]} {vy2}</span>
             </div>
             <button type="button" onClick={() => navMonth(1)}
               className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-[#1B4D3E] hover:text-[#1B4D3E] transition-colors"

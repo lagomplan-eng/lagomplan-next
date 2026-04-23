@@ -9,10 +9,11 @@ import type { Locale }               from '../../../i18n'
 import { PasswordResetForm }         from '../../../components/auth/PasswordResetForm'
 
 export async function generateMetadata({
-  params: { locale },
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
+  const { locale } = await params
   return {
     title:       locale === 'es' ? 'Mi cuenta' : 'Account',
     alternates:  buildAlternates('account'),
@@ -20,13 +21,14 @@ export async function generateMetadata({
   }
 }
 
-export default function Page({
-  params: { locale },
+export default async function Page({
+  params,
 }: {
-  params: { locale: Locale }
+  params: Promise<{ locale: Locale }>
 }) {
+  const { locale } = await params
   return (
-    <main className="pt-[72px] min-h-screen" style={{ background: '#EDE7E1' }}>
+    <main className="pt-[100px] min-h-screen" style={{ background: '#EDE7E1' }}>
       <div className="page-inner py-24">
         <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
           {locale === 'es' ? 'Mi cuenta' : 'Account'}

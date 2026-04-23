@@ -12,9 +12,10 @@ import type { Locale }                      from '../../../i18n'
 import { getAllHotelsFromGuides }            from '../../../lib/hotels'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
 
-type Props = { params: { locale: Locale } }
+type Props = { params: Promise<{ locale: Locale }> }
 
-export async function generateMetadata({ params: { locale } }: Props): Promise<Metadata> {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
   return {
     title: locale === 'es' ? 'Hoteles curados' : 'Curated hotels',
     description:
@@ -26,11 +27,12 @@ export async function generateMetadata({ params: { locale } }: Props): Promise<M
   }
 }
 
-export default function HotelsIndexPage({ params: { locale } }: Props) {
+export default async function HotelsIndexPage({ params }: Props) {
+  const { locale } = await params
   const hotels = getAllHotelsFromGuides(locale)
 
   return (
-    <main className="pt-[72px]">
+    <main className="pt-[100px]">
       <HotelsClient hotels={hotels} locale={locale} />
     </main>
   )

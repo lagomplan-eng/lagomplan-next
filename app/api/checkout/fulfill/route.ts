@@ -18,7 +18,7 @@ const PLAN_CREDITS: Record<string, number> = {
 
 export async function POST(req: NextRequest) {
   // ── Auth ──────────────────────────────────────────────────────────────────
-  const supabase = getSupabaseServer()
+  const supabase = await getSupabaseServer()
   const { data: { user }, error: authError } = await supabase.auth.getUser()
   if (authError || !user) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })

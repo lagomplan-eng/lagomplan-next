@@ -178,8 +178,8 @@ export function TripShareModal({ tripId, destination, duration, isOpen, onClose 
           {/* Watermark */}
           <span
             aria-hidden
-            className="absolute right-2 bottom-[-22px] font-display italic select-none pointer-events-none leading-none"
-            style={{ fontSize: 104, color: 'rgba(255,255,255,.05)' }}
+            className="absolute right-2 bottom-[-22px] font-sans select-none pointer-events-none leading-none"
+            style={{ fontSize: 104, fontWeight: 800, color: 'rgba(255,255,255,.05)' }}
           >
             {watermark}
           </span>
@@ -204,7 +204,7 @@ export function TripShareModal({ tripId, destination, duration, isOpen, onClose 
 
           {/* Destination */}
           <h2
-            className="font-display italic font-normal leading-[1.05] tracking-[-0.02em] text-white mb-3"
+            className="font-sans font-bold leading-[1.05] tracking-[-0.02em] text-white mb-3"
             style={{ fontSize: 'clamp(26px, 6.5vw, 34px)' }}
           >
             {destination}

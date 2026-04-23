@@ -35,7 +35,7 @@ export function GuideCard({ slug, title, tag, img, href }: GuideCardProps) {
       <p className="font-mono text-[9px] tracking-[1.5px] text-[#2D6B57] uppercase mb-1">
         {tag}
       </p>
-      <h3 className="font-['Playfair_Display'] text-[17px] text-[#0F1A16] font-normal leading-snug">
+      <h3 className="font-sans text-[17px] text-[#0F1A16] font-semibold leading-snug">
         {title}
       </h3>
     </a>
@@ -58,7 +58,7 @@ export function TripCard({ title, destination, createdAt, href }: TripCardProps)
     <a href={href} className="group block bg-[#FDFCF9] border border-[#C8D9D3] rounded-[3px] overflow-hidden hover:border-[#1B4D3E] transition-colors">
       {/* Green header with destination initial — matches existing pattern */}
       <div className="bg-[#1B4D3E] h-16 flex items-center justify-center relative overflow-hidden">
-        <span className="font-['Playfair_Display'] text-[64px] font-bold italic text-[#F4F0E8] opacity-[0.15] leading-none select-none absolute">
+        <span className="font-sans text-[64px] font-bold text-[#F4F0E8] opacity-[0.15] leading-none select-none absolute">
           {initial}
         </span>
       </div>
@@ -66,7 +66,7 @@ export function TripCard({ title, destination, createdAt, href }: TripCardProps)
         <p className="font-mono text-[9px] tracking-[1.5px] text-[#2D6B57] uppercase mb-1">
           {destination}
         </p>
-        <h3 className="font-['Playfair_Display'] text-[16px] text-[#0F1A16] font-normal mb-2">
+        <h3 className="font-sans text-[16px] text-[#0F1A16] font-semibold mb-2">
           {title}
         </h3>
         <p className="font-mono text-[9px] text-[#A0A0A0] tracking-wide">
@@ -91,11 +91,11 @@ export function TestimonialCard({ quote, name, role, initial }: TestimonialCardP
       <p className="font-mono text-[10px] tracking-widest text-[#6EBD9F] mb-3">
         ★★★★★
       </p>
-      <p className="font-['Playfair_Display'] text-[15px] text-[#0F1A16] italic leading-[1.55] mb-5">
+      <p className="font-sans text-[15px] text-[#0F1A16] leading-[1.55] mb-5">
         "{quote}"
       </p>
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-[#C8D9D3] flex items-center justify-center font-['Playfair_Display'] text-[12px] font-bold text-[#1B4D3E]">
+        <div className="w-7 h-7 rounded-full bg-[#C8D9D3] flex items-center justify-center font-sans text-[12px] font-bold text-[#1B4D3E]">
           {initial}
         </div>
         <div>
