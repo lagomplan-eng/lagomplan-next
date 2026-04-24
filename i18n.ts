@@ -35,6 +35,8 @@ export const pathnames = {
   '/destinations/[slug]': { es: '/destinos/[slug]', en: '/destinations/[slug]' },
   '/hotels': { es: '/hoteles', en: '/hotels' },
   '/hotels/[slug]': { es: '/hoteles/[slug]', en: '/hotels/[slug]' },
+  '/worldcup': { es: '/mundial', en: '/worldcup' },
+  '/worldcup/[slug]': { es: '/mundial/[slug]', en: '/worldcup/[slug]' },
   '/smart-finds': { es: '/productos-viaje', en: '/smart-finds' },
   '/smart-finds/[slug]': { es: '/productos-viaje/[slug]', en: '/smart-finds/[slug]' },
   '/about': { es: '/nosotras', en: '/about' },

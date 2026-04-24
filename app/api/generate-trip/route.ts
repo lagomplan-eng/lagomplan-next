@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import type { User } from '@supabase/supabase-js'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../lib/entitlements'
 import { getSupabaseServer } from '../../../lib/supabase/server'
 import { ANON_TRIP_LIMIT } from '../../../lib/plan/limits'
@@ -17,13 +18,48 @@ export const dynamic = 'force-dynamic'
 
 const ANON_COOKIE = 'anon_gen_count'
 
+// Structured error envelope. Every error path returns the same shape so the
+// client can branch on `code` instead of parsing free-form `error` strings.
+type ErrBody = { ok: false; code: string; message: string; detail?: unknown }
+const err = (status: number, code: string, message: string, detail?: unknown) =>
+  NextResponse.json<ErrBody>({ ok: false, code, message, detail }, { status })
+
+// Resolve the calling user from either the session cookie OR an Authorization
+// Bearer header. The header is a safety net for the just-logged-in tab where
+// the client may have a fresh access_token but the cookie hasn't propagated
+// yet (a common cause of spurious 401s on the first post-login request).
+async function resolveUser(req: NextRequest): Promise<User | null> {
+  const supabase = await getSupabaseServer()
+
+  // 1. Cookie-bound session (normal case)
+  const cookieRes = await supabase.auth.getUser()
+  if (cookieRes.data.user) return cookieRes.data.user
+
+  // 2. Bearer header fallback
+  const authHeader = req.headers.get('authorization') ?? ''
+  if (authHeader.toLowerCase().startsWith('bearer ')) {
+    const token = authHeader.slice(7).trim()
+    if (token) {
+      const tokenRes = await supabase.auth.getUser(token)
+      if (tokenRes.data.user) return tokenRes.data.user
+    }
+  }
+
+  return null
+}
+
 export async function POST(req: NextRequest) {
+  const startedAt = Date.now()
   try {
     const body = await req.json()
 
     // ── Entitlement check ────────────────────────────────────────────────────────
-    const supabase  = await getSupabaseServer()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await resolveUser(req)
+    console.log('[generate-trip]', JSON.stringify({
+      stage: 'auth_resolved',
+      userId: user?.id ?? 'anon',
+      bodyKeys: Object.keys(body ?? {}),
+    }))
 
     let authorizedUserId: string | null = null
 
@@ -35,15 +71,9 @@ export async function POST(req: NextRequest) {
         const reason = (check as { allowed: false; reason: string }).reason
         // 'error' means infra/config failure — don't show paywall for a broken service
         if (reason === 'error') {
-          return NextResponse.json(
-            { error: 'service_unavailable', reason: 'entitlement_check_failed' },
-            { status: 503 },
-          )
+          return err(503, 'entitlement_check_failed', 'Service temporarily unavailable')
         }
-        return NextResponse.json(
-          { error: 'no_credits', reason },
-          { status: 402 },
-        )
+        return err(402, 'no_credits', 'No credits remaining', { reason })
       }
 
       authorizedUserId = (check as { allowed: true; userId: string }).userId
@@ -54,10 +84,7 @@ export async function POST(req: NextRequest) {
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
       if (anonCount >= ANON_TRIP_LIMIT) {
-        return NextResponse.json(
-          { error: 'not_authenticated', reason: 'Please sign up to continue generating trips' },
-          { status: 401 },
-        )
+        return err(401, 'anon_limit_reached', 'Please sign up to continue generating trips')
       }
     }
 
@@ -65,22 +92,22 @@ export async function POST(req: NextRequest) {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     if (!supabaseUrl || !anonKey) {
-      return NextResponse.json(
-        { error: 'Supabase credentials not configured' },
-        { status: 500 },
-      )
+      console.error('[generate-trip] missing supabase env vars')
+      return err(500, 'supabase_not_configured', 'Supabase credentials not configured')
     }
 
     const functionUrl = `${supabaseUrl}/functions/v1/generate-trip`
-    console.log('[generate-trip] payload:', JSON.stringify(body))
-    console.log('[generate-trip] calling:', functionUrl)
+    console.log('[generate-trip]', JSON.stringify({
+      stage: 'edge_call',
+      userId: authorizedUserId ?? 'anon',
+      functionUrl,
+    }))
 
     // Abort at 290 s — fires before Vercel's 300 s hard kill so we can
     // return a clean JSON error instead of leaving the client with a dead socket.
     // AI generation typically takes 60–90 s, so 290 s is a safe ceiling.
     const controller = new AbortController()
     const timeoutId = setTimeout(() => controller.abort(), 290_000)
-    console.log('[generate-trip] start')
 
     let edgeRes: Response
     try {
@@ -97,7 +124,12 @@ export async function POST(req: NextRequest) {
       clearTimeout(timeoutId)
     }
 
-    console.log('[generate-trip] edge status:', edgeRes.status)
+    const edgeMs = Date.now() - startedAt
+    console.log('[generate-trip]', JSON.stringify({
+      stage: 'edge_response',
+      status: edgeRes.status,
+      ms: edgeMs,
+    }))
 
     // Read as text first so we can log and handle non-JSON safely
     const responseText = await edgeRes.text()
@@ -105,21 +137,15 @@ export async function POST(req: NextRequest) {
 
     if (!edgeRes.ok) {
       let detail: unknown
-      try { detail = JSON.parse(responseText) } catch { detail = responseText }
-      return NextResponse.json(
-        { error: `Edge Function returned ${edgeRes.status}`, detail },
-        { status: 502 },
-      )
+      try { detail = JSON.parse(responseText) } catch { detail = responseText.slice(0, 1000) }
+      return err(502, 'edge_upstream_failed', `Edge Function returned ${edgeRes.status}`, detail)
     }
 
     let data: unknown
     try {
       data = JSON.parse(responseText)
     } catch {
-      return NextResponse.json(
-        { error: 'Edge Function returned non-JSON', raw: responseText.slice(0, 500) },
-        { status: 502 },
-      )
+      return err(502, 'edge_invalid_json', 'Edge Function returned non-JSON', responseText.slice(0, 500))
     }
 
     // ── Deduct credit before returning (Vercel Functions terminate at response send) ──
@@ -146,13 +172,19 @@ export async function POST(req: NextRequest) {
 
     return response
 
-  } catch (err) {
-    const isTimeout = err instanceof Error && err.name === 'AbortError'
-    const message   = err instanceof Error ? err.message : String(err)
-    console.error('[generate-trip] error:', message)
-    return NextResponse.json(
-      { error: isTimeout ? 'Trip generation timed out — please try again' : `Internal error: ${message}` },
-      { status: isTimeout ? 504 : 500 },
-    )
+  } catch (e) {
+    const isTimeout = e instanceof Error && e.name === 'AbortError'
+    const message   = e instanceof Error ? e.message : String(e)
+    const ms        = Date.now() - startedAt
+    console.error('[generate-trip]', JSON.stringify({
+      stage: 'error',
+      timeout: isTimeout,
+      ms,
+      message,
+    }))
+    if (isTimeout) {
+      return err(504, 'timeout', 'Trip generation timed out — please try again')
+    }
+    return err(500, 'internal', `Internal error: ${message}`)
   }
 }

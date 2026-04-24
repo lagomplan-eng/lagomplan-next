@@ -36,6 +36,8 @@ export const ROUTE_MAP = {
   login:              { es: 'login',             en: 'login'         },
   privacy:            { es: 'privacidad',        en: 'privacy'       },
   terms:              { es: 'terminos',          en: 'terms'         },
+  worldcupIndex:      { es: 'mundial',           en: 'worldcup'      },
+  worldcupDetail:     { es: 'mundial',           en: 'worldcup'      },
 } as const
 
 export type RouteKey = keyof typeof ROUTE_MAP
@@ -60,7 +62,17 @@ export interface LocalizedEntity {
  * getRoute('es', 'home')          → '/es'
  */
 export function getRoute(locale: Locale, key: RouteKey): string {
-  const segment = ROUTE_MAP[key][locale]
+  // Defensive: if a caller passes a key that's not (yet) in ROUTE_MAP, log it
+  // and fall back to /<locale> instead of throwing
+  // `Cannot read properties of undefined (reading 'es')`.
+  const entry = ROUTE_MAP[key] as { es: string; en: string } | undefined
+  if (!entry) {
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(`[routes] Unknown route key: ${String(key)} — falling back to /${locale}`)
+    }
+    return `/${locale}`
+  }
+  const segment = entry[locale] ?? entry.en ?? ''
   return segment ? `/${locale}/${segment}` : `/${locale}`
 }
 
@@ -208,6 +220,8 @@ export const INTERNAL_PATHS: Record<RouteKey, string> = {
   login:              '/login',
   privacy:            '/privacy',
   terms:              '/terms',
+  worldcupIndex:      '/worldcup',
+  worldcupDetail:     '/worldcup/[slug]',
 }
 
 export function internalPath(key: RouteKey): string {

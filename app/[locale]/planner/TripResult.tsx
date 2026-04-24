@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
+import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import { usePlan, type PlanState } from '../../../components/plan/PlanProvider'
 import { PaymentPendingOverlay } from '../../../components/plan/PaymentPendingOverlay'
 import { TripLimitReachedModal } from '../../../components/plan/TripLimitReachedModal'
@@ -710,6 +711,10 @@ export default function TripResult({ params }: Props) {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const autoSaveTimerRef    = useRef<ReturnType<typeof setTimeout>>()
   const abortControllerRef  = useRef<AbortController | null>(null)
+  // Aborts any in-flight /api/generate-trip request when the effect re-runs
+  // (e.g., auth state flips null → User after login). Without this guard a
+  // second POST fires before the first completes, causing duplicate generations.
+  const generateAbortRef    = useRef<AbortController | null>(null)
   // Stores a JSON fingerprint of the last content written to (or loaded from) DB.
   // The autosave effect compares against this to skip no-op saves and to detect
   // edits that were made before tripId was available (fixing the main race condition).
@@ -920,12 +925,30 @@ export default function TripResult({ params }: Props) {
           : []
         const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
         const payload = { destination, origin, start, end, nights, duration_days, traveler, interests: parsedInterests, pace, budget }
+
+        // Abort any in-flight generation from a prior effect run (auth state
+        // transitions can retrigger this effect while the first fetch is still
+        // running — the AI call is 60–90s and would otherwise race).
+        generateAbortRef.current?.abort()
+        const controller = new AbortController()
+        generateAbortRef.current = controller
+
+        // Forward the access token explicitly. Cookies are usually enough, but
+        // on a freshly-logged-in tab the cookie may not have propagated yet —
+        // the Bearer header is a robust fallback the server accepts.
+        const supabase = getSupabaseBrowser()
+        const { data: { session } } = await supabase.auth.getSession()
+        const genHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+        if (session?.access_token) genHeaders.Authorization = `Bearer ${session.access_token}`
+
         console.log('[TripResult] POST payload:', JSON.stringify(payload))
         genStartedAt = performance.now()
         const genRes = await fetch('/api/generate-trip', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: genHeaders,
+          credentials: 'include',
           body: JSON.stringify(payload),
+          signal: controller.signal,
         })
         genStatus = genRes.status
         const genData = await genRes.json().catch(() => null)
@@ -970,9 +993,11 @@ export default function TripResult({ params }: Props) {
         // refresh loads from DB instead of triggering a new AI generation.
         if (authedUser !== null) {
           try {
+            const autoSaveHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+            if (session?.access_token) autoSaveHeaders.Authorization = `Bearer ${session.access_token}`
             const autoSaveRes = await fetch('/api/trips', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: autoSaveHeaders,
               credentials: 'include',
               body: JSON.stringify({
                 title:        normalized.title || null,
@@ -986,7 +1011,14 @@ export default function TripResult({ params }: Props) {
                 trip_data:    tripDataRaw,
               }),
             })
-            if (autoSaveRes.ok) {
+            if (!autoSaveRes.ok) {
+              // Surface the failure — silent swallowing is why autosave sometimes
+              // skips with "no tripId": the initial POST to /api/trips fails
+              // (often a cookie/token timing issue on just-logged-in tabs) and
+              // tripId never gets set.
+              const errText = await autoSaveRes.text().catch(() => '')
+              console.warn('[TripResult] autosave POST failed:', autoSaveRes.status, errText)
+            } else {
               const autoSaveData = await autoSaveRes.json().catch(() => null)
               if (autoSaveData?.success) {
                 setTripId(autoSaveData.trip_id)
@@ -1003,10 +1035,12 @@ export default function TripResult({ params }: Props) {
                   url.searchParams.set('trip_id', autoSaveData.trip_id)
                   window.history.replaceState({}, '', url.toString())
                 }
+              } else {
+                console.warn('[TripResult] autosave POST ok but no trip_id:', autoSaveData)
               }
             }
-          } catch {
-            // Auto-save is best-effort — don't block or show an error to the user
+          } catch (err) {
+            console.warn('[TripResult] autosave POST threw:', err)
           }
         }
 
@@ -1020,6 +1054,10 @@ export default function TripResult({ params }: Props) {
         }).catch(() => {})
         }
       } catch (err) {
+        // Abort is an intentional cancellation (auth state change, effect
+        // re-run) — swallow it silently. The next effect run will start a
+        // fresh request; no user-facing error.
+        if (err instanceof DOMException && err.name === 'AbortError') return
         const msg = err instanceof Error ? err.message : 'Unknown error'
         const duration = genStartedAt ? Math.round(performance.now() - genStartedAt) : null
         setError(msg)
