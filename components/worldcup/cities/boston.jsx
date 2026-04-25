@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { es, en } from "../../../lib/worldcup/data/boston";
+import { ui } from "../../../lib/worldcup/ui-strings";
 
 const T = {
   pine:"#0F3A33", sage:"#6B8F86", sageLight:"#EAF2F0",
@@ -19,118 +21,6 @@ const uf = (size, weight=400) => ({ fontFamily:"'Manrope',sans-serif", fontSize:
 const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
-
-const BOS = {
-  id:"bos", city:"Boston", country:"Estados Unidos", state:"Massachusetts", flag:"🇺🇸", accent:CITY_ACCENT,
-  tags:["Fútbol","Historia","Gastronomía","Sede co-anfitriona"],
-  stadium:{ name:"Boston Stadium (Gillette Stadium)", capacity:"~63,815", area:"Foxborough, MA — a 35 km al sur de Boston" },
-  headline:"El estadio no está en Boston. El partido sí. Esa distinción vale un tren.",
-  description:"El estadio no está en Boston. El partido sí. Esa distinción vale un tren. Boston recibe siete partidos, incluyendo un Cuartos de Final, en una ciudad que se enorgullece de haberle dado al mundo la democracia moderna, la universidad más antigua del hemisferio occidental y el mejor clam chowder del continente. La primera decisión no es qué ver: es cómo llegar a Foxborough.",
-  scores:[
-    { label:"Ambiente", value:4 }, { label:"Fútbol local", value:3 }, { label:"Gastronomía", value:4 },
-    { label:"Transporte", value:3 }, { label:"Seguridad", value:5 }, { label:"Costo", value:2 },
-  ],
-  matches:[
-    { id:"m1", date:"13 Jun", day:"Sáb", time:"21:00 ET", teams:[{name:"Haití",flag:"🇭🇹"},{name:"Escocia",flag:"🏴"}], stadium:"Boston Stadium", tag:"Grupo C", highlight:false },
-    { id:"m2", date:"16 Jun", day:"Mar", time:"18:00 ET", teams:[{name:"Playoff IC-2",flag:""},{name:"Noruega",flag:"🇳🇴"}], stadium:"Boston Stadium", tag:"Grupo I", highlight:false },
-    { id:"m3", date:"19 Jun", day:"Vie", time:"18:00 ET", teams:[{name:"Escocia",flag:"🏴"},{name:"Marruecos",flag:"🇲🇦"}], stadium:"Boston Stadium", tag:"Grupo C", highlight:false },
-    { id:"m4", date:"23 Jun", day:"Mar", time:"16:00 ET", teams:[{name:"Inglaterra",flag:"🏴"},{name:"Ghana",flag:"🇬🇭"}], stadium:"Boston Stadium", tag:"Grupo L", highlight:true },
-    { id:"m5", date:"26 Jun", day:"Vie", time:"15:00 ET", teams:[{name:"Noruega",flag:"🇳🇴"},{name:"Francia",flag:"🇫🇷"}], stadium:"Boston Stadium", tag:"Haaland vs. Mbappé", highlight:true },
-    { id:"m6", date:"29 Jun", day:"Lun", time:"16:30 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Boston Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m7", date:"9 Jul", day:"Jue", time:"16:00 ET", teams:[{name:"Cuartos de Final",flag:""},{name:"Por definir",flag:""}], stadium:"Boston Stadium", tag:"Cuartos de Final", highlight:true },
-  ],
-  manifesto:{
-    stadiumInfo:[
-      { label:"Estadio FIFA", value:"Boston Stadium (Gillette Stadium)" },
-      { label:"Aforo", value:"~63,815 — configuración FIFA" },
-      { label:"Clima (jun–jul)", value:"Días: 20–28°C · Noches: 14–18°C · Posibilidad de lluvia · Estadio al aire libre y sin techo" },
-      { label:"Partidos", value:"7 confirmados — 5 grupos + 1 Ronda de 32 + 1 Cuartos de Final" },
-      { label:"Ubicación", value:"Foxborough, MA — a 35 km al sur de Boston. No está en la ciudad. El transporte es la primera decisión de este viaje." },
-      { label:"Aeropuerto", value:"BOS — Logan International Airport · en Boston · Silver Line SL1 gratis a South Station en ~20 min" },
-    ],
-    body:"Boston es una de las cuatro sedes del torneo con Cuartos de Final. La sede recibe a Inglaterra, Francia, Noruega, Escocia, Marruecos, Ghana y Haití. El partido más anticipado es el 26 de junio: Noruega vs. Francia, Haaland vs. Mbappé. Todo lo demás en esta guía parte de una advertencia: Foxborough no es Boston. El estadio está a 35 kilómetros al sur, sin subway, sin bus regular y sin acceso práctico en Uber durante y después del partido.",
-    lagomNote:"Boston es cara. El torneo — más Sail Boston 2026 y las celebraciones del 250 aniversario de la ciudad — convierte junio y julio en temporada de precios máximos. Si aún no tienes alojamiento confirmado para julio, Cambridge y Somerville tienen opciones más económicas con acceso por Red Line.",
-  },
-  vibe:{
-    body:"Una de las ciudades más fervientes en términos deportivos de toda Norteamérica recibe a Inglaterra, Francia, Noruega y Escocia. La diáspora anglosajona e irlandesa de Nueva Inglaterra convierte cada uno de esos partidos en una invasión organizada desde el interior. Boston es primero béisbol, luego hockey, luego fútbol americano — el soccer llega en cuarto lugar. El New England Revolution existe y tiene aficionados serios, pero la cultura de fútbol de esta ciudad se construye principalmente sobre comunidades inmigrantes. El Mundial la cambia temporalmente. En comida, Boston es ciudad de cocina seria: el mejor marisco de la Costa Este, una comunidad italiana en el North End con décadas de historia, dim sum en Chinatown y una escena de restaurantes de autor en el South End que compite con cualquier ciudad del país.",
-    lagomNote:"El 26 de junio (Noruega vs. Francia), el 23 de junio (Inglaterra vs. Ghana) y el 9 de julio (Cuartos de Final) son las tres fechas de mayor demanda en Boston. Compra el tren y reserva hotel con la misma seriedad que el boleto del partido.",
-  },
-  stays:[
-    { name:"The Newbury Boston", area:"Back Bay / Newbury Street", price:"$$$$", priceCAD:"$380–650 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Back Bay"], note:"El hotel más elegante de Newbury Street, inaugurado en 2021 en la histórica sede del Ritz-Carlton de Boston. Rooftop con vistas a toda la ciudad, restaurante de nivel y la dirección más conveniente de Back Bay para tomar el Orange Line hacia South Station.", best_for:"Carácter", url:"https://booking.stay22.com/lagomplan/q9nnXSH38k" },
-    { name:"HI Boston", area:"Back Bay / Stuart Street", price:"$", priceCAD:"$60–140 USD/noche según tipo de habitación", tags:["Presupuesto","Habitaciones privadas","Internacional"], note:"El hostal oficial de Hostelling International en Boston, bien ubicado a cuatro cuadras de Back Bay Station. Habitaciones privadas y compartidas disponibles, cocina comunitaria y ambiente de mezcla internacional que encaja perfectamente con el perfil del torneo.", best_for:"Presupuesto", url:"https://booking.stay22.com/lagomplan/KnbVYGzJA5" },
-    { name:"Mandarin Oriental Boston", area:"Back Bay / Boylston Street", price:"$$$$", priceCAD:"$650–1,200 USD/noche (periodo mundialista)", tags:["Lujo","Spa","Copley Station cerca"], note:"La dirección de lujo más conveniente de Boston para el perfil mundialista: a dos cuadras de Copley Station (Green Line) y a diez minutos de South Station. Spa, restaurante de referencia y habitaciones que no necesitan disculpa la mañana del partido.", best_for:"Lujo", url:"https://booking.stay22.com/lagomplan/dEGj0szNAR" },
-  ],
-  logistics:{
-    transport:[
-      { icon:"✈", title:"Llegar a Boston — BOS", text:"BOS — Logan International Airport está en Boston. Silver Line SL1 es gratis desde el aeropuerto hasta South Station y tarda aproximadamente 20 minutos. Desde ahí se toma el MBTA Boston Stadium Train hasta Foxboro. Total desde el avión hasta el estadio: aproximadamente 80 minutos, sin taxis ni Uber." },
-      { icon:"🚆", title:"Ruta maestra — MBTA Boston Stadium Train", text:"South Station → Foxboro Station directo, sin paradas. El MBTA opera trenes especiales expresos hasta Foxboro Station, a pasos del estadio. El trayecto dura aproximadamente una hora. Son 14 trenes por partido, con una capacidad combinada de ~20,000 pasajeros." },
-      { icon:"🎟", title:"Regla de compra del tren", text:"El boleto de ida y vuelta cuesta $80 USD y se compra exclusivamente a través de la aplicación mTicket de la MBTA. No puedes comprar el boleto de tren sin tener primero tu boleto de partido. La MBTA verifica la coincidencia de fecha. Los boletos se agotan y no se venden el día del partido en la estación.", },
-      { icon:"⚠️", title:"Error crítico — perder el último tren de regreso", text:"Los trenes salen a partir de 30 minutos después del pitido final. Quien no aborda en los primeros 60 minutos tras el final del partido queda en una zona suburbana sin tránsito regular, con Ubers en modo surge (60–90 minutos de espera y precios de $80–150 USD) y la Ruta 1 completamente paralizada.", isWarning:true },
-    ],
-    timings:[
-      { label:"South Station → Foxboro Station", value:"~60 min" },
-      { label:"Back Bay Station → South Station + Stadium Train", value:"~65 min puerta a puerta" },
-      { label:"BOS Logan → Silver Line + Stadium Train", value:"~80 min total" },
-      { label:"Auto desde Boston por I-95 / Ruta 1", value:"45 min sin tráfico · 90–150 min con tráfico de partido" },
-    ],
-    matchDayCronologia:{
-      matchName:"26 Jun · Noruega vs. Francia · 15:00 ET",
-      steps:[
-        { time:"H-4:00", text:"Almuerza en tu barrio. El día de Mbappé vs. Haaland no es día para resolver la comida en Foxborough." },
-        { time:"H-3:00", text:"Dirígete a South Station. Los grupos de boarding tienen horarios asignados — respétalos." },
-        { time:"H-2:30", text:"Aborda el tren. Exactamente una hora de trayecto directo a Foxboro Station." },
-        { time:"H-1:30", text:"Llegada al estadio. Las puertas abren ~90 minutos antes. Bolso claro obligatorio." },
-        { time:"H-0:30", text:"En tu asiento. Boleto digital listo." },
-        { time:"H+0:00", text:"Partido." },
-        { time:"H+0:30", text:"Los trenes de regreso salen 30 minutos después del pitido final. Primer tren, primera salida." },
-      ],
-    },
-    timing:"Foxborough no es Boston. Esta frase debe guiar todas las decisiones de transporte de esta guía. El estadio está a 35 kilómetros al sur, sin subway, sin bus regular, sin acceso práctico en Uber durante y después del partido.",
-    cost:"Boston es cara. Junio y julio combinan Mundial, Sail Boston 2026 y celebraciones del 250 aniversario de la ciudad. Para julio, Cambridge y Somerville suelen ser el margen de ahorro con Red Line útil.",
-  },
-  vibeCards:[
-    { title:"FIFA Fan Festival™ — Boston City Hall Plaza", type:"Fan fest oficial", typeColor:T.coral, desc:"El Fan Fest de Boston se instala en la plaza del Ayuntamiento, en el corazón del centro histórico de la ciudad. Gratuito, con pantallas de gran formato, activaciones culturales y programación durante todo el torneo. Accesible por Green Line y Blue Line hasta Government Center o por Orange Line hasta State. No requiere tren especial ni reserva anticipada.", tag:"Sin boleto OK" },
-    { title:"Christopher Columbus Park (North End / Waterfront)", type:"Pantalla exterior", typeColor:T.fjord, desc:"El parque al borde del puerto de Boston, en el límite entre el North End y el waterfront, tiene vistas directas al puerto y acceso peatonal desde Faneuil Hall. Para los partidos de Francia e Inglaterra — con las comunidades francesa e irlandesa del North End en plena actividad — el ambiente nocturno en el parque es de barrio europeo.", tag:"Waterfront" },
-    { title:"Harvard Stadium (Cambridge)", type:"Estadio histórico", typeColor:T.sage, desc:"El estadio universitario más antiguo de los Estados Unidos — construido en 1903, el primero de hormigón armado del mundo — abre sus instalaciones para transmisiones públicas durante eventos deportivos de gran escala. Para el partido de Francia vs. Noruega del 26 de junio, el contexto histórico añade una capa que no tienen los sports bars de Fenway.", tag:"Histórico" },
-    { title:"The Banshee (Dorchester)", type:"Pub irlandés", typeColor:T.pine, desc:"El pub irlandés más grande de Boston, con capacidad para más de 500 personas y un ambiente en partidos de Escocia, Inglaterra o Irlanda que transforma el local en algo muy parecido a Dublín en noche de partido. Para el 13 de junio (Haití vs. Escocia) y el 23 de junio (Inglaterra vs. Ghana), The Banshee es el estadio alterno de la ciudad. Qué pedir: Fish & chips + Guinness de barril.", tag:"Dorchester" },
-    { title:"The Fours (Downtown)", type:"Sports bar histórico", typeColor:"#1A3A5C", desc:"El bar deportivo de referencia de la ciudad desde 1976, con memorabilia de los Celtics, Bruins y Red Sox por todas las paredes y pantallas en cada ángulo. Para Noruega vs. Francia (26 de junio — Haaland vs. Mbappé), The Fours es donde ver ese partido sin que nadie a tu alrededor esté mirando el teléfono. Qué pedir: Sándwich Reuben + cerveza local de Massachusetts.", tag:"Downtown" },
-    { title:"McGann's Irish Pub (North End)", type:"Pub", typeColor:"#5A3A2A", desc:"Pub irlandés en el barrio italiano de Boston. Pantallas en la barra y en el salón principal, menú de pub con opciones razonables y una clientela que mezcla la diáspora irlandesa del North End con turistas que acaban de salir de Neptune Oyster. Para los partidos nocturnos del Grupo L, el ambiente es exactamente el que se espera. Qué pedir: Clam chowder + pinta de Guinness.", tag:"North End" },
-  ],
-  food:[
-    { dish:"The Banshee", where:"Dorchester — fish & chips + Guinness de barril; pub irlandés sin disculpa, el más ruidoso de Boston en días de partido anglosajón", price:"$$", type:"Pre-partido" },
-    { dish:"The Fours", where:"Downtown — sándwich Reuben + cerveza local de Massachusetts; deportivo serio, histórico, para el partido que importa", price:"$$", type:"Sports bar" },
-    { dish:"McGann's Irish Pub", where:"North End — clam chowder + pinta de Guinness; Boston genuino, sin esfuerzo turístico", price:"$$", type:"Pub" },
-    { dish:"Cannoli", where:"North End — Mike's Pastry y Modern Pastry llevan décadas en guerra fría por el mejor cannoli de Boston", price:"$", type:"Ritual" },
-    { dish:"Marisco de la Costa Este", where:"Boston — clam chowder, ostras y cocina de puerto que supera cualquier comida dentro del estadio", price:"$$–$$$", type:"Local" },
-    { dish:"Dim sum", where:"Chinatown — una de las paradas útiles entre South Station y los días sin partido", price:"$–$$", type:"Barrio" },
-  ],
-  experiences:[
-    { title:"Freedom Trail", duration:"2 horas a día completo", desc:"El Freedom Trail es un recorrido de 4 kilómetros marcado en rojo en el pavimento que conecta 16 sitios históricos de la Revolución Americana: la Old South Meeting House donde se organizó el Boston Tea Party, el cementerio donde descansan Paul Revere y Samuel Adams, el USS Constitution en Charlestown. Se puede hacer a pie desde el North End en dos horas o en un día completo con desvíos. Gratuito en su mayor parte, sin reserva.", type:"Historia", affiliateLink:"", affiliateLabel:"Ver información" },
-    { title:"Cambridge — Harvard + MIT", duration:"Medio día", desc:"El campus de Harvard en Cambridge tiene acceso libre a sus patios interiores, museos y la arquitectura georgiana de Harvard Yard. A quince minutos en Red Line desde Downtown Crossing. MIT está a diez minutos caminando de Harvard, con el Media Lab abierto a visitantes los días de semana y la arquitectura de Gehry y Saarinen como atracciones en sí mismas.", type:"Académico", affiliateLink:"", affiliateLabel:"Ver museos" },
-    { title:"Cape Cod — excursión de día", duration:"Día completo", desc:"El Cape Cod está a 90 kilómetros al sur de Boston — accesible por autobús desde South Station (Greyhound/Peter Pan, ~2 horas hasta Hyannis) o por auto por la I-6. Las playas de Cape Cod Bay tienen aguas más calmadas que el Atlántico abierto; las de Provincetown, en la punta del cabo, son las más dramáticas. Para el fan que tiene un día libre antes del tramo intenso del calendario de junio.", type:"Costa", affiliateLink:"", affiliateLabel:"Ver opciones de transporte" },
-    { title:"North End + Waterfront", duration:"Mañana o tarde", desc:"El North End tiene más de 90 restaurantes italianos en menos de un kilómetro cuadrado. Mike's Pastry y Modern Pastry llevan décadas en guerra fría por el mejor cannoli de Boston. Combínalo con Christopher Columbus Park y el waterfront para un día de ciudad sin logística pesada.", type:"Barrio", affiliateLink:"", affiliateLabel:"Ver opciones" },
-  ],
-  lagomTips:[
-    "Foxborough no es Boston. El estadio está a 35 kilómetros al sur, sin subway, sin bus regular y sin acceso práctico en Uber durante y después del partido.",
-    "El MBTA Boston Stadium Train se compra en mTicket, cuesta $80 USD ida y vuelta y exige boleto de partido. No se vende el día del partido en la estación.",
-    "El 26 de junio (Noruega vs. Francia), el 23 de junio (Inglaterra vs. Ghana) y el 9 de julio (Cuartos de Final) son las tres fechas de mayor demanda en Boston.",
-    "El North End tiene más de 90 restaurantes italianos en menos de un kilómetro cuadrado. Mike's Pastry y Modern Pastry superan cualquier comida dentro del estadio.",
-  ],
-  matchDayChecklist:[
-    "Boleto digital del partido — app FIFA",
-    "Boleto MBTA Stadium Train comprado en mTicket",
-    "Horario de boarding del tren confirmado",
-    "South Station como punto de salida",
-    "Bolso claro obligatorio",
-    "Capa ligera de lluvia — estadio al aire libre y sin techo",
-    "Reserva de hotel confirmada para Jun 23, Jun 26 o Jul 9",
-    "Plan de regreso: abordar dentro de los primeros 60 min tras el partido",
-  ],
-  didYouKnow:"Harvard Stadium, en Cambridge, es el estadio universitario más antiguo de Estados Unidos. Construido en 1903, fue el primero de hormigón armado del mundo y funciona como punto histórico de pantallas públicas durante eventos deportivos de gran escala.",
-  closingNote:"Boston recibe siete partidos en una ciudad que se enorgullece de haberle dado al mundo la democracia moderna, la universidad más antigua del hemisferio occidental y el mejor clam chowder del continente. El estadio está en Foxborough, a una hora en tren. El Fan Fest está en City Hall Plaza, a diez minutos en subway. La ciudad de por medio es lo suficientemente rica en historia, comida y carácter como para que los días sin partido no sean días perdidos. LagomPlan no te pide que te enamores de Boston — solo que compres el boleto del tren con tiempo.",
-  closingSignature:"Lagomplan · Guía de campo · Boston · Mundial 2026",
-  plannerCTA:"Generar mi viaje a Boston",
-};
 
 const BosIllustration = () => (
   <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
@@ -175,7 +65,7 @@ const LagomNote = ({ children }) => (
     <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.8, margin:0 }}>{children}</p>
   </div>
 );
-const MatchCard = ({ match, onPlanAround }) => {
+const MatchCard = ({ match, strings }) => {
   const isTBD = !match.teams[0].flag && !match.teams[1].flag;
   const borderColor = match.highlight ? `${T.matchGold}50` : T.sandDark;
   const accentBar = match.highlight ? T.matchGold : isTBD ? T.sandDark : CITY_ACCENT;
@@ -217,12 +107,9 @@ const MatchCard = ({ match, onPlanAround }) => {
             {match.teams[1].flag && <div style={{ fontSize:26, lineHeight:1 }}>{match.teams[1].flag}</div>}
           </div>
         </div>
-        {!isTBD && (
-          null
-        )}
         {isTBD && (
           <div style={{ ...uf(12,400), color:T.inkFaint, textAlign:"center", padding:"8px 0" }}>
-            Rival por definir al terminar fase de grupos
+            {strings.rivalTBD}
           </div>
         )}
       </div>
@@ -233,15 +120,15 @@ const MatchCard = ({ match, onPlanAround }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // PROGRESSIVE DISCLOSURE
 // ─────────────────────────────────────────────────────────────────────────────
-const ShowMoreToggle = ({ expanded, onToggle }) => (
+const ShowMoreToggle = ({ expanded, onToggle, strings }) => (
   <button onClick={onToggle} style={{ display:"inline-flex", alignItems:"center", gap:5, marginTop:16, background:"transparent", border:`1px solid ${T.sage}55`, borderRadius:40, ...uf(10,600), color:T.sage, cursor:"pointer", letterSpacing:"0.08em", textTransform:"uppercase", padding:"5px 14px", transition:"all 0.18s" }}
     onMouseEnter={e => { e.currentTarget.style.background=T.sageLight; e.currentTarget.style.borderColor=T.sage; e.currentTarget.style.color=T.pine; }}
     onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=`${T.sage}55`; e.currentTarget.style.color=T.sage; }}>
-    {expanded ? "Ver menos ↑" : "Ver más ↓"}
+    {expanded ? strings.showLess : strings.showMore}
   </button>
 );
 
-const CollapsibleVibeCard = ({ item }) => {
+const CollapsibleVibeCard = ({ item, strings }) => {
   const [open, setOpen] = useState(false);
   return (
     <Card hover style={{ overflow:"hidden", display:"flex", flexDirection:"row" }}>
@@ -253,7 +140,7 @@ const CollapsibleVibeCard = ({ item }) => {
         </div>
         <div style={{ ...df(14,700), color:T.pine, lineHeight:1.25 }}>{item.title}</div>
         <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.72, margin:0, ...(open ? {} : { display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden" }) }}>{item.desc}</p>
-        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} />
+        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} strings={strings} />
       </div>
     </Card>
   );
@@ -262,7 +149,7 @@ const CollapsibleVibeCard = ({ item }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // STAY CARD
 // ─────────────────────────────────────────────────────────────────────────────
-const StayCard = ({ stay }) => (
+const StayCard = ({ stay, strings }) => (
   <Card hover style={{ display:"flex", flexDirection:"column", height:"100%" }}>
     <div style={{ padding:"22px 22px 0" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
@@ -285,7 +172,7 @@ const StayCard = ({ stay }) => (
       <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
         onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
         onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
-        Ver disponibilidad
+        {strings.checkAvailability}
       </a>
     </div>
   </Card>
@@ -325,15 +212,15 @@ const LogisticsCard = ({ item }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // SIDEBAR
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideSidebar = ({ guide, onPlan }) => {
+const GuideSidebar = ({ guide, onPlan, strings }) => {
   const [checked, setChecked] = useState({});
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
 
       <Card style={{ padding:"22px 22px", background:T.sandLight, borderColor:T.sandDark }}>
-        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
+        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>{strings.plannerKicker}</Label>
         <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
-          ¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.
+          {strings.plannerPitch}
         </p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
@@ -347,7 +234,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.sageLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>✦</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Notas Lagom</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.lagomNotes}</Label>
         </div>
         {guide.lagomTips.map((tip, i) => (
           <div key={i} style={{ display:"flex", gap:11, paddingTop:12, paddingBottom:12, borderBottom: i < guide.lagomTips.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
@@ -362,7 +249,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.matchGoldLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>☑</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Checklist día de partido</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.matchDayChecklist}</Label>
         </div>
         {guide.matchDayChecklist.map((item, i) => (
           <button key={i} onClick={() => setChecked(p => ({...p,[i]:!p[i]}))} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"9px 0", borderTop: i > 0 ? `1px solid ${T.sandDark}` : "none", background:"transparent", border:"none", cursor:"pointer", textAlign:"left", width:"100%" }}>
@@ -375,7 +262,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
       </Card>
 
       <Card style={{ padding:"20px 22px", background:T.fjordLight, borderColor:`${T.fjord}30` }}>
-        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>¿Sabías que?</Label>
+        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>{strings.didYouKnow}</Label>
         <p style={{ ...uf(13,400), color:T.fjord, lineHeight:1.72, margin:0 }}>{guide.didYouKnow}</p>
       </Card>
 
@@ -383,14 +270,14 @@ const GuideSidebar = ({ guide, onPlan }) => {
         <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
           <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>✦</span>
           <div>
-            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>Optimizar itinerario con IA</div>
+            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>{strings.optimizeAi}</div>
             <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.65, margin:"0 0 12px" }}>
-              Dinos cuántos días tienes y cuáles partidos quieres ver. La IA arma la ruta.
+              {strings.optimizeAiPitch}
             </p>
             <button onClick={onPlan} style={{ ...uf(9,700), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:"none", border:`1px solid ${T.pine}`, borderRadius:RADIUS-2, padding:"7px 14px", cursor:"pointer", transition:"all 0.18s" }}
               onMouseEnter={e => { e.currentTarget.style.background=T.pine; e.currentTarget.style.color=T.white; }}
               onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.color=T.pine; }}>
-              Optimizar ruta →
+              {strings.optimizeAiCta}
             </button>
           </div>
         </div>
@@ -402,7 +289,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE HERO
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideHero = ({ guide }) => (
+const GuideHero = ({ guide, strings }) => (
   <div style={{ display:"grid", gridTemplateColumns:"1fr 280px", gap:56, alignItems:"center", padding:"72px 0 64px", borderBottom:`1px solid rgba(28,28,26,0.08)`, marginBottom:56 }}>
     <div>
       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:18, flexWrap:"wrap" }}>
@@ -424,7 +311,7 @@ const GuideHero = ({ guide }) => (
           <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>
         ))}
         <span style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.matchGold, background:T.matchGoldLight, border:`1px solid ${T.matchGold}35`, padding:"5px 13px", borderRadius:40 }}>
-          ⚽ {guide.matches.length} partidos
+          ⚽ {guide.matches.length} {strings.matchesLabel}
         </span>
       </div>
       <div style={{ display:"flex", gap:20, flexWrap:"wrap" }}>
@@ -449,24 +336,24 @@ const GuideHero = ({ guide }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // STICKY NAV
 // ─────────────────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  {id:"matches",   label:"Partidos"},
-  {id:"manifesto", label:"Manifiesto"},
-  {id:"stays",     label:"Dónde dormir"},
-  {id:"vibe",      label:"Ambiente"},
-  {id:"logistics", label:"Logística"},
+const getNavItems = (strings) => [
+  {id:"matches",   label:strings.navMatches},
+  {id:"manifesto", label:strings.navManifesto},
+  {id:"stays",     label:strings.navStays},
+  {id:"vibe",      label:strings.navVibe},
+  {id:"logistics", label:strings.navLogistics},
 ];
 
-const StickyNav = ({ active, onNavigate, onBack }) => (
+const StickyNav = ({ active, onNavigate, onBack, guide, strings }) => (
   <div style={{ position:"sticky", top:0, zIndex:40, background:`${T.bg}F5`, backdropFilter:"blur(18px)", borderBottom:`1px solid ${T.sandDark}`, height:52, display:"flex", alignItems:"center", padding:"0 40px", gap:0, overflowX:"auto" }}>
     <button onClick={onBack} style={{ ...uf(11,500), color:T.inkFaint, background:"none", border:"none", cursor:"pointer", padding:"0 14px 0 0", marginRight:14, borderRight:`1px solid ${T.sandDark}`, whiteSpace:"nowrap", letterSpacing:"0.06em", transition:"color 0.15s" }}
       onMouseEnter={e => e.currentTarget.style.color=T.pine}
       onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
-      ← Guías
+      {strings.navBeyond === "Beyond the stadium" ? "← Guides" : "← Guías"}
     </button>
-    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Ciudad de México</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{guide.city}</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
-    {NAV_ITEMS.map(item => (
+    {getNavItems(strings).map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10, active===item.id ? 700 : 500), letterSpacing:"0.08em", textTransform:"uppercase", color: active===item.id ? T.pine : T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id ? T.coral : "transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>
     ))}
   </div>
@@ -475,7 +362,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE DETAIL
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideDetail = ({ guide, onBack }) => {
+const GuideDetail = ({ guide, onBack, strings }) => {
   const [active,        setActive]        = useState("matches");
   const [showManifesto, setShowManifesto] = useState(false);
   const [showVibe,      setShowVibe]      = useState(false);
@@ -485,7 +372,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
   useEffect(() => {
     const observers = [];
-    NAV_ITEMS.forEach(item => {
+    getNavItems(strings).forEach(item => {
       const el = document.getElementById(item.id);
       if (!el) return;
       const obs = new IntersectionObserver(
@@ -496,7 +383,7 @@ const GuideDetail = ({ guide, onBack }) => {
       observers.push(obs);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, []);
+  }, [strings]);
 
   const scrollTo = id => {
     const el = document.getElementById(id);
@@ -505,10 +392,10 @@ const GuideDetail = ({ guide, onBack }) => {
 
   return (
     <div style={{ background:T.bg, minHeight:"100vh" }}>
-      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} />
+      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} guide={guide} strings={strings} />
 
       <div style={{ maxWidth:1140, margin:"0 auto", padding:"0 40px" }}>
-        <GuideHero guide={guide} />
+        <GuideHero guide={guide} strings={strings} />
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 316px", gap:52, alignItems:"flex-start" }}>
 
@@ -517,19 +404,19 @@ const GuideDetail = ({ guide, onBack }) => {
 
             {/* 01 — MATCHES */}
             <section id="matches" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="01" title="Tus partidos"
-                subtitle="5 partidos confirmados en el Estadio Azteca. México juega el 11 y el 24 de junio — las dos fechas de mayor demanda del torneo en la ciudad." />
+              <SectionHeader number="01" title={strings.section01Title}
+                subtitle={guide.sectionSubtitles?.matches} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16 }}>
                 {guide.matches.map(match => (
-                  <MatchCard key={match.id} match={match} onPlanAround={() => {}} />
+                  <MatchCard key={match.id} match={match} strings={strings} />
                 ))}
               </div>
             </section>
 
             {/* 02 — MANIFIESTO */}
             <section id="manifesto" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="02" title="Manifiesto de campo"
-                subtitle="Lo que necesitas saber antes de llegar." />
+              <SectionHeader number="02" title={strings.section02Title}
+                subtitle={strings.section02Subtitle} />
               <Card style={{ marginBottom:24, overflow:"hidden" }}>
                 <div style={{ height:4, background:CITY_ACCENT }} />
                 <div style={{ padding:"20px 24px" }}>
@@ -549,31 +436,32 @@ const GuideDetail = ({ guide, onBack }) => {
                   <LagomNote>{guide.manifesto.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} />
+              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} strings={strings} />
             </section>
 
             {/* 03 — STAYS */}
             <section id="stays" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="03" title="Dónde dormir · Base de descanso"
-                subtitle="Refugios seleccionados para recargar energías entre diseño de autor y confort estratégico." />
-              <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
-                <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
-                  <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
-                  <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                    Los precios son estimaciones para el periodo mundialista. El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México) son las fechas más críticas.
-                    Si aún no tienes alojamiento, prioriza Airbnb en <strong>Coyoacán</strong> antes de considerar hoteles de cadena en zonas sobredemandadas. AIFA NO es una opción cercana al estadio — está a 80 km al norte.
-                  </p>
+              <SectionHeader number="03" title={strings.section03Title}
+                subtitle={strings.section03Subtitle} />
+              {guide.staysWarning && (
+                <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
+                  <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                    <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
+                    <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
+                      {guide.staysWarning}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(256px,1fr))", gap:16 }}>
-                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} />)}
+                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} strings={strings} />)}
               </div>
             </section>
 
             {/* 04 — VIBE */}
             <section id="vibe" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="04" title="Siente el ambiente"
-                subtitle="Fan Fest oficial en el Zócalo, pantallas en el Bosque de Chapultepec y las cantinas que llevan décadas transmitiendo fútbol." />
+              <SectionHeader number="04" title={strings.section04Title}
+                subtitle={guide.sectionSubtitles?.vibe} />
               <p style={{
                 ...uf(15,400), color:T.inkMid, lineHeight:1.85, marginBottom:showVibe ? 28 : 0, maxWidth:640,
                 ...(showVibe ? {} : { display:"-webkit-box", WebkitLineClamp:3, WebkitBoxOrient:"vertical", overflow:"hidden" }),
@@ -583,18 +471,18 @@ const GuideDetail = ({ guide, onBack }) => {
               {showVibe && (
                 <>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
-                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} />)}
+                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} strings={strings} />)}
                   </div>
                   <LagomNote>{guide.vibe.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} />
+              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} strings={strings} />
             </section>
 
             {/* 05 — LOGISTICS */}
             <section id="logistics" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="05" title="Llegar al estadio"
-                subtitle="Metro + Tren Ligero es la única ruta que no depende del tráfico de CDMX." />
+              <SectionHeader number="05" title={strings.section05Title}
+                subtitle={guide.sectionSubtitles?.logistics} />
               <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom: showLogistics ? 24 : 0 }}>
                 {guide.logistics.transport.slice(0, 2).map((item, i) => <LogisticsCard key={i} item={item} />)}
               </div>
@@ -605,7 +493,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                   <Card style={{ marginBottom:24 }}>
                     <div style={{ padding:"18px 24px" }}>
-                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>Tiempos reales de desplazamiento</div>
+                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>{strings.section05RealTimes}</div>
                       {guide.logistics.timings.map((t, i) => (
                         <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < guide.logistics.timings.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
                           <span style={{ ...uf(13,400), color:T.inkMid }}>{t.label}</span>
@@ -619,7 +507,7 @@ const GuideDetail = ({ guide, onBack }) => {
                     <div style={{ padding:"20px 24px" }}>
                       <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
                         <span style={{ fontSize:16 }}>⚽</span>
-                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>Cronología recomendada</div>
+                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>{strings.section05Timeline}</div>
                         <span style={{ ...uf(13,600), color:T.ink }}>{guide.logistics.matchDayCronologia.matchName}</span>
                       </div>
                       {guide.logistics.matchDayCronologia.steps.map((step, i) => (
@@ -636,24 +524,24 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 </>
               )}
-              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} />
+              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} strings={strings} />
             </section>
 
             {/* 06 — FOOD */}
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="06" title="Dónde comer · Sobremesa mundialista"
-                subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
+              <SectionHeader number="06" title={strings.section06Title}
+                subtitle={guide.sectionSubtitles?.food} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                 {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
                 {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
               </div>
-              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} />
+              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} strings={strings} />
             </section>
 
             {/* 07 — EXPERIENCES */}
             <section style={{ marginBottom:64 }}>
-              <SectionHeader number="07" title="Fuera del estadio"
-                subtitle="El entretiempo ideal para descubrir que hay vida — y mucha cultura — más allá de los 90 minutos." />
+              <SectionHeader number="07" title={strings.section07Title}
+                subtitle={strings.section07Subtitle} />
               <div style={{ display:"flex", flexDirection:"column", gap:28 }}>
                 {guide.experiences.slice(0, 1).map((exp, i) => (
                   <div key={i} style={{ display:"grid", gridTemplateColumns:"auto 1fr", gap:"0 24px" }}>
@@ -700,7 +588,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 ))}
               </div>
-              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} />
+              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} strings={strings} />
             </section>
 
             {/* 08 — CIERRE */}
@@ -718,7 +606,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
           {/* ── SIDEBAR ── */}
           <div style={{ position:"sticky", top:64, alignSelf:"flex-start", paddingBottom:48 }}>
-            <GuideSidebar guide={guide} onPlan={() => { if (typeof window !== "undefined") window.location.href = "/es/planificador?destination=" + encodeURIComponent(guide.city) }} />
+            <GuideSidebar guide={guide} strings={strings} onPlan={() => { if (typeof window !== "undefined") window.location.href = (window.location.pathname.startsWith("/en/") ? "/en/planner" : "/es/planificador") + "?destination=" + encodeURIComponent(guide.city) }} />
           </div>
         </div>
 
@@ -731,7 +619,9 @@ const GuideDetail = ({ guide, onBack }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROOT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function App() {
+export default function App({ locale = "es" }) {
+  const guide = (locale === "en" && en) ? en : es;
+  const strings = locale === "en" ? ui.en : ui.es;
   return (
     <>
       <style>{`
@@ -744,7 +634,7 @@ export default function App() {
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
       `}</style>
-      <GuideDetail guide={BOS} onBack={() => {}} />
+      <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
     </>
   );
 }

@@ -114,6 +114,52 @@ export interface Database {
         Update: Partial<Database['public']['Tables']['user_entitlements']['Insert']>
       }
 
+      // Async generation jobs (added alongside sync /api/generate-trip).
+      generation_jobs: {
+        Row: {
+          id:           string
+          user_id:      string
+          trip_id:      string | null
+          status:       'queued' | 'running' | 'completed' | 'failed'
+          inputs:       Json
+          chunks_total: number
+          chunks_done:  number
+          result:       Json | null
+          error:        string | null
+          created_at:   string
+          updated_at:   string
+        }
+        Insert: {
+          id?:           string
+          user_id:       string
+          trip_id?:      string | null
+          status:        'queued' | 'running' | 'completed' | 'failed'
+          inputs:        Json
+          chunks_total:  number
+          chunks_done?:  number
+          result?:       Json | null
+          error?:        string | null
+          created_at?:   string
+          updated_at?:   string
+        }
+        Update: Partial<Database['public']['Tables']['generation_jobs']['Insert']>
+      }
+      generation_chunks: {
+        Row: {
+          job_id:      string
+          chunk_index: number
+          content:     Json
+          created_at:  string
+        }
+        Insert: {
+          job_id:       string
+          chunk_index:  number
+          content:      Json
+          created_at?:  string
+        }
+        Update: Partial<Database['public']['Tables']['generation_chunks']['Insert']>
+      }
+
       // CONTENT (ongoing)
       // guides: { ... }
       // guide_translations: { ... }

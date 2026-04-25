@@ -26,6 +26,17 @@ export const ANON_TRIP_LIMIT = 1
 export const FREE_GUIDE_VIEWS = 1
 
 /**
+ * Duration threshold (in days) above which trip generation is routed through
+ * the async job pipeline instead of the synchronous /api/generate-trip
+ * endpoint. Short trips stay on sync (fast path); long trips use the
+ * chunked worker + polling flow which scales reliably with duration.
+ *
+ * Set to Infinity to route everything back to the sync endpoint (rollback lever).
+ * Start conservative; lower over time as confidence grows.
+ */
+export const ASYNC_THRESHOLD = 10
+
+/**
  * Given a PlanState-ish object, returns the number of trips the user has
  * used out of FREE_TRIPS_LIMIT. Always floors at 0.
  */

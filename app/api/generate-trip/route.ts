@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import type { User } from '@supabase/supabase-js'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../lib/entitlements'
-import { getSupabaseServer } from '../../../lib/supabase/server'
+import { getSupabaseAdmin, getSupabaseServer } from '../../../lib/supabase/server'
 import { ANON_TRIP_LIMIT } from '../../../lib/plan/limits'
 
 // Vercel Pro allows up to 300 s for serverless functions.
@@ -48,38 +48,75 @@ async function resolveUser(req: NextRequest): Promise<User | null> {
   return null
 }
 
+// Verify that a tripId was created by the calling user. A request that passes
+// ownership is treated as a regeneration → no credit consumed. Any failure
+// mode (missing id, not found, wrong owner, DB error) falls through to the
+// "new trip" billing path, so bypass attempts simply get charged normally.
+async function isRegenerationOfOwnedTrip(
+  tripId: unknown,
+  userId: string | null,
+): Promise<boolean> {
+  if (!userId) return false
+  if (typeof tripId !== 'string' || tripId.length === 0) return false
+
+  try {
+    const admin = getSupabaseAdmin()
+    const { data, error } = await (admin as any)
+      .from('trips')
+      .select('user_id')
+      .eq('id', tripId)
+      .single()
+
+    if (error || !data) return false
+    return data.user_id === userId
+  } catch {
+    return false
+  }
+}
+
 export async function POST(req: NextRequest) {
   const startedAt = Date.now()
   try {
     const body = await req.json()
+    const tripIdRaw = (body && typeof body === 'object') ? (body as any).tripId : null
 
     // ── Entitlement check ────────────────────────────────────────────────────────
     const user = await resolveUser(req)
+    const isRegeneration = await isRegenerationOfOwnedTrip(tripIdRaw, user?.id ?? null)
     console.log('[generate-trip]', JSON.stringify({
       stage: 'auth_resolved',
       userId: user?.id ?? 'anon',
+      tripId: typeof tripIdRaw === 'string' ? tripIdRaw : null,
+      isRegeneration,
       bodyKeys: Object.keys(body ?? {}),
     }))
 
     let authorizedUserId: string | null = null
 
     if (user) {
-      // Authenticated — check DB entitlements
-      const check = await checkGenerationAllowed()
+      if (isRegeneration) {
+        // Regeneration of an owned trip — skip entitlement check entirely so
+        // users out of credits can still iterate on trips they already paid for.
+        authorizedUserId = user.id
+      } else {
+        // Authenticated new trip — check DB entitlements
+        const check = await checkGenerationAllowed()
 
-      if (!check.allowed) {
-        const reason = (check as { allowed: false; reason: string }).reason
-        // 'error' means infra/config failure — don't show paywall for a broken service
-        if (reason === 'error') {
-          return err(503, 'entitlement_check_failed', 'Service temporarily unavailable')
+        if (!check.allowed) {
+          const reason = (check as { allowed: false; reason: string }).reason
+          // 'error' means infra/config failure — don't show paywall for a broken service
+          if (reason === 'error') {
+            return err(503, 'entitlement_check_failed', 'Service temporarily unavailable')
+          }
+          return err(402, 'no_credits', 'No credits remaining', { reason })
         }
-        return err(402, 'no_credits', 'No credits remaining', { reason })
+
+        authorizedUserId = (check as { allowed: true; userId: string }).userId
       }
 
-      authorizedUserId = (check as { allowed: true; userId: string }).userId
-
     } else {
-      // Anonymous — enforce via cookie
+      // Anonymous — enforce via cookie. Anon users cannot own a trip in the DB,
+      // so `isRegeneration` is always false here; the limit check stays.
       const cookieStore = await cookies()
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
@@ -149,8 +186,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Deduct credit before returning (Vercel Functions terminate at response send) ──
-    if (authorizedUserId) {
-      // Authenticated: decrement DB credits synchronously
+    // Regenerations of an already-owned trip never consume credits — only new trips do.
+    if (authorizedUserId && !isRegeneration) {
+      // Authenticated new trip: decrement DB credits synchronously
       await consumeOneTrip(authorizedUserId).catch(e =>
         console.error('[generate-trip] consumeOneTrip error:', e)
       )
@@ -158,8 +196,10 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json(data)
 
-    if (!authorizedUserId) {
-      // Anonymous: set cookie so the next attempt is blocked server-side
+    if (!authorizedUserId && !isRegeneration) {
+      // Anonymous new trip: set cookie so the next attempt is blocked server-side.
+      // (Anonymous users can't own a trip → isRegeneration is always false here,
+      // but the guard is kept explicit to mirror the authenticated path.)
       const cookieStore = await cookies()
       const prev = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
       response.cookies.set(ANON_COOKIE, String(prev + 1), {

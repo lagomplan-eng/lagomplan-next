@@ -14,6 +14,9 @@ import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
+import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
+import { GenerationSurface } from '../../../components/generation/GenerationSurface'
+import { useGenerationSurface } from '../../../hooks/useGenerationSurface'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -636,6 +639,12 @@ export default function TripResult({ params }: Props) {
   const [error, setError]     = useState<string | null>(null)
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [errorDurationMs, setErrorDurationMs] = useState<number | null>(null)
+  // Generation surface signals — drive the calm, phased loading UI.
+  // asyncChunksDone/Total are only set when the async /api/trips/jobs path is
+  // in use; sync generations leave them null and the surface runs on time floor.
+  const [asyncChunksDone,  setAsyncChunksDone]  = useState<number | null>(null)
+  const [asyncChunksTotal, setAsyncChunksTotal] = useState<number | null>(null)
+  const [isAsyncPath,      setIsAsyncPath]      = useState(false)
   const [rawResponse, setRawResponse] = useState<any>(null)
   const [tripId, setTripId]         = useState<string | null>(null)
   const [rawTripData, setRawTripData] = useState<any>(null)
@@ -941,37 +950,116 @@ export default function TripResult({ params }: Props) {
         const genHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
         if (session?.access_token) genHeaders.Authorization = `Bearer ${session.access_token}`
 
-        console.log('[TripResult] POST payload:', JSON.stringify(payload))
+        // Route long trips through the async job pipeline. Short trips stay
+        // on the synchronous endpoint. The async path requires auth (anon
+        // users always use sync — the jobs endpoint returns 401 for them).
+        const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+        setIsAsyncPath(useAsync)
+
+        console.log('[TripResult] POST payload:', JSON.stringify(payload), 'async:', useAsync)
         genStartedAt = performance.now()
-        const genRes = await fetch('/api/generate-trip', {
-          method: 'POST',
-          headers: genHeaders,
-          credentials: 'include',
-          body: JSON.stringify(payload),
-          signal: controller.signal,
-        })
-        genStatus = genRes.status
-        const genData = await genRes.json().catch(() => null)
-        console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
-        setRawResponse(genData)
-        if (!genRes.ok) {
-          // 401 = anonymous over-limit → redirect to login
-          if (genRes.status === 401) {
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
-            router.push({ pathname: '/login' })
-            return
+
+        let tripDataRaw: any = null
+
+        if (useAsync) {
+          // ── Async: create job, then poll until terminal ───────────────────
+          setAsyncChunksTotal(duration_days)
+          setAsyncChunksDone(0)
+          const createRes = await fetch('/api/trips/jobs', {
+            method: 'POST',
+            headers: genHeaders,
+            credentials: 'include',
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          })
+          genStatus = createRes.status
+          const createData = await createRes.json().catch(() => null)
+          setRawResponse(createData)
+          if (!createRes.ok) {
+            if (createRes.status === 401) {
+              sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
+              router.push({ pathname: '/login' })
+              return
+            }
+            if (createRes.status === 402) { openPaywall(); return }
+            const base = typeof createData?.message === 'string' ? createData.message : 'Generation failed'
+            throw new Error(base)
           }
-          // 402 = authenticated user out of credits → open paywall
-          if (genRes.status === 402) {
-            openPaywall()
-            return
+          const jobId = createData?.jobId
+          if (!jobId) throw new Error('Missing jobId from /api/trips/jobs')
+
+          const HARD_TIMEOUT_MS = 240_000
+          const POLL_INTERVAL_MS = 2_000
+          const pollStart = performance.now()
+
+          // Inline polling loop; honors abort, updates chunk signals.
+          // eslint-disable-next-line no-constant-condition
+          while (true) {
+            if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
+            if (performance.now() - pollStart > HARD_TIMEOUT_MS) {
+              throw new Error('Generation timed out after 4 minutes')
+            }
+            await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
+            if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
+
+            let pollRes: Response
+            try {
+              pollRes = await fetch(`/api/trips/jobs/${jobId}`, {
+                headers: { ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
+                credentials: 'include',
+                signal: controller.signal,
+              })
+            } catch (e) {
+              if (e instanceof DOMException && e.name === 'AbortError') throw e
+              console.warn('[TripResult] poll network error, continuing', e)
+              continue
+            }
+            if (!pollRes.ok) {
+              console.warn('[TripResult] poll returned', pollRes.status)
+              continue
+            }
+            const pollData = await pollRes.json().catch(() => null)
+            if (!pollData) continue
+            if (typeof pollData.chunksDone === 'number')  setAsyncChunksDone(pollData.chunksDone)
+            if (typeof pollData.chunksTotal === 'number') setAsyncChunksTotal(pollData.chunksTotal)
+
+            if (pollData.status === 'completed' && pollData.trip_data) {
+              tripDataRaw = pollData.trip_data
+              if (pollData.tripId) setTripId(pollData.tripId)
+              genStatus = 200
+              break
+            }
+            if (pollData.status === 'failed') {
+              throw new Error(typeof pollData.error === 'string' ? pollData.error : 'Generation failed')
+            }
           }
-          const base   = typeof genData?.error === 'string' ? genData.error : 'Generation failed'
-          const detail = genData?.detail ? `\n\n${JSON.stringify(genData.detail, null, 2)}` : ''
-          throw new Error(base + detail)
+        } else {
+          // ── Sync: existing /api/generate-trip path ────────────────────────
+          const genRes = await fetch('/api/generate-trip', {
+            method: 'POST',
+            headers: genHeaders,
+            credentials: 'include',
+            body: JSON.stringify(payload),
+            signal: controller.signal,
+          })
+          genStatus = genRes.status
+          const genData = await genRes.json().catch(() => null)
+          console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
+          setRawResponse(genData)
+          if (!genRes.ok) {
+            if (genRes.status === 401) {
+              sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
+              router.push({ pathname: '/login' })
+              return
+            }
+            if (genRes.status === 402) { openPaywall(); return }
+            const base   = typeof genData?.error === 'string' ? genData.error : 'Generation failed'
+            const detail = genData?.detail ? `\n\n${JSON.stringify(genData.detail, null, 2)}` : ''
+            throw new Error(base + detail)
+          }
+          tripDataRaw = genData?.trip_data
         }
-        const tripDataRaw = genData?.trip_data
-        if (!tripDataRaw) throw new Error(`No trip_data in response. Got: ${JSON.stringify(genData)}`)
+        if (!tripDataRaw) throw new Error(`No trip_data in response.`)
 
         // Persist so login redirect restores this exact trip
         sessionStorage.setItem('tripCache', JSON.stringify({ tripData: tripDataRaw, inputs: currentInputs }))
@@ -1170,6 +1258,8 @@ export default function TripResult({ params }: Props) {
         : []
       const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
       const payload = {
+        // tripId marks this as a regeneration → server skips credit consumption.
+        tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights, duration_days, traveler: prefTraveler, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
@@ -1373,6 +1463,8 @@ export default function TripResult({ params }: Props) {
         : []
       const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
       const payload = {
+        // tripId marks this as a regeneration → server skips credit consumption.
+        tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights, duration_days, traveler: prefTraveler, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
@@ -1681,6 +1773,23 @@ export default function TripResult({ params }: Props) {
     return acc
   }, {})
 
+  // ── Generation surface (calm, phased loading UI) ──────────────────────────
+  // Drives phase/progress/message from timing + optional chunk signals. Stays
+  // entirely presentational: the actual network work still happens in the
+  // generate effect below.
+  const gen = useGenerationSurface({
+    active:      loading && !error,
+    locale:      locale === 'en' ? 'en' : 'es',
+    isAsync:     isAsyncPath,
+    chunksDone:  asyncChunksDone,
+    chunksTotal: asyncChunksTotal,
+    slots: {
+      destination:  destination || null,
+      durationDays: Number(nights) || null,
+      travelers:    traveler || null,
+    },
+  })
+
   // ── Early returns ────────────────────────────────────────────────────────────
 
   // Payment pending — blocks everything else (paywall, loading, itinerary) until
@@ -1703,7 +1812,23 @@ export default function TripResult({ params }: Props) {
   if (!isAccessResolved || loading) {
     return (
       <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
-        <div className="page-inner"><LoadingState locale={locale} /></div>
+        <div className="page-inner">
+          {isAccessResolved && loading ? (
+            <GenerationSurface
+              destination={destination || null}
+              durationDays={Number(nights) || null}
+              travelers={traveler || null}
+              phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
+              progress={gen.progress}
+              message={gen.message}
+              stage={gen.stage}
+              error={null}
+              locale={locale === 'en' ? 'en' : 'es'}
+            />
+          ) : (
+            <LoadingState locale={locale} />
+          )}
+        </div>
       </main>
     )
   }

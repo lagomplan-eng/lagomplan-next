@@ -174,6 +174,22 @@ export interface CityGuide {
   /** City-specific optional extensions. */
   neighborhoods?: Neighborhood[]
   itinerary?: ItineraryDay[]
+  /**
+   * Section subtitles that reference city-specific facts (Azteca, Levi's,
+   * Tasqueña, etc). Generic subtitles stay in ui-strings; these override them
+   * for sections 01/04/05/06 where the copy is inherently per-city.
+   */
+  sectionSubtitles?: {
+    matches?: string
+    itinerary?: string
+    stays?: string
+    vibe?: string
+    logistics?: string
+    food?: string
+    experiences?: string
+  }
+  /** Optional warning banner shown above the stays grid. */
+  staysWarning?: string
 }
 
 /** Shape every per-city data file must export. */

@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { es, en } from "../../../lib/worldcup/data/kansas";
+import { ui } from "../../../lib/worldcup/ui-strings";
 
 const T = { pine:"#0F3A33", sage:"#6B8F86", sageLight:"#EAF2F0", sand:"#EDE7E1", sandLight:"#F7F4F1", sandDark:"#D9D2C9", coral:"#E1615B", coralLight:"#FCEEED", fjord:"#2D4F6C", fjordLight:"#E3EBF2", ink:"#1C1C1A", inkMid:"#5A5A56", inkFaint:"#9A9A94", white:"#FFFFFF", matchGold:"#B8860B", matchGoldLight:"#FBF5E0", bg:"#fff9f3" };
 const RADIUS = 10;
@@ -13,138 +15,6 @@ const uf = (size,weight=400) => ({ fontFamily:"'Manrope',sans-serif", fontSize:s
 const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
-
-const KC = {
-  id:"kc", city:"Kansas City", country:"EE.UU.", state:"Missouri / Kansas", flag:"🇺🇸", accent:CITY_ACCENT,
-  tags:["Fútbol","BBQ","Jazz","Cuartos de Final"],
-  stadium:{ name:"GEHA Field at Arrowhead Stadium", capacity:"~76,000", area:"Truman Sports Complex — 13 km al este del downtown" },
-  headline:"El estadio más ruidoso del mundo al aire libre recibe al campeón defensor. Trae tapones para los oídos — y úsalos solo si los necesitas.",
-  description:"El estadio más ruidoso del mundo al aire libre recibe al campeón defensor el 16 de junio. Argentina abre su torneo en Arrowhead — el estadio con el récord de 142.2 decibelios — ante una comunidad albiceleste del Medio Oeste que lleva meses esperando este momento. Seis partidos confirmados, incluyendo un Cuartos de Final el 11 de julio.",
-  scores:[ {label:"Ambiente",value:5}, {label:"Fútbol local",value:4}, {label:"Gastronomía",value:5}, {label:"Transporte",value:3}, {label:"Seguridad",value:4}, {label:"Costo",value:3} ],
-  matches:[
-    { id:"m1", date:"16 Jun", day:"Mar", time:"20:00 CT", teams:[{name:"Argentina",flag:"🇦🇷"},{name:"Argelia",flag:"🇩🇿"}], stadium:"Arrowhead Stadium", tag:"Grupo J — el campeón defensor abre su torneo", highlight:true },
-    { id:"m2", date:"20 Jun", day:"Sáb", time:"19:00 CT", teams:[{name:"Ecuador",flag:"🇪🇨"},{name:"Curazao",flag:"🇨🇼"}], stadium:"Arrowhead Stadium", tag:"Grupo E", highlight:false },
-    { id:"m3", date:"25 Jun", day:"Jue", time:"18:00 CT", teams:[{name:"Túnez",flag:"🇹🇳"},{name:"Países Bajos",flag:"🇳🇱"}], stadium:"Arrowhead Stadium", tag:"Grupo F", highlight:false },
-    { id:"m4", date:"27 Jun", day:"Sáb", time:"21:00 CT", teams:[{name:"Argelia",flag:"🇩🇿"},{name:"Austria",flag:"🇦🇹"}], stadium:"Arrowhead Stadium", tag:"Grupo J — cierre del grupo", highlight:false },
-    { id:"m5", date:"3 Jul", day:"Vie", time:"20:30 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Arrowhead Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m6", date:"11 Jul", day:"Sáb", time:"20:00 CT", teams:[{name:"Cuartos de Final",flag:""},{name:"Por definir",flag:""}], stadium:"Arrowhead Stadium", tag:"Cuartos de Final", highlight:true },
-  ],
-  manifesto:{
-    stadiumInfo:[
-      { label:"Estadio FIFA", value:"Kansas City Stadium (GEHA Field at Arrowhead Stadium)" },
-      { label:"Aforo", value:"~76,000 — configuración FIFA. Estadio al aire libre, sin techo. Récord mundial: 142.2 dB registrados en partido de Chiefs." },
-      { label:"Techo", value:"Sin techo — estadio abierto al aire libre" },
-      { label:"Clima (jun–jul)", value:"29–34°C días · Humedad moderada · Tormentas de verano frecuentes — posibilidad de suspensión breve por rayo; protocolo FIFA prevé esperas dentro del estadio" },
-      { label:"Partidos", value:"6 confirmados — 5 grupos + 1 Ronda de 32 + 1 Cuartos de Final (11 de julio)" },
-      { label:"Ubicación", value:"Truman Sports Complex — 13 km al este del downtown de Kansas City. Sin metro ni tren al estadio." },
-      { label:"Aeropuerto", value:"MCI — Kansas City International (nuevo terminal 2023, a 24 km al norte del downtown; ConnectKC26 Airport Direct al centro)" },
-      { label:"Visa / ESTA", value:"Ciudadanos del Programa de Exención de Visa necesitan ESTA aprobado antes de volar. Otros requieren visa B-2. Tramita en travel.state.gov." },
-    ],
-    body:"Kansas City es la sede que menos explicación necesita y que más sorprende a quien la visita sin haber estado antes. El estadio más ruidoso del mundo al aire libre. El campeón defensor en el partido inaugural de la ciudad el 16 de junio. La BBQ más seria del continente a precios que no requieren disculpa. Argentina podría regresar para el Cuartos de Final del 11 de julio — y la comunidad albiceleste de Chicago, Nueva York y Miami tiene esa fecha en el radar. Calendario: 🇦🇷🇩🇿 Mar 16 Jun · 20:00 CT: Argentina vs. Argelia (Grupo J — campeón defensor abre); 🇪🇨🇨🇼 Sáb 20 Jun · 19:00 CT: Ecuador vs. Curazao (Grupo E); 🇹🇳🇳🇱 Jue 25 Jun · 18:00 CT: Túnez vs. Países Bajos (Grupo F); 🇩🇿🇦🇹 Sáb 27 Jun · 21:00 CT: Argelia vs. Austria (Grupo J — cierre); Vie 3 Jul: Ronda de 32; Sáb 11 Jul: Cuartos de Final.",
-    lagomNote:"El partido de Argentina el 16 de junio y el Cuartos de Final del 11 de julio son las dos fechas de mayor demanda. Para el Cuartos, los equipos no se conocen hasta el 4 de julio — reserva con tarifa cancelable y confirma en cuanto salgan los cruces. El pase ConnectKC26 Stadium Direct se agota para estos partidos.",
-  },
-  vibe:{
-    body:"Arrowhead tiene el récord mundial de decibelios en estadio al aire libre — 142.2 dB. El diseño de cuenco abierto concentra el ruido hacia el campo. Cuando Argentina juega aquí el 16 de junio, la comunidad albiceleste del Medio Oeste va a demostrar por qué ese diseño importa. Sporting KC tiene una de las barras organizadas más activas de la MLS — los Cauldron llevan años construyendo una cultura de tribuna seria. Kansas City tiene también el CPKC Stadium, el primer estadio construido específicamente para un equipo profesional femenino en el mundo. Y la BBQ: la capital mundial del burnt end, la salsa dulce-picante y la discusión más seria del continente sobre qué ciudad cocina mejor la carne.",
-    zones:[], lagomNote:"KC Live! Block en el Power & Light District va a ser el segundo estadio de la ciudad en el partido de Argentina. El Fan Fest en el National WWI Museum — con vistas al skyline desde el Liberty Memorial — es el punto de salida del ConnectKC26 Stadium Direct.",
-  },
-  neighborhoods:[
-    { name:"Downtown / Power & Light District", vibe:"Base recomendada. El barrio de entretenimiento del downtown con bares con pantallas, restaurantes y acceso al KC Streetcar (gratuito). Los ConnectKC26 Stadium Direct salen del Fan Fest del National WWI Museum, a cinco minutos caminando.", best_for:"Fan WC", walk_to_stadium:"ConnectKC26 Stadium Direct (~30 min)", lagomNote:null },
-    { name:"Crossroads Arts District", vibe:"Barrio con ambiente. La mayor concentración de murales callejeros y restaurantes de autor de la ciudad. A 15 minutos caminando del downtown.", best_for:"Pareja", walk_to_stadium:"ConnectKC26 Stadium Direct desde WWI Museum", lagomNote:null },
-    { name:"Kansas City, Kansas (KCK)", vibe:"Para fans latinoamericanos y argentinos. La mayor comunidad latinoamericana del área metropolitana — restaurantes, bares y la Avenida Central que en días de Argentina o Ecuador replica la Calle Ocho de Miami.", best_for:"Comunidad", walk_to_stadium:"Bus o Uber desde KCK (~15 min al downtown)", lagomNote:null },
-  ],
-  stays:[
-    { name:"Hotel Kansas City", area:"Downtown / Baltimore Avenue", price:"$$$", priceCAD:"Precio estimado en periodo mundialista: $220–380 USD/noche", tags:["Boutique","Logia Masónica 1914","ConnectKC26 cercano"], note:"Inaugurado en 2020 en el edificio de la Logia Masónica de 1914. Techos de 6 metros, bar de whisky americano y habitaciones sin el diseño anónimo de las cadenas. ConnectKC26 Stadium Direct sale a cuatro cuadras.", best_for:"Hotel boutique", url:"" },
-    { name:"Loews Kansas City Hotel", area:"Convention Center / Downtown", price:"$$$", priceCAD:"Precio estimado en periodo mundialista: $180–300 USD/noche", tags:["Presupuesto calidad","Piscina","Conecta todo"], note:"La opción con mejor relación posición-servicio del downtown: habitaciones amplias, piscina, restaurante propio y acceso caminando a todas las rutas de ConnectKC26.", best_for:"Relación calidad", url:"https://booking.stay22.com/lagomplan/AZ3nVqqWKm" },
-    { name:"21c Museum Hotel Kansas City", area:"Crossroads Arts District", price:"$$$", priceCAD:"Precio estimado en periodo mundialista: $250–420 USD/noche", tags:["Arte contemporáneo","Galería 24h","Restaurante"], note:"Hotel-museo con instalaciones permanentes, galería pública abierta las 24 horas y restaurante de referencia. Para el fan que quiere la versión más interesante de Kansas City entre partidos de Argentina.", best_for:"Arte + fútbol", url:"" },
-  ],
-  logistics:{
-    transport:[
-      { icon:"✈", title:"Llegar a Kansas City — MCI", text:"MCI — Kansas City International tiene nuevo terminal inaugurado en 2023, a 24 km al norte del downtown. ConnectKC26 Airport Direct al centro del downtown. En Uber o taxi desde MCI al downtown: ~35 minutos, ~$40–55 USD." },
-      { icon:"🚌", title:"Ruta maestra — ConnectKC26 Stadium Direct", text:"215 autobuses expresos exclusivos para portadores de boleto de partido. Salen desde cuatro puntos park-and-ride en el área metropolitana y desde el Fan Fest en el National WWI Museum (downtown). Trayecto al estadio: ~20–30 minutos. Frecuencia: cada 15–20 minutos. El pase del Stadium Direct se compra separado del boleto de partido — reserva con anticipación." },
-      { icon:"🏟", title:"Al estadio — puntos park-and-ride", text:"Highway 40 & Stadium Drive (más cercano al estadio). Independence Center (este del área). Oak Park Mall (sur y Kansas). North Kansas City (único con servicio Region Direct también). El Stadium Direct tiene capacidad limitada — los pases para Argentina y el Cuartos de Final se agotan primero." },
-      { icon:"⚠️", title:"Error crítico — reservar el pase Stadium Direct con anticipación", text:"Los 215 autobuses tienen capacidad limitada por partido. Los pases se venden por separado al boleto de partido. Para Argentina (16 jun) y el Cuartos (11 jul), quien llega al Fan Fest sin pase reservado tiene Uber con surge o quedarse en el Fan Fest. Las 4,000 plazas de parking del estadio se venden a través de paquetes FIFA — no en puerta el día del partido.", isWarning:true },
-    ],
-    timings:[
-      { label:"Desde Fan Fest (WWI Museum) en Stadium Direct", value:"~30 min" },
-      { label:"Desde Highway 40 park-and-ride en Stadium Direct", value:"~15 min" },
-      { label:"Desde MCI en Airport Direct + Stadium Direct", value:"~65 min total" },
-      { label:"Uber desde downtown (día de partido Argentina)", value:"40–60 min + surge" },
-    ],
-    matchDayCronologia:{
-      matchName:"16 Jun · Argentina vs. Argelia · 20:00 CT",
-      steps:[
-        { time:"H-4:00", text:"Cena temprana en el Power & Light o el Crossroads. El ambiente de Argentina antes del partido ya es de partido." },
-        { time:"H-3:00", text:"Fan Fest en el WWI Museum. La comunidad albiceleste del Medio Oeste lleva horas ahí." },
-        { time:"H-2:00", text:"ConnectKC26 Stadium Direct desde el Fan Fest. Pase presentado en el autobús." },
-        { time:"H-1:30", text:"Llegada al estadio. El tailgate en los parking colindantes lleva horas activo." },
-        { time:"H-0:30", text:"En tu asiento. Boleto digital listo. Arrowhead ya está rugiendo." },
-        { time:"H+0:00", text:"Partido — el campeón defensor abre su torneo en el estadio más ruidoso del mundo." },
-        { time:"H+1:30", text:"ConnectKC26 de regreso. Los autobuses operan hasta que el último fan sale. No te quedes en la explanada." },
-      ],
-    },
-    timing:"Arrowhead está en el Truman Sports Complex, 13 km al este del downtown. Sin metro. El ConnectKC26 Stadium Direct es la solución oficial — 215 buses, cuatro park-and-rides y salida desde el Fan Fest del WWI Museum. El pase se compra por separado al boleto de partido.",
-    cost:"La sede más accesible del torneo en Estados Unidos. La BBQ más barata por calidad del país. Los precios suben para Argentina y el Cuartos de Final, pero el margen de aumento es menor que en cualquier ciudad costera.",
-  },
-  vibeCards:[
-    { title:"FIFA Fan Festival™ @ National WWI Museum", type:"Fan fest oficial", typeColor:T.coral, desc:"El Fan Fest toma el terreno del único museo nacional de la Primera Guerra Mundial en EE.UU. — con la mejor vista del skyline de Kansas City desde su terraza. El Liberty Memorial como telón de fondo. Punto de salida del ConnectKC26 Stadium Direct. Acceso caminando desde el Power & Light en 12 min.", tag:"Sin boleto OK" },
-    { title:"KC Live! Block (Power & Light)", type:"Pantalla exterior", typeColor:T.fjord, desc:"El bloque de entretenimiento del downtown con pantallas permanentes en su plaza central. Para los partidos de Argentina, KC Live! va a ser el segundo estadio de la ciudad — sin registro, sin límite de capacidad oficial.", tag:"Sin boleto" },
-    { title:"Union Station (Great Hall)", type:"Transmisión histórica", typeColor:T.pine, desc:"La estación histórica de Kansas City activa su Gran Salón para eventos deportivos de alta demanda. Ver un partido de Argentina bajo las bóvedas de piedra con pantallas donde antes había tableros de horarios es el plan mundialista más inesperado de la sede.", tag:"Icónico" },
-    { title:"18th & Vine (Jazz District)", type:"Jazz District", typeColor:T.sage, desc:"El corazón histórico del jazz americano en Kansas City tiene plazas exteriores que la comunidad futbolera activa para partidos de alto perfil. Para el fan de Países Bajos o Argentina con un bourbon de Missouri en la mano y jazz en vivo de al lado.", tag:"Jazz y fútbol" },
-    { title:"No Other Pub (Power & Light)", type:"Bar de fútbol", typeColor:"#1A3A5C", desc:"El punto de reunión de los aficionados de Sporting KC. Pantallas en todos los ángulos, selección de cervezas artesanales de Missouri y el ambiente más entendido en fútbol del downtown. Para el partido de Argentina del 16 de junio, reserva con días de anticipación.", tag:"Sporting KC fans" },
-  ],
-  food:[
-    { dish:"Joe's Kansas City BBQ", where:"Sur de Kansas City — los mejores burnt ends del continente; llega antes de las 11am o espera cola", price:"$$", type:"Imperdible" },
-    { dish:"Q39", where:"Westport / midtown — burnt ends de referencia y el ambiente más consistente de la BBQ de KC", price:"$$", type:"BBQ" },
-    { dish:"No Other Pub", where:"Power & Light — alitas + cerveza artesanal de Missouri; el bar de fútbol más serio del downtown", price:"$$", type:"Pre-partido" },
-    { dish:"Flying Saucer Draught Emporium", where:"Crossroads — más de 150 cervezas en barril + pretzels artesanales; para partidos europeos nocturnos", price:"$$", type:"Cervecería" },
-    { dish:"Flea Market Bar", where:"18th & Vine / Jazz District — nachos + margarita o cerveza mexicana; comunidad latinoamericana activa", price:"$", type:"De barrio" },
-  ],
-  experiences:[
-    { title:"18th & Vine Jazz District + Negro Leagues Baseball Museum", duration:"Medio día", desc:"El 18th & Vine District es donde nació el jazz de Kansas City en los años 30 — Charlie Parker y Count Basie pusieron este cruce en el mapa mundial. El American Jazz Museum tiene colecciones de instrumentos, grabaciones y sala de conciertos activa los fines de semana. A veinte metros, el Negro Leagues Baseball Museum documenta las ligas segregadas con una de las colecciones de béisbol más importantes del país. Los dos juntos completan un día sin auto desde el downtown.", type:"Musical", affiliateLink:"AFFILIATE_LINK_KC_JAZZ", affiliateLabel:"Tours por el Jazz District de KC" },
-    { title:"Union Station + Science City + Sea Life", duration:"Día completo", desc:"La Union Station de Kansas City — restaurada en 2002 — alberga Science City: museo de ciencias interactivo con 50 exhibiciones para familias ($16 adultos / $12 niños). En el mismo complejo, Sea Life Kansas City tiene tiburones, medusas y túnel acrílico subacuático ($24 adultos / $18 niños). Acceso por KC Streetcar hasta Union Station.", type:"Familia", affiliateLink:"AFFILIATE_LINK_KC_SCIENCECITY", affiliateLabel:"Science City en Union Station" },
-    { title:"City Market + Strawberry Hill", duration:"Mañana", desc:"El City Market al norte del downtown opera desde 1857: productores locales, especias importadas y el mejor desayuno de fin de semana sábados y domingos de 8am a 3pm. A 10 minutos al norte, Strawberry Hill en KCK tiene la mayor concentración de restaurantes croatas y eslovenos del país — una comunidad que los partidos de Croacia y Austria van a activar.", type:"Mercado", affiliateLink:"AFFILIATE_LINK_KC_CITYMARKET", affiliateLabel:"Tours gastronómicos en KC" },
-  ],
-  itinerary:[
-    { day:1, title:"Llegada y primer pulso", subtitle:"Power & Light · Jazz District · Union Station", isMatchDay:false, steps:[
-      { time:"Llegada", text:"ConnectKC26 Airport Direct desde MCI al downtown (~35 min). Kansas City tiene una lógica urbana más sencilla que otras sedes del torneo." },
-      { time:"Tarde", text:"Power & Light District. KC Live! Block con las pantallas ya activas para los partidos del día." },
-      { time:"Atardecer", text:"Liberty Memorial y el Fan Fest en el WWI Museum. La mejor vista del skyline de KC desde aquí." },
-      { time:"Noche", text:"18th & Vine Jazz District. Jazz en vivo, bourbon de Missouri y el ambiente que no existe en ninguna otra sede del torneo." },
-    ]},
-    { day:2, title:"Día de partido — Argentina vs. Argelia", subtitle:"Arrowhead Stadium · Mar 16 Jun · 20:00 CT", isMatchDay:true, matchRef:"m1", steps:[
-      { time:"H-4:00", text:"Cena temprana en el Crossroads o el Power & Light. El ambiente albiceleste empieza horas antes del partido." },
-      { time:"H-3:00", text:"Fan Fest en el WWI Museum. La comunidad argentina del Medio Oeste lleva ahí desde el mediodía." },
-      { time:"H-2:00", text:"ConnectKC26 Stadium Direct desde el Fan Fest. El pase debe estar reservado con anticipación." },
-      { time:"20:00", text:"Argentina vs. Argelia. El estadio más ruidoso del mundo. El campeón defensor abre su torneo." },
-    ]},
-    { day:3, title:"BBQ y Jazz District", subtitle:"Joe's Kansas City · 18th & Vine", isMatchDay:false, steps:[
-      { time:"Mañana", text:"Joe's Kansas City BBQ antes de las 11am para evitar la cola. Los burnt ends no se negocia." },
-      { time:"Mediodía", text:"Negro Leagues Baseball Museum + American Jazz Museum en 18th & Vine. Dos museos en el mismo barrio." },
-      { time:"Tarde", text:"Crossroads Arts District: murales, galerías, la escena de arte más activa de KC." },
-      { time:"Noche", text:"Jazz en vivo en alguno de los clubs del Jazz District. El único plan nocturno que justifica por sí solo el viaje." },
-    ]},
-  ],
-  lagomTips:[
-    "El pase ConnectKC26 Stadium Direct se vende por separado al boleto de partido y tiene capacidad limitada. Para Argentina (16 jun) y el Cuartos de Final (11 jul), los pases se agotan primero. Reserva en kansascityfwc26.com en cuanto abran la venta.",
-    "Kansas City tiene más de 100 restaurantes de BBQ. La diferencia está en los burnt ends — las puntas del pecho de res que se caramelizan en la segunda cocción. Joe's Kansas City y Q39 sirven los mejores. Empieza por ahí y decide el resto después.",
-    "Para el Cuartos de Final del 11 de julio, los equipos en juego no se conocen hasta el 4 de julio. Reserva alojamiento con tarifa cancelable para esa semana y confirma en cuanto salgan los cruces del torneo.",
-    "Arrowhead ostenta el récord Guinness de estadio al aire libre más ruidoso del mundo: 142.2 decibelios registrados en partido de Chiefs. El diseño de cuenco concentra el ruido hacia el campo. El partido de Argentina va a estar a esa escala.",
-  ],
-  matchDayChecklist:[
-    "Pase ConnectKC26 Stadium Direct reservado (separado del boleto de partido)",
-    "Boleto digital del partido — app FIFA (sin versión en papel)",
-    "ESTA aprobado o visa B-2 vigente",
-    "Llegada al Fan Fest del WWI Museum con tiempo para el bus",
-    "Ropa ligera + capa para tormentas de verano del Medio Oeste",
-    "Llegada al estadio 90 min antes — puertas abren H-1:30",
-    "Reserva de hotel confirmada para 16 jun y 11 jul",
-    "Efectivo USD o tarjeta para BBQ, bars y transporte",
-  ],
-  didYouKnow:"Arrowhead Stadium ostenta el récord Guinness de estadio al aire libre más ruidoso del mundo: 142.2 decibelios, registrados durante un partido de los Kansas City Chiefs en 2014. El diseño de cuenco abierto no es solo estética — fue construido deliberadamente para concentrar el sonido hacia el campo. En junio de 2026, Argentina va a descubrir lo que significa jugar en un estadio diseñado para el ruido.",
-  closingNote:"Kansas City es la sede que menos explicación necesita y que más sorprende a quien la visita sin haber estado antes. El estadio más ruidoso del mundo al aire libre. El campeón defensor en el partido inaugural de la ciudad. La BBQ más seria del continente a precios que no requieren disculpa. El ConnectKC26 resuelve el problema de transporte que el metro no puede resolver. LagomPlan te da el autobús correcto, el burnt end apropiado y la sala donde nació el jazz. El resto lo hace Arrowhead — a 142.2 decibelios de capacidad máxima.",
-  closingSignature:"Lagomplan · Guía de campo · Kansas City · Mundial 2026",
-  plannerCTA:"Generar mi viaje a Kansas City",
-};
 
 const KCIllustration = () => (
   <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
@@ -193,7 +63,7 @@ const LagomNote = ({ children }) => (
     <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.8, margin:0 }}>{children}</p>
   </div>
 );
-const MatchCard = ({ match, onPlanAround }) => {
+const MatchCard = ({ match, strings }) => {
   const isTBD = !match.teams[0].flag && !match.teams[1].flag;
   const borderColor = match.highlight ? `${T.matchGold}50` : T.sandDark;
   const accentBar = match.highlight ? T.matchGold : isTBD ? T.sandDark : CITY_ACCENT;
@@ -235,12 +105,9 @@ const MatchCard = ({ match, onPlanAround }) => {
             {match.teams[1].flag && <div style={{ fontSize:26, lineHeight:1 }}>{match.teams[1].flag}</div>}
           </div>
         </div>
-        {!isTBD && (
-          null
-        )}
         {isTBD && (
           <div style={{ ...uf(12,400), color:T.inkFaint, textAlign:"center", padding:"8px 0" }}>
-            Rival por definir al terminar fase de grupos
+            {strings.rivalTBD}
           </div>
         )}
       </div>
@@ -251,15 +118,15 @@ const MatchCard = ({ match, onPlanAround }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // PROGRESSIVE DISCLOSURE
 // ─────────────────────────────────────────────────────────────────────────────
-const ShowMoreToggle = ({ expanded, onToggle }) => (
+const ShowMoreToggle = ({ expanded, onToggle, strings }) => (
   <button onClick={onToggle} style={{ display:"inline-flex", alignItems:"center", gap:5, marginTop:16, background:"transparent", border:`1px solid ${T.sage}55`, borderRadius:40, ...uf(10,600), color:T.sage, cursor:"pointer", letterSpacing:"0.08em", textTransform:"uppercase", padding:"5px 14px", transition:"all 0.18s" }}
     onMouseEnter={e => { e.currentTarget.style.background=T.sageLight; e.currentTarget.style.borderColor=T.sage; e.currentTarget.style.color=T.pine; }}
     onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=`${T.sage}55`; e.currentTarget.style.color=T.sage; }}>
-    {expanded ? "Ver menos ↑" : "Ver más ↓"}
+    {expanded ? strings.showLess : strings.showMore}
   </button>
 );
 
-const CollapsibleVibeCard = ({ item }) => {
+const CollapsibleVibeCard = ({ item, strings }) => {
   const [open, setOpen] = useState(false);
   return (
     <Card hover style={{ overflow:"hidden", display:"flex", flexDirection:"row" }}>
@@ -271,7 +138,7 @@ const CollapsibleVibeCard = ({ item }) => {
         </div>
         <div style={{ ...df(14,700), color:T.pine, lineHeight:1.25 }}>{item.title}</div>
         <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.72, margin:0, ...(open ? {} : { display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden" }) }}>{item.desc}</p>
-        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} />
+        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} strings={strings} />
       </div>
     </Card>
   );
@@ -280,7 +147,7 @@ const CollapsibleVibeCard = ({ item }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // STAY CARD
 // ─────────────────────────────────────────────────────────────────────────────
-const StayCard = ({ stay }) => (
+const StayCard = ({ stay, strings }) => (
   <Card hover style={{ display:"flex", flexDirection:"column", height:"100%" }}>
     <div style={{ padding:"22px 22px 0" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
@@ -303,7 +170,7 @@ const StayCard = ({ stay }) => (
       <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
         onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
         onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
-        Ver disponibilidad
+        {strings.checkAvailability}
       </a>
     </div>
   </Card>
@@ -343,15 +210,15 @@ const LogisticsCard = ({ item }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // SIDEBAR
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideSidebar = ({ guide, onPlan }) => {
+const GuideSidebar = ({ guide, onPlan, strings }) => {
   const [checked, setChecked] = useState({});
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
 
       <Card style={{ padding:"22px 22px", background:T.sandLight, borderColor:T.sandDark }}>
-        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
+        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>{strings.plannerKicker}</Label>
         <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
-          ¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.
+          {strings.plannerPitch}
         </p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
@@ -365,7 +232,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.sageLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>✦</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Notas Lagom</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.lagomNotes}</Label>
         </div>
         {guide.lagomTips.map((tip, i) => (
           <div key={i} style={{ display:"flex", gap:11, paddingTop:12, paddingBottom:12, borderBottom: i < guide.lagomTips.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
@@ -380,7 +247,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.matchGoldLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>☑</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Checklist día de partido</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.matchDayChecklist}</Label>
         </div>
         {guide.matchDayChecklist.map((item, i) => (
           <button key={i} onClick={() => setChecked(p => ({...p,[i]:!p[i]}))} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"9px 0", borderTop: i > 0 ? `1px solid ${T.sandDark}` : "none", background:"transparent", border:"none", cursor:"pointer", textAlign:"left", width:"100%" }}>
@@ -393,7 +260,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
       </Card>
 
       <Card style={{ padding:"20px 22px", background:T.fjordLight, borderColor:`${T.fjord}30` }}>
-        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>¿Sabías que?</Label>
+        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>{strings.didYouKnow}</Label>
         <p style={{ ...uf(13,400), color:T.fjord, lineHeight:1.72, margin:0 }}>{guide.didYouKnow}</p>
       </Card>
 
@@ -401,14 +268,14 @@ const GuideSidebar = ({ guide, onPlan }) => {
         <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
           <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>✦</span>
           <div>
-            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>Optimizar itinerario con IA</div>
+            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>{strings.optimizeAi}</div>
             <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.65, margin:"0 0 12px" }}>
-              Dinos cuántos días tienes y cuáles partidos quieres ver. La IA arma la ruta.
+              {strings.optimizeAiPitch}
             </p>
             <button onClick={onPlan} style={{ ...uf(9,700), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:"none", border:`1px solid ${T.pine}`, borderRadius:RADIUS-2, padding:"7px 14px", cursor:"pointer", transition:"all 0.18s" }}
               onMouseEnter={e => { e.currentTarget.style.background=T.pine; e.currentTarget.style.color=T.white; }}
               onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.color=T.pine; }}>
-              Optimizar ruta →
+              {strings.optimizeAiCta}
             </button>
           </div>
         </div>
@@ -420,7 +287,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE HERO
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideHero = ({ guide }) => (
+const GuideHero = ({ guide, strings }) => (
   <div style={{ display:"grid", gridTemplateColumns:"1fr 280px", gap:56, alignItems:"center", padding:"72px 0 64px", borderBottom:`1px solid rgba(28,28,26,0.08)`, marginBottom:56 }}>
     <div>
       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:18, flexWrap:"wrap" }}>
@@ -442,7 +309,7 @@ const GuideHero = ({ guide }) => (
           <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>
         ))}
         <span style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.matchGold, background:T.matchGoldLight, border:`1px solid ${T.matchGold}35`, padding:"5px 13px", borderRadius:40 }}>
-          ⚽ {guide.matches.length} partidos
+          ⚽ {guide.matches.length} {strings.matchesLabel}
         </span>
       </div>
       <div style={{ display:"flex", gap:20, flexWrap:"wrap" }}>
@@ -467,24 +334,24 @@ const GuideHero = ({ guide }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // STICKY NAV
 // ─────────────────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  {id:"matches",   label:"Partidos"},
-  {id:"manifesto", label:"Manifiesto"},
-  {id:"stays",     label:"Dónde dormir"},
-  {id:"vibe",      label:"Ambiente"},
-  {id:"logistics", label:"Logística"},
+const getNavItems = (strings) => [
+  {id:"matches",   label:strings.navMatches},
+  {id:"manifesto", label:strings.navManifesto},
+  {id:"stays",     label:strings.navStays},
+  {id:"vibe",      label:strings.navVibe},
+  {id:"logistics", label:strings.navLogistics},
 ];
 
-const StickyNav = ({ active, onNavigate, onBack }) => (
+const StickyNav = ({ active, onNavigate, onBack, guide, strings }) => (
   <div style={{ position:"sticky", top:0, zIndex:40, background:`${T.bg}F5`, backdropFilter:"blur(18px)", borderBottom:`1px solid ${T.sandDark}`, height:52, display:"flex", alignItems:"center", padding:"0 40px", gap:0, overflowX:"auto" }}>
     <button onClick={onBack} style={{ ...uf(11,500), color:T.inkFaint, background:"none", border:"none", cursor:"pointer", padding:"0 14px 0 0", marginRight:14, borderRight:`1px solid ${T.sandDark}`, whiteSpace:"nowrap", letterSpacing:"0.06em", transition:"color 0.15s" }}
       onMouseEnter={e => e.currentTarget.style.color=T.pine}
       onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
-      ← Guías
+      {strings.navBeyond === "Beyond the stadium" ? "← Guides" : "← Guías"}
     </button>
-    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Ciudad de México</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{guide.city}</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
-    {NAV_ITEMS.map(item => (
+    {getNavItems(strings).map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10, active===item.id ? 700 : 500), letterSpacing:"0.08em", textTransform:"uppercase", color: active===item.id ? T.pine : T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id ? T.coral : "transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>
     ))}
   </div>
@@ -493,7 +360,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE DETAIL
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideDetail = ({ guide, onBack }) => {
+const GuideDetail = ({ guide, onBack, strings }) => {
   const [active,        setActive]        = useState("matches");
   const [showManifesto, setShowManifesto] = useState(false);
   const [showVibe,      setShowVibe]      = useState(false);
@@ -503,7 +370,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
   useEffect(() => {
     const observers = [];
-    NAV_ITEMS.forEach(item => {
+    getNavItems(strings).forEach(item => {
       const el = document.getElementById(item.id);
       if (!el) return;
       const obs = new IntersectionObserver(
@@ -514,7 +381,7 @@ const GuideDetail = ({ guide, onBack }) => {
       observers.push(obs);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, []);
+  }, [strings]);
 
   const scrollTo = id => {
     const el = document.getElementById(id);
@@ -523,10 +390,10 @@ const GuideDetail = ({ guide, onBack }) => {
 
   return (
     <div style={{ background:T.bg, minHeight:"100vh" }}>
-      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} />
+      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} guide={guide} strings={strings} />
 
       <div style={{ maxWidth:1140, margin:"0 auto", padding:"0 40px" }}>
-        <GuideHero guide={guide} />
+        <GuideHero guide={guide} strings={strings} />
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 316px", gap:52, alignItems:"flex-start" }}>
 
@@ -535,19 +402,19 @@ const GuideDetail = ({ guide, onBack }) => {
 
             {/* 01 — MATCHES */}
             <section id="matches" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="01" title="Tus partidos"
-                subtitle="5 partidos confirmados en el Estadio Azteca. México juega el 11 y el 24 de junio — las dos fechas de mayor demanda del torneo en la ciudad." />
+              <SectionHeader number="01" title={strings.section01Title}
+                subtitle={guide.sectionSubtitles?.matches} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16 }}>
                 {guide.matches.map(match => (
-                  <MatchCard key={match.id} match={match} onPlanAround={() => {}} />
+                  <MatchCard key={match.id} match={match} strings={strings} />
                 ))}
               </div>
             </section>
 
             {/* 02 — MANIFIESTO */}
             <section id="manifesto" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="02" title="Manifiesto de campo"
-                subtitle="Lo que necesitas saber antes de llegar." />
+              <SectionHeader number="02" title={strings.section02Title}
+                subtitle={strings.section02Subtitle} />
               <Card style={{ marginBottom:24, overflow:"hidden" }}>
                 <div style={{ height:4, background:CITY_ACCENT }} />
                 <div style={{ padding:"20px 24px" }}>
@@ -567,31 +434,32 @@ const GuideDetail = ({ guide, onBack }) => {
                   <LagomNote>{guide.manifesto.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} />
+              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} strings={strings} />
             </section>
 
             {/* 03 — STAYS */}
             <section id="stays" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="03" title="Dónde dormir · Base de descanso"
-                subtitle="Refugios seleccionados para recargar energías entre diseño de autor y confort estratégico." />
-              <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
-                <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
-                  <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
-                  <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                    Los precios son estimaciones para el periodo mundialista. El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México) son las fechas más críticas.
-                    Si aún no tienes alojamiento, prioriza Airbnb en <strong>Coyoacán</strong> antes de considerar hoteles de cadena en zonas sobredemandadas. AIFA NO es una opción cercana al estadio — está a 80 km al norte.
-                  </p>
+              <SectionHeader number="03" title={strings.section03Title}
+                subtitle={strings.section03Subtitle} />
+              {guide.staysWarning && (
+                <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
+                  <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                    <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
+                    <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
+                      {guide.staysWarning}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(256px,1fr))", gap:16 }}>
-                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} />)}
+                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} strings={strings} />)}
               </div>
             </section>
 
             {/* 04 — VIBE */}
             <section id="vibe" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="04" title="Siente el ambiente"
-                subtitle="Fan Fest oficial en el Zócalo, pantallas en el Bosque de Chapultepec y las cantinas que llevan décadas transmitiendo fútbol." />
+              <SectionHeader number="04" title={strings.section04Title}
+                subtitle={guide.sectionSubtitles?.vibe} />
               <p style={{
                 ...uf(15,400), color:T.inkMid, lineHeight:1.85, marginBottom:showVibe ? 28 : 0, maxWidth:640,
                 ...(showVibe ? {} : { display:"-webkit-box", WebkitLineClamp:3, WebkitBoxOrient:"vertical", overflow:"hidden" }),
@@ -601,18 +469,18 @@ const GuideDetail = ({ guide, onBack }) => {
               {showVibe && (
                 <>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
-                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} />)}
+                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} strings={strings} />)}
                   </div>
                   <LagomNote>{guide.vibe.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} />
+              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} strings={strings} />
             </section>
 
             {/* 05 — LOGISTICS */}
             <section id="logistics" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="05" title="Llegar al estadio"
-                subtitle="Metro + Tren Ligero es la única ruta que no depende del tráfico de CDMX." />
+              <SectionHeader number="05" title={strings.section05Title}
+                subtitle={guide.sectionSubtitles?.logistics} />
               <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom: showLogistics ? 24 : 0 }}>
                 {guide.logistics.transport.slice(0, 2).map((item, i) => <LogisticsCard key={i} item={item} />)}
               </div>
@@ -623,7 +491,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                   <Card style={{ marginBottom:24 }}>
                     <div style={{ padding:"18px 24px" }}>
-                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>Tiempos reales de desplazamiento</div>
+                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>{strings.section05RealTimes}</div>
                       {guide.logistics.timings.map((t, i) => (
                         <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < guide.logistics.timings.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
                           <span style={{ ...uf(13,400), color:T.inkMid }}>{t.label}</span>
@@ -637,7 +505,7 @@ const GuideDetail = ({ guide, onBack }) => {
                     <div style={{ padding:"20px 24px" }}>
                       <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
                         <span style={{ fontSize:16 }}>⚽</span>
-                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>Cronología recomendada</div>
+                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>{strings.section05Timeline}</div>
                         <span style={{ ...uf(13,600), color:T.ink }}>{guide.logistics.matchDayCronologia.matchName}</span>
                       </div>
                       {guide.logistics.matchDayCronologia.steps.map((step, i) => (
@@ -654,24 +522,24 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 </>
               )}
-              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} />
+              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} strings={strings} />
             </section>
 
             {/* 06 — FOOD */}
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="06" title="Dónde comer · Sobremesa mundialista"
-                subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
+              <SectionHeader number="06" title={strings.section06Title}
+                subtitle={guide.sectionSubtitles?.food} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                 {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
                 {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
               </div>
-              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} />
+              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} strings={strings} />
             </section>
 
             {/* 07 — EXPERIENCES */}
             <section style={{ marginBottom:64 }}>
-              <SectionHeader number="07" title="Fuera del estadio"
-                subtitle="El entretiempo ideal para descubrir que hay vida — y mucha cultura — más allá de los 90 minutos." />
+              <SectionHeader number="07" title={strings.section07Title}
+                subtitle={strings.section07Subtitle} />
               <div style={{ display:"flex", flexDirection:"column", gap:28 }}>
                 {guide.experiences.slice(0, 1).map((exp, i) => (
                   <div key={i} style={{ display:"grid", gridTemplateColumns:"auto 1fr", gap:"0 24px" }}>
@@ -718,7 +586,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 ))}
               </div>
-              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} />
+              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} strings={strings} />
             </section>
 
             {/* 08 — CIERRE */}
@@ -736,7 +604,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
           {/* ── SIDEBAR ── */}
           <div style={{ position:"sticky", top:64, alignSelf:"flex-start", paddingBottom:48 }}>
-            <GuideSidebar guide={guide} onPlan={() => { if (typeof window !== "undefined") window.location.href = "/es/planificador?destination=" + encodeURIComponent(guide.city) }} />
+            <GuideSidebar guide={guide} strings={strings} onPlan={() => { if (typeof window !== "undefined") window.location.href = (window.location.pathname.startsWith("/en/") ? "/en/planner" : "/es/planificador") + "?destination=" + encodeURIComponent(guide.city) }} />
           </div>
         </div>
 
@@ -749,7 +617,9 @@ const GuideDetail = ({ guide, onBack }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROOT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function App() {
+export default function App({ locale = "es" }) {
+  const guide = (locale === "en" && en) ? en : es;
+  const strings = locale === "en" ? ui.en : ui.es;
   return (
     <>
       <style>{`
@@ -762,7 +632,7 @@ export default function App() {
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
       `}</style>
-      <GuideDetail guide={KC} onBack={() => {}} />
+      <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
     </>
   );
 }

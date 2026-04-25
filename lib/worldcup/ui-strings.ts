@@ -30,6 +30,10 @@ export type WorldcupUi = {
   navLogistics: string
   navFood: string
   navBeyond: string
+  navItinerary: string
+  // Itinerary section (used by cities that include guide.itinerary)
+  sectionItineraryTitle: string
+  matchDayBadge: string
   // Section 01
   section01Title: string
   // Section 02
@@ -73,6 +77,9 @@ export const ui: { es: WorldcupUi; en: WorldcupUi } = {
     navLogistics: "Llegar",
     navFood: "Comer",
     navBeyond: "Fuera del estadio",
+    navItinerary: "Itinerario",
+    sectionItineraryTitle: "Ruta sugerida",
+    matchDayBadge: "Día de partido",
     section01Title: "Tus partidos",
     section02Title: "Manifiesto de campo",
     section02Subtitle: "Lo que necesitas saber antes de llegar.",
@@ -107,6 +114,9 @@ export const ui: { es: WorldcupUi; en: WorldcupUi } = {
     navLogistics: "Getting there",
     navFood: "Eating",
     navBeyond: "Beyond the stadium",
+    navItinerary: "Itinerary",
+    sectionItineraryTitle: "Suggested route",
+    matchDayBadge: "Match day",
     section01Title: "Your matches",
     section02Title: "Field manifesto",
     section02Subtitle: "What you need to know before arriving.",

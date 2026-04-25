@@ -400,7 +400,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
   useEffect(() => {
     const observers = [];
-    NAV_ITEMS.forEach(item => {
+    getNavItems(strings).forEach(item => {
       const el = document.getElementById(item.id);
       if (!el) return;
       const obs = new IntersectionObserver(
@@ -411,7 +411,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
       observers.push(obs);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, []);
+  }, [strings]);
 
   const scrollTo = id => {
     const el = document.getElementById(id);

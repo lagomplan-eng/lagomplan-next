@@ -1,5 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
+import { es, en } from "../../../lib/worldcup/data/atlanta";
+import { ui } from "../../../lib/worldcup/ui-strings";
 
 const T = {
   pine:"#0F3A33", sage:"#6B8F86", sageLight:"#EAF2F0",
@@ -19,119 +21,6 @@ const uf = (size, weight=400) => ({ fontFamily:"'Manrope',sans-serif", fontSize:
 const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
-
-const ATL = {
-  id:"atl", city:"Atlanta", country:"Estados Unidos", state:"Georgia", flag:"🇺🇸", accent:CITY_ACCENT,
-  tags:["Fútbol","Cultura","Gastronomía","Sede co-anfitriona"],
-  stadium:{ name:"Atlanta Stadium (Mercedes-Benz Stadium)", capacity:"~75,000", area:"Downtown — junto al Centennial Olympic Park" },
-  headline:"El único estadio mundialista con techo retráctil y aire acondicionado en Estados Unidos. En julio en Georgia, eso no es un lujo — es una política de salud pública.",
-  description:"El único estadio mundialista con techo retráctil y aire acondicionado en Estados Unidos. En julio en Georgia, eso no es un lujo — es una política de salud pública. Atlanta llega al Mundial con ocho partidos, dos presentaciones de España, una Semifinal y una ciudad que lleva dos décadas construyendo la cultura de soccer más seria del sur del país.",
-  scores:[
-    { label:"Ambiente", value:4 }, { label:"Fútbol local", value:4 }, { label:"Gastronomía", value:4 },
-    { label:"Transporte", value:4 }, { label:"Seguridad", value:4 }, { label:"Costo", value:3 },
-  ],
-  matches:[
-    { id:"m1", date:"15 Jun", day:"Lun", time:"12:00 ET", teams:[{name:"España",flag:"🇪🇸"},{name:"Cabo Verde",flag:"🇨🇻"}], stadium:"Atlanta Stadium", tag:"Grupo H — apertura de la sede", highlight:true },
-    { id:"m2", date:"18 Jun", day:"Jue", time:"12:00 ET", teams:[{name:"Sudáfrica",flag:"🇿🇦"},{name:"Repechaje UEFA D",flag:""}], stadium:"Atlanta Stadium", tag:"Grupo A", highlight:false },
-    { id:"m3", date:"21 Jun", day:"Dom", time:"12:00 ET", teams:[{name:"España",flag:"🇪🇸"},{name:"Arabia Saudita",flag:"🇸🇦"}], stadium:"Atlanta Stadium", tag:"Grupo H — España confirma el grupo", highlight:true },
-    { id:"m4", date:"24 Jun", day:"Mié", time:"18:00 ET", teams:[{name:"Marruecos",flag:"🇲🇦"},{name:"Haití",flag:"🇭🇹"}], stadium:"Atlanta Stadium", tag:"Grupo C", highlight:false },
-    { id:"m5", date:"27 Jun", day:"Sáb", time:"19:30 ET", teams:[{name:"RD Congo",flag:"🇨🇩"},{name:"Uzbekistán",flag:"🇺🇿"}], stadium:"Atlanta Stadium", tag:"Grupo K", highlight:false },
-    { id:"m6", date:"1 Jul", day:"Mié", time:"12:00 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m7", date:"7 Jul", day:"Mar", time:"12:00 ET", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m8", date:"15 Jul", day:"Mié", time:"15:00 ET", teams:[{name:"Semifinal",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Semifinal", highlight:true },
-  ],
-  manifesto:{
-    stadiumInfo:[
-      { label:"Estadio FIFA", value:"Atlanta Stadium (Mercedes-Benz Stadium)" },
-      { label:"Aforo", value:"~75,000 — configuración FIFA" },
-      { label:"Clima", value:"Días: 30–34°C · Humedad alta · Interior climatizado con techo retráctil y temperatura controlada" },
-      { label:"Partidos", value:"8 confirmados — 5 grupos + 1 Ronda de 32 + 1 Ronda de 16 + 1 Semifinal" },
-      { label:"Nota del estadio", value:"Mercedes-Benz Stadium: primer estadio profesional con certificación LEED Platinum en EE.UU. Los precios de comida dentro son deliberadamente más bajos que en cualquier otro estadio de la NFL." },
-      { label:"Aeropuerto", value:"ATL — Hartsfield-Jackson Atlanta International · el aeropuerto más transitado del mundo · MARTA directo al centro en ~20 min" },
-    ],
-    body:"Atlanta llega al Mundial con ocho partidos, el único estadio climatizado de Estados Unidos en el torneo y una ciudad que lleva dos décadas construyendo la cultura de soccer más seria del sur del país. España juega dos de sus tres partidos de grupos en Atlanta. Si avanza — lo que el sorteo sugiere fuertemente — los aficionados españoles tienen una base fija aquí durante dos semanas. La diáspora africana llena las tribunas de Marruecos y RD Congo desde adentro de la ciudad; y el 15 de julio, una Semifinal llega al mismo recinto donde Atlanta United gana sus títulos.",
-    lagomNote:"España juega dos partidos en Atlanta (15 y 21 de junio). Para la Semifinal del 15 de julio, los precios de hotel en Midtown suben a niveles de Super Bowl. Reserva ambas fechas simultáneamente o busca Airbnb en Decatur o Virginia-Highland, barrios bien conectados por MARTA con precios más razonables.",
-  },
-  vibe:{
-    body:"Atlanta tiene una de las comunidades africanas más grandes de Estados Unidos — las diásporas de Ghana, Nigeria, Etiopía y Senegal dan a los partidos de Cabo Verde, Marruecos y RD Congo una tribuna local que nadie tuvo que comprar un vuelo para estar ahí. España suma una comunidad hispanohablante de más de 800,000 personas en el área metropolitana. El Atlanta United fue el equipo que demostró que el sur de Estados Unidos podía sostener una cultura de soccer seria. Los Five Stripes promedian 45,000 espectadores por partido en el mismo estadio del Mundial — la mayor asistencia de la MLS. La capital culinaria del sur de Estados Unidos suma chicken and waffles, cocina coreana en Doraville, la mejor escena de restaurantes de autor del sureste del país y el Sweet Auburn Curb Market con décadas de historia.",
-    lagomNote:"Más accesible que las sedes de la Costa Este. Los precios suben en las fechas de España y la Semifinal, pero el margen de aumento es manejable comparado con Nueva York o Miami.",
-  },
-  stays:[
-    { name:"Hotel Clermont", area:"Ponce de Leon / Midtown-Inman Park", price:"$$$", priceCAD:"$220–380 USD/noche (periodo mundialista)", tags:["Hotel boutique","Rooftop","Ponce City Market cerca"], note:"El hotel que revivió el Ponce de Leon corridor de Atlanta: rooftop bar con vistas al skyline, restaurante propio y habitaciones con diseño deliberado en un edificio de los años 20. A dos cuadras del Ponce City Market y a quince minutos del estadio en MARTA.", best_for:"Carácter", url:"https://booking.stay22.com/lagomplan/wHIiapcEkW" },
-    { name:"Loews Atlanta Hotel", area:"Midtown", price:"$$$", priceCAD:"$190–320 USD/noche (periodo mundialista)", tags:["Valor","MARTA cerca","Habitaciones amplias"], note:"La mejor relación posición-precio-servicio de Midtown: habitaciones amplias, gimnasio, pool y acceso caminando a la estación de MARTA Midtown. Cuatro cuadras de Peachtree Street.", best_for:"Fan WC", url:"https://booking.stay22.com/lagomplan/d1JnNPNPDU" },
-    { name:"Four Seasons Atlanta", area:"Midtown / 14th Street", price:"$$$$", priceCAD:"$480–850 USD/noche (periodo mundialista)", tags:["Lujo","Piedmont Park","Spa"], note:"La dirección de referencia en Atlanta: vistas al parque Piedmont, restaurante Park 75 y spa de piso completo. A tres cuadras de la estación de MARTA Arts Center.", best_for:"Lujo", url:"https://booking.stay22.com/lagomplan/rFOlKarvir" },
-  ],
-  logistics:{
-    transport:[
-      { icon:"✈", title:"Llegar a Atlanta — ATL", text:"ATL — Hartsfield-Jackson Atlanta International es el aeropuerto más transitado del mundo. El MARTA Gold Line sale del aeropuerto directamente al centro de Atlanta en veinte minutos. Desde el avión hasta la puerta del Mercedes-Benz Stadium en menos de 35 minutos, sin taxi." },
-      { icon:"🚇", title:"Ruta maestra — MARTA Roja o Dorada", text:"MARTA línea Roja o Dorada → Vine City Station o GWCC/CNN Center Station. Desde Midtown (Arts Center o Midtown Station) hasta Vine City: dos o tres paradas sin transbordo, en ocho a doce minutos. Tarifa: $2.50 con tarjeta Breeze." },
-      { icon:"🏟", title:"Al estadio el día del partido", text:"El MARTA conecta directamente con el complejo del estadio desde múltiples puntos de la ciudad. Es el tránsito público más limpio y directo de cualquier sede del sur del país. Desde Inman Park, transbordo en Five Points y llegada al complejo del estadio en aproximadamente veinte minutos." },
-      { icon:"⚠️", title:"Error crítico — subestimar el calor exterior", text:"El trayecto entre la estación de MARTA y la entrada del estadio, las filas de seguridad exteriores y las zonas de espera al aire libre pueden sumar 20–30 minutos bajo el sol de julio en Atlanta con humedad alta. Lleva agua, protector solar y ropa que permita sudar.", isWarning:true },
-    ],
-    timings:[
-      { label:"Desde Midtown (Arts Center) en MARTA", value:"~12 min" },
-      { label:"Desde ATL (aeropuerto) en MARTA Gold Line", value:"~30 min puerta a puerta" },
-      { label:"Desde Inman Park en MARTA", value:"~20 min con transbordo en Five Points" },
-      { label:"Uber desde Midtown", value:"10–20 min · regreso post-partido con espera larga" },
-    ],
-    matchDayCronologia:{
-      matchName:"15 Jul · Semifinal · 15:00 ET",
-      steps:[
-        { time:"H-3:00", text:"Almuerza en Midtown o Inman Park. La Semifinal arranca a las 3pm — el mediodía tiene el calor más intenso del día." },
-        { time:"H-2:30", text:"MARTA desde tu estación hacia Vine City o GWCC/CNN Center Station." },
-        { time:"H-1:30", text:"Llegada al estadio. El aire acondicionado entra en funcionamiento en cuanto cruzas el acceso." },
-        { time:"H-0:30", text:"En tu asiento. Boleto digital listo." },
-        { time:"H+0:00", text:"Partido." },
-        { time:"H+1:45", text:"MARTA de regreso. Servicio ampliado post-partido." },
-      ],
-    },
-    timing:"Mercedes-Benz Stadium tiene lo que no tiene ningún otro estadio mundialista norteamericano, salvo el BC Place de Vancouver: un techo que se cierra y aire acondicionado. El calor de julio en Georgia deja de ser un problema en el momento en que cruzas la puerta del estadio.",
-    cost:"Más accesible que las sedes de la Costa Este. Los precios suben en las fechas de España y la Semifinal, pero el margen de aumento es manejable comparado con Nueva York o Miami.",
-  },
-  vibeCards:[
-    { title:"FIFA Fan Festival™ — Centennial Olympic Park", type:"Fan fest oficial", typeColor:T.coral, desc:"El Fan Fest de Atlanta se instala en el Centennial Olympic Park — el parque construido para los Juegos Olímpicos de 1996 en el corazón del downtown, a cinco minutos caminando del estadio. Pantallas gigantes, programación musical y acceso gratuito desde el MARTA. Para los partidos de España en especial, el parque acumula una multitud que mezcla la diáspora hispanohablante de Atlanta con aficionados internacionales.", tag:"Sin boleto OK" },
-    { title:"Centennial Olympic Park — exterior", type:"Pantalla exterior", typeColor:T.fjord, desc:"Las dimensiones del Centennial son tan generosas que el perímetro exterior del parque, con pantallas orientadas hacia las calles adyacentes, funciona como segundo anillo de transmisión. Para el fan que llega tarde al Fan Fest oficial, el exterior tiene ambiente sin necesidad de registro.", tag:"Icónico" },
-    { title:"Decatur Square — WatchFest 26", type:"WatchFest 26", typeColor:T.sage, desc:"El ayuntamiento del municipio de Decatur, a 10 km del downtown de Atlanta por la línea MARTA, organiza WatchFest 26: 34 días de transmisiones al aire libre en la plaza principal con conciertos incluidos. Para el fan que quiere el ambiente sin la masividad del Fan Fest central.", tag:"Local" },
-    { title:"Piedmont Park (Midtown)", type:"Parque urbano", typeColor:T.pine, desc:"El parque urbano más grande de Atlanta activa su gran prado central con pantallas para partidos de alta demanda. La comunidad de fanáticos de Atlanta United — los más organizados de la ciudad — usa Piedmont como punto de reunión orgánico para los partidos que no tienen pantalla en el Centennial.", tag:"Comunidad" },
-    { title:"The Midway Pub", type:"Bar de barrio", typeColor:"#1A3A5C", desc:"Bar de barrio con pantallas en todos los ángulos y una clientela mixta que va desde los aficionados del Atlanta United hasta quienes siguen la Premier League con criterio. Para los partidos de Marruecos y España, The Midway es de los pocos lugares en Atlanta donde la afición del equipo visitante también encuentra su comunidad. Qué pedir: Alitas + cerveza artesanal de Georgia. Vibe: Bar auténtico, el más futbolero de Atlanta fuera del Centennial.", tag:"Little Five Points" },
-    { title:"Fado Irish Pub", type:"Pub irlandés", typeColor:"#093b12", desc:"El pub irlandés de referencia de Atlanta, con pantallas de gran formato y una tradición establecida de transmitir fútbol europeo desde antes de que la MLS existiera en la ciudad. Para el partido de España vs. Arabia Saudita (21 de junio), la afición española de Atlanta convierte Fado en un punto de concentración. Qué pedir: Shepherd's pie + Guinness de barril. Vibe: Pub europeo, historial de fútbol serio.", tag:"Buckhead" },
-    { title:"Stats Brewpub", type:"Cervecería", typeColor:"#5A3A2A", desc:"Cervecería con el mayor número de pantallas de cualquier local del downtown de Atlanta y una selección de cervezas artesanales de Georgia seria. A cinco minutos caminando del Mercedes-Benz Stadium. Para los partidos sin afición masiva, Stats tiene el ambiente correcto sin el caos del Fan Fest. Qué pedir: Lo que esté de temporada en el taproom + pizza de masa madre. Vibe: Cervecero, pantallas serias.", tag:"Downtown" },
-  ],
-  food:[
-    { dish:"The Midway Pub", where:"Little Five Points — alitas + cerveza artesanal de Georgia; bar de barrio auténtico, el más futbolero de Atlanta fuera del Centennial", price:"$$", type:"Pre-partido" },
-    { dish:"Fado Irish Pub", where:"Buckhead — shepherd's pie + Guinness de barril; pub europeo con historial de fútbol serio", price:"$$", type:"Pub europeo" },
-    { dish:"Stats Brewpub", where:"Downtown — cerveza de temporada + pizza de masa madre; pantallas serias a cinco minutos del estadio", price:"$$", type:"Pantallas" },
-    { dish:"Sweet Auburn Curb Market", where:"Sweet Auburn — mercado histórico desde 1918 en el barrio donde nació Martin Luther King Jr.; cocina sureña y ambiente auténtico", price:"$–$$", type:"Mercado" },
-    { dish:"Cocina coreana, vietnamita y etíope", where:"Doraville / Buford Highway — la mayor diversidad gastronómica de la ciudad en un radio de diez kilómetros", price:"$–$$", type:"Excursión" },
-    { dish:"Chicken and waffles", where:"Atlanta — capital culinaria del sur de Estados Unidos, con argumento gastronómico propio y serio", price:"$$", type:"Local" },
-  ],
-  experiences:[
-    { title:"Martin Luther King Jr. National Historic Site", duration:"Medio día", desc:"El complejo del National Park Service en Sweet Auburn incluye la casa natal de King, la iglesia Ebenezer Baptist Church donde predicó y su tumba junto a Coretta Scott King — todo en el mismo radio de cuatro cuadras. Entrada gratuita, acceso por MARTA (estación King Memorial). El Centro Internacional de los Derechos Civiles y los Derechos Humanos, a diez minutos caminando del Centennial Olympic Park, complementa el recorrido con una exposición sobre el movimiento global.", type:"Historia", affiliateLink:"", affiliateLabel:"Ver información" },
-    { title:"Georgia Aquarium + World of Coca-Cola", duration:"Día completo", desc:"El Georgia Aquarium en el downtown es el más grande del hemisferio occidental: cuatro millones de galones de agua, tiburones ballena, belugas y delfines. A cien metros, el World of Coca-Cola tiene degustación de más de cien sabores de la marca desde todo el mundo. Los dos en el mismo radio de tres cuadras, con aire acondicionado — un día completo sin auto y sin sol directo.", type:"Familia", affiliateLink:"", affiliateLabel:"Ver entradas" },
-    { title:"Piedmont Park + BeltLine", duration:"Mañana o tarde", desc:"Piedmont Park en Midtown tiene 185 acres de parque urbano con lago, senderos y los mejores atardeceres de la ciudad. Conecta con el Atlanta BeltLine — corredor peatonal y ciclista de 35 kilómetros alrededor del núcleo de la ciudad. El tramo Eastside Trail, desde Inman Park hasta Ponce City Market, es el más activo y tiene acceso a mercados, restaurantes y galerías. Para el día libre entre el 21 y el 24 de junio, el BeltLine en bicicleta es el plan más completo de Atlanta.", type:"Ciudad", affiliateLink:"", affiliateLabel:"Alquilar bicicleta" },
-    { title:"Ponce City Market + Eastside Trail", duration:"Medio día", desc:"El Ponce City Market ocupa un antiguo edificio de distribución de Sears con más de cien tiendas y restaurantes en un solo recinto. Conectado al BeltLine, funciona como punto de entrada natural a Inman Park, al corredor gastronómico del Eastside Trail y a la Atlanta que se entiende mejor caminando que desde un auto.", type:"Gastronomía", affiliateLink:"", affiliateLabel:"Ver opciones" },
-  ],
-  lagomTips:[
-    "España juega dos de sus tres partidos de grupos en Atlanta. Si avanza — lo que el sorteo sugiere fuertemente — los aficionados españoles tienen una base fija aquí durante dos semanas.",
-    "MARTA línea Roja o Dorada hacia Vine City Station o GWCC/CNN Center Station es la ruta maestra. Desde Midtown son dos o tres paradas sin transbordo, en ocho a doce minutos.",
-    "No subestimes el calor exterior. El estadio está climatizado, pero filas, caminatas y zonas de espera pueden sumar 20–30 minutos bajo sol de julio con humedad alta.",
-    "Reserva simultáneamente fechas de España y Semifinal. Para el 15 de julio, Midtown puede subir a niveles de Super Bowl; Decatur y Virginia-Highland son alternativas razonables.",
-  ],
-  matchDayChecklist:[
-    "Boleto digital del partido — app FIFA",
-    "Tarjeta Breeze o pago sin contacto para MARTA",
-    "Ruta MARTA definida: Vine City o GWCC/CNN Center",
-    "Agua para el trayecto exterior",
-    "Protector solar",
-    "Ropa ligera que permita sudar",
-    "Reserva de hotel confirmada para 15 y 21 de junio (España) y 15 de julio (Semifinal)",
-    "Llegada al estadio 90 min antes — el A/C empieza al cruzar el acceso",
-  ],
-  didYouKnow:"Mercedes-Benz Stadium es el primer estadio deportivo profesional en obtener la certificación LEED Platinum en Estados Unidos. Los precios de comida dentro del recinto son notablemente más bajos que en cualquier otro estadio de la NFL — política deliberada del propietario.",
-  closingNote:"Atlanta llega al Mundial con ocho partidos, el único estadio climatizado de Estados Unidos en el torneo y una ciudad que lleva dos décadas construyendo la cultura de soccer más seria del sur del país. España juega aquí dos veces seguidas; la diáspora africana llena las tribunas de Marruecos y RD Congo desde adentro de la ciudad; y el 15 de julio, una Semifinal en el mismo recinto donde Atlanta United gana sus títulos. El MARTA llega directo. El aire acondicionado funciona. LagomPlan te da la estación y el barrio. La ciudad pone el resto.",
-  closingSignature:"Lagomplan · Guía de campo · Atlanta · Mundial 2026",
-  plannerCTA:"Generar mi viaje a Atlanta",
-};
 
 const AtlIllustration = () => (
   <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
@@ -160,7 +49,6 @@ const Card = ({ children, style={}, onClick, hover=false }) => {
     </div>
   );
 };
-const Divider = ({ my=48 }) => <div style={{ height:1, background:T.sandDark, margin:`${my}px 0` }} />;
 const SectionHeader = ({ number, title, subtitle }) => (
   <div style={{ marginBottom:32 }}>
     <div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}>
@@ -177,7 +65,7 @@ const LagomNote = ({ children }) => (
     <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.8, margin:0 }}>{children}</p>
   </div>
 );
-const MatchCard = ({ match, onPlanAround }) => {
+const MatchCard = ({ match, strings }) => {
   const isTBD = !match.teams[0].flag && !match.teams[1].flag;
   const borderColor = match.highlight ? `${T.matchGold}50` : T.sandDark;
   const accentBar = match.highlight ? T.matchGold : isTBD ? T.sandDark : CITY_ACCENT;
@@ -219,12 +107,9 @@ const MatchCard = ({ match, onPlanAround }) => {
             {match.teams[1].flag && <div style={{ fontSize:26, lineHeight:1 }}>{match.teams[1].flag}</div>}
           </div>
         </div>
-        {!isTBD && (
-          null
-        )}
         {isTBD && (
           <div style={{ ...uf(12,400), color:T.inkFaint, textAlign:"center", padding:"8px 0" }}>
-            Rival por definir al terminar fase de grupos
+            {strings.rivalTBD}
           </div>
         )}
       </div>
@@ -235,15 +120,15 @@ const MatchCard = ({ match, onPlanAround }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // PROGRESSIVE DISCLOSURE
 // ─────────────────────────────────────────────────────────────────────────────
-const ShowMoreToggle = ({ expanded, onToggle }) => (
+const ShowMoreToggle = ({ expanded, onToggle, strings }) => (
   <button onClick={onToggle} style={{ display:"inline-flex", alignItems:"center", gap:5, marginTop:16, background:"transparent", border:`1px solid ${T.sage}55`, borderRadius:40, ...uf(10,600), color:T.sage, cursor:"pointer", letterSpacing:"0.08em", textTransform:"uppercase", padding:"5px 14px", transition:"all 0.18s" }}
     onMouseEnter={e => { e.currentTarget.style.background=T.sageLight; e.currentTarget.style.borderColor=T.sage; e.currentTarget.style.color=T.pine; }}
     onMouseLeave={e => { e.currentTarget.style.background="transparent"; e.currentTarget.style.borderColor=`${T.sage}55`; e.currentTarget.style.color=T.sage; }}>
-    {expanded ? "Ver menos ↑" : "Ver más ↓"}
+    {expanded ? strings.showLess : strings.showMore}
   </button>
 );
 
-const CollapsibleVibeCard = ({ item }) => {
+const CollapsibleVibeCard = ({ item, strings }) => {
   const [open, setOpen] = useState(false);
   return (
     <Card hover style={{ overflow:"hidden", display:"flex", flexDirection:"row" }}>
@@ -255,7 +140,7 @@ const CollapsibleVibeCard = ({ item }) => {
         </div>
         <div style={{ ...df(14,700), color:T.pine, lineHeight:1.25 }}>{item.title}</div>
         <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.72, margin:0, ...(open ? {} : { display:"-webkit-box", WebkitLineClamp:2, WebkitBoxOrient:"vertical", overflow:"hidden" }) }}>{item.desc}</p>
-        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} />
+        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} strings={strings} />
       </div>
     </Card>
   );
@@ -264,7 +149,7 @@ const CollapsibleVibeCard = ({ item }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // STAY CARD
 // ─────────────────────────────────────────────────────────────────────────────
-const StayCard = ({ stay }) => (
+const StayCard = ({ stay, strings }) => (
   <Card hover style={{ display:"flex", flexDirection:"column", height:"100%" }}>
     <div style={{ padding:"22px 22px 0" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", marginBottom:12 }}>
@@ -287,7 +172,7 @@ const StayCard = ({ stay }) => (
       <a href={stay.url || "#"} target={stay.url ? "_blank" : undefined} rel="noopener noreferrer" style={{ display:"block", textAlign:"center", width:"100%", padding:"11px", borderRadius:RADIUS-2, background: stay.url ? T.pine : T.sandDark, ...uf(10,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, textDecoration:"none", transition:"opacity 0.18s", pointerEvents: stay.url ? "auto" : "none", opacity: stay.url ? 1 : 0.45 }}
         onMouseEnter={e => { if (stay.url) e.currentTarget.style.opacity="0.82"; }}
         onMouseLeave={e => { if (stay.url) e.currentTarget.style.opacity="1"; }}>
-        Ver disponibilidad
+        {strings.checkAvailability}
       </a>
     </div>
   </Card>
@@ -327,15 +212,15 @@ const LogisticsCard = ({ item }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // SIDEBAR
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideSidebar = ({ guide, onPlan }) => {
+const GuideSidebar = ({ guide, onPlan, strings }) => {
   const [checked, setChecked] = useState({});
   return (
     <div style={{ display:"flex", flexDirection:"column", gap:16 }}>
 
       <Card style={{ padding:"22px 22px", background:T.sandLight, borderColor:T.sandDark }}>
-        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>Lagomplan · Planificador</Label>
+        <Label color={T.sage} style={{ marginBottom:10, display:"block" }}>{strings.plannerKicker}</Label>
         <p style={{ ...uf(16, 700), color:T.pine, lineHeight:1.4, marginBottom:16 }}>
-          ¿Listo para tu versión del Mundial? Convierte esta guía en un itinerario adaptado a tus tiempos y presupuesto.
+          {strings.plannerPitch}
         </p>
         <button onClick={onPlan} style={{ width:"100%", padding:"11px 16px", background:T.pine, border:"none", borderRadius:RADIUS-2, ...uf(10,600), letterSpacing:"0.12em", textTransform:"uppercase", color:T.white, cursor:"pointer", transition:"opacity 0.18s" }}
           onMouseEnter={e => e.currentTarget.style.opacity="0.82"}
@@ -349,7 +234,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.sageLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>✦</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Notas Lagom</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.lagomNotes}</Label>
         </div>
         {guide.lagomTips.map((tip, i) => (
           <div key={i} style={{ display:"flex", gap:11, paddingTop:12, paddingBottom:12, borderBottom: i < guide.lagomTips.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
@@ -364,7 +249,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
           <div style={{ width:28, height:28, background:T.matchGoldLight, borderRadius:RADIUS-2, display:"flex", alignItems:"center", justifyContent:"center" }}>
             <span style={{ fontSize:13 }}>☑</span>
           </div>
-          <Label color={T.pine} style={{ fontSize:11 }}>Checklist día de partido</Label>
+          <Label color={T.pine} style={{ fontSize:11 }}>{strings.matchDayChecklist}</Label>
         </div>
         {guide.matchDayChecklist.map((item, i) => (
           <button key={i} onClick={() => setChecked(p => ({...p,[i]:!p[i]}))} style={{ display:"flex", alignItems:"flex-start", gap:10, padding:"9px 0", borderTop: i > 0 ? `1px solid ${T.sandDark}` : "none", background:"transparent", border:"none", cursor:"pointer", textAlign:"left", width:"100%" }}>
@@ -377,7 +262,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
       </Card>
 
       <Card style={{ padding:"20px 22px", background:T.fjordLight, borderColor:`${T.fjord}30` }}>
-        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>¿Sabías que?</Label>
+        <Label color={T.fjord} style={{ marginBottom:10, display:"block" }}>{strings.didYouKnow}</Label>
         <p style={{ ...uf(13,400), color:T.fjord, lineHeight:1.72, margin:0 }}>{guide.didYouKnow}</p>
       </Card>
 
@@ -385,14 +270,14 @@ const GuideSidebar = ({ guide, onPlan }) => {
         <div style={{ display:"flex", gap:12, alignItems:"flex-start" }}>
           <span style={{ fontSize:16, flexShrink:0, marginTop:1 }}>✦</span>
           <div>
-            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>Optimizar itinerario con IA</div>
+            <div style={{ ...uf(12,700), color:T.pine, marginBottom:6 }}>{strings.optimizeAi}</div>
             <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.65, margin:"0 0 12px" }}>
-              Dinos cuántos días tienes y cuáles partidos quieres ver. La IA arma la ruta.
+              {strings.optimizeAiPitch}
             </p>
             <button onClick={onPlan} style={{ ...uf(9,700), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:"none", border:`1px solid ${T.pine}`, borderRadius:RADIUS-2, padding:"7px 14px", cursor:"pointer", transition:"all 0.18s" }}
               onMouseEnter={e => { e.currentTarget.style.background=T.pine; e.currentTarget.style.color=T.white; }}
               onMouseLeave={e => { e.currentTarget.style.background="none"; e.currentTarget.style.color=T.pine; }}>
-              Optimizar ruta →
+              {strings.optimizeAiCta}
             </button>
           </div>
         </div>
@@ -404,7 +289,7 @@ const GuideSidebar = ({ guide, onPlan }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE HERO
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideHero = ({ guide }) => (
+const GuideHero = ({ guide, strings }) => (
   <div style={{ display:"grid", gridTemplateColumns:"1fr 280px", gap:56, alignItems:"center", padding:"72px 0 64px", borderBottom:`1px solid rgba(28,28,26,0.08)`, marginBottom:56 }}>
     <div>
       <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:18, flexWrap:"wrap" }}>
@@ -426,7 +311,7 @@ const GuideHero = ({ guide }) => (
           <span key={tag} style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.pine, background:T.sageLight, border:`1px solid ${T.sage}30`, padding:"5px 13px", borderRadius:40 }}>{tag}</span>
         ))}
         <span style={{ ...uf(10,600), letterSpacing:"0.1em", textTransform:"uppercase", color:T.matchGold, background:T.matchGoldLight, border:`1px solid ${T.matchGold}35`, padding:"5px 13px", borderRadius:40 }}>
-          ⚽ {guide.matches.length} partidos
+          ⚽ {guide.matches.length} {strings.matchesLabel}
         </span>
       </div>
       <div style={{ display:"flex", gap:20, flexWrap:"wrap" }}>
@@ -451,24 +336,24 @@ const GuideHero = ({ guide }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // STICKY NAV
 // ─────────────────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  {id:"matches",   label:"Partidos"},
-  {id:"manifesto", label:"Manifiesto"},
-  {id:"stays",     label:"Dónde dormir"},
-  {id:"vibe",      label:"Ambiente"},
-  {id:"logistics", label:"Logística"},
+const getNavItems = (strings) => [
+  {id:"matches",   label:strings.navMatches},
+  {id:"manifesto", label:strings.navManifesto},
+  {id:"stays",     label:strings.navStays},
+  {id:"vibe",      label:strings.navVibe},
+  {id:"logistics", label:strings.navLogistics},
 ];
 
-const StickyNav = ({ active, onNavigate, onBack }) => (
+const StickyNav = ({ active, onNavigate, onBack, guide, strings }) => (
   <div style={{ position:"sticky", top:0, zIndex:40, background:`${T.bg}F5`, backdropFilter:"blur(18px)", borderBottom:`1px solid ${T.sandDark}`, height:52, display:"flex", alignItems:"center", padding:"0 40px", gap:0, overflowX:"auto" }}>
     <button onClick={onBack} style={{ ...uf(11,500), color:T.inkFaint, background:"none", border:"none", cursor:"pointer", padding:"0 14px 0 0", marginRight:14, borderRight:`1px solid ${T.sandDark}`, whiteSpace:"nowrap", letterSpacing:"0.06em", transition:"color 0.15s" }}
       onMouseEnter={e => e.currentTarget.style.color=T.pine}
       onMouseLeave={e => e.currentTarget.style.color=T.inkFaint}>
-      ← Guías
+      {strings.navBeyond === "Beyond the stadium" ? "← Guides" : "← Guías"}
     </button>
-    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>Ciudad de México</span>
+    <span style={{ ...uf(14, 700), color:T.pine, marginRight:20, whiteSpace:"nowrap" }}>{guide.city}</span>
     <div style={{ width:1, height:20, background:T.sandDark, marginRight:4, flexShrink:0 }} />
-    {NAV_ITEMS.map(item => (
+    {getNavItems(strings).map(item => (
       <button key={item.id} onClick={() => onNavigate(item.id)} style={{ ...uf(10, active===item.id ? 700 : 500), letterSpacing:"0.08em", textTransform:"uppercase", color: active===item.id ? T.pine : T.inkFaint, background:"none", border:"none", padding:"0 13px", height:"100%", cursor:"pointer", borderBottom:`2px solid ${active===item.id ? T.coral : "transparent"}`, transition:"all 0.18s", whiteSpace:"nowrap", flexShrink:0 }}>{item.label}</button>
     ))}
   </div>
@@ -477,7 +362,7 @@ const StickyNav = ({ active, onNavigate, onBack }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE DETAIL
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideDetail = ({ guide, onBack }) => {
+const GuideDetail = ({ guide, onBack, strings }) => {
   const [active,        setActive]        = useState("matches");
   const [showManifesto, setShowManifesto] = useState(false);
   const [showVibe,      setShowVibe]      = useState(false);
@@ -487,7 +372,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
   useEffect(() => {
     const observers = [];
-    NAV_ITEMS.forEach(item => {
+    getNavItems(strings).forEach(item => {
       const el = document.getElementById(item.id);
       if (!el) return;
       const obs = new IntersectionObserver(
@@ -498,7 +383,7 @@ const GuideDetail = ({ guide, onBack }) => {
       observers.push(obs);
     });
     return () => observers.forEach(o => o.disconnect());
-  }, []);
+  }, [strings]);
 
   const scrollTo = id => {
     const el = document.getElementById(id);
@@ -507,10 +392,10 @@ const GuideDetail = ({ guide, onBack }) => {
 
   return (
     <div style={{ background:T.bg, minHeight:"100vh" }}>
-      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} />
+      <StickyNav active={active} onNavigate={scrollTo} onBack={onBack} guide={guide} strings={strings} />
 
       <div style={{ maxWidth:1140, margin:"0 auto", padding:"0 40px" }}>
-        <GuideHero guide={guide} />
+        <GuideHero guide={guide} strings={strings} />
 
         <div style={{ display:"grid", gridTemplateColumns:"1fr 316px", gap:52, alignItems:"flex-start" }}>
 
@@ -519,19 +404,19 @@ const GuideDetail = ({ guide, onBack }) => {
 
             {/* 01 — MATCHES */}
             <section id="matches" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="01" title="Tus partidos"
-                subtitle="5 partidos confirmados en el Estadio Azteca. México juega el 11 y el 24 de junio — las dos fechas de mayor demanda del torneo en la ciudad." />
+              <SectionHeader number="01" title={strings.section01Title}
+                subtitle={guide.sectionSubtitles?.matches} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16 }}>
                 {guide.matches.map(match => (
-                  <MatchCard key={match.id} match={match} onPlanAround={() => {}} />
+                  <MatchCard key={match.id} match={match} strings={strings} />
                 ))}
               </div>
             </section>
 
             {/* 02 — MANIFIESTO */}
             <section id="manifesto" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="02" title="Manifiesto de campo"
-                subtitle="Lo que necesitas saber antes de llegar." />
+              <SectionHeader number="02" title={strings.section02Title}
+                subtitle={strings.section02Subtitle} />
               <Card style={{ marginBottom:24, overflow:"hidden" }}>
                 <div style={{ height:4, background:CITY_ACCENT }} />
                 <div style={{ padding:"20px 24px" }}>
@@ -551,31 +436,32 @@ const GuideDetail = ({ guide, onBack }) => {
                   <LagomNote>{guide.manifesto.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} />
+              <ShowMoreToggle expanded={showManifesto} onToggle={() => setShowManifesto(!showManifesto)} strings={strings} />
             </section>
 
             {/* 03 — STAYS */}
             <section id="stays" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="03" title="Dónde dormir · Base de descanso"
-                subtitle="Refugios seleccionados para recargar energías entre diseño de autor y confort estratégico." />
-              <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
-                <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
-                  <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
-                  <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                    Los precios son estimaciones para el periodo mundialista. El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México) son las fechas más críticas.
-                    Si aún no tienes alojamiento, prioriza Airbnb en <strong>Coyoacán</strong> antes de considerar hoteles de cadena en zonas sobredemandadas. AIFA NO es una opción cercana al estadio — está a 80 km al norte.
-                  </p>
+              <SectionHeader number="03" title={strings.section03Title}
+                subtitle={strings.section03Subtitle} />
+              {guide.staysWarning && (
+                <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
+                  <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
+                    <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
+                    <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
+                      {guide.staysWarning}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(256px,1fr))", gap:16 }}>
-                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} />)}
+                {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} strings={strings} />)}
               </div>
             </section>
 
             {/* 04 — VIBE */}
             <section id="vibe" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="04" title="Siente el ambiente"
-                subtitle="Fan Fest oficial en el Zócalo, pantallas en el Bosque de Chapultepec y las cantinas que llevan décadas transmitiendo fútbol." />
+              <SectionHeader number="04" title={strings.section04Title}
+                subtitle={guide.sectionSubtitles?.vibe} />
               <p style={{
                 ...uf(15,400), color:T.inkMid, lineHeight:1.85, marginBottom:showVibe ? 28 : 0, maxWidth:640,
                 ...(showVibe ? {} : { display:"-webkit-box", WebkitLineClamp:3, WebkitBoxOrient:"vertical", overflow:"hidden" }),
@@ -585,18 +471,18 @@ const GuideDetail = ({ guide, onBack }) => {
               {showVibe && (
                 <>
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
-                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} />)}
+                    {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} strings={strings} />)}
                   </div>
                   <LagomNote>{guide.vibe.lagomNote}</LagomNote>
                 </>
               )}
-              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} />
+              <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} strings={strings} />
             </section>
 
             {/* 05 — LOGISTICS */}
             <section id="logistics" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="05" title="Llegar al estadio"
-                subtitle="Metro + Tren Ligero es la única ruta que no depende del tráfico de CDMX." />
+              <SectionHeader number="05" title={strings.section05Title}
+                subtitle={guide.sectionSubtitles?.logistics} />
               <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom: showLogistics ? 24 : 0 }}>
                 {guide.logistics.transport.slice(0, 2).map((item, i) => <LogisticsCard key={i} item={item} />)}
               </div>
@@ -607,7 +493,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                   <Card style={{ marginBottom:24 }}>
                     <div style={{ padding:"18px 24px" }}>
-                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>Tiempos reales de desplazamiento</div>
+                      <div style={{ ...uf(10,700), letterSpacing:"0.16em", textTransform:"uppercase", color:T.inkFaint, marginBottom:14 }}>{strings.section05RealTimes}</div>
                       {guide.logistics.timings.map((t, i) => (
                         <div key={i} style={{ display:"flex", justifyContent:"space-between", alignItems:"center", padding:"11px 0", borderBottom: i < guide.logistics.timings.length-1 ? `1px solid ${T.sandDark}` : "none" }}>
                           <span style={{ ...uf(13,400), color:T.inkMid }}>{t.label}</span>
@@ -621,7 +507,7 @@ const GuideDetail = ({ guide, onBack }) => {
                     <div style={{ padding:"20px 24px" }}>
                       <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:18 }}>
                         <span style={{ fontSize:16 }}>⚽</span>
-                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>Cronología recomendada</div>
+                        <div style={{ ...uf(11,700), letterSpacing:"0.12em", textTransform:"uppercase", color:T.matchGold }}>{strings.section05Timeline}</div>
                         <span style={{ ...uf(13,600), color:T.ink }}>{guide.logistics.matchDayCronologia.matchName}</span>
                       </div>
                       {guide.logistics.matchDayCronologia.steps.map((step, i) => (
@@ -638,24 +524,24 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 </>
               )}
-              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} />
+              <ShowMoreToggle expanded={showLogistics} onToggle={() => setShowLogistics(!showLogistics)} strings={strings} />
             </section>
 
             {/* 06 — FOOD */}
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="06" title="Dónde comer · Sobremesa mundialista"
-                subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
+              <SectionHeader number="06" title={strings.section06Title}
+                subtitle={guide.sectionSubtitles?.food} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                 {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
                 {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
               </div>
-              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} />
+              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} strings={strings} />
             </section>
 
             {/* 07 — EXPERIENCES */}
             <section style={{ marginBottom:64 }}>
-              <SectionHeader number="07" title="Fuera del estadio"
-                subtitle="El entretiempo ideal para descubrir que hay vida — y mucha cultura — más allá de los 90 minutos." />
+              <SectionHeader number="07" title={strings.section07Title}
+                subtitle={strings.section07Subtitle} />
               <div style={{ display:"flex", flexDirection:"column", gap:28 }}>
                 {guide.experiences.slice(0, 1).map((exp, i) => (
                   <div key={i} style={{ display:"grid", gridTemplateColumns:"auto 1fr", gap:"0 24px" }}>
@@ -702,7 +588,7 @@ const GuideDetail = ({ guide, onBack }) => {
                   </div>
                 ))}
               </div>
-              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} />
+              <ShowMoreToggle expanded={showExp} onToggle={() => setShowExp(!showExp)} strings={strings} />
             </section>
 
             {/* 08 — CIERRE */}
@@ -720,7 +606,7 @@ const GuideDetail = ({ guide, onBack }) => {
 
           {/* ── SIDEBAR ── */}
           <div style={{ position:"sticky", top:64, alignSelf:"flex-start", paddingBottom:48 }}>
-            <GuideSidebar guide={guide} onPlan={() => { if (typeof window !== "undefined") window.location.href = "/es/planificador?destination=" + encodeURIComponent(guide.city) }} />
+            <GuideSidebar guide={guide} strings={strings} onPlan={() => { if (typeof window !== "undefined") window.location.href = (window.location.pathname.startsWith("/en/") ? "/en/planner" : "/es/planificador") + "?destination=" + encodeURIComponent(guide.city) }} />
           </div>
         </div>
 
@@ -733,7 +619,9 @@ const GuideDetail = ({ guide, onBack }) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // ROOT
 // ─────────────────────────────────────────────────────────────────────────────
-export default function App() {
+export default function App({ locale = "es" }) {
+  const guide = (locale === "en" && en) ? en : es;
+  const strings = locale === "en" ? ui.en : ui.es;
   return (
     <>
       <style>{`
@@ -746,7 +634,7 @@ export default function App() {
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
       `}</style>
-      <GuideDetail guide={ATL} onBack={() => {}} />
+      <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
     </>
   );
 }

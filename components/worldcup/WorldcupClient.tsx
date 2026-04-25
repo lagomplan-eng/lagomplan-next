@@ -51,16 +51,84 @@ const PERSONAS_CFG = {
 } as const
 
 type PersonaKey = keyof typeof PERSONAS_CFG
+type Locale = 'es' | 'en'
 
 // ─────────────────────────────────────────────────────────────────────────────
-// ROSTER — 16 cities, full editorial data
+// MATCH TOKEN TRANSLATION — team/date tokens used in ROSTER render helpers
+// ─────────────────────────────────────────────────────────────────────────────
+const TEAM_EN: Record<string, string> = {
+  'México': 'Mexico',
+  'Sudáfrica': 'South Africa',
+  'Rep. Checa': 'Czech Rep.',
+  'Uzbekistán': 'Uzbekistan',
+  'Corea del Sur': 'South Korea',
+  'Japón': 'Japan',
+  'Rep. UEFA B': 'UEFA Playoff B',
+  'Rep. UEFA D': 'UEFA Playoff D',
+  'EUA': 'USA',
+  'Irán': 'Iran',
+  'Nueva Zelanda': 'New Zealand',
+  'Suiza': 'Switzerland',
+  'Arabia Saudita': 'Saudi Arabia',
+  'Cabo Verde': 'Cape Verde',
+  'Escocia': 'Scotland',
+  'Brasil': 'Brazil',
+  'Marruecos': 'Morocco',
+  'Francia': 'France',
+  'Noruega': 'Norway',
+  'España': 'Spain',
+  'Países Bajos': 'Netherlands',
+  'Playoff IC-1': 'IC Playoff 1',
+  'Playoff IC-2': 'IC Playoff 2',
+  'Inglaterra': 'England',
+  'Croacia': 'Croatia',
+  'Alemania': 'Germany',
+  'Bélgica': 'Belgium',
+  'Egipto': 'Egypt',
+  'Bosnia y Herz.': 'Bosnia & Herz.',
+  'Argelia': 'Algeria',
+  'Costa de Marfil': "Côte d'Ivoire",
+  'Haití': 'Haiti',
+  'Canadá': 'Canada',
+  'Panamá': 'Panama',
+  'Túnez': 'Tunisia',
+  'RD Congo': 'DR Congo',
+}
+
+const DAY_EN: Record<string, string> = {
+  'Lun': 'Mon', 'Mar': 'Tue', 'Mié': 'Wed', 'Jue': 'Thu',
+  'Vie': 'Fri', 'Sáb': 'Sat', 'Dom': 'Sun',
+}
+
+const translateTeam = (name: string, l: Locale) =>
+  l === 'es' || !name ? name : (TEAM_EN[name] ?? name)
+
+// "Jue 11 Jun" → "Thu Jun 11"
+const translateDate = (date: string, l: Locale) => {
+  if (l === 'es') return date
+  const parts = date.split(' ')
+  if (parts.length !== 3) return date
+  const [day, num, month] = parts
+  return `${DAY_EN[day] ?? day} ${month} ${num}`
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ROSTER — 16 cities, full editorial data (bilingual)
 // ─────────────────────────────────────────────────────────────────────────────
 const ROSTER = [
   {
-    id:'cdmx', city:'Ciudad de México', short:'CDX', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
+    id:'cdmx',
+    city:{ es:'Ciudad de México', en:'Mexico City' },
+    short:'CDX', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
     accent:'#1A6B5A', persona:'roberto' as PersonaKey, stadium:'Estadio Azteca', ready:true,
-    tagline:'El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.',
-    intro:'Roberto, esto es para ti. El Azteca fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
+    tagline:{
+      es:'El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.',
+      en:'The Azteca needs no introduction. What it does need, badly, is a transport strategy.',
+    },
+    intro:{
+      es:'Roberto, esto es para ti. El Azteca fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
+      en:"Roberto, this one's for you. The Azteca was yours before you were born — and now it's going to be yours again, in the most important World Cup since '86.",
+    },
     matches:[
       {date:'Jue 11 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Sudáfrica',    flagB:'🇿🇦'},
       {date:'Mié 17 Jun', teamA:'Uzbekistán',    flagA:'🇺🇿', teamB:'Colombia',     flagB:'🇨🇴'},
@@ -68,10 +136,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'gdl', city:'Guadalajara', short:'GDL', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
+    id:'gdl',
+    city:{ es:'Guadalajara', en:'Guadalajara' },
+    short:'GDL', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
     accent:'#8B2635', persona:'valentina' as PersonaKey, stadium:'Estadio Akron', ready:true,
-    tagline:'Aquí no se pregunta de qué equipo eres. Se nota antes de que abras la boca.',
-    intro:'Valentina, este es tu partido. Guadalajara es la ciudad más amable de México para viajar con bebé — barrios tranquilos, comida extraordinaria, mucho espacio.',
+    tagline:{
+      es:'Aquí no se pregunta de qué equipo eres. Se nota antes de que abras la boca.',
+      en:'Nobody asks which team you support here. It shows before you even open your mouth.',
+    },
+    intro:{
+      es:'Valentina, este es tu partido. Guadalajara es la ciudad más amable de México para viajar con bebé — barrios tranquilos, comida extraordinaria, mucho espacio.',
+      en:"Valentina, this is your match. Guadalajara is Mexico's friendliest city for traveling with a baby — quiet neighborhoods, extraordinary food, plenty of space.",
+    },
     matches:[
       {date:'Jue 11 Jun', teamA:'Corea del Sur', flagA:'🇰🇷', teamB:'Rep. Checa',    flagB:'🇨🇿'},
       {date:'Jue 18 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Corea del Sur', flagB:'🇰🇷'},
@@ -79,10 +155,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'mty', city:'Monterrey', short:'MTY', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
+    id:'mty',
+    city:{ es:'Monterrey', en:'Monterrey' },
+    short:'MTY', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
     accent:'#2D4F6C', persona:'andrea' as PersonaKey, stadium:'Estadio BBVA', ready:true,
-    tagline:'La ciudad más trabajadora de México recibe el Mundial con la misma actitud con la que construyó sus industrias: sin exceso de ornamento.',
-    intro:'Andrea, Monterrey va a sorprenderte. El estadio BBVA es probablemente el más fotogénico del torneo. Y la escena de restaurantes se convirtió en referencia nacional.',
+    tagline:{
+      es:'La ciudad más trabajadora de México recibe el Mundial con la misma actitud con la que construyó sus industrias: sin exceso de ornamento.',
+      en:"Mexico's hardest-working city welcomes the World Cup with the same attitude it built its industries: without excess ornament.",
+    },
+    intro:{
+      es:'Andrea, Monterrey va a sorprenderte. El estadio BBVA es probablemente el más fotogénico del torneo. Y la escena de restaurantes se convirtió en referencia nacional.',
+      en:"Andrea, Monterrey will surprise you. Estadio BBVA is probably the tournament's most photogenic venue. And the restaurant scene has become a national benchmark.",
+    },
     matches:[
       {date:'Dom 14 Jun', teamA:'Túnez',         flagA:'🇹🇳', teamB:'Rep. UEFA B',   flagB:''},
       {date:'Vie 19 Jun', teamA:'Túnez',         flagA:'🇹🇳', teamB:'Japón',         flagB:'🇯🇵'},
@@ -90,10 +174,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'la', city:'Los Ángeles', short:'LA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'la',
+    city:{ es:'Los Ángeles', en:'Los Angeles' },
+    short:'LA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#C4622A', persona:'roberto' as PersonaKey, stadium:'SoFi Stadium', ready:true,
-    tagline:'El estadio más caro jamás construido está a tres millas del aeropuerto más cercano a cualquier estadio mundialista. En Los Ángeles, hasta las distancias son de película.',
-    intro:'Roberto, LA es tu partido de visita que se siente de local. Hay más afición mexicana en Los Ángeles que en Guadalajara. El SoFi Stadium va a parecer el Azteca.',
+    tagline:{
+      es:'El estadio más caro jamás construido está a tres millas del aeropuerto más cercano a cualquier estadio mundialista. En Los Ángeles, hasta las distancias son de película.',
+      en:'The most expensive stadium ever built sits three miles from the closest airport of any World Cup venue. In Los Angeles, even the distances are cinematic.',
+    },
+    intro:{
+      es:'Roberto, LA es tu partido de visita que se siente de local. Hay más afición mexicana en Los Ángeles que en Guadalajara. El SoFi Stadium va a parecer el Azteca.',
+      en:'Roberto, LA is your away match that feels like home. There are more Mexican fans in Los Angeles than in Guadalajara. SoFi Stadium will feel like the Azteca.',
+    },
     matches:[
       {date:'Vie 12 Jun', teamA:'EUA',           flagA:'🇺🇸', teamB:'Paraguay',      flagB:'🇵🇾'},
       {date:'Dom 15 Jun', teamA:'Irán',          flagA:'🇮🇷', teamB:'Nueva Zelanda', flagB:'🇳🇿'},
@@ -101,10 +193,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'mia', city:'Miami', short:'MIA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'mia',
+    city:{ es:'Miami', en:'Miami' },
+    short:'MIA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#0E8B8B', persona:'andrea' as PersonaKey, stadium:'Hard Rock Stadium', ready:true,
-    tagline:'El calor en Miami no es el clima. Es el estado de ánimo permanente de la ciudad.',
-    intro:'Andrea, Miami para una pareja que sabe viajar es el destino del torneo. No porque el fútbol sea lo principal — sino porque todo lo que rodea el partido es extraordinario.',
+    tagline:{
+      es:'El calor en Miami no es el clima. Es el estado de ánimo permanente de la ciudad.',
+      en:"The heat in Miami isn't the weather. It's the city's permanent mood.",
+    },
+    intro:{
+      es:'Andrea, Miami para una pareja que sabe viajar es el destino del torneo. No porque el fútbol sea lo principal — sino porque todo lo que rodea el partido es extraordinario.',
+      en:"Andrea, Miami for a couple that knows how to travel is the destination of the tournament. Not because football is the main event — but because everything surrounding the match is extraordinary.",
+    },
     matches:[
       {date:'Lun 15 Jun', teamA:'Arabia Saudita', flagA:'🇸🇦', teamB:'Uruguay',      flagB:'🇺🇾'},
       {date:'Dom 21 Jun', teamA:'Uruguay',        flagA:'🇺🇾', teamB:'Cabo Verde',   flagB:'🇨🇻'},
@@ -112,10 +212,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'nyc', city:'Nueva York', short:'NYC', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'nyc',
+    city:{ es:'Nueva York', en:'New York' },
+    short:'NYC', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#1A3A5C', persona:'roberto' as PersonaKey, stadium:'MetLife Stadium', ready:true,
-    tagline:'La ciudad que alberga la Final no necesita explicar por qué. Solo necesita que sepas llegar al estadio.',
-    intro:'Roberto, escúchame. La final del Mundial 2026 se juega en MetLife Stadium. Si Argentina llega — y hay buenas razones para creerlo — el partido más importante del siglo se va a jugar a 30 minutos de Manhattan.',
+    tagline:{
+      es:'La ciudad que alberga la Final no necesita explicar por qué. Solo necesita que sepas llegar al estadio.',
+      en:"The city hosting the Final doesn't need to explain why. It just needs you to know how to get to the stadium.",
+    },
+    intro:{
+      es:'Roberto, escúchame. La final del Mundial 2026 se juega en MetLife Stadium. Si Argentina llega — y hay buenas razones para creerlo — el partido más importante del siglo se va a jugar a 30 minutos de Manhattan.',
+      en:'Roberto, listen. The 2026 World Cup Final is played at MetLife Stadium. If Argentina makes it — and there are good reasons to believe they will — the most important match of the century will be played 30 minutes from Manhattan.',
+    },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Brasil',        flagA:'🇧🇷', teamB:'Marruecos',    flagB:'🇲🇦'},
       {date:'Mar 16 Jun', teamA:'Francia',       flagA:'🇫🇷', teamB:'Senegal',      flagB:'🇸🇳'},
@@ -123,10 +231,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'dal', city:'Dallas', short:'DAL', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'dal',
+    city:{ es:'Dallas', en:'Dallas' },
+    short:'DAL', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#8B2635', persona:'andrea' as PersonaKey, stadium:'AT&T Stadium', ready:true,
-    tagline:'El estadio más grande del torneo está en Arlington. No en Dallas. Y no hay metro que llegue ahí.',
-    intro:'Andrea, Dallas no es el destino obvio — y esa es la razón para ir. El AT&T Stadium es la experiencia deportiva más espectacular del torneo: pantalla de 60 metros, 80 mil personas.',
+    tagline:{
+      es:'El estadio más grande del torneo está en Arlington. No en Dallas. Y no hay metro que llegue ahí.',
+      en:"The tournament's biggest stadium is in Arlington. Not Dallas. And no subway gets you there.",
+    },
+    intro:{
+      es:'Andrea, Dallas no es el destino obvio — y esa es la razón para ir. El AT&T Stadium es la experiencia deportiva más espectacular del torneo: pantalla de 60 metros, 80 mil personas.',
+      en:"Andrea, Dallas isn't the obvious destination — and that's the reason to go. AT&T Stadium is the tournament's most spectacular sports experience: a 60-meter screen, 80,000 people.",
+    },
     matches:[
       {date:'Jue 11 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Sudáfrica',    flagB:'🇿🇦'},
       {date:'Mié 18 Jun', teamA:'España',        flagA:'🇪🇸', teamB:'Brasil',       flagB:'🇧🇷'},
@@ -134,10 +250,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'sf', city:'San Francisco', short:'SF', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'sf',
+    city:{ es:'San Francisco', en:'San Francisco' },
+    short:'SF', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#4A6B9E', persona:'roberto' as PersonaKey, stadium:"Levi's Stadium", ready:true,
-    tagline:'Brasil y Alemania juegan aquí. Y México podría avanzar a octavos aquí también.',
-    intro:'Roberto, Mission District es el barrio latino más auténtico de EE.UU. en la costa oeste. Murales de Diego Rivera en las paredes, taquería El Farolito abierta hasta las 3am.',
+    tagline:{
+      es:'Brasil y Alemania juegan aquí. Y México podría avanzar a octavos aquí también.',
+      en:'Brazil and Germany play here. And Mexico could advance to the round of 16 here too.',
+    },
+    intro:{
+      es:'Roberto, Mission District es el barrio latino más auténtico de EE.UU. en la costa oeste. Murales de Diego Rivera en las paredes, taquería El Farolito abierta hasta las 3am.',
+      en:'Roberto, the Mission District is the most authentic Latino neighborhood on the U.S. West Coast. Diego Rivera murals on the walls, taquería El Farolito open until 3am.',
+    },
     matches:[
       {date:'Dom 14 Jun', teamA:'Países Bajos',  flagA:'🇳🇱', teamB:'Japón',        flagB:'🇯🇵'},
       {date:'Mar 17 Jun', teamA:'Inglaterra',    flagA:'🏴󠁧󠁢󠁥󠁮󠁧󠁿', teamB:'Croacia',      flagB:'🇭🇷'},
@@ -145,10 +269,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'hou', city:'Houston', short:'HOU', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'hou',
+    city:{ es:'Houston', en:'Houston' },
+    short:'HOU', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#6B4226', persona:'valentina' as PersonaKey, stadium:'NRG Stadium', ready:true,
-    tagline:'La ciudad más diversa de Texas recibe al torneo más diverso de la historia. La aritmética tiene sentido.',
-    intro:'Valentina, Houston es probablemente la sede más amable del torneo para viajar con bebé. La ciudad es enorme y tiene todo — barrios tranquilos, mucho espacio.',
+    tagline:{
+      es:'La ciudad más diversa de Texas recibe al torneo más diverso de la historia. La aritmética tiene sentido.',
+      en:"Texas's most diverse city welcomes the most diverse tournament in history. The arithmetic adds up.",
+    },
+    intro:{
+      es:'Valentina, Houston es probablemente la sede más amable del torneo para viajar con bebé. La ciudad es enorme y tiene todo — barrios tranquilos, mucho espacio.',
+      en:'Valentina, Houston is probably the friendliest host city in the tournament for traveling with a baby. The city is huge and has everything — quiet neighborhoods, plenty of space.',
+    },
     matches:[
       {date:'Dom 14 Jun', teamA:'Alemania',      flagA:'🇩🇪', teamB:'Curazao',      flagB:'🇨🇼'},
       {date:'Mié 17 Jun', teamA:'Portugal',      flagA:'🇵🇹', teamB:'Playoff IC-1', flagB:''},
@@ -156,10 +288,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'sea', city:'Seattle', short:'SEA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'sea',
+    city:{ es:'Seattle', en:'Seattle' },
+    short:'SEA', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#2D6E4E', persona:'andrea' as PersonaKey, stadium:'Lumen Field', ready:true,
-    tagline:'La única sede del torneo donde el estadio está a diez minutos caminando del mercado de pescado más famoso de Norteamérica. Aprovéchalo antes del partido.',
-    intro:'Andrea, Seattle es el destino del torneo para la pareja que quiere hacer algo diferente de verdad. No es la ciudad obvia — y esa es exactamente el punto.',
+    tagline:{
+      es:'La única sede del torneo donde el estadio está a diez minutos caminando del mercado de pescado más famoso de Norteamérica. Aprovéchalo antes del partido.',
+      en:"The only host city where the stadium is a ten-minute walk from North America's most famous fish market. Take advantage of it before kickoff.",
+    },
+    intro:{
+      es:'Andrea, Seattle es el destino del torneo para la pareja que quiere hacer algo diferente de verdad. No es la ciudad obvia — y esa es exactamente el punto.',
+      en:"Andrea, Seattle is the tournament destination for the couple that wants to do something genuinely different. It's not the obvious city — and that's exactly the point.",
+    },
     matches:[
       {date:'Dom 15 Jun', teamA:'Bélgica',       flagA:'🇧🇪', teamB:'Egipto',       flagB:'🇪🇬'},
       {date:'Vie 19 Jun', teamA:'EUA',           flagA:'🇺🇸', teamB:'Australia',    flagB:'🇦🇺'},
@@ -167,10 +307,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'kc', city:'Kansas City', short:'KC', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'kc',
+    city:{ es:'Kansas City', en:'Kansas City' },
+    short:'KC', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#7B3F8C', persona:'valentina' as PersonaKey, stadium:'Arrowhead Stadium', ready:true,
-    tagline:'El estadio más ruidoso del mundo al aire libre recibe al campeón defensor. Trae tapones para los oídos — y úsalos solo si los necesitas.',
-    intro:'Valentina, Kansas City es probablemente la sede más amable del torneo para familia con bebé: precios razonables, espacios amplios, sin la densidad agobiante de NYC o LA.',
+    tagline:{
+      es:'El estadio más ruidoso del mundo al aire libre recibe al campeón defensor. Trae tapones para los oídos — y úsalos solo si los necesitas.',
+      en:'The loudest open-air stadium in the world welcomes the defending champions. Bring earplugs — and only use them if you need them.',
+    },
+    intro:{
+      es:'Valentina, Kansas City es probablemente la sede más amable del torneo para familia con bebé: precios razonables, espacios amplios, sin la densidad agobiante de NYC o LA.',
+      en:"Valentina, Kansas City is probably the tournament's friendliest host for a family with a baby: reasonable prices, open spaces, without the overwhelming density of NYC or LA.",
+    },
     matches:[
       {date:'Mar 16 Jun', teamA:'Argentina',     flagA:'🇦🇷', teamB:'Argelia',      flagB:'🇩🇿'},
       {date:'Sáb 20 Jun', teamA:'Ecuador',       flagA:'🇪🇨', teamB:'Curazao',      flagB:'🇨🇼'},
@@ -178,10 +326,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'atl', city:'Atlanta', short:'ATL', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'atl',
+    city:{ es:'Atlanta', en:'Atlanta' },
+    short:'ATL', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#B5451B', persona:'roberto' as PersonaKey, stadium:'Mercedes-Benz Stadium', ready:true,
-    tagline:'El único estadio mundialista con techo retráctil y aire acondicionado en Estados Unidos. En julio en Georgia, eso no es un lujo — es una política de salud pública.',
-    intro:'Roberto, Atlanta tiene dos cosas que no combinan en ninguna otra sede del torneo: el estadio más moderno del mundo y una de las comunidades latinoamericanas de crecimiento más rápido de EE.UU.',
+    tagline:{
+      es:'El único estadio mundialista con techo retráctil y aire acondicionado en Estados Unidos. En julio en Georgia, eso no es un lujo — es una política de salud pública.',
+      en:"The only World Cup stadium in the United States with a retractable roof and air conditioning. In a Georgia July, that's not a luxury — it's public health policy.",
+    },
+    intro:{
+      es:'Roberto, Atlanta tiene dos cosas que no combinan en ninguna otra sede del torneo: el estadio más moderno del mundo y una de las comunidades latinoamericanas de crecimiento más rápido de EE.UU.',
+      en:"Roberto, Atlanta has two things that don't combine at any other host city in the tournament: the world's most modern stadium and one of the fastest-growing Latin American communities in the U.S.",
+    },
     matches:[
       {date:'Lun 15 Jun', teamA:'España',        flagA:'🇪🇸', teamB:'Cabo Verde',    flagB:'🇨🇻'},
       {date:'Jue 18 Jun', teamA:'Sudáfrica',     flagA:'🇿🇦', teamB:'Rep. UEFA D',   flagB:''},
@@ -189,10 +345,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'phi', city:'Filadelfia', short:'PHI', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'phi',
+    city:{ es:'Filadelfia', en:'Philadelphia' },
+    short:'PHI', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#2A5F8F', persona:'roberto' as PersonaKey, stadium:'Lincoln Financial Field', ready:true,
-    tagline:'El 4 de julio de 2026, Filadelfia celebra 250 años de independencia y un partido de Ronda de 16. El orden de las prioridades lo decide cada quien.',
-    intro:'Roberto, la afición local ya vive el fútbol desde dentro. La comunidad mexicana de South Philly lleva 30 años convirtiendo el barrio en un pedazo de México.',
+    tagline:{
+      es:'El 4 de julio de 2026, Filadelfia celebra 250 años de independencia y un partido de Ronda de 16. El orden de las prioridades lo decide cada quien.',
+      en:'On July 4, 2026, Philadelphia celebrates 250 years of independence and a Round of 16 match. Everyone decides their own order of priorities.',
+    },
+    intro:{
+      es:'Roberto, la afición local ya vive el fútbol desde dentro. La comunidad mexicana de South Philly lleva 30 años convirtiendo el barrio en un pedazo de México.',
+      en:'Roberto, the local fans already live football from the inside. The Mexican community in South Philly has spent 30 years turning the neighborhood into a piece of Mexico.',
+    },
     matches:[
       {date:'Dom 14 Jun', teamA:'Costa de Marfil',flagA:'🇨🇮',teamB:'Ecuador',       flagB:'🇪🇨'},
       {date:'Vie 19 Jun', teamA:'Brasil',         flagA:'🇧🇷',teamB:'Haití',          flagB:'🇭🇹'},
@@ -200,10 +364,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'bos', city:'Boston', short:'BOS', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
+    id:'bos',
+    city:{ es:'Boston', en:'Boston' },
+    short:'BOS', country:{ es:'EE.UU.', en:'USA' }, flag:'🇺🇸', region:'us',
     accent:'#8B1A1A', persona:'andrea' as PersonaKey, stadium:'Gillette Stadium', ready:true,
-    tagline:'El estadio no está en Boston. El partido sí. Esa distinción vale un tren.',
-    intro:'Andrea, Boston es la ciudad del torneo más parecida a Europa sin salir de América del Norte. Y el 27 de junio, Argentina vs Brasil en Gillette Stadium.',
+    tagline:{
+      es:'El estadio no está en Boston. El partido sí. Esa distinción vale un tren.',
+      en:"The stadium isn't in Boston. The match is. That distinction is worth a train ride.",
+    },
+    intro:{
+      es:'Andrea, Boston es la ciudad del torneo más parecida a Europa sin salir de América del Norte. Y el 27 de junio, Argentina vs Brasil en Gillette Stadium.',
+      en:'Andrea, Boston is the tournament city most like Europe without leaving North America. And on June 27, Argentina vs Brazil at Gillette Stadium.',
+    },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Haití',         flagA:'🇭🇹', teamB:'Escocia',       flagB:'🏴󠁧󠁢󠁳󠁣󠁴󠁿'},
       {date:'Mar 16 Jun', teamA:'Playoff IC-2',  flagA:'',    teamB:'Noruega',       flagB:'🇳🇴'},
@@ -211,10 +383,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'tor', city:'Toronto', short:'TOR', country:{ es:'Canadá', en:'Canada' }, flag:'🇨🇦', region:'ca',
+    id:'tor',
+    city:{ es:'Toronto', en:'Toronto' },
+    short:'TOR', country:{ es:'Canadá', en:'Canada' }, flag:'🇨🇦', region:'ca',
     accent:'#C41E3A', persona:'andrea' as PersonaKey, stadium:'BMO Field', ready:true,
-    tagline:'El estadio más pequeño del torneo también es el que pone al fanático más cerca del campo. No es una coincidencia.',
-    intro:'Andrea, Toronto no te pide que la ames. Solo te da 200 idiomas, 50 cocinas, y un ferry al atardecer — y espera a ver qué haces con eso.',
+    tagline:{
+      es:'El estadio más pequeño del torneo también es el que pone al fanático más cerca del campo. No es una coincidencia.',
+      en:"The tournament's smallest stadium also puts the fan closest to the pitch. That's not a coincidence.",
+    },
+    intro:{
+      es:'Andrea, Toronto no te pide que la ames. Solo te da 200 idiomas, 50 cocinas, y un ferry al atardecer — y espera a ver qué haces con eso.',
+      en:"Andrea, Toronto doesn't ask you to love it. It just gives you 200 languages, 50 cuisines, and a sunset ferry — and waits to see what you do with that.",
+    },
     matches:[
       {date:'Vie 12 Jun', teamA:'Canadá',        flagA:'🇨🇦', teamB:'Bosnia y Herz.',flagB:'🇧🇦'},
       {date:'Mié 17 Jun', teamA:'Ghana',         flagA:'🇬🇭', teamB:'Panamá',        flagB:'🇵🇦'},
@@ -222,10 +402,18 @@ const ROSTER = [
     ],
   },
   {
-    id:'van', city:'Vancouver', short:'VAN', country:{ es:'Canadá', en:'Canada' }, flag:'🇨🇦', region:'ca',
+    id:'van',
+    city:{ es:'Vancouver', en:'Vancouver' },
+    short:'VAN', country:{ es:'Canadá', en:'Canada' }, flag:'🇨🇦', region:'ca',
     accent:'#2D4F6C', persona:'valentina' as PersonaKey, stadium:'BC Place', ready:true,
-    tagline:'La única sede del torneo donde el estadio comparte el horizonte con montañas nevadas. No hace falta que sea metáfora.',
-    intro:'Valentina, Vancouver con bebé en junio es un plan sorprendentemente cómodo. La ciudad está cubierta de parques, la temperatura es fresca y agradable, y tiene museos infantiles de primer nivel.',
+    tagline:{
+      es:'La única sede del torneo donde el estadio comparte el horizonte con montañas nevadas. No hace falta que sea metáfora.',
+      en:'The only host city where the stadium shares its skyline with snow-capped mountains. No need to make a metaphor of it.',
+    },
+    intro:{
+      es:'Valentina, Vancouver con bebé en junio es un plan sorprendentemente cómodo. La ciudad está cubierta de parques, la temperatura es fresca y agradable, y tiene museos infantiles de primer nivel.',
+      en:"Valentina, Vancouver with a baby in June is a surprisingly comfortable plan. The city is covered in parks, the temperature is cool and pleasant, and it has top-tier children's museums.",
+    },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Australia',     flagA:'🇦🇺', teamB:'Türkiye',      flagB:'🇹🇷'},
       {date:'Jue 18 Jun', teamA:'Canadá',        flagA:'🇨🇦', teamB:'Qatar',        flagB:'🇶🇦'},
@@ -233,8 +421,6 @@ const ROSTER = [
     ],
   },
 ] as const
-
-type RosterItem = typeof ROSTER[number]
 
 // ─────────────────────────────────────────────────────────────────────────────
 // COPY — bilingual UI strings
@@ -270,8 +456,6 @@ const COPY = {
     },
   },
 } as const
-
-type Locale = 'es' | 'en'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE INDEX COMPONENT
@@ -444,12 +628,12 @@ export default function WorldcupClient({ locale }: { locale: string }) {
                       ...df('clamp(26px,3.5vw,38px)',900,'italic'),
                       color:T.pine, lineHeight:1, letterSpacing:'-0.025em', marginBottom:7,
                     }}>
-                      {item.city}
+                      {item.city[l]}
                     </h2>
 
                     {/* Tagline */}
                     <p style={{ ...uf(13,500), color:T.inkMid, lineHeight:1.5, marginBottom:6, maxWidth:500 }}>
-                      {item.tagline}
+                      {item.tagline[l]}
                     </p>
 
                     {/* Intro excerpt */}
@@ -457,7 +641,7 @@ export default function WorldcupClient({ locale }: { locale: string }) {
                       ...uf(12,400), color:T.inkFaint, lineHeight:1.65, maxWidth:500, marginBottom:18,
                       display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical', overflow:'hidden',
                     } as React.CSSProperties}>
-                      {item.intro}
+                      {item.intro[l]}
                     </p>
 
                     {/* CTAs */}
@@ -504,7 +688,7 @@ export default function WorldcupClient({ locale }: { locale: string }) {
                         borderBottom: i<item.matches.length-1 ? `1px solid ${T.sandDark}` : 'none',
                       }}>
                         <div style={{ ...uf(10,600), color:T.inkFaint, letterSpacing:'0.08em', marginBottom:5 }}>
-                          {m.date}
+                          {translateDate(m.date, l)}
                         </div>
                         <div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>
                           <span style={{
@@ -515,7 +699,7 @@ export default function WorldcupClient({ locale }: { locale: string }) {
                             padding:'2px 7px', borderRadius:4,
                             display:'flex', alignItems:'center', gap:3,
                           }}>
-                            {m.flagA} {m.teamA}
+                            {m.flagA} {translateTeam(m.teamA, l)}
                           </span>
                           <span style={{ ...uf(9,400), color:T.inkFaint, alignSelf:'center' }}>vs</span>
                           <span style={{
@@ -526,7 +710,7 @@ export default function WorldcupClient({ locale }: { locale: string }) {
                             padding:'2px 7px', borderRadius:4,
                             display:'flex', alignItems:'center', gap:3,
                           }}>
-                            {m.flagB} {m.teamB}
+                            {m.flagB} {translateTeam(m.teamB, l)}
                           </span>
                         </div>
                       </div>
