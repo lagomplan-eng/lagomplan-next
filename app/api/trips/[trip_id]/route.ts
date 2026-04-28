@@ -1,6 +1,8 @@
 // app/api/trips/[trip_id]/route.ts
-// GET  — fetch a saved trip by ID
-// PATCH — update title / trip_data (autosave)
+// GET    — fetch a saved trip by ID
+// PATCH  — update title / trip_data (autosave)
+// DELETE — remove a trip (owner-gated). Used by the regenerate/replaceTrip
+//          flows to clean up the previous version after a successful save.
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/server'
@@ -99,6 +101,49 @@ export async function PATCH(
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
     console.error('[trips/patch] error:', message)
+    return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
+  }
+}
+
+export async function DELETE(
+  _req: NextRequest,
+  { params }: { params: Promise<{ trip_id: string }> },
+) {
+  const { trip_id } = await params
+  if (!trip_id) return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
+
+  try {
+    const supabase = await getSupabaseServer()
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    if (authError || !user) {
+      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+    }
+
+    // Use admin client + explicit user_id guard so RLS can't silently no-op
+    // and a different user's id in the URL can't delete someone else's row.
+    const admin = getSupabaseAdmin()
+    const { data: deleted, error } = await admin
+      .from('trips')
+      .delete()
+      .eq('id', trip_id)
+      .eq('user_id', user.id)
+      .select('id')
+
+    if (error) {
+      console.error('[trips/delete] error:', error.message)
+      return NextResponse.json({ error: `Delete failed: ${error.message}` }, { status: 500 })
+    }
+
+    if (!deleted || deleted.length === 0) {
+      return NextResponse.json({ error: 'Trip not found or not owned by user' }, { status: 404 })
+    }
+
+    console.log('[trips/delete] removed trip:', trip_id)
+    return NextResponse.json({ success: true })
+
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err)
+    console.error('[trips/delete] error:', message)
     return NextResponse.json({ error: `Internal error: ${message}` }, { status: 500 })
   }
 }

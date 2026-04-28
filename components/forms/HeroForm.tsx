@@ -116,6 +116,9 @@ const [extra, setExtra] = useState(extraInterests.join(', '))
 
 const [pace, setPace] = useState(initialValues?.pace ?? '')
 const [budget, setBudget] = useState(initialValues?.budget ?? '')
+// Currency toggle for the budget field. The amount goes into the AI prompt as
+// a free-text string (e.g. "20,000 MXN") so the model sees the unit clearly.
+const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
 
 const [submitted, setSubmitted] = useState(false)
 const [generating, setGenerating] = useState(false)
@@ -132,6 +135,11 @@ function submit(e: React.FormEvent) {
 
     setGenerating(true)
 
+    // Append the currency code to the budget so the AI prompt sees the unit
+    // ("20,000 MXN" vs "20,000 USD"). Empty input stays empty — never emit a
+    // bare currency code with no number, which would confuse the model.
+    const budgetWithCurrency = budget.trim() ? `${budget.trim()} ${budgetCurrency}` : ''
+
     const params = new URLSearchParams({
       origin: originValue,
       destination: destValue,
@@ -141,7 +149,7 @@ function submit(e: React.FormEvent) {
       traveler:    traveler,
       interests:   [...interests, extra].filter(Boolean).join(', '),
       pace,
-      budget,
+      budget:      budgetWithCurrency,
     })
 
     router.push(`/planner?${params}` as any)
@@ -406,11 +414,31 @@ function submit(e: React.FormEvent) {
                 value={budget}
                 onChange={e => setBudget(e.target.value.replace(/[^0-9,]/g, ''))}
                 placeholder={t('budgetPlaceholder')}
-                className="w-full font-mono text-[13px] border border-[rgba(107,143,134,.22)] bg-white pl-6 pr-14 py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors"
+                className="w-full font-mono text-[13px] border border-[rgba(107,143,134,.22)] bg-white pl-6 pr-[88px] py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] text-[#A0A0A0] uppercase pointer-events-none">
-                MXN
-              </span>
+              {/* Currency toggle — same visual language as the budget-table toggle */}
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]"
+                role="group"
+                aria-label="Currency"
+              >
+                {(['MXN', 'USD'] as const).map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBudgetCurrency(c)}
+                    className={[
+                      'font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] border-none cursor-pointer transition-all',
+                      budgetCurrency === c
+                        ? 'bg-[#0F3A33] text-white'
+                        : 'bg-transparent text-[#7A7A76] hover:text-[#0F3A33]',
+                    ].join(' ')}
+                    aria-pressed={budgetCurrency === c}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>

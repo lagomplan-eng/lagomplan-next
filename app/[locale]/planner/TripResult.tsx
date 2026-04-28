@@ -284,34 +284,83 @@ function LoadingState({ locale }: { locale: string }) {
 
 // ─── Normalize helpers ─────────────────────────────────────────────────────────
 
-function normalizeDay(raw: any, index: number): Day {
+function normalizeDay(raw: any, index: number, locale: 'es' | 'en' = 'es'): Day {
   const rawItems: any[] = Array.isArray(raw?.items)  ? raw.items
                         : Array.isArray(raw?.blocks) ? raw.blocks
                         : []
+  const n = typeof raw?.n === 'number' ? raw.n : index + 1
+  // Always derive labels from the locale instead of trusting the API — the
+  // Edge Function frequently returns English labels even when other fields
+  // are localized, which breaks "DAY 1" rendering under uppercase CSS.
+  const label = locale === 'es' ? `Día ${n}` : `Day ${n}`
   return {
-    n:        typeof raw?.n === 'number'        ? raw.n        : index + 1,
-    label:    typeof raw?.label === 'string'    ? raw.label    : `Day ${index + 1}`,
+    n,
+    label,
     title:    typeof raw?.title === 'string'    ? raw.title    : '',
     progress: typeof raw?.progress === 'number' ? raw.progress : 0,
     items:    rawItems.map((raw, ii) => normalizeItem(raw, ii, index)),
   }
 }
 
-// Maps raw API type strings (any language/variant) to canonical ItemType
+// Maps raw API strings (any language/variant) to canonical ItemType.
+// Inspects `type` first, then falls back to scanning `name` + `description`
+// because the Edge Function frequently emits ambiguous types (e.g. blank or
+// "activity") for items that are clearly hotels/restaurants/transfers — and
+// hotels misclassified as `free` lose their affiliate booking link, which
+// is a revenue path we can't afford to drop.
+function detectTypeFromText(text: string): ItemType | null {
+  const t = text.toLowerCase()
+  // Hotel — covers check-in/out variants and lodging language in ES/EN
+  if (
+    t.includes('hotel') || t.includes('hosped') || t.includes('alojam') ||
+    t.includes('lodg') || t.includes('accommod') ||
+    t.includes('check-in') || t.includes('check in') || t.includes('checkin') ||
+    t.includes('check-out') || t.includes('check out') || t.includes('checkout') ||
+    t.includes('llegada al hotel') || t.includes('salida del hotel') ||
+    t.includes('resort') || t.includes('hostal') || t.includes('airbnb') ||
+    t.includes('inn ') || t.includes(' suites')
+  ) return 'hotel'
+  if (
+    t.includes('restaur') || t.includes('comida') || t.includes('cena') ||
+    t.includes('almuerz') || t.includes('desayun') || t.includes('food') ||
+    t.includes('eat') || t.includes('gastro') || t.includes('brunch') ||
+    t.includes('café') || t.includes('cafe ')
+  ) return 'restaurant'
+  if (
+    t.includes('tour') || t.includes('excurs') || t.includes('activid') ||
+    t.includes('atraccion') || t.includes('activity') || t.includes('visita') ||
+    t.includes('aventura') || t.includes('museo') || t.includes('museum')
+  ) return 'tour'
+  if (
+    t.includes('transfer') || t.includes('transport') || t.includes('traslad') ||
+    t.includes('vuelo') || t.includes('flight') || t.includes('bus') ||
+    t.includes('taxi') || t.includes('uber') || t.includes('lyft') ||
+    t.includes('renta de auto') || t.includes('car rental')
+  ) return 'transfer'
+  if (
+    t.includes('relax') || t.includes('descanso') || t.includes('spa') ||
+    t.includes('libre') || t.includes('playa') || t.includes('beach')
+  ) return 'free'
+  return null
+}
+
 function normalizeItemType(raw: unknown): ItemType {
-  const t = String(raw ?? '').toLowerCase()
-  if (t === 'hotel' || t.includes('hotel') || t.includes('hosped') || t.includes('alojam') || t.includes('lodg') || t.includes('accommod')) return 'hotel'
-  if (t === 'restaurant' || t.includes('restaur') || t.includes('comida') || t.includes('cena') || t.includes('almuerz') || t.includes('desayun') || t.includes('food') || t.includes('eat') || t.includes('gastro')) return 'restaurant'
-  if (t === 'tour' || t.includes('tour') || t.includes('excurs') || t.includes('activid') || t.includes('atraccion') || t.includes('activity') || t.includes('visita') || t.includes('aventura')) return 'tour'
-  if (t === 'transfer' || t.includes('transfer') || t.includes('transport') || t.includes('traslad') || t.includes('vuelo') || t.includes('flight') || t.includes('bus') || t.includes('taxi') || t.includes('auto')) return 'transfer'
-  if (t === 'relax' || t.includes('relax') || t.includes('descanso') || t.includes('spa') || t.includes('libre') || t.includes('playa') || t.includes('beach')) return 'free'
-  return 'free'
+  return detectTypeFromText(String(raw ?? '')) ?? 'free'
 }
 
 function normalizeItem(raw: any, index: number, dayIndex = 0): ItineraryItem {
+  // Type classification: trust `type` if it's specific, otherwise fall back to
+  // name + description. This rescues hotel rows the AI labeled as "activity"
+  // or left blank — without the rescue they render as "libre" and lose their
+  // affiliate link surface.
+  const explicitType = detectTypeFromText(String(raw?.type ?? ''))
+  const fallbackType = explicitType
+    ?? detectTypeFromText(String(raw?.title ?? raw?.name ?? ''))
+    ?? detectTypeFromText(String(raw?.description ?? raw?.desc ?? ''))
+    ?? 'free'
   return {
     id:        typeof raw?.id === 'string'   ? raw.id   : `item-d${dayIndex}-${index}`,
-    type:      normalizeItemType(raw?.type),
+    type:      fallbackType,
     time:      raw?.time   ?? '',
     name:      raw?.title  ?? raw?.name  ?? '',
     desc:      raw?.description ?? raw?.desc ?? '',
@@ -451,7 +500,17 @@ function derivePackingFromTrip(destination: string, nights: string, interests: s
   return base
 }
 
-function normalizeTripData(row: any, destination: string, nights: string, interests = ''): TripData {
+// Days between two YYYY-MM-DD strings. Returns 0 if either is missing/invalid
+// or end <= start. Matches the URL-param convention (May 4 → May 31 = 27 days).
+function daysBetween(start: string, end: string): number {
+  if (!start || !end) return 0
+  const s = new Date(start).getTime()
+  const e = new Date(end).getTime()
+  if (isNaN(s) || isNaN(e) || e <= s) return 0
+  return Math.round((e - s) / 86400000)
+}
+
+function normalizeTripData(row: any, destination: string, nights: string, interests = '', locale: 'es' | 'en' = 'es'): TripData {
   const source = row?.trip_data ?? row?.trip ?? row?.itinerary ?? row?.data ?? row ?? {}
 
   // Diagnostic: log source keys so field-name mismatches are immediately visible in DevTools
@@ -460,7 +519,7 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
   }
 
   const rawDays = Array.isArray(source.days) ? source.days : []
-  const normalizedDays = rawDays.map(normalizeDay)
+  const normalizedDays = rawDays.map((d: any, i: number) => normalizeDay(d, i, locale))
 
   // Checks — broad key coverage; fallback derives planning items from bookable itinerary entries
   const rawChecks =
@@ -645,6 +704,11 @@ export default function TripResult({ params }: Props) {
   const [asyncChunksDone,  setAsyncChunksDone]  = useState<number | null>(null)
   const [asyncChunksTotal, setAsyncChunksTotal] = useState<number | null>(null)
   const [isAsyncPath,      setIsAsyncPath]      = useState(false)
+  // Duration the active generation is producing for. Tracks the *new* value
+  // during regenerate/replaceTrip (which derive from edited dates), not the
+  // stale `nights` URL param. Used by the GenerationSurface so the waiting
+  // message always shows what we're actually generating.
+  const [activeGenDuration, setActiveGenDuration] = useState<number | null>(null)
   const [rawResponse, setRawResponse] = useState<any>(null)
   const [tripId, setTripId]         = useState<string | null>(null)
   const [rawTripData, setRawTripData] = useState<any>(null)
@@ -779,7 +843,13 @@ export default function TripResult({ params }: Props) {
         const dest      = data.destination || ''
         const tripNights = String(data.duration_days || 3)
         const interestsStr = Array.isArray(data.interests) ? data.interests.join(',') : ''
-        const normalized = normalizeTripData(data, dest, tripNights, interestsStr)
+        // Sync the displayed duration to what's stored in the DB. Without this
+        // the heading falls back to the URL `nights` prop, which is stale when
+        // the trip was previously regenerated to a different length.
+        if (typeof data.duration_days === 'number' && data.duration_days > 0) {
+          setActiveGenDuration(data.duration_days)
+        }
+        const normalized = normalizeTripData(data, dest, tripNights, interestsStr, locale === 'es' ? 'es' : 'en')
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
         setDays(normalized.days)
@@ -797,7 +867,23 @@ export default function TripResult({ params }: Props) {
         }])
         setActiveVersionIdx(0)
         setHasUserEdits(false)
+        // Sync ALL pref* drawer state from the DB row, not just destination —
+        // otherwise a saved trip re-renders with the meta pills (traveler, pace,
+        // budget, origin, interests) showing the original URL params, which are
+        // stale after any regeneration.
+        console.log('[loadFromDB] syncing prefs from DB:', {
+          travelers:    data.travelers,
+          travel_style: data.travel_style,
+          budget_level: data.budget_level,
+          origin:       data.origin,
+          interests:    data.interests,
+        })
         setPrefDest(dest)
+        if (typeof data.origin === 'string')        setPrefOrigin(data.origin)
+        if (typeof data.travelers === 'string')     setPrefTraveler(data.travelers)
+        if (typeof data.travel_style === 'string')  setPrefPace(data.travel_style)
+        if (typeof data.budget_level === 'string')  setPrefBudget(data.budget_level)
+        if (Array.isArray(data.interests))          setPrefInterests(data.interests.join(', '))
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
         // Baseline: marks this as already-in-DB so autosave only fires on real edits
@@ -911,7 +997,7 @@ export default function TripResult({ params }: Props) {
               console.log('[TripResult] cache hit — restoring trip, skipping AI call')
               const tripDataRaw = cached.tripData
               setRawTripData(tripDataRaw)
-              const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests)
+              const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
               setTripTitle(normalized.title)
               setTripSubtitle(normalized.subtitle)
               setDays(normalized.days)
@@ -933,6 +1019,7 @@ export default function TripResult({ params }: Props) {
           ? interests.split(',').map((i) => i.trim()).filter(Boolean)
           : []
         const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+        setActiveGenDuration(duration_days)
         const payload = { destination, origin, start, end, nights, duration_days, traveler, interests: parsedInterests, pace, budget }
 
         // Abort any in-flight generation from a prior effect run (auth state
@@ -1065,7 +1152,7 @@ export default function TripResult({ params }: Props) {
         sessionStorage.setItem('tripCache', JSON.stringify({ tripData: tripDataRaw, inputs: currentInputs }))
 
         setRawTripData(tripDataRaw)
-        const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests)
+        const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
         setDays(normalized.days)
@@ -1256,12 +1343,30 @@ export default function TripResult({ params }: Props) {
       const parsedInterests = prefInterests
         ? prefInterests.split(',').map((i) => i.trim()).filter(Boolean)
         : []
-      const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+      // Derive duration from the *edited* dates in the prefs drawer. The URL
+      // `nights` is stale (set at initial generation) — using it here would
+      // ignore the user's date changes.
+      const editedDays    = daysBetween(prefStart, prefEnd)
+      const duration_days = Math.min(
+        Math.max(editedDays || parseInt(nights || '0', 10) || 3, 1),
+        30,
+      )
+      const nightsForPayload = String(duration_days)
+      setActiveGenDuration(duration_days)
+      // Family/group composition only flows through when the corresponding
+      // traveler chip is active. The Edge Function should treat a missing
+      // `traveler_details` as "no extra detail" and rely on `traveler` alone.
+      const traveler_details =
+        prefTraveler === 'familia'
+          ? { adults: prefAdults, children: prefChildren }
+          : prefTraveler === 'amigos'
+          ? { group_count: prefGroupCount }
+          : null
       const payload = {
         // tripId marks this as a regeneration → server skips credit consumption.
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
-        nights, duration_days, traveler: prefTraveler, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
       const genRes  = await fetch('/api/generate-trip', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
@@ -1280,8 +1385,7 @@ export default function TripResult({ params }: Props) {
       const tripDataRaw = genData?.trip_data
       if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       setRawTripData(tripDataRaw)
-      setTripId(null)  // reset — new version hasn't been saved yet
-      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nights, prefInterests)
+      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days)
@@ -1297,6 +1401,71 @@ export default function TripResult({ params }: Props) {
       })
       setActiveVersionIdx(nextIdx)
       setHasUserEdits(false)
+
+      // Persist the regenerated version. Without this, refreshing the page
+      // re-loads the previous DB row (the URL still carries the old trip_id),
+      // so the user appears to "lose" the regeneration. Mirrors replaceTrip's
+      // autosave block so both flows behave consistently.
+      const previousTripId = tripId   // capture before we overwrite
+      if (authedUser !== null) {
+        try {
+          const autosaveBody = {
+            title:        normalized.title || null,
+            destination:  prefDest,
+            origin:       prefOrigin,
+            duration_days,
+            travelers:    prefTraveler,
+            travel_style: prefPace,
+            budget_level: prefBudget,
+            interests:    parsedInterests,
+            trip_data:    tripDataRaw,
+          }
+          console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
+          const regenSaveRes = await fetch('/api/trips', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(autosaveBody),
+          })
+          if (regenSaveRes.ok) {
+            const regenData = await regenSaveRes.json().catch(() => null)
+            if (regenData?.success) {
+              setTripId(regenData.trip_id)
+              lastSavedContentRef.current = JSON.stringify({
+                title: normalized.title, subtitle: normalized.subtitle,
+                days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                doneChecks: [],
+              })
+              if (typeof window !== 'undefined') {
+                const url = new URL(window.location.href)
+                url.searchParams.set('trip_id', regenData.trip_id)
+                window.history.replaceState({}, '', url.toString())
+              }
+              // Replacement semantics: delete the predecessor row so my-trips
+              // stays clean (one row per logical trip, not one per regen).
+              // Fire-and-forget — the new row is already live; an orphan row
+              // is recoverable, blocking on cleanup is not worth it.
+              if (previousTripId && previousTripId !== regenData.trip_id) {
+                fetch(`/api/trips/${previousTripId}`, {
+                  method: 'DELETE',
+                  credentials: 'include',
+                }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
+              }
+            } else {
+              setTripId(null)
+            }
+          } else {
+            setTripId(null)
+            console.warn('[regenerate] autosave failed:', regenSaveRes.status)
+          }
+        } catch (e) {
+          setTripId(null)
+          console.warn('[regenerate] autosave threw:', e)
+        }
+      } else {
+        // Anonymous: no DB save available
+        setTripId(null)
+      }
 
       // Credits are decremented server-side in /api/generate-trip.
       // Refresh DB state so the next guard check reflects the real balance.
@@ -1461,12 +1630,29 @@ export default function TripResult({ params }: Props) {
       const parsedInterests = prefInterests
         ? prefInterests.split(',').map((i) => i.trim()).filter(Boolean)
         : []
-      const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+      // Same fix as regenerate(): derive duration from the edited dates, not
+      // the stale URL `nights`.
+      const editedDays    = daysBetween(prefStart, prefEnd)
+      const duration_days = Math.min(
+        Math.max(editedDays || parseInt(nights || '0', 10) || 3, 1),
+        30,
+      )
+      const nightsForPayload = String(duration_days)
+      setActiveGenDuration(duration_days)
+      // Family/group composition only flows through when the corresponding
+      // traveler chip is active. The Edge Function should treat a missing
+      // `traveler_details` as "no extra detail" and rely on `traveler` alone.
+      const traveler_details =
+        prefTraveler === 'familia'
+          ? { adults: prefAdults, children: prefChildren }
+          : prefTraveler === 'amigos'
+          ? { group_count: prefGroupCount }
+          : null
       const payload = {
         // tripId marks this as a regeneration → server skips credit consumption.
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
-        nights, duration_days, traveler: prefTraveler, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
       const genRes  = await fetch('/api/generate-trip', {
         method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
@@ -1483,9 +1669,12 @@ export default function TripResult({ params }: Props) {
       }
       const tripDataRaw = genData?.trip_data
       if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
+      // Capture the predecessor before we clear it — needed below for the
+      // "delete the old row after the new one is saved" cleanup step.
+      const previousTripId = tripId
       setRawTripData(tripDataRaw)
       setTripId(null)
-      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nights, prefInterests)
+      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days)
@@ -1501,22 +1690,25 @@ export default function TripResult({ params }: Props) {
       // Auto-save regenerated trip so subsequent edits can be autosaved
       if (authedUser !== null) {
         try {
-          const regenDuration = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+          // Use the same edited duration we sent to the generator above.
+          const regenDuration = duration_days
+          const autosaveBody = {
+            title:        normalized.title || null,
+            destination:  prefDest,
+            origin:       prefOrigin,
+            duration_days: regenDuration,
+            travelers:    prefTraveler,
+            travel_style: prefPace,
+            budget_level: prefBudget,
+            interests:    parsedInterests,
+            trip_data:    tripDataRaw,
+          }
+          console.log('[replaceTrip] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
           const regenSaveRes = await fetch('/api/trips', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-              title:        normalized.title || null,
-              destination:  prefDest,
-              origin:       prefOrigin,
-              duration_days: regenDuration,
-              travelers:    prefTraveler,
-              travel_style: prefPace,
-              budget_level: prefBudget,
-              interests:    parsedInterests,
-              trip_data:    tripDataRaw,
-            }),
+            body: JSON.stringify(autosaveBody),
           })
           if (regenSaveRes.ok) {
             const regenData = await regenSaveRes.json().catch(() => null)
@@ -1532,6 +1724,14 @@ export default function TripResult({ params }: Props) {
                 const url = new URL(window.location.href)
                 url.searchParams.set('trip_id', regenData.trip_id)
                 window.history.replaceState({}, '', url.toString())
+              }
+              // Replacement semantics: drop the predecessor row so my-trips
+              // shows one logical entry per trip (not one per regen).
+              if (previousTripId && previousTripId !== regenData.trip_id) {
+                fetch(`/api/trips/${previousTripId}`, {
+                  method: 'DELETE',
+                  credentials: 'include',
+                }).catch(e => console.warn('[replaceTrip] predecessor delete failed:', e))
               }
             }
           }
@@ -1592,6 +1792,13 @@ export default function TripResult({ params }: Props) {
         country:   detectCountryGroup(city),
         startDate: prefStart || start,
         endDate:   prefEnd   || end,
+        // Group composition: families count adults from the stepper, friends use
+        // the group count, otherwise default to 2 inside getBookingOptions.
+        adults: prefTraveler === 'familia'
+          ? prefAdults
+          : prefTraveler === 'amigos'
+          ? prefGroupCount
+          : undefined,
       })
       if (options.length > 0) {
         setBookingModal({ itemName: item.name, itemType: item.type, options })
@@ -1617,6 +1824,11 @@ export default function TripResult({ params }: Props) {
       country:   detectCountryGroup(city),
       startDate: prefStart || start,
       endDate:   prefEnd   || end,
+      adults: prefTraveler === 'familia'
+        ? prefAdults
+        : prefTraveler === 'amigos'
+        ? prefGroupCount
+        : undefined,
     })
     if (options.length > 0) {
       setBookingModal({ itemName: item.name, itemType: item.type, options })
@@ -1757,7 +1969,10 @@ export default function TripResult({ params }: Props) {
   const hasActual     = budgetRows.some(r => r.actual !== null)
   const actualTotal   = budgetRows.reduce((s, r) => r.actual !== null ? s + r.actual : s, 0)
 
-  const nightsNum   = parseInt(nights || '0', 10) || 3
+  // Prefer the most-recently-generated duration so the heading ("X días en …")
+  // reflects edits made in the prefs drawer. Falls back to the URL `nights`
+  // prop on first render before any generation has run in this session.
+  const nightsNum   = activeGenDuration ?? (parseInt(nights || '0', 10) || 3)
   // dateRange uses pref state so it reflects the most-recently-regenerated trip
   const dateRange   = prefStart && prefEnd ? `${prefStart} — ${prefEnd}` : `${nightsNum} noches`
   const doneChecks  = checks.filter(c => c.done).length
@@ -1785,7 +2000,9 @@ export default function TripResult({ params }: Props) {
     chunksTotal: asyncChunksTotal,
     slots: {
       destination:  destination || null,
-      durationDays: Number(nights) || null,
+      // Prefer the active gen duration (set by regen/replace from edited dates)
+      // over the URL-stale `nights`.
+      durationDays: activeGenDuration ?? (Number(nights) || null),
       travelers:    traveler || null,
     },
   })
@@ -1816,7 +2033,7 @@ export default function TripResult({ params }: Props) {
           {isAccessResolved && loading ? (
             <GenerationSurface
               destination={destination || null}
-              durationDays={Number(nights) || null}
+              durationDays={activeGenDuration ?? (Number(nights) || null)}
               travelers={traveler || null}
               phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
               progress={gen.progress}

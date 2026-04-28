@@ -43,7 +43,7 @@
     "paceRelax": "relajado",
     "paceBalance": "balanceado",
     "paceActive": "aventurero",
-    "budget": "Presupuesto total del viaje (MXN)",
+    "budget": "Presupuesto total del viaje",
     "budgetPlaceholder": "¿Cuánto tienes en mente?",
     "budgetCurrency": "MXN",
     "submit": "Planificar mi viaje →",

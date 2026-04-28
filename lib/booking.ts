@@ -23,13 +23,17 @@ export interface BookingContext {
   country: string    // 'US' | 'europe' | 'other'
   startDate: string  // YYYY-MM-DD
   endDate: string    // YYYY-MM-DD
+  adults?: number    // guest count (defaults to 2 if absent)
 }
 
 // ── Stay22 redirect links ─────────────────────────────────────────────────────
-// Two variants:
-//   stay22Redirect  — bare widget URL, no extra params. Use for hotel/booking
-//                     widgets where extra query params break click tracking.
+// Three variants:
+//   stay22Redirect  — bare widget URL, no extra params. Use only as a last-
+//                     resort fallback (lands on the provider homepage).
 //   stay22Search    — appends address + q for activity search pre-fill (GYG, Expedia).
+//   stay22Hotel     — appends address + checkin + checkout + adults so the
+//                     downstream OTA opens with destination + dates pre-filled.
+//                     Significantly improves conversion vs landing on homepage.
 
 function stay22Redirect(widgetUrl: string): string {
   return widgetUrl
@@ -40,6 +44,21 @@ function stay22Search(widgetUrl: string, city: string, itemName?: string): strin
   params.set('address', city)
   if (itemName) params.set('q', itemName)
   return `${widgetUrl}?${params.toString()}`
+}
+
+function stay22Hotel(
+  widgetUrl: string,
+  ctx: { city: string; startDate?: string; endDate?: string; adults?: number },
+): string {
+  const params = new URLSearchParams()
+  if (ctx.city) params.set('address', ctx.city)
+  // Stay22 widgets ignore unknown / empty params, so it's safe to omit dates
+  // when they aren't set. The URL still routes to the partner homepage.
+  if (ctx.startDate) params.set('checkin', ctx.startDate)
+  if (ctx.endDate)   params.set('checkout', ctx.endDate)
+  params.set('adults', String(ctx.adults ?? 2))
+  const qs = params.toString()
+  return qs ? `${widgetUrl}?${qs}` : widgetUrl
 }
 
 // ── Country detection ─────────────────────────────────────────────────────────
@@ -72,16 +91,30 @@ export function getBookingOptions(
 
   switch (item.type) {
 
-    case 'hotel':
+    case 'hotel': {
+      const hotelCtx = {
+        city,
+        startDate: ctx.startDate,
+        endDate:   ctx.endDate,
+        adults:    ctx.adults,
+      }
       return [
+        {
+          id:       'booking',
+          provider: 'booking',
+          name:     'Booking.com',
+          desc:     'Cancelación gratis en la mayoría de las propiedades.',
+          url:      stay22Hotel('https://booking.stay22.com/lagomplan/tupscQswKK', hotelCtx),
+        },
         {
           id:       'hotelscom',
           provider: 'hotels',
           name:     'Hotels.com',
           desc:     'Mayor selección de hoteles. Precio garantizado.',
-          url:      stay22Redirect('https://hotelscom.stay22.com/lagomplan/ulAbEA6Vbn'),
+          url:      stay22Hotel('https://hotelscom.stay22.com/lagomplan/ulAbEA6Vbn', hotelCtx),
         },
       ]
+    }
 
     case 'tour':
       return [
