@@ -27,7 +27,22 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const SUPABASE_URL      = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const ANON_KEY          = Deno.env.get('SUPABASE_ANON_KEY')!
+
+// Use the LEGACY JWT-format anon key (set as a custom secret), not the
+// auto-injected SUPABASE_ANON_KEY. Supabase rolled out new opaque
+// `sb_publishable_*` keys that the existing /functions/v1/generate-trip
+// function — deployed before the rollout — rejects as "Invalid JWT format".
+// LEGACY_ANON_KEY is the original eyJhbGc... JWT-format anon key.
+const LEGACY_ANON_KEY   = Deno.env.get('LEGACY_ANON_KEY') ?? ''
+
+// Diagnostics: log key shape on cold start so we can confirm the secret was
+// set as a real JWT (eyJhbGc...) and not, e.g., the new sb_publishable_* key
+// or an empty value.
+console.log('[worker] env check:', {
+  url:          SUPABASE_URL?.slice(0, 40) || 'MISSING',
+  legacy_anon:  LEGACY_ANON_KEY ? `${LEGACY_ANON_KEY.slice(0, 10)}... (len=${LEGACY_ANON_KEY.length})` : 'EMPTY',
+  legacy_starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
+})
 
 // Budget: Supabase Edge Functions cap around 150s. We stop invoking new LLM
 // calls once the remaining budget is below this floor and exit cleanly.
@@ -57,11 +72,17 @@ function corsHeaders() {
 }
 
 async function callGenerateTrip(payload: Record<string, any>, signal: AbortSignal) {
+  console.log('[worker] calling generate-trip — token shape:', {
+    starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
+    len:        LEGACY_ANON_KEY.length,
+    prefix:     LEGACY_ANON_KEY.slice(0, 10),
+  })
   const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-trip`, {
     method: 'POST',
     headers: {
       'Content-Type':  'application/json',
-      Authorization:   `Bearer ${ANON_KEY}`,
+      apikey:          LEGACY_ANON_KEY,
+      Authorization:   `Bearer ${LEGACY_ANON_KEY}`,
     },
     body: JSON.stringify(payload),
     signal,
@@ -93,7 +114,25 @@ async function generateChunk(jobInputs: Record<string, any>, dayIndex: number, p
 
   const res = await callGenerateTrip(dayPayload, signal)
   if (!res?.trip_data) throw new Error('chunk response missing trip_data')
+  // Diagnostic — log the chunk shape on first chunk so we can see exactly
+  // where the days array lives. The existing /generate-trip Edge Function
+  // doesn't have a documented contract; the response shape was hand-rolled.
+  if (dayIndex === 0) {
+    console.log('[worker] chunk[0] keys:', Object.keys(res.trip_data || {}))
+    console.log('[worker] chunk[0] sample:', JSON.stringify(res.trip_data).slice(0, 800))
+  }
   return res.trip_data
+}
+
+// Pull days from a chunk regardless of where the field lives. The sync endpoint
+// emits days under several variants — we mirror normalizeTripData's tolerance.
+function chunkDays(chunk: any): any[] {
+  if (Array.isArray(chunk?.days))            return chunk.days
+  if (Array.isArray(chunk?.itinerary?.days)) return chunk.itinerary.days
+  if (Array.isArray(chunk?.trip?.days))      return chunk.trip.days
+  if (Array.isArray(chunk?.data?.days))      return chunk.data.days
+  if (Array.isArray(chunk?.itinerary))       return chunk.itinerary  // some variants omit the wrapper
+  return []
 }
 
 function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>): Record<string, any> {
@@ -103,16 +142,52 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
   // each chunk, keep metadata from the first chunk.
   const first = chunks[0] ?? {}
   const days = chunks.flatMap((c, i) => {
-    const d = Array.isArray(c.days) ? c.days : []
+    const d = chunkDays(c)
     return d.map((day: any, j: number) => ({ ...day, day_number: i + 1 + j }))
   })
+  console.log('[worker] assembled result:', {
+    chunks_count: chunks.length,
+    days_count:   days.length,
+    first_chunk_keys: Object.keys(first || {}),
+  })
   return {
-    title:       first.title       ?? `Viaje a ${jobInputs.destination}`,
-    subtitle:    first.subtitle    ?? `${jobInputs.duration_days} días`,
+    title:       (first as any).title       ?? `Viaje a ${jobInputs.destination}`,
+    subtitle:    (first as any).subtitle    ?? `${jobInputs.duration_days} días`,
     destination: jobInputs.destination,
     days,
-    budget:      first.budget      ?? null,
-    packing:     first.packing     ?? null,
+    budget:      (first as any).budget      ?? null,
+    packing:     (first as any).packing     ?? null,
+  }
+}
+
+// Refund one trip credit. Only refunds if the user is on a metered tier
+// (per_trip / pack_5 / pack_10) and trips_remaining hasn't already maxed out.
+// Best-effort — if anything fails, we log and move on. A user keeping the
+// credit they paid for is much worse than a missed refund here.
+async function refundOneTripIfApplicable(admin: any, userId: string): Promise<void> {
+  try {
+    const { data } = await admin
+      .from('user_entitlements')
+      .select('tier, trips_remaining, trips_used')
+      .eq('user_id', userId)
+      .single()
+
+    if (!data) return
+    // Subscribers (explorer) and free tier users don't get a metered refund —
+    // explorer is unlimited, free tier doesn't decrement on consume.
+    if (data.tier === 'explorer') return
+
+    await admin
+      .from('user_entitlements')
+      .update({
+        trips_remaining: (data.trips_remaining ?? 0) + 1,
+        trips_used:      Math.max(0, (data.trips_used ?? 0) - 1),
+        updated_at:      new Date().toISOString(),
+      })
+      .eq('user_id', userId)
+    console.log('[worker] refunded credit for user:', userId)
+  } catch (e) {
+    console.warn('[worker] refund failed (non-fatal):', e)
   }
 }
 
@@ -205,6 +280,15 @@ serve(async (req: Request) => {
         .from('generation_jobs')
         .update({ status: 'failed', error: String(e).slice(0, 500) })
         .eq('id', job.id)
+
+      // Refund the credit charged at /api/trips/jobs creation. Users shouldn't
+      // pay for upstream failures (LLM errors, Supabase outages, timeouts).
+      // Skip if any chunk was successfully generated — the user got partial
+      // value, and a no-op refund avoids credit-printing on flaky scenarios.
+      if (job.chunks_done === 0 && i === 0) {
+        await refundOneTripIfApplicable(admin, job.user_id)
+      }
+
       return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
         status: 502,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -239,7 +323,30 @@ serve(async (req: Request) => {
   }
 
   if (final.chunks_done < final.chunks_total) {
-    // Not done — reconciler or client will call us back
+    // Self re-invoke: budget exhausted but more chunks remain. Fire another
+    // worker call in the background to resume from chunks_done. Without
+    // this, jobs sit at status='running' forever (the cron reconciler is
+    // a future safety net, not the primary completion mechanism).
+    //
+    // EdgeRuntime.waitUntil keeps the function alive until the background
+    // request completes, so the re-invocation actually fires.
+    console.log('[worker] re-invoking', job.id, 'at chunks_done =', final.chunks_done, '/', final.chunks_total)
+    const reinvoke = fetch(`${SUPABASE_URL}/functions/v1/generate-trip-worker`, {
+      method: 'POST',
+      headers: {
+        'Content-Type':  'application/json',
+        apikey:          LEGACY_ANON_KEY,
+        Authorization:   `Bearer ${LEGACY_ANON_KEY}`,
+      },
+      body: JSON.stringify({ job_id: job.id }),
+    }).catch(e => console.warn('[worker] self-reinvoke failed:', e))
+
+    // @ts-ignore — EdgeRuntime is a Supabase-injected global
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime?.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(reinvoke)
+    }
+
     return new Response(JSON.stringify({ ok: true, status: 'running', chunks_done: final.chunks_done }), {
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
     })
@@ -270,23 +377,62 @@ serve(async (req: Request) => {
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, '-')
 
-  const { data: tripRow } = await admin
+  // Normalize enum-typed columns to match what the DB accepts. Mirrors
+  // /api/trips/route.ts so the worker stays in lock-step with the sync path.
+  // Without this, 'Equilibrado' / 'Familia' / etc. get rejected by the
+  // travel_style / traveler_type enum constraints and the insert fails.
+  const VALID_TRAVELERS  = ['solo', 'pareja', 'familia', 'amigos']
+  const VALID_PACES      = ['relajado', 'equilibrado', 'activo']
+  const rawTraveler      = (job.inputs as any).traveler
+  const rawPace          = (job.inputs as any).pace
+  const travelerNorm     = typeof rawTraveler === 'string'
+    ? rawTraveler.toLowerCase()
+    : null
+  const paceNorm         = typeof rawPace === 'string'
+    ? rawPace.toLowerCase()
+    : null
+  const travelersValue   = travelerNorm && VALID_TRAVELERS.includes(travelerNorm) ? travelerNorm : null
+  const travelStyleValue = paceNorm     && VALID_PACES.includes(paceNorm)         ? paceNorm     : null
+
+  const insertPayload = {
+    slug:          tripSlug,
+    title:         result.title,
+    user_id:       job.user_id,
+    trip_data:     result,
+    destination:   (job.inputs as any).destination ?? null,
+    origin:        (job.inputs as any).origin ?? null,
+    duration_days: (job.inputs as any).duration_days ?? null,
+    travelers:     travelersValue,
+    travel_style:  travelStyleValue,
+    budget_level:  (job.inputs as any).budget ?? null,
+    interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
+  }
+
+  // Check for insert errors instead of silently swallowing — the previous
+  // version assumed insert always succeeded and quietly set trip_id=null
+  // when it didn't, leaving "completed" jobs with no actual trip row.
+  const { data: tripRow, error: tripInsertErr } = await admin
     .from('trips')
-    .insert({
-      slug:          tripSlug,
-      title:         result.title,
-      user_id:       job.user_id,
-      trip_data:     result,
-      destination:   (job.inputs as any).destination ?? null,
-      origin:        (job.inputs as any).origin ?? null,
-      duration_days: (job.inputs as any).duration_days ?? null,
-      travelers:     (job.inputs as any).traveler ?? null,
-      travel_style:  (job.inputs as any).pace ?? null,
-      budget_level:  (job.inputs as any).budget ?? null,
-      interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
-    })
+    .insert(insertPayload)
     .select('id')
     .single()
+
+  if (tripInsertErr || !tripRow) {
+    console.error('[worker] trips insert failed:', tripInsertErr?.message, 'payload:', JSON.stringify(insertPayload).slice(0, 500))
+    await admin
+      .from('generation_jobs')
+      .update({
+        status: 'failed',
+        error:  `trip insert failed: ${tripInsertErr?.message ?? 'unknown'}`,
+      })
+      .eq('id', job.id)
+    // Refund the credit — user shouldn't pay for a save failure on our side
+    await refundOneTripIfApplicable(admin, job.user_id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', error: tripInsertErr?.message }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
 
   // Guarded completion — the AND status='running' clause prevents double-completion
   // if two worker invocations race.
@@ -295,12 +441,14 @@ serve(async (req: Request) => {
     .update({
       status:  'completed',
       result,
-      trip_id: tripRow?.id ?? null,
+      trip_id: tripRow.id,
     })
     .eq('id', job.id)
     .eq('status', 'running')
 
-  return new Response(JSON.stringify({ ok: true, status: 'completed' }), {
+  console.log('[worker] completed job:', job.id, '→ trip:', tripRow.id)
+
+  return new Response(JSON.stringify({ ok: true, status: 'completed', trip_id: tripRow.id }), {
     headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
   })
 })
