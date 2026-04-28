@@ -52,7 +52,7 @@ export interface VibeZone {
 
 export interface VibeSection {
   body: string
-  lagomNote: string
+  lagomNote?: string
   zones?: VibeZone[]
 }
 
@@ -145,6 +145,19 @@ export interface Stadium {
   area?: string
 }
 
+// Stay neighborhood guidance — short, opinionated commentary on which areas
+// to base in (recommended / alternative / avoid). Renders above the stays
+// list when present. Optional: cities that don't supply it just show hotels.
+export interface StayNeighborhoodItem {
+  kind: 'recommended' | 'alternative' | 'avoid'
+  title: string
+  body: string
+}
+export interface StayNeighborhoods {
+  intro?: string
+  items: StayNeighborhoodItem[]
+}
+
 export interface CityGuide {
   id: string
   city: string
@@ -160,6 +173,7 @@ export interface CityGuide {
   matches: Match[]
   manifesto: ManifestoSection
   vibe: VibeSection
+  stayNeighborhoods?: StayNeighborhoods
   stays: Stay[]
   logistics: LogisticsSection
   vibeCards: VibeCard[]

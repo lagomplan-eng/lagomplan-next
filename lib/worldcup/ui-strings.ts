@@ -50,6 +50,8 @@ export type WorldcupUi = {
   section05Timeline: string
   // Section 06
   section06Title: string
+  foodWhatToOrder: string
+  foodVibe: string
   // Section 07
   section07Title: string
   section07Subtitle: string
@@ -90,6 +92,8 @@ export const ui: { es: WorldcupUi; en: WorldcupUi } = {
     section05RealTimes: "Tiempos reales de desplazamiento",
     section05Timeline: "Cronología recomendada",
     section06Title: "Dónde comer · Sobremesa mundialista",
+    foodWhatToOrder: "Qué pedir",
+    foodVibe: "Vibe",
     section07Title: "Fuera del estadio",
     section07Subtitle: "El entretiempo ideal para descubrir que hay vida — y mucha cultura — más allá de los 90 minutos.",
   },
@@ -127,6 +131,8 @@ export const ui: { es: WorldcupUi; en: WorldcupUi } = {
     section05RealTimes: "Real travel times",
     section05Timeline: "Recommended timeline",
     section06Title: "Where to eat · World Cup table",
+    foodWhatToOrder: "What to order",
+    foodVibe: "Vibe",
     section07Title: "Beyond the stadium",
     section07Subtitle: "The perfect halftime to discover there's life — and real culture — beyond the 90 minutes.",
   },

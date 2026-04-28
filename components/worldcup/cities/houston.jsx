@@ -255,6 +255,60 @@ const StayCard = ({ stay, strings }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// NEIGHBORHOOD PREAMBLE — appears above the stay cards when the guide
+// supplies stayNeighborhoods. Compact collapsible rows so the section
+// stays scannable across all 16 guides; click to expand a row's body.
+// ─────────────────────────────────────────────────────────────────────────────
+const NEIGHBORHOOD_STYLE = {
+  recommended: { accent: T.sage,  badge: "✓"  },
+  alternative: { accent: T.fjord, badge: "·"  },
+  avoid:       { accent: T.coral, badge: "✕"  },
+}
+
+const NeighborhoodRow = ({ item }) => {
+  const [open, setOpen] = useState(false)
+  const style = NEIGHBORHOOD_STYLE[item.kind] || NEIGHBORHOOD_STYLE.alternative
+  return (
+    <div style={{ display:"flex", overflow:"hidden", background:T.white, border:`1px solid ${T.sandDark}`, borderRadius:RADIUS, transition:"border-color 0.18s" }}>
+      <div style={{ width:3, flexShrink:0, background:style.accent }} />
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          flex:1, textAlign:"left", background:"transparent", border:"none", cursor:"pointer", padding:"12px 16px",
+          display:"flex", flexDirection:"column", gap:open ? 8 : 0, transition:"gap 0.18s",
+        }}
+      >
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, flex:1, minWidth:0 }}>
+            <span style={{ ...uf(11,700), color:style.accent, flexShrink:0, width:14, textAlign:"center" }}>{style.badge}</span>
+            <span style={{ ...uf(13,600), color:T.pine, lineHeight:1.35, overflow:"hidden", textOverflow:"ellipsis", whiteSpace: open ? "normal" : "nowrap" }}>{item.title}</span>
+          </div>
+          <span style={{ ...uf(11,500), color:T.inkFaint, flexShrink:0, transform: open ? "rotate(180deg)" : "none", transition:"transform 0.18s" }}>▾</span>
+        </div>
+        {open && (
+          <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.7, margin:"4px 0 0 24px" }}>{item.body}</p>
+        )}
+      </button>
+    </div>
+  )
+}
+
+const NeighborhoodList = ({ data }) => {
+  if (!data || !Array.isArray(data.items) || data.items.length === 0) return null
+  return (
+    <div style={{ marginBottom:20 }}>
+      {data.intro && (
+        <p style={{ ...uf(12,400), color:T.inkFaint, lineHeight:1.7, margin:"0 0 12px" }}>{data.intro}</p>
+      )}
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+        {data.items.map((n, i) => <NeighborhoodRow key={i} item={n} />)}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // VIBE CARD
 // ─────────────────────────────────────────────────────────────────────────────
 const VibeCardView = ({ item }) => (
@@ -587,6 +641,9 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                     </p>
                   </div>
                 </div>
+              )}
+              {guide.stayNeighborhoods && (
+                <NeighborhoodList data={guide.stayNeighborhoods} />
               )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(250px,1fr))", gap:14 }}>
                 {guide.stays.map(stay => (

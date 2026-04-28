@@ -229,20 +229,130 @@ const StayCard = ({ stay, strings }) => (
 );
 
 // ─────────────────────────────────────────────────────────────────────────────
+// NEIGHBORHOOD PREAMBLE — appears above the stay cards when the guide
+// supplies stayNeighborhoods. Compact collapsible rows so the section
+// stays scannable across all 16 guides; click to expand a row's body.
+// ─────────────────────────────────────────────────────────────────────────────
+const NEIGHBORHOOD_STYLE = {
+  recommended: { accent: T.sage,  badge: "✓"  },
+  alternative: { accent: T.fjord, badge: "·"  },
+  avoid:       { accent: T.coral, badge: "✕"  },
+}
+
+const NeighborhoodRow = ({ item }) => {
+  const [open, setOpen] = useState(false)
+  const style = NEIGHBORHOOD_STYLE[item.kind] || NEIGHBORHOOD_STYLE.alternative
+  return (
+    <div style={{ display:"flex", overflow:"hidden", background:T.white, border:`1px solid ${T.sandDark}`, borderRadius:RADIUS, transition:"border-color 0.18s" }}>
+      <div style={{ width:3, flexShrink:0, background:style.accent }} />
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        style={{
+          flex:1, textAlign:"left", background:"transparent", border:"none", cursor:"pointer", padding:"12px 16px",
+          display:"flex", flexDirection:"column", gap:open ? 8 : 0, transition:"gap 0.18s",
+        }}
+      >
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", gap:12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, flex:1, minWidth:0 }}>
+            <span style={{ ...uf(11,700), color:style.accent, flexShrink:0, width:14, textAlign:"center" }}>{style.badge}</span>
+            <span style={{ ...uf(13,600), color:T.pine, lineHeight:1.35, overflow:"hidden", textOverflow:"ellipsis", whiteSpace: open ? "normal" : "nowrap" }}>{item.title}</span>
+          </div>
+          <span style={{ ...uf(11,500), color:T.inkFaint, flexShrink:0, transform: open ? "rotate(180deg)" : "none", transition:"transform 0.18s" }}>▾</span>
+        </div>
+        {open && (
+          <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.7, margin:"4px 0 0 24px" }}>{item.body}</p>
+        )}
+      </button>
+    </div>
+  )
+}
+
+const NeighborhoodList = ({ data }) => {
+  if (!data || !Array.isArray(data.items) || data.items.length === 0) return null
+  return (
+    <div style={{ marginBottom:20 }}>
+      {data.intro && (
+        <p style={{ ...uf(12,400), color:T.inkFaint, lineHeight:1.7, margin:"0 0 12px", fontStyle:"normal" }}>{data.intro}</p>
+      )}
+      <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+        {data.items.map((n, i) => <NeighborhoodRow key={i} item={n} />)}
+      </div>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // FOOD CARD
 // ─────────────────────────────────────────────────────────────────────────────
-const FoodCard = ({ item }) => (
-  <div style={{ background:T.white, border:`1px solid ${CARD_BORDER}`, borderRadius:RADIUS, boxShadow:CARD_SHADOW, padding:"16px 18px", display:"flex", flexDirection:"column", gap:6 }}>
-    <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
-      <span style={{ ...uf(13,600), color:T.pine, lineHeight:1.3 }}>{item.dish}</span>
-      <span style={{ ...uf(12,500), color:T.inkFaint, flexShrink:0 }}>{item.price}</span>
+// Splits the description on "Qué pedir:" and "Vibe:" (or English equivalents)
+// so we can render the main description as a paragraph and the practical hints
+// as visually distinct rows. Falls back to a single paragraph if no markers
+// match — older entries that don't follow the rich format still render fine.
+function parseFoodDescription(text) {
+  if (!text) return { body: '', whatToOrder: null, vibe: null }
+  // Match either ES "Qué pedir:" or EN "What to order:"
+  const orderRe = /(Qué pedir|What to order):\s*/i
+  const vibeRe  = /Vibe:\s*/i
+  const orderMatch = text.match(orderRe)
+  const vibeMatch  = text.match(vibeRe)
+  if (!orderMatch && !vibeMatch) return { body: text.trim(), whatToOrder: null, vibe: null }
+
+  let body = text
+  let whatToOrder = null
+  let vibe = null
+
+  if (vibeMatch) {
+    vibe = text.slice(vibeMatch.index + vibeMatch[0].length).trim().replace(/\s+$/, '')
+    body = text.slice(0, vibeMatch.index)
+  }
+  if (orderMatch) {
+    const after = body.slice(orderMatch.index + orderMatch[0].length)
+    // Strip any leading punctuation/whitespace after the marker
+    whatToOrder = after.trim().replace(/^[.\s]+/, '')
+    body = body.slice(0, orderMatch.index)
+  }
+  return { body: body.trim(), whatToOrder, vibe }
+}
+
+const FoodCard = ({ item, strings }) => {
+  const parsed = parseFoodDescription(item.where || '')
+  const [open, setOpen] = useState(false)
+  const hasDetails = parsed.body || parsed.whatToOrder || parsed.vibe
+  return (
+    <div style={{ background:T.white, border:`1px solid ${CARD_BORDER}`, borderRadius:RADIUS, boxShadow:CARD_SHADOW, padding:"18px 20px", display:"flex", flexDirection:"column", gap:10 }}>
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"flex-start", gap:10 }}>
+        <span style={{ ...uf(14,700), color:T.pine, lineHeight:1.3 }}>{item.dish}</span>
+        <span style={{ ...uf(12,500), color:T.inkFaint, flexShrink:0 }}>{item.price}</span>
+      </div>
+      <div style={{ marginTop:2 }}>
+        <Label color={T.sage} bg={T.sageLight}>{item.type}</Label>
+      </div>
+      {open && parsed.body && (
+        <p style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.7, margin:0, marginTop:4 }}>{parsed.body}</p>
+      )}
+      {open && (parsed.whatToOrder || parsed.vibe) && (
+        <div style={{ display:"flex", flexDirection:"column", gap:6, marginTop:2, paddingTop:10, borderTop:`1px solid ${T.sandDark}` }}>
+          {parsed.whatToOrder && (
+            <div style={{ display:"flex", gap:8, alignItems:"baseline" }}>
+              <span style={{ ...uf(10,700), letterSpacing:"0.06em", textTransform:"uppercase", color:T.sage, flexShrink:0 }}>{strings?.foodWhatToOrder ?? 'Qué pedir'}</span>
+              <span style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.55 }}>{parsed.whatToOrder}</span>
+            </div>
+          )}
+          {parsed.vibe && (
+            <div style={{ display:"flex", gap:8, alignItems:"baseline" }}>
+              <span style={{ ...uf(10,700), letterSpacing:"0.06em", textTransform:"uppercase", color:T.sage, flexShrink:0 }}>{strings?.foodVibe ?? 'Vibe'}</span>
+              <span style={{ ...uf(12,400), color:T.inkMid, lineHeight:1.55 }}>{parsed.vibe}</span>
+            </div>
+          )}
+        </div>
+      )}
+      {hasDetails && (
+        <ShowMoreToggle expanded={open} onToggle={() => setOpen(!open)} strings={strings} />
+      )}
     </div>
-    <p style={{ ...uf(12,400), color:T.inkFaint, lineHeight:1.55, margin:0 }}>{item.where}</p>
-    <div style={{ marginTop:4 }}>
-      <Label color={T.sage} bg={T.sageLight}>{item.type}</Label>
-    </div>
-  </div>
-);
+  )
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LOGISTICS CARD
@@ -502,6 +612,9 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                   </p>
                 </div>
               </div>
+              {guide.stayNeighborhoods && (
+                <NeighborhoodList data={guide.stayNeighborhoods} />
+              )}
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(256px,1fr))", gap:16 }}>
                 {guide.stays.map(stay => <StayCard key={stay.name} stay={stay} strings={strings} />)}
               </div>
@@ -522,7 +635,6 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                   <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:14, marginBottom:20 }}>
                     {guide.vibeCards.map(item => <CollapsibleVibeCard key={item.title} item={item} strings={strings} />)}
                   </div>
-                  <LagomNote>{guide.vibe.lagomNote}</LagomNote>
                 </>
               )}
               <ShowMoreToggle expanded={showVibe} onToggle={() => setShowVibe(!showVibe)} strings={strings} />
@@ -580,11 +692,13 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
               <SectionHeader number="06" title={strings.section06Title}
                 subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
-              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
-                {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
-                {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:14 }}>
+                {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} strings={strings} />)}
+                {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} strings={strings} />)}
               </div>
-              <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} strings={strings} />
+              {guide.food.length > 3 && (
+                <ShowMoreToggle expanded={showFood} onToggle={() => setShowFood(!showFood)} strings={strings} />
+              )}
             </section>
 
             {/* 07 — EXPERIENCES */}
