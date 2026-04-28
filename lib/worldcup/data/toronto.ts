@@ -211,6 +211,15 @@ export const en: CityGuide = {
     lagomNote:"June 12 is the most expectation-loaded match in the venue — and possibly in the tournament for Canadian fans. If you're traveling that day, book everything months ahead and arrive in the city with a day of buffer to soak up the atmosphere.",
   },
 
+  stayNeighborhoods:{
+    intro:"Toronto isn't a hard city to orient. The stadium sits at Exhibition Place, southwest of downtown — a location that pairs well with the city's most interesting neighborhoods without being far from anything.",
+    items:[
+      { kind:"recommended", title:"Recommended base: King West / Queen West", body:"The King Street West corridor combines boutique hotels, serious restaurants, and bars with screens without going overly touristy. From here, the GO Train to Exhibition Station takes five minutes from Union Station (which is 10 minutes by streetcar along King). The best quality-logistics-atmosphere balance in the city for the World Cup fan." },
+      { kind:"alternative", title:"Character pick: Distillery District", body:"A complex of restored Victorian architecture with galleries, craft bars, and quality restaurants. Quieter than King West, equally well connected. Fifteen minutes from the stadium on the GO Train. For the traveler who wants a historic-neighborhood feel between matches." },
+      { kind:"alternative", title:"Considered budget: Kensington Market / Little Portugal", body:"West of downtown, Kensington Market is the city's most eclectic neighborhood: vintage shops, affordable restaurants from nearly every cuisine in the world, and a neighborhood energy that isn't manufactured. Farther from the stadium, but served by streetcar and accessible by TTC. For those who prioritize price over commute time." },
+      { kind:"avoid", title:"Avoid as a base: Midtown / North York", body:"Comfortable for other things, but logistically far from Exhibition Place and without the density of dining and cultural options of the south-end neighborhoods. On El Tri or Canada match days, the TTC from Midtown can be a time trap." },
+    ],
+  },
   stays:[
     { name:"The Drake Hotel", area:"Queen West", price:"$$$", priceCAD:"$350–550 CAD/night (World Cup period)", tags:["Boutique","Queen West","Restaurant screens"], note:"A Toronto cultural icon for twenty years. Designer rooms, an in-house restaurant with a solid selection of screens for matches, and a perfect location for accessing the GO Train from Union Station. The hotel that best captures the spirit of Queen West without trying too hard.", best_for:"Character", url:"https://booking.stay22.com/lagomplan/3yt_JV4N4T" },
     { name:"HI Toronto", area:"Church-Wellesley Village", price:"$", priceCAD:"$60–130 CAD/night by room type", tags:["Budget","Official HI","Well-connected by TTC"], note:"Toronto's official Hostelling International outpost has private and shared rooms at honest prices by the city's standards. Good TTC connectivity to downtown and the stadium.", best_for:"Budget", url:"https://kayak.stay22.com/lagomplan/SMg1RtvpiQ" },

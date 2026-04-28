@@ -258,6 +258,14 @@ export const en: CityGuide = {
     { name:"Tlaquepaque", vibe:"Perfect for an afternoon, not as a base. Beautiful for crafts and galleries, but logistically removed from both the stadium and downtown. Ideal off-day plan — World Cup base, no.", best_for:"Day trip", walk_to_stadium:"30–45 min — not recommended as a base", lagomNote:null },
   ],
 
+  stayNeighborhoods:{
+    intro:"Guadalajara scales better than CDMX and has a clearer neighborhood logic for short-stay visitors. The stadium is in Zapopan — a municipality bordering the city to the west, not Guadalajara proper — which matters when planning transit.",
+    items:[
+      { kind:"recommended", title:"Recommended base: Providencia / Americana", body:"Providencia is the neighborhood where Guadalajara's creative class lives: thoughtful restaurants, well-curated bars, independent shops, and architecture that mixes late-colonial with 1960s modernism. La Americana sits next door and adds more varied lodging. Both connect to the rest of the city via BRT and reach the historic center in under 20 minutes. The distance to the stadium (in Zapopan, to the west) runs 20 to 35 minutes by Uber depending on traffic." },
+      { kind:"alternative", title:"Proximity pick: Zapopan Centro", body:"If you prioritize logistics over atmosphere, Zapopan Centro has decent hotels and restaurants at 15 minutes from the stadium by normal transit. Pairs well with a visit to the Santuario de Zapopan, one of the state's most important religious sites." },
+      { kind:"avoid", title:"Perfect for an afternoon, not as a base: Tlaquepaque", body:"Lovely for an afternoon of crafts and galleries, but logistically far from both the stadium and Guadalajara's center. Ideal day-off plan; World Cup base of operations, no." },
+    ],
+  },
   stays:[
     { name:"Hotel Demetria", area:"Providencia", price:"$$$", priceCAD:"World Cup rates: $150–250 USD/night", tags:["Boutique","Jalisco kitchen","Parque Metropolitano"], note:"Sixteen rooms, a restaurant serving serious Jaliscense cooking, and an aesthetic that avoids every boutique-Latin-America cliché. Four blocks from Parque Metropolitano with fast BRT access.", best_for:"Boutique", url:"https://booking.stay22.com/lagomplan/dDSl_dn7B8" },
     { name:"La Villa Hostel", area:"Americana", price:"$", priceCAD:"World Cup rates: $18–45 USD/night by room type", tags:["Budget","Private rooms","Communal kitchen"], note:"An independently run hostel with a good international vibe, shared and private rooms, and a communal kitchen. One of the most honest options in the city for budget travelers.", best_for:"Budget", url:"" },

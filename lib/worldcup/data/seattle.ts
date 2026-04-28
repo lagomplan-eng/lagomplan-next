@@ -209,6 +209,14 @@ export const en: CityGuide = {
     lagomNote:"Underestimating the night chill is the recurring mistake. June in Seattle has 22°C days but 12°C nights — and Lumen Field is open-air. With wind off Puget Sound, the perceived temperature can drop to 8–9°C. A light jacket is not optional for 8pm matches.",
   },
 
+  stayNeighborhoods:{
+    intro:"Seattle is compact for its impact. Lumen Field sits at the south end of downtown, ten minutes on foot from Pike Place Market and fifteen from Pioneer Square. The base-neighborhood logic is simple: closer to downtown, closer to everything.",
+    items:[
+      { kind:"recommended", title:"Recommended base: Capitol Hill", body:"Seattle's most active neighborhood: specialty coffee, chef-driven bars, restaurants that change the menu by the day's harvest, and the best nightlife in town. Fifteen minutes on foot from the stadium via 1st Avenue, or five minutes on Link Light Rail from Capitol Hill Station. For the fan who wants to live Seattle between matches without a car." },
+      { kind:"alternative", title:"Central option: Pioneer Square / Waterfront", body:"Seattle's historic neighborhood — brick, galleries, dark-wood bars — sits ten minutes on foot from the stadium. The renovated Waterfront (Puget Sound's new edge after the elevated highway came down) offers direct views of the Olympic Mountains and the Sound. For the fan who wants to walk to the stadium on June 19, Pioneer Square is the most logical base." },
+      { kind:"alternative", title:"With design and character: Fremont / South Lake Union", body:"Fremont calls itself 'the center of the universe' and has Seattle's highest density of craft breweries. South Lake Union, adjacent, has the city's newest hotels and Streetcar access to downtown in 10 minutes. For the Belgium fan looking for a neighborhood with European pub atmosphere, Fremont is the place." },
+    ],
+  },
   stays:[
     { name:"Hotel Theodore", area:"Downtown / 2nd Avenue", price:"$$$", priceCAD:"$260–450 USD/night (World Cup period)", tags:["Boutique","Pacific NW","6 blocks to stadium"], note:"One of the most coherent design hotels in downtown Seattle: rooms that reference Pacific Northwest culture, an active bar with a Washington State whisky selection, and six blocks on foot from the stadium. The most comfortable option for noon matches.", best_for:"Character", url:"https://booking.stay22.com/lagomplan/gsXS841AN9" },
     { name:"Green Tortoise Hostel", area:"Pike Place Market / Post Alley", price:"$", priceCAD:"$65–140 USD/night by room type", tags:["Budget","Next to the Market","International vibe"], note:"Seattle's best-located hostel: in the Post Alley building, literally next to Pike Place Market. Private and shared rooms, an international feel from day one, and the most enviable position of any budget accommodation in the city.", best_for:"Budget", url:"https://booking.stay22.com/lagomplan/F3ruuST9Kf" },

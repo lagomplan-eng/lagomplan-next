@@ -261,6 +261,14 @@ export const en: CityGuide = {
     { name:"Mount Pleasant / Main Street", vibe:"Budget with standards: Mount Pleasant / Main Street. South of downtown, Mount Pleasant has the highest concentration of independent coffee shops, bookstores, and reasonably priced restaurants in Vancouver. It's on the Expo Line (Main Street-Science World), which is exactly the station used to reach the stadium on match days. The logistics couldn't be cleaner.", best_for:"Budget", walk_to_stadium:"Main Street-Science World + pedestrian route (~15 min)", lagomNote:null },
   ],
 
+  stayNeighborhoods:{
+    intro:"Vancouver is compact for its size. BC Place sits in the heart of the city, next to False Creek — which means most of the interesting neighborhoods are fifteen or twenty minutes from the stadium on foot or via SkyTrain.",
+    items:[
+      { kind:"recommended", title:"Recommended base: Gastown / Downtown", body:"Gastown is Vancouver's historic neighborhood: cobblestones, restored warehouse architecture, and the city's best concentration of bars and restaurants in a small radius. Ten minutes on foot from BC Place. SkyTrain access from Waterfront Station connects with the airport and with Main Street-Science World (the station for reaching the stadium on match day). For the fan who wants to be in the heart of the city and walk to the match." },
+      { kind:"alternative", title:"With design: Yaletown", body:"A former industrial district reconverted into a high-end residential neighborhood with chef-driven restaurants, craft beer patios, and bars where the Premier League shows on properly sized screens. Also ten minutes on foot from the stadium. Quieter than Gastown, with higher average restaurant quality." },
+      { kind:"alternative", title:"Considered budget: Mount Pleasant / Main Street", body:"South of downtown, Mount Pleasant has the highest number of independent coffee shops, bookstores, and reasonably priced restaurants in Vancouver. It's on the Expo Line (Main Street-Science World) — exactly the station used to reach the stadium on match days. The logistics couldn't be cleaner." },
+    ],
+  },
   stays:[
     { name:"Burrard Hotel", area:"Downtown", price:"$$$", priceCAD:"$300–480 CAD/night (World Cup period)", tags:["Honest design","Boutique","Near Robson"], note:"A mid-20th-century hotel with a smart contemporary reno. Rooftop pool, rooms with honest design, and a location four blocks from Robson Street. Fifteen minutes on foot from the stadium.", best_for:"Boutique", url:"https://booking.stay22.com/lagomplan/D7ruOYHXD-" },
     { name:"HI Vancouver Central", area:"Downtown", price:"$", priceCAD:"$55–120 CAD/night by room type", tags:["Budget","Private rooms","Near SkyTrain"], note:"Vancouver's reference hostel for budget travelers. Updated facilities, private rooms available, and direct SkyTrain access two blocks away.", best_for:"Budget / hostel", url:"https://booking.stay22.com/lagomplan/ZgKZumDd-f" },

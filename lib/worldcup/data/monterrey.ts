@@ -238,6 +238,14 @@ export const en: CityGuide = {
     { name:"Guadalupe (near the stadium)", vibe:"Zone to avoid as a base for multi-day stays. The area around Estadio BBVA is functional and safe but offers little outside match days.", best_for:"Logistics only", walk_to_stadium:"15 min — no neighborhood infrastructure", lagomNote:null },
   ],
 
+  stayNeighborhoods:{
+    intro:"Monterrey is compact for its size and easier to orient than CDMX. Estadio BBVA sits in the municipality of Guadalupe — technically adjacent, not inside the city — but access from the center is manageable.",
+    items:[
+      { kind:"recommended", title:"Recommended base: Barrio Antiguo", body:"The only Monterrey neighborhood with street life past 11pm. Cobblestone streets, craft beer bars, late-night taquerías, and murals documenting the region's industrial history. Four kilometers from the Macroplaza and with direct access to Metrorrey Línea 1 from Cuauhtémoc Station. Reaching the stadium requires transit, but the neighborhood more than makes up for the logistical inconvenience." },
+      { kind:"alternative", title:"Considered alternative: San Pedro Garza García", body:"Mexico's most prosperous municipality functions in practice as Monterrey's premium residential zone. Quieter than Barrio Antiguo, with internationally rated restaurants and access via Metrorrey Línea 2. For the fan who prioritizes comfort over street-level atmosphere." },
+      { kind:"avoid", title:"Avoid as a base: Guadalupe (around the stadium)", body:"The area around Estadio BBVA is functional and safe but has little to offer outside match days. If the itinerary is purely stadium and a return flight, it has logic; for a multi-day stay, no." },
+    ],
+  },
   stays:[
     { name:"Habitta Monterrey", area:"San Pedro Garza García", price:"$$$", priceCAD:"World Cup rates: $180–290 USD/night", tags:["Boutique","Rooftop views","Sierra Madre"], note:"Contemporary design in the city's most sought-after corridor. Its own restaurant, a terrace with Sierra Madre views, and rooms without the institutional feel of international chains.", best_for:"Boutique", url:"https://expedia.stay22.com/lagomplan/yD8N_TNYL_" },
     { name:"Hostel El Greco", area:"Barrio Antiguo", price:"$", priceCAD:"World Cup rates: $20–50 USD/night by room type", tags:["Budget","Private rooms","Barrio Antiguo"], note:"One of Monterrey's few serious hostel options, well located for anyone who wants to live the neighborhood and not just sleep in it. Private and shared rooms available.", best_for:"Budget", url:"https://booking.stay22.com/lagomplan/2yUSCjx1QD" },

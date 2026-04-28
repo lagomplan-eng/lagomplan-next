@@ -242,6 +242,14 @@ export const en: CityGuide = {
     { name:"Kansas City, Kansas (KCK)", vibe:"For Latin American and Argentine fans. The metro area's largest Latin American community — restaurants, bars, and Central Avenue, which on Argentina or Ecuador match days replicates Miami's Calle Ocho.", best_for:"Community", walk_to_stadium:"Bus or Uber from KCK (~15 min to downtown)", lagomNote:null },
   ],
 
+  stayNeighborhoods:{
+    intro:"Kansas City has a simpler urban logic than other host cities. Downtown, the Power & Light District, and the Country Club Plaza concentrate most options. The stadium is east — no metro, like Dallas with Arlington, but with the ConnectKC26 network as the official solution.",
+    items:[
+      { kind:"recommended", title:"Recommended base: Downtown / Power & Light District", body:"The Power & Light District is the entertainment heart of downtown Kansas City: bars with screens, restaurants, and direct access to the KC Streetcar (free, connecting the Riverfront to Union Station over 2.2 km). The ConnectKC26 Stadium Direct buses leave from the Fan Fest at the National WWI Museum, five minutes on foot. The cleanest match-day logistics in town." },
+      { kind:"alternative", title:"For neighborhood feel: Crossroads Arts District", body:"Kansas City's gallery and chef-driven restaurant neighborhood, fifteen minutes on foot from downtown. Crossroads has the city's largest concentration of street murals and the most interesting restaurants outside the Power & Light tourist circuit. For the fan who wants to eat well between the June 16 and June 20 matches." },
+      { kind:"alternative", title:"For Argentina and Ecuador fans: Kansas City, Kansas (KCK)", body:"Across the Kansas River, KCK has the metro's largest Latin American community: Mexican restaurants, bakeries, and bars that on Argentina or Ecuador match days turn Central Avenue into something close to Miami's Calle Ocho. Access by bus or Uber from downtown in 15 minutes." },
+    ],
+  },
   stays:[
     { name:"Hotel Kansas City", area:"Downtown / Baltimore Avenue", price:"$$$", priceCAD:"$220–380 USD/night (World Cup period)", tags:["Boutique","Masonic Lodge 1914","Near ConnectKC26"], note:"Opened in 2020 in the 1914 Masonic Lodge building. 6-meter ceilings, an American whiskey bar, and rooms without the anonymous chain-hotel design. ConnectKC26 Stadium Direct leaves four blocks away.", best_for:"Boutique", url:"" },
     { name:"Loews Kansas City Hotel", area:"Convention Center / Downtown", price:"$$$", priceCAD:"$180–300 USD/night (World Cup period)", tags:["Quality value","Pool","Connects everything"], note:"The best position-to-service ratio downtown: large rooms, pool, in-house restaurant, and walking access to every ConnectKC26 route.", best_for:"Value", url:"https://booking.stay22.com/lagomplan/AZ3nVqqWKm" },
