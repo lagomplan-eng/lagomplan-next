@@ -20,9 +20,41 @@ export function PaymentPendingOverlay({
 
   async function run() {
     setPhase('confirming')
-    const result = await confirmPurchase(sessionId, 10_000)
-    if (result === 'credited') onCredited()
-    else setPhase('syncing')
+    // 1. Fast path — Stripe webhook may have already fired and written
+    //    last_session_id. Short poll (5s) so we don't wait long if it didn't.
+    const webhookResult = await confirmPurchase(sessionId, 5_000)
+    if (webhookResult === 'credited') {
+      onCredited()
+      return
+    }
+
+    // 2. Fallback — webhook hasn't landed (or isn't configured). Verify the
+    //    session directly with Stripe via /api/checkout/fulfill, which is
+    //    idempotent and writes last_session_id itself. Then re-poll to pick
+    //    up the now-credited plan.
+    setPhase('syncing')
+    try {
+      const fulfillRes = await fetch('/api/checkout/fulfill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ session_id: sessionId }),
+      })
+      if (fulfillRes.ok) {
+        const fulfillResult = await confirmPurchase(sessionId, 8_000)
+        if (fulfillResult === 'credited') {
+          onCredited()
+          return
+        }
+      } else {
+        const errBody = await fulfillRes.json().catch(() => ({}))
+        console.warn('[PaymentPendingOverlay] fulfill failed:', fulfillRes.status, errBody)
+      }
+    } catch (e) {
+      console.warn('[PaymentPendingOverlay] fulfill threw:', e)
+    }
+    // Stay on syncing phase — user can click "Actualizar" to re-run this whole
+    // sequence (webhook poll → fulfill fallback → poll).
   }
 
   useEffect(() => {
