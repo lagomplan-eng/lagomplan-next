@@ -1047,78 +1047,19 @@ export default function TripResult({ params }: Props) {
         genStartedAt = performance.now()
 
         let tripDataRaw: any = null
+        let asyncTripId: string | null = null
 
         if (useAsync) {
-          // ── Async: create job, then poll until terminal ───────────────────
-          setAsyncChunksTotal(duration_days)
-          setAsyncChunksDone(0)
-          const createRes = await fetch('/api/trips/jobs', {
-            method: 'POST',
-            headers: genHeaders,
-            credentials: 'include',
-            body: JSON.stringify(payload),
-            signal: controller.signal,
-          })
-          genStatus = createRes.status
-          const createData = await createRes.json().catch(() => null)
-          setRawResponse(createData)
-          if (!createRes.ok) {
-            if (createRes.status === 401) {
-              sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
-              router.push({ pathname: '/login' })
-              return
-            }
-            if (createRes.status === 402) { openPaywall(); return }
-            const base = typeof createData?.message === 'string' ? createData.message : 'Generation failed'
-            throw new Error(base)
-          }
-          const jobId = createData?.jobId
-          if (!jobId) throw new Error('Missing jobId from /api/trips/jobs')
-
-          const HARD_TIMEOUT_MS = 240_000
-          const POLL_INTERVAL_MS = 2_000
-          const pollStart = performance.now()
-
-          // Inline polling loop; honors abort, updates chunk signals.
-          // eslint-disable-next-line no-constant-condition
-          while (true) {
-            if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
-            if (performance.now() - pollStart > HARD_TIMEOUT_MS) {
-              throw new Error('Generation timed out after 4 minutes')
-            }
-            await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
-            if (controller.signal.aborted) throw new DOMException('Aborted', 'AbortError')
-
-            let pollRes: Response
-            try {
-              pollRes = await fetch(`/api/trips/jobs/${jobId}`, {
-                headers: { ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) },
-                credentials: 'include',
-                signal: controller.signal,
-              })
-            } catch (e) {
-              if (e instanceof DOMException && e.name === 'AbortError') throw e
-              console.warn('[TripResult] poll network error, continuing', e)
-              continue
-            }
-            if (!pollRes.ok) {
-              console.warn('[TripResult] poll returned', pollRes.status)
-              continue
-            }
-            const pollData = await pollRes.json().catch(() => null)
-            if (!pollData) continue
-            if (typeof pollData.chunksDone === 'number')  setAsyncChunksDone(pollData.chunksDone)
-            if (typeof pollData.chunksTotal === 'number') setAsyncChunksTotal(pollData.chunksTotal)
-
-            if (pollData.status === 'completed' && pollData.trip_data) {
-              tripDataRaw = pollData.trip_data
-              if (pollData.tripId) setTripId(pollData.tripId)
-              genStatus = 200
-              break
-            }
-            if (pollData.status === 'failed') {
-              throw new Error(typeof pollData.error === 'string' ? pollData.error : 'Generation failed')
-            }
+          // ── Async: helper handles POST + polling loop ────────────────────
+          try {
+            const result = await runAsyncGeneration(payload, controller.signal, session)
+            tripDataRaw = result.tripDataRaw
+            asyncTripId = result.tripId
+            genStatus = 200
+          } catch (e: any) {
+            if (e?.code === 'redirect_to_login') return
+            if (e?.code === 'paywall') { openPaywall(); return }
+            throw e
           }
         } else {
           // ── Sync: existing /api/generate-trip path ────────────────────────
@@ -1167,55 +1108,73 @@ export default function TripResult({ params }: Props) {
         // This enables autosave for any subsequent edits and ensures a browser
         // refresh loads from DB instead of triggering a new AI generation.
         if (authedUser !== null) {
-          try {
-            const autoSaveHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
-            if (session?.access_token) autoSaveHeaders.Authorization = `Bearer ${session.access_token}`
-            const autoSaveRes = await fetch('/api/trips', {
-              method: 'POST',
-              headers: autoSaveHeaders,
-              credentials: 'include',
-              body: JSON.stringify({
-                title:        normalized.title || null,
-                destination,
-                origin,
-                duration_days,
-                travelers:    traveler,
-                travel_style: pace,
-                budget_level: budget,
-                interests:    parsedInterests,
-                trip_data:    tripDataRaw,
-              }),
+          if (useAsync && asyncTripId) {
+            // Async path: the worker already inserted the trips row. Use the
+            // tripId returned from polling instead of POSTing to /api/trips,
+            // which would create a duplicate row.
+            setTripId(asyncTripId)
+            lastSavedContentRef.current = JSON.stringify({
+              title: normalized.title, subtitle: normalized.subtitle,
+              days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+              doneChecks: [],
             })
-            if (!autoSaveRes.ok) {
-              // Surface the failure — silent swallowing is why autosave sometimes
-              // skips with "no tripId": the initial POST to /api/trips fails
-              // (often a cookie/token timing issue on just-logged-in tabs) and
-              // tripId never gets set.
-              const errText = await autoSaveRes.text().catch(() => '')
-              console.warn('[TripResult] autosave POST failed:', autoSaveRes.status, errText)
-            } else {
-              const autoSaveData = await autoSaveRes.json().catch(() => null)
-              if (autoSaveData?.success) {
-                setTripId(autoSaveData.trip_id)
-                // Baseline: now that the DB entry exists, mark current content as saved
-                // so autosave only fires if the user edited during the POST window
-                lastSavedContentRef.current = JSON.stringify({
-                  title: normalized.title, subtitle: normalized.subtitle,
-                  days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
-                  doneChecks: [],
-                })
-                sessionStorage.removeItem('tripCache')
-                if (typeof window !== 'undefined') {
-                  const url = new URL(window.location.href)
-                  url.searchParams.set('trip_id', autoSaveData.trip_id)
-                  window.history.replaceState({}, '', url.toString())
-                }
-              } else {
-                console.warn('[TripResult] autosave POST ok but no trip_id:', autoSaveData)
-              }
+            sessionStorage.removeItem('tripCache')
+            if (typeof window !== 'undefined') {
+              const url = new URL(window.location.href)
+              url.searchParams.set('trip_id', asyncTripId)
+              window.history.replaceState({}, '', url.toString())
             }
-          } catch (err) {
-            console.warn('[TripResult] autosave POST threw:', err)
+          } else {
+            try {
+              const autoSaveHeaders: Record<string, string> = { 'Content-Type': 'application/json' }
+              if (session?.access_token) autoSaveHeaders.Authorization = `Bearer ${session.access_token}`
+              const autoSaveRes = await fetch('/api/trips', {
+                method: 'POST',
+                headers: autoSaveHeaders,
+                credentials: 'include',
+                body: JSON.stringify({
+                  title:        normalized.title || null,
+                  destination,
+                  origin,
+                  duration_days,
+                  travelers:    traveler,
+                  travel_style: pace,
+                  budget_level: budget,
+                  interests:    parsedInterests,
+                  trip_data:    tripDataRaw,
+                }),
+              })
+              if (!autoSaveRes.ok) {
+                // Surface the failure — silent swallowing is why autosave sometimes
+                // skips with "no tripId": the initial POST to /api/trips fails
+                // (often a cookie/token timing issue on just-logged-in tabs) and
+                // tripId never gets set.
+                const errText = await autoSaveRes.text().catch(() => '')
+                console.warn('[TripResult] autosave POST failed:', autoSaveRes.status, errText)
+              } else {
+                const autoSaveData = await autoSaveRes.json().catch(() => null)
+                if (autoSaveData?.success) {
+                  setTripId(autoSaveData.trip_id)
+                  // Baseline: now that the DB entry exists, mark current content as saved
+                  // so autosave only fires if the user edited during the POST window
+                  lastSavedContentRef.current = JSON.stringify({
+                    title: normalized.title, subtitle: normalized.subtitle,
+                    days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                    doneChecks: [],
+                  })
+                  sessionStorage.removeItem('tripCache')
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href)
+                    url.searchParams.set('trip_id', autoSaveData.trip_id)
+                    window.history.replaceState({}, '', url.toString())
+                  }
+                } else {
+                  console.warn('[TripResult] autosave POST ok but no trip_id:', autoSaveData)
+                }
+              }
+            } catch (err) {
+              console.warn('[TripResult] autosave POST threw:', err)
+            }
           }
         }
 
@@ -1316,6 +1275,97 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading])
 
+  // ── Shared async-generation helper ──────────────────────────────────────────
+  // Drives the /api/trips/jobs POST + polling loop for any caller that needs
+  // long-trip generation (initial-gen, regenerate, replaceTrip). The worker
+  // inserts the trips row itself, so callers should use the returned tripId
+  // and skip a redundant /api/trips POST.
+  //
+  // Throws:
+  //   - Error with code 'redirect_to_login' (helper has already pushed /login)
+  //   - Error with code 'paywall' (caller should call openPaywall)
+  //   - DOMException 'AbortError' on signal abort
+  //   - Plain Error on hard timeout / job failed / missing data
+  async function runAsyncGeneration(
+    payload: any,
+    signal: AbortSignal | undefined,
+    session: any,
+  ): Promise<{ tripDataRaw: any; tripId: string | null }> {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+    if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`
+
+    const duration = Math.min(Math.max(Number(payload?.duration_days) || 1, 1), 30)
+    setIsAsyncPath(true)
+    setAsyncChunksTotal(duration)
+    setAsyncChunksDone(0)
+
+    const createRes = await fetch('/api/trips/jobs', {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: JSON.stringify(payload),
+      signal,
+    })
+    const createData = await createRes.json().catch(() => null)
+    setRawResponse(createData)
+    if (!createRes.ok) {
+      if (createRes.status === 401) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
+        router.push({ pathname: '/login' })
+        throw Object.assign(new Error('redirect-to-login'), { code: 'redirect_to_login' })
+      }
+      if (createRes.status === 402) {
+        throw Object.assign(new Error('paywall'), { code: 'paywall' })
+      }
+      const base = typeof createData?.message === 'string' ? createData.message : 'Generation failed'
+      throw new Error(base)
+    }
+    const jobId = createData?.jobId
+    if (!jobId) throw new Error('Missing jobId from /api/trips/jobs')
+
+    const HARD_TIMEOUT_MS = 240_000
+    const POLL_INTERVAL_MS = 2_000
+    const pollStart = performance.now()
+
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+      if (performance.now() - pollStart > HARD_TIMEOUT_MS) {
+        throw new Error('Generation timed out after 4 minutes')
+      }
+      await new Promise(r => setTimeout(r, POLL_INTERVAL_MS))
+      if (signal?.aborted) throw new DOMException('Aborted', 'AbortError')
+
+      let pollRes: Response
+      try {
+        pollRes = await fetch(`/api/trips/jobs/${jobId}`, {
+          headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {},
+          credentials: 'include',
+          signal,
+        })
+      } catch (e) {
+        if (e instanceof DOMException && e.name === 'AbortError') throw e
+        console.warn('[runAsyncGeneration] poll network error, continuing', e)
+        continue
+      }
+      if (!pollRes.ok) {
+        console.warn('[runAsyncGeneration] poll returned', pollRes.status)
+        continue
+      }
+      const pollData = await pollRes.json().catch(() => null)
+      if (!pollData) continue
+      if (typeof pollData.chunksDone === 'number')  setAsyncChunksDone(pollData.chunksDone)
+      if (typeof pollData.chunksTotal === 'number') setAsyncChunksTotal(pollData.chunksTotal)
+
+      if (pollData.status === 'completed' && pollData.trip_data) {
+        return { tripDataRaw: pollData.trip_data, tripId: pollData.tripId ?? null }
+      }
+      if (pollData.status === 'failed') {
+        throw new Error(typeof pollData.error === 'string' ? pollData.error : 'Generation failed')
+      }
+    }
+  }
+
   // ── Regenerate from pref drawer ──────────────────────────────────────────────
   async function regenerate() {
     // ── Paywall guard (DB-backed) ────────────────────────────────────────
@@ -1368,22 +1418,54 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
-      const genRes  = await fetch('/api/generate-trip', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-      })
-      const genData = await genRes.json().catch(() => null)
-      setRawResponse(genData)
-      if (!genRes.ok) {
-        if (genRes.status === 402) {
-          refreshPlanCredits().catch(() => {})
-          setPrefOpen(false)
-          openPaywall()
-          return
+
+      // Long-trip regen routes through async (same gate as initial-gen) — the
+      // sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT for
+      // anything beyond ~14 days.
+      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      const previousTripId = tripId   // capture before any setTripId mutation
+
+      let tripDataRaw: any = null
+      let asyncTripId: string | null = null
+
+      if (useAsync) {
+        const supabase = getSupabaseBrowser()
+        const { data: { session } } = await supabase.auth.getSession()
+        try {
+          const result = await runAsyncGeneration(payload, undefined, session)
+          tripDataRaw = result.tripDataRaw
+          asyncTripId = result.tripId
+        } catch (e: any) {
+          if (e?.code === 'redirect_to_login') return
+          if (e?.code === 'paywall') {
+            refreshPlanCredits().catch(() => {})
+            setPrefOpen(false)
+            openPaywall()
+            return
+          }
+          throw e
         }
-        throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+      } else {
+        const genRes  = await fetch('/api/generate-trip', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+        })
+        const genData = await genRes.json().catch(() => null)
+        setRawResponse(genData)
+        if (!genRes.ok) {
+          if (genRes.status === 402) {
+            refreshPlanCredits().catch(() => {})
+            setPrefOpen(false)
+            openPaywall()
+            return
+          }
+          throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+        }
+        tripDataRaw = genData?.trip_data
+        if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       }
-      const tripDataRaw = genData?.trip_data
-      if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
+
+      if (!tripDataRaw) throw new Error('No trip_data from generation')
+
       setRawTripData(tripDataRaw)
       const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
       setTripTitle(normalized.title)
@@ -1402,65 +1484,80 @@ export default function TripResult({ params }: Props) {
       setActiveVersionIdx(nextIdx)
       setHasUserEdits(false)
 
-      // Persist the regenerated version. Without this, refreshing the page
-      // re-loads the previous DB row (the URL still carries the old trip_id),
-      // so the user appears to "lose" the regeneration. Mirrors replaceTrip's
-      // autosave block so both flows behave consistently.
-      const previousTripId = tripId   // capture before we overwrite
+      // Persist the regenerated version. Async path: the worker already
+      // inserted the trips row, just adopt its tripId. Sync path: POST to
+      // /api/trips ourselves. Either way, delete the predecessor afterward
+      // so my-trips shows one logical entry per trip.
       if (authedUser !== null) {
-        try {
-          const autosaveBody = {
-            title:        normalized.title || null,
-            destination:  prefDest,
-            origin:       prefOrigin,
-            duration_days,
-            travelers:    prefTraveler,
-            travel_style: prefPace,
-            budget_level: prefBudget,
-            interests:    parsedInterests,
-            trip_data:    tripDataRaw,
-          }
-          console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
-          const regenSaveRes = await fetch('/api/trips', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify(autosaveBody),
+        if (useAsync && asyncTripId) {
+          setTripId(asyncTripId)
+          lastSavedContentRef.current = JSON.stringify({
+            title: normalized.title, subtitle: normalized.subtitle,
+            days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+            doneChecks: [],
           })
-          if (regenSaveRes.ok) {
-            const regenData = await regenSaveRes.json().catch(() => null)
-            if (regenData?.success) {
-              setTripId(regenData.trip_id)
-              lastSavedContentRef.current = JSON.stringify({
-                title: normalized.title, subtitle: normalized.subtitle,
-                days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
-                doneChecks: [],
-              })
-              if (typeof window !== 'undefined') {
-                const url = new URL(window.location.href)
-                url.searchParams.set('trip_id', regenData.trip_id)
-                window.history.replaceState({}, '', url.toString())
-              }
-              // Replacement semantics: delete the predecessor row so my-trips
-              // stays clean (one row per logical trip, not one per regen).
-              // Fire-and-forget — the new row is already live; an orphan row
-              // is recoverable, blocking on cleanup is not worth it.
-              if (previousTripId && previousTripId !== regenData.trip_id) {
-                fetch(`/api/trips/${previousTripId}`, {
-                  method: 'DELETE',
-                  credentials: 'include',
-                }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href)
+            url.searchParams.set('trip_id', asyncTripId)
+            window.history.replaceState({}, '', url.toString())
+          }
+          if (previousTripId && previousTripId !== asyncTripId) {
+            fetch(`/api/trips/${previousTripId}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
+          }
+        } else {
+          try {
+            const autosaveBody = {
+              title:        normalized.title || null,
+              destination:  prefDest,
+              origin:       prefOrigin,
+              duration_days,
+              travelers:    prefTraveler,
+              travel_style: prefPace,
+              budget_level: prefBudget,
+              interests:    parsedInterests,
+              trip_data:    tripDataRaw,
+            }
+            console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
+            const regenSaveRes = await fetch('/api/trips', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify(autosaveBody),
+            })
+            if (regenSaveRes.ok) {
+              const regenData = await regenSaveRes.json().catch(() => null)
+              if (regenData?.success) {
+                setTripId(regenData.trip_id)
+                lastSavedContentRef.current = JSON.stringify({
+                  title: normalized.title, subtitle: normalized.subtitle,
+                  days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+                  doneChecks: [],
+                })
+                if (typeof window !== 'undefined') {
+                  const url = new URL(window.location.href)
+                  url.searchParams.set('trip_id', regenData.trip_id)
+                  window.history.replaceState({}, '', url.toString())
+                }
+                if (previousTripId && previousTripId !== regenData.trip_id) {
+                  fetch(`/api/trips/${previousTripId}`, {
+                    method: 'DELETE',
+                    credentials: 'include',
+                  }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
+                }
+              } else {
+                setTripId(null)
               }
             } else {
               setTripId(null)
+              console.warn('[regenerate] autosave failed:', regenSaveRes.status)
             }
-          } else {
+          } catch (e) {
             setTripId(null)
-            console.warn('[regenerate] autosave failed:', regenSaveRes.status)
+            console.warn('[regenerate] autosave threw:', e)
           }
-        } catch (e) {
-          setTripId(null)
-          console.warn('[regenerate] autosave threw:', e)
         }
       } else {
         // Anonymous: no DB save available
@@ -1654,24 +1751,54 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
       }
-      const genRes  = await fetch('/api/generate-trip', {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-      })
-      const genData = await genRes.json().catch(() => null)
-      setRawResponse(genData)
-      if (!genRes.ok) {
-        if (genRes.status === 402) {
-          refreshPlanCredits().catch(() => {})
-          openPaywall()
-          return
-        }
-        throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
-      }
-      const tripDataRaw = genData?.trip_data
-      if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
-      // Capture the predecessor before we clear it — needed below for the
-      // "delete the old row after the new one is saved" cleanup step.
+
+      // Long-trip replace routes through async (same gate as initial-gen) —
+      // the sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT
+      // for anything beyond ~14 days.
+      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      // Capture the predecessor before any setTripId mutation — needed for
+      // the "delete the old row after the new one is saved" cleanup step.
       const previousTripId = tripId
+
+      let tripDataRaw: any = null
+      let asyncTripId: string | null = null
+
+      if (useAsync) {
+        const supabase = getSupabaseBrowser()
+        const { data: { session } } = await supabase.auth.getSession()
+        try {
+          const result = await runAsyncGeneration(payload, undefined, session)
+          tripDataRaw = result.tripDataRaw
+          asyncTripId = result.tripId
+        } catch (e: any) {
+          if (e?.code === 'redirect_to_login') return
+          if (e?.code === 'paywall') {
+            refreshPlanCredits().catch(() => {})
+            openPaywall()
+            return
+          }
+          throw e
+        }
+      } else {
+        const genRes  = await fetch('/api/generate-trip', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
+        })
+        const genData = await genRes.json().catch(() => null)
+        setRawResponse(genData)
+        if (!genRes.ok) {
+          if (genRes.status === 402) {
+            refreshPlanCredits().catch(() => {})
+            openPaywall()
+            return
+          }
+          throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
+        }
+        tripDataRaw = genData?.trip_data
+        if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
+      }
+
+      if (!tripDataRaw) throw new Error('No trip_data from generation')
+
       setRawTripData(tripDataRaw)
       setTripId(null)
       const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
@@ -1687,8 +1814,30 @@ export default function TripResult({ params }: Props) {
         nights, traveler: prefTraveler, interests: prefInterests, pace: prefPace, budget: prefBudget,
       }}))
       setHasUserEdits(false)
-      // Auto-save regenerated trip so subsequent edits can be autosaved
+      // Auto-save regenerated trip so subsequent edits can be autosaved.
+      // Async path: worker already inserted the trips row, adopt its tripId.
+      // Sync path: POST to /api/trips ourselves. Either way, delete the
+      // predecessor afterward so my-trips shows one logical entry per trip.
       if (authedUser !== null) {
+        if (useAsync && asyncTripId) {
+          setTripId(asyncTripId)
+          lastSavedContentRef.current = JSON.stringify({
+            title: normalized.title, subtitle: normalized.subtitle,
+            days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
+            doneChecks: [],
+          })
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href)
+            url.searchParams.set('trip_id', asyncTripId)
+            window.history.replaceState({}, '', url.toString())
+          }
+          if (previousTripId && previousTripId !== asyncTripId) {
+            fetch(`/api/trips/${previousTripId}`, {
+              method: 'DELETE',
+              credentials: 'include',
+            }).catch(e => console.warn('[replaceTrip] predecessor delete failed:', e))
+          }
+        } else {
         try {
           // Use the same edited duration we sent to the generator above.
           const regenDuration = duration_days
@@ -1737,6 +1886,7 @@ export default function TripResult({ params }: Props) {
           }
         } catch {
           // best-effort
+        }
         }
       } else {
         // Anonymous: just reset baseline so autosave comparison works if they log in
