@@ -1305,8 +1305,15 @@ export default function TripResult({ params }: Props) {
     if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`
 
     const duration = Math.min(Math.max(Number(payload?.duration_days) || 1, 1), 30)
+    // Worker generates segments of up to 10 days each. Initialize the
+    // progress UI with the segment count (1-3 for 1-30 day trips) rather
+    // than the day count, so the bar starts in the right shape; polling
+    // would correct it on the first response anyway, but this avoids a
+    // cosmetic 0/30 → 0/3 jump at the very start of generation.
+    const SEGMENT_DAYS_UI = 10
+    const initialSegmentCount = Math.ceil(duration / SEGMENT_DAYS_UI)
     setIsAsyncPath(true)
-    setAsyncChunksTotal(duration)
+    setAsyncChunksTotal(initialSegmentCount)
     setAsyncChunksDone(0)
 
     const createRes = await fetch('/api/trips/jobs', {

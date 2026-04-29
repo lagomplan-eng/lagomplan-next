@@ -44,13 +44,23 @@ console.log('[worker] env check:', {
   legacy_starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
 })
 
-// Budget: Supabase Edge Functions cap around 150s. We stop invoking new LLM
-// calls once the remaining budget is below this floor and exit cleanly.
-// The reconciler (or client) will call us back to finish.
-const BUDGET_FLOOR_MS = 25_000
+// Budget: Supabase Edge Functions cap around 150s. A 10-day segment takes
+// ~130s. So we set BUDGET_FLOOR_MS at 135_000 — high enough that we never
+// START a segment we can't reasonably complete. Effect: at most one segment
+// per worker invocation (then self-reinvoke / cron resumes). Predictable.
+const BUDGET_FLOOR_MS = 135_000
 
-// Per-chunk LLM call timeout — generous, but below the function budget.
-const CHUNK_TIMEOUT_MS = 60_000
+// Per-segment LLM call timeout — must accommodate a 10-day segment, which
+// empirically takes ~130s on Sonnet 4.0 with the current schema.
+// (Was 60s when we generated 1 day per call; that's a hard timeout-mid-call
+// failure for 10-day segments.)
+const CHUNK_TIMEOUT_MS = 145_000
+
+// Segment size — number of days per generate-trip call. The previous design
+// generated 1 day per call (30 chunks for a 30-day trip), which made the
+// self-reinvoke chain extremely fragile. 10-day segments fit in the
+// Edge Function's ~150s budget and cut the chain length 10x.
+const SEGMENT_DAYS = 10
 
 type JobRow = {
   id:           string
@@ -96,30 +106,39 @@ async function callGenerateTrip(payload: Record<string, any>, signal: AbortSigna
   }
 }
 
-async function generateChunk(jobInputs: Record<string, any>, dayIndex: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
-  // Day-scoped payload. We derive start/end for the single day so the LLM
-  // produces a focused plan instead of the whole trip in one call.
-  const start = new Date(jobInputs.start)
-  const dayStart = new Date(start)
-  dayStart.setDate(start.getDate() + dayIndex)
+async function generateSegment(jobInputs: Record<string, any>, segmentIndex: number, totalSegments: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
+  // Segment-scoped payload. Compute the date range and day count for this
+  // segment, then ask generate-trip for `duration_days = segmentDayCount`
+  // days starting at segmentStartDate. Last segment may be shorter than
+  // SEGMENT_DAYS if total trip length isn't a multiple of 10.
+  const totalDays      = Math.max(1, Math.min(30, Number(jobInputs.duration_days) || 1))
+  const segmentStartIdx = segmentIndex * SEGMENT_DAYS
+  const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
 
-  const dayPayload = {
+  const tripStart = new Date(jobInputs.start)
+  const segmentStartDate = new Date(tripStart)
+  segmentStartDate.setDate(tripStart.getDate() + segmentStartIdx)
+  const segmentEndDate = new Date(segmentStartDate)
+  segmentEndDate.setDate(segmentStartDate.getDate() + segmentDayCount - 1)
+
+  const segmentPayload = {
     ...jobInputs,
-    duration_days: 1,
-    day_index:     dayIndex,                        // for prompt context
-    previous_day_summary: prevSummary ?? undefined, // continuity hint
-    start: dayStart.toISOString().slice(0, 10),
-    end:   dayStart.toISOString().slice(0, 10),
+    duration_days:        segmentDayCount,
+    segment_index:        segmentIndex,                  // informational, generate-trip currently ignores
+    total_segments:       totalSegments,                 // informational
+    previous_day_summary: prevSummary ?? undefined,      // continuity hint, generate-trip currently ignores
+    start: segmentStartDate.toISOString().slice(0, 10),
+    end:   segmentEndDate.toISOString().slice(0, 10),
   }
 
-  const res = await callGenerateTrip(dayPayload, signal)
-  if (!res?.trip_data) throw new Error('chunk response missing trip_data')
-  // Diagnostic — log the chunk shape on first chunk so we can see exactly
-  // where the days array lives. The existing /generate-trip Edge Function
-  // doesn't have a documented contract; the response shape was hand-rolled.
-  if (dayIndex === 0) {
-    console.log('[worker] chunk[0] keys:', Object.keys(res.trip_data || {}))
-    console.log('[worker] chunk[0] sample:', JSON.stringify(res.trip_data).slice(0, 800))
+  const res = await callGenerateTrip(segmentPayload, signal)
+  if (!res?.trip_data) throw new Error('segment response missing trip_data')
+  // Diagnostic — log shape on first segment so we can see exactly where
+  // the days array lives. The existing /generate-trip Edge Function
+  // doesn't have a documented contract; response shape was hand-rolled.
+  if (segmentIndex === 0) {
+    console.log('[worker] segment[0] keys:', Object.keys(res.trip_data || {}))
+    console.log('[worker] segment[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
   }
   return res.trip_data
 }
@@ -136,19 +155,26 @@ function chunkDays(chunk: any): any[] {
 }
 
 function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>): Record<string, any> {
-  // Concatenate per-day outputs into a single trip_data shape that matches
-  // what the sync endpoint returns. The sync endpoint's trip_data typically
-  // includes { title, subtitle, days, budget, packing }. We pull days from
-  // each chunk, keep metadata from the first chunk.
+  // Concatenate per-segment outputs into a single trip_data shape matching
+  // what the sync endpoint returns. Each chunk is a segment containing up
+  // to SEGMENT_DAYS days. Day numbers are cumulative across segments —
+  // not segment-relative — so users see "Day 17" not "Segment 2 Day 7".
+  // Trip-level metadata (title, subtitle, budget, packing) comes from the
+  // first segment; subsequent segments' versions are discarded.
   const first = chunks[0] ?? {}
-  const days = chunks.flatMap((c, i) => {
-    const d = chunkDays(c)
-    return d.map((day: any, j: number) => ({ ...day, day_number: i + 1 + j }))
-  })
+  let dayCounter = 0
+  const days: any[] = []
+  for (const chunk of chunks) {
+    const segmentDays = chunkDays(chunk)
+    for (const day of segmentDays) {
+      dayCounter += 1
+      days.push({ ...day, day_number: dayCounter })
+    }
+  }
   console.log('[worker] assembled result:', {
-    chunks_count: chunks.length,
-    days_count:   days.length,
-    first_chunk_keys: Object.keys(first || {}),
+    segments_count: chunks.length,
+    days_count:     days.length,
+    first_segment_keys: Object.keys(first || {}),
   })
   return {
     title:       (first as any).title       ?? `Viaje a ${jobInputs.destination}`,
@@ -192,13 +218,16 @@ async function refundOneTripIfApplicable(admin: any, userId: string): Promise<vo
 }
 
 function shortSummary(chunk: ChunkContent): string {
-  const d = Array.isArray(chunk.days) ? chunk.days[0] : null
-  if (!d) return ''
-  const title = d.title ?? ''
-  const activities = Array.isArray(d.activities)
-    ? d.activities.slice(0, 2).map((a: any) => a.name || a.title).filter(Boolean).join(', ')
-    : ''
-  return [title, activities].filter(Boolean).join(' · ').slice(0, 200)
+  // Compact summary of the segment we just generated, used as a continuity
+  // hint for the next segment's prompt. Picks day titles only (skipping
+  // activities to keep the summary short) so the next segment sees a
+  // sequence like "Day 1: Centro Histórico · Day 2: Coyoacán · ...".
+  // Capped at 400 chars — long enough to convey segment shape without
+  // bloating subsequent prompts.
+  const days = chunkDays(chunk)
+  if (days.length === 0) return ''
+  const titles = days.map((d: any) => d?.title).filter(Boolean)
+  return titles.join(' · ').slice(0, 400)
 }
 
 serve(async (req: Request) => {
@@ -247,7 +276,10 @@ serve(async (req: Request) => {
   // Mark running
   await admin.from('generation_jobs').update({ status: 'running' }).eq('id', job.id)
 
-  // Load any chunks already persisted (resume support)
+  // Load any segments already persisted (resume support). Each row in
+  // generation_chunks is now one segment (up to SEGMENT_DAYS days),
+  // not one day — but the table name and column names stay for backward
+  // compatibility with existing data and the polling endpoint.
   const { data: existingChunks } = await admin
     .from('generation_chunks')
     .select('chunk_index, content')
@@ -257,14 +289,20 @@ serve(async (req: Request) => {
   const chunksByIndex = new Map<number, ChunkContent>()
   for (const c of existingChunks ?? []) chunksByIndex.set((c as any).chunk_index, (c as any).content)
 
+  // Continuity hint for the next segment: summary of the most recently
+  // persisted segment. Uses chunks_done - 1 (the last completed index)
+  // rather than size - 1, which would be wrong if chunks ever come back
+  // sparse (resumed mid-failure).
   let prevSummary: string | null =
-    chunksByIndex.size > 0
-      ? shortSummary(chunksByIndex.get(chunksByIndex.size - 1) as ChunkContent)
+    job.chunks_done > 0 && chunksByIndex.has(job.chunks_done - 1)
+      ? shortSummary(chunksByIndex.get(job.chunks_done - 1) as ChunkContent)
       : null
 
-  // Generate missing chunks
+  // Generate missing segments
   for (let i = job.chunks_done; i < job.chunks_total; i++) {
-    // Budget check — if we're under the floor, bow out cleanly
+    // Budget check — if we're under the floor, bow out cleanly. With
+    // BUDGET_FLOOR_MS = 135s and segment time ~130s, this means at most
+    // one segment per invocation. Self-reinvoke (or cron) handles the rest.
     const remainingBudget = 140_000 - (Date.now() - startedAt)
     if (remainingBudget < BUDGET_FLOOR_MS) break
 
@@ -273,7 +311,7 @@ serve(async (req: Request) => {
 
     let chunk: ChunkContent
     try {
-      chunk = await generateChunk(job.inputs, i, prevSummary, ctrl.signal)
+      chunk = await generateSegment(job.inputs, i, job.chunks_total, prevSummary, ctrl.signal)
     } catch (e) {
       clearTimeout(t)
       await admin

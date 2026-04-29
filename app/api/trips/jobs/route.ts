@@ -70,7 +70,13 @@ export async function POST(req: NextRequest) {
     }
 
     const durationDays = Math.min(Math.max(Number((body as any)?.duration_days) || 1, 1), 30)
-    const chunksTotal  = durationDays
+    // Segments of up to 10 days each. The worker generates one segment per
+    // generate-trip call. Was `chunksTotal = durationDays` (1 day per chunk),
+    // which made the self-reinvoke chain length 30 for a 30-day trip; the new
+    // shape is 3 segments for 30 days, 10x shorter chain, much more reliable.
+    // Keep this constant in sync with SEGMENT_DAYS in the worker.
+    const SEGMENT_DAYS = 10
+    const chunksTotal  = Math.ceil(durationDays / SEGMENT_DAYS)
 
     const admin = getSupabaseAdmin()
 
