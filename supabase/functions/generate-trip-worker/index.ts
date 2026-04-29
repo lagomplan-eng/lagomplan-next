@@ -296,13 +296,38 @@ serve(async (req: Request) => {
     }
     clearTimeout(t)
 
-    // Persist chunk before updating counter — readers never see progress without backing data
-    await admin.from('generation_chunks').insert({
-      job_id:      job.id,
-      chunk_index: i,
-      content:     chunk,
-    })
-    await admin.from('generation_jobs').update({ chunks_done: i + 1 }).eq('id', job.id)
+    // Persist chunk before updating counter — readers never see progress
+    // without backing data. Wrapped in try/catch because the previous version
+    // had these awaits OUTSIDE any error handling; if either DB call threw
+    // (network blip, unique-constraint collision from a partial prior run,
+    // RLS misconfiguration), the function died with an unhandled exception
+    // and the job sat in status='running' forever, never reaching the cron
+    // reconciler's "rescue stuck jobs" heuristic. Mark failed instead.
+    try {
+      const { error: insertErr } = await admin
+        .from('generation_chunks')
+        .insert({ job_id: job.id, chunk_index: i, content: chunk })
+      if (insertErr) throw new Error(`chunks insert failed: ${insertErr.message}`)
+
+      const { error: updateErr } = await admin
+        .from('generation_jobs')
+        .update({ chunks_done: i + 1 })
+        .eq('id', job.id)
+      if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
+    } catch (persistErr) {
+      console.error('[worker] chunk persist failed at index', i, persistErr)
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
+        .eq('id', job.id)
+      // Don't refund here — chunks generated successfully (we paid for the
+      // LLM calls). The persistence failure is on us; eat it rather than
+      // also clawing back the credit, which compounds the user impact.
+      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
+        status: 500,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
 
     chunksByIndex.set(i, chunk)
     prevSummary = shortSummary(chunk)
