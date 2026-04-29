@@ -10,6 +10,7 @@
     "types": "supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/supabase/types.ts"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.91.1",
     "@googlemaps/js-api-loader": "^1.16.10",
     "@supabase/ssr": "^0.3.0",
     "@supabase/supabase-js": "^2.43.0",

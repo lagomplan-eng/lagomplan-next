@@ -948,6 +948,16 @@ export default function TripResult({ params }: Props) {
   // ── Generate effect ──────────────────────────────────────────────────────────
   // Cache key: serialized inputs. On match, restore from sessionStorage and skip AI.
   // This prevents regeneration after login redirect (trip continuity, no token waste).
+  //
+  // authToken collapses the User object to a stable string identity. SupabaseProvider
+  // re-emits SIGNED_IN events on token refresh / tab focus with a NEW User object
+  // reference for the same logical user — depending on the object directly would
+  // re-fire this effect on every emit, aborting the in-flight async polling and
+  // POSTing a fresh /api/trips/jobs (creating duplicate jobs and charging credits
+  // multiple times). Depending on the id string instead means same-user re-emits
+  // are no-ops; only true identity transitions (anon → user, user A → user B,
+  // logout) re-fire the effect.
+  const authToken = authedUser === undefined ? 'loading' : (authedUser?.id ?? 'anon')
   useEffect(() => {
     async function generate() {
       // Skip AI generation when loading an existing trip from DB
@@ -1203,7 +1213,7 @@ export default function TripResult({ params }: Props) {
     }
     generate()
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authedUser, isAccessResolved, generateKey])
+  }, [destination, origin, start, end, nights, traveler, interests, pace, budget, authToken, isAccessResolved, generateKey])
 
   // ── Auto-save after login (pending save) ────────────────────────────────────
   useEffect(() => {
