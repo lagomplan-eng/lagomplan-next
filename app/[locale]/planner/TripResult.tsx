@@ -1340,7 +1340,13 @@ export default function TripResult({ params }: Props) {
     const jobId = createData?.jobId
     if (!jobId) throw new Error('Missing jobId from /api/trips/jobs')
 
-    const HARD_TIMEOUT_MS = 240_000
+    // 10 minutes. The chunker now does 10-day segments at ~130s each plus
+    // self-reinvoke handoff time. A 30-day trip takes ~7-8 min wall-clock,
+    // so the previous 4-min ceiling would time out before the worker
+    // finished. 600s covers a worst-case 30-day generation with headroom.
+    // Shorter trips still resolve as soon as they complete — this is just
+    // the upper bound before we surface a timeout error to the user.
+    const HARD_TIMEOUT_MS = 600_000
     const POLL_INTERVAL_MS = 2_000
     const pollStart = performance.now()
 
