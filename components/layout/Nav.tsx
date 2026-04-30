@@ -101,7 +101,7 @@ export default function Nav() {
   // Feature flag — flip to `true` to re-expose the Mundial hub in the navbar.
   // The route (/es/worldcup, /en/worldcup) and all city pages stay live; this
   // only controls whether the top-level link is rendered. One-line revert.
-  const SHOW_MUNDIAL = false
+  const SHOW_MUNDIAL = true
 
   // ── Nav links (internal paths → next-intl translates) ─
   const navLinks = [
