@@ -8,6 +8,7 @@ import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import { usePlan, type PlanState } from '../../../components/plan/PlanProvider'
 import { PaymentPendingOverlay } from '../../../components/plan/PaymentPendingOverlay'
 import { TripLimitReachedModal } from '../../../components/plan/TripLimitReachedModal'
+import { SaveTripModal } from '../../../components/plan/SaveTripModal'
 import { buildPostGenerateToast } from '../../../lib/plan/copy'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
@@ -726,6 +727,15 @@ export default function TripResult({ params }: Props) {
   const [hasUserEdits, setHasUserEdits]   = useState(false)
   const [regenConfirmOpen, setRegenConfirmOpen] = useState(false)
 
+  // Save-prompt for anonymous users. Shown after they finish their first
+  // (and only) anon-allowed generation. Routes through the existing
+  // pendingSave round-trip in handleSave() — primary CTA stores
+  // pendingSave + redirects to /login; the auth-pending-save effect
+  // picks up after auth and saves to DB. Dismissing puts the trip into
+  // a degraded "viewing only" state surfaced via tripDegradedAnonView.
+  const [showSaveModal, setShowSaveModal] = useState(false)
+  const [tripDegradedAnonView, setTripDegradedAnonView] = useState(false)
+
   // ── UI state ─────────────────────────────────────────────────────────────────
   const [prefOpen, setPrefOpen]             = useState(false)
   const [collapsedDays, setCollapsedDays]   = useState<Set<number>>(new Set())
@@ -1196,6 +1206,15 @@ export default function TripResult({ params }: Props) {
           if (fresh) showToast(buildPostGenerateToast(fresh, locale === 'es' ? 'es' : 'en'))
           maybeShowLimitReached(fresh)
         }).catch(() => {})
+        }
+
+        // Anonymous user: surface the save prompt now that the trip is on
+        // screen. Their tripData is already in sessionStorage.tripCache;
+        // the primary CTA in the modal calls handleSave(), which sets
+        // pendingSave + redirects to /login, and the auth-pending-save
+        // effect picks it up after sign-up to persist to DB.
+        if (authedUser === null) {
+          setShowSaveModal(true)
         }
       } catch (err) {
         // Abort is an intentional cancellation (auth state change, effect
@@ -3714,6 +3733,24 @@ export default function TripResult({ params }: Props) {
           onClose={() => setShareOpen(false)}
         />
       )}
+
+      {/* ── SAVE PROMPT (anon users only) ────────────────────────────────── */}
+      <SaveTripModal
+        open={showSaveModal}
+        locale={locale === 'es' ? 'es' : 'en'}
+        onSave={() => {
+          setShowSaveModal(false)
+          // handleSave already does the right thing when authedUser is null:
+          // stores pendingSave, sets redirectAfterLogin, pushes to /login.
+          handleSave()
+        }}
+        onDismiss={() => {
+          setShowSaveModal(false)
+          // Mark the trip as anon-degraded: regenerate is disabled and a
+          // persistent banner appears. They can still view what they got.
+          setTripDegradedAnonView(true)
+        }}
+      />
 
     </main>
   )
