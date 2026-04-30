@@ -11,8 +11,6 @@ import { useRouter } from '../../../lib/navigation'
 import HeroForm from '../../../components/forms/HeroForm'
 import TripResult from './TripResult'
 import GuidesPreview from '../../../components/GuidesPreview'
-import { CreditBadge } from '../../../components/plan/CreditBadge'
-import { usePlan } from '../../../components/plan/PlanProvider'
 
 const SHOW_QUICK_START = true
 const SHOW_GUIDES = false
@@ -58,7 +56,6 @@ export default function TripGeneratorClient({ searchParams }: Props) {
 function FormPage() {
   const locale = useLocale() as 'es' | 'en'
   const isES   = locale === 'es'
-  const { openPaywall } = usePlan()
 
   return (
     <main className="pt-[100px] min-h-screen bg-[#FFF9F3]">
@@ -69,12 +66,9 @@ function FormPage() {
 
           {/* TEXT (narrower for readability) */}
           <div className="max-w-[640px] md:ml-6">
-            <div className="flex items-center gap-3 flex-wrap mb-4">
-              <span className="sec-label">
-                {isES ? 'Planificador de viajes con IA' : 'AI-powered trip planner'}
-              </span>
-              <CreditBadge onUpgradeClick={openPaywall} />
-            </div>
+            <span className="sec-label mb-4">
+              {isES ? 'Planificador de viajes con IA' : 'AI-powered trip planner'}
+            </span>
 
             <h1 className="font-sans text-[48px] max-[768px]:text-[36px] font-bold text-[#0F1A16] leading-[1.05] tracking-[-1.5px] mb-3">
               {isES ? 'Genera tu viaje' : 'Build your trip'}
