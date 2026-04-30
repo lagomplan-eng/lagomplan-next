@@ -2368,20 +2368,22 @@ export default function TripResult({ params }: Props) {
 
       {/* ── DEGRADED ANON BANNER ─────────────────────────────────────────────
           Shown after an anonymous user dismissed the post-generation save
-          prompt. Persistent reminder that the trip will be lost on tab close,
-          and one-click path back into the save flow. */}
+          prompt. Persistent reminder + one-click path straight to the save
+          flow. Save button calls handleSave() directly (skips re-showing the
+          modal): the banner *is* the prompt, and the user has already
+          self-selected to save by clicking it. */}
       {tripDegradedAnonView && authedUser === null && (
-        <div className="bg-[#F5E9D6] border-b border-[#D8C0A0]">
+        <div className="bg-[#6B8F86] border-b border-[#5A7E76]">
           <div className="max-w-[1160px] mx-auto px-7 py-3 flex items-center gap-4 flex-wrap">
-            <span className="font-sans text-[14px] text-[#5A4A3B] flex-1 min-w-[220px]">
+            <span className="font-sans text-[14px] text-white flex-1 min-w-[220px]">
               {locale === 'es'
                 ? 'Guarda tu viaje para seguir planificando.'
                 : 'Save your trip to keep planning.'}
             </span>
             <button
               type="button"
-              onClick={() => setShowSaveModal(true)}
-              className="px-4 py-2 rounded-full bg-[#0F3A33] text-white font-sans text-[13px] font-medium hover:bg-[#1A4A40] transition-colors"
+              onClick={handleSave}
+              className="px-4 py-2 rounded-full bg-white text-[#0F3A33] font-sans text-[13px] font-semibold hover:bg-[#F5F1EB] transition-colors"
             >
               {locale === 'es' ? 'Guardar mi viaje' : 'Save my trip'}
             </button>
@@ -3768,7 +3770,6 @@ export default function TripResult({ params }: Props) {
       {/* ── SAVE PROMPT (anon users only) ────────────────────────────────── */}
       <SaveTripModal
         open={showSaveModal}
-        locale={locale === 'es' ? 'es' : 'en'}
         onSave={() => {
           setShowSaveModal(false)
           // handleSave already does the right thing when authedUser is null:
