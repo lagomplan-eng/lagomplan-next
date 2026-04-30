@@ -1954,6 +1954,14 @@ export default function TripResult({ params }: Props) {
 
   function handleRegenClick() {
     if (loading) return
+    // Degraded anon view: regenerate is disabled — they declined the save
+    // prompt. Re-show the modal so they have one more chance to convert
+    // before being able to start a new generation. Server would also
+    // 401 their second anon trip, so this guard is doubly enforced.
+    if (tripDegradedAnonView) {
+      setShowSaveModal(true)
+      return
+    }
     if (hasUserEdits) {
       setRegenConfirmOpen(true)
     } else {
@@ -2357,6 +2365,29 @@ export default function TripResult({ params }: Props) {
   // ── Happy path ───────────────────────────────────────────────────────────────
   return (
     <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
+
+      {/* ── DEGRADED ANON BANNER ─────────────────────────────────────────────
+          Shown after an anonymous user dismissed the post-generation save
+          prompt. Persistent reminder that the trip will be lost on tab close,
+          and one-click path back into the save flow. */}
+      {tripDegradedAnonView && authedUser === null && (
+        <div className="bg-[#F5E9D6] border-b border-[#D8C0A0]">
+          <div className="max-w-[1160px] mx-auto px-7 py-3 flex items-center gap-4 flex-wrap">
+            <span className="font-sans text-[14px] text-[#5A4A3B] flex-1 min-w-[220px]">
+              {locale === 'es'
+                ? 'Guarda tu viaje para seguir planificando.'
+                : 'Save your trip to keep planning.'}
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowSaveModal(true)}
+              className="px-4 py-2 rounded-full bg-[#0F3A33] text-white font-sans text-[13px] font-medium hover:bg-[#1A4A40] transition-colors"
+            >
+              {locale === 'es' ? 'Guardar mi viaje' : 'Save my trip'}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section data-trip="hero" className="border-b border-[#E4DFD8] pt-12 pb-9">
