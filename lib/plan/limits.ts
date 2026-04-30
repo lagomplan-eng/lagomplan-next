@@ -8,9 +8,11 @@
 /**
  * Lifetime free trips for a signed-up user before the paywall is enforced.
  * Existing users keep whatever `trips_remaining` they were seeded with;
- * this value only applies to newly-created entitlement rows.
+ * this value only applies to newly-created entitlement rows. Must match
+ * the DB trigger default in supabase/migrations/add_user_entitlements.sql
+ * (currently 3 — set there too if changing).
  */
-export const FREE_TRIPS_LIMIT = 5
+export const FREE_TRIPS_LIMIT = 3
 
 /**
  * Free trip generations for an anonymous user (cookie-tracked) before the
