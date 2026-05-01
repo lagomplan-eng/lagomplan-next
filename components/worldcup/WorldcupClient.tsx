@@ -126,8 +126,8 @@ const ROSTER = [
       en:'The Azteca needs no introduction. What it does need, badly, is a transport strategy.',
     },
     intro:{
-      es:'Roberto, esto es para ti. El Azteca fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
-      en:"Roberto, this one's for you. The Azteca was yours before you were born — and now it's going to be yours again, in the most important World Cup since '86.",
+      es:'El Azteca fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
+      en:"The Azteca was yours before you were born — and now it's going to be yours again, in the most important World Cup since '86.",
     },
     matches:[
       {date:'Jue 11 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Sudáfrica',    flagB:'🇿🇦'},
@@ -145,8 +145,8 @@ const ROSTER = [
       en:'Nobody asks which team you support here. It shows before you even open your mouth.',
     },
     intro:{
-      es:'Valentina, este es tu partido. Guadalajara es la ciudad más amable de México para viajar con bebé — barrios tranquilos, comida extraordinaria, mucho espacio.',
-      en:"Valentina, this is your match. Guadalajara is Mexico's friendliest city for traveling with a baby — quiet neighborhoods, extraordinary food, plenty of space.",
+      es:'Guadalajara es la ciudad más amable de México para viajar con bebé — barrios tranquilos, comida extraordinaria, mucho espacio.',
+      en:"Guadalajara is Mexico's friendliest city for traveling with a baby — quiet neighborhoods, extraordinary food, plenty of space.",
     },
     matches:[
       {date:'Jue 11 Jun', teamA:'Corea del Sur', flagA:'🇰🇷', teamB:'Rep. Checa',    flagB:'🇨🇿'},
@@ -164,8 +164,8 @@ const ROSTER = [
       en:"Mexico's hardest-working city welcomes the World Cup with the same attitude it built its industries: without excess ornament.",
     },
     intro:{
-      es:'Andrea, Monterrey va a sorprenderte. El estadio BBVA es probablemente el más fotogénico del torneo. Y la escena de restaurantes se convirtió en referencia nacional.',
-      en:"Andrea, Monterrey will surprise you. Estadio BBVA is probably the tournament's most photogenic venue. And the restaurant scene has become a national benchmark.",
+      es:'Monterrey va a sorprenderte. El estadio BBVA es probablemente el más fotogénico del torneo. Y la escena de restaurantes se convirtió en referencia nacional.',
+      en:"Monterrey will surprise you. Estadio BBVA is probably the tournament's most photogenic venue. And the restaurant scene has become a national benchmark.",
     },
     matches:[
       {date:'Dom 14 Jun', teamA:'Túnez',         flagA:'🇹🇳', teamB:'Rep. UEFA B',   flagB:''},
@@ -183,8 +183,8 @@ const ROSTER = [
       en:'The most expensive stadium ever built sits three miles from the closest airport of any World Cup venue. In Los Angeles, even the distances are cinematic.',
     },
     intro:{
-      es:'Roberto, LA es tu partido de visita que se siente de local. Hay más afición mexicana en Los Ángeles que en Guadalajara. El SoFi Stadium va a parecer el Azteca.',
-      en:'Roberto, LA is your away match that feels like home. There are more Mexican fans in Los Angeles than in Guadalajara. SoFi Stadium will feel like the Azteca.',
+      es:'LA es tu partido de visita que se siente de local. Hay más afición mexicana en Los Ángeles que en Guadalajara. El SoFi Stadium va a parecer el Azteca.',
+      en:'LA is your away match that feels like home. There are more Mexican fans in Los Angeles than in Guadalajara. SoFi Stadium will feel like the Azteca.',
     },
     matches:[
       {date:'Vie 12 Jun', teamA:'EUA',           flagA:'🇺🇸', teamB:'Paraguay',      flagB:'🇵🇾'},
@@ -202,8 +202,8 @@ const ROSTER = [
       en:"The heat in Miami isn't the weather. It's the city's permanent mood.",
     },
     intro:{
-      es:'Andrea, Miami para una pareja que sabe viajar es el destino del torneo. No porque el fútbol sea lo principal — sino porque todo lo que rodea el partido es extraordinario.',
-      en:"Andrea, Miami for a couple that knows how to travel is the destination of the tournament. Not because football is the main event — but because everything surrounding the match is extraordinary.",
+      es:'Miami para una pareja que sabe viajar es el destino del torneo. No porque el fútbol sea lo principal — sino porque todo lo que rodea el partido es extraordinario.',
+      en:"Miami for a couple that knows how to travel is the destination of the tournament. Not because football is the main event — but because everything surrounding the match is extraordinary.",
     },
     matches:[
       {date:'Lun 15 Jun', teamA:'Arabia Saudita', flagA:'🇸🇦', teamB:'Uruguay',      flagB:'🇺🇾'},
@@ -221,8 +221,8 @@ const ROSTER = [
       en:"The city hosting the Final doesn't need to explain why. It just needs you to know how to get to the stadium.",
     },
     intro:{
-      es:'Roberto, escúchame. La final del Mundial 2026 se juega en MetLife Stadium. Si Argentina llega — y hay buenas razones para creerlo — el partido más importante del siglo se va a jugar a 30 minutos de Manhattan.',
-      en:'Roberto, listen. The 2026 World Cup Final is played at MetLife Stadium. If Argentina makes it — and there are good reasons to believe they will — the most important match of the century will be played 30 minutes from Manhattan.',
+      es:'La final del Mundial 2026 se juega en MetLife Stadium. Si Argentina llega — y hay buenas razones para creerlo — el partido más importante del siglo se va a jugar a 30 minutos de Manhattan.',
+      en:'The 2026 World Cup Final is played at MetLife Stadium. If Argentina makes it — and there are good reasons to believe they will — the most important match of the century will be played 30 minutes from Manhattan.',
     },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Brasil',        flagA:'🇧🇷', teamB:'Marruecos',    flagB:'🇲🇦'},
@@ -240,8 +240,8 @@ const ROSTER = [
       en:"The tournament's biggest stadium is in Arlington. Not Dallas. And no subway gets you there.",
     },
     intro:{
-      es:'Andrea, Dallas no es el destino obvio — y esa es la razón para ir. El AT&T Stadium es la experiencia deportiva más espectacular del torneo: pantalla de 60 metros, 80 mil personas.',
-      en:"Andrea, Dallas isn't the obvious destination — and that's the reason to go. AT&T Stadium is the tournament's most spectacular sports experience: a 60-meter screen, 80,000 people.",
+      es:'Dallas no es el destino obvio — y esa es la razón para ir. El AT&T Stadium es la experiencia deportiva más espectacular del torneo: pantalla de 60 metros, 80 mil personas.',
+      en:"Dallas isn't the obvious destination — and that's the reason to go. AT&T Stadium is the tournament's most spectacular sports experience: a 60-meter screen, 80,000 people.",
     },
     matches:[
       {date:'Jue 11 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Sudáfrica',    flagB:'🇿🇦'},
@@ -259,8 +259,8 @@ const ROSTER = [
       en:'Brazil and Germany play here. And Mexico could advance to the round of 16 here too.',
     },
     intro:{
-      es:'Roberto, Mission District es el barrio latino más auténtico de EE.UU. en la costa oeste. Murales de Diego Rivera en las paredes, taquería El Farolito abierta hasta las 3am.',
-      en:'Roberto, the Mission District is the most authentic Latino neighborhood on the U.S. West Coast. Diego Rivera murals on the walls, taquería El Farolito open until 3am.',
+      es:'Mission District es el barrio latino más auténtico de EE.UU. en la costa oeste. Murales de Diego Rivera en las paredes, taquería El Farolito abierta hasta las 3am.',
+      en:'The Mission District is the most authentic Latino neighborhood on the U.S. West Coast. Diego Rivera murals on the walls, taquería El Farolito open until 3am.',
     },
     matches:[
       {date:'Dom 14 Jun', teamA:'Países Bajos',  flagA:'🇳🇱', teamB:'Japón',        flagB:'🇯🇵'},
@@ -278,8 +278,8 @@ const ROSTER = [
       en:"Texas's most diverse city welcomes the most diverse tournament in history. The arithmetic adds up.",
     },
     intro:{
-      es:'Valentina, Houston es probablemente la sede más amable del torneo para viajar con bebé. La ciudad es enorme y tiene todo — barrios tranquilos, mucho espacio.',
-      en:'Valentina, Houston is probably the friendliest host city in the tournament for traveling with a baby. The city is huge and has everything — quiet neighborhoods, plenty of space.',
+      es:'Houston es probablemente la sede más amable del torneo para viajar con bebé. La ciudad es enorme y tiene todo — barrios tranquilos, mucho espacio.',
+      en:'Houston is probably the friendliest host city in the tournament for traveling with a baby. The city is huge and has everything — quiet neighborhoods, plenty of space.',
     },
     matches:[
       {date:'Dom 14 Jun', teamA:'Alemania',      flagA:'🇩🇪', teamB:'Curazao',      flagB:'🇨🇼'},
@@ -297,8 +297,8 @@ const ROSTER = [
       en:"The only host city where the stadium is a ten-minute walk from North America's most famous fish market. Take advantage of it before kickoff.",
     },
     intro:{
-      es:'Andrea, Seattle es el destino del torneo para la pareja que quiere hacer algo diferente de verdad. No es la ciudad obvia — y esa es exactamente el punto.',
-      en:"Andrea, Seattle is the tournament destination for the couple that wants to do something genuinely different. It's not the obvious city — and that's exactly the point.",
+      es:'Seattle es el destino del torneo para la pareja que quiere hacer algo diferente de verdad. No es la ciudad obvia — y esa es exactamente el punto.',
+      en:"Seattle is the tournament destination for the couple that wants to do something genuinely different. It's not the obvious city — and that's exactly the point.",
     },
     matches:[
       {date:'Dom 15 Jun', teamA:'Bélgica',       flagA:'🇧🇪', teamB:'Egipto',       flagB:'🇪🇬'},
@@ -316,8 +316,8 @@ const ROSTER = [
       en:'The loudest open-air stadium in the world welcomes the defending champions. Bring earplugs — and only use them if you need them.',
     },
     intro:{
-      es:'Valentina, Kansas City es probablemente la sede más amable del torneo para familia con bebé: precios razonables, espacios amplios, sin la densidad agobiante de NYC o LA.',
-      en:"Valentina, Kansas City is probably the tournament's friendliest host for a family with a baby: reasonable prices, open spaces, without the overwhelming density of NYC or LA.",
+      es:'Kansas City es probablemente la sede más amable del torneo para familia con bebé: precios razonables, espacios amplios, sin la densidad agobiante de NYC o LA.',
+      en:"Kansas City is probably the tournament's friendliest host for a family with a baby: reasonable prices, open spaces, without the overwhelming density of NYC or LA.",
     },
     matches:[
       {date:'Mar 16 Jun', teamA:'Argentina',     flagA:'🇦🇷', teamB:'Argelia',      flagB:'🇩🇿'},
@@ -335,8 +335,8 @@ const ROSTER = [
       en:"The only World Cup stadium in the United States with a retractable roof and air conditioning. In a Georgia July, that's not a luxury — it's public health policy.",
     },
     intro:{
-      es:'Roberto, Atlanta tiene dos cosas que no combinan en ninguna otra sede del torneo: el estadio más moderno del mundo y una de las comunidades latinoamericanas de crecimiento más rápido de EE.UU.',
-      en:"Roberto, Atlanta has two things that don't combine at any other host city in the tournament: the world's most modern stadium and one of the fastest-growing Latin American communities in the U.S.",
+      es:'Atlanta tiene dos cosas que no combinan en ninguna otra sede del torneo: el estadio más moderno del mundo y una de las comunidades latinoamericanas de crecimiento más rápido de EE.UU.',
+      en:"Atlanta has two things that don't combine at any other host city in the tournament: the world's most modern stadium and one of the fastest-growing Latin American communities in the U.S.",
     },
     matches:[
       {date:'Lun 15 Jun', teamA:'España',        flagA:'🇪🇸', teamB:'Cabo Verde',    flagB:'🇨🇻'},
@@ -354,8 +354,8 @@ const ROSTER = [
       en:'On July 4, 2026, Philadelphia celebrates 250 years of independence and a Round of 16 match. Everyone decides their own order of priorities.',
     },
     intro:{
-      es:'Roberto, la afición local ya vive el fútbol desde dentro. La comunidad mexicana de South Philly lleva 30 años convirtiendo el barrio en un pedazo de México.',
-      en:'Roberto, the local fans already live football from the inside. The Mexican community in South Philly has spent 30 years turning the neighborhood into a piece of Mexico.',
+      es:'La afición local ya vive el fútbol desde dentro. La comunidad mexicana de South Philly lleva 30 años convirtiendo el barrio en un pedazo de México.',
+      en:'The local fans already live football from the inside. The Mexican community in South Philly has spent 30 years turning the neighborhood into a piece of Mexico.',
     },
     matches:[
       {date:'Dom 14 Jun', teamA:'Costa de Marfil',flagA:'🇨🇮',teamB:'Ecuador',       flagB:'🇪🇨'},
@@ -373,8 +373,8 @@ const ROSTER = [
       en:"The stadium isn't in Boston. The match is. That distinction is worth a train ride.",
     },
     intro:{
-      es:'Andrea, Boston es la ciudad del torneo más parecida a Europa sin salir de América del Norte. Y el 27 de junio, Argentina vs Brasil en Gillette Stadium.',
-      en:'Andrea, Boston is the tournament city most like Europe without leaving North America. And on June 27, Argentina vs Brazil at Gillette Stadium.',
+      es:'Boston es la ciudad del torneo más parecida a Europa sin salir de América del Norte. Y el 27 de junio, Argentina vs Brasil en Gillette Stadium.',
+      en:'Boston is the tournament city most like Europe without leaving North America. And on June 27, Argentina vs Brazil at Gillette Stadium.',
     },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Haití',         flagA:'🇭🇹', teamB:'Escocia',       flagB:'🏴󠁧󠁢󠁳󠁣󠁴󠁿'},
@@ -392,8 +392,8 @@ const ROSTER = [
       en:"The tournament's smallest stadium also puts the fan closest to the pitch. That's not a coincidence.",
     },
     intro:{
-      es:'Andrea, Toronto no te pide que la ames. Solo te da 200 idiomas, 50 cocinas, y un ferry al atardecer — y espera a ver qué haces con eso.',
-      en:"Andrea, Toronto doesn't ask you to love it. It just gives you 200 languages, 50 cuisines, and a sunset ferry — and waits to see what you do with that.",
+      es:'Toronto no te pide que la ames. Solo te da 200 idiomas, 50 cocinas, y un ferry al atardecer — y espera a ver qué haces con eso.',
+      en:"Toronto doesn't ask you to love it. It just gives you 200 languages, 50 cuisines, and a sunset ferry — and waits to see what you do with that.",
     },
     matches:[
       {date:'Vie 12 Jun', teamA:'Canadá',        flagA:'🇨🇦', teamB:'Bosnia y Herz.',flagB:'🇧🇦'},
@@ -411,8 +411,8 @@ const ROSTER = [
       en:'The only host city where the stadium shares its skyline with snow-capped mountains. No need to make a metaphor of it.',
     },
     intro:{
-      es:'Valentina, Vancouver con bebé en junio es un plan sorprendentemente cómodo. La ciudad está cubierta de parques, la temperatura es fresca y agradable, y tiene museos infantiles de primer nivel.',
-      en:"Valentina, Vancouver with a baby in June is a surprisingly comfortable plan. The city is covered in parks, the temperature is cool and pleasant, and it has top-tier children's museums.",
+      es:'Vancouver con bebé en junio es un plan sorprendentemente cómodo. La ciudad está cubierta de parques, la temperatura es fresca y agradable, y tiene museos infantiles de primer nivel.',
+      en:"Vancouver with a baby in June is a surprisingly comfortable plan. The city is covered in parks, the temperature is cool and pleasant, and it has top-tier children's museums.",
     },
     matches:[
       {date:'Sáb 13 Jun', teamA:'Australia',     flagA:'🇦🇺', teamB:'Türkiye',      flagB:'🇹🇷'},
