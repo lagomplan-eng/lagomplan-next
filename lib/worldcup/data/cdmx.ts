@@ -17,7 +17,7 @@ export const es: CityGuide = {
 
   tags:["Fútbol","Gastronomía","Historia","Sede inaugural"],
 
-  stadium:{ name:"Estadio Azteca", capacity:"~72,766", area:"Tlalpan — Santa Úrsula Coapa" },
+  stadium:{ name:"Estadio Banorte", capacity:"~72,766", area:"Tlalpan — Santa Úrsula Coapa" },
 
   headline:"El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.",
   description:"El Azteca no necesita presentación. Lo que sí necesita es una estrategia de transporte. Ciudad de México llega al Mundial con cinco partidos — incluyendo el partido inaugural del torneo. México juega en casa el 11 y el 24 de junio. El estadio que vio la Mano de Dios y el Gol del Siglo escribe su tercer capítulo mundialista.",
@@ -32,16 +32,16 @@ export const es: CityGuide = {
   ],
 
   matches:[
-    { id:"m1", date:"11 Jun", day:"Jue", time:"14:00 CT", teams:[{name:"México",flag:"🇲🇽"},{name:"Sudáfrica",flag:"🇿🇦"}], stadium:"Estadio Azteca", tag:"Partido Inaugural — primer Mundial en el Azteca desde 1986", highlight:true },
-    { id:"m2", date:"17 Jun", day:"Mié", time:"21:00 CT", teams:[{name:"Uzbekistán",flag:"🇺🇿"},{name:"Colombia",flag:"🇨🇴"}], stadium:"Estadio Azteca", tag:"Grupo F", highlight:false },
-    { id:"m3", date:"24 Jun", day:"Mié", time:"20:00 CT", teams:[{name:"Rep. Checa",flag:"🇨🇿"},{name:"México",flag:"🇲🇽"}], stadium:"Estadio Azteca", tag:"Grupo A — partido definitorio del grupo", highlight:true },
-    { id:"m4", date:"30 Jun", day:"Mar", time:"20:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio Azteca", tag:"Fase eliminatoria", highlight:false },
-    { id:"m5", date:"5 Jul",  day:"Dom", time:"19:00 CT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio Azteca", tag:"Fase eliminatoria", highlight:false },
+    { id:"m1", date:"11 Jun", day:"Jue", time:"14:00 CT", teams:[{name:"México",flag:"🇲🇽"},{name:"Sudáfrica",flag:"🇿🇦"}], stadium:"Estadio Banorte", tag:"Partido Inaugural — primer Mundial en el Azteca desde 1986", highlight:true },
+    { id:"m2", date:"17 Jun", day:"Mié", time:"21:00 CT", teams:[{name:"Uzbekistán",flag:"🇺🇿"},{name:"Colombia",flag:"🇨🇴"}], stadium:"Estadio Banorte", tag:"Grupo F", highlight:false },
+    { id:"m3", date:"24 Jun", day:"Mié", time:"20:00 CT", teams:[{name:"Rep. Checa",flag:"🇨🇿"},{name:"México",flag:"🇲🇽"}], stadium:"Estadio Banorte", tag:"Grupo A — partido definitorio del grupo", highlight:true },
+    { id:"m4", date:"30 Jun", day:"Mar", time:"20:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio Banorte", tag:"Fase eliminatoria", highlight:false },
+    { id:"m5", date:"5 Jul",  day:"Dom", time:"19:00 CT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio Banorte", tag:"Fase eliminatoria", highlight:false },
   ],
 
   manifesto:{
     stadiumInfo:[
-      { label:"Estadio FIFA",          value:"Mexico City Stadium (Estadio Azteca/Banorte)" },
+      { label:"Estadio FIFA",          value:"Mexico City Stadium (Estadio Banorte, antes Azteca)" },
       { label:"Aforo",                 value:"~72,766 — configuración FIFA" },
       { label:"Techo",                 value:"Abierto — estadio sin techo" },
       { label:"Clima (jun–jul)",       value:"17–24°C · Tardes con lluvia · Altitud: 2,240 msnm — el estadio más alto del torneo" },
@@ -155,7 +155,7 @@ export const en: CityGuide = {
 
   tags:["Football","Food","History","Opening match"],
 
-  stadium:{ name:"Estadio Azteca", capacity:"~72,766", area:"Tlalpan — Santa Úrsula Coapa" },
+  stadium:{ name:"Estadio Banorte", capacity:"~72,766", area:"Tlalpan — Santa Úrsula Coapa" },
 
   headline:"The Azteca needs no introduction. What it does need — badly — is a transit plan.",
   description:"The Azteca needs no introduction. What it needs is a transit plan. Mexico City arrives at the World Cup with five matches — including the tournament's opening match. Mexico plays at home on June 11 and June 24. The stadium that saw the Hand of God and the Goal of the Century writes its third World Cup chapter.",
@@ -170,16 +170,16 @@ export const en: CityGuide = {
   ],
 
   matches:[
-    { id:"m1", date:"Jun 11", day:"Thu", time:"14:00 CT", teams:[{name:"Mexico",flag:"🇲🇽"},{name:"South Africa",flag:"🇿🇦"}], stadium:"Estadio Azteca", tag:"Opening Match — first World Cup at the Azteca since 1986", highlight:true },
-    { id:"m2", date:"Jun 17", day:"Wed", time:"21:00 CT", teams:[{name:"Uzbekistan",flag:"🇺🇿"},{name:"Colombia",flag:"🇨🇴"}], stadium:"Estadio Azteca", tag:"Group F", highlight:false },
-    { id:"m3", date:"Jun 24", day:"Wed", time:"20:00 CT", teams:[{name:"Czech Rep.",flag:"🇨🇿"},{name:"Mexico",flag:"🇲🇽"}], stadium:"Estadio Azteca", tag:"Group A — decisive group match", highlight:true },
-    { id:"m4", date:"Jun 30", day:"Tue", time:"20:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Estadio Azteca", tag:"Knockout stage", highlight:false },
-    { id:"m5", date:"Jul 5",  day:"Sun", time:"19:00 CT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Estadio Azteca", tag:"Knockout stage", highlight:false },
+    { id:"m1", date:"Jun 11", day:"Thu", time:"14:00 CT", teams:[{name:"Mexico",flag:"🇲🇽"},{name:"South Africa",flag:"🇿🇦"}], stadium:"Estadio Banorte", tag:"Opening Match — first World Cup at the Azteca since 1986", highlight:true },
+    { id:"m2", date:"Jun 17", day:"Wed", time:"21:00 CT", teams:[{name:"Uzbekistan",flag:"🇺🇿"},{name:"Colombia",flag:"🇨🇴"}], stadium:"Estadio Banorte", tag:"Group F", highlight:false },
+    { id:"m3", date:"Jun 24", day:"Wed", time:"20:00 CT", teams:[{name:"Czech Rep.",flag:"🇨🇿"},{name:"Mexico",flag:"🇲🇽"}], stadium:"Estadio Banorte", tag:"Group A — decisive group match", highlight:true },
+    { id:"m4", date:"Jun 30", day:"Tue", time:"20:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Estadio Banorte", tag:"Knockout stage", highlight:false },
+    { id:"m5", date:"Jul 5",  day:"Sun", time:"19:00 CT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Estadio Banorte", tag:"Knockout stage", highlight:false },
   ],
 
   manifesto:{
     stadiumInfo:[
-      { label:"FIFA stadium",        value:"Mexico City Stadium (Estadio Azteca/Banorte)" },
+      { label:"FIFA stadium",        value:"Mexico City Stadium (Estadio Banorte, formerly Azteca)" },
       { label:"Capacity",            value:"~72,766 — FIFA configuration" },
       { label:"Roof",                value:"Open — no roof" },
       { label:"Weather (Jun–Jul)",   value:"17–24°C · Afternoon rain · Altitude: 2,240 m — the highest stadium in the tournament" },

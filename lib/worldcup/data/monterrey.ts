@@ -22,19 +22,17 @@ export const es: CityGuide = {
   description:"La ciudad más trabajadora de México recibe el Mundial sin exceso de ornamento. El Estadio BBVA es el estadio de fútbol más moderno del país. La Sierra Madre es el telón de fondo más honesto que puede tener un partido. Cuatro partidos confirmados — y la advertencia más importante de esta guía: en junio, Monterrey puede superar los 40°C.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:4 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:4 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:4 },
   ],
 
   matches:[
     { id:"m1", date:"14 Jun", day:"Dom", time:"21:00 CT", teams:[{name:"Túnez",flag:"🇹🇳"},{name:"Rep. UEFA B",flag:""}], stadium:"Estadio BBVA", tag:"Grupo A — apertura de la sede", highlight:false },
     { id:"m2", date:"19 Jun", day:"Vie", time:"23:00 CT", teams:[{name:"Túnez",flag:"🇹🇳"},{name:"Japón",flag:"🇯🇵"}], stadium:"Estadio BBVA", tag:"Partido de medianoche — hora local", highlight:false },
     { id:"m3", date:"24 Jun", day:"Mié", time:"20:00 CT", teams:[{name:"Sudáfrica",flag:"🇿🇦"},{name:"Corea del Sur",flag:"🇰🇷"}], stadium:"Estadio BBVA", tag:"Grupo A — jornada final simultánea", highlight:false },
-    { id:"m4", date:"29 Jun", day:"Lun", time:"20:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio BBVA", tag:"Fase eliminatoria", highlight:false },
+    { id:"m4", date:"29 Jun", day:"Lun", time:"20:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Estadio BBVA", tag:"Ronda de 32 — 1°F vs. 2°C", highlight:false },
   ],
 
   manifesto:{
@@ -45,9 +43,9 @@ export const es: CityGuide = {
       { label:"Clima (jun–jul)",     value:"34–40°C días · 24–27°C noches · Calor seco e intenso. El estadio no tiene A/C." },
       { label:"Partidos",            value:"4 confirmados — fase de grupos (3) + Ronda de 32 (1)" },
       { label:"Aeropuerto principal",value:"MTY — Aeropuerto Internacional General Mariano Escobedo, a ~24 km del estadio en Guadalupe." },
-      { label:"Visa",                value:"México no requiere visa para la mayoría de países latinoamericanos ni europeos. Verificar en embajada o consulado." },
     ],
     body:"Monterrey no vende postal. Vende precisión: una ciudad que construyó las industrias del país y ahora recibe al mundo con la misma lógica que siempre la ha guiado — sin adorno innecesario, con resultado concreto. El Estadio BBVA es el estadio de fútbol más moderno de México: diseño de Populous, espectador a nueve metros del campo, y una vista a la Sierra Madre que ningún estadio de la competencia tiene. Cuatro partidos confirmados, incluyendo un partido de medianoche el 19 de junio (Túnez vs. Japón, 23:00 CT) — la trampa logística más específica de esta sede. Calendario completo: 🇹🇳 Dom 14 Jun · 21:00 CT: Túnez vs. Repechaje UEFA B (Grupo A — apertura); 🇹🇳🇯🇵 Vie 19 Jun · 23:00 CT: Túnez vs. Japón (partido de medianoche); 🇿🇦🇰🇷 Mié 24 Jun · 20:00 CT: Sudáfrica vs. Corea del Sur (Grupo A — jornada final simultánea con Rep. Checa vs. México en CDMX); Lun 29 Jun · 20:00 CT: Ronda de 32.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El partido de las 23:00 del 19 de junio es una trampa logística: salir del estadio a medianoche sin alojamiento confirmado en un municipio con poca oferta nocturna de transporte no es una situación ideal. Confirma alojamiento y transporte de regreso antes de asistir a ese partido. El calor de Monterrey en junio tampoco es opcional: el estadio tiene techumbre parcial y muchas zonas quedan expuestas al sol.",
   },
 
@@ -119,7 +117,7 @@ export const es: CityGuide = {
     { dish:"La Catarina",           where:"San Pedro — corte a elegir + queso fundido; asador, ruidoso y apasionado en días de partido",            price:"$$$", type:"Asador" },
     { dish:"Bola Ocho",             where:"San Pedro — alitas + cervezas de barril; sports bar con A/C, el más internacional de Monterrey",        price:"$$",  type:"Sports bar" },
     { dish:"Cabrito al pastor",     where:"Cualquier asador del Barrio Antiguo o el centro — el plato más emblemático de la cocina norteña",        price:"$$",  type:"Imperdible" },
-    { dish:"Taquería de machacado", where:"Barrio Antiguo o mercado de San Luisito — machacado con huevo, el desayuno regiomontano de referencia", price:"$",   type:"Desayuno" },
+    { dish:"Taquería de machacado", where:"Barrio Antiguo o cualquier taquería del centro — machacado con huevo, el desayuno regiomontano de referencia", price:"$",   type:"Desayuno" },
   ],
 
   experiences:[
@@ -197,19 +195,17 @@ export const en: CityGuide = {
   description:"Mexico's hardest-working city welcomes the World Cup without excess ornament. Estadio BBVA is the country's most modern football stadium. The Sierra Madre is the most honest backdrop a match can ask for. Four confirmed matches — and the most important warning in this guide: in June, Monterrey can top 40°C.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:4 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:4 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:4 },
   ],
 
   matches:[
     { id:"m1", date:"Jun 14", day:"Sun", time:"21:00 CT", teams:[{name:"Tunisia",flag:"🇹🇳"},{name:"UEFA Play-off B",flag:""}], stadium:"Estadio BBVA", tag:"Group A — host opener", highlight:false },
     { id:"m2", date:"Jun 19", day:"Fri", time:"23:00 CT", teams:[{name:"Tunisia",flag:"🇹🇳"},{name:"Japan",flag:"🇯🇵"}], stadium:"Estadio BBVA", tag:"Midnight match — local time", highlight:false },
     { id:"m3", date:"Jun 24", day:"Wed", time:"20:00 CT", teams:[{name:"South Africa",flag:"🇿🇦"},{name:"South Korea",flag:"🇰🇷"}], stadium:"Estadio BBVA", tag:"Group A — simultaneous final matchday", highlight:false },
-    { id:"m4", date:"Jun 29", day:"Mon", time:"20:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Estadio BBVA", tag:"Knockout stage", highlight:false },
+    { id:"m4", date:"Jun 29", day:"Mon", time:"20:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Estadio BBVA", tag:"Round of 32 — 1°F vs. 2°C", highlight:false },
   ],
 
   manifesto:{
@@ -220,9 +216,9 @@ export const en: CityGuide = {
       { label:"Weather (Jun–Jul)",value:"34–40°C days · 24–27°C nights · Dry, intense heat. No A/C in the stadium." },
       { label:"Matches",          value:"4 confirmed — group stage (3) + Round of 32 (1)" },
       { label:"Primary airport",  value:"MTY — General Mariano Escobedo International Airport, ~24 km from the stadium in Guadalupe." },
-      { label:"Visa",             value:"Mexico requires no visa for most Latin American or European countries. Check your embassy or consulate." },
     ],
     body:"Monterrey doesn't sell postcards. It sells precision: a city that built the country's industries and now welcomes the world with the same logic that has always guided it — no unnecessary ornament, concrete results. Estadio BBVA is Mexico's most modern football stadium: Populous design, spectators nine meters from the pitch, and a view of the Sierra Madre that no competitor stadium can match. Four confirmed matches, including a midnight kickoff on June 19 (Tunisia vs. Japan, 23:00 CT) — the most specific logistical trap of this host city. Full schedule: 🇹🇳 Sun Jun 14 · 21:00 CT: Tunisia vs. UEFA Play-off B (Group A — opener); 🇹🇳🇯🇵 Fri Jun 19 · 23:00 CT: Tunisia vs. Japan (midnight match); 🇿🇦🇰🇷 Wed Jun 24 · 20:00 CT: South Africa vs. South Korea (Group A — simultaneous final matchday with Czech Rep. vs. Mexico in CDMX); Mon Jun 29 · 20:00 CT: Round of 32.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"The 23:00 match on June 19 is a logistical trap: leaving the stadium at midnight without confirmed lodging in a municipality with limited nighttime transit is not an ideal situation. Confirm lodging and return transport before attending. Monterrey's June heat isn't optional either: the stadium has only a partial canopy, and many sections stay exposed to the sun.",
   },
 
@@ -294,7 +290,7 @@ export const en: CityGuide = {
     { dish:"La Catarina",           where:"San Pedro — cut to order + queso fundido; grill house, loud and passionate on match days",         price:"$$$", type:"Grill house" },
     { dish:"Bola Ocho",             where:"San Pedro — wings + draft beer; air-conditioned sports bar, Monterrey's most international",       price:"$$",  type:"Sports bar" },
     { dish:"Cabrito al pastor",     where:"Any grill house in Barrio Antiguo or downtown — the most emblematic dish of northern cuisine",     price:"$$",  type:"Must try" },
-    { dish:"Machacado con huevo",   where:"Barrio Antiguo or San Luisito market — machacado with egg, the benchmark Monterrey breakfast",     price:"$",   type:"Breakfast" },
+    { dish:"Machacado con huevo",   where:"Barrio Antiguo or any downtown taquería — machacado with egg, the benchmark Monterrey breakfast",     price:"$",   type:"Breakfast" },
   ],
 
   experiences:[

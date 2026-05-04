@@ -23,18 +23,16 @@ export const es: CityGuide = {
   description:"La Bay Area recibe 6 partidos del Mundial 2026 en Levi's Stadium — ubicado en Santa Clara, a 70 kilómetros al sur del centro de San Francisco. La decisión de base (SF, San José u Oakland) es tan importante como el boleto del partido. Cuatro de cinco partidos de grupos arrancan a las 21:00 PT, lo que complica el regreso nocturno en Caltrain.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:3 },
-    { label:"Gastronomía",  value:5 },
-    { label:"Transporte",   value:3 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:1 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:3 },
+    { label:"Gastronomía",       value:5 },
+    { label:"Costo",             value:1 },
   ],
 
   matches:[
     { id:"m1", date:"13 Jun", day:"Sáb", time:"12:00 PT", teams:[{name:"Qatar",flag:"🇶🇦"},{name:"Suiza",flag:"🇨🇭"}], stadium:"Levi's Stadium", tag:"Grupo B · Diurno", highlight:true },
     { id:"m2", date:"16 Jun", day:"Mar", time:"21:00 PT", teams:[{name:"Austria",flag:"🇦🇹"},{name:"Jordania",flag:"🇯🇴"}], stadium:"Levi's Stadium", tag:"Grupo J", highlight:false },
-    { id:"m3", date:"19 Jun", day:"Vie", time:"21:00 PT", teams:[{name:"Türkiye",flag:"🇹🇷"},{name:"Paraguay",flag:"🇵🇾"}], stadium:"Levi's Stadium", tag:"Grupo D", highlight:true },
+    { id:"m3", date:"19 Jun", day:"Vie", time:"21:00 PT", teams:[{name:"Türkiye",flag:"🇹🇷"},{name:"Paraguay",flag:"🇵🇾"}], stadium:"Levi's Stadium", tag:"Grupo D", highlight:false },
     { id:"m4", date:"22 Jun", day:"Lun", time:"20:00 PT", teams:[{name:"Jordania",flag:"🇯🇴"},{name:"Argelia",flag:"🇩🇿"}], stadium:"Levi's Stadium", tag:"Grupo J", highlight:false },
     { id:"m5", date:"25 Jun", day:"Jue", time:"19:00 PT", teams:[{name:"Paraguay",flag:"🇵🇾"},{name:"Australia",flag:"🇦🇺"}], stadium:"Levi's Stadium", tag:"Grupo D", highlight:false },
     { id:"m6", date:"1 Jul",  day:"Mié", time:"17:00 PT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Levi's Stadium", tag:"Ronda de 32", highlight:true },
@@ -46,10 +44,12 @@ export const es: CityGuide = {
       { label:"Aforo", value:"~69,391 — configuración FIFA (el único estadio del torneo con paneles solares que generan más energía de la que consume)" },
       { label:"Clima (jun–jul)", value:"Días: 18–26°C · Noches: 12–15°C · Microclimas: SF puede tener niebla y 15°C mientras Santa Clara tiene 28°C el mismo día" },
       { label:"Partidos", value:"6 confirmados — 5 grupos + 1 Ronda de 32. Cuatro de cinco grupos arrancan a las 21:00 PT." },
+      { label:"Nota del calendario", value:"Cuatro de los cinco partidos de grupos arrancan a las 21:00 PT — la hora más tardía de cualquier sede del torneo. Planifica el regreso y el alojamiento en función de que el pitido final llega pasadas las 23:00." },
       { label:"Ubicación", value:"Santa Clara — a 70 km al sur de SF. Acceso por VTA Light Rail (desde San José) o Caltrain (desde SF/Peninsula)." },
       { label:"Aeropuertos", value:"SJC (San José — el más cercano al estadio, ~8 km) · SFO (SF, BART al centro) · OAK (Oakland, BART, económico)" },
     ],
     body:"Levi's Stadium está en Santa Clara, al sur de la Bay Area — no en la ciudad de San Francisco. La decisión de base más importante de esta guía: quedarse cerca del estadio en Santa Clara/San José, o quedarse en San Francisco y asumir el desplazamiento de 70 kilómetros. Ambas tienen lógica según el itinerario. Si tienes varios partidos, San José gana. Si vienes por el único partido diurno del 13 de junio, SF como destino en sí mismo es el mejor plan.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"Cuatro de los cinco partidos de grupos arrancan a las 21:00 PT — la hora más tardía de cualquier sede del torneo. El pitido final llega pasadas las 23:00. El Caltrain hacia SF tiene servicio hasta las 00:30, pero no es continuo. Verifica el último tren antes del partido o ten Uber como plan B.",
   },
 
@@ -117,14 +117,13 @@ export const es: CityGuide = {
     { dish:"Kindred (Campbell)", where:"South Bay — hamburguesa gourmet + cerveza de Silicon Valley; el sports bar mejor valorado del sur de la bahía", price:"$$", type:"South Bay" },
     { dish:"La Taqueria (Mission)", where:"SF Mission District — el burrito de referencia; una cola disciplinada antes del partido diurno del sábado 13", price:"$", type:"Ritual" },
     { dish:"Koi Palace / Yank Sing", where:"Dim sum — Koi Palace en Sunset (el de locales), Yank Sing en Embarcadero (el del centro); ambos antes de la hora punta", price:"$$", type:"Chino" },
-    { dish:"Swan Oyster Depot", where:"Polk Street — mariscos de la Costa Oeste sin reservas, en barra; el mejor marisco de SF sin pretensión", price:"$$–$$$", type:"Local" },
+    { dish:"Marisco de la Costa Oeste", where:"SF y Oakland — la Bay Area tiene acceso directo al Pacífico; ostras y cangrejo del Dungeness sin intermediarios", price:"$$–$$$", type:"Local" },
   ],
 
   experiences:[
     { title:"Golden Gate + Marin Headlands + Sausalito", duration:"Medio día a día completo", desc:"El Golden Gate no necesita presentación, pero sí una estrategia: cruzarlo a pie desde el lado de SF en la mañana (sin niebla antes de las 11am) y continuar en bicicleta hasta Sausalito — un recorrido de 12 kilómetros con vistas a la bahía y a la ciudad. El ferry de regreso desde Sausalito a SF dura 30 minutos y llega al Ferry Building. Para el día libre entre el partido del 13 y el del 16 de junio.", type:"Icónico", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver ferry" },
     { title:"Exploratorium + Aquarium + Academy of Sciences", duration:"Día completo", desc:"Tres museos de primera línea: el Exploratorium en el Embarcadero (650 exhibiciones interactivas de física y biología), el Aquarium of the Bay en Pier 39 (tiburones, rayas y túnel acrílico), y la California Academy of Sciences en Golden Gate Park (planetario de 30 metros, bosque tropical bajo techo y el arrecife más grande del mundo en espacio de museo).", type:"Familiar", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver entradas" },
     { title:"Napa / Sonoma (excursión de día)", duration:"Día completo", desc:"Napa Valley está a 90 kilómetros al norte de SF por la Highway 29 — accesible en auto en 90 minutos o en tour organizado. Sonoma está a 70 kilómetros al noroeste. Los meses de junio y julio corresponden al período de crecimiento de la vid — no es época de vendimia, pero las bodegas operan con visitas y degustaciones sin la saturación de octubre.", type:"Vino", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver tours" },
-    { title:"Mission District — burritos + murales + bares", duration:"Medio día", desc:"El Mission District tiene la mayor concentración de comunidad latinoamericana de la ciudad, los murales de Balmy Alley y Clarion Alley, y las taquerías de referencia: La Taqueria para el burrito canónico, Tartine Bakery para el pan del día. Por la tarde, 20th Street tiene la mejor escena de bares de barrio de SF sin perder identidad.", type:"Barrio", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver mapa" },
   ],
 
   lagomTips:[
@@ -145,7 +144,7 @@ export const es: CityGuide = {
     "Hidratación previa — el estadio al aire libre se calienta por la tarde",
   ],
 
-  didYouKnow:"Levi's Stadium es el único estadio del torneo con paneles solares en el techo que generan más energía de la que el estadio consume. Cuando hay partido nocturno, parte de la iluminación viene directamente de la energía acumulada durante el día.",
+  didYouKnow:"Levi's Stadium es el único estadio del torneo con paneles solares en el techo que generan más energía de la que el estadio consume.",
   closingNote:"San Francisco / Bay Area es la sede más cara, la más geográficamente fragmentada y la más difícil de resolver en términos logísticos. También es la que tiene la gastronomía más sofisticada, el entorno natural más cinematográfico y el viaje en ferry desde el Embarcadero al estadio más pintoresco del torneo — si se confirma esa opción para algunos partidos. Levi's está en Santa Clara. El Fan Fest está en SF. La distancia entre ambos define el viaje. LagomPlan te dice desde qué ciudad quedarte según cuántos partidos tienes, a qué hora toma el Caltrain y por qué el burrito de La Taqueria merece la cola antes del partido diurno del sábado 13 de junio.",
   closingSignature:"Lagomplan · Guía de campo · San Francisco / Bay Area · Mundial 2026",
   plannerCTA:"Generar mi viaje a la Bay Area",
@@ -175,18 +174,16 @@ export const en: CityGuide = {
   description:"The Bay Area hosts 6 matches of the 2026 World Cup at Levi's Stadium — in Santa Clara, 70 km south of downtown San Francisco. Your base city decision (SF, San José, or Oakland) matters as much as the match ticket. Four of five group matches kick off at 21:00 PT, which complicates the late-night Caltrain return.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:3 },
-    { label:"Food",       value:5 },
-    { label:"Transit",    value:3 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:1 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:3 },
+    { label:"Food",             value:5 },
+    { label:"Cost",             value:1 },
   ],
 
   matches:[
     { id:"m1", date:"Jun 13", day:"Sat", time:"12:00 PT", teams:[{name:"Qatar",flag:"🇶🇦"},{name:"Switzerland",flag:"🇨🇭"}], stadium:"Levi's Stadium", tag:"Group B · Daytime", highlight:true },
     { id:"m2", date:"Jun 16", day:"Tue", time:"21:00 PT", teams:[{name:"Austria",flag:"🇦🇹"},{name:"Jordan",flag:"🇯🇴"}], stadium:"Levi's Stadium", tag:"Group J", highlight:false },
-    { id:"m3", date:"Jun 19", day:"Fri", time:"21:00 PT", teams:[{name:"Türkiye",flag:"🇹🇷"},{name:"Paraguay",flag:"🇵🇾"}], stadium:"Levi's Stadium", tag:"Group D", highlight:true },
+    { id:"m3", date:"Jun 19", day:"Fri", time:"21:00 PT", teams:[{name:"Türkiye",flag:"🇹🇷"},{name:"Paraguay",flag:"🇵🇾"}], stadium:"Levi's Stadium", tag:"Group D", highlight:false },
     { id:"m4", date:"Jun 22", day:"Mon", time:"20:00 PT", teams:[{name:"Jordan",flag:"🇯🇴"},{name:"Algeria",flag:"🇩🇿"}], stadium:"Levi's Stadium", tag:"Group J", highlight:false },
     { id:"m5", date:"Jun 25", day:"Thu", time:"19:00 PT", teams:[{name:"Paraguay",flag:"🇵🇾"},{name:"Australia",flag:"🇦🇺"}], stadium:"Levi's Stadium", tag:"Group D", highlight:false },
     { id:"m6", date:"Jul 1",  day:"Wed", time:"17:00 PT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Levi's Stadium", tag:"Round of 32", highlight:true },
@@ -198,10 +195,12 @@ export const en: CityGuide = {
       { label:"Capacity",          value:"~69,391 — FIFA configuration (the only tournament stadium with solar panels that generate more power than it consumes)" },
       { label:"Weather (Jun–Jul)", value:"Days: 18–26°C · Nights: 12–15°C · Microclimates: SF can be foggy and 15°C while Santa Clara hits 28°C the same day" },
       { label:"Matches",           value:"6 confirmed — 5 group + 1 Round of 32. Four of five group matches kick off at 21:00 PT." },
+      { label:"Calendar note",     value:"Four of the five group matches kick off at 21:00 PT — the latest start time of any host city in the tournament. Plan your return and accommodation around final whistles that come after 23:00." },
       { label:"Location",          value:"Santa Clara — 70 km south of SF. Access via VTA Light Rail (from San José) or Caltrain (from SF/Peninsula)." },
       { label:"Airports",          value:"SJC (San José — closest to the stadium, ~8 km) · SFO (SF, BART to downtown) · OAK (Oakland, BART, budget)" },
     ],
     body:"Levi's Stadium sits in Santa Clara, at the south end of the Bay Area — not in the city of San Francisco. The most important base decision in this guide: stay close to the stadium in Santa Clara/San José, or stay in San Francisco and absorb the 70 km commute. Both make sense depending on the itinerary. If you have multiple matches, San José wins. If you came for the lone daytime match on June 13, SF as a destination in itself is the better plan.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Four of the five group matches kick off at 21:00 PT — the latest starting time of any host city in the tournament. The final whistle comes after 23:00. Caltrain to SF runs until 00:30, but service isn't continuous. Check the last train before the match or have Uber as a plan B.",
   },
 
@@ -269,14 +268,13 @@ export const en: CityGuide = {
     { dish:"Kindred (Campbell)", where:"South Bay — gourmet burger + Silicon Valley brews; the highest-rated sports bar in the South Bay", price:"$$", type:"South Bay" },
     { dish:"La Taqueria (Mission)", where:"SF Mission District — the reference burrito; a disciplined line before the Saturday 13 daytime match", price:"$", type:"Ritual" },
     { dish:"Koi Palace / Yank Sing", where:"Dim sum — Koi Palace in Sunset (the locals' spot), Yank Sing at the Embarcadero (the downtown one); both before the rush", price:"$$", type:"Chinese" },
-    { dish:"Swan Oyster Depot", where:"Polk Street — West Coast seafood, no reservations, counter only; the best seafood in SF with zero pretension", price:"$$–$$$", type:"Local" },
+    { dish:"West Coast seafood", where:"SF and Oakland — direct Pacific access; Dungeness crab and oysters without intermediaries, the freshest on the coast", price:"$$–$$$", type:"Local" },
   ],
 
   experiences:[
     { title:"Golden Gate + Marin Headlands + Sausalito", duration:"Half to full day", desc:"The Golden Gate needs no introduction, but it does need a plan: cross on foot from the SF side in the morning (no fog before 11am) and continue by bike to Sausalito — a 12 km ride with views of the bay and the city. The return ferry from Sausalito to SF takes 30 minutes and lands at the Ferry Building. Perfect for the off-day between the June 13 and June 16 matches.", type:"Iconic", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See ferry" },
     { title:"Exploratorium + Aquarium + Academy of Sciences", duration:"Full day", desc:"Three top-tier museums: the Exploratorium on the Embarcadero (650 interactive physics and biology exhibits), the Aquarium of the Bay at Pier 39 (sharks, rays, and an acrylic tunnel), and the California Academy of Sciences in Golden Gate Park (a 30-meter planetarium, an indoor rainforest, and the largest reef on display in any museum).", type:"Family", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tickets" },
     { title:"Napa / Sonoma (day trip)", duration:"Full day", desc:"Napa Valley is 90 km north of SF on Highway 29 — reachable by car in 90 minutes or by organized tour. Sonoma sits 70 km northwest. June and July fall during the growing season — not harvest time, but wineries run tastings and tours without the October crowds.", type:"Wine", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tours" },
-    { title:"Mission District — burritos + murals + bars", duration:"Half day", desc:"The Mission District holds the city's highest concentration of Latin American community, the Balmy Alley and Clarion Alley murals, and the reference taquerías: La Taqueria for the canonical burrito, Tartine Bakery for the bread of the day. By the afternoon, 20th Street has SF's best neighborhood bar scene without losing its identity.", type:"Neighborhood", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See map" },
   ],
 
   lagomTips:[
@@ -297,7 +295,7 @@ export const en: CityGuide = {
     "Hydrate ahead — the open-air stadium heats up in the afternoon",
   ],
 
-  didYouKnow:"Levi's Stadium is the only tournament venue with rooftop solar panels that generate more power than the stadium consumes. On night matches, part of the lighting runs directly on energy stored during the day.",
+  didYouKnow:"Levi's Stadium is the only tournament venue with rooftop solar panels that generate more power than the stadium consumes.",
   closingNote:"San Francisco / Bay Area is the most expensive host city, the most geographically fragmented, and the hardest to solve logistically. It also has the most sophisticated food scene, the most cinematic natural surroundings, and — if the option gets confirmed for some matches — the most scenic ferry ride to a stadium in the tournament from the Embarcadero. Levi's is in Santa Clara. The Fan Fest is in SF. The distance between them defines the trip. LagomPlan tells you which city to stay in depending on how many matches you have, when to catch the Caltrain, and why La Taqueria's burrito earns its line before the Saturday June 13 daytime match.",
   closingSignature:"Lagomplan · Field Guide · San Francisco / Bay Area · World Cup 2026",
   plannerCTA:"Generate my Bay Area trip",

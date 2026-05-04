@@ -22,18 +22,16 @@ export const es: CityGuide = {
   description:"Toronto llega al Mundial con 6 partidos y un primer capítulo histórico: el 12 de junio de 2026, Canadá vs. Bosnia es el primer partido mundialista masculino en suelo canadiense. BMO Field es el estadio más pequeño del torneo (~45,736), con la logística de tránsito público más eficiente de las 16 sedes: el GO Train desde Union Station llega en cinco minutos.",
 
   scores:[
-    { label:"Ambiente",     value:5 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:5 },
-    { label:"Transporte",   value:5 },
-    { label:"Seguridad",    value:5 },
-    { label:"Costo",        value:2 },
+    { label:"Ambiente",          value:5 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:5 },
+    { label:"Costo",             value:2 },
   ],
 
   matches:[
     { id:"m1", date:"12 Jun", day:"Vie", time:"15:00 ET", teams:[{name:"Canadá",flag:"🇨🇦"},{name:"Bosnia",flag:"🇧🇦"}], stadium:"BMO Field", tag:"Grupo B · Histórico", highlight:true },
     { id:"m2", date:"17 Jun", day:"Mié", time:"19:00 ET", teams:[{name:"Ghana",flag:"🇬🇭"},{name:"Panamá",flag:"🇵🇦"}], stadium:"BMO Field", tag:"Grupo L", highlight:false },
-    { id:"m3", date:"20 Jun", day:"Sáb", time:"16:00 ET", teams:[{name:"Alemania",flag:"🇩🇪"},{name:"Costa de Marfil",flag:"🇨🇮"}], stadium:"BMO Field", tag:"Grupo E", highlight:true },
+    { id:"m3", date:"20 Jun", day:"Sáb", time:"16:00 ET", teams:[{name:"Alemania",flag:"🇩🇪"},{name:"Costa de Marfil",flag:"🇨🇮"}], stadium:"BMO Field", tag:"Grupo E", highlight:false },
     { id:"m4", date:"23 Jun", day:"Mar", time:"19:00 ET", teams:[{name:"Panamá",flag:"🇵🇦"},{name:"Croacia",flag:"🇭🇷"}], stadium:"BMO Field", tag:"Grupo L", highlight:false },
     { id:"m5", date:"26 Jun", day:"Vie", time:"15:00 ET", teams:[{name:"Senegal",flag:"🇸🇳"},{name:"Repechaje IC-2",flag:""}], stadium:"BMO Field", tag:"Grupo I", highlight:false },
     { id:"m6", date:"2 Jul",  day:"Jue", time:"TBD",      teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"BMO Field", tag:"2°K vs. 2°L", highlight:false },
@@ -47,9 +45,11 @@ export const es: CityGuide = {
       { label:"Partidos",       value:"6 confirmados — 5 grupos + Ronda de 32" },
       { label:"Ubicación",      value:"Exhibition Place — a 4 km del CN Tower. GO Train directo desde Union Station en 5 minutos." },
       { label:"Aeropuerto",     value:"YYZ — Toronto Pearson International (~23 km del estadio). UP Express a Union Station en 25 min." },
+      { label:"Alternativa",    value:"YTZ — Billy Bishop City Airport (solo vuelos domésticos cortos; no aplica para el grueso de los viajeros mundialistas)." },
       { label:"Visa",           value:"Canadá requiere eTA (Electronic Travel Authorization) para muchos países — trámite en línea en canada.ca antes de volar." },
     ],
     body:"El 12 de junio de 2026 es un hecho sin precedente en la historia del deporte canadiense: el primer partido mundialista masculino en suelo de Canadá. Toronto ya vibra con eso meses antes de que empiece. BMO Field es el estadio más pequeño del torneo (~45,736 asientos), expandido con estructuras temporales — también es el que pone a cada fanático más cerca del campo. La logística es la ventaja: GO Train desde Union Station → Exhibition Station en cinco minutos. No hay equivalente más eficiente en las otras 15 ciudades anfitrionas.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El 12 de junio (Canadá vs. Bosnia) es el partido de mayor demanda histórica de la sede. Los hoteles del centro desaparecen meses antes. Evalúa Airbnb en Roncesvalles, Leslieville o el East End — barrios bien conectados por TTC con precios más razonables.",
   },
 
@@ -115,16 +115,16 @@ export const es: CityGuide = {
     { dish:"Real Sports Bar & Grill", where:"Air Canada Centre — hamburguesa + cervezas artesanales de Ontario; el bar más grande de Canadá, formato monumental para el partido del 12 Jun", price:"$$",  type:"Sports bar" },
     { dish:"Fionn MacCool's",          where:"Múltiples sedes downtown — fish & chips + Guinness; pub irlandés confiable, cualquier sede se llena dos horas antes de Canadá",             price:"$$",  type:"Pub irlandés" },
     { dish:"Bar Raval",                where:"Little Italy — pintxos vascos + txakoli; coctelería seria, comida a la altura, para partidos con menos densidad de afición",                price:"$$$", type:"Gastro-bar" },
-    { dish:"Dim sum en Spadina",       where:"Chinatown — Pearl Harbourfront o Dim Sum King; una de las mejores comunidades chinas de Norteamérica",                                      price:"$–$$",type:"Barrio" },
-    { dish:"Roti en Kensington",       where:"Kensington Market — Patty King o Bacchus Roti Shop; la diáspora caribeña de Toronto cocina roti como nadie fuera de Trinidad",              price:"$",   type:"Caribe" },
-    { dish:"Pho en Broadview",         where:"East Chinatown — Pho Hung o Pho 88; la mayor concentración de restaurantes vietnamitas de la ciudad",                                        price:"$",   type:"Vietnamita" },
+    { dish:"Dim sum",                  where:"Spadina — la comunidad china de Toronto cocina dim sum con seriedad; una de las mejores de Norteamérica",                                    price:"$–$$",type:"Barrio" },
+    { dish:"Roti",                     where:"Kensington Market — la diáspora caribeña de Toronto; cocina roti con una calidad difícil de encontrar fuera del Caribe",                    price:"$",   type:"Caribe" },
+    { dish:"Pho",                      where:"Broadview — la mayor concentración de restaurantes vietnamitas de la ciudad",                                                                price:"$",   type:"Vietnamita" },
+    { dish:"Pizza napolitana",         where:"Downtown — hornos de leña, masa lenta, importados del sur de Italia",                                                                        price:"$$",  type:"Imperdible" },
   ],
 
   experiences:[
     { title:"ROM + Queen West + Barrio de las Artes", duration:"Medio día a día completo", desc:"El Royal Ontario Museum (ROM) en Bloor Street tiene una de las colecciones arqueológicas y de historia natural más importantes de Norteamérica, con secciones dedicadas a culturas mesoamericanas y africanas relevantes para un torneo con 48 naciones. Para la tarde, Queen West al oeste de Bathurst tiene galerías independientes, librerías de segunda mano y cafeterías que llevan décadas sin intentar ser trendy.", type:"Cultural", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver ROM" },
     { title:"Toronto Islands (ferry desde el centro)", duration:"Día completo", desc:"A 13 minutos en ferry desde los muelles frente al CN Tower (Ferry Terminal, $9 CAD ida y vuelta), las islas ofrecen playas, senderos, alquiler de kayaks y la mejor vista al skyline de Toronto desde el agua. En un día de junio sin partido, no hay mejor plan en la ciudad. El ferry opera desde las 6:30am; en días de partido hay servicio extra.", type:"Agua", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver ferry" },
     { title:"Kensington Market + Little Italy", duration:"Medio día", desc:"Kensington Market un sábado por la mañana es uno de los mejores mercados callejeros de Norteamérica: ropa vintage, quesos artesanales, frutas exóticas y cafeterías que no sirven café de cadena. Little Italy en College Street está a diez minutos caminando: terrazas, pastelerías italianas y restaurantes que llevan décadas en pie. Plan completo en menos de 3 kilómetros.", type:"Barrio", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver mapa" },
-    { title:"CN Tower + Ripley's Aquarium", duration:"Medio día", desc:"El CN Tower a 553 metros fue el edificio más alto del mundo durante 34 años. EdgeWalk, el paseo al borde de la plataforma abierta a 356 metros, es el atractivo extremo más conocido de la ciudad (con arnés, reserva previa, $225 CAD). A cien metros de la base, el Ripley's Aquarium of Canada tiene el túnel submarino más grande de Norteamérica y tiburones en exhibición permanente. Para familias con niños, combinación clásica.", type:"Icónico", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver entradas" },
   ],
 
   lagomTips:[
@@ -145,7 +145,7 @@ export const es: CityGuide = {
     "Plan post-partido para celebrar si Canadá anota en casa",
   ],
 
-  didYouKnow:"Toronto es una de las ciudades más diversas del mundo por porcentaje de residentes nacidos fuera del país: más del 50% de la población del área metropolitana nació en otro país. Es mayor proporción que Nueva York, Londres o París. En el Mundial, eso significa que cada partido tiene una tribuna local orgánica para la selección visitante.",
+  didYouKnow:"Toronto es una de las ciudades más diversas del mundo por porcentaje de residentes nacidos fuera del país: más del 50% de la población del área metropolitana nació en otro país. En el Mundial, eso significa que cada partido tiene una tribuna local orgánica para la selección visitante.",
   closingNote:"Toronto llega al Mundial sin necesitar que el torneo le explique quién es. Es una ciudad que ya sabe cocinar cincuenta cocinas, hablar doscientas lenguas y aplaudir a cualquier selección del mundo desde sus propias tribunas. El 12 de junio de 2026 agrega un primer capítulo a la historia del soccer masculino en Canadá. BMO Field es el estadio más pequeño del torneo. También es el que pone a cada fanático más cerca del campo que cualquier otro recinto de las 16 sedes. LagomPlan no necesita agregar más.",
   closingSignature:"Lagomplan · Guía de campo · Toronto · Mundial 2026",
   plannerCTA:"Generar mi viaje a Toronto",
@@ -175,18 +175,16 @@ export const en: CityGuide = {
   description:"Toronto arrives at the World Cup with 6 matches and a first historic chapter: on June 12, 2026, Canada vs. Bosnia is the first men's World Cup match on Canadian soil. BMO Field is the smallest stadium in the tournament (~45,736), with the most efficient public-transit logistics of any of the 16 host cities: the GO Train from Union Station arrives in five minutes.",
 
   scores:[
-    { label:"Atmosphere", value:5 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:5 },
-    { label:"Transit",    value:5 },
-    { label:"Safety",     value:5 },
-    { label:"Cost",       value:2 },
+    { label:"Atmosphere",       value:5 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:5 },
+    { label:"Cost",             value:2 },
   ],
 
   matches:[
     { id:"m1", date:"Jun 12", day:"Fri", time:"15:00 ET", teams:[{name:"Canada",flag:"🇨🇦"},{name:"Bosnia",flag:"🇧🇦"}], stadium:"BMO Field", tag:"Group B · Historic", highlight:true },
     { id:"m2", date:"Jun 17", day:"Wed", time:"19:00 ET", teams:[{name:"Ghana",flag:"🇬🇭"},{name:"Panama",flag:"🇵🇦"}], stadium:"BMO Field", tag:"Group L", highlight:false },
-    { id:"m3", date:"Jun 20", day:"Sat", time:"16:00 ET", teams:[{name:"Germany",flag:"🇩🇪"},{name:"Côte d'Ivoire",flag:"🇨🇮"}], stadium:"BMO Field", tag:"Group E", highlight:true },
+    { id:"m3", date:"Jun 20", day:"Sat", time:"16:00 ET", teams:[{name:"Germany",flag:"🇩🇪"},{name:"Côte d'Ivoire",flag:"🇨🇮"}], stadium:"BMO Field", tag:"Group E", highlight:false },
     { id:"m4", date:"Jun 23", day:"Tue", time:"19:00 ET", teams:[{name:"Panama",flag:"🇵🇦"},{name:"Croatia",flag:"🇭🇷"}], stadium:"BMO Field", tag:"Group L", highlight:false },
     { id:"m5", date:"Jun 26", day:"Fri", time:"15:00 ET", teams:[{name:"Senegal",flag:"🇸🇳"},{name:"IC Playoff 2",flag:""}], stadium:"BMO Field", tag:"Group I", highlight:false },
     { id:"m6", date:"Jul 2",  day:"Thu", time:"TBD",      teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"BMO Field", tag:"2°K vs. 2°L", highlight:false },
@@ -200,9 +198,11 @@ export const en: CityGuide = {
       { label:"Matches",           value:"6 confirmed — 5 group + Round of 32" },
       { label:"Location",          value:"Exhibition Place — 4 km from the CN Tower. GO Train direct from Union Station in 5 minutes." },
       { label:"Airport",           value:"YYZ — Toronto Pearson International (~23 km from the stadium). UP Express to Union Station in 25 min." },
+      { label:"Alternative airport",value:"YTZ — Billy Bishop City Airport (domestic short-haul only; not relevant for the majority of World Cup travelers)." },
       { label:"Visa",              value:"Canada requires an eTA (Electronic Travel Authorization) for many countries — apply online at canada.ca before flying." },
     ],
     body:"June 12, 2026 is an unprecedented event in Canadian sports history: the first men's World Cup match on Canadian soil. Toronto has been buzzing about it for months before kickoff. BMO Field is the smallest stadium in the tournament (~45,736 seats), expanded with temporary structures — and also the one that puts every fan closest to the pitch. The logistics are the advantage: GO Train from Union Station → Exhibition Station in five minutes. No equivalent exists in the other 15 host cities.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"June 12 (Canada vs. Bosnia) is the highest-demand date in the venue's history. Downtown hotels vanish months ahead. Consider Airbnb in Roncesvalles, Leslieville, or the East End — neighborhoods well-connected by TTC with more reasonable prices.",
   },
 
@@ -268,16 +268,16 @@ export const en: CityGuide = {
     { dish:"Real Sports Bar & Grill", where:"Air Canada Centre — burger + Ontario craft beer; Canada's largest bar, monumental format for the June 12 match",                  price:"$$",   type:"Sports bar" },
     { dish:"Fionn MacCool's",          where:"Multiple downtown locations — fish & chips + Guinness; reliable Irish pub, any location fills two hours before Canada",            price:"$$",   type:"Irish pub" },
     { dish:"Bar Raval",                where:"Little Italy — Basque pintxos + txakoli; serious cocktails, food to match, for matches with less dense crowds",                     price:"$$$",  type:"Gastro-bar" },
-    { dish:"Dim sum on Spadina",       where:"Chinatown — Pearl Harbourfront or Dim Sum King; one of the best Chinese communities in North America",                            price:"$–$$", type:"Neighborhood" },
-    { dish:"Roti in Kensington",       where:"Kensington Market — Patty King or Bacchus Roti Shop; Toronto's Caribbean diaspora cooks roti like no one outside Trinidad",       price:"$",    type:"Caribbean" },
-    { dish:"Pho in Broadview",         where:"East Chinatown — Pho Hung or Pho 88; the city's highest concentration of Vietnamese restaurants",                                  price:"$",    type:"Vietnamese" },
+    { dish:"Dim sum",                  where:"Spadina — one of the best Chinese communities in North America; dim sum cooked with seriousness",                                   price:"$–$$", type:"Neighborhood" },
+    { dish:"Roti",                     where:"Kensington Market — Toronto's Caribbean diaspora cooks roti at a quality difficult to find outside the Caribbean",                  price:"$",    type:"Caribbean" },
+    { dish:"Pho",                      where:"Broadview — the city's highest concentration of Vietnamese restaurants",                                                            price:"$",    type:"Vietnamese" },
+    { dish:"Neapolitan pizza",         where:"Downtown — wood-fired ovens, slow dough, ingredients sourced from southern Italy",                                                  price:"$$",   type:"Must try" },
   ],
 
   experiences:[
     { title:"ROM + Queen West + Arts District", duration:"Half to full day", desc:"The Royal Ontario Museum (ROM) on Bloor Street has one of the most important archaeological and natural history collections in North America, with sections dedicated to Mesoamerican and African cultures relevant to a 48-nation tournament. For the afternoon, Queen West west of Bathurst has independent galleries, used bookstores, and coffee shops that have spent decades not trying to be trendy.", type:"Cultural", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See ROM" },
     { title:"Toronto Islands (ferry from downtown)", duration:"Full day", desc:"Thirteen minutes by ferry from the docks across from the CN Tower (Ferry Terminal, $9 CAD round trip), the islands offer beaches, trails, kayak rentals, and the best skyline views of Toronto from the water. On a June day with no match, there's no better plan in the city. The ferry operates from 6:30am; match days have extra service.", type:"Water", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See ferry" },
     { title:"Kensington Market + Little Italy", duration:"Half day", desc:"Kensington Market on a Saturday morning is one of the best street markets in North America: vintage clothing, artisan cheese, exotic fruit, and coffee shops that don't serve chain coffee. Little Italy on College Street is a ten-minute walk away: terraces, Italian pastry shops, and restaurants that have been around for decades. A complete plan in less than 3 kilometers.", type:"Neighborhood", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See map" },
-    { title:"CN Tower + Ripley's Aquarium", duration:"Half day", desc:"The CN Tower at 553 meters was the tallest building in the world for 34 years. EdgeWalk, the open-platform walk around the outside at 356 meters, is the city's best-known extreme attraction (harness, advance reservation, $225 CAD). A hundred meters from the base, Ripley's Aquarium of Canada has the largest underwater tunnel in North America and permanent shark exhibits. For families with kids, a classic combo.", type:"Iconic", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tickets" },
   ],
 
   lagomTips:[
@@ -298,7 +298,7 @@ export const en: CityGuide = {
     "Post-match plan to celebrate if Canada scores at home",
   ],
 
-  didYouKnow:"Toronto is one of the most diverse cities in the world by percentage of residents born outside the country: more than 50% of the metro area's population was born in another country. That's a higher proportion than New York, London, or Paris. At the World Cup, that means every match has an organic local crowd for the visiting national team.",
+  didYouKnow:"Toronto is one of the most diverse cities in the world by percentage of residents born outside the country: more than 50% of the metro area's population was born in another country. At the World Cup, that means every match has an organic local crowd for the visiting national team.",
   closingNote:"Toronto arrives at the World Cup without needing the tournament to explain who it is. It's a city that already knows how to cook fifty cuisines, speak two hundred languages, and cheer for any national team in the world from its own stands. June 12, 2026 adds a first chapter to the history of men's soccer in Canada. BMO Field is the smallest stadium in the tournament. It's also the one that puts every fan closer to the pitch than any other venue of the 16 hosts. LagomPlan doesn't need to add more.",
   closingSignature:"Lagomplan · Field Guide · Toronto · World Cup 2026",
   plannerCTA:"Generate my Toronto trip",

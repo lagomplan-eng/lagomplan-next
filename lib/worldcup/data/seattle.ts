@@ -22,12 +22,10 @@ export const es: CityGuide = {
   description:"Seattle llega al Mundial con 6 partidos, el estadio más ruidoso de la NFL y el USMNT en casa el 19 de junio. Lumen Field amplifica el sonido por diseño — para USA vs. Australia, esa acústica va a demostrar por qué Seattle tiene la reputación de fanáticos que tiene. El Link Light Rail conecta el aeropuerto, Capitol Hill y el estadio sin transbordo.",
 
   scores:[
-    { label:"Ambiente",     value:5 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:5 },
-    { label:"Transporte",   value:4 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:2 },
+    { label:"Ambiente",          value:5 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:5 },
+    { label:"Costo",             value:2 },
   ],
 
   matches:[
@@ -36,7 +34,7 @@ export const es: CityGuide = {
     { id:"m3", date:"24 Jun", day:"Mié", time:"12:00 PT", teams:[{name:"Bosnia",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Grupo B", highlight:false },
     { id:"m4", date:"26 Jun", day:"Vie", time:"20:00 PT", teams:[{name:"Egipto",flag:"🇪🇬"},{name:"Irán",flag:"🇮🇷"}], stadium:"Lumen Field", tag:"Grupo G", highlight:false },
     { id:"m5", date:"29 Jun", day:"Lun", time:"TBD",      teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Lumen Field", tag:"Ronda de 32", highlight:false },
-    { id:"m6", date:"6 Jul",  day:"Lun", time:"20:00 PT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Lumen Field", tag:"Ronda de 16", highlight:true },
+    { id:"m6", date:"6 Jul",  day:"Lun", time:"20:00 PT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Lumen Field", tag:"Ronda de 16", highlight:false },
   ],
 
   manifesto:{
@@ -46,9 +44,11 @@ export const es: CityGuide = {
       { label:"Clima (jun–jul)",value:"Días: 18–24°C · Noches: 12–15°C · La sede más fresca del torneo en EE.UU. — chaqueta ligera para partidos nocturnos" },
       { label:"Partidos",       value:"6 confirmados — 4 grupos + Ronda de 32 + Ronda de 16. Tres de los cuatro de grupos arrancan al mediodía PT." },
       { label:"Ubicación",      value:"South Downtown — a 10 min caminando del Pike Place Market y 15 de Pioneer Square. Link Light Rail directo desde aeropuerto y Capitol Hill." },
+      { label:"Nota del estadio", value:"Lumen Field es considerado el estadio más ruidoso de la NFL — el diseño de cubierta atrapa el sonido. Para el partido de USMNT el 19 de junio, esa acústica va a demostrar por qué Seattle tiene la reputación que tiene." },
       { label:"Aeropuerto",     value:"SEA — Seattle-Tacoma International · Link Light Rail directo al centro en ~40 min (misma línea que llega al estadio)" },
     ],
     body:"Seattle es compacta para su impacto. Lumen Field está en el extremo sur del downtown, a diez minutos caminando del Pike Place Market y a quince de Pioneer Square. El 19 de junio, Estados Unidos vs. Australia va a ser el partido más ruidoso del torneo — Lumen Field tiene una acústica diseñada para amplificar al fanático, y 69,000 personas van a usarla. La ciudad más fría del torneo norteamericano tiene también el café más serio, el marisco más fresco y las montañas más cinematográficas a dos horas.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El 19 de junio (USMNT vs. Australia) es el partido de mayor demanda de la sede. Los hoteles en downtown y Capitol Hill para esa fecha se agotan con meses de anticipación. Airbnb en Beacon Hill (10 min en Link del estadio) o Columbia City son alternativas razonables con buena conexión.",
   },
 
@@ -114,16 +114,15 @@ export const es: CityGuide = {
     { dish:"Fuel Sports",             where:"First Hill — alitas + cerveza local del noroeste; el bar más futbolero de Seattle, el primero que se llena en días de USMNT", price:"$$",  type:"Sports bar" },
     { dish:"The George & Dragon",     where:"Fremont — bangers & mash + pinta inglesa; el pub europeo más auténtico del norte de Seattle",                                 price:"$$",  type:"Pub inglés" },
     { dish:"Rhein Haus",              where:"Capitol Hill — pretzel gigante + Hefeweizen; curling bar convertido en cervecería alemana con espacio para sentarse",         price:"$$",  type:"Cervecería" },
-    { dish:"Pike Place Chowder",      where:"Pike Place Market — clam chowder de referencia; la fila vale la pena antes del partido de mediodía",                          price:"$",   type:"Local" },
+    { dish:"Chowder del mercado",     where:"Pike Place Market — la galería interior antes de las 9am; el marisco del Puget Sound en su versión más directa",              price:"$",   type:"Local" },
     { dish:"Café de especialidad",    where:"Victrola (Capitol Hill) / Lighthouse Roasters (Fremont) / Caffe Vita; Seattle tiene la 2ª mayor concentración de cafés de especialidad del mundo", price:"$",   type:"Ritual" },
-    { dish:"Marisco del Pacífico NW", where:"Taylor Shellfish en Capitol Hill — ostras frescas sin intermediarios; el marisco más fresco del continente",                  price:"$$",  type:"Pacific NW" },
+    { dish:"Marisco del Pacífico NW", where:"Capitol Hill y Pike Place — ostras y marisco del Puget Sound sin intermediarios; el más fresco del continente",               price:"$$",  type:"Pacific NW" },
   ],
 
   experiences:[
     { title:"Pike Place Market + Olympic Sculpture Park + Waterfront", duration:"Medio día a día completo", desc:"El Pike Place Market en su versión completa — no solo el puesto de los lanzadores de pescado, sino el laberinto de tres plantas de importadores de especias, quesos locales, flores y artesanía — merece dos horas sin prisa. A cuatro cuadras al norte, el Olympic Sculpture Park del Seattle Art Museum tiene esculturas de Richard Serra y Alexander Calder al borde del Puget Sound con vistas a las montañas Olympic — entrada gratuita. El Waterfront renovado completa el itinerario con el Ferry Terminal.", type:"Ciudad", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver Market" },
     { title:"Seattle Center — Pacific Science + MoPOP + Space Needle", duration:"Día completo", desc:"El Pacific Science Center tiene el planetario más moderno del Noroeste, exposiciones interactivas para todas las edades y mariposas tropicales vivas ($26 adultos). A cien metros, el Museum of Pop Culture (MoPOP) — diseñado por Frank Gehry — tiene colecciones sobre Jimi Hendrix, Nirvana y Star Wars ($30 adultos). La Space Needle, enfrente, tiene el mirador más famoso de la ciudad. El día más completo de cualquier sede del torneo para familias.", type:"Familiar", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver entradas" },
     { title:"Mount Rainier National Park (excursión de día)", duration:"Día completo", desc:"A 90 kilómetros al sureste de Seattle, el Monte Rainier es el volcán activo más alto de EE.UU. En junio hay campos de flores silvestres en Sunrise y Paradise — los dos centros de visitantes del parque. El drive desde Seattle toma 90 minutos; desde el parque, el Rainier a 4,392 metros crea un telón de fondo que ninguna otra sede del torneo puede ofrecer.", type:"Naturaleza", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver info" },
-    { title:"Ferry a Bainbridge Island", duration:"Medio día", desc:"El ferry desde el Colman Dock sale cada 35 minutos hacia Bainbridge Island — 35 minutos de travesía con vistas al skyline de Seattle y a las montañas Olympic. La isla tiene el pueblo más fotogénico del Puget Sound: galerías, cafés y senderos costeros. Ferry: $9 ida. Plan perfecto para las mañanas previas a partidos de mediodía.", type:"Agua", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver horarios" },
   ],
 
   lagomTips:[
@@ -144,7 +143,7 @@ export const es: CityGuide = {
     "Plan para Pike Place Market o Pioneer Square pre-partido",
   ],
 
-  didYouKnow:"Lumen Field es considerado el estadio más ruidoso de la NFL — el diseño de cubierta parcial atrapa y canaliza el sonido hacia el campo. Cuando la afición de los Seattle Sounders llena el estadio, se registran ovaciones de más de 136 decibeles — equivalente al despegue de un avión a diez metros.",
+  didYouKnow:"Lumen Field es considerado el estadio más ruidoso de la NFL — el diseño de cubierta parcial atrapa y canaliza el sonido hacia el campo. Cuando la afición de los Seattle Sounders llena el estadio, el ruido es físicamente diferente al de cualquier otro recinto. Para el USMNT el 19 de junio, esa acústica va a demostrar por qué Seattle tiene la reputación que tiene.",
   closingNote:"Seattle llega al Mundial con seis partidos y el partido del USMNT más ruidoso del torneo completo. Lumen Field tiene una acústica diseñada para amplificar al fanático — y el 19 de junio, 69,000 personas van a usarla. La ciudad más fría del torneo norteamericano tiene también el café más serio, el marisco más fresco y las montañas más cinematográficas a dos horas. El Link Light Rail va directo al estadio desde el aeropuerto, desde Capitol Hill y desde el downtown sin transbordo. LagomPlan te da la estación correcta, la chaqueta para la noche del 26 de junio y la ostra del mediodía antes del partido. El resto lo hace el Rainier de fondo.",
   closingSignature:"Lagomplan · Guía de campo · Seattle · Mundial 2026",
   plannerCTA:"Generar mi viaje a Seattle",
@@ -174,12 +173,10 @@ export const en: CityGuide = {
   description:"Seattle arrives at the World Cup with 6 matches, the loudest stadium in the NFL, and USMNT at home on June 19. Lumen Field amplifies sound by design — for USA vs. Australia, that acoustic is going to prove why Seattle has the fan reputation it has. Link Light Rail links the airport, Capitol Hill, and the stadium without a transfer.",
 
   scores:[
-    { label:"Atmosphere", value:5 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:5 },
-    { label:"Transit",    value:4 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:2 },
+    { label:"Atmosphere",       value:5 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:5 },
+    { label:"Cost",             value:2 },
   ],
 
   matches:[
@@ -188,7 +185,7 @@ export const en: CityGuide = {
     { id:"m3", date:"Jun 24", day:"Wed", time:"12:00 PT", teams:[{name:"Bosnia",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Group B", highlight:false },
     { id:"m4", date:"Jun 26", day:"Fri", time:"20:00 PT", teams:[{name:"Egypt",flag:"🇪🇬"},{name:"Iran",flag:"🇮🇷"}], stadium:"Lumen Field", tag:"Group G", highlight:false },
     { id:"m5", date:"Jun 29", day:"Mon", time:"TBD",      teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Lumen Field", tag:"Round of 32", highlight:false },
-    { id:"m6", date:"Jul 6",  day:"Mon", time:"20:00 PT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Lumen Field", tag:"Round of 16", highlight:true },
+    { id:"m6", date:"Jul 6",  day:"Mon", time:"20:00 PT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Lumen Field", tag:"Round of 16", highlight:false },
   ],
 
   manifesto:{
@@ -198,9 +195,11 @@ export const en: CityGuide = {
       { label:"Weather (Jun–Jul)", value:"Days: 18–24°C · Nights: 12–15°C · The coolest U.S. host city in the tournament — light jacket required for night matches" },
       { label:"Matches",           value:"6 confirmed — 4 group + Round of 32 + Round of 16. Three of the four group matches kick off at noon PT." },
       { label:"Location",          value:"South Downtown — 10 min walk from Pike Place Market and 15 from Pioneer Square. Link Light Rail direct from airport and Capitol Hill." },
+      { label:"Stadium note",  value:"Lumen Field is considered the loudest stadium in the NFL — the partial-roof design traps sound. For the USMNT match on June 19, that acoustic is going to prove why Seattle has the reputation it has." },
       { label:"Airport",           value:"SEA — Seattle-Tacoma International · Link Light Rail direct to downtown in ~40 min (same line that reaches the stadium)" },
     ],
     body:"Seattle is compact for its impact. Lumen Field sits at the south end of downtown, a ten-minute walk from Pike Place Market and fifteen from Pioneer Square. On June 19, United States vs. Australia is going to be the loudest match of the tournament — Lumen Field has an acoustic designed to amplify the fan, and 69,000 people are going to use it. The coolest city in the North American tournament also has the most serious coffee, the freshest seafood, and the most cinematic mountains two hours away.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"June 19 (USMNT vs. Australia) is the highest-demand date in the venue. Downtown and Capitol Hill hotels for that night sell out months ahead. Airbnb in Beacon Hill (10 min on Link from the stadium) or Columbia City are reasonable alternatives with good transit.",
   },
 
@@ -266,16 +265,15 @@ export const en: CityGuide = {
     { dish:"Fuel Sports",             where:"First Hill — wings + Pacific Northwest local beer; Seattle's most football-focused bar, the first to fill on USMNT days", price:"$$",  type:"Sports bar" },
     { dish:"The George & Dragon",     where:"Fremont — bangers & mash + English pint; the most authentic European pub in north Seattle",                               price:"$$",  type:"English pub" },
     { dish:"Rhein Haus",              where:"Capitol Hill — giant pretzel + Hefeweizen; a curling bar reborn as a German beer hall with room to sit",                  price:"$$",  type:"Beer hall" },
-    { dish:"Pike Place Chowder",      where:"Pike Place Market — reference clam chowder; the line is worth it before a noon match",                                    price:"$",   type:"Local" },
+    { dish:"Market chowder",          where:"Pike Place Market interior gallery — Puget Sound seafood in its most direct form; arrive before 9am",                     price:"$",   type:"Local" },
     { dish:"Specialty coffee",        where:"Victrola (Capitol Hill) / Lighthouse Roasters (Fremont) / Caffe Vita; Seattle has the world's 2nd-highest concentration of specialty coffee shops", price:"$",   type:"Ritual" },
-    { dish:"Pacific NW seafood",      where:"Taylor Shellfish in Capitol Hill — fresh oysters with no intermediaries; the freshest seafood on the continent",          price:"$$",  type:"Pacific NW" },
+    { dish:"Pacific NW seafood",      where:"Capitol Hill and Pike Place — Puget Sound oysters and shellfish with no intermediaries; the freshest on the continent",   price:"$$",  type:"Pacific NW" },
   ],
 
   experiences:[
     { title:"Pike Place Market + Olympic Sculpture Park + Waterfront", duration:"Half to full day", desc:"Pike Place Market in its full form — not just the fish-throwing stall, but the three-story maze of spice importers, local cheesemakers, florists, and craft — deserves two unhurried hours. Four blocks north, the Seattle Art Museum's Olympic Sculpture Park has Richard Serra and Alexander Calder pieces along Puget Sound with Olympic Mountain views — free admission. The renovated Waterfront rounds out the route with the Ferry Terminal.", type:"City", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See Market" },
     { title:"Seattle Center — Pacific Science + MoPOP + Space Needle", duration:"Full day", desc:"The Pacific Science Center has the most modern planetarium in the Northwest, interactive exhibits for all ages, and live tropical butterflies ($26 adults). A hundred meters away, the Museum of Pop Culture (MoPOP) — designed by Frank Gehry — holds collections on Jimi Hendrix, Nirvana, and Star Wars ($30 adults). The Space Needle, across the way, has the city's most famous observation deck. The most complete day at any host city for families.", type:"Family", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tickets" },
     { title:"Mount Rainier National Park (day trip)", duration:"Full day", desc:"90 km southeast of Seattle, Mount Rainier is the highest active volcano in the U.S. In June there are wildflower fields at Sunrise and Paradise — the park's two visitor centers. The drive from Seattle takes 90 minutes; from the park, Rainier at 4,392 meters creates a backdrop no other tournament host city can offer.", type:"Nature", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See info" },
-    { title:"Ferry to Bainbridge Island", duration:"Half day", desc:"The ferry from Colman Dock leaves every 35 minutes for Bainbridge Island — a 35-minute crossing with views of the Seattle skyline and the Olympic Mountains. The island has the most photogenic town on Puget Sound: galleries, cafés, and coastal trails. Ferry: $9 one way. Perfect for mornings ahead of noon matches.", type:"Water", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See schedule" },
   ],
 
   lagomTips:[
@@ -296,7 +294,7 @@ export const en: CityGuide = {
     "Pre-match plan for Pike Place Market or Pioneer Square",
   ],
 
-  didYouKnow:"Lumen Field is considered the loudest stadium in the NFL — the partial-roof design traps and channels sound back onto the pitch. When the Seattle Sounders fill the venue, roars of 136+ decibels have been recorded — equivalent to a jet takeoff from ten meters away.",
+  didYouKnow:"Lumen Field is considered the loudest stadium in the NFL — the partial-roof design traps and channels sound back onto the pitch. When the Seattle Sounders fill the venue, the noise is physically different from any other stadium. For USMNT on June 19, that acoustic is going to prove why Seattle has the fan reputation it has.",
   closingNote:"Seattle arrives at the World Cup with six matches and the loudest USMNT match of the entire tournament. Lumen Field has an acoustic designed to amplify the fan — and on June 19, 69,000 people are going to use it. The coolest city in the North American tournament also has the most serious coffee, the freshest seafood, and the most cinematic mountains two hours away. Link Light Rail goes straight to the stadium from the airport, from Capitol Hill, and from downtown without a transfer. LagomPlan gives you the right station, the jacket for the June 26 night, and the noon oyster before kickoff. Rainier handles the backdrop.",
   closingSignature:"Lagomplan · Field Guide · Seattle · World Cup 2026",
   plannerCTA:"Generate my Seattle trip",

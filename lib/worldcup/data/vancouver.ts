@@ -22,12 +22,10 @@ export const es: CityGuide = {
   description:"La única sede del torneo donde el estadio comparte el horizonte con montañas nevadas. No hace falta que sea metáfora. Vancouver llega al Mundial con siete partidos, un techo retráctil — el único estadio techado de Canadá en el torneo — y Canadá jugando dos veces aquí. La segunda, el 24 de junio contra Suiza, puede ser la más importante para el país.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:5 },
-    { label:"Transporte",   value:5 },
-    { label:"Seguridad",    value:5 },
-    { label:"Costo",        value:2 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:5 },
+    { label:"Costo",             value:2 },
   ],
 
   matches:[
@@ -44,19 +42,19 @@ export const es: CityGuide = {
     stadiumInfo:[
       { label:"Estadio FIFA",         value:"Vancouver Stadium (BC Place)" },
       { label:"Aforo",                value:"~54,500 — configuración FIFA — con techo retráctil, el único estadio techado de Canadá en el torneo" },
-      { label:"Techo",                value:"Retráctil — único estadio techado de Canadá en el torneo" },
       { label:"Clima (jun–jul)",      value:"18–24°C · Lluvia ocasional · El techo cubre al fanático cuando el Pacífico decide opinar" },
       { label:"Partidos",             value:"7 confirmados (5 grupos + 1 Ronda de 32 + 1 Ronda de 16)" },
       { label:"Aeropuerto principal", value:"YVR — Vancouver International (a ~12 km del estadio, accesible por SkyTrain Canada Line en ~25 minutos)" },
       { label:"Visa",                 value:"Canadá requiere eTA para ciudadanos de muchos países — se tramita en línea en canada.ca. No confundir con visa estadounidense; son requisitos independientes." },
     ],
     body:"Vancouver no necesitaba el Mundial para ser un destino. Lo que el torneo le da es contexto: siete partidos, el sueño de Canadá de avanzar jugándose aquí, y la confirmación de que el BC Place — donde se jugó la final de la Copa del Mundo Femenina 2015 — sabe lo que es un partido grande. El estadio conoce el peso. La ciudad también.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"Canadá requiere eTA (Electronic Travel Authorization) para ciudadanos de muchos países. Se tramita en canada.ca — no confundir con la visa estadounidense, son requisitos independientes. Tramítala antes de comprar el vuelo.",
   },
 
   vibe:{
     body:"Canadá juega aquí dos veces — incluyendo el partido decisivo del Grupo B el 24 de junio contra Suiza. Vancouver es donde el sueño canadiense de avanzar se define. Si Canadá pasa la fase de grupos, esta ciudad lo vive antes que nadie. El Vancouver Whitecaps tiene una de las bases de fanáticos más activas de MLS en el país. El BC Place ya albergó la final de la Copa del Mundo Femenina 2015 — el estadio conoce el peso de un partido grande. La ciudad suma la mejor escena de sushi fuera de Japón, dim sum que rivaliza con Hong Kong, izakaya de referencia internacional y mercados con acceso directo al Pacífico. Para comer, Vancouver no necesita justificarse. El costo es el límite: una de las ciudades más caras de Norteamérica en año sin Mundial, y el torneo no hace más que confirmar lo que el mercado inmobiliario ya había establecido.",
-    lagomNote:"Para el 24 de junio (Suiza vs. Canadá, partido definitorio del Grupo B) y el 18 de junio (Canadá vs. Qatar), el PNE se llena antes del mediodía. Los dos partidos de Canadá en esta sede generan una demanda sin precedente en la historia del turismo de la ciudad.",
+    lagomNote:"Para el 24 de junio (Suiza vs. Canadá, partido definitorio del Grupo B) y el 18 de junio (Canadá vs. Qatar), el PNE se llena. Los dos partidos de Canadá en esta sede generan una demanda sin precedente en la historia del turismo de la ciudad.",
   },
 
   neighborhoods:[
@@ -99,7 +97,7 @@ export const es: CityGuide = {
         { time:"H-2:30", text:"Desayuna en Gastown o Yaletown. Los partidos de mediodía son los mejores para empezar bien el día." },
         { time:"H-2:00", text:"Toma el SkyTrain desde tu estación más cercana hacia Main Street-Science World." },
         { time:"H-1:30", text:"Llegada al estadio. Las puertas abren 90 minutos antes." },
-        { time:"H-0:30", text:"En tu asiento. Boleto digital listo. El BC Place tiene techo — si llueve, ya estás adentro." },
+        { time:"H-0:30", text:"En tu asiento. Boleto digital listo." },
         { time:"H+0:00", text:"Partido." },
         { time:"H+1:30", text:"SkyTrain de regreso por la misma ruta. El BC Place tiene techo — si llueve después del partido, ya estás adentro hasta que pase." },
       ],
@@ -172,7 +170,7 @@ export const es: CityGuide = {
 
   lagomTips:[
     "El 24 de junio (Suiza vs. Canadá, partido definitorio del Grupo B) y el 18 de junio (Canadá vs. Qatar) son las fechas de mayor demanda en Vancouver. Los dos partidos de Canadá en esta sede generan una demanda de hospedaje sin precedente en la historia del turismo de la ciudad.",
-    "La estación correcta para BC Place es Main Street-Science World. Stadium-Chinatown estará CERRADA para fans mundialistas en todos los días de partido. Ninguna app te va a actualizar esto en tiempo real.",
+    "La estación correcta para BC Place es Main Street-Science World. Stadium-Chinatown estará CERRADA para fans mundialistas en todos los días de partido.",
     "eTA canadiense obligatoria antes de volar — tramítala en canada.ca. No confundir con visa estadounidense: son requisitos completamente independientes.",
     "Vancouver tiene la mejor escena de ramen de Norteamérica fuera de Japón, sushi con acceso directo al Pacífico y dim sum que rivaliza con Hong Kong. No comas dos veces en el mismo lugar.",
   ],
@@ -188,7 +186,7 @@ export const es: CityGuide = {
     "Llegada al estadio 90 min antes — puertas abren H-1:30",
   ],
 
-  didYouKnow:"BC Place albergó la final de la Copa del Mundo Femenina 2015. Es el único estadio techado de Canadá en el torneo. El techo retráctil — el más grande del mundo cuando se inauguró en 1983 — le permite a Vancouver garantizar el partido independientemente del clima del Pacífico.",
+  didYouKnow:"BC Place albergó la final de la Copa del Mundo Femenina 2015. Es el único estadio techado de Canadá en el torneo. El techo retráctil le permite a Vancouver garantizar el partido independientemente del clima del Pacífico.",
   closingNote:"Vancouver llega al Mundial con siete partidos, un techo retráctil y las montañas North Shore de fondo. Canadá juega aquí dos veces y la segunda vez — el 24 de junio contra Suiza — puede ser la más importante del torneo para el país. Antes de ese partido, y después de él, hay una ciudad que sabe recibir al mundo porque lleva décadas siendo el punto de llegada de todos. LagomPlan te da la estación de SkyTrain correcta, el barrio indicado y la razón para quedarte un día más. El resto lo hace el Pacífico.",
   closingSignature:"Lagomplan · Guía de campo · Vancouver · Mundial 2026",
   plannerCTA:"Generar mi viaje a Vancouver",
@@ -218,12 +216,10 @@ export const en: CityGuide = {
   description:"The only host city in the tournament where the stadium shares its skyline with snow-capped mountains. No need to make a metaphor of it. Vancouver arrives at the World Cup with seven matches, a retractable roof — the only covered stadium in Canada in the tournament — and Canada playing twice here. The second one, June 24 against Switzerland, may be the most important for the country.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:5 },
-    { label:"Transit",    value:5 },
-    { label:"Safety",     value:5 },
-    { label:"Cost",       value:2 },
+    { label:"Atmosphere",      value:4 },
+    { label:"Football culture",value:4 },
+    { label:"Food",            value:5 },
+    { label:"Cost",            value:2 },
   ],
 
   matches:[
@@ -240,19 +236,19 @@ export const en: CityGuide = {
     stadiumInfo:[
       { label:"FIFA stadium",      value:"Vancouver Stadium (BC Place)" },
       { label:"Capacity",          value:"~54,500 — FIFA configuration — with a retractable roof, the only covered stadium in Canada in the tournament" },
-      { label:"Roof",               value:"Retractable — the only covered stadium in Canada in the tournament" },
       { label:"Weather (Jun–Jul)",  value:"18–24°C · Occasional rain · The roof covers fans when the Pacific decides to weigh in" },
       { label:"Matches",            value:"7 confirmed (5 group + 1 Round of 32 + 1 Round of 16)" },
       { label:"Primary airport",    value:"YVR — Vancouver International (~12 km from the stadium, accessible via SkyTrain Canada Line in ~25 minutes)" },
       { label:"Visa",               value:"Canada requires an eTA for citizens of many countries — apply online at canada.ca. Don't confuse with a U.S. visa; they're independent requirements." },
     ],
     body:"Vancouver didn't need the World Cup to be a destination. What the tournament gives it is context: seven matches, Canada's dream of advancing being played out here, and confirmation that BC Place — where the 2015 Women's World Cup Final was played — knows what a big match feels like. The stadium knows the weight. The city does too.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Canada requires an eTA (Electronic Travel Authorization) for citizens of many countries. Apply at canada.ca — don't confuse it with a U.S. visa, they're independent requirements. Handle it before buying the flight.",
   },
 
   vibe:{
     body:"Canada plays here twice — including the decisive Group B match on June 24 against Switzerland. Vancouver is where Canada's dream of advancing will be defined. If Canada makes it out of the group stage, this city lives it first. Vancouver Whitecaps has one of the most active MLS fan bases in the country. BC Place already hosted the 2015 Women's World Cup Final — the stadium knows the weight of a big match. The city adds the best sushi scene outside Japan, dim sum that rivals Hong Kong, internationally known izakaya, and markets with direct Pacific access. For eating, Vancouver doesn't need to justify itself. Cost is the ceiling: one of the most expensive cities in North America in a non–World Cup year, and the tournament just confirms what the real estate market had already established.",
-    lagomNote:"For June 24 (Switzerland vs. Canada, Group B decider) and June 18 (Canada vs. Qatar), the PNE fills before noon. Canada's two matches here generate a demand with no precedent in the city's tourism history.",
+    lagomNote:"For June 24 (Switzerland vs. Canada, Group B decider) and June 18 (Canada vs. Qatar), the PNE fills up. Canada's two matches here generate a demand with no precedent in the city's tourism history.",
   },
 
   neighborhoods:[
@@ -295,7 +291,7 @@ export const en: CityGuide = {
         { time:"H-2:30", text:"Breakfast in Gastown or Yaletown. Noon matches are the best ones for starting the day right." },
         { time:"H-2:00", text:"Take the SkyTrain from your closest station toward Main Street-Science World." },
         { time:"H-1:30", text:"Arrive at the stadium. Gates open 90 minutes before kickoff." },
-        { time:"H-0:30", text:"In your seat. Digital ticket ready. BC Place has a roof — if it rains, you're already inside." },
+        { time:"H-0:30", text:"In your seat. Digital ticket ready." },
         { time:"H+0:00", text:"Kickoff." },
         { time:"H+1:30", text:"SkyTrain back via the same route. BC Place has a roof — if it rains after the match, you're already inside until it passes." },
       ],
@@ -368,7 +364,7 @@ export const en: CityGuide = {
 
   lagomTips:[
     "June 24 (Switzerland vs. Canada, Group B decider) and June 18 (Canada vs. Qatar) are the highest-demand dates in Vancouver. Canada's two matches at this venue generate a lodging demand with no precedent in the city's tourism history.",
-    "The correct station for BC Place is Main Street-Science World. Stadium-Chinatown will be CLOSED to World Cup fans on every match day. No app will update this in real time.",
+    "The correct station for BC Place is Main Street-Science World. Stadium-Chinatown will be CLOSED to World Cup fans on every match day.",
     "Canadian eTA required before flying — apply at canada.ca. Don't confuse it with a U.S. visa: they're completely independent requirements.",
     "Vancouver has the best ramen scene in North America outside Japan, sushi with direct Pacific access, and dim sum that rivals Hong Kong. Don't eat twice in the same place.",
   ],
@@ -384,7 +380,7 @@ export const en: CityGuide = {
     "Arrive at the stadium 90 min ahead — gates open at H-1:30",
   ],
 
-  didYouKnow:"BC Place hosted the 2015 FIFA Women's World Cup Final. It's the only covered stadium in Canada in the tournament. The retractable roof — the largest in the world when it opened in 1983 — lets Vancouver guarantee the match regardless of Pacific weather.",
+  didYouKnow:"BC Place hosted the 2015 FIFA Women's World Cup Final. It's the only covered stadium in Canada in the tournament. The retractable roof lets Vancouver guarantee the match regardless of Pacific weather.",
   closingNote:"Vancouver arrives at the World Cup with seven matches, a retractable roof, and the North Shore mountains in the background. Canada plays here twice, and the second time — June 24 against Switzerland — may be the most important match of the tournament for the country. Before that match, and after it, there's a city that knows how to receive the world because it has spent decades being everyone's landing point. LagomPlan gives you the right SkyTrain station, the right neighborhood, and the reason to stay one more day. The Pacific handles the rest.",
   closingSignature:"Lagomplan · Field Guide · Vancouver · World Cup 2026",
   plannerCTA:"Generate my Vancouver trip",
