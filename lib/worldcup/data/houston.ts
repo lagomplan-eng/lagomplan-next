@@ -22,22 +22,20 @@ export const es: CityGuide = {
   description:"La ciudad más diversa de Texas recibe al torneo más diverso de la historia. La aritmética tiene sentido. Houston llega al Mundial con siete partidos, techo retráctil, climatización interior y Portugal jugando dos veces aquí. Para una ciudad donde se hablan más de 145 lenguas, casi cada bandera que entra al estadio tiene una comunidad local detrás.",
 
   scores:[
-    { label:"Ambiente",     value:5 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:4 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:3 },
+    { label:"Ambiente",          value:5 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:3 },
   ],
 
   matches:[
     { id:"m1", date:"14 Jun", day:"Dom", time:"12:00 CT", teams:[{name:"Alemania",flag:"🇩🇪"},{name:"Curazao",flag:"🇨🇼"}], stadium:"Houston Stadium", tag:"Grupo E — apertura de la sede", highlight:false },
-    { id:"m2", date:"17 Jun", day:"Mié", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Playoff Intercontinental 1",flag:""}], stadium:"Houston Stadium", tag:"Portugal en Houston", highlight:true },
+    { id:"m2", date:"17 Jun", day:"Mié", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Playoff Intercontinental 1",flag:""}], stadium:"Houston Stadium", tag:"Grupo K", highlight:true },
     { id:"m3", date:"20 Jun", day:"Sáb", time:"12:00 CT", teams:[{name:"Países Bajos",flag:"🇳🇱"},{name:"Repechaje UEFA B",flag:""}], stadium:"Houston Stadium", tag:"Grupo F", highlight:false },
     { id:"m4", date:"23 Jun", day:"Mar", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Uzbekistán",flag:"🇺🇿"}], stadium:"Houston Stadium", tag:"Grupo K — Portugal define el grupo", highlight:true },
-    { id:"m5", date:"26 Jun", day:"Vie", time:"19:00 CT", teams:[{name:"Cabo Verde",flag:"🇨🇻"},{name:"Arabia Saudita",flag:"🇸🇦"}], stadium:"Houston Stadium", tag:"Partido nocturno", highlight:false },
-    { id:"m6", date:"29 Jun", day:"Lun", time:"12:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"1°C vs. 2°F",flag:""}], stadium:"Houston Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m7", date:"4 Jul",  day:"Sáb", time:"12:00 CT", teams:[{name:"Ronda de 16",flag:"🇺🇸"},{name:"Por definir",flag:"🎆"}], stadium:"Houston Stadium", tag:"Día de la Independencia", highlight:true },
+    { id:"m5", date:"26 Jun", day:"Vie", time:"19:00 CT", teams:[{name:"Cabo Verde",flag:"🇨🇻"},{name:"Arabia Saudita",flag:"🇸🇦"}], stadium:"Houston Stadium", tag:"Grupo H", highlight:false },
+    { id:"m6", date:"29 Jun", day:"Lun", time:"12:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Houston Stadium", tag:"Ronda de 32 — 1°C vs. 2°F", highlight:false },
+    { id:"m7", date:"4 Jul",  day:"Sáb", time:"12:00 CT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Houston Stadium", tag:"Ronda de 16 — Día de la Independencia", highlight:true },
   ],
 
   manifesto:{
@@ -50,6 +48,7 @@ export const es: CityGuide = {
       { label:"Aeropuertos",  value:"IAH — George Bush Intercontinental · 35 km al norte del estadio · HOU — William P. Hobby Airport · 13 km al sur" },
     ],
     body:"Houston es la ciudad más étnicamente diversa de Estados Unidos — más de 145 lenguas se hablan en el área metropolitana. Para un torneo de 48 naciones, eso significa que casi cada bandera que entra al estadio tiene una comunidad local detrás. Alemania, Portugal, Países Bajos: todas tienen representación orgánica en la ciudad sin necesidad de que nadie vuele desde Europa. El Houston Dynamo tiene una de las aficiones más leales de la MLS y el NRG Stadium ya tiene historia mundialista — fue sede del torneo en 1994. La escena de fútbol latino en Houston, impulsada por la segunda mayor comunidad mexicana de Estados Unidos, funciona independientemente del Mundial.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"Portugal juega dos veces en Houston y ambos partidos arrancan al mediodía (12:00 CT). La comunidad lusa del área metropolitana — y la diáspora latinoamericana que sigue a Portugal por Cristiano Ronaldo — tiene Houston como punto de concentración esas dos semanas. Si Portugal avanza, puede volver en fase de eliminación. Reserva pensando en el 17 y 23 de junio como bloque, no como fechas aisladas.",
   },
 
@@ -220,22 +219,20 @@ export const en: CityGuide = {
   description:"The most diverse city in Texas welcomes the most diverse tournament in history. The math adds up. Houston arrives at the World Cup with seven matches, a retractable roof, indoor climate control, and Portugal playing twice here. In a city where 145+ languages are spoken, nearly every flag that walks into the stadium has a local community behind it.",
 
   scores:[
-    { label:"Atmosphere", value:5 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:4 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:3 },
+    { label:"Atmosphere",       value:5 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:3 },
   ],
 
   matches:[
     { id:"m1", date:"Jun 14", day:"Sun", time:"12:00 CT", teams:[{name:"Germany",flag:"🇩🇪"},{name:"Curaçao",flag:"🇨🇼"}], stadium:"Houston Stadium", tag:"Group E — venue opener", highlight:false },
-    { id:"m2", date:"Jun 17", day:"Wed", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Intercontinental Playoff 1",flag:""}], stadium:"Houston Stadium", tag:"Portugal in Houston", highlight:true },
+    { id:"m2", date:"Jun 17", day:"Wed", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Intercontinental Playoff 1",flag:""}], stadium:"Houston Stadium", tag:"Group K", highlight:true },
     { id:"m3", date:"Jun 20", day:"Sat", time:"12:00 CT", teams:[{name:"Netherlands",flag:"🇳🇱"},{name:"UEFA Playoff B",flag:""}], stadium:"Houston Stadium", tag:"Group F", highlight:false },
     { id:"m4", date:"Jun 23", day:"Tue", time:"12:00 CT", teams:[{name:"Portugal",flag:"🇵🇹"},{name:"Uzbekistan",flag:"🇺🇿"}], stadium:"Houston Stadium", tag:"Group K — Portugal decides the group", highlight:true },
-    { id:"m5", date:"Jun 26", day:"Fri", time:"19:00 CT", teams:[{name:"Cape Verde",flag:"🇨🇻"},{name:"Saudi Arabia",flag:"🇸🇦"}], stadium:"Houston Stadium", tag:"Night match", highlight:false },
-    { id:"m6", date:"Jun 29", day:"Mon", time:"12:00 CT", teams:[{name:"Round of 32",flag:""},{name:"1°C vs. 2°F",flag:""}], stadium:"Houston Stadium", tag:"Knockout stage", highlight:false },
-    { id:"m7", date:"Jul 4",  day:"Sat", time:"12:00 CT", teams:[{name:"Round of 16",flag:"🇺🇸"},{name:"TBD",flag:"🎆"}], stadium:"Houston Stadium", tag:"Independence Day", highlight:true },
+    { id:"m5", date:"Jun 26", day:"Fri", time:"19:00 CT", teams:[{name:"Cape Verde",flag:"🇨🇻"},{name:"Saudi Arabia",flag:"🇸🇦"}], stadium:"Houston Stadium", tag:"Group H", highlight:false },
+    { id:"m6", date:"Jun 29", day:"Mon", time:"12:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Houston Stadium", tag:"Round of 32 — 1°C vs. 2°F", highlight:false },
+    { id:"m7", date:"Jul 4",  day:"Sat", time:"12:00 CT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Houston Stadium", tag:"Round of 16 — Independence Day", highlight:true },
   ],
 
   manifesto:{
@@ -248,6 +245,7 @@ export const en: CityGuide = {
       { label:"Airports",          value:"IAH — George Bush Intercontinental · 35 km north of the stadium · HOU — William P. Hobby Airport · 13 km south" },
     ],
     body:"Houston is the most ethnically diverse city in the United States — more than 145 languages are spoken in the metro area. For a 48-nation tournament, that means nearly every flag walking into the stadium has a local community behind it. Germany, Portugal, Netherlands: all have organic representation in the city without anyone flying in from Europe. Houston Dynamo has one of the most loyal fan bases in MLS, and NRG Stadium already has World Cup history — it hosted matches in 1994. The Latino football scene in Houston, driven by the second-largest Mexican community in the U.S., runs independently of the tournament.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Portugal plays twice in Houston and both matches kick off at noon (12:00 CT). The Portuguese community in the metro area — plus the Latin American diaspora that follows Portugal because of Cristiano Ronaldo — turns Houston into a gathering point for those two weeks. If Portugal advances, they can return for the knockout rounds. Book treating June 17 and June 23 as a block, not as isolated dates.",
   },
 

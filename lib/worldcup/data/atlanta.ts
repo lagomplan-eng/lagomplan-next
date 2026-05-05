@@ -22,12 +22,10 @@ export const es: CityGuide = {
   description:"El único estadio mundialista con techo retráctil y aire acondicionado en Estados Unidos. En julio en Georgia, eso no es un lujo — es una política de salud pública. Atlanta llega al Mundial con ocho partidos, dos presentaciones de España, una Semifinal y una ciudad que lleva dos décadas construyendo la cultura de soccer más seria del sur del país.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:4 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:3 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:3 },
   ],
 
   matches:[
@@ -36,8 +34,8 @@ export const es: CityGuide = {
     { id:"m3", date:"21 Jun", day:"Dom", time:"12:00 ET", teams:[{name:"España",flag:"🇪🇸"},{name:"Arabia Saudita",flag:"🇸🇦"}], stadium:"Atlanta Stadium", tag:"Grupo H — España confirma el grupo", highlight:true },
     { id:"m4", date:"24 Jun", day:"Mié", time:"18:00 ET", teams:[{name:"Marruecos",flag:"🇲🇦"},{name:"Haití",flag:"🇭🇹"}], stadium:"Atlanta Stadium", tag:"Grupo C", highlight:false },
     { id:"m5", date:"27 Jun", day:"Sáb", time:"19:30 ET", teams:[{name:"RD Congo",flag:"🇨🇩"},{name:"Uzbekistán",flag:"🇺🇿"}], stadium:"Atlanta Stadium", tag:"Grupo K", highlight:false },
-    { id:"m6", date:"1 Jul",  day:"Mié", time:"12:00 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m7", date:"7 Jul",  day:"Mar", time:"12:00 ET", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Fase eliminatoria", highlight:false },
+    { id:"m6", date:"1 Jul",  day:"Mié", time:"12:00 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Ronda de 32 — 1°L vs. 3°E/H/I/J/K", highlight:false },
+    { id:"m7", date:"7 Jul",  day:"Mar", time:"12:00 ET", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Ronda de 16", highlight:false },
     { id:"m8", date:"15 Jul", day:"Mié", time:"15:00 ET", teams:[{name:"Semifinal",flag:""},{name:"Por definir",flag:""}], stadium:"Atlanta Stadium", tag:"Semifinal", highlight:true },
   ],
 
@@ -51,6 +49,7 @@ export const es: CityGuide = {
       { label:"Aeropuerto",      value:"ATL — Hartsfield-Jackson Atlanta International · el aeropuerto más transitado del mundo · MARTA directo al centro en ~20 min" },
     ],
     body:"Atlanta llega al Mundial con ocho partidos, el único estadio climatizado de Estados Unidos en el torneo y una ciudad que lleva dos décadas construyendo la cultura de soccer más seria del sur del país. España juega dos de sus tres partidos de grupos en Atlanta. Si avanza — lo que el sorteo sugiere fuertemente — los aficionados españoles tienen una base fija aquí durante dos semanas. La diáspora africana llena las tribunas de Marruecos y RD Congo desde adentro de la ciudad; y el 15 de julio, una Semifinal llega al mismo recinto donde Atlanta United gana sus títulos.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"España juega dos partidos en Atlanta (15 y 21 de junio). Para la Semifinal del 15 de julio, los precios de hotel en Midtown suben a niveles de Super Bowl. Reserva ambas fechas simultáneamente o busca Airbnb en Decatur o Virginia-Highland, barrios bien conectados por MARTA con precios más razonables.",
   },
 
@@ -123,7 +122,7 @@ export const es: CityGuide = {
 
   experiences:[
     { title:"Martin Luther King Jr. National Historic Site", duration:"Medio día", desc:"El complejo del National Park Service en Sweet Auburn incluye la casa natal de King, la iglesia Ebenezer Baptist Church donde predicó y su tumba junto a Coretta Scott King — todo en el mismo radio de cuatro cuadras. Entrada gratuita, acceso por MARTA (estación King Memorial). El Centro Internacional de los Derechos Civiles y los Derechos Humanos, a diez minutos caminando del Centennial Olympic Park, complementa el recorrido con una exposición sobre el movimiento global.", type:"Historia", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver información" },
-    { title:"Georgia Aquarium + World of Coca-Cola", duration:"Día completo", desc:"El Georgia Aquarium en el downtown es el más grande del hemisferio occidental: cuatro millones de galones de agua, tiburones ballena, belugas y delfines. A cien metros, el World of Coca-Cola tiene degustación de más de cien sabores de la marca desde todo el mundo. Los dos en el mismo radio de tres cuadras, con aire acondicionado — un día completo sin auto y sin sol directo.", type:"Familia", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver entradas" },
+    { title:"Georgia Aquarium + World of Coca-Cola + Children's Museum of Atlanta", duration:"Día completo", desc:"El Georgia Aquarium en el downtown es el más grande del hemisferio occidental: cuatro millones de galones de agua, tiburones ballena, belugas y delfines. A cien metros, el World of Coca-Cola tiene degustación de más de cien sabores de la marca desde todo el mundo y una fábrica en miniatura que funciona en tiempo real. El Children's Museum of Atlanta, en el mismo complejo del Centennial Olympic Park, tiene exposiciones interactivas para menores de 8 años. Entrada: $16 adultos / $12 niños. Los tres en el mismo radio de tres cuadras — un día completo sin auto, sin sol directo y con aire acondicionado.", type:"Familia", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver entradas" },
     { title:"Piedmont Park + BeltLine", duration:"Mañana o tarde", desc:"Piedmont Park en Midtown tiene 185 acres de parque urbano con lago, senderos y los mejores atardeceres de la ciudad. Conecta con el Atlanta BeltLine — corredor peatonal y ciclista de 35 kilómetros alrededor del núcleo de la ciudad. El tramo Eastside Trail, desde Inman Park hasta Ponce City Market, es el más activo y tiene acceso a mercados, restaurantes y galerías. Para el día libre entre el 21 y el 24 de junio, el BeltLine en bicicleta es el plan más completo de Atlanta.", type:"Ciudad", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Alquilar bicicleta" },
     { title:"Ponce City Market + Eastside Trail", duration:"Medio día", desc:"El Ponce City Market ocupa un antiguo edificio de distribución de Sears con más de cien tiendas y restaurantes en un solo recinto. Conectado al BeltLine, funciona como punto de entrada natural a Inman Park, al corredor gastronómico del Eastside Trail y a la Atlanta que se entiende mejor caminando que desde un auto.", type:"Gastronomía", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver opciones" },
   ],
@@ -176,12 +175,10 @@ export const en: CityGuide = {
   description:"The only World Cup stadium in the United States with a retractable roof and air conditioning. In a Georgia July, that's not a luxury — it's public health policy. Atlanta arrives at the World Cup with eight matches, two Spain appearances, a Semifinal, and a city that has spent two decades building the most serious soccer culture in the U.S. South.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:4 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:3 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:3 },
   ],
 
   matches:[
@@ -190,8 +187,8 @@ export const en: CityGuide = {
     { id:"m3", date:"Jun 21", day:"Sun", time:"12:00 ET", teams:[{name:"Spain",flag:"🇪🇸"},{name:"Saudi Arabia",flag:"🇸🇦"}], stadium:"Atlanta Stadium", tag:"Group H — Spain confirms the group", highlight:true },
     { id:"m4", date:"Jun 24", day:"Wed", time:"18:00 ET", teams:[{name:"Morocco",flag:"🇲🇦"},{name:"Haiti",flag:"🇭🇹"}], stadium:"Atlanta Stadium", tag:"Group C", highlight:false },
     { id:"m5", date:"Jun 27", day:"Sat", time:"19:30 ET", teams:[{name:"DR Congo",flag:"🇨🇩"},{name:"Uzbekistan",flag:"🇺🇿"}], stadium:"Atlanta Stadium", tag:"Group K", highlight:false },
-    { id:"m6", date:"Jul 1",  day:"Wed", time:"12:00 ET", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Atlanta Stadium", tag:"Knockout stage", highlight:false },
-    { id:"m7", date:"Jul 7",  day:"Tue", time:"12:00 ET", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Atlanta Stadium", tag:"Knockout stage", highlight:false },
+    { id:"m6", date:"Jul 1",  day:"Wed", time:"12:00 ET", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Atlanta Stadium", tag:"Round of 32 — 1°L vs. 3°E/H/I/J/K", highlight:false },
+    { id:"m7", date:"Jul 7",  day:"Tue", time:"12:00 ET", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Atlanta Stadium", tag:"Round of 16", highlight:false },
     { id:"m8", date:"Jul 15", day:"Wed", time:"15:00 ET", teams:[{name:"Semifinal",flag:""},{name:"TBD",flag:""}], stadium:"Atlanta Stadium", tag:"Semifinal", highlight:true },
   ],
 
@@ -205,6 +202,7 @@ export const en: CityGuide = {
       { label:"Airport",       value:"ATL — Hartsfield-Jackson Atlanta International · the busiest airport in the world · MARTA direct to downtown in ~20 min" },
     ],
     body:"Atlanta arrives at the World Cup with eight matches, the only climate-controlled stadium in the U.S. tournament, and a city that has spent two decades building the most serious soccer culture in the country's South. Spain plays two of its three group matches in Atlanta. If they advance — which the draw strongly suggests — Spanish fans have a fixed base here for two weeks. The African diaspora fills the stands for Morocco and DR Congo from inside the city; and on July 15, a Semifinal arrives at the same venue where Atlanta United wins its titles.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Spain plays two matches in Atlanta (June 15 and 21). For the Semifinal on July 15, Midtown hotel prices rise to Super Bowl levels. Book both dates simultaneously or look for Airbnb in Decatur or Virginia-Highland, neighborhoods well-connected by MARTA with more reasonable prices.",
   },
 
@@ -277,7 +275,7 @@ export const en: CityGuide = {
 
   experiences:[
     { title:"Martin Luther King Jr. National Historic Site", duration:"Half day", desc:"The National Park Service complex in Sweet Auburn includes King's birth home, Ebenezer Baptist Church where he preached, and his tomb next to Coretta Scott King — all within a four-block radius. Free admission, MARTA access (King Memorial station). The International Civil and Human Rights Center, ten minutes on foot from Centennial Olympic Park, complements the route with an exhibit on the global movement.", type:"History", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See info" },
-    { title:"Georgia Aquarium + World of Coca-Cola", duration:"Full day", desc:"The Georgia Aquarium downtown is the largest in the Western Hemisphere: four million gallons of water, whale sharks, belugas, and dolphins. A hundred meters away, the World of Coca-Cola has tastings of more than a hundred flavors from around the world. Both within a three-block radius, with air conditioning — a full day without a car and without direct sun.", type:"Family", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tickets" },
+    { title:"Georgia Aquarium + World of Coca-Cola + Children's Museum of Atlanta", duration:"Full day", desc:"The Georgia Aquarium downtown is the largest in the Western Hemisphere: four million gallons of water, whale sharks, belugas, and dolphins. A hundred meters away, the World of Coca-Cola has tastings of more than a hundred flavors from around the world and a working miniature factory. The Children's Museum of Atlanta, in the same Centennial Olympic Park complex, has interactive exhibits for children under 8. Admission: $16 adults / $12 kids. All three within a three-block radius, with air conditioning — a full day without a car and without direct sun.", type:"Family", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See tickets" },
     { title:"Piedmont Park + BeltLine", duration:"Morning or afternoon", desc:"Piedmont Park in Midtown has 185 acres of urban park with a lake, trails, and the best sunsets in the city. It connects to the Atlanta BeltLine — a 35-kilometer pedestrian and cycling corridor around the city core. The Eastside Trail section, from Inman Park to Ponce City Market, is the busiest and has access to markets, restaurants, and galleries. For the off-day between June 21 and 24, the BeltLine on a bike is the most complete plan in Atlanta.", type:"City", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Rent a bike" },
     { title:"Ponce City Market + Eastside Trail", duration:"Half day", desc:"Ponce City Market occupies a former Sears distribution building with more than a hundred shops and restaurants under one roof. Connected to the BeltLine, it functions as the natural entry point to Inman Park, the Eastside Trail food corridor, and the Atlanta that reads better on foot than from a car.", type:"Food", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"See options" },
   ],

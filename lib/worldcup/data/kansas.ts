@@ -16,18 +16,16 @@ export const es: CityGuide = {
 
   tags:["Fútbol","BBQ","Jazz","Cuartos de Final"],
 
-  stadium:{ name:"GEHA Field at Arrowhead Stadium", capacity:"~76,000", area:"Truman Sports Complex — 13 km al este del downtown" },
+  stadium:{ name:"Kansas City Stadium (GEHA Field at Arrowhead Stadium)", capacity:"~76,000", area:"Truman Sports Complex — 13 km al este del downtown" },
 
   headline:"El estadio más ruidoso del mundo al aire libre recibe al campeón defensor. Trae tapones para los oídos — y úsalos solo si los necesitas.",
   description:"El estadio más ruidoso del mundo al aire libre recibe al campeón defensor el 16 de junio. Argentina abre su torneo en Arrowhead — el estadio con el récord de 142.2 decibelios — ante una comunidad albiceleste del Medio Oeste que lleva meses esperando este momento. Seis partidos confirmados, incluyendo un Cuartos de Final el 11 de julio.",
 
   scores:[
-    { label:"Ambiente",     value:5 },
-    { label:"Fútbol local", value:4 },
-    { label:"Gastronomía",  value:5 },
-    { label:"Transporte",   value:3 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:3 },
+    { label:"Ambiente",          value:5 },
+    { label:"Cultura futbolera", value:4 },
+    { label:"Gastronomía",       value:5 },
+    { label:"Costo",             value:3 },
   ],
 
   matches:[
@@ -35,7 +33,7 @@ export const es: CityGuide = {
     { id:"m2", date:"20 Jun", day:"Sáb", time:"19:00 CT", teams:[{name:"Ecuador",flag:"🇪🇨"},{name:"Curazao",flag:"🇨🇼"}], stadium:"Arrowhead Stadium", tag:"Grupo E", highlight:false },
     { id:"m3", date:"25 Jun", day:"Jue", time:"18:00 CT", teams:[{name:"Túnez",flag:"🇹🇳"},{name:"Países Bajos",flag:"🇳🇱"}], stadium:"Arrowhead Stadium", tag:"Grupo F", highlight:false },
     { id:"m4", date:"27 Jun", day:"Sáb", time:"21:00 CT", teams:[{name:"Argelia",flag:"🇩🇿"},{name:"Austria",flag:"🇦🇹"}], stadium:"Arrowhead Stadium", tag:"Grupo J — cierre del grupo", highlight:false },
-    { id:"m5", date:"3 Jul",  day:"Vie", time:"20:30 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Arrowhead Stadium", tag:"Fase eliminatoria", highlight:false },
+    { id:"m5", date:"3 Jul",  day:"Vie", time:"20:30 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Arrowhead Stadium", tag:"Ronda de 32 — 1°K vs. 3°D/E/I/J/L", highlight:false },
     { id:"m6", date:"11 Jul", day:"Sáb", time:"20:00 CT", teams:[{name:"Cuartos de Final",flag:""},{name:"Por definir",flag:""}], stadium:"Arrowhead Stadium", tag:"Cuartos de Final", highlight:true },
   ],
 
@@ -48,9 +46,9 @@ export const es: CityGuide = {
       { label:"Partidos",        value:"6 confirmados — 5 grupos + 1 Ronda de 32 + 1 Cuartos de Final (11 de julio)" },
       { label:"Ubicación",       value:"Truman Sports Complex — 13 km al este del downtown de Kansas City. Sin metro ni tren al estadio." },
       { label:"Aeropuerto",      value:"MCI — Kansas City International (nuevo terminal 2023, a 24 km al norte del downtown; ConnectKC26 Airport Direct al centro)" },
-      { label:"Visa / ESTA",     value:"Ciudadanos del Programa de Exención de Visa necesitan ESTA aprobado antes de volar. Otros requieren visa B-2. Tramita en travel.state.gov." },
     ],
     body:"Kansas City es la sede que menos explicación necesita y que más sorprende a quien la visita sin haber estado antes. El estadio más ruidoso del mundo al aire libre. El campeón defensor en el partido inaugural de la ciudad el 16 de junio. La BBQ más seria del continente a precios que no requieren disculpa. Argentina podría regresar para el Cuartos de Final del 11 de julio — y la comunidad albiceleste de Chicago, Nueva York y Miami tiene esa fecha en el radar.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El partido de Argentina el 16 de junio y el Cuartos de Final del 11 de julio son las dos fechas de mayor demanda. Para el Cuartos, los equipos no se conocen hasta el 4 de julio — reserva con tarifa cancelable y confirma en cuanto salgan los cruces. El pase ConnectKC26 Stadium Direct se agota para estos partidos.",
   },
 
@@ -193,18 +191,16 @@ export const en: CityGuide = {
 
   tags:["Football","BBQ","Jazz","Quarterfinal"],
 
-  stadium:{ name:"GEHA Field at Arrowhead Stadium", capacity:"~76,000", area:"Truman Sports Complex — 13 km east of downtown" },
+  stadium:{ name:"Kansas City Stadium (GEHA Field at Arrowhead Stadium)", capacity:"~76,000", area:"Truman Sports Complex — 13 km east of downtown" },
 
   headline:"The loudest open-air stadium in the world welcomes the defending champion. Bring earplugs — and only use them if you need them.",
   description:"The loudest open-air stadium in the world welcomes the defending champion on June 16. Argentina opens its tournament at Arrowhead — the stadium with the 142.2 dB world record — in front of a Midwest Argentine community that has been waiting months for this moment. Six matches confirmed, including a Quarterfinal on July 11.",
 
   scores:[
-    { label:"Atmosphere", value:5 },
-    { label:"Football",   value:4 },
-    { label:"Food",       value:5 },
-    { label:"Transit",    value:3 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:3 },
+    { label:"Atmosphere",       value:5 },
+    { label:"Football culture", value:4 },
+    { label:"Food",             value:5 },
+    { label:"Cost",             value:3 },
   ],
 
   matches:[
@@ -212,7 +208,7 @@ export const en: CityGuide = {
     { id:"m2", date:"Jun 20", day:"Sat", time:"19:00 CT", teams:[{name:"Ecuador",flag:"🇪🇨"},{name:"Curaçao",flag:"🇨🇼"}], stadium:"Arrowhead Stadium", tag:"Group E", highlight:false },
     { id:"m3", date:"Jun 25", day:"Thu", time:"18:00 CT", teams:[{name:"Tunisia",flag:"🇹🇳"},{name:"Netherlands",flag:"🇳🇱"}], stadium:"Arrowhead Stadium", tag:"Group F", highlight:false },
     { id:"m4", date:"Jun 27", day:"Sat", time:"21:00 CT", teams:[{name:"Algeria",flag:"🇩🇿"},{name:"Austria",flag:"🇦🇹"}], stadium:"Arrowhead Stadium", tag:"Group J — group finale", highlight:false },
-    { id:"m5", date:"Jul 3",  day:"Fri", time:"20:30 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Arrowhead Stadium", tag:"Knockout stage", highlight:false },
+    { id:"m5", date:"Jul 3",  day:"Fri", time:"20:30 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Arrowhead Stadium", tag:"Round of 32 — 1°K vs. 3°D/E/I/J/L", highlight:false },
     { id:"m6", date:"Jul 11", day:"Sat", time:"20:00 CT", teams:[{name:"Quarterfinal",flag:""},{name:"TBD",flag:""}], stadium:"Arrowhead Stadium", tag:"Quarterfinal", highlight:true },
   ],
 
@@ -225,9 +221,9 @@ export const en: CityGuide = {
       { label:"Matches",          value:"6 confirmed — 5 group + 1 Round of 32 + 1 Quarterfinal (July 11)" },
       { label:"Location",         value:"Truman Sports Complex — 13 km east of downtown Kansas City. No subway or train to the stadium." },
       { label:"Airport",          value:"MCI — Kansas City International (new 2023 terminal, 24 km north of downtown; ConnectKC26 Airport Direct to downtown)" },
-      { label:"Visa / ESTA",      value:"Citizens of the Visa Waiver Program need an approved ESTA before flying. Others require a B-2 visa. Apply at travel.state.gov." },
     ],
     body:"Kansas City is the host city that needs the least explanation and most surprises first-time visitors. The loudest open-air stadium in the world. The defending champion in the city's opening match on June 16. The most serious barbecue on the continent at prices that don't need an apology. Argentina could return for the July 11 Quarterfinal — and the Argentine communities in Chicago, New York, and Miami have that date on their radar.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Argentina on June 16 and the Quarterfinal on July 11 are the two highest-demand dates. For the Quarterfinal, the teams won't be known until July 4 — book a cancellable rate and confirm once brackets are set. The ConnectKC26 Stadium Direct pass sells out first for these matches.",
   },
 

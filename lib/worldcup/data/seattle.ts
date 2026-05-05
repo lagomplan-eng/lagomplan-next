@@ -31,7 +31,7 @@ export const es: CityGuide = {
   matches:[
     { id:"m1", date:"15 Jun", day:"Dom", time:"12:00 PT", teams:[{name:"Bélgica",flag:"🇧🇪"},{name:"Egipto",flag:"🇪🇬"}], stadium:"Lumen Field", tag:"Grupo G · Apertura", highlight:false },
     { id:"m2", date:"19 Jun", day:"Vie", time:"12:00 PT", teams:[{name:"Estados Unidos",flag:"🇺🇸"},{name:"Australia",flag:"🇦🇺"}], stadium:"Lumen Field", tag:"Grupo D · USMNT", highlight:true },
-    { id:"m3", date:"24 Jun", day:"Mié", time:"12:00 PT", teams:[{name:"Bosnia",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Grupo B", highlight:false },
+    { id:"m3", date:"24 Jun", day:"Mié", time:"12:00 PT", teams:[{name:"Bosnia y Herzegovina",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Grupo B", highlight:false },
     { id:"m4", date:"26 Jun", day:"Vie", time:"20:00 PT", teams:[{name:"Egipto",flag:"🇪🇬"},{name:"Irán",flag:"🇮🇷"}], stadium:"Lumen Field", tag:"Grupo G", highlight:false },
     { id:"m5", date:"29 Jun", day:"Lun", time:"TBD",      teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Lumen Field", tag:"Ronda de 32", highlight:false },
     { id:"m6", date:"6 Jul",  day:"Lun", time:"20:00 PT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"Lumen Field", tag:"Ronda de 16", highlight:false },
@@ -182,7 +182,7 @@ export const en: CityGuide = {
   matches:[
     { id:"m1", date:"Jun 15", day:"Sun", time:"12:00 PT", teams:[{name:"Belgium",flag:"🇧🇪"},{name:"Egypt",flag:"🇪🇬"}], stadium:"Lumen Field", tag:"Group G · Opener", highlight:false },
     { id:"m2", date:"Jun 19", day:"Fri", time:"12:00 PT", teams:[{name:"United States",flag:"🇺🇸"},{name:"Australia",flag:"🇦🇺"}], stadium:"Lumen Field", tag:"Group D · USMNT", highlight:true },
-    { id:"m3", date:"Jun 24", day:"Wed", time:"12:00 PT", teams:[{name:"Bosnia",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Group B", highlight:false },
+    { id:"m3", date:"Jun 24", day:"Wed", time:"12:00 PT", teams:[{name:"Bosnia & Herzegovina",flag:"🇧🇦"},{name:"Qatar",flag:"🇶🇦"}], stadium:"Lumen Field", tag:"Group B", highlight:false },
     { id:"m4", date:"Jun 26", day:"Fri", time:"20:00 PT", teams:[{name:"Egypt",flag:"🇪🇬"},{name:"Iran",flag:"🇮🇷"}], stadium:"Lumen Field", tag:"Group G", highlight:false },
     { id:"m5", date:"Jun 29", day:"Mon", time:"TBD",      teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Lumen Field", tag:"Round of 32", highlight:false },
     { id:"m6", date:"Jul 6",  day:"Mon", time:"20:00 PT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"Lumen Field", tag:"Round of 16", highlight:false },

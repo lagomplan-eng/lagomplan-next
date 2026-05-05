@@ -22,12 +22,10 @@ export const es: CityGuide = {
   description:"Filadelfia tiene 6 partidos, el aeropuerto más cercano a un estadio mundialista del torneo (5 km) y el metro más directo desde el centro. El 4 de julio coincide con el 250° aniversario de la independencia de EE.UU. — la ciudad donde se firmó en 1776 es el epicentro nacional de esa fecha, y un partido de Ronda de 16 se juega en el mismo estadio de los Eagles.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:3 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:5 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:3 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:3 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:3 },
   ],
 
   matches:[
@@ -49,6 +47,7 @@ export const es: CityGuide = {
       { label:"Aeropuerto",     value:"PHL — Philadelphia International · el aeropuerto más cercano a un estadio mundialista del torneo (~5 km, ~10 min en auto)" },
     ],
     body:"Filadelfia tiene la ventaja logística más clara de cualquier sede del torneo en la Costa Este: el estadio está en South Philadelphia, conectado al centro por el metro más directo del país, y el aeropuerto está a cinco kilómetros del estadio. La ciudad se orienta sola. Brasil el 19 de junio a las 9pm y el 4 de julio con la ciudad entera de celebración son los dos momentos que definen la sede. Filadelfia es la ciudad más apasionada en términos deportivos de Estados Unidos — y la menos interesada en disimularlo.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El 4 de julio de 2026 es la fecha más compleja de gestionar. El 250° aniversario convierte a Filadelfia en el destino nacional de esa fecha — millones de visitantes para los eventos del Independence Mall, fuegos artificiales sobre el río y conciertos en el Parkway. El partido de Ronda de 16 agrega un tercer flujo encima. Reserva alojamiento con meses de anticipación y llega con un día de margen.",
   },
 
@@ -173,12 +172,10 @@ export const en: CityGuide = {
   description:"Philadelphia has 6 matches, the closest airport to any World Cup stadium in the tournament (5 km), and the most direct subway from downtown. July 4 coincides with the 250th anniversary of U.S. independence — the city where it was signed in 1776 is the national epicenter of that date, and a Round of 16 match is played at the same Eagles stadium.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:3 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:5 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:3 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:3 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:3 },
   ],
 
   matches:[
@@ -200,6 +197,7 @@ export const en: CityGuide = {
       { label:"Airport",           value:"PHL — Philadelphia International · the closest airport to any World Cup stadium in the tournament (~5 km, ~10 min by car)" },
     ],
     body:"Philadelphia has the clearest logistical advantage of any host city on the East Coast: the stadium sits in South Philadelphia, linked to downtown by the country's most direct subway, and the airport is five kilometers from the stadium. The city navigates itself. Brazil on June 19 at 9pm and July 4 with the whole city celebrating are the two moments that define the venue. Philadelphia is the most passionate sports city in the United States — and the least interested in hiding it.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"July 4, 2026 is the most complex date to manage. The 250th anniversary turns Philadelphia into the national destination for that date — millions of visitors for the Independence Mall events, fireworks over the river, and concerts on the Parkway. The Round of 16 match adds a third flow on top. Book accommodation months ahead and arrive with a day of buffer.",
   },
 

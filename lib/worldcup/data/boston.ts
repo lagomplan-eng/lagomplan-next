@@ -22,12 +22,10 @@ export const es: CityGuide = {
   description:"El estadio no está en Boston. El partido sí. Esa distinción vale un tren. Boston recibe siete partidos, incluyendo un Cuartos de Final, en una ciudad que se enorgullece de haberle dado al mundo la democracia moderna, la universidad más antigua del hemisferio occidental y el mejor clam chowder del continente. La primera decisión no es qué ver: es cómo llegar a Foxborough.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:3 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:3 },
-    { label:"Seguridad",    value:5 },
-    { label:"Costo",        value:2 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:3 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:2 },
   ],
 
   matches:[
@@ -36,7 +34,7 @@ export const es: CityGuide = {
     { id:"m3", date:"19 Jun", day:"Vie", time:"18:00 ET", teams:[{name:"Escocia",flag:"🏴"},{name:"Marruecos",flag:"🇲🇦"}], stadium:"Boston Stadium", tag:"Grupo C", highlight:false },
     { id:"m4", date:"23 Jun", day:"Mar", time:"16:00 ET", teams:[{name:"Inglaterra",flag:"🏴"},{name:"Ghana",flag:"🇬🇭"}], stadium:"Boston Stadium", tag:"Grupo L", highlight:true },
     { id:"m5", date:"26 Jun", day:"Vie", time:"15:00 ET", teams:[{name:"Noruega",flag:"🇳🇴"},{name:"Francia",flag:"🇫🇷"}], stadium:"Boston Stadium", tag:"Haaland vs. Mbappé", highlight:true },
-    { id:"m6", date:"29 Jun", day:"Lun", time:"16:30 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Boston Stadium", tag:"Fase eliminatoria", highlight:false },
+    { id:"m6", date:"29 Jun", day:"Lun", time:"16:30 ET", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"Boston Stadium", tag:"Ronda de 32", highlight:false },
     { id:"m7", date:"9 Jul",  day:"Jue", time:"16:00 ET", teams:[{name:"Cuartos de Final",flag:""},{name:"Por definir",flag:""}], stadium:"Boston Stadium", tag:"Cuartos de Final", highlight:true },
   ],
 
@@ -50,6 +48,7 @@ export const es: CityGuide = {
       { label:"Aeropuerto",     value:"BOS — Logan International Airport · en Boston · Silver Line SL1 gratis a South Station en ~20 min" },
     ],
     body:"Boston es una de las cuatro sedes del torneo con Cuartos de Final. La sede recibe a Inglaterra, Francia, Noruega, Escocia, Marruecos, Ghana y Haití. El partido más anticipado es el 26 de junio: Noruega vs. Francia, Haaland vs. Mbappé. Todo lo demás en esta guía parte de una advertencia: Foxborough no es Boston. El estadio está a 35 kilómetros al sur, sin subway, sin bus regular y sin acceso práctico en Uber durante y después del partido.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"Boston es cara. El torneo — más Sail Boston 2026 y las celebraciones del 250 aniversario de la ciudad — convierte junio y julio en temporada de precios máximos. Si aún no tienes alojamiento confirmado para julio, Cambridge y Somerville tienen opciones más económicas con acceso por Red Line.",
   },
 
@@ -175,12 +174,10 @@ export const en: CityGuide = {
   description:"The stadium isn't in Boston. The match is. That distinction is worth a train ride. Boston hosts seven matches, including a Quarterfinal, in a city that takes pride in having given the world modern democracy, the Western Hemisphere's oldest university, and the continent's best clam chowder. The first decision isn't what to see: it's how to get to Foxborough.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:3 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:3 },
-    { label:"Safety",     value:5 },
-    { label:"Cost",       value:2 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:3 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:2 },
   ],
 
   matches:[
@@ -189,7 +186,7 @@ export const en: CityGuide = {
     { id:"m3", date:"Jun 19", day:"Fri", time:"18:00 ET", teams:[{name:"Scotland",flag:"🏴"},{name:"Morocco",flag:"🇲🇦"}], stadium:"Boston Stadium", tag:"Group C", highlight:false },
     { id:"m4", date:"Jun 23", day:"Tue", time:"16:00 ET", teams:[{name:"England",flag:"🏴"},{name:"Ghana",flag:"🇬🇭"}], stadium:"Boston Stadium", tag:"Group L", highlight:true },
     { id:"m5", date:"Jun 26", day:"Fri", time:"15:00 ET", teams:[{name:"Norway",flag:"🇳🇴"},{name:"France",flag:"🇫🇷"}], stadium:"Boston Stadium", tag:"Haaland vs. Mbappé", highlight:true },
-    { id:"m6", date:"Jun 29", day:"Mon", time:"16:30 ET", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Boston Stadium", tag:"Knockout stage", highlight:false },
+    { id:"m6", date:"Jun 29", day:"Mon", time:"16:30 ET", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"Boston Stadium", tag:"Round of 32", highlight:false },
     { id:"m7", date:"Jul 9",  day:"Thu", time:"16:00 ET", teams:[{name:"Quarterfinal",flag:""},{name:"TBD",flag:""}], stadium:"Boston Stadium", tag:"Quarterfinal", highlight:true },
   ],
 
@@ -203,6 +200,7 @@ export const en: CityGuide = {
       { label:"Airport",           value:"BOS — Logan International Airport · in Boston · Silver Line SL1 free to South Station in ~20 min" },
     ],
     body:"Boston is one of only four host cities with a Quarterfinal. The venue hosts England, France, Norway, Scotland, Morocco, Ghana, and Haiti. The most anticipated match is June 26: Norway vs. France, Haaland vs. Mbappé. Everything else in this guide starts from a warning: Foxborough isn't Boston. The stadium sits 35 kilometers south, with no subway, no regular bus, and no practical Uber access during or after the match.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Boston is expensive. The tournament — plus Sail Boston 2026 and the city's 250th anniversary celebrations — turns June and July into peak-price season. If you don't have July lodging confirmed yet, Cambridge and Somerville have cheaper options with Red Line access.",
   },
 

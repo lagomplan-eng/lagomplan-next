@@ -15,18 +15,16 @@ export const es: CityGuide = {
   accent: ACCENT,
 
   tags:["Fútbol","Argentina","BBQ","Semifinal"],
-  stadium:{ name:"AT&T Stadium", capacity:"~80,000", area:"Arlington, Texas — a 25 km al oeste de Dallas" },
+  stadium:{ name:"Dallas Stadium (AT&T Stadium)", capacity:"~80,000", area:"Arlington, Texas — a 25 km al oeste de Dallas" },
 
   headline:"El estadio más grande del torneo está en Arlington. No en Dallas. Y no hay metro que llegue ahí.",
   description:"El estadio más grande del torneo no está en Dallas — está en Arlington, a 25 km, sin transporte público que llegue. Nueve partidos confirmados, incluyendo dos de Argentina en la fase de grupos y una Semifinal. Cuando los 250,000 inmigrantes argentinos del área metropolitana se sumen a los que viajaron, el AT&T Stadium va a sonar como el Monumental en una final.",
 
   scores:[
-    { label:"Ambiente",     value:5 },
-    { label:"Fútbol local", value:3 },
-    { label:"Gastronomía",  value:3 },
-    { label:"Transporte",   value:3 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:3 },
+    { label:"Ambiente",          value:5 },
+    { label:"Cultura futbolera", value:3 },
+    { label:"Gastronomía",       value:3 },
+    { label:"Costo",             value:3 },
   ],
 
   matches:[
@@ -35,8 +33,8 @@ export const es: CityGuide = {
     { id:"m3", date:"22 Jun", day:"Lun", time:"12:00 CT", teams:[{name:"Argentina",flag:"🇦🇷"},{name:"Austria",flag:"🇦🇹"}], stadium:"AT&T Stadium", tag:"Grupo J — Argentina en Dallas", highlight:true },
     { id:"m4", date:"25 Jun", day:"Jue", time:"18:00 CT", teams:[{name:"Japón",flag:"🇯🇵"},{name:"Rep. UEFA B",flag:""}], stadium:"AT&T Stadium", tag:"Grupo F", highlight:false },
     { id:"m5", date:"27 Jun", day:"Sáb", time:"21:00 CT", teams:[{name:"Argentina",flag:"🇦🇷"},{name:"Jordania",flag:"🇯🇴"}], stadium:"AT&T Stadium", tag:"Grupo J — Argentina confirma el grupo en primetime", highlight:true },
-    { id:"m6", date:"30 Jun", day:"Mar", time:"12:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Fase eliminatoria", highlight:false },
-    { id:"m7", date:"3 Jul", day:"Vie", time:"13:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Fase eliminatoria", highlight:false },
+    { id:"m6", date:"30 Jun", day:"Mar", time:"12:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Ronda de 32 — 2°E vs. 2°I", highlight:false },
+    { id:"m7", date:"3 Jul", day:"Vie", time:"13:00 CT", teams:[{name:"Ronda de 32",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Ronda de 32 — 2°D vs. 2°G", highlight:false },
     { id:"m8", date:"6 Jul", day:"Lun", time:"14:00 CT", teams:[{name:"Ronda de 16",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Fase eliminatoria", highlight:false },
     { id:"m9", date:"14 Jul", day:"Mar", time:"14:00 CT", teams:[{name:"Semifinal",flag:""},{name:"Por definir",flag:""}], stadium:"AT&T Stadium", tag:"Semifinal", highlight:true },
   ],
@@ -50,9 +48,9 @@ export const es: CityGuide = {
       { label:"Partidos",            value:"9 confirmados — el máximo de cualquier sede: 5 grupos + 2 Rondas de 32 + 1 Ronda de 16 + 1 Semifinal" },
       { label:"Ubicación crítica",   value:"Arlington, Texas — a 25 km al oeste de Dallas, 20 km al este de Fort Worth. NO existe transporte público al estadio." },
       { label:"Aeropuertos",         value:"DFW — Dallas/Fort Worth International (18 km del estadio, el más cercano). DAL — Dallas Love Field (30 km, hub doméstico de Southwest Airlines)." },
-      { label:"Visa / ESTA",         value:"Ciudadanos de países del Programa de Exención de Visa necesitan ESTA aprobado antes de volar. Otros necesitan visa de turista B-2. Tramita con antelación en travel.state.gov." },
     ],
     body:"Dallas alberga más partidos que cualquier otra sede del torneo — nueve en total, incluyendo una Semifinal y dos Rondas de 32. El estadio es el más grande del Mundial y Argentina juega aquí dos veces en la fase de grupos. Cuando los hinchas albicelestes de la metrópolis de Dallas-Fort Worth — 250,000 personas que no necesitaron comprar vuelo — se sumen a los que sí viajaron, el AT&T Stadium va a sonar como el Monumental en una final de Copa América. Hay una sola instrucción que importa más que cualquier otra en esta guía: no hay metro que llegue al estadio. Arlington es la ciudad más grande de Estados Unidos sin sistema de transporte público propio. Uber, auto propio con parking anticipado o shuttle charter son las tres únicas opciones. Planifica ese segundo tramo con anticipación — no es un detalle, es la mitad del viaje. Calendario completo: 🇳🇱🇯🇵 Dom 14 Jun · 15:00 CT: Países Bajos vs. Japón; 🏴󠁧󠁢󠁥󠁮󠁧󠁿🇭🇷 Mar 17 Jun · 15:00 CT: Inglaterra vs. Croacia; 🇦🇷🇦🇹 Lun 22 Jun · 12:00 CT: Argentina vs. Austria; 🇯🇵 Jue 25 Jun · 18:00 CT: Japón vs. Rep. UEFA B; 🇦🇷🇯🇴 Sáb 27 Jun · 21:00 CT: Argentina vs. Jordania; Mar 30 Jun / Vie 3 Jul: Rondas de 32; Lun 6 Jul: Ronda de 16; Mar 14 Jul: Semifinal.",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"Los partidos de Argentina (22 y 27 de junio) y la Semifinal (14 de julio) son las tres fechas de mayor demanda en Dallas. Los alojamientos en el corredor de Arlington se agotan meses antes para las noches de partido de Argentina. Si viajas específicamente para esos partidos, busca en Uptown, Addison o Plano — más lejos del estadio pero con mejor calidad de barrio.",
   },
 
@@ -196,18 +194,16 @@ export const en: CityGuide = {
   accent: ACCENT,
 
   tags:["Football","Argentina","BBQ","Semifinal"],
-  stadium:{ name:"AT&T Stadium", capacity:"~80,000", area:"Arlington, Texas — 25 km west of Dallas" },
+  stadium:{ name:"Dallas Stadium (AT&T Stadium)", capacity:"~80,000", area:"Arlington, Texas — 25 km west of Dallas" },
 
   headline:"The tournament's biggest stadium is in Arlington. Not in Dallas. And no metro gets you there.",
   description:"The tournament's biggest stadium isn't in Dallas — it's in Arlington, 25 km away, with no public transit reaching it. Nine confirmed matches, including two Argentina group-stage games and a Semifinal. When the metro area's 250,000 Argentine immigrants join the fans who flew in, AT&T Stadium will sound like the Monumental on final night.",
 
   scores:[
-    { label:"Atmosphere", value:5 },
-    { label:"Football",   value:3 },
-    { label:"Food",       value:3 },
-    { label:"Transit",    value:3 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:3 },
+    { label:"Atmosphere",       value:5 },
+    { label:"Football culture", value:3 },
+    { label:"Food",             value:3 },
+    { label:"Cost",             value:3 },
   ],
 
   matches:[
@@ -216,8 +212,8 @@ export const en: CityGuide = {
     { id:"m3", date:"Jun 22", day:"Mon", time:"12:00 CT", teams:[{name:"Argentina",flag:"🇦🇷"},{name:"Austria",flag:"🇦🇹"}], stadium:"AT&T Stadium", tag:"Group J — Argentina in Dallas", highlight:true },
     { id:"m4", date:"Jun 25", day:"Thu", time:"18:00 CT", teams:[{name:"Japan",flag:"🇯🇵"},{name:"UEFA Play-off B",flag:""}], stadium:"AT&T Stadium", tag:"Group F", highlight:false },
     { id:"m5", date:"Jun 27", day:"Sat", time:"21:00 CT", teams:[{name:"Argentina",flag:"🇦🇷"},{name:"Jordan",flag:"🇯🇴"}], stadium:"AT&T Stadium", tag:"Group J — Argentina seals the group in primetime", highlight:true },
-    { id:"m6", date:"Jun 30", day:"Tue", time:"12:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Knockout stage", highlight:false },
-    { id:"m7", date:"Jul 3", day:"Fri", time:"13:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Knockout stage", highlight:false },
+    { id:"m6", date:"Jun 30", day:"Tue", time:"12:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Round of 32 — 2°E vs. 2°I", highlight:false },
+    { id:"m7", date:"Jul 3", day:"Fri", time:"13:00 CT", teams:[{name:"Round of 32",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Round of 32 — 2°D vs. 2°G", highlight:false },
     { id:"m8", date:"Jul 6", day:"Mon", time:"14:00 CT", teams:[{name:"Round of 16",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Knockout stage", highlight:false },
     { id:"m9", date:"Jul 14", day:"Tue", time:"14:00 CT", teams:[{name:"Semifinal",flag:""},{name:"TBD",flag:""}], stadium:"AT&T Stadium", tag:"Semifinal", highlight:true },
   ],
@@ -231,9 +227,9 @@ export const en: CityGuide = {
       { label:"Matches",           value:"9 confirmed — the most of any host city: 5 group stage + 2 Rounds of 32 + 1 Round of 16 + 1 Semifinal" },
       { label:"Critical location", value:"Arlington, Texas — 25 km west of Dallas, 20 km east of Fort Worth. NO public transit reaches the stadium." },
       { label:"Airports",          value:"DFW — Dallas/Fort Worth International (18 km from the stadium, the closest). DAL — Dallas Love Field (30 km, Southwest Airlines domestic hub)." },
-      { label:"Visa / ESTA",       value:"Citizens of Visa Waiver countries need an approved ESTA before flying. Others need a B-2 tourist visa. Apply early at travel.state.gov." },
     ],
     body:"Dallas hosts more matches than any other host city in the tournament — nine in total, including a Semifinal and two Rounds of 32. The stadium is the World Cup's biggest and Argentina plays here twice in the group stage. When the albiceleste supporters from the Dallas-Fort Worth metroplex — 250,000 people who didn't need to buy a ticket to fly — join those who did travel, AT&T Stadium will sound like the Monumental on a Copa América final night. One instruction matters more than any other in this guide: no metro reaches the stadium. Arlington is the largest US city without its own public transit system. Uber, your own car with pre-booked parking, or a charter shuttle are the only three options. Plan that second leg in advance — it's not a detail, it's half the trip. Full schedule: 🇳🇱🇯🇵 Sun Jun 14 · 15:00 CT: Netherlands vs. Japan; 🏴󠁧󠁢󠁥󠁮󠁧󠁿🇭🇷 Tue Jun 17 · 15:00 CT: England vs. Croatia; 🇦🇷🇦🇹 Mon Jun 22 · 12:00 CT: Argentina vs. Austria; 🇯🇵 Thu Jun 25 · 18:00 CT: Japan vs. UEFA Play-off B; 🇦🇷🇯🇴 Sat Jun 27 · 21:00 CT: Argentina vs. Jordan; Tue Jun 30 / Fri Jul 3: Rounds of 32; Mon Jul 6: Round of 16; Tue Jul 14: Semifinal.",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"Argentina's matches (June 22 and 27) and the Semifinal (July 14) are Dallas's three peak-demand dates. Lodging in the Arlington corridor sells out months in advance for Argentina match nights. If you're traveling specifically for those matches, look in Uptown, Addison, or Plano — farther from the stadium but with better neighborhood quality.",
   },
 

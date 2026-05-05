@@ -16,18 +16,16 @@ export const es: CityGuide = {
 
   tags:["Fútbol","Gastronomía","Cultura","Sede co-anfitriona"],
 
-  stadium:{ name:"Estadio Akron", capacity:"~48,000", area:"Zapopan — poniente de la ciudad" },
+  stadium:{ name:"Estadio Guadalajara (Estadio Akron)", capacity:"~48,000", area:"Zapopan — poniente de la ciudad" },
 
   headline:"Aquí no se pregunta de qué equipo eres. Se nota antes de que abras la boca.",
   description:"Aquí no se pregunta de qué equipo eres — se nota antes de que abras la boca. Guadalajara llega al Mundial con cuatro partidos de fase de grupos, incluyendo México vs. Corea del Sur el 18 de junio y la joya táctica del calendario: Uruguay vs. España. El Estadio Akron fue construido para el fútbol. La ciudad, también.",
 
   scores:[
-    { label:"Ambiente",     value:4 },
-    { label:"Fútbol local", value:5 },
-    { label:"Gastronomía",  value:4 },
-    { label:"Transporte",   value:4 },
-    { label:"Seguridad",    value:4 },
-    { label:"Costo",        value:4 },
+    { label:"Ambiente",          value:4 },
+    { label:"Cultura futbolera", value:5 },
+    { label:"Gastronomía",       value:4 },
+    { label:"Costo",             value:4 },
   ],
 
   matches:[
@@ -45,9 +43,9 @@ export const es: CityGuide = {
       { label:"Clima (jun–jul)",     value:"25–29°C días · 15–17°C noches · Temporada de lluvias — chubascos breves por las tardes, mañanas soleadas" },
       { label:"Partidos",            value:"4 confirmados — exclusivamente fase de grupos. No habrá partidos de eliminación directa en esta sede." },
       { label:"Aeropuerto principal",value:"GDL — Aeropuerto Internacional Miguel Hidalgo y Costilla, a ~16 km del centro. ~30 minutos al estadio en Uber o taxi." },
-      { label:"Visa",                value:"México no requiere visa para la mayoría de países latinoamericanos ni para muchos países europeos. Verificar en embajada o consulado antes de volar." },
     ],
     body:"Guadalajara no es CDMX ni Monterrey. Es la ciudad donde el fútbol se practica como filosofía antes de que los turistas lleguen a verlo. Dos clubes de Liga MX — Chivas y Atlas — convierten el Estadio Akron en campo de batalla cada fin de semana, y el 18 de junio de 2026 lo convierten en el epicentro del sueño mexicano de avanzar. Cuatro partidos de fase de grupos, incluyendo la joya táctica del calendario: Uruguay vs. España el 26 de junio. Esta sede no tiene rondas de eliminación. Lo que tiene es cuatro partidos que ninguna otra ciudad del torneo puede superar en densidad de interés. Calendario completo: 🇰🇷🇨🇿 Jue 11 Jun · 21:00 CT: Corea del Sur vs. República Checa (Grupo A — apertura de la sede); 🇲🇽🇰🇷 Jue 18 Jun · 20:00 CT: México vs. Corea del Sur (Grupo A — el partido más esperado de la sede); 🇨🇴🇨🇩 Mar 23 Jun · 21:00 CT: Colombia vs. Rep. Democrática del Congo (Grupo K); 🇺🇾🇪🇸 Vie 26 Jun · 19:00 CT: Uruguay vs. España (Grupo H — la joya táctica del calendario).",
+    // ⚠️ EDITORIAL NOTE: este body no existe en el .docx fuente — es contenido generado. Requiere validación o reemplazo por texto aprobado.
     lagomNote:"El 18 de junio (México vs. Corea del Sur) y el 26 de junio (Uruguay vs. España) son las fechas críticas de esta sede. El primer partido define el ánimo de toda la semana en Guadalajara. El segundo es el partido tácticamente más interesante de la fase de grupos del torneo.",
   },
 
@@ -205,18 +203,16 @@ export const en: CityGuide = {
 
   tags:["Football","Food","Culture","Co-host city"],
 
-  stadium:{ name:"Estadio Akron", capacity:"~48,000", area:"Zapopan — western edge of the city" },
+  stadium:{ name:"Estadio Guadalajara (Estadio Akron)", capacity:"~48,000", area:"Zapopan — western edge of the city" },
 
   headline:"No one here asks which team you support. It's obvious before you open your mouth.",
   description:"No one here asks which team you support — it's obvious before you open your mouth. Guadalajara arrives at the World Cup with four group-stage matches, including Mexico vs. South Korea on June 18 and the tactical jewel of the calendar: Uruguay vs. Spain. Estadio Akron was built for football. The city was too.",
 
   scores:[
-    { label:"Atmosphere", value:4 },
-    { label:"Football",   value:5 },
-    { label:"Food",       value:4 },
-    { label:"Transit",    value:4 },
-    { label:"Safety",     value:4 },
-    { label:"Cost",       value:4 },
+    { label:"Atmosphere",       value:4 },
+    { label:"Football culture", value:5 },
+    { label:"Food",             value:4 },
+    { label:"Cost",             value:4 },
   ],
 
   matches:[
@@ -234,9 +230,9 @@ export const en: CityGuide = {
       { label:"Weather (Jun–Jul)",value:"25–29°C days · 15–17°C nights · Rainy season — short afternoon showers, sunny mornings" },
       { label:"Matches",          value:"4 confirmed — group stage only. No knockout matches at this host city." },
       { label:"Primary airport",  value:"GDL — Miguel Hidalgo y Costilla International Airport, ~16 km from downtown. ~30 min to the stadium by Uber or taxi." },
-      { label:"Visa",             value:"Mexico requires no visa for most Latin American countries or many European ones. Check your embassy or consulate before flying." },
     ],
     body:"Guadalajara isn't CDMX or Monterrey. It's the city where football is practiced as philosophy long before tourists show up to watch it. Two Liga MX clubs — Chivas and Atlas — turn Estadio Akron into a battlefield every weekend, and on June 18, 2026 they turn it into the epicenter of Mexico's dream of advancing. Four group-stage matches, including the tactical jewel of the calendar: Uruguay vs. Spain on June 26. This host city has no knockout rounds. What it has are four matches that no other city in the tournament can match in density of interest. Full schedule: 🇰🇷🇨🇿 Thu Jun 11 · 21:00 CT: South Korea vs. Czech Republic (Group A — host opener); 🇲🇽🇰🇷 Thu Jun 18 · 20:00 CT: Mexico vs. South Korea (Group A — the most anticipated match in the host city); 🇨🇴🇨🇩 Tue Jun 23 · 21:00 CT: Colombia vs. DR Congo (Group K); 🇺🇾🇪🇸 Fri Jun 26 · 19:00 CT: Uruguay vs. Spain (Group H — tactical jewel of the calendar).",
+    // ⚠️ EDITORIAL NOTE: this body does not exist in the source .docx — it is generated content. Requires validation or replacement with approved text.
     lagomNote:"June 18 (Mexico vs. South Korea) and June 26 (Uruguay vs. Spain) are the critical dates here. The first match sets the mood for the entire week in Guadalajara. The second is the most tactically interesting match in the group stage anywhere in the tournament.",
   },
 
