@@ -197,7 +197,7 @@ export const es: CityGuide = {
     logistics:"Una sola instrucción importa más que cualquier otra en esta guía.",
     food:"Vancouver no tiene una gastronomía nacional — tiene el Pacífico a la puerta y una comunidad asiática que lleva décadas redefiniendo lo que significa comer bien en Norteamérica.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. El 24 de junio (Suiza vs. Canadá, partido definitorio del Grupo B) y el 18 de junio (Canadá vs. Qatar) son las fechas de mayor demanda en Vancouver. Si no tienes reserva confirmada, Airbnb en Kitsilano, Commercial Drive o East Vancouver tienen buena conexión de SkyTrain.",
+  staysWarning:"<strong>Error crítico:</strong> Usar la estación Stadium-Chinatown del SkyTrain en días de partido. TransLink ha confirmado que esta estación estará CERRADA para fans mundialistas en todos los días de partido en BC Place. No importa lo que diga tu aplicación de tránsito o cualquier otra guía — no puedes entrar por ahí. La estación correcta es Main Street-Science World, siempre.",
 }
 
 export const en: CityGuide = {
@@ -391,5 +391,5 @@ export const en: CityGuide = {
     logistics:"One instruction matters more than any other in this guide.",
     food:"Vancouver doesn't have a national cuisine — it has the Pacific at its door and an Asian community that has spent decades redefining what eating well means in North America.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. June 24 (Switzerland vs. Canada, Group B decider) and June 18 (Canada vs. Qatar) are the highest-demand dates in Vancouver. If you don't have a confirmed reservation, Airbnb in Kitsilano, Commercial Drive, or East Vancouver offer good SkyTrain connectivity.",
+  staysWarning:"<strong>Critical error:</strong> Using the Stadium-Chinatown SkyTrain station on match days. TransLink has confirmed this station will be CLOSED to World Cup fans on every BC Place match day. It doesn't matter what your transit app or any other guide says — you cannot enter through there. The correct station is Main Street-Science World, always.",
 }

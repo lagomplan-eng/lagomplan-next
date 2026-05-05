@@ -390,7 +390,7 @@ const StickyNav = ({ active, onNavigate, onBack, guide, strings }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE DETAIL
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideDetail = ({ guide, onBack, strings }) => {
+const GuideDetail = ({ guide, onBack, strings, locale }) => {
   const [active,        setActive]        = useState("matches");
   const [showManifesto, setShowManifesto] = useState(false);
   const [showVibe,      setShowVibe]      = useState(false);
@@ -432,8 +432,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 01 — MATCHES */}
             <section id="matches" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="01" title={strings.section01Title}
-                subtitle="5 partidos confirmados en el Estadio Azteca. México juega el 11 y el 24 de junio — las dos fechas de mayor demanda del torneo en la ciudad." />
+              <SectionHeader number="01" title={strings.section01Title} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16 }}>
                 {guide.matches.map(match => (
                   <MatchCard key={match.id} match={match} onPlanAround={() => {}} strings={strings} />
@@ -475,8 +474,11 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                 <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
                   <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
                   <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                    Los precios son estimaciones para el periodo mundialista. El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México) son las fechas más críticas.
-                    Si aún no tienes alojamiento, prioriza Airbnb en <strong>Coyoacán</strong> antes de considerar hoteles de cadena en zonas sobredemandadas. AIFA NO es una opción cercana al estadio — está a 80 km al norte.
+                    {locale === "en" ? (
+                      <><strong>Critical error:</strong> Trying to drive to the stadium on June 12 for the USMNT match. The I-405 between the I-10 and LAX is, on a big SoFi match day, one of the most predictable congestion points in the most congested city in the United States. Century Blvd — the only direct entrance to Hollywood Park — is closed off by FIFA security zones. Official parking on June 12 costs between $80 and $250 per vehicle and sells out weeks in advance. The K Line goes direct, costs $1.75, and doesn't stop for traffic. The comparison is decisive.</>
+                    ) : (
+                      <><strong>Error crítico:</strong> Intentar llegar en auto al estadio el 12 de junio para el partido del USMNT. La I-405 entre la I-10 y el LAX es, en día de partido grande en SoFi, una de las congestiones más predecibles de la ciudad más congestionada de Estados Unidos. La Century Blvd — la única entrada directa a Hollywood Park — queda cortada por zonas de seguridad FIFA. El parking oficial el 12 de junio cuesta entre $80 y $250 por vehículo y se vende con semanas de anticipación. El K Line va directo, cuesta $1.75 y no se detiene por el tráfico. La comparación es definitiva.</>
+                    )}
                   </p>
                 </div>
               </div>
@@ -511,8 +513,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 05 — LOGISTICS */}
             <section id="logistics" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="05" title={strings.section05Title}
-                subtitle="Metro + Tren Ligero es la única ruta que no depende del tráfico de CDMX." />
+              <SectionHeader number="05" title={strings.section05Title} />
               <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom: showLogistics ? 24 : 0 }}>
                 {guide.logistics.transport.slice(0, 2).map((item, i) => <LogisticsCard key={i} item={item} />)}
               </div>
@@ -559,8 +560,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 06 — FOOD */}
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="06" title={strings.section06Title}
-                subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
+              <SectionHeader number="06" title={strings.section06Title} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                 {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
                 {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
@@ -664,7 +664,7 @@ export default function App({ locale = "es" }) {
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
       `}</style>
-      <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
+      <GuideDetail guide={guide} strings={strings} locale={locale} onBack={() => {}} />
     </>
   );
 }

@@ -154,7 +154,7 @@ export const es: CityGuide = {
     logistics:"Link Light Rail conecta aeropuerto, downtown, Capitol Hill y estadio sin transbordo. Stadium Station está en la puerta norte.",
     food:"Café de especialidad de referencia mundial, marisco del Pacífico Noroeste más fresco del continente y los pubs que funcionan cuando llega el partido.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. El 19 de junio (USMNT vs. Australia) es la fecha más crítica de Seattle — downtown y Capitol Hill se agotan con meses de anticipación. Si no tienes reserva, considera Airbnb en Beacon Hill o Columbia City, ambos a 10–15 min en Link del estadio.",
+  staysWarning:"<strong>Error crítico:</strong> Subestimar el frío de la noche en el partido del 26 de junio (Egipto vs. Irán, 20:00 PT). Seattle en junio tiene días de 22°C pero noches de 12°C — y Lumen Field es un estadio al aire libre. El partido de las 8pm termina pasadas las 10pm. Con el viento del Puget Sound, la temperatura percibida puede bajar hasta los 8–9°C. Una chaqueta ligera no es opcional para las noches en el estadio, independientemente de cómo sea el día.",
 }
 
 export const en: CityGuide = {
@@ -305,5 +305,5 @@ export const en: CityGuide = {
     logistics:"Link Light Rail connects airport, downtown, Capitol Hill, and the stadium without a transfer. Stadium Station is at the north gate.",
     food:"World-class specialty coffee, the freshest Pacific Northwest seafood on the continent, and the pubs that deliver when kickoff arrives.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. June 19 (USMNT vs. Australia) is Seattle's critical date — downtown and Capitol Hill sell out months ahead. If you don't have a reservation, consider Airbnb in Beacon Hill or Columbia City, both 10–15 min on Link from the stadium.",
+  staysWarning:"<strong>Critical error:</strong> Underestimating the night chill at the June 26 match (Egypt vs. Iran, 8:00pm PT). Seattle in June has 22°C (72°F) days but 12°C (54°F) nights — and Lumen Field is an open-air stadium. The 8pm match ends past 10pm. With wind off Puget Sound, the perceived temperature can drop to 8–9°C (46–48°F). A light jacket is not optional for stadium nights, regardless of how the day felt.",
 }

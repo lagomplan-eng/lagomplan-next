@@ -419,7 +419,7 @@ const StickyNav = ({ active, onNavigate, onBack, guide, strings }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // GUIDE DETAIL
 // ─────────────────────────────────────────────────────────────────────────────
-const GuideDetail = ({ guide, onBack, strings }) => {
+const GuideDetail = ({ guide, onBack, strings, locale }) => {
   const [active,        setActive]        = useState("matches");
   const [showManifesto, setShowManifesto] = useState(false);
   const [showVibe,      setShowVibe]      = useState(false);
@@ -461,8 +461,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 01 — MATCHES */}
             <section id="matches" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="01" title={strings.section01Title}
-                subtitle="5 partidos confirmados en el Estadio Azteca. México juega el 11 y el 24 de junio — las dos fechas de mayor demanda del torneo en la ciudad." />
+              <SectionHeader number="01" title={strings.section01Title} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(280px,1fr))", gap:16 }}>
                 {guide.matches.map(match => (
                   <MatchCard key={match.id} match={match} onPlanAround={() => {}} strings={strings} />
@@ -504,8 +503,11 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                 <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
                   <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
                   <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                    Los precios son estimaciones para el periodo mundialista. El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México) son las fechas más críticas.
-                    Si aún no tienes alojamiento, prioriza Airbnb en <strong>Coyoacán</strong> antes de considerar hoteles de cadena en zonas sobredemandadas. AIFA NO es una opción cercana al estadio — está a 80 km al norte.
+                    {locale === "en" ? (
+                      <><strong>Critical error:</strong> Assuming there is public transit to AT&T Stadium. There isn't. Arlington is the largest city in the United States without its own public transit system. Dallas's DART does not reach Arlington. Uber, your own car with parking booked in advance, or a charter shuttle are the only three options. Anyone arriving by public transit to downtown Dallas or DFW airport needs a second leg by car or rideshare to reach the stadium. Plan that second leg ahead of time — it's not a detail, it's half the trip.</>
+                    ) : (
+                      <><strong>Error crítico:</strong> Asumir que hay transporte público al AT&T Stadium. No lo hay. Arlington es la ciudad más grande de Estados Unidos sin sistema de transporte público propio. El DART de Dallas no llega a Arlington. Uber, auto propio con parking anticipado o shuttle charter son las tres únicas opciones. Quien llega en transporte público al centro de Dallas o al aeropuerto DFW necesita un segundo tramo en auto o rideshare para llegar al estadio. Planifica ese segundo tramo con anticipación — no es un detalle, es la mitad del viaje.</>
+                    )}
                   </p>
                 </div>
               </div>
@@ -520,7 +522,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             {/* 04 — VIBE */}
             <section id="vibe" style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
               <SectionHeader number="04" title={strings.section04Title}
-                subtitle="Fan Fest oficial en el Zócalo, pantallas en el Bosque de Chapultepec y las cantinas que llevan décadas transmitiendo fútbol." />
+                subtitle="Fan Fest oficial en el Kay Bailey Hutchison Convention Center, pantallas en Klyde Warren Park y los bares de Deep Ellum donde el fútbol se mezcla con música en vivo." />
               <p style={{
                 ...uf(15,400), color:T.inkMid, lineHeight:1.85, marginBottom:showVibe ? 28 : 0, maxWidth:640,
                 ...(showVibe ? {} : { display:"-webkit-box", WebkitLineClamp:3, WebkitBoxOrient:"vertical", overflow:"hidden" }),
@@ -540,8 +542,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 05 — LOGISTICS */}
             <section id="logistics" style={{ marginBottom:64, scrollMarginTop:64 }}>
-              <SectionHeader number="05" title={strings.section05Title}
-                subtitle="Metro + Tren Ligero es la única ruta que no depende del tráfico de CDMX." />
+              <SectionHeader number="05" title={strings.section05Title} />
               <div style={{ display:"flex", flexDirection:"column", gap:10, marginBottom: showLogistics ? 24 : 0 }}>
                 {guide.logistics.transport.slice(0, 2).map((item, i) => <LogisticsCard key={i} item={item} />)}
               </div>
@@ -588,8 +589,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
 
             {/* 06 — FOOD */}
             <section style={{ marginBottom:64, scrollMarginTop:64, background:SECTION_ALT_BG, borderRadius:RADIUS+2, padding:"32px 28px 28px", marginLeft:-4, marginRight:-4 }}>
-              <SectionHeader number="06" title={strings.section06Title}
-                subtitle="CDMX tiene la gastronomía con más diversidad de América Latina — más de 150 tipos de chile y una cocina reconocida por la UNESCO. El reto no es encontrar dónde comer bien, sino elegir." />
+              <SectionHeader number="06" title={strings.section06Title} />
               <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(220px,1fr))", gap:12 }}>
                 {guide.food.slice(0, 3).map((f, i) => <FoodCard key={i} item={f} />)}
                 {showFood && guide.food.slice(3).map((f, i) => <FoodCard key={i+3} item={f} />)}
@@ -693,7 +693,7 @@ export default function App({ locale = "es" }) {
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
       `}</style>
-      <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
+      <GuideDetail guide={guide} strings={strings} locale={locale} onBack={() => {}} />
     </>
   );
 }

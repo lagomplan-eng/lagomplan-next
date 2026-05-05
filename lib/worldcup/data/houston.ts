@@ -200,7 +200,7 @@ export const es: CityGuide = {
     food:"Vietnamita, barbecue, pubs de fútbol y la cocina que explica la diversidad de Houston.",
     experiences:"Museos gratuitos, NASA, Hermann Park y Bellaire para entender la ciudad entre partidos.",
   },
-  staysWarning:"Los precios indicados son estimaciones para el periodo mundialista. Portugal juega dos veces en Houston y el 4 de julio añade demanda de Ronda de 16. Si no tienes reserva confirmada, busca opciones en Midtown, Museum District o Montrose con acceso razonable al METRORail.",
+  staysWarning:"<strong>Error crítico:</strong> Ignorar el calor exterior en los partidos de mediodía. El estadio tiene A/C — la calle no. La fila de seguridad exterior al NRG en junio a las 10:30am con humedad del Golfo de México puede ser más dura que cualquier partido dentro del recinto. Hidratación antes de salir del hotel, ropa ligera, protector solar. El estadio climatizado es el premio — hay que merecerlo llegando bien equipado.",
 }
 
 export const en: CityGuide = {
@@ -397,5 +397,5 @@ export const en: CityGuide = {
     food:"Vietnamese, barbecue, football pubs, and the cuisine that explains Houston's diversity.",
     experiences:"Free museums, NASA, Hermann Park, and Bellaire to understand the city between matches.",
   },
-  staysWarning:"Prices shown are estimates for the World Cup period. Portugal plays twice in Houston and July 4 adds Round-of-16 demand. If you don't have a confirmed reservation, look at Midtown, Museum District, or Montrose with reasonable METRORail access.",
+  staysWarning:"<strong>Critical error:</strong> Ignoring the outdoor heat at midday matches. The stadium has A/C — the street does not. The outdoor security line at NRG in June at 10:30am with Gulf of Mexico humidity can be tougher than any match inside the venue. Hydrate before leaving the hotel, wear light clothing, sunscreen. The climate-controlled stadium is the prize — you have to earn it by arriving well-equipped.",
 }

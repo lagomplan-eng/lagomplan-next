@@ -153,7 +153,7 @@ export const es: CityGuide = {
     logistics:"SEPTA Broad Street Line directo de City Hall al estadio en 18 minutos. PHL es el aeropuerto más cercano del torneo — 5 km, 10 min en Uber.",
     food:"Cheesesteaks de Passyunk, Reading Terminal Market, el Italian Market de South Philly y los pubs históricos del centro.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. El 4 de julio de 2026 es la fecha más crítica — el 250° aniversario trae tres eventos simultáneos (celebraciones del Independence Mall + fuegos sobre el río + Ronda de 16). Reserva con meses de anticipación y llega con un día de margen.",
+  staysWarning:"<strong>Error crítico:</strong> Ir en auto al estadio el 4 de julio. El Broad Street desde el centro hasta el puente South está cortado al tráfico por los eventos de la independencia desde primera hora. Los accesos por la I-76 y la I-95 convergen con el flujo de los eventos del Parkway. Cualquier ruta en auto ese día tarda el doble de lo habitual. El metro va directo, sale desde City Hall y llega en 18 minutos. No existe decisión más clara en esta guía.",
 }
 
 export const en: CityGuide = {
@@ -303,5 +303,5 @@ export const en: CityGuide = {
     logistics:"SEPTA Broad Street Line direct from City Hall to the stadium in 18 minutes. PHL is the closest airport in the tournament — 5 km, 10 min by Uber.",
     food:"Passyunk Avenue cheesesteaks, Reading Terminal Market, the South Philly Italian Market, and downtown's historic pubs.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. July 4, 2026 is the critical date — the 250th anniversary brings three simultaneous events (Independence Mall celebrations + fireworks over the river + Round of 16). Book months ahead and arrive with a day of buffer.",
+  staysWarning:"<strong>Critical error:</strong> Driving to the stadium on July 4. Broad Street from downtown to the South bridge is closed to traffic by the Independence Day events starting first thing in the morning. Access via I-76 and I-95 converges with the flow from the Parkway events. Any car route that day takes twice as long as usual. The subway goes direct, leaves from City Hall, and gets there in 18 minutes. There's no clearer decision in this guide.",
 }

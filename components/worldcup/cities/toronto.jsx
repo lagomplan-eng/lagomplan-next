@@ -484,9 +484,7 @@ const GuideDetail = ({ guide, onBack, strings }) => {
                 <div style={{ marginBottom:18, padding:"14px 18px", background:T.coralLight, border:`1px solid ${T.coral}40`, borderRadius:RADIUS }}>
                   <div style={{ display:"flex", gap:10, alignItems:"flex-start" }}>
                     <span style={{ fontSize:14, flexShrink:0 }}>⚠️</span>
-                    <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }}>
-                      {guide.staysWarning}
-                    </p>
+                    <p style={{ ...uf(13,400), color:T.inkMid, lineHeight:1.7, margin:0 }} dangerouslySetInnerHTML={{ __html: guide.staysWarning }} />
                   </div>
                 </div>
               )}

@@ -156,7 +156,7 @@ export const es: CityGuide = {
     logistics:"GO Train desde Union Station a Exhibition Station en 5 minutos — la mejor logística de tránsito público del torneo, sin excepción.",
     food:"Dim sum en Spadina, roti en Kensington, pho en Broadview — la ciudad con más del 50% de residentes nacidos fuera del país.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. El 12 de junio (Canadá vs. Bosnia, primer partido mundialista masculino en Canadá) es la fecha más crítica — los hoteles del centro se agotan meses antes. Roncesvalles, Leslieville y el East End son alternativas razonables con buena conexión por TTC.",
+  staysWarning:"<strong>Error crítico:</strong> Intentar llegar al estadio en auto el 12 de junio. El tráfico alrededor de Exhibition Place y Lake Shore Boulevard West en el partido inaugural de Canadá será de proporciones históricas. El Uber desde cualquier punto del centro tomará entre 45 y 90 minutos. El GO Train tarda cinco minutos desde Union Station — esa comparación dice todo.",
 }
 
 export const en: CityGuide = {
@@ -309,5 +309,5 @@ export const en: CityGuide = {
     logistics:"GO Train from Union Station to Exhibition Station in 5 minutes — the best public-transit logistics in the tournament, without exception.",
     food:"Dim sum on Spadina, roti in Kensington, pho in Broadview — the city with more than 50% of residents born outside the country.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. June 12 (Canada vs. Bosnia, the first men's World Cup match on Canadian soil) is the critical date — downtown hotels sell out months ahead. Roncesvalles, Leslieville, and the East End are reasonable alternatives with good TTC connectivity.",
+  staysWarning:"<strong>Critical error:</strong> Trying to reach the stadium by car on June 12. Traffic around Exhibition Place and Lake Shore Boulevard West for Canada's opening match will be historic. An Uber from anywhere downtown will take between 45 and 90 minutes. The GO Train takes five minutes from Union Station — that comparison says it all.",
 }

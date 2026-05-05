@@ -20,7 +20,7 @@ export const es: CityGuide = {
   stadium:{ name:"Estadio Banorte", capacity:"~72,766", area:"Tlalpan — Santa Úrsula Coapa" },
 
   headline:"El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.",
-  description:"El Azteca no necesita presentación. Lo que sí necesita es una estrategia de transporte. Ciudad de México llega al Mundial con cinco partidos — incluyendo el partido inaugural del torneo. México juega en casa el 11 y el 24 de junio. El estadio que vio la Mano de Dios y el Gol del Siglo escribe su tercer capítulo mundialista.",
+  description:"El Azteca, ahora Estadio Banorte no necesita presentación. Lo que sí necesita es una estrategia de transporte. Ciudad de México llega al Mundial con cinco partidos — incluyendo el partido inaugural del torneo. México juega en casa el 11 y el 24 de junio. El estadio que vio la Mano de Dios y el Gol del Siglo escribe su tercer capítulo mundialista.",
 
   scores:[
     { label:"Ambiente",     value:5 },
@@ -54,7 +54,7 @@ export const es: CityGuide = {
   },
 
   vibe:{
-    body:"El país anfitrión juega dos partidos en este estadio. El 11 de junio, el Azteca recibe el partido inaugural del torneo por primera vez en su historia. No hay ciudad en México que vaya a superar eso. Este estadio vio la Mano de Dios y el Gol del Siglo. En 2026 escribe su tercer capítulo mundialista. El peso histórico de la sede es único en el torneo. La ciudad suma la gastronomía con más diversidad de América Latina — más de 150 tipos de chile, 70 formas de preparar el maíz, y una escena que la UNESCO reconoció como Patrimonio Cultural Inmaterial. El costo es el límite: la más cara de las tres sedes mexicanas, y el Mundial la encarece aún más.",
+    body:"El país anfitrión juega dos partidos en este estadio. El 11 de junio, el Estadio Banorte recibe el partido inaugural del torneo por primera vez en su historia. No hay ciudad en México que vaya a superar eso. Este estadio vio la Mano de Dios y el Gol del Siglo. En 2026 escribe su tercer capítulo mundialista. El peso histórico de la sede es único en el torneo. La ciudad suma la gastronomía con más diversidad de América Latina — más de 150 tipos de chile, 70 formas de preparar el maíz, y una escena que la UNESCO reconoció como Patrimonio Cultural Inmaterial. La más cara de las tres sedes mexicanas, y el Mundial la encarece aún más. Sin reserva anticipada, el presupuesto se dobla sin avisar.",
   },
 
   stayNeighborhoods:{
@@ -62,7 +62,7 @@ export const es: CityGuide = {
     items:[
       { kind:"recommended", title:"Base recomendada: Condesa / Roma Norte", body:"El triángulo de oro del turismo consciente en CDMX. Hoteles boutique, mercados, restaurantes con identidad y conexión directa al Metro. El recorrido al Azteca desde esta zona toma entre 45 y 55 minutos usando el Metro Línea 1 (Insurgentes → Pino Suárez, transbordo a Línea 2 → Tasqueña, luego Tren Ligero hasta Estadio Azteca). Es el camino más confiable en día de partido. La caminata entre ambos barrios es de 15 minutos; comparten plaza, ambiente y precio." },
       { kind:"alternative", title:"Jugada de criterio: Coyoacán",          body:"El barrio bohemio del sur tiene una ventaja que pocos fans aprovechan: el Tren Ligero pasa por aquí. La estación Xotepingo está a menos de dos kilómetros del Jardín Centenario. Quedarse en Coyoacán acorta la logística a menos de 15 minutos de trayecto al Azteca. Precio por debajo de Condesa, atmósfera por encima de cualquier cadena hotelera en Insurgentes." },
-      { kind:"avoid",       title:"Zona a evitar como base: Inmediaciones del estadio (Tlalpan / Santa Úrsula Coapa)", body:"La zona inmediata al Azteca tiene opciones de hospedaje muy limitadas y una infraestructura de servicios que no está preparada para absorber a 72,000 fanáticos internacionales. Conveniente en teoría, frustrante en la práctica." },
+      { kind:"avoid",       title:"Zona a evitar como base: Inmediaciones del estadio (Tlalpan / Santa Úrsula Coapa)", body:"La zona inmediata al Estadio Azteca tiene opciones de hospedaje muy limitadas y una infraestructura de servicios que no está preparada para absorber a 72,000 fanáticos internacionales. Conveniente en teoría, frustrante en la práctica." },
     ],
   },
 
@@ -77,7 +77,7 @@ export const es: CityGuide = {
       { icon:"✈", title:"Llegar a Ciudad de México — AICM", text:"AICM — Benito Juárez International (MEX) está en el nororiente de la ciudad. Metro desde Terminal Aérea (Línea 5) → Pantitlán → Línea 1 hacia Condesa / Roma Norte. El recorrido completo AICM → Estadio Azteca via Metro + Tren Ligero toma ~75 minutos. Costo total: ~$10 MXN." },
       { icon:"🚇", title:"Del aeropuerto al barrio base", text:"Metro desde Terminal Aérea → Pantitlán → Línea 1 → Insurgentes o Pino Suárez (para Condesa / Roma Norte). El sistema opera con Tarjeta CDMX recargable. Tarifa: $5 MXN por viaje. Uber desde AICM a Roma Norte: ~$150–250 MXN sin tráfico, hasta $500 MXN en hora punta." },
       { icon:"🏟", title:"Al estadio el día del partido — ruta maestra", text:"Metro Línea 1 o 2 → Tasqueña → Tren Ligero → Estadio Azteca. El Tren Ligero opera con derecho de vía propio desde Tasqueña hasta la estación Estadio Azteca en ~15 minutos. Desde Condesa o Roma Norte, el recorrido completo toma entre 45 y 55 minutos. Tarifa total: $10 MXN ($5 Metro + $5 Tren Ligero). Lleva Tarjeta CDMX cargada." },
-      { icon:"⚠️", title:"Error crítico — AIFA no es opción", text:"AIFA (Felipe Ángeles, Santa Lucía) está en el Estado de México, a más de 80 kilómetros al norte del Estadio Azteca. Si tu aerolínea opera desde AIFA, llega a CDMX con al menos dos días de margen antes del partido. La conexión al sur de la ciudad en día de partido es un ejercicio de paciencia que no todos sobreviven con buen humor.", isWarning:true },
+      { icon:"⚠️", title:"Error crítico — AIFA no es opción", text:"Error crítico: Reservar vuelo de llegada en AIFA si tu estadía base es el Azteca. Felipe Ángeles está en Santa Lucía, a más de 80 kilómetros al norte del estadio. La conexión al sur de la ciudad en día de partido es un ejercicio de paciencia que no todos sobreviven con buen humor. Si tu aerolínea opera desde AIFA, llega a CDMX con al menos dos días de margen.", isWarning:true },
     ],
     timings:[
       { label:"Desde Condesa en transporte público",           value:"~50 min" },
@@ -91,7 +91,7 @@ export const es: CityGuide = {
         { time:"H-3:00", text:"Almuerza en el barrio. El Azteca no tiene gastronomía que valga la pena; come bien antes de salir." },
         { time:"H-2:30", text:"Desplázate al Metro. Línea 1 o 2 hacia Tasqueña. Sin prisa, sin correr." },
         { time:"H-1:30", text:"Llegada a Tasqueña. Toma el Tren Ligero — la única ruta que no depende del tráfico de CDMX." },
-        { time:"H-1:00", text:"Llegada al estadio. Puertas abiertas. El primer partido inaugural del Azteca en su historia." },
+        { time:"H-1:00", text:"Llegada al estadio. Puertas abiertas. El primer partido inaugural del Estadio Azteca en su historia." },
         { time:"H-0:30", text:"Ya en tu asiento. Boleto digital listo en el móvil — sin versión en papel." },
         { time:"H+0:00", text:"Partido." },
         { time:"H+1:30", text:"Toma el Tren Ligero de regreso inmediatamente. La espera en Tasqueña se multiplica cada 15 minutos que pasan." },
@@ -116,13 +116,13 @@ export const es: CityGuide = {
 
   experiences:[
     { title:"Teotihuacán + Museo Nacional de Antropología", duration:"Día completo", desc:"La zona arqueológica de Teotihuacán está a 50 kilómetros al noreste y se puede llegar en camión desde la Terminal del Norte en menos de una hora. Recomendación: llegada antes de las 9am para evitar el calor y los grupos de tour. Para la tarde, el Museo Nacional de Antropología en Chapultepec tiene la colección arqueológica prehispánica más completa del continente — la Sala Mexica justifica la visita por sí sola.", type:"Histórico", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Ver tours a Teotihuacán" },
-    { title:"Xochimilco + Coyoacán", duration:"Día completo", desc:"Trajinera por la mañana, Mercado de Coyoacán al mediodía, Museo Frida Kahlo por la tarde (reserva en línea con anticipación — el acceso en puerta siempre está agotado). El Tren Ligero conecta Coyoacán con la ciudad central, lo que hace de este plan el día libre más lógico para quien también tiene partido en el Azteca.", type:"Cultural", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Reservar trajinera en Xochimilco" },
+    { title:"Xochimilco + Coyoacán", duration:"Día completo", desc:"Trajinera por la mañana, Mercado de Coyoacán al mediodía, Museo Frida Kahlo por la tarde (reserva en línea con anticipación — el acceso en puerta siempre está agotado). El Tren Ligero conecta Coyoacán con la ciudad central, lo que hace de este plan el día libre más lógico para quien también tiene partido en el Estadio Banorte.", type:"Cultural", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Reservar trajinera en Xochimilco" },
     { title:"Mercado de Jamaica + La Merced", duration:"Medio día", desc:"El Mercado de Jamaica es el mayoreo de flores más grande de México — llega al amanecer. La Merced es el corazón comercial del oriente de la ciudad: bulliciosa, fotogénica y poco visitada por el fan internacional. Ninguno de los dos está en el itinerario estándar. Por eso merecen estar aquí.", type:"Local", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Tour de mercados en CDMX" },
     { title:"Bosque de Chapultepec", duration:"Mañana o tarde", desc:"El parque urbano más grande de América Latina rodea el Castillo de Chapultepec en más de 680 hectáreas. El lago, los museos del perímetro — Rufino Tamayo, Arte Moderno, Historia Natural — y la vista del Castillo desde la segunda sección hacen de Chapultepec el respiro necesario entre partidos. Entrada libre los domingos.", type:"Ciudad", affiliateLink:"https://getyourguide.stay22.com/lagomplan/s1vPPVVq1r", affiliateLabel:"Tour cultural en Chapultepec" },
   ],
 
   lagomTips:[
-    "El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México, definitorio del Grupo A) son las fechas más críticas. Reserva alojamiento con meses de anticipación — el Mundial inaugural en el Azteca desde 1986 no tiene precedente en turismo de la ciudad.",
+    "El 11 de junio (México vs. Sudáfrica, partido inaugural) y el 24 de junio (Rep. Checa vs. México, definitorio del Grupo A) son las fechas más críticas. Reserva alojamiento con meses de anticipación — el Mundial inaugural en el Estadio BAnorte desde 1986 no tiene precedente en turismo de la ciudad.",
     "La ruta correcta al estadio es Metro + Tren Ligero, siempre. El tráfico de CDMX no distingue entre día de partido y día laboral — la diferencia es que 70,000 personas intentan hacer lo mismo que tú, al mismo tiempo. Línea 1 o 2 → Tasqueña → Tren Ligero.",
     "Si tu vuelo llega a AIFA (Felipe Ángeles, Santa Lucía), llegas a 80 km al norte del Azteca con conectividad limitada al sur. Si tienes opción, vuela siempre a AICM (Benito Juárez, MEX). Si no hay opción, llega con dos días de margen antes del partido.",
     "CDMX tiene más de 150 tipos de chile y 70 formas de preparar el maíz. La cocina mexicana es Patrimonio Cultural Inmaterial de la Humanidad. El reto no es encontrar dónde comer bien — es aceptar que una semana no alcanza.",
@@ -193,7 +193,7 @@ export const en: CityGuide = {
   },
 
   vibe:{
-    body:"The host nation plays twice here. On June 11, the Azteca hosts the opening match for the first time in its history. No other Mexican city is going to top that. This stadium saw the Hand of God and the Goal of the Century. In 2026 it writes its third World Cup chapter. The historical weight is unique in the tournament. The city adds the most diverse food scene in Latin America — more than 150 chile varieties, 70 ways to prepare corn, and a culinary tradition that UNESCO recognized as Intangible Cultural Heritage. Cost is the ceiling: the priciest of Mexico's three host cities, and the World Cup pushes it further.",
+    body:"The host nation plays twice here. On June 11, the Azteca hosts the opening match for the first time in its history. No other Mexican city is going to top that. This stadium saw the Hand of God and the Goal of the Century. In 2026 it writes its third World Cup chapter. The historical weight is unique in the tournament. The city adds the most diverse food scene in Latin America — more than 150 chile varieties, 70 ways to prepare corn, and a culinary tradition that UNESCO recognized as Intangible Cultural Heritage. The priciest of Mexico's three host cities, and the World Cup pushes it further. Without booking ahead, the budget doubles without warning.",
     lagomNote:"June 11 (Mexico vs. South Africa, opening match) and June 24 (Czech Rep. vs. Mexico, Group A decider) are the critical dates. Book accommodation months ahead — an opening World Cup match at the Azteca since 1986 has no precedent in the city's tourism history.",
   },
 
@@ -217,7 +217,7 @@ export const en: CityGuide = {
       { icon:"✈", title:"Arriving in Mexico City — AICM", text:"AICM — Benito Juárez International (MEX) sits northeast of the city. Take the Metro from Terminal Aérea (Line 5) → Pantitlán → Line 1 toward Condesa / Roma Norte. The full AICM → Estadio Azteca trip via Metro + Light Rail runs ~75 minutes. Total cost: ~$10 MXN." },
       { icon:"🚇", title:"Airport to base neighborhood", text:"Metro from Terminal Aérea → Pantitlán → Line 1 → Insurgentes or Pino Suárez (for Condesa / Roma Norte). The system runs on a rechargeable Tarjeta CDMX. Fare: $5 MXN per ride. Uber AICM to Roma Norte: ~$150–250 MXN without traffic, up to $500 MXN at rush hour." },
       { icon:"🏟", title:"To the stadium on match day — master route", text:"Metro Line 1 or 2 → Tasqueña → Light Rail → Estadio Azteca. The Light Rail runs in its own right-of-way from Tasqueña to the Estadio Azteca stop in ~15 minutes. From Condesa or Roma Norte, the full trip is 45–55 minutes. Total fare: $10 MXN ($5 Metro + $5 Light Rail). Carry a loaded Tarjeta CDMX." },
-      { icon:"⚠️", title:"Critical error — AIFA is not an option", text:"AIFA (Felipe Ángeles, Santa Lucía) sits in the State of Mexico, more than 80 km north of the Estadio Azteca. If your airline flies into AIFA, arrive in CDMX with at least two days of buffer before the match. Getting to the south of the city on match day is a patience exercise not everyone survives in good humor.", isWarning:true },
+      { icon:"⚠️", title:"Critical error — AIFA is not an option", text:"Critical error: booking an arrival flight into AIFA if your base is near the Azteca. Felipe Ángeles is in Santa Lucía, more than 80 kilometers north of the stadium. Getting to the south of the city on match day is a patience exercise not everyone survives in good humor. If your airline operates from AIFA, arrive in CDMX with at least two days of buffer.", isWarning:true },
     ],
     timings:[
       { label:"From Condesa via public transit",            value:"~50 min" },

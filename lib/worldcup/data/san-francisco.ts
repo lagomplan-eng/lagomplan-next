@@ -155,7 +155,7 @@ export const es: CityGuide = {
     logistics:"Levi's está en Santa Clara, a 70 km al sur de SF. Caltrain y VTA son las rutas sin tráfico — confirma el último tren antes de entrar al estadio.",
     food:"La Bay Area tiene la escena de restaurantes más sofisticada de la Costa Oeste y los pubs de fútbol más curados de California — el reto es elegir entre el burrito de La Taqueria y el fish & chips de Mad Dog.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. San Francisco tiene los hoteles más caros de California; San José y Oakland son 30–40% más económicos sin renunciar a acceso transit. Para partidos nocturnos, prioriza base en Santa Clara o San José si no quieres depender del último Caltrain a SF.",
+  staysWarning:"<strong>Error crítico:</strong> Ir en Uber desde San Francisco al estadio en partido nocturno sin haber calculado el precio de regreso. El viaje de ida puede costar $60–80 USD con tráfico de partido. El de regreso a las 23:30, con 69,000 personas saliendo al mismo tiempo, puede superar los $120–150 USD con precio surge y 40–60 minutos de espera. Si sales desde SF, el Caltrain es la única ruta de regreso predecible. Verifica el horario del último tren antes de entrar al estadio.",
 }
 
 export const en: CityGuide = {
@@ -306,5 +306,5 @@ export const en: CityGuide = {
     logistics:"Levi's is in Santa Clara, 70 km south of SF. Caltrain and VTA are the traffic-free routes — check the last train before you enter the stadium.",
     food:"The Bay Area has the most sophisticated restaurant scene on the West Coast and California's best-curated football pubs — the challenge is choosing between La Taqueria's burrito and Mad Dog's fish & chips.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. San Francisco has California's most expensive hotels; San José and Oakland run 30–40% cheaper without giving up transit access. For night matches, base yourself in Santa Clara or San José if you don't want to depend on the last Caltrain back to SF.",
+  staysWarning:"<strong>Critical error:</strong> Taking an Uber from San Francisco to the stadium on a night match without calculating the return cost. The outbound ride can run $60–80 USD with match-day traffic. The return at 11:30pm, with 69,000 people leaving at the same time, can exceed $120–150 USD with surge pricing and 40–60 minutes of wait. If you're staying in SF, Caltrain is the only predictable way back. Check the last train's schedule before entering the stadium.",
 }

@@ -155,7 +155,7 @@ export const es: CityGuide = {
     logistics:"Foxborough no es Boston. El MBTA Boston Stadium Train desde South Station es la única ruta práctica — el pase se compra en mTicket y exige boleto de partido.",
     food:"Clam chowder, cannolis del North End, marisco del puerto y los pubs irlandeses de Dorchester y el centro.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. El 23 de junio (Inglaterra vs. Ghana), el 26 de junio (Noruega vs. Francia) y el 9 de julio (Cuartos de Final) son las fechas más críticas. Sail Boston 2026 y las celebraciones del 250 aniversario añaden demanda. Cambridge y Somerville, bien conectados por Red Line, son las alternativas razonables.",
+  staysWarning:"<strong>Error crítico:</strong> Perder el último tren de regreso desde Foxborough. Los trenes salen a partir de 30 minutos después del pitido final. Quien no aborda en los primeros 60 minutos tras el final del partido queda en una zona suburbana sin tránsito regular, con Ubers en modo surge (60–90 minutos de espera y precios de $80–150 USD) y la Ruta 1 completamente paralizada. El estadio diseñó la logística de regreso alrededor del tren — úsalo como está diseñado.",
 }
 
 export const en: CityGuide = {
@@ -307,5 +307,5 @@ export const en: CityGuide = {
     logistics:"Foxborough isn't Boston. The MBTA Boston Stadium Train from South Station is the only practical route — the pass is sold on mTicket and requires a match ticket.",
     food:"Clam chowder, North End cannoli, harbor seafood, and the Irish pubs of Dorchester and downtown.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. June 23 (England vs. Ghana), June 26 (Norway vs. France), and July 9 (Quarterfinal) are the critical dates. Sail Boston 2026 and the 250th anniversary celebrations add demand. Cambridge and Somerville, well-connected by the Red Line, are the reasonable alternatives.",
+  staysWarning:"<strong>Critical error:</strong> Missing the last return train from Foxborough. Trains depart starting 30 minutes after the final whistle. Anyone who doesn't board within the first 60 minutes after the match ends is stranded in a suburban area without regular transit, with Ubers on surge (60–90 minute waits and $80–150 USD fares) and Route 1 completely paralyzed. The stadium designed its return logistics around the train — use it as designed.",
 }

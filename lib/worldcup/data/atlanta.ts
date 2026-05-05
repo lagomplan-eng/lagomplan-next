@@ -156,7 +156,7 @@ export const es: CityGuide = {
     logistics:"MARTA directo al Mercedes-Benz Stadium desde downtown, Midtown y el aeropuerto — el único estadio climatizado del torneo en Estados Unidos.",
     food:"Cocina sureña seria, Sweet Auburn Curb Market, Buford Highway y los pubs europeos del corredor de Buckhead.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. España (15 y 21 de junio) y la Semifinal (15 de julio) son las fechas más críticas — Midtown puede subir a niveles de Super Bowl. Decatur y Virginia-Highland, bien conectados por MARTA, son las alternativas razonables.",
+  staysWarning:"<strong>Error crítico:</strong> Subestimar el calor exterior pensando que el estadio con A/C lo resuelve todo. El trayecto entre la estación de MARTA y la entrada del estadio, las filas de seguridad exteriores y las zonas de espera al aire libre pueden sumar 20–30 minutos bajo el sol de julio en Atlanta con humedad alta. Lleva agua, protector solar y ropa que permita sudar. El estadio climatizado es el destino — el trayecto para llegar ahí no lo es.",
 }
 
 export const en: CityGuide = {
@@ -309,5 +309,5 @@ export const en: CityGuide = {
     logistics:"MARTA direct to Mercedes-Benz Stadium from downtown, Midtown, and the airport — the only climate-controlled stadium in the U.S. tournament.",
     food:"Serious Southern cooking, Sweet Auburn Curb Market, Buford Highway, and the European pubs on the Buckhead corridor.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. Spain (June 15 and 21) and the Semifinal (July 15) are the critical dates — Midtown can hit Super Bowl levels. Decatur and Virginia-Highland, well-connected by MARTA, are the reasonable alternatives.",
+  staysWarning:"<strong>Critical error:</strong> Underestimating the outdoor heat thinking the A/C stadium solves everything. The walk between the MARTA station and the stadium entrance, the outdoor security lines, and the open-air waiting zones can add up to 20–30 minutes under Atlanta's July sun with high humidity. Bring water, sunscreen, and clothing that lets you sweat. The climate-controlled stadium is the destination — getting there is not.",
 }

@@ -178,7 +178,7 @@ export const es: CityGuide = {
     logistics:"Sin metro al estadio. ConnectKC26 Stadium Direct es la solución oficial — el pase se compra por separado al boleto de partido.",
     food:"La BBQ más seria del continente, el Jazz District y los bares que Sporting KC convirtió en el mapa futbolero de la ciudad.",
   },
-  staysWarning:"Los precios son estimaciones para el periodo mundialista. Argentina (16 jun) y el Cuartos de Final (11 jul) son las fechas más críticas. Para el Cuartos, los equipos no se conocen hasta el 4 de julio — reserva con tarifa cancelable en Power & Light o Crossroads y confirma en cuanto salgan los cruces.",
+  staysWarning:"<strong>Error crítico:</strong> No reservar el pase ConnectKC26 Stadium Direct con anticipación. Los 215 autobuses tienen capacidad limitada por partido y los pases se venden por separado al boleto. El partido de Argentina el 16 de junio y el Cuartos de Final del 11 de julio son los que agotan primero. Quien llega al Fan Fest el día del partido sin pase reservado tiene dos opciones: Uber con precio surge y 40 minutos de espera, o quedarse viendo el partido en las pantallas del Fan Fest. Las 4,000 plazas de parking general del estadio se venden a través de los paquetes FIFA — no en la puerta el día del partido.",
 }
 
 export const en: CityGuide = {
@@ -353,5 +353,5 @@ export const en: CityGuide = {
     logistics:"No subway to the stadium. ConnectKC26 Stadium Direct is the official solution — the pass is sold separately from the match ticket.",
     food:"The most serious barbecue on the continent, the Jazz District, and the bars Sporting KC turned into the city's football map.",
   },
-  staysWarning:"Prices are estimates for the World Cup period. Argentina (Jun 16) and the Quarterfinal (Jul 11) are the critical dates. For the Quarterfinal, the teams won't be known until July 4 — book a cancellable rate in Power & Light or Crossroads and confirm once the brackets drop.",
+  staysWarning:"<strong>Critical error:</strong> Not reserving the ConnectKC26 Stadium Direct pass in advance. The 215 buses have limited per-match capacity and passes are sold separately from the ticket. Argentina on June 16 and the Quarterfinal on July 11 are the first to sell out. Anyone arriving at the Fan Fest on match day without a reserved pass has two options: Uber with surge pricing and a 40-minute wait, or staying to watch the match on the Fan Fest screens. The stadium's 4,000 general parking spots are sold through FIFA packages — not at the gate on match day.",
 }
