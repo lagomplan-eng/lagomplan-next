@@ -120,7 +120,7 @@ const ROSTER = [
     id:'cdmx',
     city:{ es:'Ciudad de México', en:'Mexico City' },
     short:'CDX', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
-    accent:'#1A6B5A', persona:'roberto' as PersonaKey, stadium:'Estadio Azteca', ready:true,
+    accent:'#1A6B5A', persona:'roberto' as PersonaKey, stadium:'Estadio Banorte', ready:true,
     tagline:{
       es:'El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.',
       en:'The Azteca needs no introduction. What it does need, badly, is a transport strategy.',
