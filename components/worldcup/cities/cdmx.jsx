@@ -36,36 +36,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // CITY ILLUSTRATION — Ciudad de México
 // ─────────────────────────────────────────────────────────────────────────────
-const CdmxIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#EBF0E8" rx={RADIUS} />
-    <rect x="0" y="0" width="280" height="80" fill="#F5F0E8" opacity="0.5" />
-    {/* Popocatépetl volcano */}
-    <polygon points="148,90 188,25 228,90" fill="#2D5A3A" opacity="0.42" />
-    <polygon points="185,90 218,36 251,90" fill="#3A6B4A" opacity="0.35" />
-    {/* Snow caps */}
-    <polygon points="188,25 200,46 176,46" fill="white" opacity="0.82" />
-    <polygon points="218,36 228,52 208,52" fill="white" opacity="0.65" />
-    {/* City skyline */}
-    <rect x="10" y="66" width="6"  height="24" fill="#1A6B5A" opacity="0.28" rx={1} />
-    <rect x="19" y="58" width="8"  height="32" fill="#1A6B5A" opacity="0.32" rx={1} />
-    <rect x="31" y="63" width="5"  height="27" fill="#1A6B5A" opacity="0.22" rx={1} />
-    <rect x="39" y="52" width="10" height="38" fill="#1A6B5A" opacity="0.30" rx={1} />
-    <rect x="53" y="60" width="7"  height="30" fill="#1A6B5A" opacity="0.20" rx={1} />
-    <rect x="64" y="56" width="6"  height="34" fill="#1A6B5A" opacity="0.25" rx={1} />
-    {/* Torre Latinoamericana — tall spire */}
-    <rect x="74" y="40" width="4"  height="50" fill="#1A6B5A" opacity="0.35" rx={1} />
-    <polygon points="76,40 73,47 79,47" fill="#1A6B5A" opacity="0.4" />
-    {/* Estadio Azteca oval */}
-    <ellipse cx="110" cy="110" rx="36" ry="13" fill="#1A6B5A" opacity="0.16" />
-    <ellipse cx="110" cy="110" rx="26" ry="9"  fill="#1A6B5A" opacity="0.10" />
-    {/* Ángel de la Independencia column */}
-    <rect x="33" y="42" width="2.5" height="24" fill="#C4622A" opacity="0.55" />
-    <polygon points="34.25,42 31.5,49 37,49" fill="#C4622A" opacity="0.5" />
-    {/* Flag */}
-    <text x="258" y="50" fontSize="20" textAnchor="middle">🇲🇽</text>
-  </svg>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRIMITIVE COMPONENTS
@@ -488,7 +458,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <CdmxIllustration />
+      <img src="/images/WC%20images/CDMX.png" alt="CDMX" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -755,8 +725,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

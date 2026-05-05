@@ -33,34 +33,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // CITY ILLUSTRATION — Monterrey
 // ─────────────────────────────────────────────────────────────────────────────
-const MtyIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#E8EDF2" rx={RADIUS} />
-    <rect x="0" y="0" width="280" height="80" fill="#F0EDE8" opacity="0.6" />
-    {/* Sierra Madre — Cerro de la Silla iconic shape */}
-    <polygon points="100,90 140,22 180,90" fill="#2D4F6C" opacity="0.5" />
-    <polygon points="60,90 105,35 150,90" fill="#3A6080" opacity="0.4" />
-    <polygon points="150,90 185,45 220,90" fill="#2D4F6C" opacity="0.35" />
-    {/* Cerro de la Silla saddle hint */}
-    <path d="M125,42 Q140,22 155,42" stroke="white" strokeWidth="1.5" fill="none" opacity="0.6" />
-    {/* Industrial chimneys — Fundidora */}
-    <rect x="10" y="55" width="5" height="35" fill="#2D4F6C" opacity="0.4" rx={1} />
-    <rect x="19" y="48" width="5" height="42" fill="#2D4F6C" opacity="0.45" rx={1} />
-    <rect x="28" y="52" width="5" height="38" fill="#2D4F6C" opacity="0.38" rx={1} />
-    {/* Smoke from chimneys */}
-    <circle cx="12" cy="53" r="3" fill="#9A9A94" opacity="0.25" />
-    <circle cx="21" cy="46" r="3" fill="#9A9A94" opacity="0.2" />
-    {/* City skyline */}
-    <rect x="40" y="64" width="7"  height="26" fill="#2D4F6C" opacity="0.28" rx={1} />
-    <rect x="51" y="58" width="9"  height="32" fill="#2D4F6C" opacity="0.32" rx={1} />
-    <rect x="64" y="62" width="6"  height="28" fill="#2D4F6C" opacity="0.22" rx={1} />
-    {/* Estadio BBVA oval */}
-    <ellipse cx="225" cy="108" rx="36" ry="12" fill="#2D4F6C" opacity="0.16" />
-    <ellipse cx="225" cy="108" rx="26" ry="8"  fill="#2D4F6C" opacity="0.10" />
-    {/* Flag */}
-    <text x="258" y="50" fontSize="20" textAnchor="middle">🇲🇽</text>
-  </svg>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED COMPONENTS
@@ -413,7 +385,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <MtyIllustration />
+      <img src="/images/WC%20images/Monterrey.png" alt="Monterrey" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -679,8 +651,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

@@ -35,29 +35,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // CITY ILLUSTRATION — Vancouver
 // ─────────────────────────────────────────────────────────────────────────────
-const VanIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#E8F0EC" rx={RADIUS} />
-    <rect x="0" y="95" width="280" height="45" fill="#D8E5EE" />
-    <polygon points="0,95 45,40 90,95"  fill="#4A7A6A" opacity="0.5" />
-    <polygon points="40,95 90,28 140,95" fill="#2D4F4A" opacity="0.55" />
-    <polygon points="90,95 145,32 200,95" fill="#3D6A5A" opacity="0.45" />
-    <polygon points="155,95 200,52 245,95" fill="#4A7A6A" opacity="0.35" />
-    <polygon points="90,28 102,46 78,46"  fill="white" opacity="0.85" />
-    <polygon points="145,32 155,48 135,48" fill="white" opacity="0.7" />
-    <polygon points="45,40 53,55 37,55"  fill="white" opacity="0.6" />
-    <rect x="16" y="72" width="7"  height="23" fill="#2D4F6C" opacity="0.3" rx={1} />
-    <rect x="27" y="64" width="9"  height="31" fill="#2D4F6C" opacity="0.35" rx={1} />
-    <rect x="40" y="68" width="6"  height="27" fill="#2D4F6C" opacity="0.25" rx={1} />
-    <rect x="50" y="60" width="8"  height="35" fill="#2D4F6C" opacity="0.3" rx={1} />
-    <rect x="62" y="70" width="5"  height="25" fill="#2D4F6C" opacity="0.2" rx={1} />
-    <ellipse cx="226" cy="88" rx="30" ry="12" fill="#2D4F6C" opacity="0.18" />
-    <rect x="196" y="76" width="60" height="12" fill="#2D4F6C" opacity="0.15" rx={2} />
-    <path d="M196,76 Q226,60 256,76" stroke="#2D4F6C" strokeWidth="1.5" fill="none" opacity="0.3" />
-    <line x1="0" y1="93" x2="180" y2="93" stroke="#6B8F86" strokeWidth="1" opacity="0.4" strokeDasharray="4,3" />
-    <text x="258" y="48" fontSize="20" textAnchor="middle">🇨🇦</text>
-  </svg>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRIMITIVE COMPONENTS
@@ -426,7 +403,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <VanIllustration />
+      <img src="/images/WC%20images/Vancouver.png" alt="Vancouver" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );

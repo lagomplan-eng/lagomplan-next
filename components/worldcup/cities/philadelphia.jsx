@@ -22,33 +22,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const PhiIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#DDE6E3" rx={RADIUS} />
-    <rect x="0" y="108" width="280" height="32" fill="#8FAFA7" />
-    {/* Liberty Bell silhouette (left) */}
-    <path d="M30 50 L54 50 L52 82 L32 82 Z" fill="#004C54" opacity="0.55" />
-    <rect x="38" y="42" width="8" height="9" fill="#004C54" opacity="0.55" rx={1} />
-    <path d="M28 82 L56 82 L54 88 L30 88 Z" fill="#004C54" opacity="0.6" />
-    <line x1="42" y1="55" x2="42" y2="78" stroke="#FFFFFF" strokeWidth="1" opacity="0.5" />
-    {/* Philadelphia skyline */}
-    <rect x="78"  y="64" width="12" height="44" fill="#004C54" opacity="0.5" rx={1} />
-    <rect x="94"  y="48" width="16" height="60" fill="#004C54" opacity="0.6" rx={1} />
-    <rect x="114" y="36" width="14" height="72" fill="#004C54" opacity="0.65" rx={1} />
-    <rect x="132" y="54" width="12" height="54" fill="#004C54" opacity="0.5" rx={1} />
-    <rect x="148" y="42" width="18" height="66" fill="#004C54" opacity="0.6" rx={1} />
-    <rect x="170" y="58" width="12" height="50" fill="#004C54" opacity="0.45" rx={1} />
-    <rect x="186" y="48" width="14" height="60" fill="#004C54" opacity="0.55" rx={1} />
-    {/* City Hall tower with William Penn statue (pointy top) */}
-    <rect x="120" y="36" width="2" height="8" fill="#004C54" opacity="0.8" />
-    <circle cx="121" cy="33" r="2" fill="#004C54" opacity="0.75" />
-    {/* Independence Hall silhouette (right) */}
-    <rect x="218" y="64" width="36" height="44" fill="#004C54" opacity="0.55" rx={1} />
-    <rect x="232" y="50" width="8" height="14" fill="#004C54" opacity="0.65" rx={1} />
-    <path d="M228 50 L244 50 L236 38 Z" fill="#004C54" opacity="0.6" />
-    <text x="258" y="22" fontSize="16" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -392,7 +365,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <PhiIllustration />
+      <img src="/images/WC%20images/Filadelfia.png" alt="Philadelphia" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -659,8 +632,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

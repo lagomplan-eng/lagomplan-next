@@ -22,32 +22,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const SeaIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#D8E4E0" rx={RADIUS} />
-    {/* Mount Rainier silhouette in back */}
-    <path d="M0,108 L60,72 L100,56 L130,72 L180,52 L220,72 L280,108 Z" fill="#A8BFB8" opacity="0.55" />
-    <path d="M90,62 L100,56 L110,62 Z" fill="#FFFFFF" opacity="0.8" />
-    <path d="M172,58 L180,52 L188,58 Z" fill="#FFFFFF" opacity="0.7" />
-    {/* Water */}
-    <rect x="0" y="108" width="280" height="32" fill="#7A9CA8" />
-    {/* Space Needle */}
-    <rect x="50" y="52" width="3" height="56" fill="#4A7C7E" opacity="0.75" />
-    <ellipse cx="51.5" cy="48" rx="11" ry="4" fill="#4A7C7E" opacity="0.75" />
-    <path d="M47 48 L56 48 L52 42 Z" fill="#4A7C7E" opacity="0.7" />
-    {/* Seattle skyline */}
-    <rect x="82"  y="64" width="12" height="44" fill="#2D4F6C" opacity="0.5" rx={1} />
-    <rect x="98"  y="54" width="14" height="54" fill="#2D4F6C" opacity="0.55" rx={1} />
-    <rect x="116" y="46" width="16" height="62" fill="#2D4F6C" opacity="0.6" rx={1} />
-    <rect x="136" y="58" width="12" height="50" fill="#2D4F6C" opacity="0.5" rx={1} />
-    <rect x="152" y="48" width="14" height="60" fill="#2D4F6C" opacity="0.55" rx={1} />
-    <rect x="170" y="64" width="10" height="44" fill="#2D4F6C" opacity="0.45" rx={1} />
-    {/* Ferry on water */}
-    <rect x="218" y="114" width="26" height="6" fill="#FFFFFF" opacity="0.7" rx={1} />
-    <rect x="224" y="110" width="14" height="4" fill="#FFFFFF" opacity="0.65" rx={1} />
-    <text x="258" y="24" fontSize="16" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -391,7 +365,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <SeaIllustration />
+      <img src="/images/WC%20images/Seattle.png" alt="Seattle" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -658,8 +632,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

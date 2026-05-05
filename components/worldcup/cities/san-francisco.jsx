@@ -22,33 +22,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const SfIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#E6DAD0" rx={RADIUS} />
-    <rect x="0" y="108" width="280" height="32" fill="#8AA7B5" />
-    {/* Golden Gate towers */}
-    <rect x="42"  y="24" width="10" height="84" fill="#B85C3E" opacity="0.7" rx={1} />
-    <rect x="210" y="24" width="10" height="84" fill="#B85C3E" opacity="0.7" rx={1} />
-    {/* Bridge deck */}
-    <rect x="28"  y="74" width="224" height="5" fill="#B85C3E" opacity="0.55" />
-    {/* Suspension cables */}
-    <path d="M47,24 Q131,90 215,24" stroke="#B85C3E" strokeWidth="1.5" fill="none" opacity="0.55" />
-    <path d="M47,28 Q131,84 215,28" stroke="#B85C3E" strokeWidth="1"   fill="none" opacity="0.4" />
-    {/* SF skyline behind (small) */}
-    <rect x="62"  y="56" width="10" height="18" fill="#2D4F6C" opacity="0.35" rx={1} />
-    <rect x="76"  y="48" width="14" height="26" fill="#2D4F6C" opacity="0.4"  rx={1} />
-    <rect x="94"  y="40" width="10" height="34" fill="#2D4F6C" opacity="0.45" rx={1} />
-    <rect x="108" y="52" width="12" height="22" fill="#2D4F6C" opacity="0.35" rx={1} />
-    <rect x="124" y="34" width="10" height="40" fill="#2D4F6C" opacity="0.5"  rx={1} />
-    <rect x="138" y="46" width="14" height="28" fill="#2D4F6C" opacity="0.4"  rx={1} />
-    <rect x="156" y="54" width="10" height="20" fill="#2D4F6C" opacity="0.35" rx={1} />
-    <rect x="170" y="42" width="14" height="32" fill="#2D4F6C" opacity="0.45" rx={1} />
-    <rect x="188" y="56" width="10" height="18" fill="#2D4F6C" opacity="0.35" rx={1} />
-    {/* Fog line */}
-    <path d="M0,90 Q70,82 140,90 Q210,82 280,90" stroke="#FFFFFF" strokeWidth="1.5" fill="none" opacity="0.3" />
-    <text x="258" y="22" fontSize="16" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -392,7 +365,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <SfIllustration />
+      <img src="/images/WC%20images/San%20Francisco.png" alt="San Francisco" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -659,8 +632,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

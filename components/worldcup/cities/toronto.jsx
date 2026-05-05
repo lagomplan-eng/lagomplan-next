@@ -22,31 +22,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const TorIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#E8DCDC" rx={RADIUS} />
-    <rect x="0" y="108" width="280" height="32" fill="#8A9EB5" />
-    {/* Maple leaf (left, understated) */}
-    <path d="M38 28 L42 34 L48 30 L46 38 L52 40 L46 46 L48 54 L42 50 L38 58 L34 50 L28 54 L30 46 L24 40 L30 38 L28 30 L34 34 Z" fill="#C41E3A" opacity="0.6" />
-    {/* CN Tower */}
-    <rect x="156" y="18" width="4" height="90" fill="#C41E3A" opacity="0.7" />
-    <rect x="152" y="60" width="12" height="12" fill="#C41E3A" opacity="0.8" rx={2} />
-    <rect x="155" y="18" width="6" height="6" fill="#C41E3A" opacity="0.75" rx={1} />
-    {/* Toronto skyline */}
-    <rect x="70"  y="66" width="14" height="42" fill="#2D4F6C" opacity="0.5" rx={1} />
-    <rect x="88"  y="52" width="12" height="56" fill="#2D4F6C" opacity="0.55" rx={1} />
-    <rect x="104" y="44" width="14" height="64" fill="#2D4F6C" opacity="0.6" rx={1} />
-    <rect x="122" y="56" width="10" height="52" fill="#2D4F6C" opacity="0.5" rx={1} />
-    <rect x="136" y="40" width="12" height="68" fill="#2D4F6C" opacity="0.6" rx={1} />
-    <rect x="170" y="50" width="14" height="58" fill="#2D4F6C" opacity="0.55" rx={1} />
-    <rect x="188" y="64" width="10" height="44" fill="#2D4F6C" opacity="0.45" rx={1} />
-    <rect x="202" y="54" width="14" height="54" fill="#2D4F6C" opacity="0.55" rx={1} />
-    <rect x="220" y="66" width="10" height="42" fill="#2D4F6C" opacity="0.4" rx={1} />
-    {/* Ferry on lake */}
-    <rect x="240" y="116" width="20" height="5" fill="#FFFFFF" opacity="0.7" rx={1} />
-    <text x="258" y="22" fontSize="16" textAnchor="middle">🇨🇦</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -390,7 +365,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <TorIllustration />
+      <img src="/images/WC%20images/Toronto.png" alt="Toronto" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -657,8 +632,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

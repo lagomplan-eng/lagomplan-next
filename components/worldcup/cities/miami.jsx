@@ -16,21 +16,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 );
 
 
-const MIAIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#E8F5F5" rx={RADIUS} />
-    <rect x="0" y="100" width="280" height="40" fill="#B8E0E0" />
-    <rect x="20" y="55" width="14" height="45" fill="#0E8B8B" opacity="0.35" rx={1} />
-    <rect x="38" y="38" width="20" height="62" fill="#0E8B8B" opacity="0.45" rx={1} />
-    <rect x="63" y="45" width="16" height="55" fill="#0E8B8B" opacity="0.3" rx={1} />
-    <rect x="84" y="30" width="22" height="70" fill="#0E8B8B" opacity="0.5" rx={1} />
-    <rect x="111" y="50" width="14" height="50" fill="#0E8B8B" opacity="0.3" rx={1} />
-    <rect x="130" y="42" width="18" height="58" fill="#0E8B8B" opacity="0.4" rx={1} />
-    <path d="M155,100 Q180,85 205,92 Q230,80 255,90" stroke="#0E8B8B" strokeWidth="1.5" fill="none" opacity="0.3" />
-    <path d="M200,68 Q220,55 240,68" stroke="#0E8B8B" strokeWidth="1" fill="none" opacity="0.2" />
-    <text x="258" y="30" fontSize="20" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => { const [h,setH]=useState(false); return <div onClick={onClick} onMouseEnter={()=>hover&&setH(true)} onMouseLeave={()=>hover&&setH(false)} style={{ background:T.white, border:`1px solid ${CARD_BORDER}`, borderRadius:RADIUS, boxShadow:h?"0 4px 16px rgba(28,28,26,0.09)":CARD_SHADOW, transition:"box-shadow 0.22s, transform 0.22s", transform:h?"translateY(-1px)":"none", cursor:onClick?"pointer":"default", ...style }}>{children}</div>; };
 const SectionHeader = ({ number, title, subtitle }) => (<div style={{ marginBottom:32 }}><div style={{ display:"flex", alignItems:"center", gap:12, marginBottom:10 }}><span style={{ ...uf(9,500), letterSpacing:"0.18em", textTransform:"uppercase", color:T.inkFaint }}>{number}</span><div style={{ flex:1, height:1, background:"rgba(28,28,26,0.08)" }} /></div><h2 style={{ ...df(27,700,"normal"), color:T.pine, lineHeight:1.05, marginBottom:subtitle?8:0 }}>{title}</h2>{subtitle&&<p style={{ ...uf(14,400), color:T.inkMid, lineHeight:1.65, margin:0, maxWidth:540 }}>{subtitle}</p>}</div>);
@@ -355,7 +340,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <MIAIllustration />
+      <img src="/images/WC%20images/Miami.png" alt="Miami" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -621,8 +606,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

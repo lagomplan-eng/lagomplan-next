@@ -16,32 +16,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const KCIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#EDE8F0" rx={RADIUS} />
-    <rect x="0" y="0" width="280" height="80" fill="#F5F0F8" opacity="0.5" />
-    {/* KC skyline */}
-    <rect x="10" y="62" width="7"  height="28" fill="#7B3F8C" opacity="0.28" rx={1} />
-    <rect x="21" y="54" width="9"  height="36" fill="#7B3F8C" opacity="0.32" rx={1} />
-    <rect x="34" y="58" width="6"  height="32" fill="#7B3F8C" opacity="0.22" rx={1} />
-    <rect x="44" y="48" width="11" height="42" fill="#7B3F8C" opacity="0.30" rx={1} />
-    <rect x="59" y="55" width="8"  height="35" fill="#7B3F8C" opacity="0.24" rx={1} />
-    {/* Liberty Memorial column */}
-    <rect x="72" y="36" width="5"  height="54" fill="#7B3F8C" opacity="0.42" rx={1} />
-    <polygon points="74.5,36 70,46 79,46" fill="#7B3F8C" opacity="0.45" />
-    {/* Union Station dome */}
-    <path d="M90,90 Q110,65 130,90" fill="#7B3F8C" opacity="0.18" />
-    <rect x="90" y="90" width="40" height="15" fill="#7B3F8C" opacity="0.12" rx={1} />
-    {/* Arrowhead Stadium oval */}
-    <ellipse cx="220" cy="105" rx="42" ry="16" fill="#7B3F8C" opacity="0.16" />
-    <ellipse cx="220" cy="105" rx="30" ry="11" fill="#7B3F8C" opacity="0.10" />
-    {/* Music note hint */}
-    <circle cx="165" cy="60" r="5" fill="#7B3F8C" opacity="0.3" />
-    <rect x="169" y="44" width="2" height="18" fill="#7B3F8C" opacity="0.3" rx={1} />
-    {/* Flag */}
-    <text x="258" y="50" fontSize="20" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [h, setH] = useState(false);
@@ -380,7 +354,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <KCIllustration />
+      <img src="/images/WC%20images/Kansas%20City.png" alt="Kansas City" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -647,8 +621,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

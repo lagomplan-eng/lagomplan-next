@@ -22,23 +22,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const AtlIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#F0EDE8" rx={RADIUS} />
-    <rect x="0" y="100" width="280" height="40" fill="#E8D8CC" />
-    <rect x="18" y="55" width="12" height="45" fill="#C4622A" opacity="0.35" rx={1} />
-    <rect x="35" y="40" width="18" height="60" fill="#C4622A" opacity="0.45" rx={1} />
-    <rect x="58" y="48" width="14" height="52" fill="#C4622A" opacity="0.3" rx={1} />
-    <rect x="77" y="30" width="22" height="70" fill="#C4622A" opacity="0.5" rx={1} />
-    <rect x="104" y="43" width="16" height="57" fill="#C4622A" opacity="0.35" rx={1} />
-    <rect x="125" y="35" width="20" height="65" fill="#C4622A" opacity="0.4" rx={1} />
-    <ellipse cx="195" cy="92" rx="42" ry="14" fill="#2D2D2D" opacity="0.12" />
-    <rect x="153" y="78" width="84" height="14" fill="#3A3A3A" opacity="0.1" rx={2} />
-    <path d="M153,78 Q195,55 237,78" stroke="#2D2D2D" strokeWidth="1.5" fill="none" opacity="0.2" />
-    <circle cx="195" cy="78" r="5" fill="#2D2D2D" opacity="0.15" />
-    <text x="258" y="30" fontSize="20" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -382,7 +365,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <AtlIllustration />
+      <img src="/images/WC%20images/Atlanta.png" alt="Atlanta" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -649,8 +632,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

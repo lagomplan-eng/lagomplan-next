@@ -23,25 +23,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 );
 
 
-const NycIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#DDE6F0" rx={RADIUS} />
-    <rect x="0" y="108" width="280" height="32" fill="#A8BED4" />
-    <rect x="10"  y="70" width="18" height="38" fill="#1A3B5C" opacity="0.5"  rx={1} />
-    <rect x="32"  y="50" width="14" height="58" fill="#1A3B5C" opacity="0.55" rx={1} />
-    <rect x="50"  y="35" width="20" height="73" fill="#1A3B5C" opacity="0.6"  rx={1} />
-    <rect x="74"  y="45" width="16" height="63" fill="#1A3B5C" opacity="0.5"  rx={1} />
-    <rect x="94"  y="20" width="18" height="88" fill="#1A3B5C" opacity="0.65" rx={1} />
-    <rect x="116" y="40" width="14" height="68" fill="#1A3B5C" opacity="0.45" rx={1} />
-    <rect x="134" y="55" width="20" height="53" fill="#1A3B5C" opacity="0.55" rx={1} />
-    <rect x="158" y="30" width="16" height="78" fill="#1A3B5C" opacity="0.6"  rx={1} />
-    <circle cx="225" cy="55" r="4" fill="#1A3B5C" opacity="0.55" />
-    <rect x="223" y="57" width="4" height="35" fill="#1A3B5C" opacity="0.55" rx={1} />
-    <path d="M218 52 L232 52 L225 40 Z" fill="#1A3B5C" opacity="0.45" />
-    <path d="M175,108 Q200,90 225,108 Q250,90 275,108" stroke="#1A3B5C" strokeWidth="1" fill="none" opacity="0.3" />
-    <text x="258" y="25" fontSize="18" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -388,7 +369,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <NycIllustration />
+      <img src="/images/WC%20images/NYC_NJ.png" alt="New York" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -654,8 +635,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

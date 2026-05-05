@@ -15,23 +15,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>{children}</span>
 );
 
-const LAIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#F5EDE5" rx={RADIUS} />
-    <rect x="0" y="105" width="280" height="35" fill="#E8D4C0" />
-    <rect x="16" y="65" width="10" height="40" fill="#C4622A" opacity="0.3" rx={1} />
-    <rect x="30" y="50" width="16" height="55" fill="#C4622A" opacity="0.4" rx={1} />
-    <rect x="50" y="42" width="20" height="63" fill="#C4622A" opacity="0.45" rx={1} />
-    <rect x="75" y="55" width="14" height="50" fill="#C4622A" opacity="0.3" rx={1} />
-    <rect x="94" y="38" width="18" height="67" fill="#C4622A" opacity="0.5" rx={1} />
-    <rect x="117" y="58" width="12" height="47" fill="#C4622A" opacity="0.25" rx={1} />
-    <path d="M155,105 Q175,88 195,95 Q210,80 230,90 Q250,78 270,88" stroke="#E8D4C0" strokeWidth="2" fill="none" opacity="0.6" />
-    <circle cx="210" cy="65" r="22" fill="none" stroke="#C4622A" strokeWidth="1" opacity="0.15" />
-    <rect x="198" y="43" width="24" height="5" fill="#C4622A" opacity="0.2" rx={1} />
-    <path d="M198,48 L222,48 L222,65 L198,65 Z" fill="#C4622A" opacity="0.08" />
-    <text x="258" y="30" fontSize="20" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 const Card = ({ children, style={}, onClick, hover=false }) => {
   const [h, setH] = useState(false);
@@ -373,7 +356,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <LAIllustration />
+      <img src="/images/WC%20images/Los%20Angeles.png" alt="Los Angeles" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -639,8 +622,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

@@ -33,38 +33,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // CITY ILLUSTRATION — Guadalajara
 // ─────────────────────────────────────────────────────────────────────────────
-const GdlIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#EDE8DC" rx={RADIUS} />
-    <rect x="0" y="0" width="280" height="80" fill="#F5EEE5" opacity="0.5" />
-    {/* Cathedral towers */}
-    <rect x="78" y="42" width="9" height="48" fill="#8B2635" opacity="0.28" rx={1} />
-    <polygon points="82.5,42 77,52 88,52" fill="#8B2635" opacity="0.35" />
-    <rect x="94" y="42" width="9" height="48" fill="#8B2635" opacity="0.28" rx={1} />
-    <polygon points="98.5,42 93,52 104,52" fill="#8B2635" opacity="0.35" />
-    {/* Cathedral body */}
-    <rect x="70" y="68" width="51" height="22" fill="#8B2635" opacity="0.14" rx={1} />
-    {/* City buildings */}
-    <rect x="10" y="70" width="6"  height="20" fill="#8B2635" opacity="0.22" rx={1} />
-    <rect x="20" y="62" width="8"  height="28" fill="#8B2635" opacity="0.26" rx={1} />
-    <rect x="32" y="66" width="5"  height="24" fill="#8B2635" opacity="0.18" rx={1} />
-    <rect x="40" y="58" width="10" height="32" fill="#8B2635" opacity="0.22" rx={1} />
-    <rect x="54" y="64" width="6"  height="26" fill="#8B2635" opacity="0.16" rx={1} />
-    {/* Minerva roundabout */}
-    <circle cx="168" cy="85" r="14" fill="none" stroke="#8B2635" strokeWidth="1.2" opacity="0.28" />
-    <rect x="166" y="62" width="4" height="23" fill="#8B2635" opacity="0.38" rx={1} />
-    <polygon points="168,62 164.5,69 171.5,69" fill="#8B2635" opacity="0.42" />
-    {/* Estadio Akron oval */}
-    <ellipse cx="222" cy="108" rx="36" ry="13" fill="#8B2635" opacity="0.14" />
-    <ellipse cx="222" cy="108" rx="26" ry="9"  fill="#8B2635" opacity="0.10" />
-    {/* Agave plant hint */}
-    <line x1="245" y1="90" x2="238" y2="80" stroke="#2D6B4A" strokeWidth="1.5" opacity="0.4" />
-    <line x1="245" y1="90" x2="252" y2="80" stroke="#2D6B4A" strokeWidth="1.5" opacity="0.4" />
-    <line x1="245" y1="90" x2="245" y2="78" stroke="#2D6B4A" strokeWidth="1.5" opacity="0.4" />
-    {/* Flag */}
-    <text x="258" y="50" fontSize="20" textAnchor="middle">🇲🇽</text>
-  </svg>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PRIMITIVE COMPONENTS
@@ -419,7 +387,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <GdlIllustration />
+      <img src="/images/WC%20images/Guadalajara.png" alt="Guadalajara" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -685,8 +653,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"

@@ -33,31 +33,6 @@ const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // CITY ILLUSTRATION — Dallas
 // ─────────────────────────────────────────────────────────────────────────────
-const DalIllustration = () => (
-  <svg viewBox="0 0 280 140" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ width:"100%", height:"100%" }}>
-    <rect width="280" height="140" fill="#EAE0D5" rx={RADIUS} />
-    <rect x="0" y="0" width="280" height="80" fill="#F5EDE5" opacity="0.5" />
-    {/* Dallas skyline — Reunion Tower ball hint */}
-    <rect x="10" y="50" width="7"  height="40" fill="#8B2635" opacity="0.28" rx={1} />
-    <rect x="21" y="40" width="9"  height="50" fill="#8B2635" opacity="0.32" rx={1} />
-    <rect x="34" y="44" width="6"  height="46" fill="#8B2635" opacity="0.22" rx={1} />
-    <rect x="44" y="35" width="11" height="55" fill="#8B2635" opacity="0.30" rx={1} />
-    <rect x="59" y="42" width="8"  height="48" fill="#8B2635" opacity="0.24" rx={1} />
-    <rect x="71" y="38" width="7"  height="52" fill="#8B2635" opacity="0.28" rx={1} />
-    {/* Reunion Tower — distinctive sphere on pole */}
-    <rect x="82" y="30" width="4" height="60" fill="#8B2635" opacity="0.40" rx={1} />
-    <circle cx="84" cy="28" r="7" fill="#8B2635" opacity="0.38" />
-    {/* AT&T Stadium — large oval, Arlington */}
-    <ellipse cx="210" cy="100" rx="52" ry="22" fill="#8B2635" opacity="0.14" />
-    <ellipse cx="210" cy="100" rx="40" ry="16" fill="#8B2635" opacity="0.10" />
-    {/* Stadium roof arc */}
-    <path d="M158,100 Q210,68 262,100" stroke="#8B2635" strokeWidth="1.5" fill="none" opacity="0.25" />
-    {/* Texas star */}
-    <text x="240" y="60" fontSize="18" textAnchor="middle">⭐</text>
-    {/* Flag */}
-    <text x="258" y="38" fontSize="16" textAnchor="middle">🇺🇸</text>
-  </svg>
-);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SHARED COMPONENTS (identical pattern)
@@ -410,7 +385,7 @@ const GuideHero = ({ guide, strings }) => (
       </div>
     </div>
     <div style={{ height:210, borderRadius:RADIUS+2, overflow:"hidden", boxShadow:CARD_SHADOW }}>
-      <DalIllustration />
+      <img src="/images/WC%20images/Dallas.png" alt="Dallas" style={{ width:"100%", height:"100%", objectFit:"cover" }} />
     </div>
   </div>
 );
@@ -676,8 +651,8 @@ const GuideDetail = ({ guide, onBack, strings }) => {
             </section>
 
             {/* 08 — CIERRE */}
-            <section style={{ marginBottom:0 }}>
-              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", overflow:"hidden" }}>
+            <section style={{ marginBottom:0, scrollMarginTop:64 }}>
+              <div style={{ background:T.pine, borderRadius:RADIUS+2, padding:"48px 44px 44px", position:"relative", overflow:"hidden" }}>
                 <div style={{ width:32, height:2, background:T.coral, marginBottom:28, opacity:0.85 }} />
                 <blockquote style={{ ...df("clamp(18px,2.4vw,24px)",400,"normal"), color:T.sand, lineHeight:1.75, margin:"0 0 24px", maxWidth:540 }}>
                   "{guide.closingNote}"
