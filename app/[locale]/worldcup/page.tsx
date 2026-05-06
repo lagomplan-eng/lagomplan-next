@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function WorldcupIndexPage({ params }: Props) {
   const { locale } = await params
   return (
-    <main className="pt-[88px]" style={{ background: '#EDE7E1', minHeight: '100vh' }}>
+    <main className="pt-[88px]" style={{ minHeight: '100vh' }}>
       <WorldcupClient locale={locale} />
       <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 32px' }}>
         <NewsletterEndOfGuide />
