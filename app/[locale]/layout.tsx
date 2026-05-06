@@ -11,6 +11,7 @@
 export const dynamic = 'force-dynamic'
 
 import type { Metadata }              from 'next'
+import Script                         from 'next/script'
 import { Manrope, Fraunces, DM_Mono } from 'next/font/google'
 import { notFound }                   from 'next/navigation'
 import { NextIntlClientProvider }     from 'next-intl'
@@ -88,6 +89,18 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-39KTC50YH3"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-39KTC50YH3');
+          `}
+        </Script>
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
             <PlanProvider>
