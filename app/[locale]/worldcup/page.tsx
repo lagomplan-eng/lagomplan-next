@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
 import type { Locale } from '../../../i18n'
 import WorldcupClient from '../../../components/worldcup/WorldcupClient'
+import NewsletterEndOfGuide from '../../../components/newsletter/NewsletterEndOfGuide'
 
 type Props = { params: Promise<{ locale: Locale }> }
 
@@ -23,6 +24,9 @@ export default async function WorldcupIndexPage({ params }: Props) {
   return (
     <main className="pt-[88px]" style={{ background: '#EDE7E1', minHeight: '100vh' }}>
       <WorldcupClient locale={locale} />
+      <div style={{ maxWidth: 1020, margin: '0 auto', padding: '0 32px' }}>
+        <NewsletterEndOfGuide />
+      </div>
     </main>
   )
 }

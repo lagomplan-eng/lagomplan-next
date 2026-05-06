@@ -160,8 +160,9 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
         {/* ── End-of-guide newsletter (hidden on print) ─────────────────
              Sits INSIDE the max-w-[1200px] px-8 wrapper so its inner
              Pine card aligns with the "Recommended experiences" card
-             rendered just above it on the left column. */}
-        <div className="print:hidden">
+             rendered just above it on the left column. The -mt-8 closes
+             the dead air the grid's pb-20 leaves behind. */}
+        <div className="-mt-8 print:hidden">
           <NewsletterEndOfGuide />
         </div>
 
