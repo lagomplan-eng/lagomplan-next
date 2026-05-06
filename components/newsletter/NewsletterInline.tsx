@@ -1,0 +1,150 @@
+'use client'
+
+/**
+ * NewsletterInline — editorial CTA dropped between guide sections.
+ *
+ * Static inline block (no scroll/session logic). Submits via the same
+ * Mailchimp JSONP endpoint as NewsletterPopup. On success, replaces
+ * itself with a ✓ confirmation row.
+ *
+ * Props let guide pages tailor the eyebrow/headline/sub for context
+ * (e.g. a World Cup guide can say "Cobertura del Mundial, en tu correo.").
+ */
+
+import { useCallback, useRef, useState } from 'react'
+import styles from './NewsletterInline.module.css'
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+interface NewsletterInlineProps {
+  eyebrow?:  string
+  headline?: string
+  sub?:      string
+}
+
+type Status = 'idle' | 'loading' | 'error' | 'success'
+
+export default function NewsletterInline({
+  eyebrow  = 'Boletín Lagomplan',
+  headline = 'Más guías así, cada semana.',
+  sub      = 'Destinos, itinerarios y tips de planeación — en tu correo.',
+}: NewsletterInlineProps) {
+  const [email,  setEmail]  = useState('')
+  const [status, setStatus] = useState<Status>('idle')
+  const [error,  setError]  = useState('Verifica tu correo e intenta de nuevo.')
+  const callbackIdRef = useRef(0)
+
+  const submit = useCallback(() => {
+    const value = email.trim()
+    if (!value || !EMAIL_RE.test(value)) {
+      setError('Verifica tu correo e intenta de nuevo.')
+      setStatus('error')
+      return
+    }
+
+    const url = process.env.NEXT_PUBLIC_MAILCHIMP_URL
+    if (!url || url === 'YOUR_MAILCHIMP_ACTION_URL') {
+      setError('Newsletter no configurado.')
+      setStatus('error')
+      return
+    }
+
+    setStatus('loading')
+
+    const cbName = `lgmInlineCb_${Date.now()}_${++callbackIdRef.current}`
+    const w = window as unknown as Record<string, unknown>
+
+    const cleanup = (script: HTMLScriptElement) => {
+      try { delete w[cbName] } catch { w[cbName] = undefined }
+      script.remove()
+    }
+
+    w[cbName] = (data: { result?: string; msg?: string }) => {
+      if (data && data.result === 'success') {
+        setStatus('success')
+      } else {
+        const msg = data && data.msg && data.msg.length < 80
+          ? data.msg
+          : 'Verifica tu correo e intenta de nuevo.'
+        setError(msg)
+        setStatus('error')
+      }
+      cleanup(script)
+    }
+
+    const fullUrl =
+      url.replace('/post?', '/post-json?') +
+      '&EMAIL=' + encodeURIComponent(value) +
+      '&c=' + cbName
+
+    const script = document.createElement('script')
+    script.src = fullUrl
+    script.onerror = () => {
+      setError('No pudimos conectar. Intenta más tarde.')
+      setStatus('error')
+      cleanup(script)
+    }
+    document.body.appendChild(script)
+  }, [email])
+
+  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') submit()
+  }
+
+  if (status === 'success') {
+    return (
+      <div className={styles.wrap}>
+        <div className={styles.success} role="status">
+          <div className={styles.successCheck}>✓</div>
+          <div>
+            <div className={styles.successMsg}>¡Ya estás dentro.</div>
+            <div className={styles.successSub}>
+              Revisa tu correo para confirmar tu suscripción.
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const isLoading = status === 'loading'
+
+  return (
+    <div className={styles.wrap}>
+      <div className={styles.block}>
+        <div className={styles.text}>
+          <div className={styles.eyebrow}>{eyebrow}</div>
+          <div className={styles.headline}>{headline}</div>
+          <div className={styles.sub}>{sub}</div>
+        </div>
+
+        <div className={styles.formCol}>
+          <div className={styles.form}>
+            <input
+              type="email"
+              autoComplete="email"
+              aria-label="Tu correo electrónico"
+              placeholder="tu@correo.com"
+              className={styles.input}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              onKeyDown={onKeyDown}
+              disabled={isLoading}
+            />
+            <button
+              type="button"
+              className={styles.btn}
+              onClick={submit}
+              disabled={isLoading}
+            >
+              {isLoading ? '...' : 'Suscribirse'}
+            </button>
+          </div>
+          {status === 'error' && (
+            <div className={styles.error} role="alert">{error}</div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}

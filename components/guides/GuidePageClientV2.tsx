@@ -27,6 +27,7 @@ import { Transport }               from './RightColumn/Transport'
 import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
 import { GuideFreeIndicator }      from './GuideFreeIndicator'
+import NewsletterInline            from '../newsletter/NewsletterInline'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -137,6 +138,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
           <div>
             <Itinerary data={data.itinerary} locale={locale} />
             <HotelsSection data={data.hotels} locale={locale} onToast={toast.show} />
+            <NewsletterInline />
             <ExperiencesSection data={data.experiences} onToast={toast.show} />
           </div>
 

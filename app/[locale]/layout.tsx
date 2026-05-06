@@ -21,6 +21,7 @@ import Nav    from '../../components/layout/Nav'
 import Footer from '../../components/layout/Footer'
 import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
 import { PlanProvider } from '../../components/plan/PlanProvider'
+import NewsletterPopup from '../../components/newsletter/NewsletterPopup'
 import '../globals.css'
 
 // ── Fonts ──────────────────────────────────────────────────
@@ -94,6 +95,7 @@ export default async function RootLayout({
               <Nav />
               {children}
               <Footer />
+              <NewsletterPopup />
             </PlanProvider>
           </SupabaseProvider>
         </NextIntlClientProvider>

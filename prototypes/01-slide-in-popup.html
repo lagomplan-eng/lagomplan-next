@@ -1,0 +1,326 @@
+<!--
+  LAGOMPLAN — Newsletter Slide-In Card
+  =====================================
+  WHERE TO PASTE: Webflow Site Settings → Custom Code → Footer Code
+  (Paste once — works site-wide)
+
+  SETUP:
+  1. Replace YOUR_MAILCHIMP_ACTION_URL below with your Mailchimp form action URL.
+     Get it from: Mailchimp → Audience → Signup forms → Embedded forms → copy the "action" attribute.
+     It looks like: https://lagomplan.us1.list-manage.com/subscribe/post?u=XXXXX&id=XXXXX
+  2. Save + Publish in Webflow.
+
+  BEHAVIOR:
+  - Slides in bottom-right after user scrolls 40% of the page
+  - Shows once per browser session (sessionStorage)
+  - If user dismisses with ×, hides for 7 days (localStorage)
+  - On successful submit: shows confirmation message, hides form
+-->
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Mono:wght@400&family=DM+Sans:wght@400;500&display=swap');
+
+  #lgm-popup {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 304px;
+    background: #1B4D3E;
+    border-radius: 6px;
+    padding: 22px 20px 18px;
+    z-index: 9999;
+    box-shadow: 0 16px 48px rgba(15, 26, 22, 0.28);
+    transform: translateY(120%);
+    opacity: 0;
+    transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.38s ease;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  #lgm-popup.lgm-visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #lgm-popup.lgm-hidden {
+    transform: translateY(120%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #lgm-close {
+    position: absolute;
+    top: 12px;
+    right: 14px;
+    background: none;
+    border: none;
+    color: rgba(244, 240, 232, 0.35);
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0;
+    font-family: 'DM Mono', monospace;
+    transition: color 0.15s;
+  }
+
+  #lgm-close:hover {
+    color: rgba(244, 240, 232, 0.75);
+  }
+
+  #lgm-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: #6EBD9F;
+    margin-bottom: 8px;
+  }
+
+  #lgm-headline {
+    font-family: 'Playfair Display', serif;
+    font-size: 19px;
+    color: #F4F0E8;
+    line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  #lgm-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba(244, 240, 232, 0.58);
+    line-height: 1.55;
+    margin-bottom: 14px;
+  }
+
+  #lgm-form-row {
+    display: flex;
+  }
+
+  #lgm-email {
+    flex: 1;
+    background: rgba(244, 240, 232, 0.1);
+    border: 1px solid rgba(244, 240, 232, 0.18);
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    padding: 9px 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: #F4F0E8;
+    outline: none;
+    transition: border-color 0.15s;
+    -webkit-appearance: none;
+  }
+
+  #lgm-email::placeholder {
+    color: rgba(244, 240, 232, 0.3);
+  }
+
+  #lgm-email:focus {
+    border-color: rgba(110, 189, 159, 0.5);
+  }
+
+  #lgm-submit {
+    background: #F4F0E8;
+    color: #1B4D3E;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 9px 14px;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.15s;
+    -webkit-appearance: none;
+  }
+
+  #lgm-submit:hover {
+    background: #E8E0D0;
+  }
+
+  #lgm-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  #lgm-privacy {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(244, 240, 232, 0.25);
+    letter-spacing: 0.4px;
+    margin-top: 8px;
+  }
+
+  #lgm-error {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: #F4A393;
+    margin-top: 6px;
+    display: none;
+  }
+
+  #lgm-success {
+    display: none;
+    text-align: center;
+    padding: 8px 0 4px;
+  }
+
+  #lgm-success-icon {
+    font-size: 28px;
+    margin-bottom: 8px;
+    color: #6EBD9F;
+  }
+
+  #lgm-success-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    color: #F4F0E8;
+    margin-bottom: 4px;
+  }
+
+  #lgm-success-sub {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    color: rgba(244, 240, 232, 0.5);
+  }
+</style>
+
+<div id="lgm-popup" role="dialog" aria-label="Newsletter de Lagomplan">
+  <button id="lgm-close" aria-label="Cerrar">×</button>
+
+  <div id="lgm-content">
+    <div id="lgm-eyebrow">Guías · Consejos · Mundial 2026</div>
+    <div id="lgm-headline">Tu próximo viaje,<br>antes de que lo pidas.</div>
+    <div id="lgm-sub">Destinos curados, rutas probadas y tips de planeación — en tu correo.</div>
+
+    <div id="lgm-form-row">
+      <input
+        id="lgm-email"
+        type="email"
+        placeholder="tu@correo.com"
+        autocomplete="email"
+        aria-label="Tu correo electrónico"
+      />
+      <button id="lgm-submit">Unirme →</button>
+    </div>
+
+    <div id="lgm-error">Verifica tu correo e intenta de nuevo.</div>
+    <div id="lgm-privacy">Sin spam. Cancela cuando quieras.</div>
+  </div>
+
+  <div id="lgm-success">
+    <div id="lgm-success-icon">✓</div>
+    <div id="lgm-success-text">¡Ya estás dentro.</div>
+    <div id="lgm-success-sub">Revisa tu correo para confirmar.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ─── CONFIG ───────────────────────────────────────────────────────────────
+  var MAILCHIMP_URL = 'YOUR_MAILCHIMP_ACTION_URL';
+  // Replace above with your Mailchimp action URL, e.g.:
+  // 'https://lagomplan.us1.list-manage.com/subscribe/post?u=XXXXX&id=XXXXX'
+
+  var SCROLL_TRIGGER = 0.40;   // Show after 40% scroll
+  var DISMISS_DAYS   = 7;      // Hide for 7 days after × click
+  var SESSION_KEY    = 'lgm_popup_seen';
+  var DISMISS_KEY    = 'lgm_popup_dismissed';
+  // ──────────────────────────────────────────────────────────────────────────
+
+  var popup   = document.getElementById('lgm-popup');
+  var closeBtn = document.getElementById('lgm-close');
+  var submitBtn = document.getElementById('lgm-submit');
+  var emailInput = document.getElementById('lgm-email');
+  var errorEl = document.getElementById('lgm-error');
+  var contentEl = document.getElementById('lgm-content');
+  var successEl = document.getElementById('lgm-success');
+
+  var shown = false;
+
+  function isDismissed() {
+    try {
+      var val = localStorage.getItem(DISMISS_KEY);
+      if (!val) return false;
+      return Date.now() < parseInt(val, 10);
+    } catch (e) { return false; }
+  }
+
+  function isSeenThisSession() {
+    try {
+      return !!sessionStorage.getItem(SESSION_KEY);
+    } catch (e) { return false; }
+  }
+
+  function markSeen() {
+    try { sessionStorage.setItem(SESSION_KEY, '1'); } catch (e) {}
+  }
+
+  function show() {
+    if (shown || isDismissed() || isSeenThisSession()) return;
+    shown = true;
+    markSeen();
+    popup.classList.add('lgm-visible');
+  }
+
+  function hide(permanent) {
+    popup.classList.remove('lgm-visible');
+    popup.classList.add('lgm-hidden');
+    if (permanent) {
+      try {
+        localStorage.setItem(DISMISS_KEY, Date.now() + DISMISS_DAYS * 86400000);
+      } catch (e) {}
+    }
+  }
+
+  // Scroll trigger
+  window.addEventListener('scroll', function () {
+    if (shown) return;
+    var scrolled = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+    if (scrolled >= SCROLL_TRIGGER) show();
+  }, { passive: true });
+
+  // Close button
+  closeBtn.addEventListener('click', function () {
+    hide(true);
+  });
+
+  // Form submit
+  submitBtn.addEventListener('click', function () {
+    var email = emailInput.value.trim();
+    errorEl.style.display = 'none';
+
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errorEl.style.display = 'block';
+      return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '...';
+
+    // Mailchimp JSONP submit
+    var url = MAILCHIMP_URL.replace('/post?', '/post-json?') + '&EMAIL=' + encodeURIComponent(email) + '&c=lgmCallback';
+
+    window.lgmCallback = function (data) {
+      if (data.result === 'success') {
+        contentEl.style.display = 'none';
+        successEl.style.display = 'block';
+        setTimeout(function () { hide(true); }, 3500);
+      } else {
+        errorEl.textContent = data.msg && data.msg.length < 80 ? data.msg : 'Verifica tu correo e intenta de nuevo.';
+        errorEl.style.display = 'block';
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Unirme →';
+      }
+    };
+
+    var script = document.createElement('script');
+    script.src = url;
+    document.body.appendChild(script);
+  });
+
+  // ESC key closes
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && popup.classList.contains('lgm-visible')) hide(true);
+  });
+})();
+</script>
