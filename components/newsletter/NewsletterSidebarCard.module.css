@@ -4,10 +4,13 @@
    ───────────────────────────────────────────────────────────────────── */
 
 .card {
-  width: 220px;
+  /* Width: inherited from the sidebar column — matches Tips / PlanCTA /
+     Checklist / Transport, none of which set a fixed width. */
   background: #0F3A33;
-  border-radius: 4px;
-  padding: 16px;
+  /* Match rounded-2xl (16px) used by every other V2 sidebar card. */
+  border-radius: 16px;
+  /* Match px-5 / py-4 of PlanCTA — 20px horizontal, ~16-20px vertical. */
+  padding: 20px;
   font-family: var(--font-sans), 'Manrope', sans-serif;
 }
 
