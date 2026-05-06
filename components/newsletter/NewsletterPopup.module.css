@@ -63,6 +63,7 @@
   color: #F4F0E8;
   line-height: 1.25;
   margin-bottom: 6px;
+  white-space: pre-line;
 }
 
 .sub {

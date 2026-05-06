@@ -192,5 +192,44 @@
     "signup": "Crear cuenta",
     "login": "Iniciar sesión",
     "privacy": "Privacidad"
+  },
+
+  "newsletter": {
+    "common": {
+      "placeholder": "tu@correo.com",
+      "ariaEmail": "Tu correo electrónico",
+      "loading": "...",
+      "errorEmail": "Verifica tu correo e intenta de nuevo.",
+      "errorEmailShort": "Verifica tu correo.",
+      "errorNetwork": "No pudimos conectar. Intenta más tarde."
+    },
+    "popup": {
+      "eyebrow": "Guías · Consejos · Mundial 2026",
+      "headline": "Tu próximo viaje,\nantes de que lo pidas.",
+      "sub": "Destinos curados, rutas probadas y tips de planeación — en tu correo.",
+      "submit": "Unirme →",
+      "privacy": "Sin spam. Cancela cuando quieras.",
+      "ariaDialog": "Newsletter de Lagomplan",
+      "ariaClose": "Cerrar",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    },
+    "sidebar": {
+      "label": "Boletín",
+      "headline": "Más guías como esta.",
+      "sub": "Destinos, tips y Mundial 2026 — en tu correo.",
+      "submit": "Unirme →",
+      "privacy": "Sin spam · Cancela cuando quieras",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    },
+    "endOfGuide": {
+      "label": "Boletín Lagomplan",
+      "headline": "¿Te gustó esta guía?\nRecibe más como esta.",
+      "sub": "Destinos curados, itinerarios y tips — cada semana.",
+      "submit": "Suscribirse",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    }
   }
 }

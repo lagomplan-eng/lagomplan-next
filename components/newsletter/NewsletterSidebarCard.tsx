@@ -11,6 +11,7 @@
  */
 
 import { useCallback, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import styles from './NewsletterSidebarCard.module.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -23,17 +24,18 @@ interface NewsletterSidebarCardProps {
 type Status = 'idle' | 'loading' | 'error' | 'success'
 
 export default function NewsletterSidebarCard({
-  headline = 'Más guías como esta.',
-  sub      = 'Destinos, tips y Mundial 2026 — en tu correo.',
+  headline,
+  sub,
 }: NewsletterSidebarCardProps) {
+  const t = useTranslations('newsletter')
   const [email,  setEmail]  = useState('')
   const [status, setStatus] = useState<Status>('idle')
-  const [error,  setError]  = useState('Verifica tu correo.')
+  const [error,  setError]  = useState(t('common.errorEmailShort'))
 
   const submit = useCallback(async () => {
     const value = email.trim()
     if (!value || !EMAIL_RE.test(value)) {
-      setError('Verifica tu correo.')
+      setError(t('common.errorEmailShort'))
       setStatus('error')
       return
     }
@@ -49,17 +51,17 @@ export default function NewsletterSidebarCard({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({})) as { error?: string }
-        setError(data.error ?? 'Verifica tu correo e intenta de nuevo.')
+        setError(data.error ?? t('common.errorEmail'))
         setStatus('error')
         return
       }
 
       setStatus('success')
     } catch {
-      setError('No pudimos conectar. Intenta más tarde.')
+      setError(t('common.errorNetwork'))
       setStatus('error')
     }
-  }, [email])
+  }, [email, t])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') submit()
@@ -70,8 +72,8 @@ export default function NewsletterSidebarCard({
       <div className={styles.card}>
         <div className={styles.success} role="status">
           <div className={styles.successCheck}>✓</div>
-          <div className={styles.successText}>¡Ya estás dentro.</div>
-          <div className={styles.successSub}>Revisa tu correo para confirmar.</div>
+          <div className={styles.successText}>{t('sidebar.successText')}</div>
+          <div className={styles.successSub}>{t('sidebar.successSub')}</div>
         </div>
       </div>
     )
@@ -81,15 +83,15 @@ export default function NewsletterSidebarCard({
 
   return (
     <div className={styles.card}>
-      <div className={styles.label}>Boletín</div>
-      <div className={styles.headline}>{headline}</div>
-      <div className={styles.sub}>{sub}</div>
+      <div className={styles.label}>{t('sidebar.label')}</div>
+      <div className={styles.headline}>{headline ?? t('sidebar.headline')}</div>
+      <div className={styles.sub}>{sub ?? t('sidebar.sub')}</div>
 
       <input
         type="email"
         autoComplete="email"
-        aria-label="Tu correo electrónico"
-        placeholder="tu@correo.com"
+        aria-label={t('common.ariaEmail')}
+        placeholder={t('common.placeholder')}
         className={styles.input}
         value={email}
         onChange={e => setEmail(e.target.value)}
@@ -107,10 +109,10 @@ export default function NewsletterSidebarCard({
         onClick={submit}
         disabled={isLoading}
       >
-        {isLoading ? '...' : 'Unirme →'}
+        {isLoading ? t('common.loading') : t('sidebar.submit')}
       </button>
 
-      <div className={styles.privacy}>Sin spam · Cancela cuando quieras</div>
+      <div className={styles.privacy}>{t('sidebar.privacy')}</div>
     </div>
   )
 }

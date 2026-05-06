@@ -8,9 +8,11 @@
      is now nested inside, so the inner Pine card aligns with the
      "Recommended experiences" section above. No Sand band — the page's
      own background reads cleaner. Negative top margin pulls the banner
-     up against the grid's pb-20 so it doesn't float in dead air. */
+     up against the grid's pb-20 so it doesn't float in dead air; bottom
+     margin gives breathing room before the global <Footer />. */
   width: 100%;
   margin-top: -32px;
+  margin-bottom: 56px;
   font-family: var(--font-sans), 'Manrope', sans-serif;
 }
 

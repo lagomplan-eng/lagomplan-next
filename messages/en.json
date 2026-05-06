@@ -192,5 +192,44 @@
     "signup": "Sign up",
     "login": "Log in",
     "privacy": "Privacy"
+  },
+
+  "newsletter": {
+    "common": {
+      "placeholder": "you@email.com",
+      "ariaEmail": "Your email address",
+      "loading": "...",
+      "errorEmail": "Check your email and try again.",
+      "errorEmailShort": "Check your email.",
+      "errorNetwork": "Couldn't connect. Try again later."
+    },
+    "popup": {
+      "eyebrow": "Guides · Tips · World Cup 2026",
+      "headline": "Your next trip,\nbefore you ask for it.",
+      "sub": "Curated destinations, proven routes and planning tips — in your inbox.",
+      "submit": "Join →",
+      "privacy": "No spam. Cancel anytime.",
+      "ariaDialog": "Lagomplan newsletter",
+      "ariaClose": "Close",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    },
+    "sidebar": {
+      "label": "Newsletter",
+      "headline": "More guides like this.",
+      "sub": "Destinations, tips and World Cup 2026 — in your inbox.",
+      "submit": "Join →",
+      "privacy": "No spam · Cancel anytime",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    },
+    "endOfGuide": {
+      "label": "Lagomplan newsletter",
+      "headline": "Liked this guide?\nGet more like it.",
+      "sub": "Curated destinations, itineraries and tips — every week.",
+      "submit": "Subscribe",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    }
   }
 }

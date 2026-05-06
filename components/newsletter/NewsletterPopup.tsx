@@ -13,6 +13,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import styles from './NewsletterPopup.module.css'
 
 const SCROLL_TRIGGER = 0.40
@@ -54,9 +55,10 @@ function isSeenThisSession(): boolean {
 }
 
 export default function NewsletterPopup() {
+  const t = useTranslations('newsletter')
   const [visible, setVisible] = useState(false)
   const [status,  setStatus]  = useState<Status>('idle')
-  const [error,   setError]   = useState<string>('Verifica tu correo e intenta de nuevo.')
+  const [error,   setError]   = useState<string>(t('common.errorEmail'))
   const [email,   setEmail]   = useState('')
   const shownRef = useRef(false)
 
@@ -102,7 +104,7 @@ export default function NewsletterPopup() {
   const submit = useCallback(async () => {
     const value = email.trim()
     if (!value || !EMAIL_RE.test(value)) {
-      setError('Verifica tu correo e intenta de nuevo.')
+      setError(t('common.errorEmail'))
       setStatus('error')
       return
     }
@@ -118,7 +120,7 @@ export default function NewsletterPopup() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({})) as { error?: string }
-        setError(data.error ?? 'Verifica tu correo e intenta de nuevo.')
+        setError(data.error ?? t('common.errorEmail'))
         setStatus('error')
         return
       }
@@ -126,10 +128,10 @@ export default function NewsletterPopup() {
       setStatus('success')
       setTimeout(dismiss, 3500)
     } catch {
-      setError('No pudimos conectar. Intenta más tarde.')
+      setError(t('common.errorNetwork'))
       setStatus('error')
     }
-  }, [email, dismiss])
+  }, [email, dismiss, t])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') submit()
@@ -141,13 +143,13 @@ export default function NewsletterPopup() {
   return (
     <div
       role="dialog"
-      aria-label="Newsletter de Lagomplan"
+      aria-label={t('popup.ariaDialog')}
       aria-hidden={!visible}
       className={`${styles.popup} ${visible ? styles.visible : ''}`}
     >
       <button
         type="button"
-        aria-label="Cerrar"
+        aria-label={t('popup.ariaClose')}
         className={styles.close}
         onClick={dismiss}
       >
@@ -157,25 +159,21 @@ export default function NewsletterPopup() {
       {isSuccess ? (
         <div className={styles.success}>
           <div className={styles.successIcon}>✓</div>
-          <div className={styles.successText}>¡Ya estás dentro.</div>
-          <div className={styles.successSub}>Revisa tu correo para confirmar.</div>
+          <div className={styles.successText}>{t('popup.successText')}</div>
+          <div className={styles.successSub}>{t('popup.successSub')}</div>
         </div>
       ) : (
         <div>
-          <div className={styles.eyebrow}>Guías · Consejos · Mundial 2026</div>
-          <div className={styles.headline}>
-            Tu próximo viaje,<br />antes de que lo pidas.
-          </div>
-          <div className={styles.sub}>
-            Destinos curados, rutas probadas y tips de planeación — en tu correo.
-          </div>
+          <div className={styles.eyebrow}>{t('popup.eyebrow')}</div>
+          <div className={styles.headline}>{t('popup.headline')}</div>
+          <div className={styles.sub}>{t('popup.sub')}</div>
 
           <div className={styles.formRow}>
             <input
               type="email"
               autoComplete="email"
-              aria-label="Tu correo electrónico"
-              placeholder="tu@correo.com"
+              aria-label={t('common.ariaEmail')}
+              placeholder={t('common.placeholder')}
               className={styles.email}
               value={email}
               onChange={e => setEmail(e.target.value)}
@@ -188,14 +186,14 @@ export default function NewsletterPopup() {
               onClick={submit}
               disabled={isLoading}
             >
-              {isLoading ? '...' : 'Unirme →'}
+              {isLoading ? t('common.loading') : t('popup.submit')}
             </button>
           </div>
 
           {status === 'error' && (
             <div className={styles.error} role="alert">{error}</div>
           )}
-          <div className={styles.privacy}>Sin spam. Cancela cuando quieras.</div>
+          <div className={styles.privacy}>{t('popup.privacy')}</div>
         </div>
       )}
     </div>

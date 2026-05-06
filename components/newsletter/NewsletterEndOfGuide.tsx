@@ -12,6 +12,7 @@
  */
 
 import { useCallback, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import styles from './NewsletterEndOfGuide.module.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -24,17 +25,18 @@ interface NewsletterEndOfGuideProps {
 type Status = 'idle' | 'loading' | 'error' | 'success'
 
 export default function NewsletterEndOfGuide({
-  headline = '¿Te gustó esta guía?\nRecibe más como esta.',
-  sub      = 'Destinos curados, itinerarios y tips — cada semana.',
+  headline,
+  sub,
 }: NewsletterEndOfGuideProps) {
+  const t = useTranslations('newsletter')
   const [email,  setEmail]  = useState('')
   const [status, setStatus] = useState<Status>('idle')
-  const [error,  setError]  = useState('Verifica tu correo e intenta de nuevo.')
+  const [error,  setError]  = useState(t('common.errorEmail'))
 
   const submit = useCallback(async () => {
     const value = email.trim()
     if (!value || !EMAIL_RE.test(value)) {
-      setError('Verifica tu correo e intenta de nuevo.')
+      setError(t('common.errorEmail'))
       setStatus('error')
       return
     }
@@ -50,17 +52,17 @@ export default function NewsletterEndOfGuide({
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({})) as { error?: string }
-        setError(data.error ?? 'Verifica tu correo e intenta de nuevo.')
+        setError(data.error ?? t('common.errorEmail'))
         setStatus('error')
         return
       }
 
       setStatus('success')
     } catch {
-      setError('No pudimos conectar. Intenta más tarde.')
+      setError(t('common.errorNetwork'))
       setStatus('error')
     }
-  }, [email])
+  }, [email, t])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') submit()
@@ -73,9 +75,9 @@ export default function NewsletterEndOfGuide({
     <section className={styles.section}>
       <div className={styles.card}>
         <div className={styles.text}>
-          <div className={styles.label}>Boletín Lagomplan</div>
-          <div className={styles.headline}>{headline}</div>
-          <div className={styles.sub}>{sub}</div>
+          <div className={styles.label}>{t('endOfGuide.label')}</div>
+          <div className={styles.headline}>{headline ?? t('endOfGuide.headline')}</div>
+          <div className={styles.sub}>{sub ?? t('endOfGuide.sub')}</div>
         </div>
 
         <div className={styles.formWrap}>
@@ -83,8 +85,8 @@ export default function NewsletterEndOfGuide({
             <div className={styles.success} role="status">
               <div className={styles.successCheck}>✓</div>
               <div>
-                <div className={styles.successText}>¡Ya estás dentro.</div>
-                <div className={styles.successSub}>Revisa tu correo para confirmar.</div>
+                <div className={styles.successText}>{t('endOfGuide.successText')}</div>
+                <div className={styles.successSub}>{t('endOfGuide.successSub')}</div>
               </div>
             </div>
           ) : (
@@ -93,8 +95,8 @@ export default function NewsletterEndOfGuide({
                 <input
                   type="email"
                   autoComplete="email"
-                  aria-label="Tu correo electrónico"
-                  placeholder="tu@correo.com"
+                  aria-label={t('common.ariaEmail')}
+                  placeholder={t('common.placeholder')}
                   className={styles.input}
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -107,7 +109,7 @@ export default function NewsletterEndOfGuide({
                   onClick={submit}
                   disabled={isLoading}
                 >
-                  {isLoading ? '...' : 'Suscribirse'}
+                  {isLoading ? t('common.loading') : t('endOfGuide.submit')}
                 </button>
               </div>
               {status === 'error' && (
