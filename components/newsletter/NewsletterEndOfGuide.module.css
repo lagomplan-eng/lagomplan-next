@@ -6,13 +6,11 @@
 .section {
   /* Fills the page wrapper (max-w-[1200px] mx-auto px-8) the component
      is now nested inside, so the inner Pine card aligns with the
-     "Recommended experiences" section above. Vertical padding gives
-     the Sand band a visible breathe; horizontal padding stays 0
-     because the page wrapper already supplies px-8. */
+     "Recommended experiences" section above. No Sand band — the page's
+     own background reads cleaner. Negative top margin pulls the banner
+     up against the grid's pb-20 so it doesn't float in dead air. */
   width: 100%;
-  background: #EDE7E1;
-  border-top: 1px solid #C8D5D2;
-  padding: 24px 0;
+  margin-top: -32px;
   font-family: var(--font-sans), 'Manrope', sans-serif;
 }
 
