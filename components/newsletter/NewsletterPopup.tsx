@@ -8,8 +8,8 @@
  *    per session (sessionStorage).
  *  - "×" dismisses for 7 days (localStorage timestamp).
  *  - Successful submit → ✓ confirmation, auto-hide after 3.5s.
- *  - Submission uses Mailchimp's JSONP endpoint; the action URL must be
- *    set via NEXT_PUBLIC_MAILCHIMP_URL.
+ *  - Submits to /api/subscribe — same server route used by the footer
+ *    NewsletterForm (Mailchimp Marketing API, key stays server-side).
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -59,7 +59,6 @@ export default function NewsletterPopup() {
   const [error,   setError]   = useState<string>('Verifica tu correo e intenta de nuevo.')
   const [email,   setEmail]   = useState('')
   const shownRef = useRef(false)
-  const callbackIdRef = useRef(0)
 
   // Scroll-trigger
   useEffect(() => {
@@ -100,7 +99,7 @@ export default function NewsletterPopup() {
     return () => document.removeEventListener('keydown', onKey)
   }, [visible, dismiss])
 
-  const submit = useCallback(() => {
+  const submit = useCallback(async () => {
     const value = email.trim()
     if (!value || !EMAIL_RE.test(value)) {
       setError('Verifica tu correo e intenta de nuevo.')
@@ -108,50 +107,28 @@ export default function NewsletterPopup() {
       return
     }
 
-    const url = process.env.NEXT_PUBLIC_MAILCHIMP_URL
-    if (!url || url === 'YOUR_MAILCHIMP_ACTION_URL') {
-      setError('Newsletter no configurado.')
-      setStatus('error')
-      return
-    }
-
     setStatus('loading')
 
-    const cbName = `lgmPopupCb_${Date.now()}_${++callbackIdRef.current}`
-    const w = window as unknown as Record<string, unknown>
+    try {
+      const res = await fetch('/api/subscribe', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: value }),
+      })
 
-    const cleanup = (script: HTMLScriptElement) => {
-      try { delete w[cbName] } catch { w[cbName] = undefined }
-      script.remove()
-    }
-
-    w[cbName] = (data: { result?: string; msg?: string }) => {
-      if (data && data.result === 'success') {
-        setStatus('success')
-        setTimeout(dismiss, 3500)
-      } else {
-        const msg = data && data.msg && data.msg.length < 80
-          ? data.msg
-          : 'Verifica tu correo e intenta de nuevo.'
-        setError(msg)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string }
+        setError(data.error ?? 'Verifica tu correo e intenta de nuevo.')
         setStatus('error')
+        return
       }
-      cleanup(script)
-    }
 
-    const fullUrl =
-      url.replace('/post?', '/post-json?') +
-      '&EMAIL=' + encodeURIComponent(value) +
-      '&c=' + cbName
-
-    const script = document.createElement('script')
-    script.src = fullUrl
-    script.onerror = () => {
+      setStatus('success')
+      setTimeout(dismiss, 3500)
+    } catch {
       setError('No pudimos conectar. Intenta más tarde.')
       setStatus('error')
-      cleanup(script)
     }
-    document.body.appendChild(script)
   }, [email, dismiss])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

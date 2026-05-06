@@ -3,15 +3,15 @@
 /**
  * NewsletterInline — editorial CTA dropped between guide sections.
  *
- * Static inline block (no scroll/session logic). Submits via the same
- * Mailchimp JSONP endpoint as NewsletterPopup. On success, replaces
+ * Static inline block (no scroll/session logic). Posts to /api/subscribe
+ * (same server route as the footer NewsletterForm). On success, replaces
  * itself with a ✓ confirmation row.
  *
  * Props let guide pages tailor the eyebrow/headline/sub for context
  * (e.g. a World Cup guide can say "Cobertura del Mundial, en tu correo.").
  */
 
-import { useCallback, useRef, useState } from 'react'
+import { useCallback, useState } from 'react'
 import styles from './NewsletterInline.module.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -32,9 +32,8 @@ export default function NewsletterInline({
   const [email,  setEmail]  = useState('')
   const [status, setStatus] = useState<Status>('idle')
   const [error,  setError]  = useState('Verifica tu correo e intenta de nuevo.')
-  const callbackIdRef = useRef(0)
 
-  const submit = useCallback(() => {
+  const submit = useCallback(async () => {
     const value = email.trim()
     if (!value || !EMAIL_RE.test(value)) {
       setError('Verifica tu correo e intenta de nuevo.')
@@ -42,49 +41,27 @@ export default function NewsletterInline({
       return
     }
 
-    const url = process.env.NEXT_PUBLIC_MAILCHIMP_URL
-    if (!url || url === 'YOUR_MAILCHIMP_ACTION_URL') {
-      setError('Newsletter no configurado.')
-      setStatus('error')
-      return
-    }
-
     setStatus('loading')
 
-    const cbName = `lgmInlineCb_${Date.now()}_${++callbackIdRef.current}`
-    const w = window as unknown as Record<string, unknown>
+    try {
+      const res = await fetch('/api/subscribe', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ email: value }),
+      })
 
-    const cleanup = (script: HTMLScriptElement) => {
-      try { delete w[cbName] } catch { w[cbName] = undefined }
-      script.remove()
-    }
-
-    w[cbName] = (data: { result?: string; msg?: string }) => {
-      if (data && data.result === 'success') {
-        setStatus('success')
-      } else {
-        const msg = data && data.msg && data.msg.length < 80
-          ? data.msg
-          : 'Verifica tu correo e intenta de nuevo.'
-        setError(msg)
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string }
+        setError(data.error ?? 'Verifica tu correo e intenta de nuevo.')
         setStatus('error')
+        return
       }
-      cleanup(script)
-    }
 
-    const fullUrl =
-      url.replace('/post?', '/post-json?') +
-      '&EMAIL=' + encodeURIComponent(value) +
-      '&c=' + cbName
-
-    const script = document.createElement('script')
-    script.src = fullUrl
-    script.onerror = () => {
+      setStatus('success')
+    } catch {
       setError('No pudimos conectar. Intenta más tarde.')
       setStatus('error')
-      cleanup(script)
     }
-    document.body.appendChild(script)
   }, [email])
 
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
