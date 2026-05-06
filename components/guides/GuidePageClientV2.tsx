@@ -27,7 +27,8 @@ import { Transport }               from './RightColumn/Transport'
 import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
 import { GuideFreeIndicator }      from './GuideFreeIndicator'
-import NewsletterInline            from '../newsletter/NewsletterInline'
+import NewsletterSidebarCard       from '../newsletter/NewsletterSidebarCard'
+import NewsletterEndOfGuide        from '../newsletter/NewsletterEndOfGuide'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -138,7 +139,6 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
           <div>
             <Itinerary data={data.itinerary} locale={locale} />
             <HotelsSection data={data.hotels} locale={locale} onToast={toast.show} />
-            <NewsletterInline />
             <ExperiencesSection data={data.experiences} onToast={toast.show} />
           </div>
 
@@ -152,6 +152,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
               completionMessage={checklistDone}
             />
             <Transport data={data.transport} />
+            <NewsletterSidebarCard />
           </div>
 
         </div>
@@ -161,6 +162,11 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src="/images/logo.png" alt="Lagomplan" className="h-8 w-auto opacity-75" />
         </div>
+      </div>
+
+      {/* ── End-of-guide newsletter (hidden on print) ── */}
+      <div className="print:hidden">
+        <NewsletterEndOfGuide />
       </div>
 
       {/* ── Toast ── */}

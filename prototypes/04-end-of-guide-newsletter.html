@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lagomplan — End of Guide Newsletter (Prototype D)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400;1,700&family=Manrope:wght@400;500;600&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --pine:       #0F3A33;
+      --sage:       #6B8F86;
+      --sand:       #EDE7E1;
+      --cream:      #F4F0E8;
+      --sand-light: #F7F4F0;
+      --pale:       #C8D5D2;
+      --near-black: #0E1A17;
+    }
+
+    body {
+      font-family: 'Manrope', sans-serif;
+      background: var(--sand-light);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 24px;
+    }
+
+    /* ─── SECTION WRAPPER ────────────────────────────────────── */
+    .end-section {
+      width: 100%;
+      max-width: 860px;
+      background: var(--sand);
+      border-top: 1px solid var(--pale);
+      padding: 24px;
+    }
+
+    /* ─── CARD ───────────────────────────────────────────────── */
+    .end-nl {
+      background: var(--pine);
+      border-radius: 4px;
+      padding: 28px 32px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+    }
+
+    .end-nl-text { flex: 1; }
+
+    .end-nl-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 6px;
+    }
+
+    .end-nl-headline {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 22px;
+      color: var(--sand);
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .end-nl-sub {
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      color: rgba(237, 231, 225, 0.5);
+      line-height: 1.5;
+    }
+
+    /* ─── FORM ───────────────────────────────────────────────── */
+    .end-nl-form-wrap { flex-shrink: 0; }
+
+    .end-nl-form { display: flex; }
+
+    .end-nl-input {
+      background: rgba(244, 240, 232, 0.08);
+      border: 1px solid rgba(244, 240, 232, 0.2);
+      border-right: none;
+      border-radius: 3px 0 0 3px;
+      padding: 11px 16px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      color: var(--cream);
+      width: 200px;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .end-nl-input::placeholder { color: rgba(244, 240, 232, 0.28); }
+    .end-nl-input:focus { border-color: rgba(244, 240, 232, 0.45); }
+
+    .end-nl-btn {
+      background: rgba(244, 240, 232, 0.12);
+      border: 1px solid rgba(244, 240, 232, 0.5);
+      border-radius: 0 3px 3px 0;
+      padding: 11px 22px;
+      font-family: 'Manrope', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      color: var(--cream);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+
+    .end-nl-btn:hover { background: rgba(244, 240, 232, 0.2); }
+    .end-nl-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .end-nl-error {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: #F4A393;
+      margin-top: 6px;
+      display: none;
+    }
+
+    /* ─── SUCCESS ─────────────────────────────────────────────── */
+    .end-nl-success {
+      display: none;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .end-nl-success-check {
+      font-size: 24px;
+      color: var(--sage);
+      flex-shrink: 0;
+    }
+
+    .end-nl-success-text {
+      font-family: 'Fraunces', serif;
+      font-style: italic;
+      font-size: 18px;
+      color: var(--cream);
+      margin-bottom: 3px;
+    }
+
+    .end-nl-success-sub {
+      font-family: 'DM Mono', monospace;
+      font-size: 10px;
+      color: rgba(244, 240, 232, 0.35);
+    }
+
+    /* ─── MOBILE ─────────────────────────────────────────────── */
+    @media (max-width: 600px) {
+      .end-nl {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+        padding: 22px 20px;
+      }
+
+      .end-nl-form-wrap { width: 100%; }
+      .end-nl-form { width: 100%; }
+      .end-nl-input { flex: 1; width: auto; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="end-section">
+    <div class="end-nl" id="end-nl-card">
+
+      <div class="end-nl-text">
+        <div class="end-nl-label">Boletín Lagomplan</div>
+        <div class="end-nl-headline">¿Te gustó esta guía?<br>Recibe más como esta.</div>
+        <div class="end-nl-sub">Destinos curados, itinerarios y tips — cada semana.</div>
+      </div>
+
+      <div class="end-nl-form-wrap">
+        <div id="end-form-visible">
+          <div class="end-nl-form">
+            <input
+              class="end-nl-input"
+              id="end-nl-email"
+              type="email"
+              placeholder="tu@correo.com"
+              autocomplete="email"
+              aria-label="Tu correo electrónico"
+            />
+            <button class="end-nl-btn" id="end-nl-btn">Suscribirse</button>
+          </div>
+          <div class="end-nl-error" id="end-nl-error">Verifica tu correo e intenta de nuevo.</div>
+        </div>
+
+        <div class="end-nl-success" id="end-nl-success">
+          <div class="end-nl-success-check">✓</div>
+          <div>
+            <div class="end-nl-success-text">¡Ya estás dentro.</div>
+            <div class="end-nl-success-sub">Revisa tu correo para confirmar.</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    const MAILCHIMP_URL = 'YOUR_MAILCHIMP_ACTION_URL';
+
+    const emailInput  = document.getElementById('end-nl-email');
+    const btn         = document.getElementById('end-nl-btn');
+    const errorEl     = document.getElementById('end-nl-error');
+    const formVisible = document.getElementById('end-form-visible');
+    const successEl   = document.getElementById('end-nl-success');
+
+    btn.addEventListener('click', submit);
+    emailInput.addEventListener('keydown', e => { if (e.key === 'Enter') submit(); });
+
+    function submit() {
+      const email = emailInput.value.trim();
+      errorEl.style.display = 'none';
+
+      if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        errorEl.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = '...';
+
+      const cbName = 'lgmEndCb' + Date.now();
+      const url = MAILCHIMP_URL.replace('/post?', '/post-json?') +
+                  '&EMAIL=' + encodeURIComponent(email) + '&c=' + cbName;
+
+      window[cbName] = function (data) {
+        if (data.result === 'success') {
+          formVisible.style.display = 'none';
+          successEl.style.display = 'flex';
+        } else {
+          errorEl.textContent = data.msg && data.msg.length < 80
+            ? data.msg : 'Verifica tu correo e intenta de nuevo.';
+          errorEl.style.display = 'block';
+          btn.disabled = false;
+          btn.textContent = 'Suscribirse';
+        }
+        delete window[cbName];
+      };
+
+      const script = document.createElement('script');
+      script.src = url;
+      document.body.appendChild(script);
+    }
+  </script>
+</body>
+</html>

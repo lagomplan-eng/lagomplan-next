@@ -1,0 +1,130 @@
+/* ─────────────────────────────────────────────────────────────────────
+   NewsletterSidebarCard — Pine 220px-wide sidebar card.
+   Drops in as the last item of the right column on a guide detail page.
+   ───────────────────────────────────────────────────────────────────── */
+
+.card {
+  width: 220px;
+  background: #0F3A33;
+  border-radius: 4px;
+  padding: 16px;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+}
+
+.label {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #6B8F86;
+  margin-bottom: 7px;
+}
+
+.headline {
+  font-family: var(--font-display), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 15px;
+  color: #EDE7E1;
+  line-height: 1.3;
+  margin-bottom: 5px;
+}
+
+.sub {
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 11px;
+  color: rgba(237, 231, 225, 0.5);
+  line-height: 1.45;
+  margin-bottom: 12px;
+}
+
+.input {
+  width: 100%;
+  display: block;
+  background: rgba(244, 240, 232, 0.08);
+  border: 1px solid rgba(244, 240, 232, 0.2);
+  border-radius: 3px;
+  padding: 8px 10px;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 11px;
+  color: #F4F0E8;
+  outline: none;
+  margin-bottom: 7px;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: rgba(244, 240, 232, 0.28);
+}
+
+.input:focus {
+  border-color: rgba(244, 240, 232, 0.45);
+}
+
+.btn {
+  width: 100%;
+  display: block;
+  background: rgba(244, 240, 232, 0.12);
+  border: 1px solid rgba(244, 240, 232, 0.5);
+  border-radius: 3px;
+  padding: 8px 0;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #F4F0E8;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  -webkit-appearance: none;
+}
+
+.btn:hover {
+  background: rgba(244, 240, 232, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.privacy {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(244, 240, 232, 0.22);
+  margin-top: 7px;
+  text-align: center;
+}
+
+.error {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 9px;
+  color: #F4A393;
+  margin-top: 5px;
+}
+
+.success {
+  text-align: center;
+  padding: 8px 0;
+}
+
+.successCheck {
+  font-size: 20px;
+  color: #6B8F86;
+  margin-bottom: 6px;
+}
+
+.successText {
+  font-family: var(--font-display), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  color: #F4F0E8;
+  margin-bottom: 3px;
+}
+
+.successSub {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(244, 240, 232, 0.35);
+}

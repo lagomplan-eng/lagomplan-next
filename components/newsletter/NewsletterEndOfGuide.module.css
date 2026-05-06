@@ -1,0 +1,163 @@
+/* ─────────────────────────────────────────────────────────────────────
+   NewsletterEndOfGuide — Pine card inside a Sand-bg section.
+   Sits after all guide content, before the layout's <Footer />.
+   ───────────────────────────────────────────────────────────────────── */
+
+.section {
+  width: 100%;
+  max-width: 860px;
+  margin: 0 auto;
+  background: #EDE7E1;
+  border-top: 1px solid #C8D5D2;
+  padding: 24px;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+}
+
+.card {
+  background: #0F3A33;
+  border-radius: 4px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.label {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #6B8F86;
+  margin-bottom: 6px;
+}
+
+.headline {
+  font-family: var(--font-display), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 22px;
+  color: #EDE7E1;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  white-space: pre-line;
+}
+
+.sub {
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 13px;
+  color: rgba(237, 231, 225, 0.5);
+  line-height: 1.5;
+}
+
+.formWrap {
+  flex-shrink: 0;
+}
+
+.form {
+  display: flex;
+}
+
+.input {
+  background: rgba(244, 240, 232, 0.08);
+  border: 1px solid rgba(244, 240, 232, 0.2);
+  border-right: none;
+  border-radius: 3px 0 0 3px;
+  padding: 11px 16px;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 13px;
+  color: #F4F0E8;
+  width: 200px;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  min-width: 0;
+}
+
+.input::placeholder {
+  color: rgba(244, 240, 232, 0.28);
+}
+
+.input:focus {
+  border-color: rgba(244, 240, 232, 0.45);
+}
+
+.btn {
+  background: rgba(244, 240, 232, 0.12);
+  border: 1px solid rgba(244, 240, 232, 0.5);
+  border-radius: 0 3px 3px 0;
+  padding: 11px 22px;
+  font-family: var(--font-sans), 'Manrope', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #F4F0E8;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  -webkit-appearance: none;
+}
+
+.btn:hover {
+  background: rgba(244, 240, 232, 0.2);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.error {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 10px;
+  color: #F4A393;
+  margin-top: 6px;
+}
+
+.success {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.successCheck {
+  font-size: 24px;
+  color: #6B8F86;
+  flex-shrink: 0;
+}
+
+.successText {
+  font-family: var(--font-display), 'Fraunces', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: #F4F0E8;
+  margin-bottom: 3px;
+}
+
+.successSub {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(244, 240, 232, 0.35);
+}
+
+@media (max-width: 600px) {
+  .card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 22px 20px;
+  }
+  .formWrap {
+    width: 100%;
+  }
+  .form {
+    width: 100%;
+  }
+  .input {
+    flex: 1;
+    width: auto;
+  }
+}
