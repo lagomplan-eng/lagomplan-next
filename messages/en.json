@@ -47,7 +47,7 @@
     "budgetPlaceholder": "What's your ballpark?",
     "budgetCurrency": "MXN",
     "submit": "Plan my trip →",
-    "freeNote": "✦ Plan 5 trips free · No credit card needed",
+    "freeNote": "✦ Plan {count} trips free · No credit card needed",
     "googlePowered": "Powered by Google Maps",
     "suggestions": "Suggestions",
     "night": "night",

@@ -47,7 +47,7 @@
     "budgetPlaceholder": "¿Cuánto tienes en mente?",
     "budgetCurrency": "MXN",
     "submit": "Planificar mi viaje →",
-    "freeNote": "✦ Planifica 3 viajes gratis · Sin tarjeta",
+    "freeNote": "✦ Planifica {count} viajes gratis · Sin tarjeta",
     "googlePowered": "Impulsado por Google Maps",
     "suggestions": "Sugerencias",
     "night": "noche",

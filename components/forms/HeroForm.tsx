@@ -5,6 +5,7 @@ import { useRouter } from '../../lib/navigation'
 import { useTranslations } from 'next-intl'
 import PlacesInput, { type PlaceResult } from './PlacesInput'
 import DateRangePicker, { type DateRange } from './DateRangePicker'
+import { FREE_TRIPS_LIMIT } from '../../lib/plan/limits'
 
 type Traveler = 'solo' | 'pareja' | 'familia' | 'amigos'
 
@@ -461,7 +462,7 @@ function submit(e: React.FormEvent) {
           </button>
 
           <p className="font-sans text-[10px] text-[#6B8F86] text-center mt-2.5 tracking-[.3px]">
-            {t('freeNote')}
+            {t('freeNote', { count: FREE_TRIPS_LIMIT })}
           </p>
         </div>
 
