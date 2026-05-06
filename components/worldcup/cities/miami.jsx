@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { es, en } from "../../../lib/worldcup/data/miami";
 import { ui } from "../../../lib/worldcup/ui-strings";
+import { MOBILE_CSS } from "../../../lib/worldcup/mobile-css";
 
 const T = { pine:"#0F3A33", sage:"#6B8F86", sageLight:"#EAF2F0", sand:"#EDE7E1", sandLight:"#F7F4F1", sandDark:"#D9D2C9", coral:"#E1615B", coralLight:"#FCEEED", fjord:"#2D4F6C", fjordLight:"#E3EBF2", ink:"#1C1C1A", inkMid:"#5A5A56", inkFaint:"#9A9A94", white:"#FFFFFF", matchGold:"#B8860B", matchGoldLight:"#FBF5E0", bg:"#fff9f3" };
 const RADIUS = 10;
@@ -647,6 +648,7 @@ export default function App({ locale = "es" }) {
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
+        ${MOBILE_CSS}
       `}</style>
       <GuideDetail guide={guide} strings={strings} locale={locale} onBack={() => {}} />
     </>

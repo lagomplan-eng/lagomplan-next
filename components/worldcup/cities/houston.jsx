@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { es, en } from "../../../lib/worldcup/data/houston";
 import { ui } from "../../../lib/worldcup/ui-strings";
+import { MOBILE_CSS } from "../../../lib/worldcup/mobile-css";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS — LagomPlan canonical
@@ -709,6 +710,7 @@ export default function App({ locale = "es" }) {
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:${T.bg};}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
+        ${MOBILE_CSS}
       `}</style>
       <GuideDetail guide={guide} strings={strings} onBack={() => {}} />
     </>

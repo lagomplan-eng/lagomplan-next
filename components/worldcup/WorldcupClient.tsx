@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Link } from '../../lib/navigation'
+import { MOBILE_CSS } from '../../lib/worldcup/mobile-css'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // DESIGN TOKENS — LagomPlan canonical
@@ -493,6 +494,7 @@ export default function WorldcupClient({ locale }: { locale: string }) {
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:#fff9f3;}
         ::-webkit-scrollbar-thumb{background:${T.sandDark};border-radius:3px;}
+        ${MOBILE_CSS}
       `}</style>
 
       <div style={{ background:'#fff9f3', minHeight:'100vh', fontFamily:"'Manrope', sans-serif" }}>
