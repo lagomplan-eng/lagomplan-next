@@ -133,7 +133,6 @@ export default async function PricingPage({
             ]}
             badge={t('plans.explorer.badge')}
             cta={t('plans.explorer.cta')}
-            cancelNote={t('plans.explorer.cancelNote')}
           />
         </div>
 
@@ -232,10 +231,9 @@ interface ExplorerCardProps {
   features:    string[]
   badge:       string
   cta:         string
-  cancelNote:  string
 }
 
-function ExplorerCard({ name, price, priceSuffix, usd, features, badge, cta, cancelNote }: ExplorerCardProps) {
+function ExplorerCard({ name, price, priceSuffix, usd, features, badge, cta }: ExplorerCardProps) {
   return (
     <article className="bg-pine rounded-[10px] flex flex-col p-5">
       <span className="self-start font-sans text-[9px] font-bold uppercase tracking-[0.08em] text-sand bg-coral px-2 py-1 rounded mb-3">
@@ -266,9 +264,6 @@ function ExplorerCard({ name, price, priceSuffix, usd, features, badge, cta, can
       >
         {cta}
       </button>
-      <p className="text-center font-sans text-[9px] text-sand/[0.25] mt-2">
-        {cancelNote}
-      </p>
     </article>
   )
 }

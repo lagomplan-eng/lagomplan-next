@@ -263,20 +263,20 @@
         "name":  "Per trip",
         "price": "39",
         "usd":   "≈ $1.99 USD",
-        "note":  "For occasional trips or trying the platform."
+        "note":  "For you, if you don't travel much or are just testing"
       },
       "pack5": {
         "name":  "Pack of 5",
         "price": "149",
         "usd":   "≈ $7.99 USD",
-        "note":  "$30 per trip. For families planning the season."
+        "note":  "For you, who loves a getaway or plans a handful of trips a year"
       },
       "pack10": {
         "badge": "Best value",
         "name":  "Pack of 10",
         "price": "249",
         "usd":   "≈ $12.99 USD",
-        "note":  "$25 per trip. The best one-time deal."
+        "note":  "For you, who loves to travel and wants the best one-time deal"
       },
       "explorer": {
         "badge":       "Recommended",
@@ -287,8 +287,7 @@
         "feature1":    "Unlimited trips",
         "feature2":    "Saved history",
         "feature3":    "Cancel anytime",
-        "cta":         "Get started",
-        "cancelNote":  "No commitment"
+        "cta":         "Get started"
       }
     },
     "faq": {
@@ -296,7 +295,7 @@
       "q1": "What's included in the free trip?",
       "a1": "The first trip is completely free and requires no account. You get a full plan with itinerary, estimated budget and activities. Results stay active for 7 days and you can always download the PDF.",
       "q2": "Why do I need an account for Trip 2?",
-      "a2": "Your account lets us save the trip permanently and give you access from any device. Trip 2 is also completely free — you just need to sign up.",
+      "a2": "Your account lets us save your trip and give you access from any device, plus your second and third trips are completely free.",
       "q3": "What's the difference between the packs and Explorer Monthly?",
       "a3": "Packs are one-time purchases: you buy a fixed number of generations and use them at your own pace. Explorer Monthly gives you unlimited trips for $199 MXN per month. If you plan 3+ trips a year, Explorer is the better deal.",
       "q4": "Do trips in the packs expire?",

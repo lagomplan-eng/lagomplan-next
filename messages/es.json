@@ -263,20 +263,20 @@
         "name":  "Por viaje",
         "price": "39",
         "usd":   "≈ $1.99 USD",
-        "note":  "Para viajes esporádicos o probar la plataforma."
+        "note":  "Para tí que no viajas mucho, o estás probando"
       },
       "pack5": {
         "name":  "Pack 5 viajes",
         "price": "149",
         "usd":   "≈ $7.99 USD",
-        "note":  "$30 por viaje. Para familias que planean la temporada."
+        "note":  "Para tí que te gusta escaparte o planear algunos viajes al año"
       },
       "pack10": {
         "badge": "Mejor precio",
         "name":  "Pack 10 viajes",
         "price": "249",
         "usd":   "≈ $12.99 USD",
-        "note":  "$25 por viaje. El mejor valor de pago único."
+        "note":  "Para tí que amas viajar y quieres el mejor valor de pago único"
       },
       "explorer": {
         "badge":       "Recomendado",
@@ -287,8 +287,7 @@
         "feature1":    "Viajes ilimitados",
         "feature2":    "Historial guardado",
         "feature3":    "Cancela cuando quieras",
-        "cta":         "Comenzar",
-        "cancelNote":  "Sin compromiso"
+        "cta":         "Comenzar"
       }
     },
     "faq": {
@@ -296,7 +295,7 @@
       "q1": "¿Qué incluye el viaje gratis?",
       "a1": "El primer viaje es completamente gratis y no requiere cuenta. Recibes un plan completo con itinerario, presupuesto estimado y actividades. Los resultados se mantienen activos 7 días y siempre puedes descargar el PDF.",
       "q2": "¿Por qué necesito crear cuenta para el Viaje 2?",
-      "a2": "Tu cuenta nos permite guardar el viaje permanentemente y darte acceso desde cualquier dispositivo. El Viaje 2 también es completamente gratuito — solo necesitas registrarte.",
+      "a2": "Tu cuenta nos permite guardar tu viaje y darte acceso desde cualquier dispositivo, además tu segundo y tercer viaje son completamente gratuitos.",
       "q3": "¿Qué diferencia hay entre los packs y Explorer Mensual?",
       "a3": "Los packs son de pago único: compras un número fijo de generaciones y las usas a tu ritmo. Explorer Mensual te da viajes ilimitados por $199 MXN al mes. Si planeas 3 o más viajes al año, Explorer sale más económico.",
       "q4": "¿Los viajes de los packs tienen fecha de vencimiento?",
