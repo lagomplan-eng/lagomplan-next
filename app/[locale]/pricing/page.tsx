@@ -41,7 +41,7 @@ export default async function PricingPage({
   const t = await getTranslations({ locale, namespace: 'pricing' })
 
   return (
-    <main className="pt-[100px] min-h-screen bg-sand">
+    <main className="pt-[100px] min-h-screen bg-cream">
       <div className="max-w-5xl mx-auto px-6 max-[768px]:px-5 py-16 max-[768px]:py-10">
 
         {/* ── 1 · Hero ─────────────────────────────────────────────── */}
@@ -162,11 +162,6 @@ export default async function PricingPage({
             ))}
           </div>
         </section>
-
-        {/* ── 8 · Trust footer ─────────────────────────────────────── */}
-        <p className="text-center font-sans text-[11px] text-sage leading-[1.7]">
-          {t('footer')}
-        </p>
 
       </div>
     </main>
