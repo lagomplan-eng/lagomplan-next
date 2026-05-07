@@ -1999,6 +1999,7 @@ export default function TripResult({ params }: Props) {
           : prefTraveler === 'amigos'
           ? prefGroupCount
           : undefined,
+        locale: locale === 'en' ? 'en' : 'es',
       })
       if (options.length > 0) {
         setBookingModal({ itemName: item.name, itemType: item.type, options })
@@ -2029,6 +2030,7 @@ export default function TripResult({ params }: Props) {
         : prefTraveler === 'amigos'
         ? prefGroupCount
         : undefined,
+      locale: locale === 'en' ? 'en' : 'es',
     })
     if (options.length > 0) {
       setBookingModal({ itemName: item.name, itemType: item.type, options })
