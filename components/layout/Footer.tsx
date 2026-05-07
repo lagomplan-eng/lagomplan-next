@@ -51,6 +51,7 @@ export default async function Footer() {
     { key: '/guides',  labelKey: 'links.guides'  },
     { key: '/hotels',  labelKey: 'links.hotels'  },
     { key: '/planner', labelKey: 'links.planner' },
+    { key: '/pricing', labelKey: 'links.pricing' },
   ] as const
 
   const connectLinks = [
