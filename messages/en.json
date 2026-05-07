@@ -231,5 +231,80 @@
       "successText": "You're in.",
       "successSub": "Check your inbox to confirm."
     }
+  },
+
+  "pricing": {
+    "meta": {
+      "title": "Pricing",
+      "description": "Start free. Plans from $39 MXN. Unlimited trips with Explorer Monthly."
+    },
+    "eyebrow": "Lagomplan — Pricing",
+    "hero": {
+      "line1": "Travel more.",
+      "line2": "Plan less.",
+      "body":  "Start free. Upgrade whenever. No strings attached."
+    },
+    "free": {
+      "tier1": { "title": "No login",     "sub": "1 full plan, no account or card needed" },
+      "tier2": { "title": "With account", "sub": "Save your trip forever" },
+      "tier3": { "title": "PDF anytime",  "sub": "Download your plan whenever you want" }
+    },
+    "paid": {
+      "headline": "Ready for more trips?",
+      "eyebrow":  "Pick your plan"
+    },
+    "common": {
+      "currency": "MXN",
+      "buy":      "Buy"
+    },
+    "plans": {
+      "perTrip": {
+        "name":  "Per trip",
+        "price": "39",
+        "usd":   "≈ $1.99 USD",
+        "note":  "For occasional trips or trying the platform."
+      },
+      "pack5": {
+        "name":  "Pack of 5",
+        "price": "149",
+        "usd":   "≈ $7.99 USD",
+        "note":  "$30 per trip. For families planning the season."
+      },
+      "pack10": {
+        "badge": "Best value",
+        "name":  "Pack of 10",
+        "price": "249",
+        "usd":   "≈ $12.99 USD",
+        "note":  "$25 per trip. The best one-time deal."
+      },
+      "explorer": {
+        "badge":       "Recommended",
+        "name":        "Explorer Monthly",
+        "price":       "199",
+        "priceSuffix": "MXN/mo",
+        "usd":         "≈ $9.99 USD",
+        "feature1":    "Unlimited trips",
+        "feature2":    "Saved history",
+        "feature3":    "Cancel anytime",
+        "cta":         "Get started",
+        "cancelNote":  "No commitment"
+      }
+    },
+    "faq": {
+      "title": "Frequently asked",
+      "q1": "What's included in the free trip?",
+      "a1": "The first trip is completely free and requires no account. You get a full plan with itinerary, estimated budget and activities. Results stay active for 7 days and you can always download the PDF.",
+      "q2": "Why do I need an account for Trip 2?",
+      "a2": "Your account lets us save the trip permanently and give you access from any device. Trip 2 is also completely free — you just need to sign up.",
+      "q3": "What's the difference between the packs and Explorer Monthly?",
+      "a3": "Packs are one-time purchases: you buy a fixed number of generations and use them at your own pace. Explorer Monthly gives you unlimited trips for $199 MXN per month. If you plan 3+ trips a year, Explorer is the better deal.",
+      "q4": "Do trips in the packs expire?",
+      "a4": "No. Trips bought in any pack don't expire — use them whenever you want, no pressure.",
+      "q5": "Can I cancel Explorer anytime?",
+      "a5": "Yes. Cancel from your account with no paperwork or penalty. Your access stays active until the end of the period you've already paid for.",
+      "q6": "Do you accept Mexican cards?",
+      "a6": "Yes. We accept Mexican and international credit and debit cards. MXN prices are processed locally."
+    },
+    "footer": "Made in Mexico · lagomplan.com · Travel well. Plan less."
   }
 }
