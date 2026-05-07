@@ -246,9 +246,9 @@
       "body":  "Start free. Upgrade whenever. No strings attached."
     },
     "free": {
-      "tier1": { "title": "No login",     "sub": "1 full plan, no account or card needed" },
-      "tier2": { "title": "With account", "sub": "Save your trip forever" },
-      "tier3": { "title": "PDF anytime",  "sub": "Download your plan whenever you want" }
+      "tier1": { "title": "No login",          "sub": "1 full plan, no account or card needed" },
+      "tier2": { "title": "With account",      "sub": "2 more free trips" },
+      "tier3": { "title": "Save & download",   "sub": "View and download your plan anytime" }
     },
     "paid": {
       "headline": "Ready for more trips?",

@@ -246,9 +246,9 @@
       "body":  "Empieza gratis. Actualiza cuando quieras. Sin compromisos."
     },
     "free": {
-      "tier1": { "title": "Sin login",   "sub": "1 plan completo, sin registro ni tarjeta" },
-      "tier2": { "title": "Con cuenta",  "sub": "Guarda tu viaje permanentemente" },
-      "tier3": { "title": "PDF siempre", "sub": "Descarga tu plan en cualquier momento" }
+      "tier1": { "title": "Sin login",         "sub": "1 plan completo, sin registro ni tarjeta" },
+      "tier2": { "title": "Con cuenta",        "sub": "2 viajes más gratis" },
+      "tier3": { "title": "Guarda y descarga", "sub": "Ve y descarga tu plan cuando quieras" }
     },
     "paid": {
       "headline": "¿Listo para más viajes?",
