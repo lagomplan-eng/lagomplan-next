@@ -11,7 +11,9 @@
 import type { Metadata }              from 'next'
 import { getTranslations }            from 'next-intl/server'
 import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
+import { getRoute }                   from '../../../lib/routes'
 import type { Locale }                from '../../../i18n'
+import CheckoutButton, { type CheckoutPlan } from '../../../components/pricing/CheckoutButton'
 
 // ── Metadata ───────────────────────────────────────────────────────────────────
 
@@ -39,6 +41,8 @@ export default async function PricingPage({
 }) {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'pricing' })
+  const signupHref = getRoute(locale, 'signup')
+  const loadingText = locale === 'es' ? 'Cargando…' : 'Loading…'
 
   return (
     <main className="pt-[100px] min-h-screen bg-cream">
@@ -99,7 +103,10 @@ export default async function PricingPage({
             usd={t('plans.perTrip.usd')}
             note={t('plans.perTrip.note')}
             cta={t('common.buy')}
-            dataPlan="per-trip"
+            plan="trip-1"
+            locale={locale}
+            signupHref={signupHref}
+            loadingText={loadingText}
           />
           <PlanCard
             name={t('plans.pack5.name')}
@@ -108,7 +115,10 @@ export default async function PricingPage({
             usd={t('plans.pack5.usd')}
             note={t('plans.pack5.note')}
             cta={t('common.buy')}
-            dataPlan="pack-5"
+            plan="trip-5"
+            locale={locale}
+            signupHref={signupHref}
+            loadingText={loadingText}
           />
           <PlanCard
             name={t('plans.pack10.name')}
@@ -117,7 +127,10 @@ export default async function PricingPage({
             usd={t('plans.pack10.usd')}
             note={t('plans.pack10.note')}
             cta={t('common.buy')}
-            dataPlan="pack-10"
+            plan="trip-10"
+            locale={locale}
+            signupHref={signupHref}
+            loadingText={loadingText}
             badge={t('plans.pack10.badge')}
             emphasis
           />
@@ -133,6 +146,9 @@ export default async function PricingPage({
             ]}
             badge={t('plans.explorer.badge')}
             cta={t('plans.explorer.cta')}
+            locale={locale}
+            signupHref={signupHref}
+            loadingText={loadingText}
           />
         </div>
 
@@ -171,19 +187,26 @@ export default async function PricingPage({
 // ── Cards 1–3 (one-time purchase) ──────────────────────────────────────────────
 
 interface PlanCardProps {
-  name:     string
-  price:    string
-  currency: string
-  usd:      string
-  note:     string
-  cta:      string
-  dataPlan: string
+  name:        string
+  price:       string
+  currency:    string
+  usd:         string
+  note:        string
+  cta:         string
+  plan:        CheckoutPlan
+  locale:      string
+  signupHref:  string
+  loadingText: string
   /** Renders the "best value" badge above the name + thicker accent border. */
   badge?:    string
   emphasis?: boolean
 }
 
-function PlanCard({ name, price, currency, usd, note, cta, dataPlan, badge, emphasis }: PlanCardProps) {
+function PlanCard({
+  name, price, currency, usd, note, cta,
+  plan, locale, signupHref, loadingText,
+  badge, emphasis,
+}: PlanCardProps) {
   const border = emphasis
     ? 'border-[1.5px] border-pine/[0.30]'
     : 'border border-pine/[0.13]'
@@ -204,14 +227,15 @@ function PlanCard({ name, price, currency, usd, note, cta, dataPlan, badge, emph
       <p className="font-sans text-[10px] text-[#4A5568] leading-relaxed border-t border-pine/[0.13] pt-3 mb-4 flex-1">
         {note}
       </p>
-      {/* TODO: wire Stripe checkout for `dataPlan` (per-trip / pack-5 / pack-10) */}
-      <button
-        type="button"
-        data-plan={dataPlan}
+      <CheckoutButton
+        plan={plan}
+        locale={locale}
+        signupHref={signupHref}
+        loadingText={loadingText}
         className="w-full bg-transparent border border-pine/[0.20] text-pine font-sans text-[10px] font-semibold py-2.5 rounded-[5px] transition-colors hover:bg-pine/[0.05]"
       >
         {cta}
-      </button>
+      </CheckoutButton>
     </article>
   )
 }
@@ -226,9 +250,15 @@ interface ExplorerCardProps {
   features:    string[]
   badge:       string
   cta:         string
+  locale:      string
+  signupHref:  string
+  loadingText: string
 }
 
-function ExplorerCard({ name, price, priceSuffix, usd, features, badge, cta }: ExplorerCardProps) {
+function ExplorerCard({
+  name, price, priceSuffix, usd, features, badge, cta,
+  locale, signupHref, loadingText,
+}: ExplorerCardProps) {
   return (
     <article className="bg-pine rounded-[10px] flex flex-col p-5">
       <span className="self-start font-sans text-[9px] font-bold uppercase tracking-[0.08em] text-sand bg-coral px-2 py-1 rounded mb-3">
@@ -251,14 +281,16 @@ function ExplorerCard({ name, price, priceSuffix, usd, features, badge, cta }: E
           </li>
         ))}
       </ul>
-      {/* TODO: wire Stripe checkout for `explorer-monthly` */}
-      <button
-        type="button"
-        data-plan="explorer-monthly"
+      <CheckoutButton
+        plan="subscription"
+        locale={locale}
+        signupHref={signupHref}
+        loadingText={loadingText}
+        errorTone="sand"
         className="w-full bg-transparent border border-sand/[0.25] text-sand font-sans text-[10px] font-semibold py-2.5 rounded-[5px] transition-colors hover:bg-sand/[0.05]"
       >
         {cta}
-      </button>
+      </CheckoutButton>
     </article>
   )
 }
