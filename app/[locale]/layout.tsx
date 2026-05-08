@@ -23,7 +23,12 @@ import Footer from '../../components/layout/Footer'
 import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
 import { PlanProvider } from '../../components/plan/PlanProvider'
 import NewsletterPopup from '../../components/newsletter/NewsletterPopup'
+import { MetaPixelTracker } from '../../components/analytics/MetaPixelTracker'
 import '../globals.css'
+
+// Loaded only when configured. Set in Vercel envs (Production + Preview);
+// keep unset locally so dev requests don't pollute production analytics.
+const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
 // ── Fonts ──────────────────────────────────────────────────
 const manrope = Manrope({
@@ -101,6 +106,40 @@ export default async function RootLayout({
             gtag('config', 'G-39KTC50YH3');
           `}
         </Script>
+
+        {/* ── Meta Pixel — loads only when NEXT_PUBLIC_META_PIXEL_ID is set ──
+            The base loader, init, and the initial PageView are all here.
+            Subsequent App Router navigations are tracked by
+            <MetaPixelTracker /> below (rendered inside the body so
+            usePathname / useSearchParams work). */}
+        {META_PIXEL_ID && (
+          <>
+            <Script id="meta-pixel" strategy="afterInteractive">
+              {`
+                !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+                n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+                if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+                n.queue=[];t=b.createElement(e);t.async=!0;
+                t.src=v;s=b.getElementsByTagName(e)[0];
+                s.parentNode.insertBefore(t,s)}(window, document,'script',
+                'https://connect.facebook.net/en_US/fbevents.js');
+                fbq('init', '${META_PIXEL_ID}');
+                fbq('track', 'PageView');
+              `}
+            </Script>
+            <noscript>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                height="1"
+                width="1"
+                style={{ display: 'none' }}
+                alt=""
+                src={`https://www.facebook.com/tr?id=${META_PIXEL_ID}&ev=PageView&noscript=1`}
+              />
+            </noscript>
+          </>
+        )}
+
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
             <PlanProvider>
@@ -109,6 +148,7 @@ export default async function RootLayout({
               {children}
               <Footer />
               <NewsletterPopup />
+              <MetaPixelTracker />
             </PlanProvider>
           </SupabaseProvider>
         </NextIntlClientProvider>
