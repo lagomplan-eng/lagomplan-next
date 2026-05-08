@@ -24,11 +24,14 @@ import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
 import { PlanProvider } from '../../components/plan/PlanProvider'
 import NewsletterPopup from '../../components/newsletter/NewsletterPopup'
 import { MetaPixelTracker } from '../../components/analytics/MetaPixelTracker'
+import { GoogleAnalyticsTracker } from '../../components/analytics/GoogleAnalyticsTracker'
 import '../globals.css'
 
-// Loaded only when configured. Set in Vercel envs (Production + Preview);
-// keep unset locally so dev requests don't pollute production analytics.
-const META_PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID
+// Both pixels load only when configured. Set in Vercel envs
+// (Production + Preview); keep unset locally so dev requests don't
+// pollute production analytics.
+const META_PIXEL_ID    = process.env.NEXT_PUBLIC_META_PIXEL_ID
+const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
 // ── Fonts ──────────────────────────────────────────────────
 const manrope = Manrope({
@@ -94,18 +97,27 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
-        <Script
-          src="https://www.googletagmanager.com/gtag/js?id=G-39KTC50YH3"
-          strategy="afterInteractive"
-        />
-        <Script id="google-analytics" strategy="afterInteractive">
-          {`
-            window.dataLayer = window.dataLayer || [];
-            function gtag(){dataLayer.push(arguments);}
-            gtag('js', new Date());
-            gtag('config', 'G-39KTC50YH3');
-          `}
-        </Script>
+        {/* ── Google Analytics 4 — loads only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set ──
+            send_page_view: false disables gtag's auto page_view (which only
+            fires once per script load). The <GoogleAnalyticsTracker> below
+            handles every page_view manually — initial load + every App
+            Router client navigation — via usePathname/useSearchParams. */}
+        {GA_MEASUREMENT_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${GA_MEASUREMENT_ID}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${GA_MEASUREMENT_ID}', { send_page_view: false });
+              `}
+            </Script>
+          </>
+        )}
 
         {/* ── Meta Pixel — loads only when NEXT_PUBLIC_META_PIXEL_ID is set ──
             The base loader, init, and the initial PageView are all here.
@@ -148,6 +160,7 @@ export default async function RootLayout({
               {children}
               <Footer />
               <NewsletterPopup />
+              <GoogleAnalyticsTracker />
               <MetaPixelTracker />
             </PlanProvider>
           </SupabaseProvider>

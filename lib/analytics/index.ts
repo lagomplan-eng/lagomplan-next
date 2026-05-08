@@ -20,3 +20,4 @@ export {
   isMetaEnabled,
 } from './meta'
 export type { MetaStandardEvent } from './meta'
+export { gaTrack, gaPageView, isGAEnabled } from './ga'

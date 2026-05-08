@@ -28,22 +28,7 @@
  */
 
 import { metaTrack, metaTrackCustom } from './meta'
-
-declare global {
-  interface Window {
-    gtag?: (command: string, ...args: unknown[]) => void
-  }
-}
-
-function gtagEvent(name: string, params?: Record<string, unknown>): void {
-  if (typeof window === 'undefined') return
-  if (typeof window.gtag !== 'function') return
-  if (params) {
-    window.gtag('event', name, params)
-  } else {
-    window.gtag('event', name)
-  }
-}
+import { gaTrack } from './ga'
 
 // ── Standard / recommended events ──────────────────────────────────────────────
 
@@ -69,7 +54,7 @@ export const events = {
    */
   lead(params?: { content_name?: string; value?: number; currency?: string }) {
     metaTrack('Lead', params)
-    gtagEvent('generate_lead', params)
+    gaTrack('generate_lead', params)
   },
 
   /**
@@ -78,7 +63,7 @@ export const events = {
    */
   viewContent(params: ContentParams) {
     metaTrack('ViewContent', params)
-    gtagEvent('view_item', params)
+    gaTrack('view_item', params)
   },
 
   /**
@@ -87,7 +72,7 @@ export const events = {
    */
   search(params: { search_string: string; destination?: string }) {
     metaTrack('Search', { search_string: params.search_string })
-    gtagEvent('search', { search_term: params.search_string })
+    gaTrack('search', { search_term: params.search_string })
   },
 
   /**
@@ -96,7 +81,7 @@ export const events = {
    */
   initiateCheckout(params: CheckoutParams & { plan?: string }) {
     metaTrack('InitiateCheckout', params)
-    gtagEvent('begin_checkout', params)
+    gaTrack('begin_checkout', params)
   },
 
   /**
@@ -105,7 +90,7 @@ export const events = {
    */
   completeRegistration(params?: { method?: string }) {
     metaTrack('CompleteRegistration', params)
-    gtagEvent('sign_up', params)
+    gaTrack('sign_up', params)
   },
 
   /**
@@ -116,7 +101,7 @@ export const events = {
    */
   purchase(params: CheckoutParams & { transaction_id?: string }) {
     metaTrack('Purchase', params)
-    gtagEvent('purchase', params)
+    gaTrack('purchase', params)
   },
 
   /**
@@ -125,7 +110,7 @@ export const events = {
    */
   contact() {
     metaTrack('Contact')
-    gtagEvent('contact')
+    gaTrack('contact')
   },
 
   // ── Lagomplan-specific custom events ────────────────────────────────────────
@@ -141,7 +126,7 @@ export const events = {
     traveler?:   string
   }) {
     metaTrackCustom('ItineraryGenerated', params)
-    gtagEvent('itinerary_generated', params)
+    gaTrack('itinerary_generated', params)
   },
 
   /**
@@ -150,7 +135,7 @@ export const events = {
    */
   hotelAffiliateClick(params: { provider: string; destination: string }) {
     metaTrackCustom('HotelAffiliateClick', params)
-    gtagEvent('hotel_affiliate_click', params)
+    gaTrack('hotel_affiliate_click', params)
   },
 
   /**
@@ -159,7 +144,7 @@ export const events = {
    */
   outboundPartnerClick(params: { provider: string; category: string }) {
     metaTrackCustom('OutboundPartnerClick', params)
-    gtagEvent('outbound_partner_click', params)
+    gaTrack('outbound_partner_click', params)
   },
 
   /**
@@ -169,7 +154,7 @@ export const events = {
    */
   waitlistSignup(params: { surface: 'popup' | 'sidebar' | 'end-of-guide' | 'footer' }) {
     metaTrack('Lead', { content_name: `newsletter-${params.surface}` })
-    gtagEvent('waitlist_signup', params)
+    gaTrack('waitlist_signup', params)
   },
 
   /**
@@ -178,7 +163,7 @@ export const events = {
    */
   guideDownload(params: { slug: string; locale: 'es' | 'en' }) {
     metaTrackCustom('GuideDownload', params)
-    gtagEvent('guide_download', params)
+    gaTrack('guide_download', params)
   },
 
   /**
@@ -186,6 +171,6 @@ export const events = {
    */
   ctaClick(params: { cta_id: string; surface?: string }) {
     metaTrackCustom('CtaClick', params)
-    gtagEvent('cta_click', params)
+    gaTrack('cta_click', params)
   },
 }
