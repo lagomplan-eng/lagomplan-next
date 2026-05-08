@@ -55,10 +55,18 @@ export type MetaStandardEvent =
   | 'AddPaymentInfo'
   | 'Subscribe'
 
-/** Fire one of Meta's standard events with optional parameters. */
+/**
+ * Fire one of Meta's standard events with optional parameters.
+ *
+ * Param type is `object` rather than `Record<string, unknown>` so
+ * call-site interfaces with optional fields — e.g. `{ value?: number }`
+ * — are assignable without a cast. TS treats those interfaces as
+ * missing the implicit index signature that `Record<string, unknown>`
+ * requires under strict mode.
+ */
 export function metaTrack(
   event:  MetaStandardEvent,
-  params?: Record<string, unknown>,
+  params?: object,
 ): void {
   if (typeof window === 'undefined') return
   if (typeof window.fbq !== 'function') return
@@ -72,7 +80,7 @@ export function metaTrack(
 /** Fire a custom event (anything not in MetaStandardEvent). */
 export function metaTrackCustom(
   event:  string,
-  params?: Record<string, unknown>,
+  params?: object,
 ): void {
   if (typeof window === 'undefined') return
   if (typeof window.fbq !== 'function') return

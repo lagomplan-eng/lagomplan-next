@@ -29,10 +29,16 @@ const MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 /** True when GA4 is configured for this build. */
 export const isGAEnabled = !!MEASUREMENT_ID
 
-/** Fire any GA4 event with optional parameters. */
+/**
+ * Fire any GA4 event with optional parameters.
+ *
+ * Param type is `object` rather than `Record<string, unknown>` so
+ * call-site interfaces with optional fields (ContentParams,
+ * CheckoutParams, etc.) are assignable without a cast under TS strict.
+ */
 export function gaTrack(
   event:  string,
-  params?: Record<string, unknown>,
+  params?: object,
 ): void {
   if (typeof window === 'undefined') return
   if (typeof window.gtag !== 'function') return
