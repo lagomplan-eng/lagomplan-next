@@ -14,6 +14,7 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
+import { events } from '../../lib/analytics'
 import styles from './NewsletterPopup.module.css'
 
 const SCROLL_TRIGGER = 0.40
@@ -126,6 +127,7 @@ export default function NewsletterPopup() {
       }
 
       setStatus('success')
+      events.waitlistSignup({ surface: 'popup' })
       setTimeout(dismiss, 3500)
     } catch {
       setError(t('common.errorNetwork'))
