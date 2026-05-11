@@ -774,6 +774,14 @@ export default function TripResult({ params }: Props) {
 
   // ── Data state ──────────────────────────────────────────────────────────────
   const [loading, setLoading] = useState(true)
+  // Distinguishes DB/cache restoration from AI generation. Hydration shouldn't
+  // be gated behind GenerationSurface — that surface is tuned for slow AI work
+  // and makes ~200ms DB loads feel artificially slow.
+  //   'hydrating'  → fast restore (DB load, cache hit). Renders a calm skeleton.
+  //   'generating' → AI call (initial gen, regenerate, replaceTrip). Renders
+  //                  the existing GenerationSurface.
+  // Default 'hydrating' covers the first paint before we know which path runs.
+  const [loadingKind, setLoadingKind] = useState<'hydrating' | 'generating'>('hydrating')
   const [error, setError]     = useState<string | null>(null)
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [errorDurationMs, setErrorDurationMs] = useState<number | null>(null)
@@ -1125,6 +1133,10 @@ export default function TripResult({ params }: Props) {
           // Cache invalid or inputs changed — discard
           sessionStorage.removeItem('tripCache')
         }
+
+        // Reached the AI path. Promote the loading kind so the gate renders
+        // GenerationSurface (premium phased UI) instead of the skeleton.
+        setLoadingKind('generating')
 
         // ── 2. Fresh AI generation ──────────────────────────────────────
         const parsedInterests = interests
@@ -1589,6 +1601,7 @@ export default function TripResult({ params }: Props) {
     }
     const nextIdx = versions.length   // index the new version will occupy
     setLoading(true)
+    setLoadingKind('generating')
     setError(null)
     try {
       const parsedInterests = prefInterests
@@ -1922,6 +1935,7 @@ export default function TripResult({ params }: Props) {
     sessionStorage.removeItem('tripCache_data')
     console.log('CACHE CLEARED')
     setLoading(true)
+    setLoadingKind('generating')
     setError(null)
     console.log('GENERATE CALLED')
     try {
@@ -2386,12 +2400,14 @@ export default function TripResult({ params }: Props) {
     return <main className="pt-[100px] min-h-screen bg-[#FAF8F5]" />
   }
 
-  // Loading gate — covers both "access check in progress" and "AI generation in progress".
+  // Loading gate — three branches: access check, AI generation, fast hydration.
   if (!isAccessResolved || loading) {
     return (
       <main className="pt-[100px] min-h-screen bg-[#FAF8F5]">
         <div className="page-inner">
-          {isAccessResolved && loading ? (
+          {!isAccessResolved ? (
+            <LoadingState locale={locale} />
+          ) : loadingKind === 'generating' ? (
             <GenerationSurface
               destination={destination || null}
               durationDays={activeGenDuration ?? (Number(nights) || null)}
@@ -2404,7 +2420,24 @@ export default function TripResult({ params }: Props) {
               locale={locale === 'en' ? 'en' : 'es'}
             />
           ) : (
-            <LoadingState locale={locale} />
+            // Hydration — DB load or cache restore. Reuses existing day-card
+            // chrome so layout dimensions match the post-load content exactly
+            // (zero layout shift on hand-off).
+            <div data-loading="hydrating" className="animate-pulse">
+              <div className="mb-7">
+                <div className="h-2.5 w-24 bg-[#E4DFD8] rounded mb-3" />
+                <div className="h-9 w-3/4 max-w-[420px] bg-[#E4DFD8] rounded mb-2.5" />
+                <div className="h-3.5 w-1/2 max-w-[280px] bg-[#EDE7E1] rounded" />
+              </div>
+              {[0, 1, 2].map(n => (
+                <div key={n} className="bg-white border border-[#E4DFD8] rounded-[18px] p-6 mb-3.5">
+                  <div className="h-2.5 w-20 bg-[#E4DFD8] rounded mb-3" />
+                  <div className="h-4 w-2/3 bg-[#E4DFD8] rounded mb-4" />
+                  <div className="h-3 w-full bg-[#EDE7E1] rounded mb-1.5" />
+                  <div className="h-3 w-5/6 bg-[#EDE7E1] rounded" />
+                </div>
+              ))}
+            </div>
           )}
         </div>
       </main>
