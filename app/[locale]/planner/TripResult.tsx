@@ -104,6 +104,12 @@ interface Props {
   params: Record<string, string>
 }
 
+// ─── sessionStorage cache schema ──────────────────────────────────────────────
+// Bump whenever the cached trip shape changes. Older caches are silently
+// dropped on read — better than rendering a stale trip with missing fields
+// (e.g. accommodations introduced after the cache was written).
+const TRIP_CACHE_SCHEMA = 2
+
 // ─── Display label maps ────────────────────────────────────────────────────────
 
 // Normalises both HeroForm values ('Relajado') and legacy drawer keys ('relaxed')
@@ -1096,6 +1102,7 @@ export default function TripResult({ params }: Props) {
           try {
             const cached = JSON.parse(cachedRaw)
             if (
+              cached.schemaVersion === TRIP_CACHE_SCHEMA &&
               cached.tripData &&
               JSON.stringify(cached.inputs) === JSON.stringify(currentInputs)
             ) {
@@ -1195,7 +1202,7 @@ export default function TripResult({ params }: Props) {
         if (!tripDataRaw) throw new Error(`No trip_data in response.`)
 
         // Persist so login redirect restores this exact trip
-        sessionStorage.setItem('tripCache', JSON.stringify({ tripData: tripDataRaw, inputs: currentInputs }))
+        sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
 
         setRawTripData(tripDataRaw)
         const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
