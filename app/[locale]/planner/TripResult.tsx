@@ -474,10 +474,23 @@ function activeAmount(row: BudgetRow): number {
   return row.actual ?? row.userEst ?? row.aiEst
 }
 
-function deriveChecksFromDays(days: Day[]): CheckItem[] {
+function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): CheckItem[] {
+  const locale = opts?.locale ?? 'es'
   const checks: CheckItem[] = []
   const seenHotels = new Set<string>()
   const lastDayN = days.length > 0 ? days[days.length - 1].n : 0
+
+  // Universal pre-trip: book hotel. Always present on overnight trips
+  // (days.length > 1), even if the AI didn't emit per-day hotel items.
+  // Stable ID so done-state survives regenerate.
+  if (days.length > 1) {
+    checks.push({
+      id:   'pretrip-book-hotel',
+      icon: '🏨',
+      text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
+      done: false,
+    })
+  }
 
   days.forEach(day => {
     day.items.forEach((item) => {
@@ -569,33 +582,12 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
     source.action_items       ??
     null
 
+  // `normalizedChecks` is computed for future consumers, but the rendered
+  // checklist is derived fresh in the component via deriveChecksFromDays —
+  // the pre-trip "Reservar hotel" injection lives there now.
   const normalizedChecks: CheckItem[] = Array.isArray(rawChecks)
     ? rawChecks.map(normalizeCheckItem)
-    : deriveChecksFromDays(normalizedDays)
-
-  // Mandatory "book hotel" pre-trip check for overnight itineraries.
-  // The hotel section above is the discovery surface; this check is the
-  // accountability surface — sits in the right-rail "Planea tu viaje"
-  // panel so users can mark lodging as booked. Same business rule that
-  // drives the accommodations[] contract.
-  //
-  // Idempotent: skipped if the AI already produced a hotel-flavored
-  // check (any keyword that wouldn't false-positive on food-adjacent
-  // items — `hotel / hosped / alojam / stay / lodg / book.{,1,2}hotel`).
-  const nightsFromParam = parseInt(nights || '0', 10)
-  if (nightsFromParam >= 1) {
-    const HOTEL_CHECK_RE = /hotel|hosped|alojam|\bstay\b|\blodg|reserv.*aloj|book.*hotel/i
-    const alreadyHasHotelCheck = normalizedChecks.some(c => HOTEL_CHECK_RE.test(c.text))
-    if (!alreadyHasHotelCheck) {
-      normalizedChecks.unshift({
-        id:   'auto-book-hotel',
-        icon: '🏨',
-        text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
-        done: false,
-        // No `day` → renders under "Antes del viaje" in the planning panel.
-      })
-    }
-  }
+    : deriveChecksFromDays(normalizedDays, { locale })
 
   // Packing — broad key coverage; fallback generates a contextual list from destination/interests
   const rawPacking =
@@ -2331,8 +2323,8 @@ export default function TripResult({ params }: Props) {
 
   // ── Derived checklist — always reflects current days state ──────────────────
   const checks = useMemo(
-    () => deriveChecksFromDays(days).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
-    [days, doneCheckIds],
+    () => deriveChecksFromDays(days, { locale: locale === 'en' ? 'en' : 'es' }).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
+    [days, doneCheckIds, locale],
   )
 
   // ── Computed values ──────────────────────────────────────────────────────────
