@@ -3816,9 +3816,31 @@ export default function TripResult({ params }: Props) {
                 />
               </div>
               <div>
-                <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-1.5">
-                  Precio · {budgetCurrency}
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76]">
+                    {locale === 'es' ? 'Precio' : 'Price'}
+                  </label>
+                  {/* Inline currency selector — same control as the budget
+                      panel, so the picked currency is the one the AI/budget
+                      uses too. No conversion happens; this is a label switch. */}
+                  <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
+                    {(['MXN', 'USD'] as const).map(c => (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => setBudgetCurrency(c)}
+                        className={[
+                          'font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] border-none cursor-pointer transition-all',
+                          budgetCurrency === c
+                            ? 'bg-[#0F3A33] text-white'
+                            : 'bg-transparent text-[#7A7A76] hover:text-[#0F3A33]',
+                        ].join(' ')}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                </div>
                 <input
                   type="number"
                   min="0"
