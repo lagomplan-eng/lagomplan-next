@@ -7,6 +7,7 @@
 import { useEffect, useState } from 'react'
 import type { Phase, GenError } from '../../hooks/useTripGeneration'
 import type { Tier } from '../../lib/generation/messages'
+import { titleCaseCity } from '../../lib/planner/format'
 
 export type GenerationSurfaceProps = {
   destination?: string | null
@@ -75,7 +76,7 @@ export function GenerationSurface({
           {isES ? 'Tu plan' : 'Your plan'}
         </div>
         <div className="font-display text-[28px] md:text-[34px] font-semibold text-[#0F3A33] leading-tight text-center">
-          {destination ?? (isES ? 'Tu próximo viaje' : 'Your next trip')}
+          {destination ? titleCaseCity(destination) : (isES ? 'Tu próximo viaje' : 'Your next trip')}
         </div>
         <div className="font-sans text-[13px] text-[#7A7A76] text-center">
           {[
