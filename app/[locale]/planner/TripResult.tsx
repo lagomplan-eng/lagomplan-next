@@ -1385,6 +1385,49 @@ export default function TripResult({ params }: Props) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading])
 
+  // ── pagehide flush — covers the autosave debounce gap on tab close ───────────
+  // Autosave is debounced 1500ms. If the user edits and closes the tab inside
+  // that window, the PATCH never fires. `pagehide` + `fetch keepalive` lets a
+  // final dirty save outlive the document. Reads latest state via a ref so the
+  // listener doesn't re-bind on every keystroke.
+  const flushSnapshotRef = useRef({
+    tripId:        null as string | null,
+    tripTitle:     '',
+    tripSubtitle:  '',
+    days:          [] as Day[],
+    packing:       [] as string[],
+    budgetRows:    [] as BudgetRow[],
+    doneCheckIds:  new Set<string>(),
+  })
+  useEffect(() => {
+    flushSnapshotRef.current = { tripId, tripTitle, tripSubtitle, days, packing, budgetRows, doneCheckIds }
+  })
+  useEffect(() => {
+    const flushIfDirty = () => {
+      const s = flushSnapshotRef.current
+      if (!s.tripId) return
+      const doneChecksArr = Array.from(s.doneCheckIds).sort()
+      const content = JSON.stringify({ title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr })
+      if (content === lastSavedContentRef.current) return
+      try {
+        fetch(`/api/trips/${s.tripId}`, {
+          method:      'PATCH',
+          headers:     { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          keepalive:   true,  // survives document unload (~64KB cap)
+          body: JSON.stringify({
+            title: s.tripTitle,
+            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr },
+          }),
+        })
+      } catch {}
+    }
+    // pagehide is more reliable than beforeunload — iOS Safari fires pagehide
+    // but not beforeunload when the tab is backgrounded.
+    window.addEventListener('pagehide', flushIfDirty)
+    return () => window.removeEventListener('pagehide', flushIfDirty)
+  }, [])
+
   // ── Shared async-generation helper ──────────────────────────────────────────
   // Drives the /api/trips/jobs POST + polling loop for any caller that needs
   // long-trip generation (initial-gen, regenerate, replaceTrip). The worker
