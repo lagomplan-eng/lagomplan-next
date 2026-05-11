@@ -51,7 +51,9 @@ const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
   resort:       'Resort',
   cabin:        'Cabaña',
   glamping:     'Glamping',
-  unspecified:  'Alojamiento',
+  // Used as eyebrow ONLY — the heading falls back to the city-name
+  // form when no neighborhood is set.
+  unspecified:  'Hospedaje',
 }
 
 const TYPE_LABEL_EN: Record<Accommodation['accommodationType'], string> = {
@@ -62,7 +64,7 @@ const TYPE_LABEL_EN: Record<Accommodation['accommodationType'], string> = {
   resort:       'Resort',
   cabin:        'Cabin',
   glamping:     'Glamping',
-  unspecified:  'Stay',
+  unspecified:  'Lodging',
 }
 
 const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
@@ -115,23 +117,30 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Pr
     <section
       data-section="where-to-stay"
       aria-labelledby="where-to-stay-heading"
-      className="mt-12 mb-8 max-[768px]:mt-8"
+      className="mb-10"
     >
-      <div className="flex items-baseline gap-3 mb-4">
-        <span className="font-mono text-[10px] font-medium tracking-[0.18em] uppercase text-[#6B8F86]">
-          {sectionEyebrow}
-        </span>
-        <span className="h-px flex-1 bg-[#0F3A33]/15" />
+      {/* Header mirrors the "Tu itinerario" header below — same eyebrow
+          font, weight, color (#B8B5AF), same display headline weight
+          and color (#1C1C1A). Visual rhythm matches the rest of the
+          result page. */}
+      <div className="flex items-baseline justify-between mb-[18px]">
+        <div>
+          <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
+            {sectionEyebrow}
+          </div>
+          <div
+            id="where-to-stay-heading"
+            className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]"
+          >
+            {sectionHeadline}
+          </div>
+        </div>
       </div>
 
-      <h2
-        id="where-to-stay-heading"
-        className="font-display text-[24px] font-semibold text-[#0F3A33] tracking-[-0.01em] mb-5 max-[640px]:text-[20px]"
-      >
-        {sectionHeadline}
-      </h2>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      {/* Cards stack vertically — same column treatment as days.
+          Multi-city / multi-night fan-out is Phase 3, at which point
+          a md:grid-cols-2 becomes worth it. */}
+      <div className="flex flex-col gap-3.5">
         {effective.map(acc => (
           <AccommodationCard
             key={acc.id}
@@ -193,52 +202,61 @@ function AccommodationCard({
     })
   }
 
-  // Heading text — neighborhood is the editorial hook when known;
-  // typeLabel covers the fallback case.
-  const heading = acc.neighborhood?.trim()
-    ? acc.neighborhood.trim()
-    : typeLabel
+  // Heading: prefer the neighborhood (editorial hook). When the trip
+  // is a fallback / no-neighborhood case, fall back to actionable city
+  // copy — "Hoteles en Oaxaca" reads as a real surface; "Stay" or
+  // "Lodging" alone reads like an unfilled placeholder.
+  const heading = acc.neighborhood?.trim() ||
+    (locale === 'en' ? `Hotels in ${acc.city}` : `Hoteles en ${acc.city}`)
 
   // Rationale — fall back to a generic line for synthesized stubs that
   // ship without one. Phase 1's fallback synthesizer already provides
   // one, so this is mostly defensive.
   const rationale = acc.rationale?.trim() || fallbackTagline
 
+  // Date range formatting + nights word agree with locale.
+  const nightsWord = locale === 'en'
+    ? (acc.nights === 1 ? 'night' : 'nights')
+    : (acc.nights === 1 ? 'noche' : 'noches')
+
   return (
     <article
       data-accommodation-id={acc.id}
       data-accommodation-source={acc.source}
-      className="flex flex-col bg-[#FDFCF9] border border-[#0F3A33]/15 rounded-xl p-5 transition-colors hover:border-[#0F3A33]/30"
+      className="bg-white border border-[#E4DFD8] rounded-[18px] p-6 transition-colors hover:border-[#0F3A33]/30"
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
-        <div>
-          <p className="font-mono text-[10px] font-medium tracking-[0.14em] uppercase text-[#6B8F86] mb-1">
+      <div className="flex items-start justify-between gap-3 mb-3">
+        <div className="min-w-0">
+          <p className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1.5">
             {typeLabel}
             {acc.familyFriendly ? (locale === 'en' ? ' · Family' : ' · Familiar') : ''}
           </p>
-          <h3 className="font-display text-[18px] font-semibold text-[#0F3A33] leading-tight">
+          <h3 className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A] leading-tight">
             {heading}
           </h3>
         </div>
-        <span className="font-mono text-[12px] font-medium tracking-[0.06em] text-[#0F3A33] bg-[#0F3A33]/[0.06] rounded-md px-2 py-[3px] shrink-0">
+        <span
+          aria-label={locale === 'en' ? `Price tier ${priceLabel}` : `Nivel de precio ${priceLabel}`}
+          className="font-mono text-[11px] font-medium tracking-[.04em] text-[#0F3A33] bg-[#EDE7E1] rounded-md px-2 py-[3px] shrink-0"
+        >
           {priceLabel}
         </span>
       </div>
 
-      <p className="font-sans text-[13.5px] text-[#4A5568] leading-[1.55] mb-4 flex-1">
+      <p className="font-sans text-[14px] text-[#4A5568] leading-[1.6] mb-5">
         {rationale}
       </p>
 
-      <div className="flex items-center justify-between gap-3">
-        <span className="font-mono text-[10px] tracking-[0.06em] text-[#9CA3AF]">
-          {acc.checkInDate} → {acc.checkOutDate} · {acc.nights} {locale === 'en' ? (acc.nights === 1 ? 'night' : 'nights') : (acc.nights === 1 ? 'noche' : 'noches')}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <span className="font-mono text-[10px] tracking-[.06em] text-[#9CA3AF]">
+          {acc.checkInDate} → {acc.checkOutDate} · {acc.nights} {nightsWord}
         </span>
         <a
           href={href}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={handleClick}
-          className="inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold text-white bg-[#0F3A33] px-3.5 py-2 rounded-md transition-colors hover:bg-[#2D6B5A]"
+          className="inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold text-white bg-[#0F3A33] px-4 py-2 rounded-md transition-colors hover:bg-[#2D6B5A]"
         >
           {ctaText}
           <span aria-hidden>→</span>
