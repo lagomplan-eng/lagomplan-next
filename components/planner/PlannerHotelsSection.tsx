@@ -33,6 +33,7 @@ import type {
   TripDestinationContext,
 } from '../../lib/planner/accommodations'
 import { effectiveAccommodations } from '../../lib/planner/use-effective-accommodations'
+import { titleCaseCity } from '../../lib/planner/format'
 import { buildAffiliateLink } from '../../lib/affiliate'
 import { events } from '../../lib/analytics'
 
@@ -98,12 +99,13 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Pr
   // Section copy — kept inline to ship fast. Move to messages/*.json
   // alongside the rest of the planner copy when the page settles.
   const sectionEyebrow = locale === 'en' ? 'Where to stay' : 'Dónde quedarse'
+  const cityDisplay = titleCaseCity(ctx.destination)
   const sectionHeadlineSingular = (n: number) => locale === 'en'
-    ? `${n} night in ${ctx.destination}`
-    : `${n} noche en ${ctx.destination}`
+    ? `${n} night in ${cityDisplay}`
+    : `${n} noche en ${cityDisplay}`
   const sectionHeadlinePlural   = (n: number) => locale === 'en'
-    ? `${n} nights in ${ctx.destination}`
-    : `${n} noches en ${ctx.destination}`
+    ? `${n} nights in ${cityDisplay}`
+    : `${n} noches en ${cityDisplay}`
   const sectionHeadline = ctx.nights === 1
     ? sectionHeadlineSingular(ctx.nights)
     : sectionHeadlinePlural(ctx.nights)
@@ -206,8 +208,9 @@ function AccommodationCard({
   // is a fallback / no-neighborhood case, fall back to actionable city
   // copy — "Hoteles en Oaxaca" reads as a real surface; "Stay" or
   // "Lodging" alone reads like an unfilled placeholder.
+  const cityDisplay = titleCaseCity(acc.city)
   const heading = acc.neighborhood?.trim() ||
-    (locale === 'en' ? `Hotels in ${acc.city}` : `Hoteles en ${acc.city}`)
+    (locale === 'en' ? `Hotels in ${cityDisplay}` : `Hoteles en ${cityDisplay}`)
 
   // Rationale — fall back to a generic line for synthesized stubs that
   // ship without one. Phase 1's fallback synthesizer already provides

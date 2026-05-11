@@ -15,6 +15,7 @@ import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
 import type { Accommodation, TripDestinationContext } from '../../../lib/planner/accommodations'
 import { computeNights } from '../../../lib/planner/accommodations'
+import { titleCaseCity } from '../../../lib/planner/format'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
@@ -565,6 +566,30 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
   const normalizedChecks: CheckItem[] = Array.isArray(rawChecks)
     ? rawChecks.map(normalizeCheckItem)
     : deriveChecksFromDays(normalizedDays)
+
+  // Mandatory "book hotel" pre-trip check for overnight itineraries.
+  // The hotel section above is the discovery surface; this check is the
+  // accountability surface — sits in the right-rail "Planea tu viaje"
+  // panel so users can mark lodging as booked. Same business rule that
+  // drives the accommodations[] contract.
+  //
+  // Idempotent: skipped if the AI already produced a hotel-flavored
+  // check (any keyword that wouldn't false-positive on food-adjacent
+  // items — `hotel / hosped / alojam / stay / lodg / book.{,1,2}hotel`).
+  const nightsFromParam = parseInt(nights || '0', 10)
+  if (nightsFromParam >= 1) {
+    const HOTEL_CHECK_RE = /hotel|hosped|alojam|\bstay\b|\blodg|reserv.*aloj|book.*hotel/i
+    const alreadyHasHotelCheck = normalizedChecks.some(c => HOTEL_CHECK_RE.test(c.text))
+    if (!alreadyHasHotelCheck) {
+      normalizedChecks.unshift({
+        id:   'auto-book-hotel',
+        icon: '🏨',
+        text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
+        done: false,
+        // No `day` → renders under "Antes del viaje" in the planning panel.
+      })
+    }
+  }
 
   // Packing — broad key coverage; fallback generates a contextual list from destination/interests
   const rawPacking =
@@ -2456,16 +2481,21 @@ export default function TripResult({ params }: Props) {
 
             {/* Hero left */}
             <div>
-              {/* Eyebrow — uses pref state so it updates after regeneration */}
+              {/* Eyebrow — uses pref state so it updates after regeneration.
+                  Eyebrow is already CSS-uppercased; titleCaseCity normalises
+                  the mixed-case input first so "oaxaca" doesn't render as
+                  "oaxaca" via a CSS transform that doesn't fix bad casing. */}
               <div data-trip-hero="eyebrow" className="font-mono text-[10px] tracking-[.16em] uppercase text-[#6B8F86] mb-4 flex items-center gap-2.5">
                 <span className="w-[22px] h-px bg-[#6B8F86] shrink-0" />
-                {prefOrigin ? `${prefOrigin} → ${prefDest}` : 'Resultado del plan'}
+                {prefOrigin
+                  ? `${titleCaseCity(prefOrigin)} → ${titleCaseCity(prefDest)}`
+                  : 'Resultado del plan'}
               </div>
 
               {/* Title */}
               <h1 data-trip-hero="title" className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
                 {tripTitle || `Tu viaje a`}<br />
-                <span className="text-[#0F3A33]">{prefDest}</span>
+                <span className="text-[#0F3A33]">{titleCaseCity(prefDest)}</span>
               </h1>
 
               {/* Subtitle */}
@@ -2480,7 +2510,7 @@ export default function TripResult({ params }: Props) {
                 </span>
                 {prefDest && (
                   <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
-                    <span>📍</span> {prefDest}
+                    <span>📍</span> {titleCaseCity(prefDest)}
                   </span>
                 )}
                 {prefTraveler && (
@@ -2551,11 +2581,11 @@ export default function TripResult({ params }: Props) {
                 {/* Gradient overlay so the destination label stays readable */}
                 <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,58,51,.55)] via-transparent to-transparent" />
                 <span className="absolute bottom-[22px] left-[22px] font-display text-[24px] font-light text-white/90 tracking-[-0.01em]">
-                  {prefDest || 'Tu destino'}
+                  {titleCaseCity(prefDest) || 'Tu destino'}
                 </span>
                 {prefOrigin && (
                   <span className="absolute top-3.5 right-3.5 font-mono text-[9px] font-medium tracking-[.12em] uppercase text-white bg-[rgba(15,58,51,.65)] backdrop-blur-sm px-2.5 py-[3px] rounded-full">
-                    desde {prefOrigin}
+                    desde {titleCaseCity(prefOrigin)}
                   </span>
                 )}
               </div>
@@ -2935,7 +2965,7 @@ export default function TripResult({ params }: Props) {
                   Tu itinerario
                 </div>
                 <div className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                  {nightsNum} días en {prefDest || 'tu destino'}
+                  {nightsNum} días en {titleCaseCity(prefDest) || 'tu destino'}
                 </div>
               </div>
               <button
