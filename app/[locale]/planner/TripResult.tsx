@@ -13,6 +13,7 @@ import { buildPostGenerateToast } from '../../../lib/plan/copy'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
+import type { Accommodation } from '../../../lib/planner/accommodations'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -77,6 +78,14 @@ interface TripData {
   checks: CheckItem[]
   budgetRows: BudgetRow[]
   packing: string[]
+  /**
+   * Structured lodging surface — guaranteed non-empty for overnight trips
+   * by the validation gate in app/api/generate-trip/route.ts. Renderer
+   * lands in Phase 2 (<PlannerHotelsSection>). For now the field carries
+   * forward through normalisation so the data is available end-to-end.
+   * See lib/planner/accommodations.ts for the entity contract.
+   */
+  accommodations: Accommodation[]
 }
 
 interface TripVersion {
@@ -593,13 +602,34 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
     return lbl !== 'total' && cat !== 'total'
   })
 
+  // Structured accommodations from the server pipeline (Edge Fn → validation
+  // gate → fallback synthesizer). For pre-v1 trips the field is absent and
+  // we ship an empty array; Phase 2 adds a client-side derivation hook
+  // that fills it from destination + dates when missing on legacy data.
+  const rawAccommodations = Array.isArray(source.accommodations) ? source.accommodations : []
+  const normalizedAccommodations: Accommodation[] = rawAccommodations.map((raw: any, i: number) => ({
+    id:                typeof raw?.id === 'string' ? raw.id : `acc-${i}`,
+    city:              typeof raw?.city === 'string' ? raw.city : (destination ?? ''),
+    neighborhood:      typeof raw?.neighborhood === 'string' ? raw.neighborhood : undefined,
+    accommodationType: raw?.accommodationType ?? 'unspecified',
+    rationale:         typeof raw?.rationale === 'string' ? raw.rationale : '',
+    priceTier:         raw?.priceTier ?? 'mid',
+    familyFriendly:    raw?.familyFriendly === true,
+    checkInDate:       typeof raw?.checkInDate === 'string' ? raw.checkInDate : '',
+    checkOutDate:      typeof raw?.checkOutDate === 'string' ? raw.checkOutDate : '',
+    nights:            typeof raw?.nights === 'number' ? raw.nights : 0,
+    source:            raw?.source === 'fallback' ? 'fallback' : 'ai',
+    fallback:          raw?.fallback === true || raw?.source === 'fallback',
+  }))
+
   return {
-    title:      row?.title ?? source.title ?? `${destination} · ${parseInt(nights || '0', 10) || 3} nights`,
-    subtitle:   source.subtitle ?? 'AI-generated trip plan',
-    days:       normalizedDays,
-    checks:     normalizedChecks,
-    budgetRows: normalizedBudget,
-    packing:    normalizedPacking,
+    title:          row?.title ?? source.title ?? `${destination} · ${parseInt(nights || '0', 10) || 3} nights`,
+    subtitle:       source.subtitle ?? 'AI-generated trip plan',
+    days:           normalizedDays,
+    checks:         normalizedChecks,
+    budgetRows:     normalizedBudget,
+    packing:        normalizedPacking,
+    accommodations: normalizedAccommodations,
   }
 }
 

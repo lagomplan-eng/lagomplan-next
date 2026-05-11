@@ -154,6 +154,27 @@ export default async function RootLayout({
           </>
         )}
 
+        {/* ── Stay22 LetMeAllez — passive monetization middleware ──────
+            Auto-monetizes any outbound travel link the team adds in
+            future (Booking/Hotels.com/Agoda/etc.) without needing to
+            route it through buildAffiliateLink. Async load, lmaID
+            fixed on the Stay22 dashboard. The CTAs we generate
+            through lib/affiliate/build.ts already carry our `aid`
+            so LetMeAllez is supplementary — not the source of truth. */}
+        <Script id="stay22-letmeallez" strategy="afterInteractive">
+          {`
+            (function (s, t, a, y, twenty, two) {
+              s.Stay22 = s.Stay22 || {};
+              s.Stay22.params = { lmaID: '69b992c248666aca4133dbbe' };
+              twenty = t.createElement(a);
+              two = t.getElementsByTagName(a)[0];
+              twenty.async = 1;
+              twenty.src = y;
+              two.parentNode.insertBefore(twenty, two);
+            })(window, document, 'script', 'https://scripts.stay22.com/letmeallez.js');
+          `}
+        </Script>
+
         {/* ── Meta Pixel — loads only when NEXT_PUBLIC_META_PIXEL_ID is set ──
             The base loader, init, and the initial PageView are all here.
             Subsequent App Router navigations are tracked by

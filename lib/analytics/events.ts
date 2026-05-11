@@ -173,4 +173,51 @@ export const events = {
     metaTrackCustom('CtaClick', params)
     gaTrack('cta_click', params)
   },
+
+  // ── Planner monetization-reliability funnel ─────────────────────────────────
+  //
+  // These events instrument the hotel-monetization pipeline (see
+  // lib/planner/validate-trip.ts + app/api/generate-trip/route.ts). They
+  // exist primarily for ops dashboards and revenue-leak alerts rather than
+  // ad attribution, which is why they only fire to GA — Meta's standard
+  // events don't have a natural mapping for "validation gate triggered."
+
+  /**
+   * Fired when the planner generates an itinerary that triggered the
+   * validation gate's fallback path. Tracking this is how we'll know
+   * if AI prompt drift is causing the synthesizer to fire more often.
+   */
+  plannerFallbackUsed(params: { destination: string; nights: number; reason: string }) {
+    gaTrack('planner_fallback_used', params)
+  },
+
+  /**
+   * Fired on every accommodation render (Phase 2 — left in place now so
+   * Phase 2 doesn't need to touch this file). `source` separates
+   * AI-recommended rows from synthesized stubs in the dashboard.
+   */
+  plannerHotelRendered(params: {
+    tripId:       string | null
+    accommodationId: string
+    source:       'ai' | 'fallback'
+    nights:       number
+  }) {
+    gaTrack('planner_hotel_rendered', params)
+  },
+
+  /**
+   * Fired when a user clicks any hotel/accommodation CTA in the planner.
+   * Pairs with events.hotelAffiliateClick (above) when the click is
+   * specifically on a Stay22 affiliate link.
+   */
+  plannerHotelClicked(params: {
+    tripId:       string | null
+    accommodationId: string
+    source:       'ai' | 'fallback'
+    provider:     string
+    city:         string
+  }) {
+    metaTrackCustom('PlannerHotelClicked', { provider: params.provider, city: params.city })
+    gaTrack('planner_hotel_clicked', params)
+  },
 }
