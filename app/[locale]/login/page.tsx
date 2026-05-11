@@ -4,7 +4,7 @@
  * TODO: implement full page UI
  */
 import type { Metadata }              from 'next'
-import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
+import { buildAlternates, buildOpenGraph, NO_INDEX } from '../../../lib/seo'
 import type { Locale }               from '../../../i18n'
 import LoginForm                     from '../../../components/auth/LoginForm'
 
@@ -18,6 +18,7 @@ export async function generateMetadata({
     title:       locale === 'es' ? 'Iniciar sesión' : 'Log in',
     alternates:  buildAlternates('login'),
     openGraph:   buildOpenGraph(locale),
+    robots:      NO_INDEX,
   }
 }
 

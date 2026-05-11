@@ -1,5 +1,5 @@
 import type { Metadata }                    from 'next'
-import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
+import { buildAlternates, buildOpenGraph, NO_INDEX } from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
 import SignupForm                           from '../../../components/auth/SignupForm'
 
@@ -13,6 +13,7 @@ export async function generateMetadata({
     title:      locale === 'es' ? 'Crear cuenta' : 'Sign up',
     alternates: buildAlternates('signup'),
     openGraph:  buildOpenGraph(locale),
+    robots:     NO_INDEX,
   }
 }
 

@@ -17,7 +17,13 @@ import { notFound }                   from 'next/navigation'
 import { NextIntlClientProvider }     from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
 import { locales, type Locale }       from '../../i18n'
-import { buildAlternates, buildOpenGraph } from '../../lib/seo'
+import {
+  BASE_URL,
+  buildAlternates,
+  buildOpenGraph,
+  ORGANIZATION_SCHEMA,
+  WEBSITE_SCHEMA,
+} from '../../lib/seo'
 import Nav    from '../../components/layout/Nav'
 import Footer from '../../components/layout/Footer'
 import { SupabaseProvider } from '../../components/auth/SupabaseProvider'
@@ -70,10 +76,19 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
   return {
+    // metadataBase resolves all relative URLs (OG/Twitter images, etc.)
+    // against production. Without it, Next renders relative URLs against
+    // localhost in dev/preview and emits a warning.
+    metadataBase: new URL(BASE_URL),
     title:       { default: t('title'), template: `%s — Lagomplan` },
     description: t('description'),
     alternates:  buildAlternates('home'),
     openGraph:   buildOpenGraph(locale),
+    twitter: {
+      card:        'summary_large_image',
+      site:        '@lagomplantravel',
+      creator:     '@lagomplantravel',
+    },
   }
 }
 
@@ -97,6 +112,26 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <body>
+        {/* ── JSON-LD: Organization + WebSite (site-wide schemas) ───────
+            Establishes the brand entity in Google's Knowledge Graph and
+            makes the site eligible for the sitelinks searchbox once
+            authority threshold is reached. Cheap to include site-wide;
+            Google deduplicates equivalent schemas across pages. */}
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({ '@id': `${BASE_URL}#organization`, ...ORGANIZATION_SCHEMA }),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({ '@id': `${BASE_URL}#website`, ...WEBSITE_SCHEMA }),
+          }}
+        />
+
         {/* ── Google Analytics 4 — loads only when NEXT_PUBLIC_GA_MEASUREMENT_ID is set ──
             send_page_view: false disables gtag's auto page_view (which only
             fires once per script load). The <GoogleAnalyticsTracker> below

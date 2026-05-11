@@ -15,7 +15,14 @@ import { getRoute, getGuideUrl, getDestinationUrl, getHotelUrl, getSmartFindUrl 
   from './routes'
 import type { LocalizedEntity, RouteKey } from './routes'
 
-const BASE_URL = 'https://lagomplan.com'
+/**
+ * Production canonical host. Must include `www` because that's the host
+ * Vercel serves and the host the SSL cert covers; without `www`, every
+ * canonical and hreflang would point to a host Google sees as a separate
+ * site, splitting authority. Also re-exported so app/sitemap.ts and
+ * app/robots.ts use the same source of truth.
+ */
+export const BASE_URL = 'https://www.lagomplan.com'
 
 // ── Canonical ─────────────────────────────────────────────
 
@@ -117,3 +124,67 @@ export function buildOpenGraph(
     ...overrides,
   }
 }
+
+// ── Robots metadata for private / functional pages ────────
+//
+// Use `noIndex` on pages that should never appear in Google's index:
+// auth flows (signup/login), authenticated dashboards (my-trips, account),
+// and personal share URLs (/trips/share/[shareId]).
+//
+// Even with robots.txt disallowing the same paths, this adds defense in
+// depth — robots.txt only stops crawling; if Google discovers a URL via
+// backlinks, it can still index a "blocked" URL with no snippet. The
+// noindex meta tag prevents that case entirely.
+
+/**
+ * Returns a Metadata.robots block that tells Google + Bing to neither
+ * index nor follow links from this page.
+ */
+export const NO_INDEX: NonNullable<Metadata['robots']> = {
+  index: false,
+  follow: false,
+  googleBot: {
+    index: false,
+    follow: false,
+  },
+}
+
+// ── JSON-LD structured data ───────────────────────────────
+//
+// Renders into a <script type="application/ld+json"> tag. Keep schemas
+// minimal and accurate — Google penalises over-claimed structured data
+// (e.g. inflated review counts) more than missing markup.
+
+/**
+ * Organization schema for the homepage. Establishes the Lagomplan brand
+ * entity in the Knowledge Graph and links the site to its social
+ * profiles. Without this, "Lagomplan" remains an unrecognised string in
+ * Google's eyes regardless of how many backlinks the site earns.
+ */
+export const ORGANIZATION_SCHEMA = {
+  '@context':     'https://schema.org',
+  '@type':        'Organization',
+  name:           'Lagomplan',
+  url:            BASE_URL,
+  logo:           `${BASE_URL}/images/logo.png`,
+  sameAs: [
+    'https://www.instagram.com/lagomplantravel/',
+    'https://www.facebook.com/profile.php?id=61582151266836',
+    'https://www.linkedin.com/company/lagomplan/',
+  ],
+} as const
+
+/**
+ * WebSite schema. Eligible for the Google sitelinks searchbox when the
+ * site grows enough to qualify; cheap to include now. The locale
+ * defaults to ES because Spanish is the canonical language per
+ * `buildAlternates`.
+ */
+export const WEBSITE_SCHEMA = {
+  '@context':      'https://schema.org',
+  '@type':         'WebSite',
+  name:            'Lagomplan',
+  url:             BASE_URL,
+  inLanguage:      ['es-MX', 'en-US'],
+  publisher:       { '@id': `${BASE_URL}#organization` },
+} as const
