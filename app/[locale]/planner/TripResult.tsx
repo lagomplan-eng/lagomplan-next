@@ -330,11 +330,26 @@ function detectTypeFromText(text: string): ItemType | null {
     t.includes('resort') || t.includes('hostal') || t.includes('airbnb') ||
     t.includes('inn ') || t.includes(' suites')
   ) return 'hotel'
+  // Restaurant detection — tightened (2026-05-11).
+  //
+  // Previously this also matched on `comida / cena / almuerz / desayun /
+  // food / eat / gastro / café / cafe` — far too broad. Those keywords
+  // hit on any food-adjacent block: market visits, picnics, cooking
+  // classes, food tours, family meals at home. The result was every
+  // block with food in it getting promoted to type='restaurant', which
+  // surfaced the booking modal in places it didn't belong and made
+  // the itinerary read like a restaurant guide.
+  //
+  // The principled fix is to drop keyword detection entirely and rely
+  // on a richer block.type enum from the AI (tracked as Phase 1.5 /
+  // Option C in the audit). Until then, this conservative keyword set
+  // only matches signals that almost always mean an actual restaurant.
+  // Anything food-related that doesn't match stays as the AI's
+  // original type (typically 'food' → falls back to 'free').
   if (
-    t.includes('restaur') || t.includes('comida') || t.includes('cena') ||
-    t.includes('almuerz') || t.includes('desayun') || t.includes('food') ||
-    t.includes('eat') || t.includes('gastro') || t.includes('brunch') ||
-    t.includes('café') || t.includes('cafe ')
+    t.includes('restaur') ||
+    t.includes(' bistro') ||
+    t.includes('brunch')
   ) return 'restaurant'
   if (
     t.includes('tour') || t.includes('excurs') || t.includes('activid') ||
