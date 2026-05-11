@@ -1868,6 +1868,7 @@ export default function TripResult({ params }: Props) {
       return { ...row, userEst, actual }
     }))
     setOpenBudgetEditId(null)
+    setHasUserEdits(true)
   }
 
   // ── UI helpers ───────────────────────────────────────────────────────────────
@@ -1894,6 +1895,7 @@ export default function TripResult({ params }: Props) {
       s.has(id) ? s.delete(id) : s.add(id)
       return s
     })
+    setHasUserEdits(true)
   }
 
   function deleteItem(itemId: string, dayN: number) {
@@ -2225,6 +2227,7 @@ export default function TripResult({ params }: Props) {
       })
       return next
     })
+    setHasUserEdits(true)
   }
 
   function addPackingItem() {
@@ -2232,6 +2235,7 @@ export default function TripResult({ params }: Props) {
     if (!trimmed) return
     setPacking(prev => [...prev, trimmed])
     setNewPackingItem('')
+    setHasUserEdits(true)
   }
 
   function openEditModal(item: ItineraryItem, dayN: number, isNew = false) {
