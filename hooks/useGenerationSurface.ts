@@ -27,7 +27,10 @@ import {
 } from '../lib/generation/messages'
 
 // Timing constants mirror the spec exactly.
-const TOTAL_MIN_MS         = 6_500
+// Reduced from 6500 → 4000ms: 6.5s was tuned for slow AI calls, but it also
+// gated cache hits and DB hydration, making fast loads feel artificially slow.
+// 4s still covers the cross-fade of all four phase messages without rushing.
+const TOTAL_MIN_MS         = 4_000
 const INITIATING_MIN_MS    = 400
 const WARMING_MIN_MS       = 1_200
 const COMPOSING_MIN_MS     = 2_000
