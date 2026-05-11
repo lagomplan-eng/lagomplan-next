@@ -13,7 +13,9 @@ import { buildPostGenerateToast } from '../../../lib/plan/copy'
 import { TripShareModal } from '../../../components/trips/TripShareModal'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
-import type { Accommodation } from '../../../lib/planner/accommodations'
+import type { Accommodation, TripDestinationContext } from '../../../lib/planner/accommodations'
+import { computeNights } from '../../../lib/planner/accommodations'
+import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -762,6 +764,15 @@ export default function TripResult({ params }: Props) {
   const [tripTitle, setTripTitle]     = useState('')
   const [tripSubtitle, setTripSubtitle] = useState('')
   const [days, setDays]         = useState<Day[]>([])
+  /**
+   * Structured accommodations from the server pipeline. Mirrors how
+   * `days` is wired: same lifecycle, set wherever `setDays(normalized.days); setAccommodations(normalized.accommodations)`
+   * fires. Drives the <PlannerHotelsSection> render. For legacy trips
+   * (no field on the AI response) this stays `[]` and the section
+   * component falls back to a deterministic stub at render time via
+   * `effectiveAccommodations`.
+   */
+  const [accommodations, setAccommodations] = useState<Accommodation[]>([])
   const [doneCheckIds, setDoneCheckIds] = useState<Set<string>>(new Set())
   const [budgetRows, setBudgetRows] = useState<BudgetRow[]>([])
   const [packing, setPacking]   = useState<string[]>([])
@@ -907,7 +918,7 @@ export default function TripResult({ params }: Props) {
         const normalized = normalizeTripData(data, dest, tripNights, interestsStr, locale === 'es' ? 'es' : 'en')
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
-        setDays(normalized.days)
+        setDays(normalized.days); setAccommodations(normalized.accommodations)
         const doneChecksArr: string[] = Array.isArray(data.trip_data?.doneChecks) ? data.trip_data.doneChecks : []
         setDoneCheckIds(new Set(doneChecksArr))
         setBudgetRows(normalized.budgetRows)
@@ -1065,7 +1076,7 @@ export default function TripResult({ params }: Props) {
               const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
               setTripTitle(normalized.title)
               setTripSubtitle(normalized.subtitle)
-              setDays(normalized.days)
+              setDays(normalized.days); setAccommodations(normalized.accommodations)
               setDoneCheckIds(new Set())
               setBudgetRows(normalized.budgetRows)
               setPacking(normalized.packing)
@@ -1161,7 +1172,7 @@ export default function TripResult({ params }: Props) {
         const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
-        setDays(normalized.days)
+        setDays(normalized.days); setAccommodations(normalized.accommodations)
         setDoneCheckIds(new Set())
         setBudgetRows(normalized.budgetRows)
         setPacking(normalized.packing)
@@ -1557,7 +1568,7 @@ export default function TripResult({ params }: Props) {
       const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
-      setDays(normalized.days)
+      setDays(normalized.days); setAccommodations(normalized.accommodations)
       setDoneCheckIds(new Set())
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
@@ -1891,7 +1902,7 @@ export default function TripResult({ params }: Props) {
       const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
-      setDays(normalized.days)
+      setDays(normalized.days); setAccommodations(normalized.accommodations)
       setDoneCheckIds(new Set())
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
@@ -2888,6 +2899,34 @@ export default function TripResult({ params }: Props) {
                 )}
               </div>
             )}
+
+            {/* ── Where to stay — guaranteed surface for overnight trips ──
+                Renders the structured accommodations[] coming from the
+                Phase 1 pipeline (validation gate → retry → fallback).
+                For legacy trips without the field the section's hook
+                derives a deterministic stub at view time, so every
+                overnight trip surfaces at least one hotel CTA.
+                Same-day trips (rare; planner enforces min 1 night)
+                render nothing. */}
+            <PlannerHotelsSection
+              tripId={tripId}
+              accommodations={accommodations}
+              ctx={{
+                destination: prefDest || destination || '',
+                start:       prefStart || start || '',
+                end:         prefEnd   || end   || '',
+                // Derive nights from the active dates so legacy trips
+                // (stored with the OLD field but loaded into the new UI)
+                // can still resolve overnight status correctly.
+                nights:      computeNights(prefStart || start, prefEnd || end),
+                adults:      prefTraveler === 'familia'
+                  ? prefAdults
+                  : prefTraveler === 'amigos'
+                  ? prefGroupCount
+                  : undefined,
+                locale:      locale === 'en' ? 'en' : 'es',
+              } satisfies TripDestinationContext}
+            />
 
             {/* Section header */}
             <div className="flex items-baseline justify-between mb-[18px]">
