@@ -872,7 +872,11 @@ export default function TripResult({ params }: Props) {
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
 
   // ── Autosave status ───────────────────────────────────────────────────────────
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
+  // Bump to force the autosave effect to re-run when the user hits Retry after
+  // a failed save. The effect's normal trigger is content change; without this,
+  // an unchanged dirty payload wouldn't re-fire.
+  const [autosaveRetryKey, setAutosaveRetryKey] = useState(0)
   const autoSaveTimerRef    = useRef<ReturnType<typeof setTimeout>>()
   const abortControllerRef  = useRef<AbortController | null>(null)
   // Aborts any in-flight /api/generate-trip request when the effect re-runs
@@ -1353,37 +1357,61 @@ export default function TripResult({ params }: Props) {
     abortControllerRef.current?.abort()
     setSaveStatus('saving')
 
-    autoSaveTimerRef.current = setTimeout(async () => {
+    const body = JSON.stringify({
+      title:     tripTitle,
+      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr },
+    })
+
+    // Exponential backoff: ~6.5s window covers most transient blips (cookie
+    // refresh, brief network drops). After 3 retries, surface the error state
+    // so the user can hit Retry manually.
+    const RETRY_DELAYS = [500, 1500, 4500]
+    let retryTimer: ReturnType<typeof setTimeout> | undefined
+
+    const attempt = async (i: number) => {
       const controller = new AbortController()
       abortControllerRef.current = controller
       try {
-        console.log('[autosave] patching trip:', tripId)
+        console.log('[autosave] patching trip:', tripId, 'attempt', i + 1)
         const res = await fetch(`/api/trips/${tripId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          method:      'PATCH',
+          headers:     { 'Content-Type': 'application/json' },
           credentials: 'include',
-          signal: controller.signal,
-          body: JSON.stringify({ title: tripTitle, trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr } }),
+          signal:      controller.signal,
+          body,
         })
         if (res.ok) {
           console.log('[autosave] saved')
-          lastSavedContentRef.current = content   // advance baseline
+          lastSavedContentRef.current = content
           setSaveStatus('saved')
-          setTimeout(() => setSaveStatus('idle'), 2000)
+          setTimeout(() => setSaveStatus(s => s === 'saved' ? 'idle' : s), 2000)
+          return
+        }
+        console.warn('[autosave] failed:', res.status, 'attempt', i + 1)
+        if (i < RETRY_DELAYS.length) {
+          retryTimer = setTimeout(() => { void attempt(i + 1) }, RETRY_DELAYS[i])
         } else {
-          console.warn('[autosave] failed:', res.status)
-          setSaveStatus('idle')
+          setSaveStatus('error')
         }
       } catch (err) {
         if (err instanceof Error && err.name === 'AbortError') return
-        console.warn('[autosave] error:', err)
-        setSaveStatus('idle')
+        console.warn('[autosave] error:', err, 'attempt', i + 1)
+        if (i < RETRY_DELAYS.length) {
+          retryTimer = setTimeout(() => { void attempt(i + 1) }, RETRY_DELAYS[i])
+        } else {
+          setSaveStatus('error')
+        }
       }
-    }, 1500)
+    }
 
-    return () => clearTimeout(autoSaveTimerRef.current)
+    autoSaveTimerRef.current = setTimeout(() => { void attempt(0) }, 1500)
+
+    return () => {
+      clearTimeout(autoSaveTimerRef.current)
+      if (retryTimer) clearTimeout(retryTimer)
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading])
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading, autosaveRetryKey])
 
   // ── pagehide flush — covers the autosave debounce gap on tab close ───────────
   // Autosave is debounced 1500ms. If the user edits and closes the tab inside
@@ -2576,13 +2604,23 @@ export default function TripResult({ params }: Props) {
               {/* Action row */}
               <div data-trip="action-row" className="flex items-center pt-[18px] border-t border-[#E4DFD8]">
                 <button
-                  className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${tripId ? 'text-[#2D6B57] cursor-default' : 'text-[#7A7A76] hover:text-[#0F3A33]'}`}
-                  onClick={handleSave}
+                  className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${
+                    tripId && saveStatus === 'error'
+                      ? 'text-[#B45A3C] hover:text-[#8A3F26] cursor-pointer'
+                      : tripId
+                      ? 'text-[#2D6B57] cursor-default'
+                      : 'text-[#7A7A76] hover:text-[#0F3A33]'
+                  }`}
+                  onClick={() => {
+                    if (saveStatus === 'error') { setSaveStatus('saving'); setAutosaveRetryKey(k => k + 1); return }
+                    handleSave()
+                  }}
                   disabled={saveStatus === 'saving'}
                 >
                   {!tripId && <><span>🔖</span> {locale === 'es' ? 'Guardar' : 'Save'}</>}
                   {tripId && saveStatus === 'saving' && <><span className="animate-pulse">💾</span> {locale === 'es' ? 'Guardando…' : 'Saving…'}</>}
-                  {tripId && saveStatus !== 'saving' && <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>}
+                  {tripId && saveStatus === 'error'  && <><span>↻</span> {locale === 'es' ? 'Reintentar guardado' : 'Retry save'}</>}
+                  {tripId && (saveStatus === 'idle' || saveStatus === 'saved') && <><span>✔</span> {locale === 'es' ? 'Guardado' : 'Saved'}</>}
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
