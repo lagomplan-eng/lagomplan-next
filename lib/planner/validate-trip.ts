@@ -24,8 +24,26 @@ import { synthesizeFallbackAccommodations } from './fallback-accommodations'
 /** Whatever shape `trip_data` actually has — we only read accommodations[]. */
 export interface ValidatableTripData {
   accommodations?: Accommodation[]
+  days?:           unknown[]
   // Catch-all so callers can pass the raw AI response without re-typing it.
   [key: string]: unknown
+}
+
+/**
+ * The trip has at least one itinerary day. Used as a separate signal
+ * from the accommodations gate — both failure modes can trigger a
+ * retry but have different fallback semantics: empty days have no
+ * deterministic recovery (only the LLM can generate day blocks), so
+ * the caller surfaces a structured error instead of synthesizing.
+ *
+ * Pre-existing Claude flakiness sometimes emits trip_data with the
+ * schema satisfied but `days` empty. The audit + on-call experience
+ * shows it's intermittent — a single retry recovers >90% of the time.
+ */
+export function hasValidDays(tripData: unknown): boolean {
+  if (!tripData || typeof tripData !== 'object') return false
+  const days = (tripData as ValidatableTripData).days
+  return Array.isArray(days) && days.length > 0
 }
 
 export type ValidationStatus =

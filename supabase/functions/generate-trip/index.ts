@@ -147,10 +147,14 @@
     const start     = typeof input.start === "string" ? input.start : "";
     const end       = typeof input.end   === "string" ? input.end   : "";
 
-    // When the previous attempt produced no accommodations, the calling
-    // layer sends retryHint='no_accommodations_emitted'. The retry prompt
-    // is tighter (explicit rejection of the previous output's shape).
-    const isRetry = input.retryHint === "no_accommodations_emitted";
+    // When the previous attempt produced bad output, the calling
+    // layer sends a retryHint describing what failed. The retry prompt
+    // is tighter — explicit rejection of the prior output shape +
+    // diagnosis of what was wrong, so the model has a meaningful chance
+    // of doing better on the second pass.
+    const isRetryNoAccommodations = input.retryHint === "no_accommodations_emitted";
+    const isRetryNoDays           = input.retryHint === "no_days_emitted";
+    const isRetry                 = isRetryNoAccommodations || isRetryNoDays;
 
     const accommodationsBlock = overnight
       ? `
@@ -170,7 +174,13 @@
   ALOJAMIENTO:
   Este viaje es de un solo día. Devuelve "accommodations": [] (arreglo vacío).`;
 
-    const retryNote = isRetry
+    const retryNote = isRetryNoDays
+      ? `
+  IMPORTANTE: La generación anterior devolvió un arreglo "days" vacío y fue rechazada.
+  DEBES devolver exactamente ${d} día(s) en el arreglo "days", cada uno con 4-7 bloques.
+  No omitas el arreglo. No lo dejes vacío. Genera contenido real para cada día.
+  `
+      : isRetryNoAccommodations
       ? `
   IMPORTANTE: La generación anterior NO incluyó alojamiento y fue rechazada.
   Asegúrate de que el arreglo "accommodations" esté completo según las reglas siguientes.

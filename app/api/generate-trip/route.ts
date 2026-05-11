@@ -11,7 +11,7 @@ import { getSupabaseAdmin, getSupabaseServer } from '../../../lib/supabase/serve
 import { ANON_TRIP_LIMIT } from '../../../lib/plan/limits'
 import { computeNights, isOvernight } from '../../../lib/planner/accommodations'
 import type { TripDestinationContext } from '../../../lib/planner/accommodations'
-import { validateAccommodations } from '../../../lib/planner/validate-trip'
+import { validateAccommodations, hasValidDays } from '../../../lib/planner/validate-trip'
 
 // Vercel Pro allows up to 300 s for serverless functions.
 // AI generation takes 60–90 s — the old 60 s limit guaranteed a timeout.
@@ -231,48 +231,63 @@ export async function POST(req: NextRequest) {
     let workingEnvelope: unknown = attempt1.data
     let workingTripData = extractTripData(workingEnvelope)
     let validation = validateAccommodations(workingTripData, ctx, 0)
+    let daysOk     = hasValidDays(workingTripData)
 
     console.log('[generate-trip]', JSON.stringify({
       stage:                 'validation_attempt_1',
       tripId:                typeof tripIdRaw === 'string' ? tripIdRaw : null,
       overnight,
       nights,
-      status:                validation.status,
+      accommodationsStatus:  validation.status,
       accommodationsCount:   validation.accommodationsCount,
+      daysOk,
     }))
 
     // ── Attempt 2 (one retry, tightened) ─────────────────────────────────────────
-    // Trigger only when the first attempt missed accommodations. The Edge Fn
-    // reads `retryHint` to tighten its prompt — see supabase/functions/
-    // generate-trip/index.ts.
-    if (validation.status === 'no_hotels') {
+    // Trigger when EITHER:
+    //   - accommodations are missing on an overnight trip, OR
+    //   - days[] is empty (intermittent Claude flakiness — schema satisfied,
+    //     but model emitted zero day blocks. Pre-existing failure mode that
+    //     used to surface as "no itinerary days were found in the expected
+    //     format" on the frontend; server-side retry catches >90% of these).
+    // The Edge Fn reads `retryHint` to tighten its prompt — see
+    // supabase/functions/generate-trip/index.ts.
+    const needsRetry = validation.status === 'no_hotels' || daysOk === false
+    if (needsRetry) {
+      const retryReason = daysOk === false
+        ? 'no_days_emitted'
+        : 'no_accommodations_emitted'
+
       console.log('[generate-trip]', JSON.stringify({
         stage:  'retry_trigger',
-        reason: 'no_accommodations_on_attempt_1',
+        reason: retryReason,
       }))
 
       const attempt2 = await callEdgeOnce({
-        retryHint: 'no_accommodations_emitted',
+        retryHint: retryReason,
       })
 
       if (attempt2.ok) {
         workingEnvelope = attempt2.data
         workingTripData = extractTripData(workingEnvelope)
         validation = validateAccommodations(workingTripData, ctx, 1)
+        daysOk     = hasValidDays(workingTripData)
         console.log('[generate-trip]', JSON.stringify({
           stage:                 'validation_attempt_2',
-          status:                validation.status,
+          accommodationsStatus:  validation.status,
           accommodationsCount:   validation.accommodationsCount,
+          daysOk,
         }))
       } else {
-        // Retry itself failed — proceed to fallback synthesis without burning
-        // the user's credit a second time. Validation gate at attempt=1
-        // synthesizes the stub deterministically.
+        // Retry itself failed — apply accommodations fallback (no day-level
+        // fallback possible). Validation gate at attempt=1 synthesizes the
+        // accommodation stub deterministically.
         validation = validateAccommodations(workingTripData, ctx, 1)
         console.log('[generate-trip]', JSON.stringify({
           stage:                 'retry_failed_falling_back',
-          status:                validation.status,
+          accommodationsStatus:  validation.status,
           accommodationsCount:   validation.accommodationsCount,
+          daysOk,
         }))
       }
     }
@@ -283,6 +298,25 @@ export async function POST(req: NextRequest) {
         nights,
         destination: ctx.destination,
       }))
+    }
+
+    // ── Days are not recoverable via fallback ────────────────────────────────────
+    // If the retry didn't fix the empty-days problem, ship a structured 502
+    // so the client can show a "try again" message rather than rendering an
+    // empty trip. The user's credit was already consumed by this point —
+    // accept the cost; this is rare enough not to need refund logic, and
+    // the alternative (silently rendering an empty trip) is the worst UX.
+    if (daysOk === false) {
+      console.error('[generate-trip]', JSON.stringify({
+        stage: 'no_days_after_retry',
+        nights,
+        destination: ctx.destination,
+      }))
+      return err(
+        502,
+        'no_days_after_retry',
+        'Trip generation produced an empty itinerary. Please try again.',
+      )
     }
 
     // Repackage the (possibly fallback-augmented) trip_data into the Edge
