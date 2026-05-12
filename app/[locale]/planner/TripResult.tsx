@@ -538,6 +538,24 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
   return checks
 }
 
+// Filters the user's prior done-check IDs against the check IDs the *new*
+// days produce, keeping only those that still apply. Universal pre-trip
+// checks use stable semantic IDs (e.g. `pretrip-book-hotel`) so they
+// survive; per-day checks use `check-${item.id}` and lose their match when
+// the AI emits a new item, which is the correct outcome for activity-level
+// confirmations that no longer exist.
+function reconcileDoneChecks(
+  prev:   Set<string>,
+  days:   Day[],
+  locale: 'es' | 'en',
+): Set<string> {
+  if (prev.size === 0) return prev
+  const stillValid = new Set(deriveChecksFromDays(days, { locale }).map(c => c.id))
+  const next = new Set<string>()
+  prev.forEach(id => { if (stillValid.has(id)) next.add(id) })
+  return next
+}
+
 function derivePackingFromTrip(
   destination: string,
   nights: string,
@@ -1799,7 +1817,10 @@ export default function TripResult({ params }: Props) {
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days); setAccommodations(normalized.accommodations)
-      setDoneCheckIds(new Set())
+      // Keep done-state for checks that still exist after regen. Universal
+      // pre-trip checks (stable IDs) survive; per-day item confirmations
+      // drop because the new AI items have fresh IDs.
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       const newLabel = `v${nextIdx + 1}${prefPace ? ' · ' + (PACE_DISPLAY[prefPace] ?? prefPace) : ''}`
@@ -2140,7 +2161,9 @@ export default function TripResult({ params }: Props) {
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days); setAccommodations(normalized.accommodations)
-      setDoneCheckIds(new Set())
+      // Same reconciliation as regenerate() — universal checks survive,
+      // per-day item confirmations drop.
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       // Write fresh cache so a subsequent login redirect restores this new trip
