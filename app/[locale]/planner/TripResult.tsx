@@ -2432,12 +2432,13 @@ export default function TripResult({ params }: Props) {
     chunksDone:  asyncChunksDone,
     chunksTotal: asyncChunksTotal,
     slots: {
-      destination:  destination || null,
-      // Prefer the active gen duration (set by regen/replace from edited dates)
-      // over the URL-stale `nights`. `nights` is the empty string when truly
-      // missing — keep that as null. "0" (same-day) becomes 1 via the helper.
+      // Read from pref state, not URL params. URL params are the *initial*
+      // form submission — drawer edits update prefs, never the URL. During
+      // regen after a drawer edit, the GenerationSurface must reflect what
+      // the user is *actually* regenerating, not the old form values.
+      destination:  prefDest || null,
       durationDays: activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null),
-      travelers:    traveler || null,
+      travelers:    prefTraveler || null,
     },
   })
 
@@ -2468,9 +2469,9 @@ export default function TripResult({ params }: Props) {
             <LoadingState locale={locale} />
           ) : loadingKind === 'generating' ? (
             <GenerationSurface
-              destination={destination || null}
+              destination={prefDest || null}
               durationDays={activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null)}
-              travelers={traveler || null}
+              travelers={prefTraveler || null}
               phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
               progress={gen.progress}
               message={gen.message}
