@@ -3981,9 +3981,15 @@ export default function TripResult({ params }: Props) {
 
             <div className="grid grid-cols-2 gap-2.5 mb-3">
               <div>
-                <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-1.5">
-                  Hora
-                </label>
+                {/* Mirror the Precio label-row layout so both inputs end up
+                    at the same Y. The right side is empty here, but the
+                    flex + min-h matches the height the MXN/USD pill imposes
+                    in the Precio column. */}
+                <div className="flex items-center justify-between mb-1.5 min-h-[22px]">
+                  <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76]">
+                    Hora
+                  </label>
+                </div>
                 <input
                   value={editTime}
                   onChange={e => setEditTime(e.target.value)}
@@ -3992,7 +3998,7 @@ export default function TripResult({ params }: Props) {
                 />
               </div>
               <div>
-                <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center justify-between mb-1.5 min-h-[22px]">
                   <label className="block font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76]">
                     {locale === 'es' ? 'Precio' : 'Price'}
                   </label>
