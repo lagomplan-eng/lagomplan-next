@@ -186,16 +186,43 @@
   `
       : "";
 
+    // Phase 3 — family composition awareness. If traveler_details ships
+    // children data, surface it explicitly in the prompt + add a soft
+    // guidance block so the AI deliberately adapts venue / pacing / food
+    // choices to the family. Kept short on purpose — the user warned us
+    // not to overcorrect into "family spam".
+    const td = input.traveler_details
+    const isFamily   = input.travelers === "familia" && td && Array.isArray(td.children) && td.children.length > 0
+    const familyLine = isFamily
+      ? `\n  - Composición familiar: ${td.adults ?? 2} adulto(s) + ${td.children.length} niño(s) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`
+      : "";
+    const familyGuidance = isFamily
+      ? `
+
+  VIAJE FAMILIAR (importante):
+  El grupo incluye niños. Adapta el itinerario con criterio — sin exagerar — para que funcione
+  para todos:
+    - Restaurantes: prioriza opciones kid-friendly (menú infantil, espacios amplios, sin
+      ambiente demasiado formal a la cena). Mantén variedad para los adultos.
+    - Hoteles: prioriza opciones familiares (cuartos comunicantes, alberca, kit infantil).
+    - Actividades: incluye 1-2 bloques por día que niños puedan disfrutar (parques,
+      experiencias interactivas, museos con sección infantil). Evita atracciones con
+      restricciones de edad evidentes.
+    - Pacing: deja espacio para descansos a media tarde. No empujes 7 bloques en un día con
+      niños pequeños — 4-5 es mejor.
+    - No hagas el viaje exclusivamente para niños. Sigue siendo un viaje para todos.`
+      : "";
+
     return `Genera un itinerario de viaje con estos datos:
   - Origen: ${input.origin ?? "(no especificado)"}
   - Destino: ${input.destination}
   - Duración: ${d} días${overnight ? ` (${nights} noche(s))` : " (sin pernocta)"}
   - Fechas: ${start || "(no especificadas)"} → ${end || "(no especificadas)"}
-  - Viajeros: ${input.travelers} persona(s)
+  - Viajeros: ${input.travelers} persona(s)${familyLine}
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
-  ${retryNote}${accommodationsBlock}
+  ${retryNote}${accommodationsBlock}${familyGuidance}
 
   TIPOS DE BLOQUE (CRÍTICO):
   Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:
