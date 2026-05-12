@@ -18,7 +18,6 @@ import { computeNights } from '../../../lib/planner/accommodations'
 import { titleCaseCity } from '../../../lib/planner/format'
 import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib/planner/classify-block'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
-import NewsletterPdfPrompt from '../../../components/newsletter/NewsletterPdfPrompt'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -947,9 +946,6 @@ export default function TripResult({ params }: Props) {
 
   // ── Paywall state (paywallOpen now in PlanProvider) ──────────────────────────
   const [shareOpen,   setShareOpen]     = useState(false)
-  // Soft newsletter prompt shown when the user clicks the PDF download.
-  // Closing OR submitting → fires window.print().
-  const [pdfPromptOpen, setPdfPromptOpen] = useState(false)
   const [generateKey, setGenerateKey]   = useState(0)  // increment to manually retrigger generate
 
   // ── Autosave status ───────────────────────────────────────────────────────────
@@ -2862,7 +2858,10 @@ export default function TripResult({ params }: Props) {
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
                 <button
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] hover:text-[#0F3A33] transition-colors"
-                  onClick={() => setPdfPromptOpen(true)}
+                  onClick={() => {
+                    showToast(locale === 'es' ? '📄 Generando PDF…' : '📄 Generating PDF…')
+                    setTimeout(() => window.print(), 300)
+                  }}
                 >
                   <span>⬇</span> PDF
                 </button>
@@ -4235,19 +4234,6 @@ export default function TripResult({ params }: Props) {
           onClose={() => setShareOpen(false)}
         />
       )}
-
-      {/* ── NEWSLETTER PROMPT BEFORE PDF DOWNLOAD ────────────────────────── */}
-      <NewsletterPdfPrompt
-        open={pdfPromptOpen}
-        onResolve={() => {
-          setPdfPromptOpen(false)
-          // Tiny delay so the modal can finish its fade-out before the
-          // browser's print dialog opens — otherwise the dialog briefly
-          // overlaps the still-fading prompt.
-          showToast(locale === 'es' ? '📄 Generando PDF…' : '📄 Generating PDF…')
-          setTimeout(() => window.print(), 300)
-        }}
-      />
 
       {/* ── SAVE PROMPT (anon users only) ────────────────────────────────── */}
       <SaveTripModal

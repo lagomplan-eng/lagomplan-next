@@ -29,6 +29,7 @@ import type { GuideShare }         from './CuratedGuideShareModal'
 import { GuideFreeIndicator }      from './GuideFreeIndicator'
 import NewsletterSidebarCard       from '../newsletter/NewsletterSidebarCard'
 import NewsletterEndOfGuide        from '../newsletter/NewsletterEndOfGuide'
+import NewsletterPdfPrompt         from '../newsletter/NewsletterPdfPrompt'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -79,6 +80,10 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
   const toast       = useToast()
   const plannerHref = buildPlannerHref(data.slug, locale)
   const [shareOpen, setShareOpen] = useState(false)
+  // Soft newsletter prompt before the PDF print fires. Closing OR submitting
+  // both fall through to window.print() — user is never blocked from
+  // downloading.
+  const [pdfPromptOpen, setPdfPromptOpen] = useState(false)
 
   // Analytics: fire on mount
   useEffect(() => {
@@ -101,7 +106,14 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
   }
 
   const handlePdf = () => {
+    setPdfPromptOpen(true)
+  }
+
+  const resolvePdfPrompt = () => {
+    setPdfPromptOpen(false)
     toast.show(locale === 'en' ? '📄 Generating PDF…' : '📄 Generando PDF…')
+    // Small delay so the modal can finish its fade-out before the
+    // browser's print dialog opens.
     setTimeout(() => window.print(), 300)
   }
 
@@ -191,6 +203,12 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
         guide={guideShare}
         isOpen={shareOpen}
         onClose={() => setShareOpen(false)}
+      />
+
+      {/* ── Newsletter prompt before PDF print ── */}
+      <NewsletterPdfPrompt
+        open={pdfPromptOpen}
+        onResolve={resolvePdfPrompt}
       />
 
     </div>
