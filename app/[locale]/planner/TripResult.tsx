@@ -499,40 +499,82 @@ function reconcileDoneChecks(
   return next
 }
 
+// Locale-aware fallback packing copy. The function only runs when the AI
+// didn't emit a `what_to_pack` array (rare today but still the safety net
+// for failures). The copy mirrors the prior Spanish-only set with English
+// counterparts so EN users don't see Spanish strings in their fallback.
+const PACKING_COPY: Record<'es' | 'en', {
+  base:        (days: number) => string[]
+  beach:       string[]
+  hiking:      string[]
+  laundryBag:  string
+  family:      string[]
+}> = {
+  es: {
+    base: (n) => [
+      'Documentos de identidad (INE / pasaporte)',
+      'Tarjeta de crédito / efectivo',
+      'Teléfono y cargador',
+      'Seguro de viaje',
+      `Ropa para ${n} días`,
+      'Artículos de higiene personal',
+      'Medicamentos básicos / botiquín',
+    ],
+    beach: ['Traje de baño', 'Protector solar SPF 50+', 'Lentes de sol', 'Sandalias'],
+    hiking: ['Zapatos de trekking', 'Repelente de insectos', 'Botella de agua reutilizable'],
+    laundryBag: 'Bolsa de lavandería',
+    family: [
+      'Snacks para el camino',
+      'Toallitas húmedas',
+      'Cambio de ropa extra',
+      'Entretenimiento (libros, tablet, juegos)',
+    ],
+  },
+  en: {
+    base: (n) => [
+      'ID documents (passport)',
+      'Credit card / cash',
+      'Phone and charger',
+      'Travel insurance',
+      `Clothes for ${n} day${n === 1 ? '' : 's'}`,
+      'Toiletries',
+      'Basic medications / first-aid kit',
+    ],
+    beach: ['Swimsuit', 'SPF 50+ sunscreen', 'Sunglasses', 'Sandals'],
+    hiking: ['Hiking shoes', 'Insect repellent', 'Reusable water bottle'],
+    laundryBag: 'Laundry bag',
+    family: [
+      'Snacks for the road',
+      'Wet wipes',
+      'Extra change of clothes',
+      'Entertainment (books, tablet, games)',
+    ],
+  },
+}
+
 function derivePackingFromTrip(
   destination: string,
   nights: string,
   interests: string,
   traveler?: { type?: string; childCount?: number },
+  locale: 'es' | 'en' = 'es',
 ): string[] {
+  const copy = PACKING_COPY[locale]
   const n = durationDaysFromNights(nights)
-  const base = [
-    'Documentos de identidad (INE / pasaporte)',
-    'Tarjeta de crédito / efectivo',
-    'Teléfono y cargador',
-    'Seguro de viaje',
-    `Ropa para ${n} días`,
-    'Artículos de higiene personal',
-    'Medicamentos básicos / botiquín',
-  ]
+  const base = [...copy.base(n)]
   const interestsLower = interests.toLowerCase()
   if (interestsLower.includes('playa') || interestsLower.includes('beach') || destination.toLowerCase().includes('vallarta') || destination.toLowerCase().includes('cancún') || destination.toLowerCase().includes('tulum')) {
-    base.push('Traje de baño', 'Protector solar SPF 50+', 'Lentes de sol', 'Sandalias')
+    base.push(...copy.beach)
   }
   if (interestsLower.includes('senderismo') || interestsLower.includes('hiking') || interestsLower.includes('naturaleza')) {
-    base.push('Zapatos de trekking', 'Repelente de insectos', 'Botella de agua reutilizable')
+    base.push(...copy.hiking)
   }
-  if (n >= 5) base.push('Bolsa de lavandería')
+  if (n >= 5) base.push(copy.laundryBag)
   // Subtle family adaptation — only fires when children are present. Kept
   // intentionally short to avoid "family spam"; AI prompt enrichment handles
   // the rest of the contextual tuning.
   if ((traveler?.childCount ?? 0) > 0) {
-    base.push(
-      'Snacks para el camino',
-      'Toallitas húmedas',
-      'Cambio de ropa extra',
-      'Entretenimiento (libros, tablet, juegos)',
-    )
+    base.push(...copy.family)
   }
   return base
 }
@@ -601,7 +643,7 @@ function normalizeTripData(
 
   const normalizedPacking: string[] = Array.isArray(rawPacking)
     ? rawPacking.map((p: any) => (typeof p === 'string' ? p : p?.item ?? p?.name ?? p?.text ?? String(p)))
-    : derivePackingFromTrip(destination, nights, interests, traveler)
+    : derivePackingFromTrip(destination, nights, interests, traveler, locale)
 
   // Budget — broad key coverage; also handle { category: amount } object shape
   const rawBudget =
