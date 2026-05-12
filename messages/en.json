@@ -216,6 +216,17 @@
       "successText": "You're in.",
       "successSub": "Check your inbox to confirm."
     },
+    "pdfPrompt": {
+      "eyebrow": "Itinerary · PDF",
+      "headline": "Like this trip?\nGet more like it.",
+      "sub": "Curated itineraries, tips and routes — straight to your inbox.",
+      "submit": "Join →",
+      "privacy": "No spam. Cancel anytime.",
+      "ariaDialog": "Subscribe before downloading your PDF",
+      "ariaClose": "Close and download",
+      "successText": "You're in!",
+      "successSub": "Generating your PDF…"
+    },
     "sidebar": {
       "label": "Newsletter",
       "headline": "More guides like this.",
