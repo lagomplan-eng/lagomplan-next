@@ -11,6 +11,7 @@ import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
 import { getAllHotelsFromGuides }            from '../../../lib/hotels'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
+import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
 type Props = { params: Promise<{ locale: Locale }> }
 
@@ -34,6 +35,9 @@ export default async function HotelsIndexPage({ params }: Props) {
   return (
     <main className="pt-[100px]">
       <HotelsClient hotels={hotels} locale={locale} />
+      <div className="page-inner">
+        <NewsletterEndOfGuide />
+      </div>
     </main>
   )
 }

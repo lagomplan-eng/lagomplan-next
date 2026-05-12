@@ -11,6 +11,7 @@ import { useRouter } from '../../../lib/navigation'
 import HeroForm from '../../../components/forms/HeroForm'
 import TripResult from './TripResult'
 import GuidesPreview from '../../../components/GuidesPreview'
+import NewsletterEndOfGuide from '../../../components/newsletter/NewsletterEndOfGuide'
 
 const SHOW_QUICK_START = true
 const SHOW_GUIDES = false
@@ -93,6 +94,7 @@ function FormPage() {
             <QuickStartSection locale={locale} />
             <GuidesPreview locale={locale} />
             <TrustStrip locale={locale} />
+            <NewsletterEndOfGuide />
           </div>
 
         </div>

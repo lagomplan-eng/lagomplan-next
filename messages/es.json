@@ -7,6 +7,7 @@
     "planner": "Planificador",
     "guides": "Guías",
     "hotels": "Hoteles",
+    "worldcup": "Mundial",
     "login": "Iniciar sesión",
     "signup": "Crear cuenta",
     "myTrips": "Mis viajes",
@@ -34,6 +35,7 @@
     "amigos": "Amigos",
     "adults": "Adultos",
     "childrenAges": "Edades de los niños",
+    "addBaby": "+ Añadir bebé",
     "addChild": "+ Añadir niño",
     "groupCount": "¿Cuántos viajan?",
     "interests": "Intereses",
@@ -42,11 +44,11 @@
     "paceRelax": "relajado",
     "paceBalance": "balanceado",
     "paceActive": "aventurero",
-    "budget": "Presupuesto total del viaje (MXN)",
+    "budget": "Presupuesto total del viaje",
     "budgetPlaceholder": "¿Cuánto tienes en mente?",
     "budgetCurrency": "MXN",
     "submit": "Planificar mi viaje →",
-    "freeNote": "✦ Primer plan gratis · Sin registro",
+    "freeNote": "✦ Planifica {count} viajes gratis · Sin tarjeta",
     "googlePowered": "Impulsado por Google Maps",
     "suggestions": "Sugerencias",
     "night": "noche",
@@ -151,6 +153,7 @@
       "guides": "Guías de viaje",
       "hotels": "Hoteles",
       "planner": "Planificador",
+      "pricing": "Precios",
       "about": "Nosotras",
       "contact": "Contacto",
       "instagram": "Instagram"
@@ -191,5 +194,117 @@
     "signup": "Crear cuenta",
     "login": "Iniciar sesión",
     "privacy": "Privacidad"
+  },
+
+  "newsletter": {
+    "common": {
+      "placeholder": "tu@correo.com",
+      "ariaEmail": "Tu correo electrónico",
+      "loading": "...",
+      "errorEmail": "Verifica tu correo e intenta de nuevo.",
+      "errorEmailShort": "Verifica tu correo.",
+      "errorNetwork": "No pudimos conectar. Intenta más tarde."
+    },
+    "popup": {
+      "eyebrow": "Guías · Consejos · Mundial 2026",
+      "headline": "Tu próximo viaje,\nantes de que lo pidas.",
+      "sub": "Destinos curados, rutas probadas y tips de planeación — en tu correo.",
+      "submit": "Unirme →",
+      "privacy": "Sin spam. Cancela cuando quieras.",
+      "ariaDialog": "Newsletter de Lagomplan",
+      "ariaClose": "Cerrar",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    },
+    "sidebar": {
+      "label": "Boletín",
+      "headline": "Más guías como esta.",
+      "sub": "Destinos, tips y Mundial 2026 — en tu correo.",
+      "submit": "Unirme →",
+      "privacy": "Sin spam · Cancela cuando quieras",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    },
+    "endOfGuide": {
+      "label": "Boletín Lagomplan",
+      "headline": "¿Te gustó esta guía?\nRecibe más como esta.",
+      "sub": "Destinos curados, itinerarios y tips — cada semana.",
+      "submit": "Suscribirse",
+      "successText": "¡Ya estás dentro.",
+      "successSub": "Revisa tu correo para confirmar."
+    }
+  },
+
+  "pricing": {
+    "meta": {
+      "title": "Precios",
+      "description": "Empieza gratis. Planes desde $39 MXN. Viajes ilimitados con Explorer Mensual."
+    },
+    "eyebrow": "Lagomplan — Precios",
+    "hero": {
+      "line1": "Viaja más.",
+      "line2": "Planea menos.",
+      "body":  "Empieza gratis. Actualiza cuando quieras. Sin compromisos."
+    },
+    "free": {
+      "tier1": { "title": "Sin login",         "sub": "1 plan completo, sin registro ni tarjeta" },
+      "tier2": { "title": "Con cuenta",        "sub": "2 viajes más gratis" },
+      "tier3": { "title": "Guarda y descarga", "sub": "Ve y descarga tu plan cuando quieras" }
+    },
+    "paid": {
+      "headline": "¿Listo para más viajes?",
+      "eyebrow":  "Elige tu plan"
+    },
+    "common": {
+      "currency": "MXN",
+      "buy":      "Comprar"
+    },
+    "plans": {
+      "perTrip": {
+        "name":  "Por viaje",
+        "price": "39",
+        "usd":   "≈ $1.99 USD",
+        "note":  "Para tí que no viajas mucho, o estás probando"
+      },
+      "pack5": {
+        "name":  "Pack 5 viajes",
+        "price": "149",
+        "usd":   "≈ $7.99 USD",
+        "note":  "Para tí que te gusta escaparte o planear algunos viajes al año"
+      },
+      "pack10": {
+        "badge": "Mejor precio",
+        "name":  "Pack 10 viajes",
+        "price": "249",
+        "usd":   "≈ $12.99 USD",
+        "note":  "Para tí que amas viajar y quieres el mejor valor de pago único"
+      },
+      "explorer": {
+        "badge":       "Recomendado",
+        "name":        "Explorer Mensual",
+        "price":       "199",
+        "priceSuffix": "MXN/mes",
+        "usd":         "≈ $9.99 USD",
+        "feature1":    "Viajes ilimitados",
+        "feature2":    "Historial guardado",
+        "feature3":    "Cancela cuando quieras",
+        "cta":         "Comenzar"
+      }
+    },
+    "faq": {
+      "title": "Preguntas frecuentes",
+      "q1": "¿Qué incluye el viaje gratis?",
+      "a1": "El primer viaje es completamente gratis y no requiere cuenta. Recibes un plan completo con itinerario, presupuesto estimado y actividades. Los resultados se mantienen activos 7 días y siempre puedes descargar el PDF.",
+      "q2": "¿Por qué necesito crear cuenta para el Viaje 2?",
+      "a2": "Tu cuenta nos permite guardar tu viaje y darte acceso desde cualquier dispositivo, además tu segundo y tercer viaje son completamente gratuitos.",
+      "q3": "¿Qué diferencia hay entre los packs y Explorer Mensual?",
+      "a3": "Los packs son de pago único: compras un número fijo de generaciones y las usas a tu ritmo. Explorer Mensual te da viajes ilimitados por $199 MXN al mes. Si planeas 3 o más viajes al año, Explorer sale más económico.",
+      "q4": "¿Los viajes de los packs tienen fecha de vencimiento?",
+      "a4": "No. Los viajes comprados en cualquier pack no expiran — puedes usarlos cuando quieras, sin presión.",
+      "q5": "¿Puedo cancelar Explorer en cualquier momento?",
+      "a5": "Sí. Cancelas desde tu cuenta sin trámites ni penalización. Tu acceso se mantiene hasta el final del período ya pagado.",
+      "q6": "¿Aceptan tarjetas mexicanas?",
+      "a6": "Sí. Aceptamos tarjetas de crédito y débito mexicanas e internacionales. Los precios en MXN se procesan localmente."
+    }
   }
 }

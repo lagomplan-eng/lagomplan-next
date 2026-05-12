@@ -5,6 +5,7 @@ import { useRouter } from '../../lib/navigation'
 import { useTranslations } from 'next-intl'
 import PlacesInput, { type PlaceResult } from './PlacesInput'
 import DateRangePicker, { type DateRange } from './DateRangePicker'
+import { FREE_TRIPS_LIMIT } from '../../lib/plan/limits'
 
 type Traveler = 'solo' | 'pareja' | 'familia' | 'amigos'
 
@@ -116,6 +117,9 @@ const [extra, setExtra] = useState(extraInterests.join(', '))
 
 const [pace, setPace] = useState(initialValues?.pace ?? '')
 const [budget, setBudget] = useState(initialValues?.budget ?? '')
+// Currency toggle for the budget field. The amount goes into the AI prompt as
+// a free-text string (e.g. "20,000 MXN") so the model sees the unit clearly.
+const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
 
 const [submitted, setSubmitted] = useState(false)
 const [generating, setGenerating] = useState(false)
@@ -132,6 +136,11 @@ function submit(e: React.FormEvent) {
 
     setGenerating(true)
 
+    // Append the currency code to the budget so the AI prompt sees the unit
+    // ("20,000 MXN" vs "20,000 USD"). Empty input stays empty — never emit a
+    // bare currency code with no number, which would confuse the model.
+    const budgetWithCurrency = budget.trim() ? `${budget.trim()} ${budgetCurrency}` : ''
+
     const params = new URLSearchParams({
       origin: originValue,
       destination: destValue,
@@ -141,8 +150,28 @@ function submit(e: React.FormEvent) {
       traveler:    traveler,
       interests:   [...interests, extra].filter(Boolean).join(', '),
       pace,
-      budget,
+      budget:      budgetWithCurrency,
+      // Explicit currency param so the result page can initialize the
+      // budgetCurrency state without sniffing the budget string. DB load
+      // will override this once the trip is saved.
+      currency:    budgetCurrency,
     })
+
+    // Traveler-detail serialization — only when relevant to the selected
+    // type, so URLs for solo/pareja stay clean. The result page parses
+    // these to hydrate the pref drawer (prevents losing children data on
+    // the form → result transition).
+    if (traveler === 'familia') {
+      params.set('adults', String(adults))
+      if (children.length > 0) {
+        // `type:age` per child, joined by `|`. URLSearchParams handles the
+        // percent-encoding of accented age labels.
+        params.set('children', children.map(c => `${c.type}:${c.age}`).join('|'))
+      }
+    }
+    if (traveler === 'amigos') {
+      params.set('groupCount', String(groupCount))
+    }
 
     router.push(`/planner?${params}` as any)
   }
@@ -296,6 +325,16 @@ function submit(e: React.FormEvent) {
                     <button
                       type="button"
                       onClick={() => {
+                        setChildren(prev => [...prev, { id: nextKidId, type: 'baby', age: '0-11 m' }])
+                        setNextKidId(n => n + 1)
+                      }}
+                      className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[#E4EFEC] transition-all"
+                    >
+                      {t('addBaby')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setChildren(prev => [...prev, { id: nextKidId, type: 'kid', age: '3 anos' }])
                         setNextKidId(n => n + 1)
                       }}
@@ -406,11 +445,31 @@ function submit(e: React.FormEvent) {
                 value={budget}
                 onChange={e => setBudget(e.target.value.replace(/[^0-9,]/g, ''))}
                 placeholder={t('budgetPlaceholder')}
-                className="w-full font-mono text-[13px] border border-[rgba(107,143,134,.22)] bg-white pl-6 pr-14 py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors"
+                className="w-full font-mono text-[13px] border border-[rgba(107,143,134,.22)] bg-white pl-6 pr-[88px] py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors"
               />
-              <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[8px] text-[#A0A0A0] uppercase pointer-events-none">
-                MXN
-              </span>
+              {/* Currency toggle — same visual language as the budget-table toggle */}
+              <div
+                className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]"
+                role="group"
+                aria-label="Currency"
+              >
+                {(['MXN', 'USD'] as const).map(c => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setBudgetCurrency(c)}
+                    className={[
+                      'font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] border-none cursor-pointer transition-all',
+                      budgetCurrency === c
+                        ? 'bg-[#0F3A33] text-white'
+                        : 'bg-transparent text-[#7A7A76] hover:text-[#0F3A33]',
+                    ].join(' ')}
+                    aria-pressed={budgetCurrency === c}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -433,7 +492,7 @@ function submit(e: React.FormEvent) {
           </button>
 
           <p className="font-sans text-[10px] text-[#6B8F86] text-center mt-2.5 tracking-[.3px]">
-            {t('freeNote')}
+            {t('freeNote', { count: FREE_TRIPS_LIMIT })}
           </p>
         </div>
 

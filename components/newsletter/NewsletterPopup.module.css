@@ -1,0 +1,176 @@
+/* ─────────────────────────────────────────────────────────────────────
+   NewsletterPopup
+   Slide-in bottom-right card. Forest-green surface.
+   Animation: idle → translateY(120%); visible → translateY(0).
+   ───────────────────────────────────────────────────────────────────── */
+
+.popup {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 304px;
+  background: #1B4D3E;
+  border-radius: 6px;
+  padding: 22px 20px 18px;
+  z-index: 9999;
+  box-shadow: 0 16px 48px rgba(15, 26, 22, 0.28);
+  transform: translateY(120%);
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.38s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity   0.38s ease;
+  font-family: var(--font-sans), 'DM Sans', sans-serif;
+}
+
+.visible {
+  transform: translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: rgba(244, 240, 232, 0.35);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  transition: color 0.15s;
+}
+
+.close:hover {
+  color: rgba(244, 240, 232, 0.75);
+}
+
+.eyebrow {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  color: #6EBD9F;
+  margin-bottom: 8px;
+}
+
+.headline {
+  font-family: var(--font-display), 'Playfair Display', serif;
+  font-size: 19px;
+  color: #F4F0E8;
+  line-height: 1.25;
+  margin-bottom: 6px;
+  white-space: pre-line;
+}
+
+.sub {
+  font-family: var(--font-sans), 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: rgba(244, 240, 232, 0.58);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+
+.formRow {
+  display: flex;
+}
+
+.email {
+  flex: 1;
+  background: rgba(244, 240, 232, 0.1);
+  border: 1px solid rgba(244, 240, 232, 0.18);
+  border-right: none;
+  border-radius: 4px 0 0 4px;
+  padding: 9px 12px;
+  font-family: var(--font-sans), 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #F4F0E8;
+  outline: none;
+  transition: border-color 0.15s;
+  -webkit-appearance: none;
+  min-width: 0;
+}
+
+.email::placeholder {
+  color: rgba(244, 240, 232, 0.3);
+}
+
+.email:focus {
+  border-color: rgba(110, 189, 159, 0.5);
+}
+
+.submit {
+  background: #F4F0E8;
+  color: #1B4D3E;
+  font-family: var(--font-sans), 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 9px 14px;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s;
+  -webkit-appearance: none;
+}
+
+.submit:hover {
+  background: #E8E0D0;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.privacy {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 9px;
+  color: rgba(244, 240, 232, 0.25);
+  letter-spacing: 0.4px;
+  margin-top: 8px;
+}
+
+.error {
+  font-family: var(--font-mono), 'DM Mono', monospace;
+  font-size: 10px;
+  color: #F4A393;
+  margin-top: 6px;
+}
+
+.success {
+  text-align: center;
+  padding: 8px 0 4px;
+}
+
+.successIcon {
+  font-size: 28px;
+  margin-bottom: 8px;
+  color: #6EBD9F;
+}
+
+.successText {
+  font-family: var(--font-display), 'Playfair Display', serif;
+  font-size: 16px;
+  color: #F4F0E8;
+  margin-bottom: 4px;
+}
+
+.successSub {
+  font-family: var(--font-sans), 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: rgba(244, 240, 232, 0.5);
+}
+
+/* Mobile: keep the card readable on narrow phones */
+@media (max-width: 480px) {
+  .popup {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    width: auto;
+  }
+}

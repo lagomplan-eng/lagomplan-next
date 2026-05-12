@@ -26,6 +26,9 @@ import { Checklist }               from './RightColumn/Checklist'
 import { Transport }               from './RightColumn/Transport'
 import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
+import { GuideFreeIndicator }      from './GuideFreeIndicator'
+import NewsletterSidebarCard       from '../newsletter/NewsletterSidebarCard'
+import NewsletterEndOfGuide        from '../newsletter/NewsletterEndOfGuide'
 
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
@@ -110,6 +113,9 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
   return (
     <div className="bg-[#FFF9F3] min-h-screen pt-[100px]">
 
+      {/* Freemium transparency banner — anonymous users only */}
+      <GuideFreeIndicator slug={data.slug} />
+
       {/* Hidden input consumed by Nav locale switcher */}
       {alternateLocaleUrl && (
         <input type="hidden" id="__alternate_locale_url" value={alternateLocaleUrl} />
@@ -146,8 +152,18 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
               completionMessage={checklistDone}
             />
             <Transport data={data.transport} />
+            <NewsletterSidebarCard />
           </div>
 
+        </div>
+
+        {/* ── End-of-guide newsletter (hidden on print) ─────────────────
+             Sits INSIDE the max-w-[1200px] px-8 wrapper so its inner
+             Pine card aligns with the "Recommended experiences" card
+             rendered just above it on the left column. The -mt-8 closes
+             the dead air the grid's pb-20 leaves behind. */}
+        <div className="-mt-8 print:hidden">
+          <NewsletterEndOfGuide />
         </div>
 
         {/* ── PRINT FOOTER — logo, shown only in PDF/print ─── */}

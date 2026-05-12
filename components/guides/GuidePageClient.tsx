@@ -28,6 +28,7 @@ import type {
   GuideSection as GuideSectionData,
 } from '../../lib/guides'
 import type { Locale } from '../../i18n'
+import { GuideFreeIndicator } from './GuideFreeIndicator'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -700,6 +701,9 @@ export function GuidePageClient({ guide, locale }: Props) {
 
   return (
     <main className="pt-[64px] min-h-screen pb-24" style={{ background: '#FAF8F5' }}>
+
+      {/* Freemium transparency banner — anonymous users only */}
+      <GuideFreeIndicator slug={isES ? guide.slug_es : guide.slug_en} />
 
       {/* Exposes the correct alternate-locale URL for the Nav language switcher.
           Guides have different slugs per locale, so the Nav reads this value

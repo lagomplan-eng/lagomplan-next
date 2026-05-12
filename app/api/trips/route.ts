@@ -26,6 +26,8 @@ export async function POST(req: NextRequest) {
       title,
       destination, origin, duration_days,
       travelers, travel_style, budget_level, interests, trip_data,
+      traveler_adults, traveler_children, traveler_group_count,
+      currency,
     } = body
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -69,12 +71,36 @@ export async function POST(req: NextRequest) {
     // interests: TEXT[] — already an array from frontend
     const interestsValue: string[] = Array.isArray(interests) ? interests : []
 
-    // duration_days: INTEGER
-    const durationDaysValue: number = Math.min(Math.max(Number(duration_days) || 1, 1), 30)
+    // duration_days: INTEGER. 0 is a valid same-day value, so we can't use `||`.
+    const rawDuration = Number(duration_days)
+    const durationDaysValue: number = isNaN(rawDuration)
+      ? 1
+      : Math.min(Math.max(rawDuration, 0), 30)
+
+    // ── Traveler details (Phase 2B columns) ───────────────────────────────────
+    // Each defaults to the column default if omitted from the request body, so
+    // older clients that don't send these fields keep working.
+    const adultsRaw = Number(traveler_adults)
+    const adultsValue: number | undefined = isNaN(adultsRaw) ? undefined : Math.min(Math.max(adultsRaw, 1), 20)
+
+    const childrenValue: Array<{ type: 'baby' | 'kid'; age: string }> | undefined =
+      Array.isArray(traveler_children)
+        ? traveler_children
+            .filter((c): c is { type: string; age: string } => !!c && typeof c === 'object')
+            .map(c => ({
+              type: c.type === 'baby' ? 'baby' as const : 'kid' as const,
+              age:  typeof c.age === 'string' ? c.age : '',
+            }))
+        : undefined
+
+    const groupRaw = Number(traveler_group_count)
+    const groupValue: number | null | undefined = traveler_group_count === null
+      ? null
+      : isNaN(groupRaw) ? undefined : Math.min(Math.max(groupRaw, 2), 50)
 
     const slug = generateSlug(destination)
 
-    const insertPayload = {
+    const insertPayload: Record<string, unknown> = {
       slug,
       title:        title && String(title).trim() ? String(title).trim() : null,
       origin:       origin   ? String(origin)   : null,
@@ -87,6 +113,13 @@ export async function POST(req: NextRequest) {
       trip_data,
       user_id:      user.id,
     }
+    if (adultsValue !== undefined)   insertPayload.traveler_adults      = adultsValue
+    if (childrenValue !== undefined) insertPayload.traveler_children    = childrenValue
+    if (groupValue !== undefined)    insertPayload.traveler_group_count = groupValue
+
+    // currency: enum-style TEXT ('USD' | 'MXN'). Invalid values fall back to
+    // the column default rather than 400ing the request.
+    if (currency === 'USD' || currency === 'MXN') insertPayload.currency = currency
 
     console.log('[trips/post] inserting:', {
       ...insertPayload,

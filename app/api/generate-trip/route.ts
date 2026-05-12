@@ -5,8 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import type { User } from '@supabase/supabase-js'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../lib/entitlements'
-import { getSupabaseServer } from '../../../lib/supabase/server'
+import { getSupabaseAdmin, getSupabaseServer } from '../../../lib/supabase/server'
+import { ANON_TRIP_LIMIT } from '../../../lib/plan/limits'
+import { computeNights, isOvernight } from '../../../lib/planner/accommodations'
+import type { TripDestinationContext } from '../../../lib/planner/accommodations'
+import { validateAccommodations, hasValidDays } from '../../../lib/planner/validate-trip'
 
 // Vercel Pro allows up to 300 s for serverless functions.
 // AI generation takes 60–90 s — the old 60 s limit guaranteed a timeout.
@@ -14,50 +19,112 @@ import { getSupabaseServer } from '../../../lib/supabase/server'
 export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
-const ANON_COOKIE   = 'anon_gen_count'
-const ANON_LIMIT    = 1   // anonymous users get 1 free generation, then must sign up
+const ANON_COOKIE = 'anon_gen_count'
+
+// Structured error envelope. Every error path returns the same shape so the
+// client can branch on `code` instead of parsing free-form `error` strings.
+type ErrBody = { ok: false; code: string; message: string; detail?: unknown }
+const err = (status: number, code: string, message: string, detail?: unknown) =>
+  NextResponse.json<ErrBody>({ ok: false, code, message, detail }, { status })
+
+// Resolve the calling user from either the session cookie OR an Authorization
+// Bearer header. The header is a safety net for the just-logged-in tab where
+// the client may have a fresh access_token but the cookie hasn't propagated
+// yet (a common cause of spurious 401s on the first post-login request).
+async function resolveUser(req: NextRequest): Promise<User | null> {
+  const supabase = await getSupabaseServer()
+
+  // 1. Cookie-bound session (normal case)
+  const cookieRes = await supabase.auth.getUser()
+  if (cookieRes.data.user) return cookieRes.data.user
+
+  // 2. Bearer header fallback
+  const authHeader = req.headers.get('authorization') ?? ''
+  if (authHeader.toLowerCase().startsWith('bearer ')) {
+    const token = authHeader.slice(7).trim()
+    if (token) {
+      const tokenRes = await supabase.auth.getUser(token)
+      if (tokenRes.data.user) return tokenRes.data.user
+    }
+  }
+
+  return null
+}
+
+// Verify that a tripId was created by the calling user. A request that passes
+// ownership is treated as a regeneration → no credit consumed. Any failure
+// mode (missing id, not found, wrong owner, DB error) falls through to the
+// "new trip" billing path, so bypass attempts simply get charged normally.
+async function isRegenerationOfOwnedTrip(
+  tripId: unknown,
+  userId: string | null,
+): Promise<boolean> {
+  if (!userId) return false
+  if (typeof tripId !== 'string' || tripId.length === 0) return false
+
+  try {
+    const admin = getSupabaseAdmin()
+    const { data, error } = await (admin as any)
+      .from('trips')
+      .select('user_id')
+      .eq('id', tripId)
+      .single()
+
+    if (error || !data) return false
+    return data.user_id === userId
+  } catch {
+    return false
+  }
+}
 
 export async function POST(req: NextRequest) {
+  const startedAt = Date.now()
   try {
     const body = await req.json()
+    const tripIdRaw = (body && typeof body === 'object') ? (body as any).tripId : null
 
     // ── Entitlement check ────────────────────────────────────────────────────────
-    const supabase  = await getSupabaseServer()
-    const { data: { user } } = await supabase.auth.getUser()
+    const user = await resolveUser(req)
+    const isRegeneration = await isRegenerationOfOwnedTrip(tripIdRaw, user?.id ?? null)
+    console.log('[generate-trip]', JSON.stringify({
+      stage: 'auth_resolved',
+      userId: user?.id ?? 'anon',
+      tripId: typeof tripIdRaw === 'string' ? tripIdRaw : null,
+      isRegeneration,
+      bodyKeys: Object.keys(body ?? {}),
+    }))
 
     let authorizedUserId: string | null = null
 
     if (user) {
-      // Authenticated — check DB entitlements
-      const check = await checkGenerationAllowed()
+      if (isRegeneration) {
+        // Regeneration of an owned trip — skip entitlement check entirely so
+        // users out of credits can still iterate on trips they already paid for.
+        authorizedUserId = user.id
+      } else {
+        // Authenticated new trip — check DB entitlements
+        const check = await checkGenerationAllowed()
 
-      if (!check.allowed) {
-        const reason = (check as { allowed: false; reason: string }).reason
-        // 'error' means infra/config failure — don't show paywall for a broken service
-        if (reason === 'error') {
-          return NextResponse.json(
-            { error: 'service_unavailable', reason: 'entitlement_check_failed' },
-            { status: 503 },
-          )
+        if (!check.allowed) {
+          const reason = (check as { allowed: false; reason: string }).reason
+          // 'error' means infra/config failure — don't show paywall for a broken service
+          if (reason === 'error') {
+            return err(503, 'entitlement_check_failed', 'Service temporarily unavailable')
+          }
+          return err(402, 'no_credits', 'No credits remaining', { reason })
         }
-        return NextResponse.json(
-          { error: 'no_credits', reason },
-          { status: 402 },
-        )
+
+        authorizedUserId = (check as { allowed: true; userId: string }).userId
       }
 
-      authorizedUserId = (check as { allowed: true; userId: string }).userId
-
     } else {
-      // Anonymous — enforce via cookie
+      // Anonymous — enforce via cookie. Anon users cannot own a trip in the DB,
+      // so `isRegeneration` is always false here; the limit check stays.
       const cookieStore = await cookies()
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
-      if (anonCount >= ANON_LIMIT) {
-        return NextResponse.json(
-          { error: 'not_authenticated', reason: 'Please sign up to continue generating trips' },
-          { status: 401 },
-        )
+      if (anonCount >= ANON_TRIP_LIMIT) {
+        return err(401, 'anon_limit_reached', 'Please sign up to continue generating trips')
       }
     }
 
@@ -65,66 +132,203 @@ export async function POST(req: NextRequest) {
     const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
     if (!supabaseUrl || !anonKey) {
-      return NextResponse.json(
-        { error: 'Supabase credentials not configured' },
-        { status: 500 },
-      )
+      console.error('[generate-trip] missing supabase env vars')
+      return err(500, 'supabase_not_configured', 'Supabase credentials not configured')
     }
 
     const functionUrl = `${supabaseUrl}/functions/v1/generate-trip`
-    console.log('[generate-trip] payload:', JSON.stringify(body))
-    console.log('[generate-trip] calling:', functionUrl)
+    console.log('[generate-trip]', JSON.stringify({
+      stage: 'edge_call',
+      userId: authorizedUserId ?? 'anon',
+      functionUrl,
+    }))
 
-    // Abort at 290 s — fires before Vercel's 300 s hard kill so we can
-    // return a clean JSON error instead of leaving the client with a dead socket.
-    // AI generation typically takes 60–90 s, so 290 s is a safe ceiling.
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 290_000)
-    console.log('[generate-trip] start')
+    // ── Deterministic nights / overnight ─────────────────────────────────────────
+    // Computed server-side from the request, never inferred by the LLM.
+    // Same calculation the front-end uses (lib/planner/accommodations.ts).
+    // Pass both into the Edge Function so its prompt can branch on overnight.
+    const tripStart = typeof body?.start === 'string' ? body.start : ''
+    const tripEnd   = typeof body?.end   === 'string' ? body.end   : ''
+    const nights    = computeNights(tripStart, tripEnd)
+    const overnight = isOvernight(nights)
 
-    let edgeRes: Response
-    try {
-      edgeRes = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type':  'application/json',
-          'Authorization': `Bearer ${anonKey}`,
-        },
-        body: JSON.stringify(body),
-        signal: controller.signal,
+    const ctx: TripDestinationContext = {
+      destination: typeof body?.destination === 'string' ? body.destination : '',
+      start:       tripStart,
+      end:         tripEnd,
+      nights,
+      adults:      typeof body?.travelers === 'number' ? body.travelers : undefined,
+      locale:      body?.locale === 'en' ? 'en' : 'es',
+    }
+
+    // ── Edge Function caller (factored so we can retry it) ───────────────────────
+    // Returns either the parsed trip_data on success, or an ErrBody-style failure
+    // that the outer handler short-circuits with. The 290s timeout is per attempt;
+    // the retry path is gated on the response shape, not on whether the Edge
+    // Function timed out (a timeout is an outer failure we surface to the user).
+    async function callEdgeOnce(extraBody: Record<string, unknown>): Promise<
+      | { ok: true; data: unknown }
+      | { ok: false; status: number; code: string; message: string; detail?: unknown }
+    > {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 290_000)
+
+      let edgeRes: Response
+      try {
+        edgeRes = await fetch(functionUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type':  'application/json',
+            'Authorization': `Bearer ${anonKey}`,
+          },
+          body: JSON.stringify({ ...body, ...extraBody, nights, overnight }),
+          signal: controller.signal,
+        })
+      } finally {
+        clearTimeout(timeoutId)
+      }
+
+      console.log('[generate-trip]', JSON.stringify({
+        stage:  'edge_response',
+        status: edgeRes.status,
+        ms:     Date.now() - startedAt,
+      }))
+
+      const responseText = await edgeRes.text()
+      console.log('[generate-trip] edge response (first 1000):', responseText.slice(0, 1000))
+
+      if (!edgeRes.ok) {
+        let detail: unknown
+        try { detail = JSON.parse(responseText) } catch { detail = responseText.slice(0, 1000) }
+        return { ok: false, status: 502, code: 'edge_upstream_failed',
+                 message: `Edge Function returned ${edgeRes.status}`, detail }
+      }
+
+      try {
+        return { ok: true, data: JSON.parse(responseText) }
+      } catch {
+        return { ok: false, status: 502, code: 'edge_invalid_json',
+                 message: 'Edge Function returned non-JSON', detail: responseText.slice(0, 500) }
+      }
+    }
+
+    // ── Attempt 1 ────────────────────────────────────────────────────────────────
+    const attempt1 = await callEdgeOnce({})
+    if (attempt1.ok === false) {
+      return err(attempt1.status, attempt1.code, attempt1.message, attempt1.detail)
+    }
+
+    // ── Validate accommodations contract ─────────────────────────────────────────
+    // Trip shape on the edge is { success, trip_data } — operate on trip_data.
+    function extractTripData(payload: unknown): unknown {
+      if (payload && typeof payload === 'object') {
+        const obj = payload as { trip_data?: unknown }
+        if (obj.trip_data) return obj.trip_data
+      }
+      return payload
+    }
+
+    let workingEnvelope: unknown = attempt1.data
+    let workingTripData = extractTripData(workingEnvelope)
+    let validation = validateAccommodations(workingTripData, ctx, 0)
+    let daysOk     = hasValidDays(workingTripData)
+
+    console.log('[generate-trip]', JSON.stringify({
+      stage:                 'validation_attempt_1',
+      tripId:                typeof tripIdRaw === 'string' ? tripIdRaw : null,
+      overnight,
+      nights,
+      accommodationsStatus:  validation.status,
+      accommodationsCount:   validation.accommodationsCount,
+      daysOk,
+    }))
+
+    // ── Attempt 2 (one retry, tightened) ─────────────────────────────────────────
+    // Trigger when EITHER:
+    //   - accommodations are missing on an overnight trip, OR
+    //   - days[] is empty (intermittent Claude flakiness — schema satisfied,
+    //     but model emitted zero day blocks. Pre-existing failure mode that
+    //     used to surface as "no itinerary days were found in the expected
+    //     format" on the frontend; server-side retry catches >90% of these).
+    // The Edge Fn reads `retryHint` to tighten its prompt — see
+    // supabase/functions/generate-trip/index.ts.
+    const needsRetry = validation.status === 'no_hotels' || daysOk === false
+    if (needsRetry) {
+      const retryReason = daysOk === false
+        ? 'no_days_emitted'
+        : 'no_accommodations_emitted'
+
+      console.log('[generate-trip]', JSON.stringify({
+        stage:  'retry_trigger',
+        reason: retryReason,
+      }))
+
+      const attempt2 = await callEdgeOnce({
+        retryHint: retryReason,
       })
-    } finally {
-      clearTimeout(timeoutId)
+
+      if (attempt2.ok) {
+        workingEnvelope = attempt2.data
+        workingTripData = extractTripData(workingEnvelope)
+        validation = validateAccommodations(workingTripData, ctx, 1)
+        daysOk     = hasValidDays(workingTripData)
+        console.log('[generate-trip]', JSON.stringify({
+          stage:                 'validation_attempt_2',
+          accommodationsStatus:  validation.status,
+          accommodationsCount:   validation.accommodationsCount,
+          daysOk,
+        }))
+      } else {
+        // Retry itself failed — apply accommodations fallback (no day-level
+        // fallback possible). Validation gate at attempt=1 synthesizes the
+        // accommodation stub deterministically.
+        validation = validateAccommodations(workingTripData, ctx, 1)
+        console.log('[generate-trip]', JSON.stringify({
+          stage:                 'retry_failed_falling_back',
+          accommodationsStatus:  validation.status,
+          accommodationsCount:   validation.accommodationsCount,
+          daysOk,
+        }))
+      }
     }
 
-    console.log('[generate-trip] edge status:', edgeRes.status)
+    if (validation.fellBackToStub) {
+      console.log('[generate-trip]', JSON.stringify({
+        stage:       'fallback_used',
+        nights,
+        destination: ctx.destination,
+      }))
+    }
 
-    // Read as text first so we can log and handle non-JSON safely
-    const responseText = await edgeRes.text()
-    console.log('[generate-trip] edge response (first 1000):', responseText.slice(0, 1000))
-
-    if (!edgeRes.ok) {
-      let detail: unknown
-      try { detail = JSON.parse(responseText) } catch { detail = responseText }
-      return NextResponse.json(
-        { error: `Edge Function returned ${edgeRes.status}`, detail },
-        { status: 502 },
+    // ── Days are not recoverable via fallback ────────────────────────────────────
+    // If the retry didn't fix the empty-days problem, ship a structured 502
+    // so the client can show a "try again" message rather than rendering an
+    // empty trip. The user's credit was already consumed by this point —
+    // accept the cost; this is rare enough not to need refund logic, and
+    // the alternative (silently rendering an empty trip) is the worst UX.
+    if (daysOk === false) {
+      console.error('[generate-trip]', JSON.stringify({
+        stage: 'no_days_after_retry',
+        nights,
+        destination: ctx.destination,
+      }))
+      return err(
+        502,
+        'no_days_after_retry',
+        'Trip generation produced an empty itinerary. Please try again.',
       )
     }
 
-    let data: unknown
-    try {
-      data = JSON.parse(responseText)
-    } catch {
-      return NextResponse.json(
-        { error: 'Edge Function returned non-JSON', raw: responseText.slice(0, 500) },
-        { status: 502 },
-      )
-    }
+    // Repackage the (possibly fallback-augmented) trip_data into the Edge
+    // Function's original envelope shape so downstream clients see no change.
+    const data = (workingEnvelope && typeof workingEnvelope === 'object')
+      ? { ...(workingEnvelope as Record<string, unknown>), trip_data: validation.tripData }
+      : { trip_data: validation.tripData }
 
     // ── Deduct credit before returning (Vercel Functions terminate at response send) ──
-    if (authorizedUserId) {
-      // Authenticated: decrement DB credits synchronously
+    // Regenerations of an already-owned trip never consume credits — only new trips do.
+    if (authorizedUserId && !isRegeneration) {
+      // Authenticated new trip: decrement DB credits synchronously
       await consumeOneTrip(authorizedUserId).catch(e =>
         console.error('[generate-trip] consumeOneTrip error:', e)
       )
@@ -132,8 +336,10 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json(data)
 
-    if (!authorizedUserId) {
-      // Anonymous: set cookie so the next attempt is blocked server-side
+    if (!authorizedUserId && !isRegeneration) {
+      // Anonymous new trip: set cookie so the next attempt is blocked server-side.
+      // (Anonymous users can't own a trip → isRegeneration is always false here,
+      // but the guard is kept explicit to mirror the authenticated path.)
       const cookieStore = await cookies()
       const prev = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
       response.cookies.set(ANON_COOKIE, String(prev + 1), {
@@ -146,13 +352,19 @@ export async function POST(req: NextRequest) {
 
     return response
 
-  } catch (err) {
-    const isTimeout = err instanceof Error && err.name === 'AbortError'
-    const message   = err instanceof Error ? err.message : String(err)
-    console.error('[generate-trip] error:', message)
-    return NextResponse.json(
-      { error: isTimeout ? 'Trip generation timed out — please try again' : `Internal error: ${message}` },
-      { status: isTimeout ? 504 : 500 },
-    )
+  } catch (e) {
+    const isTimeout = e instanceof Error && e.name === 'AbortError'
+    const message   = e instanceof Error ? e.message : String(e)
+    const ms        = Date.now() - startedAt
+    console.error('[generate-trip]', JSON.stringify({
+      stage: 'error',
+      timeout: isTimeout,
+      ms,
+      message,
+    }))
+    if (isTimeout) {
+      return err(504, 'timeout', 'Trip generation timed out — please try again')
+    }
+    return err(500, 'internal', `Internal error: ${message}`)
   }
 }

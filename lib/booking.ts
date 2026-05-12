@@ -3,10 +3,16 @@
 // Used by the booking modal in TripResult.tsx.
 //
 // Architecture:
-//   Hotels   → Stay22 Booking.com redirect widget (clean URL — no extra params)
-//   Tours    → Stay22 GYG / Expedia redirect widgets (address + q for pre-fill)
+//   Hotels   → Stay22 Allez deep link (canonical — destination/dates honored)
+//   Tours    → Stay22 Allez deep link (canonical — destination honored)
 //   Dining   → OpenTable / TheFork / Google Maps (direct search)
 //   Transfer → Uber / Google Maps (direct deep-link)
+//
+// Hotel + tour links go through `buildAffiliateLink` in lib/affiliate/.
+// Restaurants and transfers continue to use direct search URLs because
+// no Stay22 partner serves them.
+
+import { buildAffiliateLink } from './affiliate'
 
 export type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
 
@@ -23,23 +29,8 @@ export interface BookingContext {
   country: string    // 'US' | 'europe' | 'other'
   startDate: string  // YYYY-MM-DD
   endDate: string    // YYYY-MM-DD
-}
-
-// ── Stay22 redirect links ─────────────────────────────────────────────────────
-// Two variants:
-//   stay22Redirect  — bare widget URL, no extra params. Use for hotel/booking
-//                     widgets where extra query params break click tracking.
-//   stay22Search    — appends address + q for activity search pre-fill (GYG, Expedia).
-
-function stay22Redirect(widgetUrl: string): string {
-  return widgetUrl
-}
-
-function stay22Search(widgetUrl: string, city: string, itemName?: string): string {
-  const params = new URLSearchParams()
-  params.set('address', city)
-  if (itemName) params.set('q', itemName)
-  return `${widgetUrl}?${params.toString()}`
+  adults?: number    // guest count (defaults to 2 if absent)
+  locale?: 'es' | 'en'  // drives campaign label for Stay22 attribution
 }
 
 // ── Country detection ─────────────────────────────────────────────────────────
@@ -72,34 +63,56 @@ export function getBookingOptions(
 
   switch (item.type) {
 
-    case 'hotel':
+    case 'hotel': {
+      const linkCtx = {
+        city,
+        startDate: ctx.startDate,
+        endDate:   ctx.endDate,
+        adults:    ctx.adults,
+        locale:    ctx.locale,
+        surface:   'planner' as const,
+      }
       return [
+        {
+          id:       'booking',
+          provider: 'booking',
+          name:     'Booking.com',
+          desc:     'Cancelación gratis en la mayoría de las propiedades.',
+          url:      buildAffiliateLink('booking', linkCtx),
+        },
         {
           id:       'hotelscom',
           provider: 'hotels',
           name:     'Hotels.com',
           desc:     'Mayor selección de hoteles. Precio garantizado.',
-          url:      stay22Redirect('https://hotelscom.stay22.com/lagomplan/ulAbEA6Vbn'),
+          url:      buildAffiliateLink('hotelscom', linkCtx),
         },
       ]
+    }
 
-    case 'tour':
+    case 'tour': {
+      const linkCtx = {
+        city,
+        locale:  ctx.locale,
+        surface: 'planner' as const,
+      }
       return [
         {
           id:       'gyg',
           provider: 'gyg',
           name:     'GetYourGuide',
           desc:     'Experiencias verificadas. Cancelación gratis hasta 24 hrs.',
-          url:      stay22Search('https://getyourguide.stay22.com/lagomplan/vP_T4j_a5L', city, item.name),
+          url:      buildAffiliateLink('getyourguide', linkCtx),
         },
         {
           id:       'expedia',
           provider: 'expedia',
           name:     'Expedia Actividades',
           desc:     'Tours y actividades con soporte 24/7.',
-          url:      stay22Search('https://expedia.stay22.com/lagomplan/B03L4axuky', city, item.name),
+          url:      buildAffiliateLink('expedia', linkCtx),
         },
       ]
+    }
 
     case 'restaurant':
       if (country === 'US') {

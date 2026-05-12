@@ -206,7 +206,10 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
       cell.el.addEventListener('click', () => {
         const { value: lv, phase: lp } = latestRef.current
         setHover(null)
-        if (lp === 'start' || (lv.start && cell.date <= lv.start)) {
+        // `<` instead of `<=` so a second click on the same start date is
+        // treated as end=start (a same-day, 0-night trip), not as a fresh
+        // start selection.
+        if (lp === 'start' || (lv.start && cell.date < lv.start)) {
           onChange({ start: cell.date, end: null, nights: 0 })
           setPhase('end')
         } else {

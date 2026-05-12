@@ -363,28 +363,12 @@ export default async function HomePage({
 
       {/* ⑥ REVIEWS */}
       <section
-        className="py-24 max-[768px]:py-16 relative overflow-hidden"
+        className="py-24 max-[768px]:py-16 relative"
         style={{
           background: '#FFFFFF',
           borderTop: '1px solid rgba(200,191,181,.3)',
         }}
       >
-        <svg
-          className="absolute bottom-0 left-0 right-0 h-[80px] opacity-[0.05] pointer-events-none"
-          viewBox="0 0 1200 80"
-          preserveAspectRatio="xMidYMax meet"
-          aria-hidden="true"
-        >
-          <rect x="20" y="15" width="44" height="65" fill="#0F3A33" />
-          <rect x="75" y="35" width="30" height="45" fill="#0F3A33" />
-          <rect x="125" y="5" width="54" height="75" fill="#0F3A33" />
-          <rect x="190" y="28" width="38" height="52" fill="#0F3A33" />
-          <rect x="250" y="18" width="46" height="62" fill="#0F3A33" />
-          <rect x="315" y="2" width="58" height="78" fill="#0F3A33" />
-          <rect x="695" y="0" width="63" height="80" fill="#0F3A33" />
-          <rect x="875" y="8" width="53" height="72" fill="#0F3A33" />
-        </svg>
-
         <div className="page-inner relative z-10">
           <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-12 max-[768px]:mb-8">

@@ -7,6 +7,7 @@
     "planner": "Planner",
     "guides": "Guides",
     "hotels": "Hotels",
+    "worldcup": "World Cup",
     "login": "Log in",
     "signup": "Sign up",
     "myTrips": "My trips",
@@ -34,6 +35,7 @@
     "amigos": "Friends",
     "adults": "Adults",
     "childrenAges": "Children's ages",
+    "addBaby": "+ Add baby",
     "addChild": "+ Add child",
     "groupCount": "How many traveling?",
     "interests": "Interests",
@@ -46,7 +48,7 @@
     "budgetPlaceholder": "What's your ballpark?",
     "budgetCurrency": "MXN",
     "submit": "Plan my trip →",
-    "freeNote": "✦ Try it for free · No card · Signup to save it",
+    "freeNote": "✦ Plan {count} trips free · No credit card needed",
     "googlePowered": "Powered by Google Maps",
     "suggestions": "Suggestions",
     "night": "night",
@@ -151,6 +153,7 @@
       "guides": "Travel guides",
       "hotels": "Hotels",
       "planner": "Planner",
+      "pricing": "Pricing",
       "about": "About us",
       "contact": "Contact",
       "instagram": "Instagram"
@@ -191,5 +194,117 @@
     "signup": "Sign up",
     "login": "Log in",
     "privacy": "Privacy"
+  },
+
+  "newsletter": {
+    "common": {
+      "placeholder": "you@email.com",
+      "ariaEmail": "Your email address",
+      "loading": "...",
+      "errorEmail": "Check your email and try again.",
+      "errorEmailShort": "Check your email.",
+      "errorNetwork": "Couldn't connect. Try again later."
+    },
+    "popup": {
+      "eyebrow": "Guides · Tips · World Cup 2026",
+      "headline": "Your next trip,\nbefore you ask for it.",
+      "sub": "Curated destinations, proven routes and planning tips — in your inbox.",
+      "submit": "Join →",
+      "privacy": "No spam. Cancel anytime.",
+      "ariaDialog": "Lagomplan newsletter",
+      "ariaClose": "Close",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    },
+    "sidebar": {
+      "label": "Newsletter",
+      "headline": "More guides like this.",
+      "sub": "Destinations, tips and World Cup 2026 — in your inbox.",
+      "submit": "Join →",
+      "privacy": "No spam · Cancel anytime",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    },
+    "endOfGuide": {
+      "label": "Lagomplan newsletter",
+      "headline": "Liked this guide?\nGet more like it.",
+      "sub": "Curated destinations, itineraries and tips — every week.",
+      "submit": "Subscribe",
+      "successText": "You're in.",
+      "successSub": "Check your inbox to confirm."
+    }
+  },
+
+  "pricing": {
+    "meta": {
+      "title": "Pricing",
+      "description": "Start free. Plans from $39 MXN. Unlimited trips with Explorer Monthly."
+    },
+    "eyebrow": "Lagomplan — Pricing",
+    "hero": {
+      "line1": "Travel more.",
+      "line2": "Plan less.",
+      "body":  "Start free. Upgrade whenever. No strings attached."
+    },
+    "free": {
+      "tier1": { "title": "No login",          "sub": "1 full plan, no account or card needed" },
+      "tier2": { "title": "With account",      "sub": "2 more free trips" },
+      "tier3": { "title": "Save & download",   "sub": "View and download your plan anytime" }
+    },
+    "paid": {
+      "headline": "Ready for more trips?",
+      "eyebrow":  "Pick your plan"
+    },
+    "common": {
+      "currency": "MXN",
+      "buy":      "Buy"
+    },
+    "plans": {
+      "perTrip": {
+        "name":  "Per trip",
+        "price": "39",
+        "usd":   "≈ $1.99 USD",
+        "note":  "For you, if you don't travel much or are just testing"
+      },
+      "pack5": {
+        "name":  "Pack of 5",
+        "price": "149",
+        "usd":   "≈ $7.99 USD",
+        "note":  "For you, who loves a getaway or plans a handful of trips a year"
+      },
+      "pack10": {
+        "badge": "Best value",
+        "name":  "Pack of 10",
+        "price": "249",
+        "usd":   "≈ $12.99 USD",
+        "note":  "For you, who loves to travel and wants the best one-time deal"
+      },
+      "explorer": {
+        "badge":       "Recommended",
+        "name":        "Explorer Monthly",
+        "price":       "199",
+        "priceSuffix": "MXN/mo",
+        "usd":         "≈ $9.99 USD",
+        "feature1":    "Unlimited trips",
+        "feature2":    "Saved history",
+        "feature3":    "Cancel anytime",
+        "cta":         "Get started"
+      }
+    },
+    "faq": {
+      "title": "Frequently asked",
+      "q1": "What's included in the free trip?",
+      "a1": "The first trip is completely free and requires no account. You get a full plan with itinerary, estimated budget and activities. Results stay active for 7 days and you can always download the PDF.",
+      "q2": "Why do I need an account for Trip 2?",
+      "a2": "Your account lets us save your trip and give you access from any device, plus your second and third trips are completely free.",
+      "q3": "What's the difference between the packs and Explorer Monthly?",
+      "a3": "Packs are one-time purchases: you buy a fixed number of generations and use them at your own pace. Explorer Monthly gives you unlimited trips for $199 MXN per month. If you plan 3+ trips a year, Explorer is the better deal.",
+      "q4": "Do trips in the packs expire?",
+      "a4": "No. Trips bought in any pack don't expire — use them whenever you want, no pressure.",
+      "q5": "Can I cancel Explorer anytime?",
+      "a5": "Yes. Cancel from your account with no paperwork or penalty. Your access stays active until the end of the period you've already paid for.",
+      "q6": "Do you accept Mexican cards?",
+      "a6": "Yes. We accept Mexican and international credit and debit cards. MXN prices are processed locally."
+    }
   }
 }

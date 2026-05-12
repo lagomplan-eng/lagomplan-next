@@ -3,7 +3,7 @@
  * Route ES: /es/mis-viajes  EN: /en/my-trips
  */
 import type { Metadata }              from 'next'
-import { buildAlternates, buildOpenGraph } from '../../../lib/seo'
+import { buildAlternates, buildOpenGraph, NO_INDEX } from '../../../lib/seo'
 import type { Locale }               from '../../../i18n'
 import MyTripsClient                 from './MyTripsClient'
 
@@ -17,6 +17,7 @@ export async function generateMetadata({
     title:       locale === 'es' ? 'Mis viajes' : 'My trips',
     alternates:  buildAlternates('myTrips'),
     openGraph:   buildOpenGraph(locale),
+    robots:      NO_INDEX,
   }
 }
 
