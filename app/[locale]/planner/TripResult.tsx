@@ -1049,6 +1049,24 @@ export default function TripResult({ params }: Props) {
         if (typeof data.travel_style === 'string')  setPrefPace(data.travel_style)
         if (typeof data.budget_level === 'string')  setPrefBudget(data.budget_level)
         if (Array.isArray(data.interests))          setPrefInterests(data.interests.join(', '))
+        // Phase 2B: hydrate traveler-detail columns. Older rows have defaults
+        // (adults=2, children=[], group_count=null) which matches the form's
+        // own defaults — so no UI guard needed for legacy trips.
+        if (typeof (data as any).traveler_adults === 'number') {
+          setPrefAdults((data as any).traveler_adults)
+        }
+        if (Array.isArray((data as any).traveler_children)) {
+          const list = (data as any).traveler_children as Array<{ type?: string; age?: string }>
+          setPrefChildren(list.map((c, i) => ({
+            id:   i,
+            type: c?.type === 'baby' ? 'baby' : 'kid',
+            age:  typeof c?.age === 'string' ? c.age : '',
+          })))
+          setPrefNextKidId(list.length)
+        }
+        if (typeof (data as any).traveler_group_count === 'number') {
+          setPrefGroupCount((data as any).traveler_group_count)
+        }
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
         // Baseline: marks this as already-in-DB so autosave only fires on real edits
@@ -1322,6 +1340,12 @@ export default function TripResult({ params }: Props) {
                   budget_level: budget,
                   interests:    parsedInterests,
                   trip_data:    tripDataRaw,
+                  // Phase 2B: capture traveler details on the initial save so
+                  // refresh-after-generate restores them without needing a
+                  // subsequent autosave round-trip.
+                  traveler_adults:      prefAdults,
+                  traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
+                  traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
                 }),
               })
               if (!autoSaveRes.ok) {
@@ -1425,7 +1449,17 @@ export default function TripResult({ params }: Props) {
     if (loading)      { console.log('[autosave] skipped: loading=true');   return }
 
     const doneChecksArr = Array.from(doneCheckIds).sort()
-    const content = JSON.stringify({ title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr })
+    // Children are serialized to their persisted shape (id is React-internal
+    // and irrelevant to the fingerprint).
+    const childrenSerial = prefChildren.map(c => ({ type: c.type, age: c.age }))
+    // group_count only persists for `amigos`; for other traveler types it's
+    // explicitly null so a switch away from amigos clears the column.
+    const groupCountSerial = prefTraveler === 'amigos' ? prefGroupCount : null
+    const content = JSON.stringify({
+      title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr,
+      travelers: prefTraveler, traveler_adults: prefAdults,
+      traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
+    })
     if (content === lastSavedContentRef.current) return   // nothing changed
 
     clearTimeout(autoSaveTimerRef.current)
@@ -1435,6 +1469,13 @@ export default function TripResult({ params }: Props) {
     const body = JSON.stringify({
       title:     tripTitle,
       trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr },
+      // Phase 2B — traveler details flow through autosave so drawer edits
+      // (e.g. pareja → familia + 2 kids) survive refresh without needing a
+      // regenerate.
+      travelers:            prefTraveler || null,
+      traveler_adults:      prefAdults,
+      traveler_children:    childrenSerial,
+      traveler_group_count: groupCountSerial,
     })
 
     // Exponential backoff: ~6.5s window covers most transient blips (cookie
@@ -1486,7 +1527,8 @@ export default function TripResult({ params }: Props) {
       if (retryTimer) clearTimeout(retryTimer)
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading, autosaveRetryKey])
+  }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading, autosaveRetryKey,
+      prefTraveler, prefAdults, prefChildren, prefGroupCount])
 
   // ── pagehide flush — covers the autosave debounce gap on tab close ───────────
   // Autosave is debounced 1500ms. If the user edits and closes the tab inside
@@ -1501,16 +1543,29 @@ export default function TripResult({ params }: Props) {
     packing:       [] as string[],
     budgetRows:    [] as BudgetRow[],
     doneCheckIds:  new Set<string>(),
+    prefTraveler:  '',
+    prefAdults:    2,
+    prefChildren:  [] as Child[],
+    prefGroupCount: 2,
   })
   useEffect(() => {
-    flushSnapshotRef.current = { tripId, tripTitle, tripSubtitle, days, packing, budgetRows, doneCheckIds }
+    flushSnapshotRef.current = {
+      tripId, tripTitle, tripSubtitle, days, packing, budgetRows, doneCheckIds,
+      prefTraveler, prefAdults, prefChildren, prefGroupCount,
+    }
   })
   useEffect(() => {
     const flushIfDirty = () => {
       const s = flushSnapshotRef.current
       if (!s.tripId) return
       const doneChecksArr = Array.from(s.doneCheckIds).sort()
-      const content = JSON.stringify({ title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr })
+      const childrenSerial = s.prefChildren.map(c => ({ type: c.type, age: c.age }))
+      const groupCountSerial = s.prefTraveler === 'amigos' ? s.prefGroupCount : null
+      const content = JSON.stringify({
+        title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr,
+        travelers: s.prefTraveler, traveler_adults: s.prefAdults,
+        traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
+      })
       if (content === lastSavedContentRef.current) return
       try {
         fetch(`/api/trips/${s.tripId}`, {
@@ -1521,6 +1576,10 @@ export default function TripResult({ params }: Props) {
           body: JSON.stringify({
             title: s.tripTitle,
             trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr },
+            travelers:            s.prefTraveler || null,
+            traveler_adults:      s.prefAdults,
+            traveler_children:    childrenSerial,
+            traveler_group_count: groupCountSerial,
           }),
         })
       } catch {}
@@ -1788,6 +1847,11 @@ export default function TripResult({ params }: Props) {
               budget_level: prefBudget,
               interests:    parsedInterests,
               trip_data:    tripDataRaw,
+              // Phase 2B — traveler details ride along with the regen save so
+              // the new trips row is created with the updated composition.
+              traveler_adults:      prefAdults,
+              traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
+              traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
             }
             console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
             const regenSaveRes = await fetch('/api/trips', {
@@ -2122,6 +2186,10 @@ export default function TripResult({ params }: Props) {
             budget_level: prefBudget,
             interests:    parsedInterests,
             trip_data:    tripDataRaw,
+            // Phase 2B parity with the regenerate path.
+            traveler_adults:      prefAdults,
+            traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
+            traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
           }
           console.log('[replaceTrip] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
           const regenSaveRes = await fetch('/api/trips', {
