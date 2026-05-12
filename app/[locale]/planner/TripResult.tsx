@@ -796,6 +796,9 @@ export default function TripResult({ params }: Props) {
     interests = '',
     pace = '',
     budget = '',
+    adults: adultsParam = '',
+    children: childrenParam = '',
+    groupCount: groupCountParam = '',
     trip_id:  savedTripId = '',
     checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
   } = params
@@ -904,10 +907,34 @@ export default function TripResult({ params }: Props) {
   })
 
   // ── Traveler detail state ────────────────────────────────────────────────────
-  const [prefAdults, setPrefAdults]           = useState(2)
-  const [prefChildren, setPrefChildren]       = useState<Child[]>([])
-  const [prefNextKidId, setPrefNextKidId]     = useState(0)
-  const [prefGroupCount, setPrefGroupCount]   = useState(2)
+  // Initial values are parsed from URL params (set by HeroForm submit) so the
+  // pref drawer reflects the user's actual selection on first paint. Refresh
+  // persistence still relies on DB columns — Phase 2B work.
+  const [prefAdults, setPrefAdults] = useState(() => {
+    const n = parseInt(adultsParam, 10)
+    return isNaN(n) || n < 1 ? 2 : Math.min(n, 20)
+  })
+  const [prefChildren, setPrefChildren] = useState<Child[]>(() => {
+    if (!childrenParam) return []
+    return childrenParam.split('|').filter(Boolean).map((part, i) => {
+      const idx = part.indexOf(':')
+      const type = idx > 0 ? part.slice(0, idx) : ''
+      const age  = idx > 0 ? part.slice(idx + 1) : part
+      return {
+        id:   i,
+        type: (type === 'baby' ? 'baby' : 'kid') as 'baby' | 'kid',
+        age:  age || '',
+      }
+    })
+  })
+  const [prefNextKidId, setPrefNextKidId] = useState(() => {
+    if (!childrenParam) return 0
+    return childrenParam.split('|').filter(Boolean).length
+  })
+  const [prefGroupCount, setPrefGroupCount] = useState(() => {
+    const n = parseInt(groupCountParam, 10)
+    return isNaN(n) || n < 2 ? 2 : Math.min(n, 50)
+  })
 
   // ── Paywall state (paywallOpen now in PlanProvider) ──────────────────────────
   const [shareOpen,   setShareOpen]     = useState(false)

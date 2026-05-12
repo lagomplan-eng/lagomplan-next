@@ -153,6 +153,22 @@ function submit(e: React.FormEvent) {
       budget:      budgetWithCurrency,
     })
 
+    // Traveler-detail serialization — only when relevant to the selected
+    // type, so URLs for solo/pareja stay clean. The result page parses
+    // these to hydrate the pref drawer (prevents losing children data on
+    // the form → result transition).
+    if (traveler === 'familia') {
+      params.set('adults', String(adults))
+      if (children.length > 0) {
+        // `type:age` per child, joined by `|`. URLSearchParams handles the
+        // percent-encoding of accented age labels.
+        params.set('children', children.map(c => `${c.type}:${c.age}`).join('|'))
+      }
+    }
+    if (traveler === 'amigos') {
+      params.set('groupCount', String(groupCount))
+    }
+
     router.push(`/planner?${params}` as any)
   }
 
