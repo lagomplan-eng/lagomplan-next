@@ -3241,11 +3241,22 @@ export default function TripResult({ params }: Props) {
             {/* Day cards */}
             <div className="flex flex-col gap-3.5">
               {days.length === 0 ? (
-                <div className="bg-white border border-[#E4DFD8] rounded-[18px] p-6">
-                  <p className="font-sans text-[15px] text-[#7A7A76]">
-                    The API returned successfully, but no itinerary days were found in the expected format.
-                  </p>
-                </div>
+                // Only show the "no days" message once we've actually
+                // received a response (rawTripData !== null). Without this
+                // gate, a brief window between the loading gate falling
+                // and the response state landing causes the message to
+                // flash before the real itinerary appears — most visible
+                // when the auth-state effect ticks `isAccessResolved`
+                // after the first POST is already in flight.
+                rawTripData ? (
+                  <div className="bg-white border border-[#E4DFD8] rounded-[18px] p-6">
+                    <p className="font-sans text-[15px] text-[#7A7A76]">
+                      {locale === 'es'
+                        ? 'La generación terminó pero no encontramos días en el formato esperado. Inténtalo de nuevo.'
+                        : 'Generation finished but no itinerary days came back in the expected shape. Try again.'}
+                    </p>
+                  </div>
+                ) : null
               ) : (
                 days.map((day) => {
                   const isCollapsed = collapsedDays.has(day.n)
