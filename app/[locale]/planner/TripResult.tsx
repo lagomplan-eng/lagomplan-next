@@ -538,7 +538,12 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
   return checks
 }
 
-function derivePackingFromTrip(destination: string, nights: string, interests: string): string[] {
+function derivePackingFromTrip(
+  destination: string,
+  nights: string,
+  interests: string,
+  traveler?: { type?: string; childCount?: number },
+): string[] {
   const n = durationDaysFromNights(nights)
   const base = [
     'Documentos de identidad (INE / pasaporte)',
@@ -557,6 +562,17 @@ function derivePackingFromTrip(destination: string, nights: string, interests: s
     base.push('Zapatos de trekking', 'Repelente de insectos', 'Botella de agua reutilizable')
   }
   if (n >= 5) base.push('Bolsa de lavandería')
+  // Subtle family adaptation — only fires when children are present. Kept
+  // intentionally short to avoid "family spam"; AI prompt enrichment handles
+  // the rest of the contextual tuning.
+  if ((traveler?.childCount ?? 0) > 0) {
+    base.push(
+      'Snacks para el camino',
+      'Toallitas húmedas',
+      'Cambio de ropa extra',
+      'Entretenimiento (libros, tablet, juegos)',
+    )
+  }
   return base
 }
 
@@ -570,7 +586,14 @@ function daysBetween(start: string, end: string): number {
   return Math.round((e - s) / 86400000)
 }
 
-function normalizeTripData(row: any, destination: string, nights: string, interests = '', locale: 'es' | 'en' = 'es'): TripData {
+function normalizeTripData(
+  row: any,
+  destination: string,
+  nights: string,
+  interests = '',
+  locale: 'es' | 'en' = 'es',
+  traveler?: { type?: string; childCount?: number },
+): TripData {
   const source = row?.trip_data ?? row?.trip ?? row?.itinerary ?? row?.data ?? row ?? {}
 
   // Diagnostic: log source keys so field-name mismatches are immediately visible in DevTools
@@ -617,7 +640,7 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
 
   const normalizedPacking: string[] = Array.isArray(rawPacking)
     ? rawPacking.map((p: any) => (typeof p === 'string' ? p : p?.item ?? p?.name ?? p?.text ?? String(p)))
-    : derivePackingFromTrip(destination, nights, interests)
+    : derivePackingFromTrip(destination, nights, interests, traveler)
 
   // Budget — broad key coverage; also handle { category: amount } object shape
   const rawBudget =
@@ -1123,7 +1146,7 @@ export default function TripResult({ params }: Props) {
               console.log('[TripResult] cache hit — restoring trip, skipping AI call')
               const tripDataRaw = cached.tripData
               setRawTripData(tripDataRaw)
-              const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
+              const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
               setTripTitle(normalized.title)
               setTripSubtitle(normalized.subtitle)
               setDays(normalized.days); setAccommodations(normalized.accommodations)
@@ -1223,7 +1246,7 @@ export default function TripResult({ params }: Props) {
         sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
 
         setRawTripData(tripDataRaw)
-        const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en')
+        const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
         setDays(normalized.days); setAccommodations(normalized.accommodations)
@@ -1686,7 +1709,7 @@ export default function TripResult({ params }: Props) {
       if (!tripDataRaw) throw new Error('No trip_data from generation')
 
       setRawTripData(tripDataRaw)
-      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
+      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days); setAccommodations(normalized.accommodations)
@@ -2022,7 +2045,7 @@ export default function TripResult({ params }: Props) {
 
       setRawTripData(tripDataRaw)
       setTripId(null)
-      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en')
+      const normalized = normalizeTripData({ trip_data: tripDataRaw }, prefDest, nightsForPayload, prefInterests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
       setTripTitle(normalized.title)
       setTripSubtitle(normalized.subtitle)
       setDays(normalized.days); setAccommodations(normalized.accommodations)
