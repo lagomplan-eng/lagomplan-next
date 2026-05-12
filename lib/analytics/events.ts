@@ -152,7 +152,7 @@ export const events = {
    * Mirrors `lead` for Meta but adds a custom GA event for surface
    * attribution.
    */
-  waitlistSignup(params: { surface: 'popup' | 'sidebar' | 'end-of-guide' | 'footer' }) {
+  waitlistSignup(params: { surface: 'popup' | 'sidebar' | 'end-of-guide' | 'footer' | 'pdf' }) {
     metaTrack('Lead', { content_name: `newsletter-${params.surface}` })
     gaTrack('waitlist_signup', params)
   },
