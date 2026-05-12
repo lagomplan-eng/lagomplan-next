@@ -16,6 +16,7 @@ import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../.
 import type { Accommodation, TripDestinationContext } from '../../../lib/planner/accommodations'
 import { computeNights } from '../../../lib/planner/accommodations'
 import { titleCaseCity } from '../../../lib/planner/format'
+import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib/planner/classify-block'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
@@ -334,80 +335,15 @@ function normalizeDay(raw: any, index: number, locale: 'es' | 'en' = 'es'): Day 
   }
 }
 
-// Maps raw API strings (any language/variant) to canonical ItemType.
-// Inspects `type` first, then falls back to scanning `name` + `description`
-// because the Edge Function frequently emits ambiguous types (e.g. blank or
-// "activity") for items that are clearly hotels/restaurants/transfers — and
-// hotels misclassified as `free` lose their affiliate booking link, which
-// is a revenue path we can't afford to drop.
-function detectTypeFromText(text: string): ItemType | null {
-  const t = text.toLowerCase()
-  // Hotel — covers check-in/out variants and lodging language in ES/EN
-  if (
-    t.includes('hotel') || t.includes('hosped') || t.includes('alojam') ||
-    t.includes('lodg') || t.includes('accommod') ||
-    t.includes('check-in') || t.includes('check in') || t.includes('checkin') ||
-    t.includes('check-out') || t.includes('check out') || t.includes('checkout') ||
-    t.includes('llegada al hotel') || t.includes('salida del hotel') ||
-    t.includes('resort') || t.includes('hostal') || t.includes('airbnb') ||
-    t.includes('inn ') || t.includes(' suites')
-  ) return 'hotel'
-  // Restaurant detection — tightened (2026-05-11).
-  //
-  // Previously this also matched on `comida / cena / almuerz / desayun /
-  // food / eat / gastro / café / cafe` — far too broad. Those keywords
-  // hit on any food-adjacent block: market visits, picnics, cooking
-  // classes, food tours, family meals at home. The result was every
-  // block with food in it getting promoted to type='restaurant', which
-  // surfaced the booking modal in places it didn't belong and made
-  // the itinerary read like a restaurant guide.
-  //
-  // The principled fix is to drop keyword detection entirely and rely
-  // on a richer block.type enum from the AI (tracked as Phase 1.5 /
-  // Option C in the audit). Until then, this conservative keyword set
-  // only matches signals that almost always mean an actual restaurant.
-  // Anything food-related that doesn't match stays as the AI's
-  // original type (typically 'food' → falls back to 'free').
-  if (
-    t.includes('restaur') ||
-    t.includes(' bistro') ||
-    t.includes('brunch')
-  ) return 'restaurant'
-  if (
-    t.includes('tour') || t.includes('excurs') || t.includes('activid') ||
-    t.includes('atraccion') || t.includes('activity') || t.includes('visita') ||
-    t.includes('aventura') || t.includes('museo') || t.includes('museum')
-  ) return 'tour'
-  if (
-    t.includes('transfer') || t.includes('transport') || t.includes('traslad') ||
-    t.includes('vuelo') || t.includes('flight') || t.includes('bus') ||
-    t.includes('taxi') || t.includes('uber') || t.includes('lyft') ||
-    t.includes('renta de auto') || t.includes('car rental')
-  ) return 'transfer'
-  if (
-    t.includes('relax') || t.includes('descanso') || t.includes('spa') ||
-    t.includes('libre') || t.includes('playa') || t.includes('beach')
-  ) return 'free'
-  return null
-}
-
-function normalizeItemType(raw: unknown): ItemType {
-  return detectTypeFromText(String(raw ?? '')) ?? 'free'
-}
-
 function normalizeItem(raw: any, index: number, dayIndex = 0): ItineraryItem {
-  // Type classification: trust `type` if it's specific, otherwise fall back to
-  // name + description. This rescues hotel rows the AI labeled as "activity"
-  // or left blank — without the rescue they render as "libre" and lose their
-  // affiliate link surface.
-  const explicitType = detectTypeFromText(String(raw?.type ?? ''))
-  const fallbackType = explicitType
-    ?? detectTypeFromText(String(raw?.title ?? raw?.name ?? ''))
-    ?? detectTypeFromText(String(raw?.description ?? raw?.desc ?? ''))
-    ?? 'free'
+  // classifyBlock trusts a canonical semantic type from the Edge Function
+  // first (post P0 rollout — hotel / restaurant / tour / transfer / free,
+  // plus culture→tour and nature→free), then falls back to keyword
+  // scanning across type/title/description for legacy stored trips and
+  // the occasional AI response that ignores the prompt. Default 'free'.
   return {
     id:        typeof raw?.id === 'string'   ? raw.id   : `item-d${dayIndex}-${index}`,
-    type:      fallbackType,
+    type:      classifyBlock(raw),
     time:      raw?.time   ?? '',
     name:      raw?.title  ?? raw?.name  ?? '',
     desc:      raw?.description ?? raw?.desc ?? '',
