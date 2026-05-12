@@ -1188,7 +1188,16 @@ export default function TripResult({ params }: Props) {
           : []
         const duration_days = durationDaysFromNights(nights)
         setActiveGenDuration(duration_days)
-        const payload = { destination, origin, start, end, nights, duration_days, traveler, interests: parsedInterests, pace, budget }
+        // Forward traveler_details to the Edge Fn so the prompt can branch
+        // on family composition (Phase 3). Matches the shape regenerate()
+        // and replaceTrip() already send. Solo / pareja → undefined.
+        const traveler_details =
+          prefTraveler === 'familia'
+            ? { adults: prefAdults, children: prefChildren.map(c => ({ type: c.type, age: c.age })) }
+            : prefTraveler === 'amigos'
+            ? { group_count: prefGroupCount }
+            : undefined
+        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget }
 
         // Abort any in-flight generation from a prior effect run (auth state
         // transitions can retrigger this effect while the first fetch is still
