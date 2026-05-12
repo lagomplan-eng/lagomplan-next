@@ -104,62 +104,84 @@ export default function NewsletterPdfPrompt({ open, onResolve }: Props) {
   const isSuccess = status === 'success'
   const isLoading = status === 'loading'
 
+  if (!open) return null
+
   return (
     <div
       role="dialog"
+      aria-modal="true"
       aria-label={t('pdfPrompt.ariaDialog')}
-      aria-hidden={!open}
-      className={`${styles.popup} ${open ? styles.visible : ''}`}
+      className="fixed inset-0 bg-black/40 backdrop-blur-[6px] z-[9999] flex items-center justify-center p-[18px]"
+      onClick={resolve}
     >
-      <button
-        type="button"
-        aria-label={t('pdfPrompt.ariaClose')}
-        className={styles.close}
-        onClick={resolve}
+      {/* Local keyframe so the modal animates the same way the planner's
+          other confirm modals do — the `mIn` keyframe is defined inline
+          inside TripResult.tsx, out of scope here. */}
+      <style>{`@keyframes mIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
+      {/* Card — inherits the green surface, padding, and shadow from the
+          popup styles, but rendered as a centered modal instead of the
+          slide-in bottom-right. Matches the planner's other confirm
+          modals (regen confirm, save prompt) in geometry. */}
+      <div
+        className="relative w-full max-w-[420px] rounded-[6px] font-sans"
+        style={{
+          background: '#1B4D3E',
+          padding: '26px 22px 22px',
+          boxShadow: '0 16px 48px rgba(15, 26, 22, 0.28)',
+          animation: 'mIn 0.25s ease',
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        ×
-      </button>
+        <button
+          type="button"
+          aria-label={t('pdfPrompt.ariaClose')}
+          className={styles.close}
+          onClick={resolve}
+        >
+          ×
+        </button>
 
-      {isSuccess ? (
-        <div className={styles.success}>
-          <div className={styles.successIcon}>✓</div>
-          <div className={styles.successText}>{t('pdfPrompt.successText')}</div>
-          <div className={styles.successSub}>{t('pdfPrompt.successSub')}</div>
-        </div>
-      ) : (
-        <div>
-          <div className={styles.eyebrow}>{t('pdfPrompt.eyebrow')}</div>
-          <div className={styles.headline}>{t('pdfPrompt.headline')}</div>
-          <div className={styles.sub}>{t('pdfPrompt.sub')}</div>
-
-          <div className={styles.formRow}>
-            <input
-              type="email"
-              autoComplete="email"
-              aria-label={t('common.ariaEmail')}
-              placeholder={t('common.placeholder')}
-              className={styles.email}
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              onKeyDown={onKeyDown}
-              disabled={isLoading}
-            />
-            <button
-              type="button"
-              className={styles.submit}
-              onClick={submit}
-              disabled={isLoading}
-            >
-              {isLoading ? t('common.loading') : t('pdfPrompt.submit')}
-            </button>
+        {isSuccess ? (
+          <div className={styles.success}>
+            <div className={styles.successIcon}>✓</div>
+            <div className={styles.successText}>{t('pdfPrompt.successText')}</div>
+            <div className={styles.successSub}>{t('pdfPrompt.successSub')}</div>
           </div>
+        ) : (
+          <div>
+            <div className={styles.eyebrow}>{t('pdfPrompt.eyebrow')}</div>
+            <div className={styles.headline}>{t('pdfPrompt.headline')}</div>
+            <div className={styles.sub}>{t('pdfPrompt.sub')}</div>
 
-          {status === 'error' && (
-            <div className={styles.error} role="alert">{error}</div>
-          )}
-          <div className={styles.privacy}>{t('pdfPrompt.privacy')}</div>
-        </div>
-      )}
+            <div className={styles.formRow}>
+              <input
+                type="email"
+                autoComplete="email"
+                aria-label={t('common.ariaEmail')}
+                placeholder={t('common.placeholder')}
+                className={styles.email}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                onKeyDown={onKeyDown}
+                disabled={isLoading}
+              />
+              <button
+                type="button"
+                className={styles.submit}
+                onClick={submit}
+                disabled={isLoading}
+              >
+                {isLoading ? t('common.loading') : t('pdfPrompt.submit')}
+              </button>
+            </div>
+
+            {status === 'error' && (
+              <div className={styles.error} role="alert">{error}</div>
+            )}
+            <div className={styles.privacy}>{t('pdfPrompt.privacy')}</div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
