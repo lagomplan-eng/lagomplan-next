@@ -59,7 +59,11 @@ export async function PATCH(
 
   try {
     const body = await req.json()
-    const { title, trip_data } = body
+    const {
+      title, trip_data,
+      travelers, travel_style, budget_level, interests,
+      traveler_adults, traveler_children, traveler_group_count,
+    } = body
 
     const supabase = await getSupabaseServer()
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -68,8 +72,34 @@ export async function PATCH(
     }
 
     const updatePayload: Record<string, unknown> = {}
-    if (title !== undefined) updatePayload.title = title || null
-    if (trip_data !== undefined) updatePayload.trip_data = trip_data
+    if (title !== undefined)        updatePayload.title        = title || null
+    if (trip_data !== undefined)    updatePayload.trip_data    = trip_data
+    // Pref fields — only assigned when the client explicitly sends them so the
+    // autosave path can choose to bundle them with content edits or not.
+    if (travelers !== undefined)    updatePayload.travelers    = travelers || null
+    if (travel_style !== undefined) updatePayload.travel_style = travel_style || null
+    if (budget_level !== undefined) updatePayload.budget_level = budget_level || null
+    if (Array.isArray(interests))   updatePayload.interests    = interests
+    if (traveler_adults !== undefined) {
+      const n = Number(traveler_adults)
+      if (!isNaN(n)) updatePayload.traveler_adults = Math.min(Math.max(n, 1), 20)
+    }
+    if (Array.isArray(traveler_children)) {
+      updatePayload.traveler_children = traveler_children
+        .filter((c: any) => !!c && typeof c === 'object')
+        .map((c: any) => ({
+          type: c.type === 'baby' ? 'baby' : 'kid',
+          age:  typeof c.age === 'string' ? c.age : '',
+        }))
+    }
+    if (traveler_group_count !== undefined) {
+      if (traveler_group_count === null) {
+        updatePayload.traveler_group_count = null
+      } else {
+        const n = Number(traveler_group_count)
+        if (!isNaN(n)) updatePayload.traveler_group_count = Math.min(Math.max(n, 2), 50)
+      }
+    }
 
     if (Object.keys(updatePayload).length === 0) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
