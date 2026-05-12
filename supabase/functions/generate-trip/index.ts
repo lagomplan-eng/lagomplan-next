@@ -106,8 +106,7 @@
                   time:        { type: "string" },                                                             
                   title:       { type: "string" },                                                               
                   description: { type: "string" },
-                  type:        { type: "string", enum: ["transport", "food", "culture", "nature", "walk", "rest",
-   "free"] },                                                                                                    
+                  type:        { type: "string", enum: ["hotel", "restaurant", "tour", "transfer", "culture", "nature", "free"] },                                                                                                    
                 },                                                                                             
               },                                                                                                 
             },                                              
@@ -197,6 +196,25 @@
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
   ${retryNote}${accommodationsBlock}
+
+  TIPOS DE BLOQUE (CRÍTICO):
+  Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:
+    - "hotel"      → check-in, check-out, llegada/salida del hotel, descanso en alojamiento.
+    - "restaurant" → cualquier comida bookeable: desayuno, almuerzo, comida, cena, brunch
+                     en un restaurante / fonda / taquería / marisquería / parrilla /
+                     café / panadería / bistró específico.
+    - "tour"       → atracciones, museos, recorridos guiados, experiencias, clases,
+                     excursiones, parques temáticos, actividades programadas.
+    - "transfer"   → vuelos, traslados al/del aeropuerto, taxis, Uber, autobús, tren,
+                     ferry, metro, renta de auto, shuttle, transporte entre puntos.
+    - "culture"    → exploración cultural sin booking (callejear por un barrio, plazas,
+                     mercados como paseo, miradores, edificios históricos en exterior).
+    - "nature"     → exploración natural sin booking (playa, parques, senderos cortos,
+                     observación de paisaje).
+    - "free"       → tiempo libre / opcional / descanso sin estructura específica.
+
+  Regla clave: si el bloque es una comida en un lugar concreto, type DEBE ser "restaurant",
+  NUNCA "free", "culture" o "nature". El usuario debe poder reservar mesa desde ese bloque.
 
   Llama a la herramienta emit_trip con el itinerario completo. Usa lugares, restaurantes y rutas reales de
   ${input.destination}. Incluye exactamente ${d} día(s). Cada día debe tener entre 4 y 7 bloques.`;
