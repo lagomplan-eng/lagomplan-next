@@ -27,6 +27,7 @@ export async function POST(req: NextRequest) {
       destination, origin, duration_days,
       travelers, travel_style, budget_level, interests, trip_data,
       traveler_adults, traveler_children, traveler_group_count,
+      currency,
     } = body
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -115,6 +116,10 @@ export async function POST(req: NextRequest) {
     if (adultsValue !== undefined)   insertPayload.traveler_adults      = adultsValue
     if (childrenValue !== undefined) insertPayload.traveler_children    = childrenValue
     if (groupValue !== undefined)    insertPayload.traveler_group_count = groupValue
+
+    // currency: enum-style TEXT ('USD' | 'MXN'). Invalid values fall back to
+    // the column default rather than 400ing the request.
+    if (currency === 'USD' || currency === 'MXN') insertPayload.currency = currency
 
     console.log('[trips/post] inserting:', {
       ...insertPayload,

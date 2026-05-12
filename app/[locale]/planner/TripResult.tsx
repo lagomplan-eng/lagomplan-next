@@ -1085,6 +1085,10 @@ export default function TripResult({ params }: Props) {
         if (typeof (data as any).traveler_group_count === 'number') {
           setPrefGroupCount((data as any).traveler_group_count)
         }
+        // C1 — hydrate the budget currency from DB so USD/MXN survives refresh.
+        if ((data as any).currency === 'USD' || (data as any).currency === 'MXN') {
+          setBudgetCurrency((data as any).currency)
+        }
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
         // Baseline: marks this as already-in-DB so autosave only fires on real edits
@@ -1364,6 +1368,7 @@ export default function TripResult({ params }: Props) {
                   traveler_adults:      prefAdults,
                   traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
                   traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
+                  currency:             budgetCurrency,
                 }),
               })
               if (!autoSaveRes.ok) {
@@ -1477,6 +1482,7 @@ export default function TripResult({ params }: Props) {
       title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr,
       travelers: prefTraveler, traveler_adults: prefAdults,
       traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
+      currency: budgetCurrency,
     })
     if (content === lastSavedContentRef.current) return   // nothing changed
 
@@ -1494,6 +1500,7 @@ export default function TripResult({ params }: Props) {
       traveler_adults:      prefAdults,
       traveler_children:    childrenSerial,
       traveler_group_count: groupCountSerial,
+      currency:             budgetCurrency,
     })
 
     // Exponential backoff: ~6.5s window covers most transient blips (cookie
@@ -1546,7 +1553,7 @@ export default function TripResult({ params }: Props) {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days, packing, budgetRows, tripTitle, tripSubtitle, tripId, doneCheckIds, loading, autosaveRetryKey,
-      prefTraveler, prefAdults, prefChildren, prefGroupCount])
+      prefTraveler, prefAdults, prefChildren, prefGroupCount, budgetCurrency])
 
   // ── pagehide flush — covers the autosave debounce gap on tab close ───────────
   // Autosave is debounced 1500ms. If the user edits and closes the tab inside
@@ -1565,11 +1572,12 @@ export default function TripResult({ params }: Props) {
     prefAdults:    2,
     prefChildren:  [] as Child[],
     prefGroupCount: 2,
+    budgetCurrency: 'MXN' as 'MXN' | 'USD',
   })
   useEffect(() => {
     flushSnapshotRef.current = {
       tripId, tripTitle, tripSubtitle, days, packing, budgetRows, doneCheckIds,
-      prefTraveler, prefAdults, prefChildren, prefGroupCount,
+      prefTraveler, prefAdults, prefChildren, prefGroupCount, budgetCurrency,
     }
   })
   useEffect(() => {
@@ -1583,6 +1591,7 @@ export default function TripResult({ params }: Props) {
         title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr,
         travelers: s.prefTraveler, traveler_adults: s.prefAdults,
         traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
+        currency: s.budgetCurrency,
       })
       if (content === lastSavedContentRef.current) return
       try {
@@ -1598,6 +1607,7 @@ export default function TripResult({ params }: Props) {
             traveler_adults:      s.prefAdults,
             traveler_children:    childrenSerial,
             traveler_group_count: groupCountSerial,
+            currency:             s.budgetCurrency,
           }),
         })
       } catch {}
@@ -1873,6 +1883,7 @@ export default function TripResult({ params }: Props) {
               traveler_adults:      prefAdults,
               traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
               traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
+              currency:             budgetCurrency,
             }
             console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
             const regenSaveRes = await fetch('/api/trips', {
@@ -2213,6 +2224,7 @@ export default function TripResult({ params }: Props) {
             traveler_adults:      prefAdults,
             traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
             traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
+            currency:             budgetCurrency,
           }
           console.log('[replaceTrip] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
           const regenSaveRes = await fetch('/api/trips', {

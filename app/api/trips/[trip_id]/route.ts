@@ -63,6 +63,7 @@ export async function PATCH(
       title, trip_data,
       travelers, travel_style, budget_level, interests,
       traveler_adults, traveler_children, traveler_group_count,
+      currency,
     } = body
 
     const supabase = await getSupabaseServer()
@@ -100,6 +101,9 @@ export async function PATCH(
         if (!isNaN(n)) updatePayload.traveler_group_count = Math.min(Math.max(n, 2), 50)
       }
     }
+    // currency — only accept the two known values; anything else is ignored
+    // rather than 400ing the autosave.
+    if (currency === 'USD' || currency === 'MXN') updatePayload.currency = currency
 
     if (Object.keys(updatePayload).length === 0) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
