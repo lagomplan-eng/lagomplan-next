@@ -110,6 +110,19 @@ interface Props {
 // (e.g. accommodations introduced after the cache was written).
 const TRIP_CACHE_SCHEMA = 2
 
+// ─── Duration normalization ───────────────────────────────────────────────────
+// nights=0 is a legal explicit value (same-day trip). The naive
+// `parseInt(nights, 10) || 3` pattern coerces 0 to 3 because `0 || x` returns
+// x in JS — silently turning same-day trips into 3-day itineraries.
+// Returns the number of *days* the itinerary should span (1 for same-day,
+// otherwise preserves the existing nights==duration_days convention).
+function durationDaysFromNights(raw: string | number | null | undefined): number {
+  const n = typeof raw === 'number' ? raw : parseInt(String(raw ?? ''), 10)
+  if (isNaN(n)) return 3                 // truly missing → product default
+  if (n <= 0)  return 1                  // explicit same-day
+  return Math.min(Math.max(n, 1), 30)    // overnight: unchanged
+}
+
 // ─── Display label maps ────────────────────────────────────────────────────────
 
 // Normalises both HeroForm values ('Relajado') and legacy drawer keys ('relaxed')
@@ -526,7 +539,7 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
 }
 
 function derivePackingFromTrip(destination: string, nights: string, interests: string): string[] {
-  const n = parseInt(nights || '3', 10) || 3
+  const n = durationDaysFromNights(nights)
   const base = [
     'Documentos de identidad (INE / pasaporte)',
     'Tarjeta de crédito / efectivo',
@@ -663,7 +676,7 @@ function normalizeTripData(row: any, destination: string, nights: string, intere
   }))
 
   return {
-    title:          row?.title ?? source.title ?? `${destination} · ${parseInt(nights || '0', 10) || 3} nights`,
+    title:          row?.title ?? source.title ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
     subtitle:       source.subtitle ?? 'AI-generated trip plan',
     days:           normalizedDays,
     checks:         normalizedChecks,
@@ -942,7 +955,8 @@ export default function TripResult({ params }: Props) {
         }
         const data = await res.json()
         const dest      = data.destination || ''
-        const tripNights = String(data.duration_days || 3)
+        // 0 is a valid same-day duration; only fall back to 3 when truly absent.
+        const tripNights = String(typeof data.duration_days === 'number' ? data.duration_days : 3)
         const interestsStr = Array.isArray(data.interests) ? data.interests.join(',') : ''
         // Sync the displayed duration to what's stored in the DB. Without this
         // the heading falls back to the URL `nights` prop, which is stale when
@@ -1134,7 +1148,7 @@ export default function TripResult({ params }: Props) {
         const parsedInterests = interests
           ? interests.split(',').map((i) => i.trim()).filter(Boolean)
           : []
-        const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+        const duration_days = durationDaysFromNights(nights)
         setActiveGenDuration(duration_days)
         const payload = { destination, origin, start, end, nights, duration_days, traveler, interests: parsedInterests, pace, budget }
 
@@ -1602,11 +1616,10 @@ export default function TripResult({ params }: Props) {
       // Derive duration from the *edited* dates in the prefs drawer. The URL
       // `nights` is stale (set at initial generation) — using it here would
       // ignore the user's date changes.
-      const editedDays    = daysBetween(prefStart, prefEnd)
-      const duration_days = Math.min(
-        Math.max(editedDays || parseInt(nights || '0', 10) || 3, 1),
-        30,
-      )
+      const editedNights  = daysBetween(prefStart, prefEnd)
+      const duration_days = (prefStart && prefEnd)
+        ? durationDaysFromNights(editedNights)
+        : durationDaysFromNights(nights)
       const nightsForPayload = String(duration_days)
       setActiveGenDuration(duration_days)
       // Family/group composition only flows through when the corresponding
@@ -1790,7 +1803,7 @@ export default function TripResult({ params }: Props) {
     console.log('[SAVE TRIP CALLED]', { userId })
     if (!rawTripData) { showToast(locale === 'es' ? 'No hay viaje para guardar' : 'No trip to save'); return }
     try {
-      const duration_days = Math.min(Math.max(parseInt(nights || '0', 10) || 3, 1), 30)
+      const duration_days = durationDaysFromNights(nights)
       const parsedInterests = prefInterests
         ? prefInterests.split(',').map((i) => i.trim()).filter(Boolean)
         : []
@@ -1938,11 +1951,10 @@ export default function TripResult({ params }: Props) {
         : []
       // Same fix as regenerate(): derive duration from the edited dates, not
       // the stale URL `nights`.
-      const editedDays    = daysBetween(prefStart, prefEnd)
-      const duration_days = Math.min(
-        Math.max(editedDays || parseInt(nights || '0', 10) || 3, 1),
-        30,
-      )
+      const editedNights  = daysBetween(prefStart, prefEnd)
+      const duration_days = (prefStart && prefEnd)
+        ? durationDaysFromNights(editedNights)
+        : durationDaysFromNights(nights)
       const nightsForPayload = String(duration_days)
       setActiveGenDuration(duration_days)
       // Family/group composition only flows through when the corresponding
@@ -2343,7 +2355,7 @@ export default function TripResult({ params }: Props) {
   // Prefer the most-recently-generated duration so the heading ("X días en …")
   // reflects edits made in the prefs drawer. Falls back to the URL `nights`
   // prop on first render before any generation has run in this session.
-  const nightsNum   = activeGenDuration ?? (parseInt(nights || '0', 10) || 3)
+  const nightsNum   = activeGenDuration ?? durationDaysFromNights(nights)
   // dateRange uses pref state so it reflects the most-recently-regenerated trip
   const dateRange   = prefStart && prefEnd ? `${prefStart} — ${prefEnd}` : `${nightsNum} noches`
   const doneChecks  = checks.filter(c => c.done).length
@@ -2372,8 +2384,9 @@ export default function TripResult({ params }: Props) {
     slots: {
       destination:  destination || null,
       // Prefer the active gen duration (set by regen/replace from edited dates)
-      // over the URL-stale `nights`.
-      durationDays: activeGenDuration ?? (Number(nights) || null),
+      // over the URL-stale `nights`. `nights` is the empty string when truly
+      // missing — keep that as null. "0" (same-day) becomes 1 via the helper.
+      durationDays: activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null),
       travelers:    traveler || null,
     },
   })
@@ -2406,7 +2419,7 @@ export default function TripResult({ params }: Props) {
           ) : loadingKind === 'generating' ? (
             <GenerationSurface
               destination={destination || null}
-              durationDays={activeGenDuration ?? (Number(nights) || null)}
+              durationDays={activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null)}
               travelers={traveler || null}
               phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
               progress={gen.progress}
@@ -3082,7 +3095,7 @@ export default function TripResult({ params }: Props) {
                   Tu itinerario
                 </div>
                 <div className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                  {nightsNum} días en {titleCaseCity(prefDest) || 'tu destino'}
+                  {nightsNum} {nightsNum === 1 ? 'día' : 'días'} en {titleCaseCity(prefDest) || 'tu destino'}
                 </div>
               </div>
               <button
@@ -4016,7 +4029,7 @@ export default function TripResult({ params }: Props) {
         <TripShareModal
           tripId={tripId}
           destination={destination}
-          duration={Number(nights) || null}
+          duration={nights ? durationDaysFromNights(nights) : null}
           isOpen={shareOpen}
           onClose={() => setShareOpen(false)}
         />
