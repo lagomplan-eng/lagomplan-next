@@ -3048,6 +3048,15 @@ export default function TripResult({ params }: Props) {
                         ))}
                         <button
                           onClick={() => {
+                            setPrefChildren(prev => [...prev, { id: prefNextKidId, type: 'baby', age: '0-11 m' }])
+                            setPrefNextKidId(n => n + 1)
+                          }}
+                          className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[rgba(15,58,51,.04)] transition-all"
+                        >
+                          + Añadir bebé
+                        </button>
+                        <button
+                          onClick={() => {
                             setPrefChildren(prev => [...prev, { id: prefNextKidId, type: 'kid', age: '3 años' }])
                             setPrefNextKidId(n => n + 1)
                           }}

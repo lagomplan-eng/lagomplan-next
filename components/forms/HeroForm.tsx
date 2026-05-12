@@ -321,6 +321,16 @@ function submit(e: React.FormEvent) {
                     <button
                       type="button"
                       onClick={() => {
+                        setChildren(prev => [...prev, { id: nextKidId, type: 'baby', age: '0-11 m' }])
+                        setNextKidId(n => n + 1)
+                      }}
+                      className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[#E4EFEC] transition-all"
+                    >
+                      {t('addBaby')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
                         setChildren(prev => [...prev, { id: nextKidId, type: 'kid', age: '3 anos' }])
                         setNextKidId(n => n + 1)
                       }}
