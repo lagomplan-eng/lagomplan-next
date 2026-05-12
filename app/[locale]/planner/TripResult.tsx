@@ -150,6 +150,13 @@ const BUDGET_DISPLAY: Record<string, string> = {
 }
 function budgetLabel(val: string) { return BUDGET_DISPLAY[val] ?? val }
 
+// Currency-aware budget tier buckets for the prefs-drawer dropdown.
+// The label includes the currency suffix so the option value is unambiguous
+// when persisted (e.g. "$10k–$15k MXN" vs "$500–$1k USD"). USD tiers are
+// rough-equivalents of the MXN tiers at ~17:1, rounded to round numbers.
+const BUDGET_BUCKETS_MXN = ['$10k–$15k MXN', '$15k–$25k MXN', '$25k–$40k MXN', '$40k+ MXN'] as const
+const BUDGET_BUCKETS_USD = ['$500–$1k USD', '$1k–$1.5k USD', '$1.5k–$2.5k USD', '$2.5k+ USD'] as const
+
 // ─── Traveler detail types ────────────────────────────────────────────────────
 
 const BABY_AGES = ['0-11 m', '1 año', '2 años']
@@ -2945,10 +2952,13 @@ export default function TripResult({ params }: Props) {
                     onChange={e => setPrefBudget(e.target.value)}
                     className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#C8D9D3] rounded-[2px] px-3 py-2 pr-8 outline-none focus:border-[#0F3A33] focus:shadow-[0_0_0_3px_rgba(15,58,51,.06)] appearance-none transition-all"
                   >
-                    <option value="$10k–$15k">$10k–$15k MXN</option>
-                    <option value="$15k–$25k">$15k–$25k MXN</option>
-                    <option value="$25k–$40k">$25k–$40k MXN</option>
-                    <option value="$40k+">$40k+ MXN</option>
+                    {/* Render tiers in the currency the user picked. The
+                        option value and label match so the persisted
+                        prefBudget string carries the currency suffix
+                        explicitly — no parsing or guessing downstream. */}
+                    {(budgetCurrency === 'USD' ? BUDGET_BUCKETS_USD : BUDGET_BUCKETS_MXN).map(b => (
+                      <option key={b} value={b}>{b}</option>
+                    ))}
                   </select>
                   <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#6B8F86]" viewBox="0 0 10 6" fill="none">
                     <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
