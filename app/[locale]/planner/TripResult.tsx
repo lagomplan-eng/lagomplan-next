@@ -817,6 +817,7 @@ export default function TripResult({ params }: Props) {
     adults: adultsParam = '',
     children: childrenParam = '',
     groupCount: groupCountParam = '',
+    currency: currencyParam = '',
     trip_id:  savedTripId = '',
     checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
   } = params
@@ -892,7 +893,11 @@ export default function TripResult({ params }: Props) {
 
   // ── Budget inline edit state ──────────────────────────────────────────────────
   const [openBudgetEditId, setOpenBudgetEditId] = useState<string | null>(null)
-  const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
+  // Seed from URL currency param so a fresh form submission with USD picked
+  // shows USD immediately in the item-edit modal — before any DB hydration.
+  const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>(
+    currencyParam === 'USD' ? 'USD' : 'MXN'
+  )
 
   // ── Edit modal state ─────────────────────────────────────────────────────────
   const [editModalItem, setEditModalItem] = useState<ItineraryItem | null>(null)
@@ -2766,11 +2771,29 @@ export default function TripResult({ params }: Props) {
                   : 'Resultado del plan'}
               </div>
 
-              {/* Title */}
-              <h1 data-trip-hero="title" className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
-                {tripTitle || `Tu viaje a`}<br />
-                <span className="text-[#0F3A33]">{titleCaseCity(prefDest)}</span>
-              </h1>
+              {/* Title — the destination span only shows when (a) we're on
+                  the fallback "Tu viaje a" copy that needs to be completed
+                  with the destination, or (b) the AI title doesn't already
+                  mention the destination. Otherwise we'd render
+                  "Escapada por Uruguay" / "Uruguay" — destination twice. */}
+              {(() => {
+                const destDisplay = titleCaseCity(prefDest)
+                const hasAITitle  = !!tripTitle
+                const titleMentionsDest = hasAITitle && destDisplay
+                  && tripTitle.toLowerCase().includes(prefDest.toLowerCase())
+                const showDestLine = destDisplay && !titleMentionsDest
+                return (
+                  <h1 data-trip-hero="title" className="font-display text-[clamp(34px,4vw,52px)] font-normal leading-[1.06] tracking-[-0.03em] text-[#1C1C1A] mb-3.5">
+                    {tripTitle || (locale === 'es' ? 'Tu viaje a' : 'Your trip to')}
+                    {showDestLine && (
+                      <>
+                        <br />
+                        <span className="text-[#0F3A33]">{destDisplay}</span>
+                      </>
+                    )}
+                  </h1>
+                )
+              })()}
 
               {/* Subtitle */}
               <p data-trip-hero="subtitle" className="text-[14px] font-light leading-[1.75] text-[#7A7A76] max-w-[420px] mb-6">

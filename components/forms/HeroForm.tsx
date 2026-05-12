@@ -151,6 +151,10 @@ function submit(e: React.FormEvent) {
       interests:   [...interests, extra].filter(Boolean).join(', '),
       pace,
       budget:      budgetWithCurrency,
+      // Explicit currency param so the result page can initialize the
+      // budgetCurrency state without sniffing the budget string. DB load
+      // will override this once the trip is saved.
+      currency:    budgetCurrency,
     })
 
     // Traveler-detail serialization — only when relevant to the selected
