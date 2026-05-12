@@ -23,8 +23,16 @@
 
 export type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
 
-const CANONICAL_TYPES: Set<ItemType> = new Set([
-  'hotel', 'tour', 'restaurant', 'free', 'transfer',
+// Strong canonical types we trust outright when the AI emits them — these
+// each carry an affiliate / booking surface and the AI deliberately picking
+// one is high-signal.
+//
+// `free` is intentionally NOT in this set. It's both (a) the legitimate
+// "free time" category and (b) the lazy/legacy default the AI falls back
+// to when uncertain. We run keyword rescue on `free` so a block that's
+// really a restaurant or transfer doesn't end up under Libre.
+const TRUSTED_TYPES: Set<ItemType> = new Set([
+  'hotel', 'tour', 'restaurant', 'transfer',
 ])
 
 // AI-side companion types we accept and remap to the renderer's enum.
@@ -50,26 +58,33 @@ interface RawBlock {
 export function classifyBlock(raw: RawBlock | null | undefined): ItemType {
   if (!raw) return 'free'
 
-  // 1. Trust a canonical semantic type emitted by the AI.
+  // 1. Trust a strong canonical type emitted by the AI (hotel /
+  //    restaurant / tour / transfer). `free` is NOT in this set —
+  //    see TRUSTED_TYPES comment.
   const rawType = String(raw.type ?? '').toLowerCase().trim()
-  if (CANONICAL_TYPES.has(rawType as ItemType)) {
+  if (TRUSTED_TYPES.has(rawType as ItemType)) {
     return rawType as ItemType
   }
 
-  // 2. Remap AI companion types (culture, nature) onto canonical.
-  if (rawType && COMPANION_MAP[rawType]) {
-    return COMPANION_MAP[rawType]
-  }
-
-  // 3. Keyword fallback — `type` first (covers legacy strings like
-  //    "Hotel check-in"), then title/name, then description.
+  // 2. Keyword rescue — scan type → title → desc. Runs BEFORE the
+  //    companion remap so a 'culture' block whose title says
+  //    "Check-in en X" upgrades to 'hotel' instead of getting
+  //    permanently fixed at 'tour' via the companion map. Same
+  //    rescue logic salvages restaurants from any non-trusted type.
   const detected =
     detectTypeFromText(String(raw.type ?? '')) ??
     detectTypeFromText(String(raw.title ?? raw.name ?? '')) ??
     detectTypeFromText(String(raw.description ?? raw.desc ?? ''))
+  if (detected) return detected
+
+  // 3. Companion remap — used when keyword rescue finds nothing.
+  //    Lets AI 'culture' / 'nature' blocks reach a sensible bucket.
+  if (rawType && COMPANION_MAP[rawType]) {
+    return COMPANION_MAP[rawType]
+  }
 
   // 4. Default.
-  return detected ?? 'free'
+  return 'free'
 }
 
 /**
