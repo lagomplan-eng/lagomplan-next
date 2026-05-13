@@ -36,10 +36,11 @@ export default async function HotelsIndexPage({ params }: Props) {
   const hotels = getAllHotels(locale)
 
   return (
-    // Sand background is set on <main> so the bridge CTA + newsletter
-    // sections below the client inherit the same surface. Avoids the
-    // earlier issue where only the client area had the cream background.
-    <main className="pt-[100px] bg-[var(--sand)]">
+    // #FFF9F3 — same warm cream the planner, signup, and guide pages
+    // use. var(--sand) (#EDE7E1) was a different, darker bucket and
+    // made the Hotels page visually disconnected from the rest of
+    // the site. Set on <main> so bridge CTA + newsletter inherit.
+    <main className="pt-[100px] bg-[#FFF9F3]">
       <HotelsClient hotels={hotels} locale={locale} />
       <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">

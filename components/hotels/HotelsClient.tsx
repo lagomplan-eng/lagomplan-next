@@ -123,7 +123,10 @@ export default function HotelsClient({ hotels, locale }: Props) {
     <div>
       {/* ─────── HERO ─────── */}
       <section style={{ padding: '64px 0 40px' }}>
-        <div className="page-inner" style={{ maxWidth: 960 }}>
+        {/* Hero uses the same page-inner container as the curated grid
+            below so the left edge of "DÓNDE QUEDARSE" / "Hoteles que…"
+            aligns with "HOTELES CURADOS" — no maxWidth override here. */}
+        <div className="page-inner">
         <p style={sectionLabelStyle}>{L.eyebrow}</p>
 
         <h1 style={{
@@ -131,6 +134,9 @@ export default function HotelsClient({ hotels, locale }: Props) {
           fontSize: 'clamp(36px, 5.5vw, 56px)',
           color: NK, lineHeight: 1.05, letterSpacing: '-1px',
           marginBottom: 16, whiteSpace: 'pre-line',
+          // Headline-only constraint so it doesn't read across the
+          // full 1280px container.
+          maxWidth: 720,
         }}>{L.headline}</h1>
 
         <p style={{
