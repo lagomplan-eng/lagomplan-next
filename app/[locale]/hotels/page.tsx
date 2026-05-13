@@ -9,7 +9,7 @@
 import type { Metadata }                    from 'next'
 import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
-import { getAllHotelsFromGuides }            from '../../../lib/hotels'
+import { getAllHotels }                     from '../../../lib/hotels'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
@@ -30,7 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function HotelsIndexPage({ params }: Props) {
   const { locale } = await params
-  const hotels = getAllHotelsFromGuides(locale)
+  // Combined feed: curated guides + worldcup city stays. Both corpora are
+  // the only authoritative sources of hotel records.
+  const hotels = getAllHotels(locale)
 
   return (
     <main className="pt-[100px]">
