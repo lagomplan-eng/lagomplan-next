@@ -12,6 +12,7 @@ import type { Locale }                      from '../../../i18n'
 import { getAllHotels }                     from '../../../lib/hotels'
 import { getRenderableCityNeighborhoods }   from '../../../lib/hotels-neighborhoods'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
+import SmartFindsSection                    from '../../../components/hotels/SmartFindsSection'
 import PlannerBridgeCTA                     from '../../../components/hotels/PlannerBridgeCTA'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
@@ -48,6 +49,7 @@ export default async function HotelsIndexPage({ params }: Props) {
         neighborhoods={neighborhoods}
         locale={locale}
       />
+      <SmartFindsSection locale={locale} />
       <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">
         <NewsletterEndOfGuide />
