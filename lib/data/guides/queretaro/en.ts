@@ -137,7 +137,7 @@ export const guide: FlatGuide = {
       description: 'A retreat designed for those who value attention to detail, steps from the most iconic temples. Outdoor areas provide a calm respite to decompress after a day of exploration.',
       tag: 'Curated service and unbeatable location',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/_fF6NqiDqC?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
-      archetypes: ['Parejas'],
+      archetypes: ['Parejas', 'Aventura', 'Bienestar'],
     },
   ],
 

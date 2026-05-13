@@ -48,6 +48,46 @@ const RULES = [
     // luxury, romance / "solo adultos" / "adults-only" language.
     test: /boutique|design hotel|rooftop|spa|romántic|romantic|solo adultos|adults?[-\s]?only|couples?|luxury|lujo|porfirian|porfiriana|st\.\s*regis|four seasons|ritz[-\s]carlton|the cape|las alcobas|four bedrooms with intimate|escapada en pareja/,
   },
+  {
+    archetype: 'Solo',
+    // Solo / backpacker / coliving signals. Word-boundary `\bsolo\b` keeps
+    // it from matching every casual use of "solo" (es: "sólo"). Hostels and
+    // colivings are strong solo signals because they're priced + designed
+    // around single travelers with common areas.
+    test: /hostel|hostal|hostería|backpacker|mochiler|\bsolo travel|\bpara uno\b|individual room|coliving|co-living|capsule|cápsula|nómada(s)? digital|digital nomad|comunidad de viajer/,
+  },
+  {
+    archetype: 'Negocios',
+    // Business / corporate signals. Narrow on purpose — generic "downtown"
+    // or "polanco" fires on too many leisure boutiques in the corpus.
+    test: /\bbusiness (hotel|center|district|class|stay)|business cent|business[-\s]+ready|centro de negocios|ejecutiv|executive (suite|level|floor|lounge)|conference (room|center|facility)|conferenc(e|ia)s? para empresas|distrito financiero|corporate (stay|client|traveler)|para viajes de negocios|hilton garden|holiday inn|marriott courtyard|hyatt regency|hyatt place|sheraton|intercontinental|crowne plaza/,
+  },
+  {
+    archetype: 'Aventura',
+    // Outdoor / adventure activities — strong domain-specific verbs.
+    test: /aventura|adventure|outdoor|trekking|hiking|senderismo|kayak|surf|rappel|escalada|climbing|jungla|selva|\bjungle\b|cenote|tirolesa|zipline|safari|expedici|ecoturismo|ecotourism|mountain bike|paddleboard|snorkel/,
+  },
+  {
+    archetype: 'Bienestar',
+    // Wellness signals. `\bspa\b` deliberately overlaps with the Parejas
+    // rule — many spa hotels suit BOTH couples and wellness travelers,
+    // and the catalog should reflect that overlap.
+    test: /wellness|bienestar|\byoga\b|meditation|meditación|mindfulness|retreat|retiro|holistic|holístic|termal|thermal|aguas termales|hot springs|detox|ayurveda|temazcal|chakra|\bspa\b|sound bath|baño sonoro/,
+  },
+  {
+    archetype: 'Workation',
+    // Long-stay / remote-work signals. Requires explicit workation /
+    // coworking / remote-work language — won't fire on a generic "good
+    // wifi" boutique, which is most of the corpus.
+    test: /workation|coworking|co-working|remote work|nómada(s)? digital|digital nomad|long[-\s]stay|estancia (larga|extendida)|extended stay|monthly stay|workspace|escritorio (cómodo|amplio|ergonomic|ergonómico)|fiber internet|fibra óptica/,
+  },
+  {
+    archetype: 'Eco',
+    // Sustainability signals. `\beco\b` word-boundary avoids matching
+    // "economic" / "economía". `leed certified` and `b corp` catch
+    // the credentialed sustainability-positioned properties.
+    test: /\beco\b|ecológic|ecolodge|sustainable|sostenible|sustentable|orgánic|organic farm|permaculture|permacultura|carbon neutral|carbono neutral|net[-\s]zero|off[-\s]grid|fuera de la red|solar power|paneles solares|biofilico|biophilic|biofílic|leed certified|leed[-\s]gold|green hotel|reforestación|reforestation|b[-\s]?corp/,
+  },
 ]
 
 function deriveArchetypes(text) {
@@ -132,10 +172,33 @@ function processFile(filePath, arrayKey) {
     }
     const objText = content.slice(objStart, objEnd + 1)
 
-    // Already tagged? Leave it alone.
-    if (/\barchetypes\s*:/.test(objText)) {
-      out.push(objText)
-      skipped++
+    // Has an `archetypes: [...]` line already? Extend-mode: parse the
+    // existing array, run derivation, take the union, and rewrite the
+    // line in place. This lets the script add NEW archetype rules
+    // (e.g. the 6 added later) to records that were tagged in an
+    // earlier pass without re-deriving the original tags from scratch.
+    const existingMatch = objText.match(/archetypes\s*:\s*\[([^\]]*)\]/)
+    if (existingMatch) {
+      const existing = existingMatch[1]
+        .split(',')
+        .map(s => s.trim().replace(/^['"]|['"]$/g, ''))
+        .filter(Boolean)
+      const derived = deriveArchetypes(objText)
+      const union = Array.from(new Set([...existing, ...derived]))
+
+      // Same set → nothing to change; preserve the source byte-for-byte.
+      if (union.length === existing.length &&
+          union.every(a => existing.includes(a))) {
+        out.push(objText)
+        skipped++
+        i = objEnd + 1
+        continue
+      }
+
+      const newLine = `archetypes: [${union.map(a => `'${a}'`).join(', ')}]`
+      const updated = objText.replace(/archetypes\s*:\s*\[[^\]]*\]/, newLine)
+      out.push(updated)
+      touched++
       i = objEnd + 1
       continue
     }

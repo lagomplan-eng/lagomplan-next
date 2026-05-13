@@ -101,7 +101,7 @@ export const guide: FlatGuide = {
       description: "The most exclusive luxury retreat at the end of the Hotel Zone. Ideal for families seeking peace, a sargassum-free beach (due to its location), and a world-class Kids' Club.",
       tag: 'Zen luxury and privacy',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/PlmvNbFRph?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
-      archetypes: ['Familias', 'Parejas'],
+      archetypes: ['Familias', 'Parejas', 'Bienestar'],
     },
     {
       name: 'Grand Fiesta Americana Coral Beach',

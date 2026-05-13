@@ -119,7 +119,7 @@ export const guide: FlatGuide = {
       description: 'Impeccable service and a world-class couples spa. Their restaurant, La Veladora, is unmissable.',
       tag: 'Wellness and gastronomy',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/s0Fk2Y3dyy?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
-      archetypes: ['Parejas'],
+      archetypes: ['Parejas', 'Bienestar'],
     },
   ],
 

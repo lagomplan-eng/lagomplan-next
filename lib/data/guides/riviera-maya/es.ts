@@ -191,7 +191,7 @@ export const guide: FlatGuide = {
       description: 'Si buscas el "vibe" de Tulum pero con orden. Sus tiendas de campaña de lujo en la zona de la selva ofrecen una desconexión total. Visualmente increíble con un enfoque de bienestar muy auténtico.',
       tag: 'Eco-diseño y sofisticación bohemia',
       affiliateUrl: 'https://expedia.stay22.com/lagomplan/wAI91b98X-?aid=lagomplan&campaign=lagomplan-rivieramayaroadtripdesemanasanta&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Riviera+Maya%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Friviera-maya-roadtrip-de-semana-santa',
-      archetypes: ['Parejas'],
+      archetypes: ['Parejas', 'Aventura', 'Bienestar', 'Eco'],
     },
   ],
 

@@ -131,7 +131,7 @@ export const guide: FlatGuide = {
       description: 'The epitome of historic romance. Once the retreat of Elizabeth Taylor and Richard Burton, it\'s now a boutique gem with marble bridges, open-air bathtubs, and service that transports you to Hollywood\'s golden era.',
       tag: 'Legendary luxury and classic elegance',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/HW6l2Lk3x8?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
-      archetypes: ['Parejas'],
+      archetypes: ['Parejas', 'Bienestar'],
     },
     {
       name: 'Hotel Mousai',

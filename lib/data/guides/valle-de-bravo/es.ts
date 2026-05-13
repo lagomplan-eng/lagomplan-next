@@ -161,7 +161,7 @@ export const guide: FlatGuide = {
       description: 'Lujo rústico-contemporáneo escondido en el bosque. El paraíso para los niños por su tirolesa, tiro con arco y lago propio, permitiendo a los padres relajarse en un spa de primer nivel integrado a la naturaleza.',
       tag: 'Aventura chic y bosque profundo',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/yFZ__sDAyk',
-      archetypes: ['Familias', 'Parejas'],
+      archetypes: ['Familias', 'Parejas', 'Aventura', 'Bienestar'],
     },
     {
       name: 'Hotel Avándaro Golf & Spa',
@@ -170,7 +170,7 @@ export const guide: FlatGuide = {
       description: 'El corazón social de Avándaro. Ofrece una experiencia clásica familiar con alberca climatizada, canchas de tenis y cercanía a la zona comercial, ideal para quienes buscan comodidad y movimiento.',
       tag: 'Confort clásico y atmósfera familiar',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/1NmV5gYKKD?aid=lagomplan&campaign=lagomplan-valledebravoavandaroaventuraenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=51200+Valle+de+Bravo%2C+State+of+Mexico%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fvalle-de-bravo-avandaro-aventura-en-familia',
-      archetypes: ['Familias', 'Parejas'],
+      archetypes: ['Familias', 'Parejas', 'Aventura', 'Bienestar'],
     },
     {
       name: 'Wander Cabins',

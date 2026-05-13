@@ -101,7 +101,7 @@ export const guide: FlatGuide = {
       description: 'El encuentro perfecto entre una villa italiana y el modernismo mexicano. Ubicado en una propiedad histórica con un jardín impecable y una alberca de diseño, es ideal para grupos que aprecian el arte, la exclusividad y un spa de clase mundial.',
       tag: 'Lujo contemporáneo y herencia histórica',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A7eNLw3xb2?aid=lagomplan&campaign=lagomplan-cuernavacarefugiodeprimaveraestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Cuernavaca%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcuernavaca-refugio-de-primavera-estilo',
-      archetypes: ['Familias', 'Parejas'],
+      archetypes: ['Familias', 'Parejas', 'Bienestar'],
     },
     {
       name: 'Hacienda de Cortés',
