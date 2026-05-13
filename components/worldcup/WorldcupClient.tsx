@@ -123,12 +123,12 @@ const ROSTER = [
     short:'CDX', country:{ es:'México',  en:'Mexico'  }, flag:'🇲🇽', region:'mx',
     accent:'#1A6B5A', persona:'roberto' as PersonaKey, stadium:'Estadio Banorte', ready:true,
     tagline:{
-      es:'El Azteca no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.',
-      en:'The Azteca needs no introduction. What it does need, badly, is a transport strategy.',
+      es:'El Azteca, ahora Estadio Banorte, no necesita presentación. Lo que sí necesita, y mucho, es una estrategia de transporte.',
+      en:'The Azteca, now Estadio Banorte, needs no introduction. What it does need, badly, is a transport strategy.',
     },
     intro:{
-      es:'El Azteca fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
-      en:"The Azteca was yours before you were born — and now it's going to be yours again, in the most important World Cup since '86.",
+      es:'El Azteca, ahora Estadio Banorte, fue tuyo antes de que nacieras — y ahora va a ser tuyo de nuevo, en el Mundial más importante desde el 86.',
+      en:"The Azteca, now Estadio Banorte, was yours before you were born — and now it's going to be yours again, in the most important World Cup since '86.",
     },
     matches:[
       {date:'Jue 11 Jun', teamA:'México',        flagA:'🇲🇽', teamB:'Sudáfrica',    flagB:'🇿🇦'},
