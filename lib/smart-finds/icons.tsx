@@ -25,6 +25,10 @@ export type IconKey =
   | 'crackers'     | 'bottle'       | 'wipes'        | 'neckpillow'
   | 'toy'          | 'blanket'      | 'tent'         | 'sunscreen'
   | 'float'        | 'mat'          | 'diaper'
+  // Parejas + Fan kits
+  | 'speaker'      | 'powerbank'    | 'wallet'       | 'poncho'
+  | 'scale'        | 'adapter'      | 'esim'         | 'crossbody'
+  | 'insurance'
 
 export const ICONS: Record<IconKey, (color: string) => JSX.Element> = {
   doona: (c) => (
@@ -268,6 +272,87 @@ export const ICONS: Record<IconKey, (color: string) => JSX.Element> = {
       <path d="M22 16 L18 10 Q18 8 22 8 L42 8 Q46 8 46 10 L42 16" stroke={c} strokeWidth="2" />
       <circle cx="16" cy="38" r="3" stroke={c} strokeWidth="2" />
       <circle cx="48" cy="38" r="3" stroke={c} strokeWidth="2" />
+    </svg>
+  ),
+  speaker: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <circle cx="32" cy="32" r="18" stroke={c} strokeWidth="2.5" />
+      <circle cx="32" cy="32" r="7" stroke={c} strokeWidth="2.5" />
+      <circle cx="32" cy="32" r="2.5" fill={c} />
+      <path d="M12 22 Q6 32 12 42" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".4" />
+      <path d="M52 22 Q58 32 52 42" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".4" />
+    </svg>
+  ),
+  powerbank: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <rect x="10" y="22" width="44" height="22" rx="4" stroke={c} strokeWidth="2.5" />
+      <rect x="54" y="28" width="4" height="10" rx="2" fill={c} opacity=".4" />
+      <rect x="16" y="28" width="10" height="10" rx="2" stroke={c} strokeWidth="2" />
+      <line x1="30" y1="33" x2="48" y2="33" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".4" />
+      <line x1="26" y1="14" x2="26" y2="22" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="38" y1="14" x2="38" y2="22" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="20" y1="14" x2="44" y2="14" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  ),
+  wallet: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <rect x="10" y="18" width="44" height="30" rx="3" stroke={c} strokeWidth="2.5" />
+      <line x1="32" y1="18" x2="32" y2="48" stroke={c} strokeWidth="2" />
+      <rect x="14" y="24" width="14" height="18" rx="2" stroke={c} strokeWidth="2" opacity=".5" />
+      <line x1="36" y1="26" x2="50" y2="26" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".5" />
+      <line x1="36" y1="32" x2="50" y2="32" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".5" />
+      <line x1="36" y1="38" x2="44" y2="38" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".5" />
+    </svg>
+  ),
+  poncho: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <path d="M32 10 L10 24 L16 24 L16 52 L48 52 L48 24 L54 24 Z" stroke={c} strokeWidth="2.5" fill="none" />
+      <path d="M24 10 Q32 6 40 10" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M20 30 Q18 38 16 44" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".4" strokeDasharray="3 3" />
+      <path d="M44 30 Q46 38 48 44" stroke={c} strokeWidth="1.5" strokeLinecap="round" opacity=".4" strokeDasharray="3 3" />
+    </svg>
+  ),
+  scale: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <path d="M24 8 Q24 4 32 4 Q40 4 40 8 L40 16 L24 16 Z" stroke={c} strokeWidth="2.5" fill="none" />
+      <rect x="10" y="16" width="44" height="32" rx="4" stroke={c} strokeWidth="2.5" />
+      <rect x="16" y="22" width="32" height="16" rx="2" stroke={c} strokeWidth="2" fill={`${c}10`} />
+      <line x1="20" y1="30" x2="28" y2="30" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <line x1="32" y1="30" x2="44" y2="30" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+    </svg>
+  ),
+  adapter: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <rect x="14" y="14" width="36" height="36" rx="5" stroke={c} strokeWidth="2.5" />
+      <line x1="23" y1="14" x2="23" y2="8" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <line x1="41" y1="14" x2="41" y2="8" stroke={c} strokeWidth="3" strokeLinecap="round" />
+      <circle cx="32" cy="32" r="7" stroke={c} strokeWidth="2" />
+      <line x1="32" y1="25" x2="32" y2="39" stroke={c} strokeWidth="2" opacity=".4" />
+      <line x1="25" y1="32" x2="39" y2="32" stroke={c} strokeWidth="2" opacity=".4" />
+    </svg>
+  ),
+  esim: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <rect x="18" y="10" width="28" height="44" rx="4" stroke={c} strokeWidth="2.5" />
+      <rect x="22" y="14" width="20" height="14" rx="2" stroke={c} strokeWidth="2" fill={`${c}10`} />
+      <path d="M24 38 Q32 32 40 38" stroke={c} strokeWidth="2.5" strokeLinecap="round" />
+      <path d="M20 44 Q32 36 44 44" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".5" />
+      <circle cx="32" cy="50" r="2.5" fill={c} />
+    </svg>
+  ),
+  crossbody: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <rect x="14" y="22" width="36" height="30" rx="4" stroke={c} strokeWidth="2.5" />
+      <path d="M22 22 Q22 14 32 12 Q42 14 42 22" stroke={c} strokeWidth="2.5" fill="none" />
+      <line x1="14" y1="36" x2="50" y2="36" stroke={c} strokeWidth="1.5" opacity=".4" />
+      <rect x="26" y="40" width="12" height="8" rx="2" stroke={c} strokeWidth="2" opacity=".5" />
+      <path d="M50 26 Q56 20 52 14" stroke={c} strokeWidth="2" strokeLinecap="round" opacity=".5" />
+    </svg>
+  ),
+  insurance: (c) => (
+    <svg viewBox="0 0 64 64" fill="none" width={44} height={44}>
+      <path d="M32 8 L52 16 L52 36 Q52 50 32 58 Q12 50 12 36 L12 16 Z" stroke={c} strokeWidth="2.5" fill="none" />
+      <path d="M22 32 L28 38 L42 26" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   ),
 }

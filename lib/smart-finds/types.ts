@@ -93,16 +93,30 @@ export type KitContent =
 // product references; resolution to actual Product records happens at the
 // render boundary via resolveKitProducts(kit, PRODUCTS).
 
+/**
+ * Audience persona. Drives the persona-coloured badge on each kit
+ * section header and the FilterBar filtering behaviour.
+ */
+export type Persona = 'familias' | 'parejas' | 'fan'
+
 export interface Kit {
   id:         string
   num:        string
   title:      string
   subtitle:   string
-  /** Pain quote shown in the masthead PainStrip and as the section opener. */
+  /** Pain quote shown as the section opener. */
   painMoment: string
   /** Two-sentence editorial scene-setter shown under the H2. */
   scene:      string
   /** Optional "POR QUÉ NO INCLUIMOS" callout (currently only on La mochila). */
   omit?:      string
+  /** Audience this kit serves — drives badge color and filter membership. */
+  persona:    Persona
+  /**
+   * Free-form situation tags reserved for future filtering (e.g. 'vuelo',
+   * 'traslado'). Empty array on launch; populated once the editorial team
+   * sets canonical situation taxonomy.
+   */
+  situations: string[]
   content:    KitContent
 }

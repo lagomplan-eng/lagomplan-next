@@ -15,6 +15,7 @@
 import type { Kit } from '../../lib/smart-finds'
 import FlatKit from './FlatKit'
 import MochilaKit from './MochilaKit'
+import PersonaBadge from './PersonaBadge'
 import { PINE, SAGE, SAND, MUTED } from './tokens'
 
 interface Props {
@@ -31,14 +32,20 @@ export default function KitSection({ kit, isLast }: Props) {
         scrollMarginTop: 80,
       }}
     >
-      {/* Header — line-free. The faded big numeral on its own carries
-          enough visual weight; the old horizontal divider + "KIT 02"
-          marker felt brutalist next to the rest of the site. */}
+      {/* Header — KIT eyebrow + persona pill in a single row, then the
+          large kit title underneath. The persona pill colour signals
+          the audience at scroll-glance. */}
       <div style={{ marginBottom: 32 }}>
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
-          letterSpacing: '.18em', color: SAGE, marginBottom: 4,
-        }}>KIT {kit.num}</div>
+          display: 'flex', alignItems: 'center', gap: 12,
+          marginBottom: 10,
+        }}>
+          <span style={{
+            fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+            letterSpacing: '.18em', color: SAGE,
+          }}>KIT {kit.num}</span>
+          <PersonaBadge persona={kit.persona} />
+        </div>
 
         <h2 style={{
           fontFamily: "'Fraunces',serif",

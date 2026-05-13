@@ -471,6 +471,246 @@ export const PRODUCTS: Record<string, Product> = {
     category: 'familia',
     surfaces: ['hotels-strip'],
   },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // PAREJAS KIT 04 — Nunca más en el carrusel
+  // ────────────────────────────────────────────────────────────────────────
+
+  'calpak-carry-on-expandable': {
+    id: 'calpak-carry-on-expandable', icon: 'suitcase',
+    brand: 'CALPAK', name: 'Carry-on expandible',
+    tag: 'LA QUE NO DOCUMENTAS',
+    opinion: 'El balance correcto entre tamaño y estilo. Expandible cuando necesitas el espacio extra, cabe en cabina cuando no.',
+    price: '$3,500–5,000 MXN', where: 'Amazon MX', link: '#',
+  },
+  'eagle-creek-pack-it-cubes': {
+    id: 'eagle-creek-pack-it-cubes', icon: 'pouches',
+    brand: 'EAGLE CREEK', name: 'Pack-It Cubes — set 3',
+    tag: 'EL SISTEMA, NO EL PRODUCTO',
+    opinion: 'Un cubo por categoría. Tres cubos y sabes exactamente qué va dónde. El carry-on only no existe sin esto.',
+    price: '$700–1,200 MXN', where: 'Amazon MX', link: '#',
+  },
+  'matador-flatpak-toiletry': {
+    id: 'matador-flatpak-toiletry', icon: 'wipes',
+    brand: 'MATADOR', name: 'FlatPak toiletry bag',
+    tag: 'FLAT. TSA. LISTO.',
+    opinion: 'La bolsa de toiletries que no ocupa el espacio que no tiene. Flat, TSA-ready.',
+    price: '$500–900 MXN', where: 'Amazon MX', link: '#',
+  },
+  'etekcity-luggage-scale': {
+    id: 'etekcity-luggage-scale', icon: 'scale',
+    brand: 'ETEKCITY', name: 'Báscula de equipaje digital',
+    tag: 'PÉSALA ANTES DE SALIR',
+    opinion: 'Pésala antes de salir. El aeropuerto no tiene compasión con los kilos de más.',
+    price: '$200–350 MXN', where: 'Amazon MX', link: '#',
+  },
+  'bellroy-tech-kit': {
+    id: 'bellroy-tech-kit', icon: 'pouches',
+    brand: 'BELLROY', name: 'Tech Kit — cable organizer',
+    tag: 'EL CAOS DE CABLES, RESUELTO',
+    opinion: 'Todo tu cable chaos en un flat pouch. Sin revolver el bolso cada vez que necesitas algo.',
+    price: '$900–1,400 MXN', where: 'Amazon MX', link: '#',
+  },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // PAREJAS KIT 05 — Para que el lunes no duela tanto
+  // ────────────────────────────────────────────────────────────────────────
+
+  'jbl-clip-5': {
+    id: 'jbl-clip-5', icon: 'speaker',
+    brand: 'JBL', name: 'Clip 5 — bocina portátil',
+    tag: 'EL VIAJE SUENA MEJOR',
+    opinion: 'La bocina que no pesa y cabe en cualquier bolso. Del balcón del hotel a la vista al mar, al restaurante de noche.',
+    price: '$900–1,400 MXN', where: 'Amazon MX', link: '#',
+  },
+  'beis-the-weekender': {
+    id: 'beis-the-weekender', icon: 'backpack',
+    brand: 'BÉIS', name: 'The Weekender bag',
+    tag: 'EL BAG DEL PUENTE',
+    opinion: 'Para 72 horas, ni la maleta grande ni solo el backpack. Cabe en cabina, se lleva al restaurante sin pena.',
+    price: '$2,500–3,500 MXN', where: 'BÉIS online', link: '#',
+  },
+  'slip-silk-eye-mask': {
+    id: 'slip-silk-eye-mask', icon: 'neckpillow',
+    brand: 'SLIP', name: 'Silk eye mask — 2-pack',
+    tag: 'DORMIRSE DE VERDAD',
+    opinion: 'Para la pareja que viaja para descansar de verdad. El cuarto del hotel nunca está completamente oscuro.',
+    price: '$350–600 MXN', where: 'Amazon MX', link: '#',
+  },
+  'wacaco-nanopresso': {
+    id: 'wacaco-nanopresso', icon: 'bottle',
+    brand: 'WACACO', name: 'Nanopresso — espresso portátil',
+    tag: 'PORQUE EL CAFÉ DEL HOTEL NO',
+    opinion: 'El café del hotel es un insulto. Este cabe en el bolsillo, hace un espresso real, y pesa 336 gramos.',
+    price: '$1,200–1,800 MXN', where: 'Amazon MX', link: '#',
+  },
+  'hydroflask-32oz': {
+    id: 'hydroflask-32oz', icon: 'bottle',
+    brand: 'HYDROFLASK', name: '32oz — termo de viaje',
+    tag: 'SIN COMPRAR AGUA TODO EL DÍA',
+    opinion: 'Para el par que siempre está buscando agua en el resort. Llena el tuyo al salir del cuarto.',
+    price: '$700–1,200 MXN', where: 'Amazon MX', link: '#',
+  },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // PAREJAS KIT 06 — Sin cargador prestado
+  // ────────────────────────────────────────────────────────────────────────
+
+  'anker-733-power-bank-65w': {
+    id: 'anker-733-power-bank-65w', icon: 'powerbank',
+    brand: 'ANKER', name: '733 Power Bank GaNPrime 65W',
+    tag: 'UN CABLE PARA TODO',
+    opinion: 'Carga el laptop, el teléfono, y la tablet al mismo tiempo. Desde un solo cuerpo. El único hub de viaje que realmente funciona.',
+    price: '$1,500–2,200 MXN', where: 'Amazon MX', link: '#',
+  },
+  'anker-727-gan-charger': {
+    id: 'anker-727-gan-charger', icon: 'adapter',
+    brand: 'ANKER', name: '727 GaN charger — 4 puertos',
+    tag: 'EL BLOCK QUE REEMPLAZA A TODOS',
+    opinion: 'El block de corriente que reemplaza a todos tus blocks. 4 puertos, 100W total, del tamaño de un borrador.',
+    price: '$800–1,300 MXN', where: 'Amazon MX', link: '#',
+  },
+  'epicka-travel-adapter': {
+    id: 'epicka-travel-adapter', icon: 'adapter',
+    brand: 'EPICKA', name: 'Universal travel adapter',
+    tag: '150 DESTINOS, UN ADAPTADOR',
+    opinion: 'Para el viajero que va a más de un país. Compatible con más de 150 destinos, USB-C incluido.',
+    price: '$350–600 MXN', where: 'Amazon MX', link: '#',
+  },
+  'airalo-esim-no-roaming': {
+    id: 'airalo-esim-no-roaming', icon: 'esim',
+    brand: 'AIRALO', name: 'eSIM — sin roaming',
+    tag: 'SIN SORPRESAS EN LA FACTURA',
+    opinion: 'Sin SIM física. Sin roaming. Compras el plan antes de subir al avión y llegas con señal.',
+    price: 'desde $150 MXN', where: 'airalo.com', link: '#',
+  },
+  'nomad-cable-organizer': {
+    id: 'nomad-cable-organizer', icon: 'pouches',
+    brand: 'NOMAD', name: 'Cable organizer pouch',
+    tag: 'SIN REVOLVER EL BOLSO',
+    opinion: 'Un pouch flat con separadores. Nada se enreda, todo se encuentra.',
+    price: '$600–900 MXN', where: 'Amazon MX', link: '#',
+  },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // FAN KIT 07 — En las gradas
+  // ────────────────────────────────────────────────────────────────────────
+
+  'patagonia-black-hole-crossbody': {
+    id: 'patagonia-black-hole-crossbody', icon: 'crossbody',
+    brand: 'PATAGONIA', name: 'Black Hole Crossbody 5L',
+    tag: 'EL QUE ENTRA AL ESTADIO',
+    opinion: 'La mayoría de los estadios FIFA tienen restricciones de bolso. Este entra. Cabe el teléfono, la billetera, los documentos, y la cámara.',
+    price: '$1,200–1,800 MXN', where: 'Amazon MX · patagonia.com', link: '#',
+  },
+  'anker-powercore-10000-slim': {
+    id: 'anker-powercore-10000-slim', icon: 'powerbank',
+    brand: 'ANKER', name: 'PowerCore 10000 slim',
+    tag: 'PARA LAS 6 HORAS DE PARTIDO',
+    opinion: 'Día de partido = 6-8 horas fuera de casa. Videos, fotos, stories, GPS, Uber. El teléfono no llega. Este sí.',
+    price: '$550–800 MXN', where: 'Amazon MX', link: '#',
+  },
+  'loop-experience-earplugs': {
+    id: 'loop-experience-earplugs', icon: 'headphones',
+    brand: 'LOOP', name: 'Experience earplugs',
+    tag: 'EL AMBIENTE, SIN EL DAÑO',
+    opinion: 'Un estadio lleno puede llegar a 110dB. Estos filtran el ruido dañino sin quitar la emoción.',
+    price: '$800–1,200 MXN', where: 'Amazon MX', link: '#',
+  },
+  'sol-rain-poncho': {
+    id: 'sol-rain-poncho', icon: 'poncho',
+    brand: 'SOL', name: 'Emergency rain poncho compacto',
+    tag: 'PARA LA LLUVIA QUE NO VES VENIR',
+    opinion: 'En el estadio no puedes salir cuando llueve. Este pesa 60 gramos y cabe en el bolsillo.',
+    price: '$150–300 MXN', where: 'Amazon MX', link: '#',
+  },
+  'bellroy-travel-wallet': {
+    id: 'bellroy-travel-wallet', icon: 'wallet',
+    brand: 'BELLROY', name: 'Travel Wallet — slim',
+    tag: 'TODO EN UN SOLO LUGAR',
+    opinion: 'La entrada, el pasaporte, el efectivo, la tarjeta — en uno. Para entrar al estadio con todo en orden.',
+    price: '$900–1,400 MXN', where: 'Amazon MX', link: '#',
+  },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // FAN KIT 08 — De estadio en estadio
+  // ────────────────────────────────────────────────────────────────────────
+
+  'osprey-farpoint-40': {
+    id: 'osprey-farpoint-40', icon: 'backpack',
+    brand: 'OSPREY', name: 'Farpoint 40 — travel backpack',
+    tag: 'CERO MALETAS DOCUMENTADAS',
+    opinion: '40 litros. Cabe en cabina. El backpack que cambia la manera de viajar multi-ciudad.',
+    price: '$3,500–5,500 MXN', where: 'Amazon MX · decathlon.mx', link: '#',
+  },
+  'sea-to-summit-scrubba': {
+    id: 'sea-to-summit-scrubba', icon: 'pouches',
+    brand: 'SEA TO SUMMIT', name: 'Scrubba Wash Bag',
+    tag: 'PARA LLEVAR MENOS Y LAVAR MÁS',
+    opinion: 'Un bolso que es también una lavadora manual. Lavas un jersey en 3 minutos en cualquier lavabo.',
+    price: '$700–1,000 MXN', where: 'Amazon MX', link: '#',
+  },
+  'eagle-creek-compression-cubes': {
+    id: 'eagle-creek-compression-cubes', icon: 'pouches',
+    brand: 'EAGLE CREEK', name: 'Compression packing cubes',
+    tag: 'EL TRUCO DEL ESPACIO',
+    opinion: 'Para comprimir los jerseys y la ropa de partido. Lo que normalmente llenaría dos bolsos cabe en uno.',
+    price: '$600–1,000 MXN', where: 'Amazon MX', link: '#',
+  },
+  'etekcity-luggage-scale-fan': {
+    id: 'etekcity-luggage-scale-fan', icon: 'scale',
+    brand: 'ETEKCITY', name: 'Báscula de equipaje digital',
+    tag: 'PÉSALA EN CADA CIUDAD',
+    opinion: 'Las aerolíneas en Estados Unidos cobran $35 USD por maleta de más. Sin sorpresas.',
+    price: '$200–350 MXN', where: 'Amazon MX', link: '#',
+  },
+  'lagomplan-planner-wc': {
+    id: 'lagomplan-planner-wc', icon: 'journal',
+    brand: 'LAGOMPLAN', name: 'Planificador IA — ruta WC',
+    tag: 'PLANIFICA LA RUTA PRIMERO',
+    opinion: 'Antes de reservar vuelos entre ciudades, planifica la ruta completa con el planificador.',
+    price: 'Gratis', where: 'lagomplan.com', link: '/planificador',
+  },
+
+  // ────────────────────────────────────────────────────────────────────────
+  // FAN KIT 09 — El viaje grande
+  // ────────────────────────────────────────────────────────────────────────
+
+  'bellroy-passport-sleeve': {
+    id: 'bellroy-passport-sleeve', icon: 'wallet',
+    brand: 'BELLROY', name: 'Passport Sleeve — document wallet',
+    tag: 'TODO EN ORDEN, DESDE EL INICIO',
+    opinion: 'El pasaporte, la visa, el seguro impreso, los confirmations del hotel. Todo en una cosa.',
+    price: '$700–1,000 MXN', where: 'Amazon MX', link: '#',
+  },
+  'world-nomads-insurance': {
+    id: 'world-nomads-insurance', icon: 'insurance',
+    brand: 'WORLD NOMADS', name: 'Travel insurance',
+    tag: 'EL QUE NADIE CONTRATA (Y TODOS NECESITAN)',
+    opinion: 'El que más se arrepiente de no haberlo contratado es el que tuvo un problema. Para el viaje grande, no es opcional.',
+    price: 'desde $500 MXN', where: 'worldnomads.com', link: '#',
+  },
+  'airalo-esim-usa-canada': {
+    id: 'airalo-esim-usa-canada', icon: 'esim',
+    brand: 'AIRALO', name: 'eSIM USA + Canadá',
+    tag: 'SEÑAL DESDE QUE ATERRIZAS',
+    opinion: 'Sin SIM física, sin ir a la tienda de AT&T en el aeropuerto, sin depender del WiFi del hotel.',
+    price: 'desde $200 MXN', where: 'airalo.com', link: '#',
+  },
+  'wise-card': {
+    id: 'wise-card', icon: 'cards',
+    brand: 'WISE', name: 'Wise card — tipo de cambio real',
+    tag: 'EL TIPO DE CAMBIO REAL',
+    opinion: 'La tarjeta que convierte pesos a dólares al tipo de cambio real, sin comisiones absurdas.',
+    price: 'Gratis (app)', where: 'wise.com', link: '#',
+  },
+  'pacsafe-coversafe-belt': {
+    id: 'pacsafe-coversafe-belt', icon: 'suitcase',
+    brand: 'PACSAFE', name: 'Coversafe anti-theft belt',
+    tag: 'LO QUE NADIE VE QUE LLEVAS',
+    opinion: 'Para el primer viaje a una ciudad que no conoces. El efectivo y los documentos extra van en el cinturón.',
+    price: '$500–800 MXN', where: 'Amazon MX', link: '#',
+  },
 }
 
 // ── Lookup helpers ───────────────────────────────────────────────────────────

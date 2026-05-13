@@ -15,13 +15,14 @@ export type {
   SubSection,
   SurfaceTag,
   SmartFindCategory,
+  Persona,
 } from './types'
 
 export type { IconKey } from './icons'
 export { ICONS } from './icons'
 
 export { PRODUCTS, getProduct, getProductsBySurface } from './products'
-export { KITS, getKit } from './kits'
+export { KITS, getKit, getKitsByPersona } from './kits'
 
 import type { Product, Kit, KitProductRef } from './types'
 import { getProduct } from './products'

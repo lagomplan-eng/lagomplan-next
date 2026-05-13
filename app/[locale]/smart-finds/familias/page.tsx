@@ -14,8 +14,8 @@
 import type { Metadata } from 'next'
 import type { Locale }   from '../../../../i18n'
 import { KITS }          from '../../../../lib/smart-finds'
-import KitSection        from '../../../../components/smart-finds/KitSection'
-import PainStrip         from '../../../../components/smart-finds/PainStrip'
+import FilterableKits    from '../../../../components/smart-finds/FilterableKits'
+import PainStrip, { type PainStripItem } from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
 import {
   PINE, SAGE, SAND, CREAM, MUTED, CARD_RADIUS,
@@ -28,13 +28,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const isES = locale === 'es'
   return {
     title: isES
-      ? 'Smart Finds: Kits Curados para Viajar con Niños | Lagomplan'
-      : 'Smart Finds: Curated Kits for Traveling With Kids | Lagomplan',
+      ? 'Smart Finds: Kits Curados para Viajar Bien | Lagomplan'
+      : 'Smart Finds: Curated Travel Kits | Lagomplan',
     description: isES
-      ? 'Tres kits curados para viajar con niños pequeños. Lo que sí llevar, por qué, y dónde conseguirlo — desde la perspectiva de alguien que viaja con bebés.'
-      : 'Three curated kits for traveling with young kids. What to actually pack, why, and where to find it — from someone who travels with babies.',
+      ? 'Nueve kits curados para viajar bien. Lo que sí llevar, por qué, y dónde conseguirlo — para familias, parejas y fans del fútbol.'
+      : 'Nine curated kits for traveling well. What to actually pack, why, and where to find it — for families, couples, and football fans.',
   }
 }
+
+// Pain-strip trio — one quote per persona, fixed regardless of filter
+// selection. Surfaces the audience mapping at the top of the page.
+const PAIN_TRIO: PainStripItem[] = [
+  { kitId: 'sin-perder-a-nadie', quote: 'El taxi no acepta la carriola'         },
+  { kitId: 'en-las-gradas',      quote: 'La entrada costó lo que costó'         },
+  { kitId: 'el-viaje-grande',    quote: 'Primera vez cruzando para ver un partido' },
+]
 
 export default async function Page({ params }: Props) {
   const { locale } = await params
@@ -90,8 +98,8 @@ export default async function Page({ params }: Props) {
                 color: '#7A7773', lineHeight: 1.65, maxWidth: 420,
               }}>
                 {isES
-                  ? 'Tres kits curados para viajar con niños pequeños. Lo que sí llevar, por qué, y dónde conseguirlo.'
-                  : 'Three curated kits for traveling with young kids. What to actually pack, why, and where to find it.'}
+                  ? 'Nueve kits curados para viajar bien. Lo que sí llevar, por qué, y dónde conseguirlo.'
+                  : 'Nine curated kits for traveling well. What to actually pack, why, and where to find it.'}
               </p>
             </div>
 
@@ -125,7 +133,7 @@ export default async function Page({ params }: Props) {
             paddingBottom: 32,
           }}>
             {([
-              ['03', isES ? 'kits curados'          : 'curated kits'],
+              ['09', isES ? 'kits curados'          : 'curated kits'],
               ['0',  isES ? 'patrocinios pagados'   : 'paid sponsorships'],
             ] as const).map(([n, l]) => (
               <div key={l}>
@@ -145,24 +153,16 @@ export default async function Page({ params }: Props) {
 
       {/* ── KITS ──────────────────────────────────────────────────────── */}
       <div className="page-inner" style={{ padding: '40px 24px 100px' }}>
-        {/* Pain strip — contained block, not full-bleed. Sits at the top of
-            the kits container so the pain → kit flow reads as one unit. */}
+        {/* Pain strip — 3 curated quotes, one per persona. Stays fixed
+            regardless of the FilterBar selection so the pain → audience
+            mapping reads at the top of the page. */}
         <div style={{ marginBottom: 64 }}>
-          <PainStrip kits={KITS} />
+          <PainStrip items={PAIN_TRIO} kits={KITS} />
         </div>
 
-        {KITS.map((kit, i) => (
-          <div key={kit.id}>
-            <KitSection kit={kit} isLast={i === KITS.length - 1} />
-            {i < KITS.length - 1 && (
-              <div style={{
-                display: 'flex', justifyContent: 'center',
-                margin: '80px 0',
-                fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED,
-              }}>✦</div>
-            )}
-          </div>
-        ))}
+        {/* Filterable kit list — client island for the persona filter
+            state. The masthead + planner CTA + newsletter stay server. */}
+        <FilterableKits kits={KITS} />
 
         {/* PLANNER CTA — same Pine block treatment as Hotels' PlannerBridgeCTA,
             with the site-wide 14-px radius so the corner softness reads
