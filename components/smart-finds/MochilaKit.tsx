@@ -19,6 +19,7 @@ import { resolveProductRefs } from '../../lib/smart-finds'
 import ProductCard from './ProductCard'
 import HeroCard from './HeroCard'
 import { PINE, MUTED, BORDER } from './tokens'
+import type { Product } from '../../lib/smart-finds'
 
 interface Props {
   kit: Kit
@@ -118,7 +119,7 @@ function SystemContent({ system }: { system: System }) {
 // Picks the hero (if any) and renders it as HeroCard above, with the
 // remaining products in a 1/2/3-column grid that collapses on mobile.
 
-function ProductRow({ products }: { products: { product: import('../../lib/smart-finds').Product; hero?: boolean }[] }) {
+function ProductRow({ products }: { products: { product: Product; hero?: boolean }[] }) {
   const heroIx = products.findIndex(p => p.hero)
   const hero   = heroIx >= 0 ? products[heroIx] : null
   const rest   = heroIx >= 0
@@ -128,7 +129,6 @@ function ProductRow({ products }: { products: { product: import('../../lib/smart
   // Cap at 3 columns to match the prototype; 1 column when there's
   // only one product (avoids a left-aligned narrow card on a wide grid).
   const cols = Math.min(rest.length || 1, 3)
-  // Tailwind utility class chosen by column count + collapses below 720px.
   const colClass =
     cols === 3 ? 'grid grid-cols-3 max-[900px]:grid-cols-2 max-[640px]:grid-cols-1' :
     cols === 2 ? 'grid grid-cols-2 max-[640px]:grid-cols-1' :
@@ -142,7 +142,7 @@ function ProductRow({ products }: { products: { product: import('../../lib/smart
         </div>
       )}
       {rest.length > 0 && (
-        <div className={colClass} style={{ gap: 1, background: BORDER }}>
+        <div className={colClass} style={{ gap: 16 }}>
           {rest.map(p => <ProductCard key={p.product.id} product={p.product} />)}
         </div>
       )}

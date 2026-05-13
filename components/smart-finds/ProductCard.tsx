@@ -15,7 +15,7 @@
 import { useState } from 'react'
 import type { Product } from '../../lib/smart-finds'
 import IconZone from './IconZone'
-import { PINE, SAGE, SAND, OW, MUTED, BORDER } from './tokens'
+import { PINE, SAGE, SAND, SURFACE, MUTED, BORDER, CARD_RADIUS } from './tokens'
 
 interface Props {
   product: Product
@@ -29,11 +29,13 @@ export default function ProductCard({ product }: Props) {
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: OW,
-        border: `1px solid ${hov ? PINE : BORDER}`,
+        background: SURFACE,
+        border: `1.5px solid ${hov ? PINE : BORDER}`,
+        borderRadius: CARD_RADIUS,
         display: 'flex', flexDirection: 'column',
         transition: 'border-color .15s',
         position: 'relative',
+        overflow: 'hidden',  // clips the IconZone's square corners to the rounded card
       }}
     >
       <IconZone product={product} height={72} idPrefix="d" />

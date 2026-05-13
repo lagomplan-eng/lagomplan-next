@@ -22,8 +22,7 @@ export default function PainStrip({ kits }: Props) {
   return (
     <div style={{ background: PINE }}>
       <div
-        className="grid grid-cols-3 max-[720px]:grid-cols-1"
-        style={{ maxWidth: 1140, margin: '0 auto', padding: '0 40px' }}
+        className="page-inner grid grid-cols-3 max-[720px]:grid-cols-1"
       >
         {kits.map((kit, i) => (
           <a

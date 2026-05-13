@@ -13,7 +13,6 @@ import type { Kit } from '../../lib/smart-finds'
 import { resolveFlatKit } from '../../lib/smart-finds'
 import HeroCard from './HeroCard'
 import ProductCard from './ProductCard'
-import { BORDER } from './tokens'
 
 interface Props {
   kit: Kit
@@ -26,12 +25,14 @@ export default function FlatKit({ kit }: Props) {
   return (
     <div>
       <HeroCard product={hero} />
-      {/* 2-col grid on desktop; 1-col below 720px via inline media query
-          isn't possible with React style — rely on `grid-template-columns`
-          set wide and the column-collapse via Tailwind utility class. */}
+      {/* 2-col grid on desktop, 1-col below 720px. Real gap (16px) +
+          transparent background because the card chrome is now rounded
+          — the old gap:1 + BORDER bg trick read as a hairline divider
+          between square-cornered tiles, which clashes with the rounded
+          radius. */}
       <div
         className="grid grid-cols-2 max-[720px]:grid-cols-1"
-        style={{ gap: 1, background: BORDER }}
+        style={{ gap: 16 }}
       >
         {rest.map(p => <ProductCard key={p.id} product={p} />)}
       </div>

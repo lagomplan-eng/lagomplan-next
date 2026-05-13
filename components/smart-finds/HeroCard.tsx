@@ -16,7 +16,7 @@
 import { useState } from 'react'
 import type { Product } from '../../lib/smart-finds'
 import IconZone from './IconZone'
-import { PINE, SAGE, SAND, OW, MUTED } from './tokens'
+import { PINE, SAGE, SAND, SURFACE, MUTED, BORDER, CARD_RADIUS } from './tokens'
 
 interface Props {
   product: Product
@@ -32,10 +32,12 @@ export default function HeroCard({ product }: Props) {
       style={{
         display: 'flex',
         flexWrap: 'wrap',
-        border: `1px solid ${PINE}`,
-        background: OW,
-        marginBottom: 1,
+        border: `1.5px solid ${hov ? PINE : BORDER}`,
+        borderRadius: CARD_RADIUS,
+        background: SURFACE,
+        marginBottom: 16,                // separates hero from the grid below
         transition: 'border-color .15s',
+        overflow: 'hidden',              // clips IconZone corners to the rounded card
       }}
     >
       {/* Icon zone — left column, fixed 200px on desktop. On mobile the

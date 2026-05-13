@@ -17,7 +17,9 @@ import { KITS }          from '../../../../lib/smart-finds'
 import KitSection        from '../../../../components/smart-finds/KitSection'
 import PainStrip         from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
-import { PINE, SAGE, SAND, OW, MUTED, BORDER } from '../../../../components/smart-finds/tokens'
+import {
+  PINE, SAGE, SAND, CREAM, MUTED, BORDER, CARD_RADIUS,
+} from '../../../../components/smart-finds/tokens'
 
 type Props = { params: Promise<{ locale: Locale }> }
 
@@ -39,13 +41,13 @@ export default async function Page({ params }: Props) {
   const isES = locale === 'es'
 
   return (
-    <main style={{
-      background: OW, minHeight: '100vh', color: PINE,
-      paddingTop: 100, // clearance for the sticky site Nav
-    }}>
+    <main
+      className="pt-[100px] min-h-screen"
+      style={{ background: CREAM, color: PINE }}
+    >
       {/* ── MASTHEAD ─────────────────────────────────────────────────── */}
       <header style={{ borderBottom: `1px solid ${BORDER}` }}>
-        <div style={{ maxWidth: 1140, margin: '0 auto', padding: '0 40px' }}>
+        <div className="page-inner">
 
           {/* Section-label row */}
           <div style={{
@@ -146,7 +148,7 @@ export default async function Page({ params }: Props) {
       <PainStrip kits={KITS} />
 
       {/* ── KITS ──────────────────────────────────────────────────────── */}
-      <div style={{ maxWidth: 1140, margin: '0 auto', padding: '72px 40px 100px' }}>
+      <div className="page-inner" style={{ padding: '72px 24px 100px' }}>
         {KITS.map((kit, i) => (
           <div key={kit.id}>
             <KitSection kit={kit} isLast={i === KITS.length - 1} />
@@ -165,12 +167,15 @@ export default async function Page({ params }: Props) {
           </div>
         ))}
 
-        {/* PLANNER CTA */}
+        {/* PLANNER CTA — same Pine block treatment as Hotels' PlannerBridgeCTA,
+            with the site-wide 14-px radius so the corner softness reads
+            consistently across surfaces. */}
         <div
           className="grid grid-cols-[1fr_auto] max-[640px]:grid-cols-1"
           style={{
             background: PINE, padding: '48px 52px', marginTop: 96,
             gap: 48, alignItems: 'center',
+            borderRadius: CARD_RADIUS,
           }}
         >
           <div>
