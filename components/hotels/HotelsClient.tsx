@@ -179,31 +179,40 @@ export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
           background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
           padding: '16px 20px', position: 'relative',
         }}>
-          {/* Search */}
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            background: SAND, borderRadius: 10, padding: '12px 18px',
-            marginBottom: 14, border: `1.5px solid ${BD}`,
+          {/* Search — visual parity with the /guias search bar:
+              full-pill chrome, cream fill (#FFFDF9), sage SVG glyph,
+              pine input text. Wrapped in <label> so the whole pill is
+              a click target (matches GuidesClient.tsx pattern). */}
+          <label style={{
+            display: 'flex', alignItems: 'center', gap: 12,
+            padding: '16px 20px', border: `1px solid ${BD}`,
+            borderRadius: 999, background: '#FFFDF9',
+            cursor: 'text', marginBottom: 14,
           }}>
-            <span aria-hidden style={{ color: MU, fontSize: 16, flexShrink: 0 }}>🔍</span>
+            <svg
+              width="16" height="16" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" strokeWidth={2} aria-hidden
+              style={{ color: SAGE, flexShrink: 0 }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
             <input
               value={searchVal}
               onChange={e => setSearchVal(e.target.value)}
               placeholder={L.searchPlaceholder}
               style={{
-                flex: 1, border: 'none', background: 'transparent',
-                fontSize: 15, fontWeight: 500, color: NK,
-                fontFamily: "'Manrope', sans-serif", outline: 'none',
+                flex: 1, border: 0, outline: 0, background: 'transparent',
+                color: PINE, fontFamily: 'inherit', fontSize: 14,
               }}
             />
             {searchVal && (
               <button
                 onClick={() => setSearchVal('')}
                 aria-label={isES ? 'Limpiar búsqueda' : 'Clear search'}
-                style={{ border: 'none', background: 'transparent', color: MU, fontSize: 18, cursor: 'pointer' }}
+                style={{ border: 'none', background: 'transparent', color: MU, fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 0 }}
               >×</button>
             )}
-          </div>
+          </label>
 
           {/* Row 1 — price filters + destinations expander */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
