@@ -20,7 +20,14 @@
  * as the worldcup-stays data on the same page.
  */
 
-import { SMART_FINDS, type SmartFind } from '../../lib/smart-finds'
+import {
+  getProductsBySurface,
+  type Product as SmartFind,
+  type SmartFindCategory,
+} from '../../lib/smart-finds'
+
+// Pre-resolve on import — server-component evaluation, no per-render cost.
+const SMART_FINDS = getProductsBySurface('hotels-strip')
 
 const PINE  = '#0F3A33'
 const SAGE  = '#6B8F86'
@@ -29,7 +36,7 @@ const MU    = '#8A8480'
 const BD    = '#DDD8D2'
 const WHITE = '#FFFFFF'
 
-const CATEGORY_LABEL: Record<SmartFind['category'], { es: string; en: string }> = {
+const CATEGORY_LABEL: Record<SmartFindCategory, { es: string; en: string }> = {
   avion:      { es: 'El kit del avión',          en: 'The flight kit'            },
   organizado: { es: 'El sistema',                en: 'The system'                },
   conectado:  { es: 'Internet y corriente',      en: 'Power and connectivity'    },
@@ -84,7 +91,7 @@ export default function SmartFindsSection({ locale }: Props) {
             <SmartFindCard
               key={p.id}
               product={p}
-              categoryLabel={CATEGORY_LABEL[p.category][locale]}
+              categoryLabel={CATEGORY_LABEL[p.category ?? 'organizado'][locale]}
               cta={L.cta}
             />
           ))}

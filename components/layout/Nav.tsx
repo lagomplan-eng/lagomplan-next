@@ -105,9 +105,10 @@ export default function Nav() {
 
   // ── Nav links (internal paths → next-intl translates) ─
   const navLinks = [
-    { key: 'planner' as const,       label: t('planner')  },
-    { key: 'guidesIndex' as const,   label: t('guides')   },
-    { key: 'hotelsIndex' as const,   label: t('hotels')   },
+    { key: 'planner' as const,           label: t('planner')    },
+    { key: 'guidesIndex' as const,       label: t('guides')     },
+    { key: 'smartFindsFamilias' as const, label: t('smartFinds') },
+    { key: 'hotelsIndex' as const,       label: t('hotels')     },
     ...(SHOW_MUNDIAL
       ? [{ key: 'worldcupIndex' as const, label: t('worldcup') }]
       : []),
@@ -115,12 +116,13 @@ export default function Nav() {
 
   // Internal paths for Link href (must match pathnames keys in i18n.ts)
   const LINK_PATHS = {
-    planner:       '/planner',
-    guidesIndex:   '/guides',
-    hotelsIndex:   '/hotels',
-    worldcupIndex: '/worldcup',
-    login:         '/login',
-    signup:        '/signup',
+    planner:             '/planner',
+    guidesIndex:         '/guides',
+    smartFindsFamilias:  '/smart-finds/familias',
+    hotelsIndex:         '/hotels',
+    worldcupIndex:       '/worldcup',
+    login:               '/login',
+    signup:              '/signup',
   } as const
 
   return (
