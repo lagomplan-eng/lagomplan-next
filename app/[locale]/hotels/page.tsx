@@ -10,7 +10,9 @@ import type { Metadata }                    from 'next'
 import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
 import { getAllHotels }                     from '../../../lib/hotels'
+import { getRenderableCityNeighborhoods }   from '../../../lib/hotels-neighborhoods'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
+import NeighborhoodsSection                 from '../../../components/hotels/NeighborhoodsSection'
 import PlannerBridgeCTA                     from '../../../components/hotels/PlannerBridgeCTA'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
@@ -33,7 +35,8 @@ export default async function HotelsIndexPage({ params }: Props) {
   const { locale } = await params
   // Combined feed: curated guides + worldcup city stays. Both corpora are
   // the only authoritative sources of hotel records.
-  const hotels = getAllHotels(locale)
+  const hotels        = getAllHotels(locale)
+  const neighborhoods = getRenderableCityNeighborhoods(locale)
 
   return (
     // #FFF9F3 — same warm cream the planner, signup, and guide pages
@@ -42,6 +45,7 @@ export default async function HotelsIndexPage({ params }: Props) {
     // the site. Set on <main> so bridge CTA + newsletter inherit.
     <main className="pt-[100px] bg-[#FFF9F3]">
       <HotelsClient hotels={hotels} locale={locale} />
+      <NeighborhoodsSection cities={neighborhoods} locale={locale} />
       <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">
         <NewsletterEndOfGuide />
