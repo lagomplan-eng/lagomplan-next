@@ -66,6 +66,12 @@ export interface Stay {
   best_for: string
   url?: string
   hotel_link?: string
+  /**
+   * Traveler archetypes this stay suits. Drives the archetype filter on the
+   * Hotels page. Optional so legacy records keep validating. Pre-populated
+   * by a one-time derivation pass over name/tags/note/best_for; editable.
+   */
+  archetypes?: string[]
 }
 
 export interface TransportItem {
