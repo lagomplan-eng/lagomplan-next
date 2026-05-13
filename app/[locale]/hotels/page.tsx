@@ -12,7 +12,6 @@ import type { Locale }                      from '../../../i18n'
 import { getAllHotels }                     from '../../../lib/hotels'
 import { getRenderableCityNeighborhoods }   from '../../../lib/hotels-neighborhoods'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
-import NeighborhoodsSection                 from '../../../components/hotels/NeighborhoodsSection'
 import PlannerBridgeCTA                     from '../../../components/hotels/PlannerBridgeCTA'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
@@ -44,8 +43,11 @@ export default async function HotelsIndexPage({ params }: Props) {
     // made the Hotels page visually disconnected from the rest of
     // the site. Set on <main> so bridge CTA + newsletter inherit.
     <main className="pt-[100px] bg-[#FFF9F3]">
-      <HotelsClient hotels={hotels} locale={locale} />
-      <NeighborhoodsSection cities={neighborhoods} locale={locale} />
+      <HotelsClient
+        hotels={hotels}
+        neighborhoods={neighborhoods}
+        locale={locale}
+      />
       <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">
         <NewsletterEndOfGuide />

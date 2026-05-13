@@ -36,6 +36,8 @@ import {
   matchesDestination,
   listDestinations,
 } from '../../lib/hotels'
+import type { CityNeighborhoods } from '../../lib/hotels-neighborhoods'
+import NeighborhoodsSection from './NeighborhoodsSection'
 
 // ── Visual tokens — locked to the prototype + the production design system ──
 // Inline so the component is self-contained and matches the prototype 1:1.
@@ -64,11 +66,12 @@ const DEFAULT_GRAD = CATEGORY_GRAD.Boutique
 // ── Component ────────────────────────────────────────────────────────────────
 
 interface Props {
-  hotels: HotelListing[]
-  locale: 'es' | 'en'
+  hotels:        HotelListing[]
+  neighborhoods: CityNeighborhoods[]
+  locale:        'es' | 'en'
 }
 
-export default function HotelsClient({ hotels, locale }: Props) {
+export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
   const isES = locale === 'es'
 
   const [searchVal,         setSearchVal]         = useState('')
@@ -90,6 +93,16 @@ export default function HotelsClient({ hotels, locale }: Props) {
       matchesSearch(h, searchVal)
     ),
     [hotels, priceFilter, archetypeFilter, destinationFilter, searchVal],
+  )
+
+  // Neighborhoods are contextual — surface only the picked city's barrios
+  // when the destination filter is active. Match on cityName so it lines
+  // up with the destination chip labels the user clicked.
+  const selectedNeighborhoods = useMemo(
+    () => destinationFilter
+      ? neighborhoods.filter(n => n.cityName === destinationFilter)
+      : [],
+    [neighborhoods, destinationFilter],
   )
 
   const handleArchetypeClick = (f: ArchetypeFilter) => {
@@ -334,6 +347,15 @@ export default function HotelsClient({ hotels, locale }: Props) {
         )}
         </div>
       </section>
+
+      {/* ─────── NEIGHBORHOODS · contextual to picked destination ───────
+          Only renders when the user has chosen a destination AND that
+          city has at least one neighborhood with editorial body copy.
+          Otherwise stays hidden. Hides itself again the moment the
+          destination filter resets to Todos. */}
+      {selectedNeighborhoods.length > 0 && (
+        <NeighborhoodsSection cities={selectedNeighborhoods} locale={locale} />
+      )}
     </div>
   )
 }
