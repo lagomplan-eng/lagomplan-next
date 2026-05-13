@@ -18,7 +18,7 @@ import KitSection        from '../../../../components/smart-finds/KitSection'
 import PainStrip         from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
 import {
-  PINE, SAGE, SAND, CREAM, MUTED, BORDER, CARD_RADIUS,
+  PINE, SAGE, SAND, CREAM, MUTED, CARD_RADIUS,
 } from '../../../../components/smart-finds/tokens'
 
 type Props = { params: Promise<{ locale: Locale }> }
@@ -46,7 +46,7 @@ export default async function Page({ params }: Props) {
       style={{ background: CREAM, color: PINE }}
     >
       {/* ── MASTHEAD ─────────────────────────────────────────────────── */}
-      <header style={{ borderBottom: `1px solid ${BORDER}` }}>
+      <header>
         <div className="page-inner">
 
           {/* Section-label row — line-free. Spacing carries the
@@ -209,7 +209,6 @@ export default async function Page({ params }: Props) {
         <div
           className="grid grid-cols-2 max-[820px]:grid-cols-1"
           style={{
-            borderTop: `1px solid ${BORDER}`,
             marginTop: 72, paddingTop: 56, gap: 72, alignItems: 'center',
           }}
         >
