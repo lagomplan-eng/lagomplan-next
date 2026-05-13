@@ -33,6 +33,8 @@ import {
   matchesArchetype,
   matchesPrice,
   matchesSearch,
+  matchesDestination,
+  listDestinations,
 } from '../../lib/hotels'
 
 // ── Visual tokens — locked to the prototype + the production design system ──
@@ -69,19 +71,25 @@ interface Props {
 export default function HotelsClient({ hotels, locale }: Props) {
   const isES = locale === 'es'
 
-  const [searchVal,       setSearchVal]       = useState('')
+  const [searchVal,         setSearchVal]         = useState('')
   // null = "Todos" pill. Same convention as the prototype's "Todos" sentinel.
-  const [priceFilter,     setPriceFilter]     = useState<'$' | '$$' | '$$$' | null>(null)
-  const [archetypeFilter, setArchetypeFilter] = useState<ArchetypeId>('Todos')
-  const [comingSoonToast, setComingSoonToast] = useState<string | null>(null)
+  const [priceFilter,       setPriceFilter]       = useState<'$' | '$$' | '$$$' | null>(null)
+  const [archetypeFilter,   setArchetypeFilter]   = useState<ArchetypeId>('Todos')
+  const [destinationFilter, setDestinationFilter] = useState<string | null>(null)
+  const [destinationsOpen,  setDestinationsOpen]  = useState(false)
+  const [comingSoonToast,   setComingSoonToast]   = useState<string | null>(null)
+
+  // Destination list is stable for a given hotel set — compute once.
+  const destinations = useMemo(() => listDestinations(hotels), [hotels])
 
   const filtered = useMemo(
     () => hotels.filter(h =>
       matchesPrice(h, priceFilter) &&
       matchesArchetype(h, archetypeFilter) &&
+      matchesDestination(h, destinationFilter) &&
       matchesSearch(h, searchVal)
     ),
-    [hotels, priceFilter, archetypeFilter, searchVal],
+    [hotels, priceFilter, archetypeFilter, destinationFilter, searchVal],
   )
 
   const handleArchetypeClick = (f: ArchetypeFilter) => {
@@ -175,7 +183,7 @@ export default function HotelsClient({ hotels, locale }: Props) {
             )}
           </div>
 
-          {/* Row 1 — price filters */}
+          {/* Row 1 — price filters + destinations expander */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
             {/* "Todos" sentinel */}
             <button
@@ -191,7 +199,39 @@ export default function HotelsClient({ hotels, locale }: Props) {
                 {p.id} · {isES ? p.labelES : p.labelEN}
               </button>
             ))}
+            {/* "+ Destinos" expander — toggles the destination chip row.
+                When a destination is selected, the pill goes active and
+                shows the picked city for visibility. */}
+            <button
+              onClick={() => setDestinationsOpen(o => !o)}
+              style={pillStyle(destinationFilter !== null)}
+              aria-expanded={destinationsOpen}
+            >
+              {destinationFilter
+                ? `📍 ${destinationFilter}`
+                : (isES ? '+ Destinos' : '+ Destinations')}
+            </button>
           </div>
+
+          {/* Row 1a — destinations chip row (expander) */}
+          {destinationsOpen && (
+            <div style={{
+              display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10,
+              paddingBottom: 4,
+            }}>
+              <button
+                onClick={() => { setDestinationFilter(null); setDestinationsOpen(false) }}
+                style={pillStyle(destinationFilter === null)}
+              >{L.pricePillAll}</button>
+              {destinations.map(d => (
+                <button
+                  key={d}
+                  onClick={() => { setDestinationFilter(d); setDestinationsOpen(false) }}
+                  style={pillStyle(destinationFilter === d)}
+                >{d}</button>
+              ))}
+            </div>
+          )}
 
           {/* Row 2 — archetype filters */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>

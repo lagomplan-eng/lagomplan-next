@@ -105,6 +105,25 @@ export function matchesSearch(hotel: HotelListing, search: string): boolean {
   )
 }
 
+/**
+ * Destination filter — exact-match on the localized destination label so
+ * the filter pill row matches whatever the user clicks. `null` = all.
+ */
+export function matchesDestination(hotel: HotelListing, destination: string | null): boolean {
+  if (!destination) return true
+  return hotel.destination === destination
+}
+
+/**
+ * Returns the deduped list of destinations present in a hotel set, sorted
+ * alphabetically. Feeds the "+ Destinos" expander pill row in the client.
+ */
+export function listDestinations(hotels: HotelListing[]): string[] {
+  const set = new Set<string>()
+  for (const h of hotels) set.add(h.destination)
+  return [...set].sort((a, b) => a.localeCompare(b))
+}
+
 // ── Utility ────────────────────────────────────────────────────────────────────
 
 function slugifyHotelName(name: string): string {
