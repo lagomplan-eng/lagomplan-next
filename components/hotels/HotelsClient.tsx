@@ -84,6 +84,12 @@ export default function HotelsClient({ hotels, locale }: Props) {
     [hotels, priceFilter, archetypeFilter, searchVal],
   )
 
+  // Split by corpus so each section reads as its own offering. Same card
+  // treatment for both — what differs is the section label + headline so
+  // users understand the context (editorial picks vs World Cup stays).
+  const guideHotels    = useMemo(() => filtered.filter(h => h.source === 'guide'),    [filtered])
+  const worldcupHotels = useMemo(() => filtered.filter(h => h.source === 'worldcup'), [filtered])
+
   const handleArchetypeClick = (f: ArchetypeFilter) => {
     if (f.comingSoon) {
       const label = isES ? f.labelES : f.labelEN
@@ -103,8 +109,12 @@ export default function HotelsClient({ hotels, locale }: Props) {
     searchPlaceholder: isES ? 'ej. méxico, cancún, nueva york…'            : 'e.g. mexico, cancun, new york…',
     travelerLabel:     isES ? 'Viajero'                                    : 'Traveler',
     pricePillAll:      isES ? 'Todos'                                      : 'All',
-    sectionLabel:      isES ? 'Hoteles curados'                            : 'Curated hotels',
-    sectionHeadline:   isES ? 'Dónde quedarse bien'                        : 'Where to stay, well',
+    // Layer 1 — curated editorial hotels (source: 'guide')
+    guideSectionLabel:    isES ? 'Hoteles curados'                         : 'Curated hotels',
+    guideSectionHeadline: isES ? 'Dónde quedarse bien'                     : 'Where to stay, well',
+    // Layer 2 — World Cup host-city stays (source: 'worldcup')
+    wcSectionLabel:    isES ? 'Sedes del Mundial 2026'                     : 'World Cup 2026 host cities',
+    wcSectionHeadline: isES ? 'Dónde quedarse en ciudad sede'              : 'Where to stay in each host city',
     countOne:          isES ? 'hotel'                                      : 'hotel',
     countMany:         isES ? 'hoteles'                                    : 'hotels',
     emptyHeadline:     isES ? 'Sin coincidencias'                          : 'No matches',
@@ -252,48 +262,67 @@ export default function HotelsClient({ hotels, locale }: Props) {
         </div>
       </section>
 
-      {/* ─────── CURATED GRID ─────── */}
-      <section style={{ padding: '0 0 64px' }}>
-        <div className="page-inner">
-        <div style={{ marginBottom: 28 }}>
-          <p style={sectionLabelStyle}>{L.sectionLabel}</p>
-          <h2 style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
-            color: NK, marginBottom: 4,
-          }}>{L.sectionHeadline}</h2>
-          <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 13, color: MU,
-          }}>
-            {filtered.length} {filtered.length === 1 ? L.countOne : L.countMany}
-          </p>
-        </div>
+      {/* ─────── LAYER 1 · CURATED EDITORIAL HOTELS (guide source) ─────── */}
+      {guideHotels.length > 0 && (
+        <section style={{ padding: '0 0 64px' }}>
+          <div className="page-inner">
+            <div style={{ marginBottom: 28 }}>
+              <p style={sectionLabelStyle}>{L.guideSectionLabel}</p>
+              <h2 style={sectionHeadlineStyle}>{L.guideSectionHeadline}</h2>
+              <p style={sectionCountStyle}>
+                {guideHotels.length} {guideHotels.length === 1 ? L.countOne : L.countMany}
+              </p>
+            </div>
+            <div style={gridStyle}>
+              {guideHotels.map(h => (
+                <HotelCard key={h.id} hotel={h} locale={locale}
+                  saveLabel={L.saveLabel} bookCta={L.bookCta} guideCta={L.guideCta} />
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
-        {filtered.length === 0 ? (
-          <div style={{
-            background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-            padding: '40px 32px', textAlign: 'center',
-          }}>
-            <h3 style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800,
-              color: NK, marginBottom: 6,
-            }}>{L.emptyHeadline}</h3>
-            <p style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
-            }}>{L.emptyBody}</p>
+      {/* ─────── LAYER 2 · WORLD CUP HOST-CITY STAYS (worldcup source) ─────── */}
+      {worldcupHotels.length > 0 && (
+        <section style={{ padding: '0 0 64px' }}>
+          <div className="page-inner">
+            <div style={{ marginBottom: 28 }}>
+              <p style={sectionLabelStyle}>{L.wcSectionLabel}</p>
+              <h2 style={sectionHeadlineStyle}>{L.wcSectionHeadline}</h2>
+              <p style={sectionCountStyle}>
+                {worldcupHotels.length} {worldcupHotels.length === 1 ? L.countOne : L.countMany}
+              </p>
+            </div>
+            <div style={gridStyle}>
+              {worldcupHotels.map(h => (
+                <HotelCard key={h.id} hotel={h} locale={locale}
+                  saveLabel={L.saveLabel} bookCta={L.bookCta} guideCta={L.guideCta} />
+              ))}
+            </div>
           </div>
-        ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 20,
-          }}>
-            {filtered.map(h => (
-              <HotelCard key={h.id} hotel={h} locale={locale} saveLabel={L.saveLabel} bookCta={L.bookCta} guideCta={L.guideCta} />
-            ))}
+        </section>
+      )}
+
+      {/* ─────── GLOBAL EMPTY STATE (filters wipe out both sections) ─────── */}
+      {guideHotels.length === 0 && worldcupHotels.length === 0 && (
+        <section style={{ padding: '0 0 64px' }}>
+          <div className="page-inner">
+            <div style={{
+              background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
+              padding: '40px 32px', textAlign: 'center',
+            }}>
+              <h3 style={{
+                fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800,
+                color: NK, marginBottom: 6,
+              }}>{L.emptyHeadline}</h3>
+              <p style={{
+                fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
+              }}>{L.emptyBody}</p>
+            </div>
           </div>
-        )}
-        </div>
-      </section>
+        </section>
+      )}
     </div>
   )
 }
@@ -449,6 +478,21 @@ const sectionLabelStyle: React.CSSProperties = {
   fontSize: 11, fontWeight: 600,
   letterSpacing: '1.5px', textTransform: 'uppercase',
   color: SAGE, marginBottom: 8,
+}
+
+const sectionHeadlineStyle: React.CSSProperties = {
+  fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
+  color: NK, marginBottom: 4,
+}
+
+const sectionCountStyle: React.CSSProperties = {
+  fontFamily: "'Manrope', sans-serif", fontSize: 13, color: MU,
+}
+
+const gridStyle: React.CSSProperties = {
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
+  gap: 20,
 }
 
 function pillStyle(active: boolean): React.CSSProperties {
