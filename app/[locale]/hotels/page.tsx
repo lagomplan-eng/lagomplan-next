@@ -11,6 +11,7 @@ import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
 import { getAllHotels }                     from '../../../lib/hotels'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
+import PlannerBridgeCTA                     from '../../../components/hotels/PlannerBridgeCTA'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
 type Props = { params: Promise<{ locale: Locale }> }
@@ -35,8 +36,12 @@ export default async function HotelsIndexPage({ params }: Props) {
   const hotels = getAllHotels(locale)
 
   return (
-    <main className="pt-[100px]">
+    // Sand background is set on <main> so the bridge CTA + newsletter
+    // sections below the client inherit the same surface. Avoids the
+    // earlier issue where only the client area had the cream background.
+    <main className="pt-[100px] bg-[var(--sand)]">
       <HotelsClient hotels={hotels} locale={locale} />
+      <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">
         <NewsletterEndOfGuide />
       </div>

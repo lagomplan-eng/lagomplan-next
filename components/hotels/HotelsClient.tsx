@@ -118,9 +118,12 @@ export default function HotelsClient({ hotels, locale }: Props) {
   }
 
   return (
-    <div style={{ background: SAND, minHeight: '100vh' }}>
+    // No local background — the page wrapper sets var(--sand) on <main>
+    // so the bridge CTA and newsletter below the client inherit cleanly.
+    <div>
       {/* ─────── HERO ─────── */}
-      <section style={{ padding: '64px 24px 56px', maxWidth: 960, margin: '0 auto' }}>
+      <section style={{ padding: '64px 0 40px' }}>
+        <div className="page-inner" style={{ maxWidth: 960 }}>
         <p style={sectionLabelStyle}>{L.eyebrow}</p>
 
         <h1 style={{
@@ -240,11 +243,13 @@ export default function HotelsClient({ hotels, locale }: Props) {
             </div>
           )}
         </div>
+        </div>
       </section>
 
       {/* ─────── CURATED GRID ─────── */}
-      <section style={{ padding: '0 24px 96px', maxWidth: 1200, margin: '0 auto' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto 28px' }}>
+      <section style={{ padding: '0 0 64px' }}>
+        <div className="page-inner">
+        <div style={{ marginBottom: 28 }}>
           <p style={sectionLabelStyle}>{L.sectionLabel}</p>
           <h2 style={{
             fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
@@ -260,7 +265,7 @@ export default function HotelsClient({ hotels, locale }: Props) {
         {filtered.length === 0 ? (
           <div style={{
             background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-            padding: '40px 32px', maxWidth: 960, margin: '0 auto', textAlign: 'center',
+            padding: '40px 32px', textAlign: 'center',
           }}>
             <h3 style={{
               fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800,
@@ -281,6 +286,7 @@ export default function HotelsClient({ hotels, locale }: Props) {
             ))}
           </div>
         )}
+        </div>
       </section>
     </div>
   )
