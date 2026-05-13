@@ -74,6 +74,12 @@ interface Props {
 export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
   const isES = locale === 'es'
 
+  // Feature flag — flip to `true` once guide hotels carry archetype tags.
+  // Today only worldcup stays are tagged (Familias/Parejas), so showing
+  // the row produces near-empty result sets for most pills. State + data
+  // wiring stays intact so this is a one-line revival.
+  const SHOW_ARCHETYPE_FILTERS = false
+
   const [searchVal,         setSearchVal]         = useState('')
   // null = "Todos" pill. Same convention as the prototype's "Todos" sentinel.
   const [priceFilter,       setPriceFilter]       = useState<'$' | '$$' | '$$$' | null>(null)
@@ -264,7 +270,14 @@ export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
             </div>
           )}
 
-          {/* Row 2 — archetype filters */}
+          {/* Row 2 — archetype filters.
+              Hidden until guide hotels are tagged with archetypes. Today
+              the catalog only carries Familias/Parejas tags on worldcup
+              stays, so the pills would render mostly empty result sets.
+              Flip SHOW_ARCHETYPE_FILTERS to true once tagging lands. The
+              filter state + ARCHETYPE_FILTERS data stays wired so this
+              is a one-line revival. */}
+          {SHOW_ARCHETYPE_FILTERS && (
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
             <span style={{
               fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 700,
@@ -305,6 +318,7 @@ export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
               )
             })}
           </div>
+          )}
 
           {/* Coming-soon toast (anchored above the filter card) */}
           {comingSoonToast && (
