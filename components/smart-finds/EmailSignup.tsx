@@ -44,14 +44,17 @@ export default function EmailSignup({ locale }: Props) {
 
   if (submitted) {
     return (
-      <div style={{ padding: 22, background: SAND, borderLeft: `2px solid ${PINE}` }}>
+      <div style={{
+        padding: '18px 22px', background: SAND,
+        borderRadius: 14,
+      }}>
         <div style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+          fontFamily: "'Fraunces',serif",
           fontSize: 17, fontWeight: 700, color: PINE, marginBottom: 5,
-        }}>{isES ? 'Ya estás en la lista.' : 'You’re on the list.'}</div>
+        }}>{isES ? 'Ya estás en la lista' : 'You’re on the list'}</div>
         <div style={{
           fontFamily: "'Manrope',sans-serif", fontSize: 12, color: MUTED,
-        }}>{isES ? 'El próximo jueves, en tu correo.' : 'See you in your inbox next Thursday.'}</div>
+        }}>{isES ? 'El próximo jueves, en tu correo' : 'See you in your inbox next Thursday'}</div>
       </div>
     )
   }

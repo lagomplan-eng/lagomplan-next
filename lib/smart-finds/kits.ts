@@ -28,9 +28,9 @@ export const KITS: Kit[] = [
   {
     id:         'operativo',
     num:        '01',
-    title:      'El operativo.',
+    title:      'El operativo',
     subtitle:   'Del aeropuerto al Uber al hotel al restaurante. Y repetir.',
-    painMoment: 'El taxi no acepta la carriola.',
+    painMoment: 'El taxi no acepta la carriola',
     scene:      'El taxi no acepta la carriola. Y ese es solo el primero de los once traslados del viaje.',
     content: {
       type: 'flat',
@@ -48,9 +48,9 @@ export const KITS: Kit[] = [
   {
     id:         'mochila',
     num:        '02',
-    title:      'La mochila.',
+    title:      'La mochila',
     subtitle:   'Para vuelos largos y traslados que no terminan.',
-    painMoment: 'La mochila de los niños. Sin sistema, sin paz.',
+    painMoment: 'La mochila de los niños · sin sistema, sin paz',
     scene:      'La mochila del niño puede ser la mejor herramienta del viaje o el mayor generador de caos. La diferencia no está en los productos — está en el sistema.',
     omit:       'Tablets sin contenido descargado previamente — en el avión no hay wifi confiable. Snacks con azúcar para el despegue — el pico y la caída se sienten en 60cm².',
     content: {
@@ -125,9 +125,9 @@ export const KITS: Kit[] = [
   {
     id:         'quedarse',
     num:        '03',
-    title:      'Quedarse.',
+    title:      'Quedarse',
     subtitle:   'Lo que los hoteles no te dan. Y no son más toallas.',
-    painMoment: '40 minutos en la playa. Demasiado sol.',
+    painMoment: '40 minutos en la playa · demasiado sol',
     scene:      'El hotel tiene toallas, camastros, y un niñero que trae agua. Lo que no tiene es sombra de verdad para un bebé de 10 meses.',
     content: {
       type: 'flat',

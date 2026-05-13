@@ -41,7 +41,7 @@ export default function KitSection({ kit, isLast }: Props) {
         }}>KIT {kit.num}</div>
 
         <h2 style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+          fontFamily: "'Fraunces',serif",
           fontSize: 40, fontWeight: 700, color: PINE,
           lineHeight: 1, letterSpacing: '-.02em', marginBottom: 6,
         }}>{kit.title}</h2>
@@ -51,11 +51,10 @@ export default function KitSection({ kit, isLast }: Props) {
           color: MUTED, marginBottom: 16,
         }}>{kit.subtitle}</div>
 
-        {/* Scene — no left-bar. Italic Fraunces is enough visual
-            differentiation; the bar read as a printed pull-quote
-            rule, which clashed with the softer chrome elsewhere. */}
+        {/* Scene — no left-bar, no italic. Sits as plain Fraunces
+            body so it reads as editorial prose, not a pull-quote. */}
         <p style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+          fontFamily: "'Fraunces',serif",
           fontSize: 15, color: '#5A5754', lineHeight: 1.7,
           maxWidth: 640,
           marginBottom: kit.omit ? 16 : 0,

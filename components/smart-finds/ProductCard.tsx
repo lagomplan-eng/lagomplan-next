@@ -63,9 +63,9 @@ export default function ProductCard({ product }: Props) {
         }}>{toSentenceCase(product.tag)}</div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic', fontSize: 13,
+          fontFamily: "'Fraunces',serif", fontSize: 13,
           color: '#5A5754', lineHeight: 1.7, flex: 1, marginBottom: 16,
-        }}>&ldquo;{product.opinion}&rdquo;</div>
+        }}>{product.opinion}</div>
 
         {/* Footer — no divider. The whitespace + change in alignment
             is enough rhythm; the borderTop read as print-y next to

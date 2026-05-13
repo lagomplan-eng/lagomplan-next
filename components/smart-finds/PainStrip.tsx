@@ -1,18 +1,18 @@
 /**
  * components/smart-finds/PainStrip.tsx
  *
- * PINE-backgrounded 3-column strip below the masthead. Each cell quotes
- * the kit's `painMoment` in italic Fraunces, with the kit title as a
- * small underline that anchors to the kit section below.
+ * Contained PINE-backgrounded 3-cell block. Each cell quotes the kit's
+ * `painMoment` and links to the kit section below via in-page anchor.
  *
- * Columns stack on mobile so each pain quote keeps full width and
- * readable size.
+ * Layout: sits inside the page's `page-inner` container (no full-bleed
+ * — the rest of the site doesn't use full-width banners). 14-px radius
+ * matches the Hotels card and Planner Bridge chrome.
  *
  * Server component — no interactivity beyond the anchor link.
  */
 
 import type { Kit } from '../../lib/smart-finds'
-import { PINE, SAND } from './tokens'
+import { PINE, SAND, CARD_RADIUS } from './tokens'
 
 interface Props {
   kits: Kit[]
@@ -20,40 +20,42 @@ interface Props {
 
 export default function PainStrip({ kits }: Props) {
   return (
-    <div style={{ background: PINE }}>
-      <div
-        className="page-inner grid grid-cols-3 max-[720px]:grid-cols-1"
-      >
-        {kits.map((kit, i) => (
-          <a
-            key={kit.id}
-            href={`#${kit.id}`}
-            style={{
-              padding: '36px 32px',
-              display: 'flex', flexDirection: 'column', gap: 14,
-              textDecoration: 'none',
-              borderRight: i < kits.length - 1 ? `1px solid ${SAND}15` : 'none',
-              transition: 'background .18s',
-            }}
-            className="hover:bg-[rgba(237,231,225,0.04)]"
-          >
-            <div style={{
-              fontFamily: "'Fraunces',serif", fontStyle: 'italic',
-              fontSize: 20, fontWeight: 700, color: SAND, lineHeight: 1.2,
-            }}>
-              &ldquo;{kit.painMoment}&rdquo;
-            </div>
-            <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
-              letterSpacing: '.14em', color: `${SAND}55`,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              {kit.title.toUpperCase().replace(/\./g, '')}
-              <span style={{ color: `${SAND}30` }}>→</span>
-            </div>
-          </a>
-        ))}
-      </div>
+    <div
+      className="grid grid-cols-3 max-[720px]:grid-cols-1"
+      style={{
+        background: PINE,
+        borderRadius: CARD_RADIUS,
+        overflow: 'hidden',
+      }}
+    >
+      {kits.map((kit) => (
+        <a
+          key={kit.id}
+          href={`#${kit.id}`}
+          style={{
+            padding: '32px 28px',
+            display: 'flex', flexDirection: 'column', gap: 12,
+            textDecoration: 'none',
+            transition: 'background .18s',
+          }}
+          className="hover:bg-[rgba(237,231,225,0.04)]"
+        >
+          <div style={{
+            fontFamily: "'Fraunces',serif",
+            fontSize: 19, fontWeight: 700, color: SAND, lineHeight: 1.25,
+          }}>
+            &ldquo;{kit.painMoment}&rdquo;
+          </div>
+          <div style={{
+            fontFamily: "'Manrope',sans-serif", fontSize: 10, fontWeight: 700,
+            letterSpacing: '.14em', color: `${SAND}66`,
+            display: 'flex', alignItems: 'center', gap: 8,
+          }}>
+            {kit.title.toUpperCase()}
+            <span style={{ color: `${SAND}40` }}>→</span>
+          </div>
+        </a>
+      ))}
     </div>
   )
 }

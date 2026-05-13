@@ -83,7 +83,7 @@ export default async function Page({ params }: Props) {
               }}
                 className="max-[640px]:!text-[52px]"
               >
-                Smart<br /><em>{isES ? 'Finds.' : 'Finds.'}</em>
+                Smart<br />Finds
               </h1>
               <p style={{
                 fontFamily: "'Manrope',sans-serif", fontSize: 15,
@@ -104,7 +104,7 @@ export default async function Page({ params }: Props) {
                 letterSpacing: '.2em', color: PINE, opacity: .35, marginBottom: 12,
               }}>{isES ? 'NOTA DE LA EDITORA' : 'EDITOR’S NOTE'}</div>
               <p style={{
-                fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+                fontFamily: "'Fraunces',serif",
                 fontSize: 14, color: PINE, lineHeight: 1.75, marginBottom: 14,
               }}>{isES
                 ? '“Viajar con un toddler y un bebé no es un viaje más difícil. Es una categoría distinta. Esta selección la construimos para eso.”'
@@ -143,11 +143,14 @@ export default async function Page({ params }: Props) {
         </div>
       </header>
 
-      {/* ── PAIN STRIP ────────────────────────────────────────────────── */}
-      <PainStrip kits={KITS} />
-
       {/* ── KITS ──────────────────────────────────────────────────────── */}
-      <div className="page-inner" style={{ padding: '72px 24px 100px' }}>
+      <div className="page-inner" style={{ padding: '40px 24px 100px' }}>
+        {/* Pain strip — contained block, not full-bleed. Sits at the top of
+            the kits container so the pain → kit flow reads as one unit. */}
+        <div style={{ marginBottom: 64 }}>
+          <PainStrip kits={KITS} />
+        </div>
+
         {KITS.map((kit, i) => (
           <div key={kit.id}>
             <KitSection kit={kit} isLast={i === KITS.length - 1} />
@@ -178,7 +181,7 @@ export default async function Page({ params }: Props) {
               letterSpacing: '.2em', color: SAGE, marginBottom: 12,
             }}>{isES ? 'ANTES DE EMPACAR' : 'BEFORE YOU PACK'}</div>
             <h3 style={{
-              fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+              fontFamily: "'Fraunces',serif",
               fontSize: 28, fontWeight: 700, color: SAND,
               lineHeight: 1.1, marginBottom: 12,
             }}>{isES ? '¿Ya tienes el itinerario?' : 'Got the itinerary?'}</h3>
@@ -216,12 +219,12 @@ export default async function Page({ params }: Props) {
               letterSpacing: '.2em', color: SAGE, marginBottom: 12,
             }}>{isES ? 'EL ITINERARIO' : 'THE NEWSLETTER'}</div>
             <h3 style={{
-              fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+              fontFamily: "'Fraunces',serif",
               fontSize: 26, fontWeight: 700, color: PINE,
               lineHeight: 1.2, marginBottom: 10,
             }}>{isES
-              ? <>Nuevos kits y guías,<br />directo a tu correo.</>
-              : <>New kits and guides,<br />straight to your inbox.</>}</h3>
+              ? <>Nuevos kits y guías,<br />directo a tu correo</>
+              : <>New kits and guides,<br />straight to your inbox</>}</h3>
             <p style={{
               fontFamily: "'Manrope',sans-serif", fontSize: 13,
               color: MUTED, lineHeight: 1.65,

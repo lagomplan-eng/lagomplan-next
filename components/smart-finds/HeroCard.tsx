@@ -88,9 +88,9 @@ export default function HeroCard({ product }: Props) {
         }}>{toSentenceCase(product.tag)}</div>
 
         <p style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic', fontSize: 15,
+          fontFamily: "'Fraunces',serif", fontSize: 15,
           color: '#5A5754', lineHeight: 1.75, maxWidth: 480, marginBottom: 22,
-        }}>&ldquo;{product.opinion}&rdquo;</p>
+        }}>{product.opinion}</p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           <div>

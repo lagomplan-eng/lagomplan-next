@@ -88,7 +88,7 @@ function SystemContent({ system }: { system: System }) {
     <div>
       {system.note && (
         <p style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic',
+          fontFamily: "'Fraunces',serif",
           fontSize: 13, color: MUTED, marginBottom: 20,
         }}>{system.note}</p>
       )}
