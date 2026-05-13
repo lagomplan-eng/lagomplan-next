@@ -47,6 +47,12 @@ export type ArchetypeId =
   | 'Todos'
   | 'Familias'
   | 'Parejas'
+  | 'Solo'
+  | 'Negocios'
+  | 'Aventura'
+  | 'Bienestar'
+  | 'Workation'
+  | 'Eco'
   | 'Pet Friendly'
   | 'LGBTQ+ Friendly'
 
@@ -61,11 +67,17 @@ export interface ArchetypeFilter {
 }
 
 export const ARCHETYPE_FILTERS: ArchetypeFilter[] = [
-  { id: 'Todos',           labelES: 'Todos',          labelEN: 'All',              icon: '',    active: true,  comingSoon: false },
-  { id: 'Familias',        labelES: 'Con niños',      labelEN: 'With kids',        icon: '👨‍👩‍👧', active: true,  comingSoon: false },
-  { id: 'Parejas',         labelES: 'Parejas',        labelEN: 'Couples',          icon: '💑',  active: true,  comingSoon: false },
-  { id: 'Pet Friendly',    labelES: 'Pet Friendly',   labelEN: 'Pet Friendly',     icon: '🐾',  active: false, comingSoon: true  },
-  { id: 'LGBTQ+ Friendly', labelES: 'LGBTQ+ Friendly', labelEN: 'LGBTQ+ Friendly', icon: '🏳️‍🌈', active: false, comingSoon: true  },
+  { id: 'Todos',           labelES: 'Todos',           labelEN: 'All',              icon: '',    active: true,  comingSoon: false },
+  { id: 'Familias',        labelES: 'Con niños',       labelEN: 'With kids',        icon: '👨‍👩‍👧', active: true,  comingSoon: false },
+  { id: 'Parejas',         labelES: 'Parejas',         labelEN: 'Couples',          icon: '💑',  active: true,  comingSoon: false },
+  { id: 'Solo',            labelES: 'Solo',            labelEN: 'Solo',             icon: '🎒',  active: true,  comingSoon: false },
+  { id: 'Negocios',        labelES: 'Negocios',        labelEN: 'Business',         icon: '💼',  active: true,  comingSoon: false },
+  { id: 'Aventura',        labelES: 'Aventura',        labelEN: 'Adventure',        icon: '🗺️',  active: true,  comingSoon: false },
+  { id: 'Bienestar',       labelES: 'Bienestar',       labelEN: 'Wellness',         icon: '🧘',  active: true,  comingSoon: false },
+  { id: 'Workation',       labelES: 'Workation',       labelEN: 'Workation',        icon: '💻',  active: true,  comingSoon: false },
+  { id: 'Eco',             labelES: 'Eco',             labelEN: 'Eco',              icon: '🌿',  active: true,  comingSoon: false },
+  { id: 'Pet Friendly',    labelES: 'Pet Friendly',    labelEN: 'Pet Friendly',     icon: '🐾',  active: false, comingSoon: true  },
+  { id: 'LGBTQ+ Friendly', labelES: 'LGBTQ+ Friendly', labelEN: 'LGBTQ+ Friendly',  icon: '🏳️‍🌈', active: false, comingSoon: true  },
 ]
 
 // Price filter buckets — same trick: locale-aware label, single source.
