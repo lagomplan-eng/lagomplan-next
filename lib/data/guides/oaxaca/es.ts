@@ -137,6 +137,7 @@ export const guide: FlatGuide = {
       description: 'Ubicado en el antiguo Convento de Santa Catalina. Sus jardines y alberca son un oasis absoluto después de caminar por el centro.',
       tag: 'Historia con alberca',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/Y5O4MyDD2s?aid=lagomplan&campaign=lagomplan-oaxacatradicionenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Oaxaca%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Foaxaca-tradicion-en-familia',
+      archetypes: [],
     },
     {
       name: 'Hotel con Corazón',
@@ -145,6 +146,7 @@ export const guide: FlatGuide = {
       description: 'Un hotel boutique con causa (apoyan la educación local). Es moderno, limpio y muy acogedor. El desayuno en su patio es el inicio perfecto del día.',
       tag: 'Socialmente responsable',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/M4pKOuN63t?aid=lagomplan&campaign=lagomplan-oaxacatradicionenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Oaxaca%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Foaxaca-tradicion-en-familia',
+      archetypes: ['Parejas'],
     },
     {
       name: 'City Centro Oaxaca',
@@ -153,6 +155,7 @@ export const guide: FlatGuide = {
       description: 'Ubicado en el Barrio de Jalatlaco (el más colorido). Tiene un diseño contemporáneo muy fotogénico y una alberca pequeña pero efectiva para refrescarse.',
       tag: 'Estilo en Jalatlaco',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/tGFeKKQIrw?aid=lagomplan&campaign=lagomplan-oaxacatradicionenfamilia&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&conmeth=normal&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Oaxaca%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Foaxaca-tradicion-en-familia',
+      archetypes: [],
     },
   ],
 

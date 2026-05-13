@@ -101,6 +101,7 @@ export const guide: FlatGuide = {
       description: 'El refugio de lujo más exclusivo al final de la Zona Hotelera. Ideal para familias que buscan paz, una playa sin sargazo (por su ubicación) y un Kids\' Club de primer nivel.',
       tag: 'Lujo zen y privacidad',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/PlmvNbFRph?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
+      archetypes: ['Familias', 'Parejas'],
     },
     {
       name: 'Grand Fiesta Americana Coral Beach',
@@ -109,6 +110,7 @@ export const guide: FlatGuide = {
       description: 'El mejor deal de lujo familiar. Recientemente se volvió All-Inclusive, pero mantiene una calidad gastronómica superior. Su club de niños es de los mejores de México.',
       tag: 'Resort de alta gama todo incluido',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/8ezclsJ3wa?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
+      archetypes: ['Familias', 'Parejas'],
     },
     {
       name: 'Aloft Cancun',
@@ -117,6 +119,7 @@ export const guide: FlatGuide = {
       description: 'La opción smart value. No es un resort frente al mar, pero está a pasos de la playa pública y rodeado de servicios. Perfecto para familias que prefieren invertir su presupuesto en parques y excursiones.',
       tag: 'Ubicación estratégica y ahorro',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/WSZq7xX49s?aid=lagomplan&campaign=lagomplan-cancunfamilyvalueedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Canc%C3%BAn%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcancun-family-value-edition',
+      archetypes: ['Familias'],
     },
   ],
 

@@ -173,6 +173,7 @@ export const guide: FlatGuide = {
       description: 'El refugio perfecto para los primeros días. Al ser una comunidad cerrada, te aísla por completo de las multitudes. Las villas con alberca propia son ideales para que cada quien tenga su espacio mientras disfrutan del silencio de los canales.',
       tag: 'Privacidad absoluta y logística impecable',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/Pbav6MvoS0?aid=lagomplan&campaign=lagomplan-rivieramayaroadtripdesemanasanta&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Riviera+Maya%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Friviera-maya-roadtrip-de-semana-santa',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Esencia, Xpu-Há',
@@ -181,6 +182,7 @@ export const guide: FlatGuide = {
       description: 'Ubicado en una de las playas más hermosas y amplias de la zona. Su exclusividad garantiza que la playa nunca se sienta saturada. El punto medio perfecto entre Playa del Carmen y Tulum.',
       tag: 'Lujo silencioso y la mejor playa de la Riviera',
       affiliateUrl: 'https://hotelscom.stay22.com/lagomplan/lT2IMyWNzu?aid=lagomplan&campaign=lagomplan-rivieramayaroadtripdesemanasanta&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Riviera+Maya%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Friviera-maya-roadtrip-de-semana-santa',
+      archetypes: ['Familias', 'Parejas'],
     },
     {
       name: 'Habitas Tulum',
@@ -189,6 +191,7 @@ export const guide: FlatGuide = {
       description: 'Si buscas el "vibe" de Tulum pero con orden. Sus tiendas de campaña de lujo en la zona de la selva ofrecen una desconexión total. Visualmente increíble con un enfoque de bienestar muy auténtico.',
       tag: 'Eco-diseño y sofisticación bohemia',
       affiliateUrl: 'https://expedia.stay22.com/lagomplan/wAI91b98X-?aid=lagomplan&campaign=lagomplan-rivieramayaroadtripdesemanasanta&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Riviera+Maya%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Friviera-maya-roadtrip-de-semana-santa',
+      archetypes: ['Parejas'],
     },
   ],
 

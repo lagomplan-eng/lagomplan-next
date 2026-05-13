@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
       description: 'The epitome of historic romance. Once the retreat of Elizabeth Taylor and Richard Burton, it\'s now a boutique gem with marble bridges, open-air bathtubs, and service that transports you to Hollywood\'s golden era.',
       tag: 'Legendary luxury and classic elegance',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/HW6l2Lk3x8?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Mousai',
@@ -139,6 +140,7 @@ export const guide: FlatGuide = {
       description: 'Vanguard design in the South Zone. An Adults Only hotel with one of the most spectacular infinity pools in the world. The place for those seeking technology, infinite views, and a vibrant modern atmosphere.',
       tag: 'Bold modernity and panoramic views',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/g_5prIqCps?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Amapa',
@@ -147,6 +149,7 @@ export const guide: FlatGuide = {
       description: 'Contemporary minimalism in the heart of the Romantic Zone. An Adults Only boutique hotel celebrating Mexican design with clean aesthetics, local textiles, and a perfect rooftop terrace for unpretentious sunsets.',
       tag: 'Smart design and local pulse',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/iOevGf3QhC?aid=lagomplan&campaign=lagomplan-puertovallartaromancerelax&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Puerto+Vallarta%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fpuerto-vallarta-romance-relax',
+      archetypes: ['Parejas'],
     },
   ],
 

@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
       description: 'Lujo en las alturas. Ubicado en los pisos superiores de un rascacielos en Reforma, ofrece las vistas más románticas del Castillo de Chapultepec desde tu cama.',
       tag: 'Lujo en las nubes',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/2oeHmjK31f?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Brick Hotel',
@@ -103,6 +104,7 @@ export const guide: FlatGuide = {
       description: 'Una joya en la Roma Norte. Combina una fachada de principios del siglo XX con un interior moderno y minimalista. Es el punto de partida ideal para explorar galerías a pie.',
       tag: 'Modern Heritage',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/4GOkOu55mT?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Casa Cuenca',
@@ -111,6 +113,7 @@ export const guide: FlatGuide = {
       description: 'Un refugio contemporáneo que prioriza el descanso y la ubicación estratégica. Sus habitaciones están diseñadas para estancias largas y cómodas, complementadas por un restaurante romántico.',
       tag: 'Ubicación imbatible y confort',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/UifOIGl3dG?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas'],
     },
   ],
 

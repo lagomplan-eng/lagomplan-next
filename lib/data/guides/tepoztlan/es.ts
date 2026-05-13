@@ -101,6 +101,7 @@ export const guide: FlatGuide = {
       description: 'Es el estándar de oro del romance en Tepoztlán. Jardines impecables y una de las mejores albercas de México. Cero ruido, máximo lujo.',
       tag: 'Cero ruido, máximo lujo',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/Vz3HyMwMOc?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Posada del Tepozteco',
@@ -109,6 +110,7 @@ export const guide: FlatGuide = {
       description: 'Ubicación histórica con la mejor vista al cerro desde la terraza. Ideal para desayunos largos con el Tepozteco de fondo.',
       tag: 'El corazón del pueblo',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/vBJnnsMdHA?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Boutique Casa Fernanda',
@@ -117,6 +119,7 @@ export const guide: FlatGuide = {
       description: 'Servicio impecable y un spa de primer nivel diseñado para parejas. Su restaurante, La Veladora, es imperdible.',
       tag: 'Wellness y gastronomía',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/s0Fk2Y3dyy?aid=lagomplan&campaign=lagomplan-tepoztlanromanticedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tepoztl%C3%A1n%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftepoztlan-romantic-edition',
+      archetypes: ['Parejas'],
     },
   ],
 

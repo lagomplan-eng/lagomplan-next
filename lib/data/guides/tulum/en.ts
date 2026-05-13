@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
       description: 'Sustainable luxury in high-design tents on the beach. Ideal for a solo traveler for its communal atmosphere, shared dinners, and welcome rituals.',
       tag: 'Eco-chic and connection',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/KVQtrW7le8?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Dune Boutique Hotel',
@@ -139,6 +140,7 @@ export const guide: FlatGuide = {
       description: 'A wellness sanctuary where you can start the day with beachfront yoga and explore by bicycle, then retreat to a Mediterranean design atmosphere that blends jungle and Caribbean.',
       tag: 'Wellness and beachfront luxury',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Astral Tulum',
@@ -147,6 +149,7 @@ export const guide: FlatGuide = {
       description: 'Directly on the beach, offering stylish private suites. The perfect retreat for those seeking Caribbean aesthetics without sacrificing full-service comfort.',
       tag: 'Beachfront and versatile',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: [],
     },
   ],
 

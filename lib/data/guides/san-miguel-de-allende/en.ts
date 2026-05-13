@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
       description: 'The gold standard of luxury in the city. Spacious suites and impeccable service. The Luna Rooftop bar is the unmissable gathering point for watching San Miguel come alive at dusk.',
       tag: 'The gold standard',
       affiliateUrl: 'https://expedia.stay22.com/lagomplan/Lsgi-5VOmE?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Casa Blanca 7',
@@ -139,6 +140,7 @@ export const guide: FlatGuide = {
       description: 'A Mediterranean luxury retreat in the heart of San Miguel. The 5-star atmosphere blends the serenity of internal gardens with wellness amenities that invite total pause.',
       tag: 'Sophistication and absolute calm',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/ZdY-QecWVB?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Selina San Miguel de Allende',
@@ -147,6 +149,7 @@ export const guide: FlatGuide = {
       description: 'Don\'t be fooled by the name — the "Private Suites" in the historic mansion are spacious, very stylish, and a fraction of the cost of larger luxury hotels. Unbeatable location (steps from the Parroquia).',
       tag: 'Smart Value in the center',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/ElNfHFUOaY?aid=lagomplan&campaign=lagomplan-sanmigueldeallendeparejasterrazas&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=San+Miguel+de+Allende%2C+Guanajuato%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fsan-miguel-de-allende-parejas-terrazas',
+      archetypes: ['Parejas'],
     },
   ],
 
