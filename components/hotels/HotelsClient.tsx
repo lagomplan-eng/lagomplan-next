@@ -95,15 +95,24 @@ export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
     [hotels, priceFilter, archetypeFilter, destinationFilter, searchVal],
   )
 
-  // Neighborhoods are contextual — surface only the picked city's barrios
-  // when the destination filter is active. Match on cityName so it lines
-  // up with the destination chip labels the user clicked.
-  const selectedNeighborhoods = useMemo(
-    () => destinationFilter
-      ? neighborhoods.filter(n => n.cityName === destinationFilter)
-      : [],
-    [neighborhoods, destinationFilter],
-  )
+  // Neighborhoods are contextual — surface only the picked city's barrios.
+  // Two paths land here:
+  //   1. Explicit destination filter pill — exact match on cityName.
+  //   2. Search input narrows the visible hotels to a single destination
+  //      (e.g. typing "cdmx" or "mexico" matches CDMX hotels only) — fall
+  //      through to inferring the city from the filtered set.
+  // If filters span more than one city, the section stays hidden.
+  const selectedNeighborhoods = useMemo(() => {
+    if (destinationFilter) {
+      return neighborhoods.filter(n => n.cityName === destinationFilter)
+    }
+    const dests = new Set(filtered.map(h => h.destination))
+    if (dests.size === 1) {
+      const only = dests.values().next().value as string
+      return neighborhoods.filter(n => n.cityName === only)
+    }
+    return []
+  }, [neighborhoods, destinationFilter, filtered])
 
   const handleArchetypeClick = (f: ArchetypeFilter) => {
     if (f.comingSoon) {
