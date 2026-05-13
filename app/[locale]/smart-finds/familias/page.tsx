@@ -49,16 +49,19 @@ export default async function Page({ params }: Props) {
       <header style={{ borderBottom: `1px solid ${BORDER}` }}>
         <div className="page-inner">
 
-          {/* Section-label row */}
+          {/* Section-label row — line-free. Spacing carries the
+              relationship between the two labels; the horizontal rule
+              between them was the most "magazine layout" tell on the
+              whole page. */}
           <div style={{
             padding: '36px 0 0',
-            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{
               fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
               letterSpacing: '.24em', color: SAGE,
             }}>{isES ? 'SMART FINDS / FAMILIAS' : 'SMART FINDS / FAMILIES'}</div>
-            <div style={{ flex: 1, minWidth: 40, height: 1, background: BORDER }} />
             <div style={{
               fontFamily: "'Manrope',sans-serif", fontSize: 9,
               letterSpacing: '.14em', color: MUTED,
@@ -114,28 +117,24 @@ export default async function Page({ params }: Props) {
             </div>
           </div>
 
-          {/* 2-metric strip */}
+          {/* 2-metric strip — no border-top, no border-right between
+              metrics. Just two stat blocks with horizontal gap. */}
           <div style={{
-            display: 'flex',
-            borderTop: `1px solid ${BORDER}`,
-            marginTop: 32,
+            display: 'flex', gap: 56,
+            marginTop: 40,
+            paddingBottom: 32,
           }}>
             {([
               ['03', isES ? 'kits curados'          : 'curated kits'],
               ['0',  isES ? 'patrocinios pagados'   : 'paid sponsorships'],
-            ] as const).map(([n, l], i) => (
-              <div key={l} style={{
-                padding: '14px 0',
-                paddingLeft: i > 0 ? 32 : 0,
-                borderRight: i === 0 ? `1px solid ${BORDER}` : 'none',
-                marginRight: i === 0 ? 32 : 0,
-              }}>
+            ] as const).map(([n, l]) => (
+              <div key={l}>
                 <div style={{
-                  fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 900, color: PINE,
+                  fontFamily: "'Fraunces',serif", fontSize: 28, fontWeight: 900, color: PINE,
                 }}>{n}</div>
                 <div style={{
-                  fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED,
-                  letterSpacing: '.1em', marginTop: 2,
+                  fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED,
+                  marginTop: 4,
                 }}>{l}</div>
               </div>
             ))}
@@ -154,15 +153,10 @@ export default async function Page({ params }: Props) {
             <KitSection kit={kit} isLast={i === KITS.length - 1} />
             {i < KITS.length - 1 && (
               <div style={{
-                display: 'flex', alignItems: 'center', gap: 16,
+                display: 'flex', justifyContent: 'center',
                 margin: '80px 0',
-              }}>
-                <div style={{ height: 1, flex: 1, background: BORDER }} />
-                <div style={{
-                  fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED,
-                }}>✦</div>
-                <div style={{ height: 1, flex: 1, background: BORDER }} />
-              </div>
+                fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED,
+              }}>✦</div>
             )}
           </div>
         ))}

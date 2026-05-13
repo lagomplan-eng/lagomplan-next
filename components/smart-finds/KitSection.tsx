@@ -15,7 +15,7 @@
 import type { Kit } from '../../lib/smart-finds'
 import FlatKit from './FlatKit'
 import MochilaKit from './MochilaKit'
-import { PINE, SAGE, SAND, MUTED, BORDER } from './tokens'
+import { PINE, SAGE, SAND, MUTED } from './tokens'
 
 interface Props {
   kit:    Kit
@@ -31,39 +31,33 @@ export default function KitSection({ kit, isLast }: Props) {
         scrollMarginTop: 80,
       }}
     >
-      {/* Header */}
+      {/* Header — line-free. The faded big numeral on its own carries
+          enough visual weight; the old horizontal divider + "KIT 02"
+          marker felt brutalist next to the rest of the site. */}
       <div style={{ marginBottom: 32 }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20,
-        }}>
-          <div style={{
-            fontFamily: "'Fraunces',serif", fontStyle: 'italic',
-            fontSize: 56, fontWeight: 900,
-            color: `${PINE}0D`, lineHeight: 1, flexShrink: 0,
-          }}>{kit.num}</div>
-          <div style={{ flex: 1, height: 1, background: BORDER }} />
-          <div style={{
-            fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
-            letterSpacing: '.2em', color: MUTED,
-          }}>KIT {kit.num}</div>
-        </div>
+          fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+          letterSpacing: '.18em', color: SAGE, marginBottom: 4,
+        }}>KIT {kit.num}</div>
 
         <h2 style={{
           fontFamily: "'Fraunces',serif", fontStyle: 'italic',
           fontSize: 40, fontWeight: 700, color: PINE,
-          lineHeight: 1, letterSpacing: '-.02em', marginBottom: 5,
+          lineHeight: 1, letterSpacing: '-.02em', marginBottom: 6,
         }}>{kit.title}</h2>
 
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 13,
-          color: SAGE, marginBottom: 20,
+          fontFamily: "'Manrope',sans-serif", fontSize: 14,
+          color: MUTED, marginBottom: 16,
         }}>{kit.subtitle}</div>
 
+        {/* Scene — no left-bar. Italic Fraunces is enough visual
+            differentiation; the bar read as a printed pull-quote
+            rule, which clashed with the softer chrome elsewhere. */}
         <p style={{
           fontFamily: "'Fraunces',serif", fontStyle: 'italic',
-          fontSize: 14, color: '#7A7773', lineHeight: 1.8,
-          borderLeft: `2px solid ${BORDER}`, paddingLeft: 18,
-          maxWidth: 600,
+          fontSize: 15, color: '#5A5754', lineHeight: 1.7,
+          maxWidth: 640,
           marginBottom: kit.omit ? 16 : 0,
         }}>{kit.scene}</p>
 

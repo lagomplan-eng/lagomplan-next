@@ -15,7 +15,8 @@
 import { useState } from 'react'
 import type { Product } from '../../lib/smart-finds'
 import IconZone from './IconZone'
-import { PINE, SAGE, SAND, SURFACE, MUTED, BORDER, CARD_RADIUS } from './tokens'
+import { PINE, SAGE, SURFACE, MUTED, BORDER, CARD_RADIUS } from './tokens'
+import { toSentenceCase } from './text'
 
 interface Props {
   product: Product
@@ -41,40 +42,45 @@ export default function ProductCard({ product }: Props) {
       <IconZone product={product} height={72} idPrefix="d" />
 
       <div style={{
-        padding: '18px 18px 16px',
+        padding: '20px 20px 18px',
         display: 'flex', flexDirection: 'column', flex: 1,
       }}>
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
-          letterSpacing: '.2em', color: SAGE, marginBottom: 4,
+          fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+          letterSpacing: '.18em', color: SAGE, marginBottom: 6,
         }}>{product.brand}</div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontSize: 15, fontWeight: 700,
-          color: PINE, lineHeight: 1.2, marginBottom: 5,
+          fontFamily: "'Fraunces',serif", fontSize: 17, fontWeight: 700,
+          color: PINE, lineHeight: 1.2, marginBottom: 6,
         }}>{product.name}</div>
 
+        {/* Tag — softer than the old "— ALL CAPS" treatment. Sentence
+            case + Manrope reads as a product subtitle, not a marker. */}
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 600,
-          letterSpacing: '.1em', color: MUTED, marginBottom: 12,
-        }}>— {product.tag}</div>
+          fontFamily: "'Manrope',sans-serif", fontSize: 11, fontWeight: 500,
+          color: MUTED, marginBottom: 12,
+        }}>{toSentenceCase(product.tag)}</div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontStyle: 'italic', fontSize: 12,
-          color: '#5A5754', lineHeight: 1.7, flex: 1, marginBottom: 14,
+          fontFamily: "'Fraunces',serif", fontStyle: 'italic', fontSize: 13,
+          color: '#5A5754', lineHeight: 1.7, flex: 1, marginBottom: 16,
         }}>&ldquo;{product.opinion}&rdquo;</div>
 
+        {/* Footer — no divider. The whitespace + change in alignment
+            is enough rhythm; the borderTop read as print-y next to
+            soft-corner cards elsewhere on the site. */}
         <div style={{
-          borderTop: `1px solid ${BORDER}`, paddingTop: 12,
           display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          gap: 12,
         }}>
           <div>
             <div style={{
-              fontFamily: "'Fraunces',serif", fontSize: 13, fontWeight: 700,
+              fontFamily: "'Manrope',sans-serif", fontSize: 13, fontWeight: 700,
               color: PINE,
             }}>{product.price}</div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 8, color: MUTED,
+              fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED,
               marginTop: 2,
             }}>{product.where}</div>
           </div>
@@ -84,14 +90,15 @@ export default function ProductCard({ product }: Props) {
             rel="noopener noreferrer sponsored"
             style={{
               background: hov ? PINE : 'transparent',
-              color:      hov ? SAND : PINE,
+              color:      hov ? '#FFFFFF' : PINE,
               border: `1px solid ${PINE}`,
+              borderRadius: 999,
               fontFamily: "'Manrope',sans-serif",
-              fontSize: 8, fontWeight: 700, letterSpacing: '.1em',
-              padding: '7px 12px', textDecoration: 'none',
-              transition: 'all .14s',
+              fontSize: 11, fontWeight: 600,
+              padding: '8px 16px', textDecoration: 'none',
+              transition: 'all .14s', whiteSpace: 'nowrap',
             }}
-          >VER →</a>
+          >Ver →</a>
         </div>
       </div>
     </div>
