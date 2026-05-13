@@ -45,9 +45,9 @@ export const KITS: Kit[] = [
       type: 'flat',
       products: [
         { productId: 'doona-car-seat-stroller',  hero: true },
-        { productId: 'babyzen-yoyo2'                       },
+        { productId: 'gb-pockit-all-city'                  },
         { productId: 'ergobaby-omni-breeze'                },
-        { productId: 'samsonite-cabin-suitcase'            },
+        { productId: 'mia-mily-cabin-suitcase'             },
         { productId: 'apple-airtag-4pack'                  },
       ],
     },
