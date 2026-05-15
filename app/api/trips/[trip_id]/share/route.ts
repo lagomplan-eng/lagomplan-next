@@ -41,7 +41,21 @@ export async function POST(
   }
 
   // ── Return existing share_id if already set ─────────────────────────────────
+  // ALSO re-assert is_shared: true. The share-view page redirects to /home
+  // when is_shared is falsy, so a row with share_id set but is_shared=false
+  // (legacy data, schema migration that didn't backfill, manual DB edit) gave
+  // a valid-looking URL that bounced recipients to the homepage. Setting it
+  // on every POST keeps the endpoint idempotent.
   if (trip.share_id) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error: flagError } = await (supabase as any)
+      .from('trips')
+      .update({ is_shared: true })
+      .eq('id', trip_id)
+    if (flagError) {
+      console.error('[trips/share] is_shared re-assert error:', flagError.message)
+      return NextResponse.json({ error: flagError.message }, { status: 500 })
+    }
     return NextResponse.json({ shareId: trip.share_id })
   }
 
