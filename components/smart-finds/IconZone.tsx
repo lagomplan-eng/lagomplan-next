@@ -34,8 +34,10 @@ export default function IconZone({
   const patternId  = `${idPrefix}${product.id}`
 
   // Real product photo — replaces the SVG glyph + dotted pattern.
-  // Object-contain so the whole product is visible on both the 72-px
-  // grid card and the ~220-px hero card.
+  // Object-cover so the image fills the slot edge-to-edge; assumes
+  // Amazon-style centred product shots where light cropping is safe.
+  // Pair with a generous height (≥180 px on ProductCard) to keep the
+  // crop honest.
   if (product.image) {
     return (
       <div style={{
@@ -47,7 +49,7 @@ export default function IconZone({
           alt={`${product.brand} ${product.name}`}
           fill
           sizes="(max-width: 720px) 100vw, (max-width: 1140px) 50vw, 360px"
-          style={{ objectFit: 'contain', padding: 6 }}
+          style={{ objectFit: 'cover' }}
         />
       </div>
     )
