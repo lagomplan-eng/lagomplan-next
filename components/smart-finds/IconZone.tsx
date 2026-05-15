@@ -8,6 +8,7 @@
  * Pure render — safe in Server Components.
  */
 
+import Image from 'next/image'
 import type { Product } from '../../lib/smart-finds'
 import { ICONS } from '../../lib/smart-finds'
 import { PINE, SAND } from './tokens'
@@ -31,6 +32,26 @@ export default function IconZone({
 }: Props) {
   const renderIcon = product.icon ? ICONS[product.icon] : null
   const patternId  = `${idPrefix}${product.id}`
+
+  // Real product photo — replaces the SVG glyph + dotted pattern.
+  // Object-contain so the whole product is visible on both the 72-px
+  // grid card and the ~220-px hero card.
+  if (product.image) {
+    return (
+      <div style={{
+        width: '100%', height, background,
+        position: 'relative', overflow: 'hidden', flexShrink: 0,
+      }}>
+        <Image
+          src={product.image}
+          alt={`${product.brand} ${product.name}`}
+          fill
+          sizes="(max-width: 720px) 100vw, (max-width: 1140px) 50vw, 360px"
+          style={{ objectFit: 'contain', padding: 6 }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div style={{

@@ -35,6 +35,7 @@ export const PRODUCTS: Record<string, Product> = {
   'doona-car-seat-stroller': {
     id:      'doona-car-seat-stroller',
     icon:    'doona',
+    image:   '/images/smart-finds/doona-car-seat-stroller.jpg',
     brand:   'DOONA',
     name:    'Silla de auto + carriola',
     tag:     'LA INVERSIÓN QUE SE PAGA SOLA',
@@ -46,6 +47,7 @@ export const PRODUCTS: Record<string, Product> = {
   'gb-pockit-all-city': {
     id:      'gb-pockit-all-city',
     icon:    'stroller',
+    image:   '/images/smart-finds/gb-pockit-all-city.jpg',
     brand:   'GB',
     name:    'Pockit+ All City — carriola ultra compacta',
     tag:     'ENTRA EN CABINA. PUNTO.',
@@ -57,6 +59,7 @@ export const PRODUCTS: Record<string, Product> = {
   'ergobaby-omni-breeze': {
     id:      'ergobaby-omni-breeze',
     icon:    'carrier',
+    image:   '/images/smart-finds/ergobaby-omni-breeze.jpg',
     brand:   'ERGOBABY',
     name:    'Omni Breeze — portabebé',
     tag:     'MANOS LIBRES EN AEROPUERTOS',
@@ -68,6 +71,7 @@ export const PRODUCTS: Record<string, Product> = {
   'mia-mily-cabin-suitcase': {
     id:      'mia-mily-cabin-suitcase',
     icon:    'suitcase',
+    image:   '/images/smart-finds/mia-mily-cabin-suitcase.jpg',
     brand:   'MIA MILY',
     name:    'Maleta de cabina',
     tag:     'TODO LO ESENCIAL, CONTIGO',
@@ -79,6 +83,7 @@ export const PRODUCTS: Record<string, Product> = {
   'apple-airtag-4pack': {
     id:      'apple-airtag-4pack',
     icon:    'airtag',
+    image:   '/images/smart-finds/apple-airtag-4pack.jpg',
     brand:   'APPLE',
     name:    'AirTag 4-pack',
     tag:     'RASTREADOR DE PAZ MENTAL',

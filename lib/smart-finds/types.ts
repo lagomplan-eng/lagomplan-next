@@ -47,6 +47,9 @@ export interface Product {
   link:      string
   /** SVG icon key — used by kit cards (Familias page). */
   icon?:     IconKey
+  /** Real product photo path (absolute, e.g. '/images/smart-finds/doona.jpg').
+   *  When present, the card renders this in place of the SVG icon. */
+  image?:    string
   /** Display emoji — used by the Hotels-page strip cards. */
   emoji?:    string
   /** Editorial connective shown under the opinion on some strip cards. */
