@@ -39,9 +39,11 @@ export default function ProductCard({ product }: Props) {
         overflow: 'hidden',  // clips the IconZone's square corners to the rounded card
       }}
     >
-      {/* Image-bearing products get a taller slot (180 px) so the photo
-          actually reads; SVG-icon products keep the compact 72 px panel. */}
-      <IconZone product={product} height={product.image ? 180 : 72} idPrefix="d" />
+      {/* Image-bearing products get a 300-px square-ish slot so the
+          photo actually reads; SVG-icon products keep the compact
+          72-px panel. Slot width follows the card (max ~608 px at
+          desktop), so 300 px tall ≈ 2:1 landscape ratio. */}
+      <IconZone product={product} height={product.image ? 300 : 72} idPrefix="d" />
 
       <div style={{
         padding: '20px 20px 18px',
