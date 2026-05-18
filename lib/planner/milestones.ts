@@ -79,6 +79,7 @@ function categorizeCheck(check: CheckInput): MilestoneId {
     case '🚗': return 'traslados'
     case '🎫':
     case '🍽': return 'reservas'
+    case '🧳': return 'listos'
   }
   // Text-based fallback.
   const t = check.text.toLowerCase()

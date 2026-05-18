@@ -487,6 +487,16 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
       text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
       done: false,
     })
+    // Universal pre-trip: pack. Without this auto-inject the `Listos`
+    // milestone in the Readiness Bar perpetually shows as n/a (dimmed)
+    // because the AI rarely emits packing checks on its own. Same
+    // pattern as the hotel auto-inject — stable ID, locale-aware text.
+    checks.push({
+      id:   'pretrip-pack',
+      icon: '🧳',
+      text: locale === 'en' ? 'Pack bag' : 'Empacar maleta',
+      done: false,
+    })
   }
 
   days.forEach(day => {
@@ -3503,7 +3513,7 @@ export default function TripResult({ params }: Props) {
                                         <button
                                           onClick={() => openBookingModal(item)}
                                           className={[
-                                            'flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase px-2.5 py-[5px] rounded-[4px] hover:-translate-y-px whitespace-nowrap',
+                                            'flex items-center gap-1 font-sans text-[12px] font-semibold px-3 py-[6px] rounded-[4px] hover:-translate-y-px whitespace-nowrap',
                                             itemIsBooked
                                               ? 'bg-[rgba(15,58,51,.08)] text-[#0F3A33] hover:bg-[rgba(15,58,51,.14)]'
                                               : 'bg-[#0F3A33] text-white hover:bg-[#1A5247]',
