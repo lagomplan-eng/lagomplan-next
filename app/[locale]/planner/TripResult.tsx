@@ -18,6 +18,9 @@ import { computeNights } from '../../../lib/planner/accommodations'
 import { titleCaseCity } from '../../../lib/planner/format'
 import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib/planner/classify-block'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
+import TripReadinessBar from '../../../components/planner/TripReadinessBar'
+import StatusPill from '../../../components/planner/StatusPill'
+import { computeMilestones } from '../../../lib/planner/milestones'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -173,25 +176,37 @@ const TYPE_INFO: Record<ItemType, { icon: string; label: string }> = {
   transfer:   { icon: '🚗', label: 'Transfer' },
 }
 
+// Type-color rail — muted Lagom tones. Keeps the at-a-glance type cue
+// for itinerary scanning (hotel = pine, tour = sage, etc.) without the
+// loud saturated palette the page had before. Same 5 distinguishable
+// hues, all dialed into the brand's calm-execution range.
 const TYPE_BORDER: Record<ItemType, string> = {
-  hotel: '#0F3A33', tour: '#0891B2', restaurant: '#D97706',
-  free: '#CEC8C0', transfer: '#2D4F6C',
+  hotel:      '#0F3A33',   // Pine — primary
+  tour:       '#6B8F86',   // Sage — soft secondary
+  restaurant: '#C49B6E',   // Muted warm tan (was saturated amber)
+  free:       '#DDD8D2',   // Neutral
+  transfer:   '#7A8B9A',   // Muted blue-grey (was saturated navy)
 }
 
+// Row backgrounds were tinting every itinerary row with the type colour.
+// All transparent now — the left rail + the icon carry the type signal.
 const TYPE_ROW_BG: Record<ItemType, string> = {
-  hotel:      'rgba(15,58,51,.06)',
-  tour:       'rgba(8,145,178,.06)',
-  restaurant: 'rgba(217,119,6,.07)',
+  hotel:      'transparent',
+  tour:       'transparent',
+  restaurant: 'transparent',
   free:       'transparent',
-  transfer:   'rgba(45,79,108,.06)',
+  transfer:   'transparent',
 }
 
+// Type badge — unified muted treatment. The icon + uppercase label still
+// reads as the type cue; the per-type colour-chip chrome that competed
+// with the StatusPill is gone.
 const TYPE_BADGE: Record<ItemType, { color: string; bg: string }> = {
-  hotel:      { color: '#0F3A33', bg: 'rgba(15,58,51,.07)' },
-  tour:       { color: '#0E7490', bg: '#ECFEFF' },
-  restaurant: { color: '#92400E', bg: '#FFFBEB' },
-  free:       { color: '#7A7A76', bg: '#EDE7E1' },
-  transfer:   { color: '#2D4F6C', bg: '#EBF4FF' },
+  hotel:      { color: '#7A7A76', bg: 'transparent' },
+  tour:       { color: '#7A7A76', bg: 'transparent' },
+  restaurant: { color: '#7A7A76', bg: 'transparent' },
+  free:       { color: '#B8B5AF', bg: 'transparent' },
+  transfer:   { color: '#7A7A76', bg: 'transparent' },
 }
 
 // ─── Booking providers ────────────────────────────────────────────────────────
@@ -215,6 +230,23 @@ const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
   tour:       'Reservar experiencia',
   restaurant: 'Reservar mesa',
   transfer:   'Reservar transfer',
+}
+
+// Per-type day-item booking CTA labels. Replaces the old generic
+// "Reservar / Ver opciones" with action-verb copy ("Reservar mesa",
+// "Reservar traslado") per the trip-OS rework brief. When the matching
+// check is done, the button flips to a "✓ Reservado" affordance.
+const BOOKING_CTA_ES: Partial<Record<ItemType, string>> = {
+  hotel:      'Reservar hotel',
+  transfer:   'Reservar traslado',
+  restaurant: 'Reservar mesa',
+  tour:       'Reservar tour',
+}
+const BOOKING_CTA_EN: Partial<Record<ItemType, string>> = {
+  hotel:      'Book hotel',
+  transfer:   'Book transfer',
+  restaurant: 'Book table',
+  tour:       'Book tour',
 }
 
 // ── Canonical budget categories ───────────────────────────────────────────────
@@ -259,9 +291,19 @@ function providerFromUrl(url: string): string {
 
 // ─── Helper components ────────────────────────────────────────────────────────
 
-function CheckRow({ check, onToggle }: { check: CheckItem; onToggle: (id: string) => void }) {
+function CheckRow({
+  check, onToggle, locale,
+}: {
+  check:    CheckItem
+  onToggle: (id: string) => void
+  locale:   'es' | 'en'
+}) {
   return (
-    <div className="flex items-center gap-[7px] py-[7px] border-b border-[#E4DFD8] last:border-b-0">
+    <div
+      data-check-row
+      data-check-id={check.id}
+      className="flex items-center gap-[7px] py-[7px] border-b border-[#E4DFD8] last:border-b-0 transition-colors rounded-[6px] -mx-1 px-1"
+    >
       <button
         className="w-[15px] h-[15px] rounded-[3px] border-[1.5px] shrink-0 flex items-center justify-center transition-all"
         style={check.done
@@ -280,15 +322,14 @@ function CheckRow({ check, onToggle }: { check: CheckItem; onToggle: (id: string
       >
         {check.text}
       </span>
-      <span
-        className="font-mono text-[9px] font-medium tracking-[.06em] uppercase px-[5px] py-px rounded-full shrink-0 whitespace-nowrap"
-        style={check.done
-          ? { color: '#6B8F86', background: 'rgba(107,143,134,.12)' }
-          : { color: '#B8B5AF', background: '#EDE7E1' }
-        }
-      >
-        {check.done ? '✓ Listo' : 'Pendiente'}
-      </span>
+      {/* StatusPill — unified execution-status language across surfaces.
+          Pending (not yet booked) ↔ Booked (action complete). Same pill
+          appears on day-item rows so checklist + itinerary speak in sync. */}
+      <StatusPill
+        status={check.done ? 'booked' : 'pending'}
+        locale={locale}
+        size="xs"
+      />
     </div>
   )
 }
@@ -444,6 +485,16 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
       id:   'pretrip-book-hotel',
       icon: '🏨',
       text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
+      done: false,
+    })
+    // Universal pre-trip: pack. Without this auto-inject the `Listos`
+    // milestone in the Readiness Bar perpetually shows as n/a (dimmed)
+    // because the AI rarely emits packing checks on its own. Same
+    // pattern as the hotel auto-inject — stable ID, locale-aware text.
+    checks.push({
+      id:   'pretrip-pack',
+      icon: '🧳',
+      text: locale === 'en' ? 'Pack bag' : 'Empacar maleta',
       done: false,
     })
   }
@@ -2513,6 +2564,24 @@ export default function TripResult({ params }: Props) {
   const doneChecks  = checks.filter(c => c.done).length
   const totalChecks = checks.length
   const progressPct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0
+  const pendingCount = totalChecks - doneChecks
+
+  // Set of check IDs — lets each day-item lookup in O(1) whether it has
+  // a corresponding bookable check (StatusPill visibility) and whether
+  // that check is done (recommended ↔ booked transition).
+  const allCheckIdsSet = useMemo(() => new Set(checks.map(c => c.id)), [checks])
+
+  // Trip Readiness System — buckets the flat check list into 5 milestone
+  // categories (Itinerario / Hospedaje / Traslados / Reservas / Listos).
+  // Drives the milestone tracker pills in <TripReadinessBar />. Cheap to
+  // recompute; recomputes whenever the check list changes.
+  const milestones = useMemo(
+    () => computeMilestones({
+      daysCount: days.length,
+      checks: checks.map(c => ({ id: c.id, text: c.text, done: c.done, icon: c.icon })),
+    }),
+    [days.length, checks],
+  )
   const nextCheck   = checks.find(c => !c.done)
   const checksBefore = checks.filter(c => !c.day)
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
@@ -3171,44 +3240,29 @@ export default function TripResult({ params }: Props) {
         </div>
       </div>
 
-      {/* ── CONTROL BAR ───────────────────────────────────────────────────── */}
+      {/* ── TRIP READINESS BAR (Phase 1 of "trip OS" rework) ───────────────
+          Replaces the old "0 de N listos" strip. Same Pine container so
+          sticky positioning + visual continuity stay intact; bar internals
+          now carry the 3-zone command-center layout (% / milestones /
+          next-step CTA) on desktop and a collapsed pill on mobile. */}
       <div data-trip="control-bar" className="bg-[#0F3A33]">
         <div className="max-w-[1160px] mx-auto px-7">
-          <div className="flex items-center h-[50px]">
-
-            {/* Progress */}
-            <div className="flex items-center gap-[11px] pr-[22px] border-r border-white/10 shrink-0 min-w-[150px]">
-              <span className="font-mono text-[11px] font-medium tracking-[.04em] text-white/90 whitespace-nowrap">
-                {totalChecks > 0 ? `${doneChecks} de ${totalChecks} listos` : `${days.length} días`}
-              </span>
-              <div className="w-[72px] h-[3px] bg-white/15 rounded-full overflow-hidden shrink-0">
-                <div
-                  className="h-full bg-[#A8C4BE] rounded-full transition-all duration-1000"
-                  style={{ width: `${totalChecks > 0 ? progressPct : (days.length > 0 ? 100 : 0)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Next step */}
-            <div className="flex items-center gap-[9px] px-[22px] flex-1 min-w-0">
-              <span className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-white/40 shrink-0">
-                Siguiente
-              </span>
-              {nextCheck ? (
-                <>
-                  <span className="text-[13px] shrink-0">{nextCheck.icon}</span>
-                  <span className="text-[12px] text-white/80 whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">
-                    {nextCheck.text}
-                  </span>
-                </>
-              ) : days.length > 0 ? (
-                <span className="text-[12px] text-white/60 flex-1">
-                  {days[0]?.title || `Día 1`}
-                </span>
-              ) : null}
-            </div>
-
-          </div>
+          <TripReadinessBar
+            readinessPct={progressPct}
+            totalChecks={totalChecks}
+            doneChecks={doneChecks}
+            pendingCount={pendingCount}
+            milestones={milestones}
+            nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
+            daysCount={days.length}
+            locale={locale === 'en' ? 'en' : 'es'}
+            // Bar CTA now marks the next check done directly. The bar shows
+            // an inline "✓ Reservado · Deshacer" affordance for 4 s after
+            // each click so mis-clicks are recoverable without leaving the
+            // top of the page. toggleCheck is idempotent — same handler
+            // services both the mark-done and the undo paths.
+            onToggleCheck={toggleCheck}
+          />
         </div>
       </div>
 
@@ -3269,6 +3323,15 @@ export default function TripResult({ params }: Props) {
                   : undefined,
                 locale:      locale === 'en' ? 'en' : 'es',
               } satisfies TripDestinationContext}
+              // Drives the accommodation StatusPill — recommended ↔ booked.
+              // Same milestone state that powers the top Readiness Bar, so
+              // both surfaces flip in sync when the user ticks the auto-
+              // injected "Reservar hotel" check.
+              hospedajeBooked={milestones.find(m => m.id === 'hospedaje')?.state === 'done'}
+              // Backstop signal — if ctx.nights resolves to 0 (multi-city
+              // trips with hydration hiccups), days.length keeps the
+              // section from disappearing.
+              daysCount={days.length}
             />
 
             {/* Section header */}
@@ -3396,12 +3459,18 @@ export default function TripResult({ params }: Props) {
                                         {item.time}
                                       </span>
                                     )}
-                                    {/* Status dot — matches prototype .item-pending-dot */}
-                                    <span
-                                      className="w-[6px] h-[6px] rounded-full shrink-0"
-                                      style={{ background: tbadge.color, opacity: 0.3 }}
-                                      title="Pendiente"
-                                    />
+                                    {/* StatusPill — only for items that emit a checklist entry
+                                        (hotel / transfer / tour / restaurant). Flips from
+                                        ⭐ Recomendado → ✅ Reservado the moment the matching
+                                        check is ticked in the sidebar. Same data feed as the
+                                        top Readiness Bar so all surfaces move in sync. */}
+                                    {allCheckIdsSet.has(`check-${item.id}`) && (
+                                      <StatusPill
+                                        status={doneCheckIds.has(`check-${item.id}`) ? 'booked' : 'recommended'}
+                                        locale={locale === 'en' ? 'en' : 'es'}
+                                        size="xs"
+                                      />
+                                    )}
                                   </div>
                                   <div data-trip-item="name" className="text-[13px] font-medium text-[#1C1C1A] leading-[1.3] mb-[3px]">
                                     {item.name}
@@ -3419,15 +3488,32 @@ export default function TripResult({ params }: Props) {
                                     </div>
                                   )}
                                   <div className="flex flex-col gap-[3px] items-end">
-                                    {/* Opens booking modal — hidden for libre/free items */}
-                                    {item.type !== 'free' && (
-                                    <button
-                                      onClick={() => openBookingModal(item)}
-                                      className="flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase text-white bg-[#0F3A33] px-2.5 py-[5px] rounded-[4px] hover:bg-[#1A5247] hover:-translate-y-px transition-all whitespace-nowrap"
-                                    >
-                                      {item.affiliate || item.bookingOptions ? 'Ver opciones' : 'Reservar'}
-                                    </button>
-                                    )}
+                                    {/* Opens booking modal — hidden for libre/free items.
+                                        Label is contextual per type ("Reservar mesa",
+                                        "Reservar traslado", …) and flips to "✓ Reservado"
+                                        once the matching check is ticked. */}
+                                    {item.type !== 'free' && (() => {
+                                      const itemIsBooked = doneCheckIds.has(`check-${item.id}`)
+                                      const ctaDict     = locale === 'en' ? BOOKING_CTA_EN : BOOKING_CTA_ES
+                                      const ctaFallback = locale === 'en' ? 'Book' : 'Reservar'
+                                      const buttonLabel = itemIsBooked
+                                        ? (locale === 'en' ? '✓ Booked' : '✓ Reservado')
+                                        : (ctaDict[item.type] ?? ctaFallback)
+                                      return (
+                                        <button
+                                          onClick={() => openBookingModal(item)}
+                                          className={[
+                                            'flex items-center gap-1 font-sans text-[12px] font-semibold px-3 py-[6px] rounded-[4px] hover:-translate-y-px whitespace-nowrap',
+                                            itemIsBooked
+                                              ? 'bg-[rgba(15,58,51,.08)] text-[#0F3A33] hover:bg-[rgba(15,58,51,.14)]'
+                                              : 'bg-[#0F3A33] text-white hover:bg-[#1A5247]',
+                                            'transition-all',
+                                          ].join(' ')}
+                                        >
+                                          {buttonLabel}
+                                        </button>
+                                      )
+                                    })()}
                                     <button
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#0F3A33] hover:bg-[rgba(15,58,51,.05)] transition-all"
                                       onClick={() => openEditModal(item, day.n)}
@@ -3519,7 +3605,7 @@ export default function TripResult({ params }: Props) {
                           Antes del viaje
                         </div>
                         {checksBefore.map(check => (
-                          <CheckRow key={check.id} check={check} onToggle={toggleCheck} />
+                          <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
                         ))}
                       </>
                     )}
@@ -3573,7 +3659,7 @@ export default function TripResult({ params }: Props) {
                                 }}
                               >
                                 {dayChecks.map(check => (
-                                  <CheckRow key={check.id} check={check} onToggle={toggleCheck} />
+                                  <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
                                 ))}
                               </div>
                             </div>

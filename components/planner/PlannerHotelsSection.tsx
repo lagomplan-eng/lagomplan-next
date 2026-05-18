@@ -36,12 +36,24 @@ import { effectiveAccommodations } from '../../lib/planner/use-effective-accommo
 import { titleCaseCity } from '../../lib/planner/format'
 import { buildAffiliateLink } from '../../lib/affiliate'
 import { events } from '../../lib/analytics'
+import StatusPill from './StatusPill'
 
 interface Props {
   tripId:           string | null
   accommodations:   Accommodation[] | undefined | null
   /** Server-derived trip context — destination + dates + nights. */
   ctx:              TripDestinationContext
+  /** When true, the Hospedaje milestone has completed (the auto-injected
+   *  "Reservar hotel" check is done). Flips every card's StatusPill from
+   *  'recommended' to 'booked'. Treats all accommodations on the trip as
+   *  a single booking unit — fine for the common 1-hotel trip; refine
+   *  per-card in a later phase if multi-city stays need independent state. */
+  hospedajeBooked?: boolean
+  /** Total itinerary days. Backstop signal: when ctx.nights resolves to 0
+   *  on a multi-city trip (date state lifecycle hiccups), we fall back to
+   *  daysCount - 1 to keep the section visible. Without this, multi-city
+   *  trips like "Buenos Aires → Uruguay" silently lose their hotel CTA. */
+  daysCount?:       number
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -77,15 +89,31 @@ const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
 
 const PRICE_TIER_LABEL_EN = PRICE_TIER_LABEL_ES
 
-export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Props) {
+export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked, daysCount }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
+
+  // Backstop nights value. ctx.nights can resolve to 0 on multi-city trips
+  // where prefStart/prefEnd haven't fully hydrated, which used to make the
+  // whole section disappear (effectiveAccommodations treats nights=0 as
+  // same-day and skips fallback). Fall back to daysCount - 1 so any trip
+  // with a real itinerary keeps its hotel CTA.
+  const effectiveNights = useMemo(() => {
+    if (ctx.nights >= 1) return ctx.nights
+    if (daysCount && daysCount > 1) return daysCount - 1
+    return 0
+  }, [ctx.nights, daysCount])
+
+  const resolvedCtx = useMemo(
+    () => ({ ...ctx, nights: effectiveNights }),
+    [ctx, effectiveNights],
+  )
 
   // Resolve once per render — covers both new-pipeline trips (AI or
   // server fallback) and legacy trips where the field never existed.
   const effective = useMemo(
-    () => effectiveAccommodations(accommodations ?? null, ctx),
-    [accommodations, ctx],
+    () => effectiveAccommodations(accommodations ?? null, resolvedCtx),
+    [accommodations, resolvedCtx],
   )
 
   // Same-day trip → render nothing. (Same-day branch also short-circuits
@@ -106,11 +134,17 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Pr
   const sectionHeadlinePlural   = (n: number) => locale === 'en'
     ? `${n} nights in ${cityDisplay}`
     : `${n} noches en ${cityDisplay}`
-  const sectionHeadline = ctx.nights === 1
-    ? sectionHeadlineSingular(ctx.nights)
-    : sectionHeadlinePlural(ctx.nights)
+  // Use effectiveNights here too so the headline reads "4 noches en X"
+  // rather than "0 noches en X" on the multi-city ctx.nights=0 path.
+  const sectionHeadline = effectiveNights === 1
+    ? sectionHeadlineSingular(effectiveNights)
+    : sectionHeadlinePlural(effectiveNights)
 
-  const ctaPrimary = locale === 'en' ? 'Find stays' : 'Ver opciones'
+  // Booked-aware CTA. Default = trip-progression action; booked state =
+  // a softer "view your booking" affordance so the card doesn't keep
+  // pushing a CTA the user already acted on.
+  const ctaPrimary = locale === 'en' ? 'Book for this trip' : 'Reservar para este viaje'
+  const ctaBooked  = locale === 'en' ? 'View booking'        : 'Ver reserva'
   const fallbackTagline = locale === 'en'
     ? 'Hand-picked area for this trip'
     : 'Zona recomendada para este viaje'
@@ -152,8 +186,10 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Pr
             typeLabel={typeLabel[acc.accommodationType]}
             priceLabel={priceLabel[acc.priceTier]}
             ctaText={ctaPrimary}
+            ctaBooked={ctaBooked}
             fallbackTagline={fallbackTagline}
             locale={locale}
+            booked={!!hospedajeBooked}
           />
         ))}
       </div>
@@ -170,12 +206,18 @@ interface CardProps {
   typeLabel:       string
   priceLabel:      string
   ctaText:         string
+  /** CTA label shown when `booked` is true. Lets the card swap from
+   *  the trip-progression action ("Reservar para este viaje") to a
+   *  softer post-booking affordance ("Ver reserva"). */
+  ctaBooked:       string
   fallbackTagline: string
   locale:          'es' | 'en'
+  /** True when the Hospedaje milestone is done; flips the StatusPill. */
+  booked:          boolean
 }
 
 function AccommodationCard({
-  acc, ctx, tripId, typeLabel, priceLabel, ctaText, fallbackTagline, locale,
+  acc, ctx, tripId, typeLabel, priceLabel, ctaText, ctaBooked, fallbackTagline, locale, booked,
 }: CardProps) {
   // Build the Stay22 Allez URL eagerly so the <a href> ships in HTML —
   // lets LetMeAllez see it on page load, and respects the user's "open
@@ -226,14 +268,29 @@ function AccommodationCard({
     <article
       data-accommodation-id={acc.id}
       data-accommodation-source={acc.source}
-      className="bg-white border border-[#E4DFD8] rounded-[18px] p-6 transition-colors hover:border-[#0F3A33]/30"
+      data-accommodation-status={booked ? 'booked' : 'recommended'}
+      className={[
+        'bg-white rounded-[18px] p-6 transition-colors',
+        booked
+          ? 'border border-[#0F3A33]/50 hover:border-[#0F3A33]'
+          : 'border border-[#E4DFD8] hover:border-[#0F3A33]/30',
+      ].join(' ')}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <p className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1.5">
-            {typeLabel}
-            {acc.familyFriendly ? (locale === 'en' ? ' · Family' : ' · Familiar') : ''}
-          </p>
+          {/* Eyebrow row — type label + StatusPill. Pill flips to
+              'Reservado' when the Hospedaje milestone completes. */}
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <p className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF]">
+              {typeLabel}
+              {acc.familyFriendly ? (locale === 'en' ? ' · Family' : ' · Familiar') : ''}
+            </p>
+            <StatusPill
+              status={booked ? 'booked' : 'recommended'}
+              locale={locale}
+              size="xs"
+            />
+          </div>
           <h3 className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A] leading-tight">
             {heading}
           </h3>
@@ -259,9 +316,14 @@ function AccommodationCard({
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={handleClick}
-          className="inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold text-white bg-[#0F3A33] px-4 py-2 rounded-md transition-colors hover:bg-[#2D6B5A]"
+          className={[
+            'inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold px-4 py-2 rounded-md transition-colors',
+            booked
+              ? 'text-[#0F3A33] bg-[rgba(15,58,51,.08)] hover:bg-[rgba(15,58,51,.14)]'
+              : 'text-white bg-[#0F3A33] hover:bg-[#2D6B5A]',
+          ].join(' ')}
         >
-          {ctaText}
+          {booked ? ctaBooked : ctaText}
           <span aria-hidden>→</span>
         </a>
       </div>
