@@ -33,9 +33,12 @@ interface Props {
 // its Pine fill because that's the moment of truth — a state-change
 // the user worked toward deserves the visual weight.
 const TONE_STYLES: Record<StatusTone, { bg: string; fg: string; border: string }> = {
-  neutral:  { bg: 'transparent',           fg: '#9A9690', border: 'transparent'           },  // whisper
-  progress: { bg: 'rgba(248,232,200,.4)',  fg: '#8A6A2C', border: 'rgba(217,180,90,.25)'  },  // soft amber
-  done:     { bg: '#0F3A33',               fg: '#FFFFFF', border: '#0F3A33'               },  // solid PINE
+  neutral:  { bg: 'transparent', fg: '#9A9690', border: 'transparent' },  // whisper — Recomendado / Saved
+  progress: { bg: 'transparent', fg: '#9A9690', border: 'transparent' },  // whisper — Pendiente / In progress
+                                                                          //   Amber was the only off-palette note;
+                                                                          //   matched to neutral so the chip recedes
+                                                                          //   on every unchecked sidebar row.
+  done:     { bg: '#0F3A33',     fg: '#FFFFFF', border: '#0F3A33'     },  // solid PINE — moment of truth keeps the weight
 }
 
 const SIZE_STYLES: Record<Size, { fontSize: number; padX: number; padY: number; gap: number; radius: number; glyphSize: number }> = {
