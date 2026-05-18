@@ -22,16 +22,20 @@ interface Props {
   status: ExecutionStatus
   locale: 'es' | 'en'
   size?:  Size
-  /** Hide the glyph (used when space is tight or the parent already shows one). */
+  /** Hide the glyph. Defaults: hidden at `xs` (Lagom polish — text is
+   *  enough at tight scale), shown at `sm` / `md`. Pass explicitly to
+   *  override either way. */
   glyphless?: boolean
 }
 
-// Tone → palette. PINE family for done-states; SAND-warm for neutrals;
-// SAGE-tinted for in-flight. Keeps Lagomplan's editorial minimalism.
+// Tone → palette. Polished for Lagom minimalism: neutral whispers
+// (no bg, just muted text), pending stays subtly amber, done holds
+// its Pine fill because that's the moment of truth — a state-change
+// the user worked toward deserves the visual weight.
 const TONE_STYLES: Record<StatusTone, { bg: string; fg: string; border: string }> = {
-  neutral:  { bg: '#FFF9F3', fg: '#0F3A33', border: '#DDD8D2' },   // CREAM bg, PINE fg
-  progress: { bg: '#FBEFD8', fg: '#7A5A14', border: '#EFE0B8' },   // amber tint
-  done:     { bg: '#0F3A33', fg: '#FFFFFF', border: '#0F3A33' },   // solid PINE
+  neutral:  { bg: 'transparent',           fg: '#9A9690', border: 'transparent'           },  // whisper
+  progress: { bg: 'rgba(248,232,200,.4)',  fg: '#8A6A2C', border: 'rgba(217,180,90,.25)'  },  // soft amber
+  done:     { bg: '#0F3A33',               fg: '#FFFFFF', border: '#0F3A33'               },  // solid PINE
 }
 
 const SIZE_STYLES: Record<Size, { fontSize: number; padX: number; padY: number; gap: number; radius: number; glyphSize: number }> = {
@@ -45,6 +49,9 @@ export default function StatusPill({ status, locale, size = 'sm', glyphless }: P
   const palette = TONE_STYLES[cfg.tone]
   const sz      = SIZE_STYLES[size]
   const label   = locale === 'es' ? cfg.labelES : cfg.labelEN
+
+  // Size-aware glyph default: xs hides, sm/md show. Explicit prop wins.
+  const showGlyph = glyphless === undefined ? size !== 'xs' : !glyphless
 
   return (
     <span style={{
@@ -67,7 +74,7 @@ export default function StatusPill({ status, locale, size = 'sm', glyphless }: P
       // the state change without distracting from the page.
       transition:     'background-color .22s ease, color .22s ease, border-color .22s ease',
     }}>
-      {!glyphless && (
+      {showGlyph && (
         <span aria-hidden style={{ fontSize: sz.glyphSize, lineHeight: 1 }}>{cfg.glyph}</span>
       )}
       <span>{label}</span>

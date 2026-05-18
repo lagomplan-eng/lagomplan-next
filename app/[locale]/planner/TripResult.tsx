@@ -176,25 +176,37 @@ const TYPE_INFO: Record<ItemType, { icon: string; label: string }> = {
   transfer:   { icon: '🚗', label: 'Transfer' },
 }
 
+// Type-color rail — muted Lagom tones. Keeps the at-a-glance type cue
+// for itinerary scanning (hotel = pine, tour = sage, etc.) without the
+// loud saturated palette the page had before. Same 5 distinguishable
+// hues, all dialed into the brand's calm-execution range.
 const TYPE_BORDER: Record<ItemType, string> = {
-  hotel: '#0F3A33', tour: '#0891B2', restaurant: '#D97706',
-  free: '#CEC8C0', transfer: '#2D4F6C',
+  hotel:      '#0F3A33',   // Pine — primary
+  tour:       '#6B8F86',   // Sage — soft secondary
+  restaurant: '#C49B6E',   // Muted warm tan (was saturated amber)
+  free:       '#DDD8D2',   // Neutral
+  transfer:   '#7A8B9A',   // Muted blue-grey (was saturated navy)
 }
 
+// Row backgrounds were tinting every itinerary row with the type colour.
+// All transparent now — the left rail + the icon carry the type signal.
 const TYPE_ROW_BG: Record<ItemType, string> = {
-  hotel:      'rgba(15,58,51,.06)',
-  tour:       'rgba(8,145,178,.06)',
-  restaurant: 'rgba(217,119,6,.07)',
+  hotel:      'transparent',
+  tour:       'transparent',
+  restaurant: 'transparent',
   free:       'transparent',
-  transfer:   'rgba(45,79,108,.06)',
+  transfer:   'transparent',
 }
 
+// Type badge — unified muted treatment. The icon + uppercase label still
+// reads as the type cue; the per-type colour-chip chrome that competed
+// with the StatusPill is gone.
 const TYPE_BADGE: Record<ItemType, { color: string; bg: string }> = {
-  hotel:      { color: '#0F3A33', bg: 'rgba(15,58,51,.07)' },
-  tour:       { color: '#0E7490', bg: '#ECFEFF' },
-  restaurant: { color: '#92400E', bg: '#FFFBEB' },
-  free:       { color: '#7A7A76', bg: '#EDE7E1' },
-  transfer:   { color: '#2D4F6C', bg: '#EBF4FF' },
+  hotel:      { color: '#7A7A76', bg: 'transparent' },
+  tour:       { color: '#7A7A76', bg: 'transparent' },
+  restaurant: { color: '#7A7A76', bg: 'transparent' },
+  free:       { color: '#B8B5AF', bg: 'transparent' },
+  transfer:   { color: '#7A7A76', bg: 'transparent' },
 }
 
 // ─── Booking providers ────────────────────────────────────────────────────────
