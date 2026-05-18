@@ -18,6 +18,8 @@ import { computeNights } from '../../../lib/planner/accommodations'
 import { titleCaseCity } from '../../../lib/planner/format'
 import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib/planner/classify-block'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
+import TripReadinessBar from '../../../components/planner/TripReadinessBar'
+import { computeMilestones } from '../../../lib/planner/milestones'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -2513,6 +2515,19 @@ export default function TripResult({ params }: Props) {
   const doneChecks  = checks.filter(c => c.done).length
   const totalChecks = checks.length
   const progressPct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0
+  const pendingCount = totalChecks - doneChecks
+
+  // Trip Readiness System — buckets the flat check list into 5 milestone
+  // categories (Itinerario / Hospedaje / Traslados / Reservas / Listos).
+  // Drives the milestone tracker pills in <TripReadinessBar />. Cheap to
+  // recompute; recomputes whenever the check list changes.
+  const milestones = useMemo(
+    () => computeMilestones({
+      daysCount: days.length,
+      checks: checks.map(c => ({ id: c.id, text: c.text, done: c.done })),
+    }),
+    [days.length, checks],
+  )
   const nextCheck   = checks.find(c => !c.done)
   const checksBefore = checks.filter(c => !c.day)
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
@@ -3171,44 +3186,23 @@ export default function TripResult({ params }: Props) {
         </div>
       </div>
 
-      {/* ── CONTROL BAR ───────────────────────────────────────────────────── */}
+      {/* ── TRIP READINESS BAR (Phase 1 of "trip OS" rework) ───────────────
+          Replaces the old "0 de N listos" strip. Same Pine container so
+          sticky positioning + visual continuity stay intact; bar internals
+          now carry the 3-zone command-center layout (% / milestones /
+          next-step CTA) on desktop and a collapsed pill on mobile. */}
       <div data-trip="control-bar" className="bg-[#0F3A33]">
         <div className="max-w-[1160px] mx-auto px-7">
-          <div className="flex items-center h-[50px]">
-
-            {/* Progress */}
-            <div className="flex items-center gap-[11px] pr-[22px] border-r border-white/10 shrink-0 min-w-[150px]">
-              <span className="font-mono text-[11px] font-medium tracking-[.04em] text-white/90 whitespace-nowrap">
-                {totalChecks > 0 ? `${doneChecks} de ${totalChecks} listos` : `${days.length} días`}
-              </span>
-              <div className="w-[72px] h-[3px] bg-white/15 rounded-full overflow-hidden shrink-0">
-                <div
-                  className="h-full bg-[#A8C4BE] rounded-full transition-all duration-1000"
-                  style={{ width: `${totalChecks > 0 ? progressPct : (days.length > 0 ? 100 : 0)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Next step */}
-            <div className="flex items-center gap-[9px] px-[22px] flex-1 min-w-0">
-              <span className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-white/40 shrink-0">
-                Siguiente
-              </span>
-              {nextCheck ? (
-                <>
-                  <span className="text-[13px] shrink-0">{nextCheck.icon}</span>
-                  <span className="text-[12px] text-white/80 whitespace-nowrap overflow-hidden text-ellipsis flex-1 min-w-0">
-                    {nextCheck.text}
-                  </span>
-                </>
-              ) : days.length > 0 ? (
-                <span className="text-[12px] text-white/60 flex-1">
-                  {days[0]?.title || `Día 1`}
-                </span>
-              ) : null}
-            </div>
-
-          </div>
+          <TripReadinessBar
+            readinessPct={progressPct}
+            totalChecks={totalChecks}
+            doneChecks={doneChecks}
+            pendingCount={pendingCount}
+            milestones={milestones}
+            nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
+            daysCount={days.length}
+            locale={locale === 'en' ? 'en' : 'es'}
+          />
         </div>
       </div>
 
