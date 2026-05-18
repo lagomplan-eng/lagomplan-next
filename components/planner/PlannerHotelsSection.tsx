@@ -49,6 +49,11 @@ interface Props {
    *  a single booking unit — fine for the common 1-hotel trip; refine
    *  per-card in a later phase if multi-city stays need independent state. */
   hospedajeBooked?: boolean
+  /** Total itinerary days. Backstop signal: when ctx.nights resolves to 0
+   *  on a multi-city trip (date state lifecycle hiccups), we fall back to
+   *  daysCount - 1 to keep the section visible. Without this, multi-city
+   *  trips like "Buenos Aires → Uruguay" silently lose their hotel CTA. */
+  daysCount?:       number
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -84,15 +89,31 @@ const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
 
 const PRICE_TIER_LABEL_EN = PRICE_TIER_LABEL_ES
 
-export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked }: Props) {
+export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked, daysCount }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
+
+  // Backstop nights value. ctx.nights can resolve to 0 on multi-city trips
+  // where prefStart/prefEnd haven't fully hydrated, which used to make the
+  // whole section disappear (effectiveAccommodations treats nights=0 as
+  // same-day and skips fallback). Fall back to daysCount - 1 so any trip
+  // with a real itinerary keeps its hotel CTA.
+  const effectiveNights = useMemo(() => {
+    if (ctx.nights >= 1) return ctx.nights
+    if (daysCount && daysCount > 1) return daysCount - 1
+    return 0
+  }, [ctx.nights, daysCount])
+
+  const resolvedCtx = useMemo(
+    () => ({ ...ctx, nights: effectiveNights }),
+    [ctx, effectiveNights],
+  )
 
   // Resolve once per render — covers both new-pipeline trips (AI or
   // server fallback) and legacy trips where the field never existed.
   const effective = useMemo(
-    () => effectiveAccommodations(accommodations ?? null, ctx),
-    [accommodations, ctx],
+    () => effectiveAccommodations(accommodations ?? null, resolvedCtx),
+    [accommodations, resolvedCtx],
   )
 
   // Same-day trip → render nothing. (Same-day branch also short-circuits
@@ -113,9 +134,11 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx, hosp
   const sectionHeadlinePlural   = (n: number) => locale === 'en'
     ? `${n} nights in ${cityDisplay}`
     : `${n} noches en ${cityDisplay}`
-  const sectionHeadline = ctx.nights === 1
-    ? sectionHeadlineSingular(ctx.nights)
-    : sectionHeadlinePlural(ctx.nights)
+  // Use effectiveNights here too so the headline reads "4 noches en X"
+  // rather than "0 noches en X" on the multi-city ctx.nights=0 path.
+  const sectionHeadline = effectiveNights === 1
+    ? sectionHeadlineSingular(effectiveNights)
+    : sectionHeadlinePlural(effectiveNights)
 
   const ctaPrimary = locale === 'en' ? 'Find stays' : 'Ver opciones'
   const fallbackTagline = locale === 'en'

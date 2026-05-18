@@ -263,7 +263,11 @@ function providerFromUrl(url: string): string {
 
 function CheckRow({ check, onToggle }: { check: CheckItem; onToggle: (id: string) => void }) {
   return (
-    <div className="flex items-center gap-[7px] py-[7px] border-b border-[#E4DFD8] last:border-b-0">
+    <div
+      data-check-row
+      data-check-id={check.id}
+      className="flex items-center gap-[7px] py-[7px] border-b border-[#E4DFD8] last:border-b-0 transition-colors rounded-[6px] -mx-1 px-1"
+    >
       <button
         className="w-[15px] h-[15px] rounded-[3px] border-[1.5px] shrink-0 flex items-center justify-center transition-all"
         style={check.done
@@ -3202,6 +3206,22 @@ export default function TripResult({ params }: Props) {
             nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
             daysCount={days.length}
             locale={locale === 'en' ? 'en' : 'es'}
+            onNextStepClick={() => {
+              // Phase 5 (C) — scroll the next pending check into view and
+              // pulse it briefly so the user's eye lands on the row they
+              // need to interact with. Falls back silently if the row
+              // isn't mounted (e.g. checklist drawer collapsed on mobile).
+              if (!nextCheck) return
+              const el = typeof document !== 'undefined'
+                ? document.querySelector<HTMLElement>(`[data-check-id="${nextCheck.id}"]`)
+                : null
+              if (!el) return
+              el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+              // Pulse via inline style — restore after 1.5 s.
+              const prev = el.style.background
+              el.style.background = 'rgba(168, 196, 190, 0.28)'
+              window.setTimeout(() => { el.style.background = prev }, 1500)
+            }}
           />
         </div>
       </div>
@@ -3268,6 +3288,10 @@ export default function TripResult({ params }: Props) {
               // both surfaces flip in sync when the user ticks the auto-
               // injected "Reservar hotel" check.
               hospedajeBooked={milestones.find(m => m.id === 'hospedaje')?.state === 'done'}
+              // Backstop signal — if ctx.nights resolves to 0 (multi-city
+              // trips with hydration hiccups), days.length keeps the
+              // section from disappearing.
+              daysCount={days.length}
             />
 
             {/* Section header */}
