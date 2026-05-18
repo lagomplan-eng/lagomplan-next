@@ -242,17 +242,17 @@ function MilestonePill({
   state:    MilestoneState
   progress: string | null
 }) {
-  // Visual treatment by state:
-  //   done    — solid SAND-tinted background, PINE text, ● glyph
-  //   pending — outlined ring, white/80 text, ○ glyph
-  //   na      — outlined ring, white/30 text, dotted glyph (dimmed)
+  // Visual treatment by state (aligned with StatusPill's whisper-or-solid
+  // language, inverted for the Pine bar background):
+  //   done    — sage fill on Pine, Pine text (moment of completion stays loud)
+  //   pending — transparent, white/85 text, hairline ring (whisper)
+  //   na      — transparent, white/30 text (almost invisible — dimmed)
+  // Glyphs (● / ○ / ·) dropped — matches StatusPill xs default.
   const styles = state === 'done'
     ? 'bg-[#A8C4BE] text-[#0F3A33] border-transparent'
     : state === 'pending'
-      ? 'bg-transparent text-white/85 border-white/25'
+      ? 'bg-transparent text-white/85 border-white/20'
       : 'bg-transparent text-white/30 border-white/10'
-
-  const glyph = state === 'done' ? '●' : state === 'pending' ? '○' : '·'
 
   return (
     <div
@@ -261,7 +261,6 @@ function MilestonePill({
         styles,
       ].join(' ')}
     >
-      <span className="text-[10px] leading-none" aria-hidden>{glyph}</span>
       <span className="font-sans text-[11px] font-medium whitespace-nowrap">{label}</span>
       {progress && state === 'pending' && (
         <span className="font-mono text-[9px] text-white/40 tabular-nums">{progress}</span>
