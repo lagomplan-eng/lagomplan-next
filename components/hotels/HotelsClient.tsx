@@ -74,11 +74,11 @@ interface Props {
 export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
   const isES = locale === 'es'
 
-  // Feature flag — flip to `true` once guide hotels carry archetype tags.
-  // Today only worldcup stays are tagged (Familias/Parejas), so showing
-  // the row produces near-empty result sets for most pills. State + data
-  // wiring stays intact so this is a one-line revival.
-  const SHOW_ARCHETYPE_FILTERS = false
+  // Feature flag — guide + worldcup hotels are now tagged across the
+  // full 8-archetype set via scripts/derive-archetypes.mjs (59 records
+  // gained tags in the last pass). Safe to surface the Viajero filter
+  // row. Flip back to false if a future data wipe leaves pills empty.
+  const SHOW_ARCHETYPE_FILTERS = true
 
   const [searchVal,         setSearchVal]         = useState('')
   // null = "Todos" pill. Same convention as the prototype's "Todos" sentinel.
