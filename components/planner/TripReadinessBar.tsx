@@ -134,7 +134,7 @@ export default function TripReadinessBar({
             <button
               type="button"
               onClick={onNextStepClick}
-              className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-full whitespace-nowrap shrink-0"
+              className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
             >
               {ctaLabel}
             </button>
@@ -220,7 +220,7 @@ export default function TripReadinessBar({
                 <button
                   type="button"
                   onClick={onNextStepClick}
-                  className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-full whitespace-nowrap shrink-0"
+                  className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
                 >
                   {ctaLabel}
                 </button>
