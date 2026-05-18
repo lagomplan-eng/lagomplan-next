@@ -19,6 +19,7 @@ import { titleCaseCity } from '../../../lib/planner/format'
 import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib/planner/classify-block'
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import TripReadinessBar from '../../../components/planner/TripReadinessBar'
+import StatusPill from '../../../components/planner/StatusPill'
 import { computeMilestones } from '../../../lib/planner/milestones'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
@@ -261,7 +262,13 @@ function providerFromUrl(url: string): string {
 
 // ─── Helper components ────────────────────────────────────────────────────────
 
-function CheckRow({ check, onToggle }: { check: CheckItem; onToggle: (id: string) => void }) {
+function CheckRow({
+  check, onToggle, locale,
+}: {
+  check:    CheckItem
+  onToggle: (id: string) => void
+  locale:   'es' | 'en'
+}) {
   return (
     <div
       data-check-row
@@ -286,15 +293,14 @@ function CheckRow({ check, onToggle }: { check: CheckItem; onToggle: (id: string
       >
         {check.text}
       </span>
-      <span
-        className="font-mono text-[9px] font-medium tracking-[.06em] uppercase px-[5px] py-px rounded-full shrink-0 whitespace-nowrap"
-        style={check.done
-          ? { color: '#6B8F86', background: 'rgba(107,143,134,.12)' }
-          : { color: '#B8B5AF', background: '#EDE7E1' }
-        }
-      >
-        {check.done ? '✓ Listo' : 'Pendiente'}
-      </span>
+      {/* StatusPill — unified execution-status language across surfaces.
+          Pending (not yet booked) ↔ Booked (action complete). Same pill
+          appears on day-item rows so checklist + itinerary speak in sync. */}
+      <StatusPill
+        status={check.done ? 'booked' : 'pending'}
+        locale={locale}
+        size="xs"
+      />
     </div>
   )
 }
@@ -2521,6 +2527,11 @@ export default function TripResult({ params }: Props) {
   const progressPct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0
   const pendingCount = totalChecks - doneChecks
 
+  // Set of check IDs — lets each day-item lookup in O(1) whether it has
+  // a corresponding bookable check (StatusPill visibility) and whether
+  // that check is done (recommended ↔ booked transition).
+  const allCheckIdsSet = useMemo(() => new Set(checks.map(c => c.id)), [checks])
+
   // Trip Readiness System — buckets the flat check list into 5 milestone
   // categories (Itinerario / Hospedaje / Traslados / Reservas / Listos).
   // Drives the milestone tracker pills in <TripReadinessBar />. Cheap to
@@ -3419,12 +3430,18 @@ export default function TripResult({ params }: Props) {
                                         {item.time}
                                       </span>
                                     )}
-                                    {/* Status dot — matches prototype .item-pending-dot */}
-                                    <span
-                                      className="w-[6px] h-[6px] rounded-full shrink-0"
-                                      style={{ background: tbadge.color, opacity: 0.3 }}
-                                      title="Pendiente"
-                                    />
+                                    {/* StatusPill — only for items that emit a checklist entry
+                                        (hotel / transfer / tour / restaurant). Flips from
+                                        ⭐ Recomendado → ✅ Reservado the moment the matching
+                                        check is ticked in the sidebar. Same data feed as the
+                                        top Readiness Bar so all surfaces move in sync. */}
+                                    {allCheckIdsSet.has(`check-${item.id}`) && (
+                                      <StatusPill
+                                        status={doneCheckIds.has(`check-${item.id}`) ? 'booked' : 'recommended'}
+                                        locale={locale === 'en' ? 'en' : 'es'}
+                                        size="xs"
+                                      />
+                                    )}
                                   </div>
                                   <div data-trip-item="name" className="text-[13px] font-medium text-[#1C1C1A] leading-[1.3] mb-[3px]">
                                     {item.name}
@@ -3542,7 +3559,7 @@ export default function TripResult({ params }: Props) {
                           Antes del viaje
                         </div>
                         {checksBefore.map(check => (
-                          <CheckRow key={check.id} check={check} onToggle={toggleCheck} />
+                          <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
                         ))}
                       </>
                     )}
@@ -3596,7 +3613,7 @@ export default function TripResult({ params }: Props) {
                                 }}
                               >
                                 {dayChecks.map(check => (
-                                  <CheckRow key={check.id} check={check} onToggle={toggleCheck} />
+                                  <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
                                 ))}
                               </div>
                             </div>
