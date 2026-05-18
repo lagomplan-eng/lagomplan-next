@@ -3256,22 +3256,12 @@ export default function TripResult({ params }: Props) {
             nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
             daysCount={days.length}
             locale={locale === 'en' ? 'en' : 'es'}
-            onNextStepClick={() => {
-              // Phase 5 (C) — scroll the next pending check into view and
-              // pulse it briefly so the user's eye lands on the row they
-              // need to interact with. Falls back silently if the row
-              // isn't mounted (e.g. checklist drawer collapsed on mobile).
-              if (!nextCheck) return
-              const el = typeof document !== 'undefined'
-                ? document.querySelector<HTMLElement>(`[data-check-id="${nextCheck.id}"]`)
-                : null
-              if (!el) return
-              el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-              // Pulse via inline style — restore after 1.5 s.
-              const prev = el.style.background
-              el.style.background = 'rgba(168, 196, 190, 0.28)'
-              window.setTimeout(() => { el.style.background = prev }, 1500)
-            }}
+            // Bar CTA now marks the next check done directly. The bar shows
+            // an inline "✓ Reservado · Deshacer" affordance for 4 s after
+            // each click so mis-clicks are recoverable without leaving the
+            // top of the page. toggleCheck is idempotent — same handler
+            // services both the mark-done and the undo paths.
+            onToggleCheck={toggleCheck}
           />
         </div>
       </div>

@@ -22,7 +22,7 @@
  * no side-effects beyond local expand/collapse state on mobile.
  */
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Milestone, MilestoneState } from '../../lib/planner/milestones'
 
 interface NextCheckInfo {
@@ -42,16 +42,58 @@ interface Props {
   nextCheck:    NextCheckInfo | null
   daysCount:    number
   locale:       'es' | 'en'
-  /** Optional CTA handler; if absent, the button still renders but is inert. */
-  onNextStepClick?: () => void
+  /** Toggle handler — the bar calls this with the next check's ID when the
+   *  user clicks the CTA (mark done) or Deshacer (undo). Same handler
+   *  handles both directions; toggleCheck in TripResult is idempotent. */
+  onToggleCheck?: (checkId: string) => void
 }
 
 export default function TripReadinessBar({
   readinessPct, totalChecks, doneChecks, pendingCount,
-  milestones, nextCheck, daysCount, locale, onNextStepClick,
+  milestones, nextCheck, daysCount, locale, onToggleCheck,
 }: Props) {
   const isES = locale === 'es'
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Inline-undo banner: when the user marks the next check done, the right
+  // zone shifts to a "✓ Reservado · Deshacer" affordance for 4 s. The
+  // banner's data is snapshotted at click time so it survives the cascade
+  // re-render that moves nextCheck to a different check.
+  const [recent, setRecent] = useState<{
+    id:   string
+    text: string
+    icon: string
+  } | null>(null)
+  const undoTimer = useRef<number | null>(null)
+
+  function clearUndoTimer() {
+    if (undoTimer.current != null) {
+      window.clearTimeout(undoTimer.current)
+      undoTimer.current = null
+    }
+  }
+
+  function handleMarkDone() {
+    if (!nextCheck || !onToggleCheck) return
+    onToggleCheck(nextCheck.id)
+    setRecent({ id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon })
+    clearUndoTimer()
+    undoTimer.current = window.setTimeout(() => {
+      setRecent(null)
+      undoTimer.current = null
+    }, 4000)
+  }
+
+  function handleUndo() {
+    if (!recent || !onToggleCheck) return
+    onToggleCheck(recent.id)
+    clearUndoTimer()
+    setRecent(null)
+  }
+
+  // Cancel pending timer on unmount so a route change mid-undo doesn't
+  // try to setState on an unmounted component.
+  useEffect(() => () => clearUndoTimer(), [])
 
   const tripReady   = totalChecks > 0 && pendingCount === 0
   const hasItinerary = daysCount > 0
@@ -119,8 +161,27 @@ export default function TripReadinessBar({
           ))}
         </div>
 
-        {/* RIGHT — next step + CTA */}
-        {nextCheck ? (
+        {/* RIGHT — undo banner / next step / all-done */}
+        {recent ? (
+          <div className="flex items-center gap-3 pl-5 border-l border-white/10 shrink-0 max-w-[340px]">
+            <div className="flex flex-col text-right min-w-0">
+              <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-[#A8C4BE]">
+                {isES ? '✓ Reservado' : '✓ Booked'}
+              </span>
+              <span className="font-sans text-[12px] text-white/55 truncate flex items-center gap-1.5 justify-end mt-[2px]">
+                <span aria-hidden>{recent.icon}</span>
+                <span className="truncate">{recent.text}</span>
+              </span>
+            </div>
+            <button
+              type="button"
+              onClick={handleUndo}
+              className="font-sans text-[12px] font-semibold text-white bg-transparent hover:bg-white/10 transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0 border border-white/25"
+            >
+              {isES ? 'Deshacer' : 'Undo'}
+            </button>
+          </div>
+        ) : nextCheck ? (
           <div className="flex items-center gap-3 pl-5 border-l border-white/10 shrink-0 max-w-[340px]">
             <div className="flex flex-col text-right min-w-0">
               <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-white/40">
@@ -133,7 +194,7 @@ export default function TripReadinessBar({
             </div>
             <button
               type="button"
-              onClick={onNextStepClick}
+              onClick={handleMarkDone}
               className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
             >
               {ctaLabel}
@@ -206,7 +267,26 @@ export default function TripReadinessBar({
               ))}
             </div>
 
-            {nextCheck && (
+            {recent ? (
+              <div className="flex items-center justify-between gap-3 pt-1">
+                <div className="flex flex-col min-w-0 flex-1">
+                  <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-[#A8C4BE]">
+                    {isES ? '✓ Reservado' : '✓ Booked'}
+                  </span>
+                  <span className="font-sans text-[13px] text-white/55 truncate flex items-center gap-1.5 mt-[2px]">
+                    <span aria-hidden>{recent.icon}</span>
+                    <span className="truncate">{recent.text}</span>
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleUndo}
+                  className="font-sans text-[12px] font-semibold text-white bg-transparent hover:bg-white/10 transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0 border border-white/25"
+                >
+                  {isES ? 'Deshacer' : 'Undo'}
+                </button>
+              </div>
+            ) : nextCheck && (
               <div className="flex items-center justify-between gap-3 pt-1">
                 <div className="flex flex-col min-w-0 flex-1">
                   <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-white/40">
@@ -219,7 +299,7 @@ export default function TripReadinessBar({
                 </div>
                 <button
                   type="button"
-                  onClick={onNextStepClick}
+                  onClick={handleMarkDone}
                   className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
                 >
                   {ctaLabel}
