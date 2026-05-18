@@ -220,6 +220,23 @@ const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
   transfer:   'Reservar transfer',
 }
 
+// Per-type day-item booking CTA labels. Replaces the old generic
+// "Reservar / Ver opciones" with action-verb copy ("Reservar mesa",
+// "Reservar traslado") per the trip-OS rework brief. When the matching
+// check is done, the button flips to a "✓ Reservado" affordance.
+const BOOKING_CTA_ES: Partial<Record<ItemType, string>> = {
+  hotel:      'Reservar hotel',
+  transfer:   'Reservar traslado',
+  restaurant: 'Reservar mesa',
+  tour:       'Reservar tour',
+}
+const BOOKING_CTA_EN: Partial<Record<ItemType, string>> = {
+  hotel:      'Book hotel',
+  transfer:   'Book transfer',
+  restaurant: 'Book table',
+  tour:       'Book tour',
+}
+
 // ── Canonical budget categories ───────────────────────────────────────────────
 // Five fixed groups — everything from the AI or edit modal maps into one of these.
 const BUDGET_ICON: Record<string, string> = {
@@ -3459,15 +3476,32 @@ export default function TripResult({ params }: Props) {
                                     </div>
                                   )}
                                   <div className="flex flex-col gap-[3px] items-end">
-                                    {/* Opens booking modal — hidden for libre/free items */}
-                                    {item.type !== 'free' && (
-                                    <button
-                                      onClick={() => openBookingModal(item)}
-                                      className="flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase text-white bg-[#0F3A33] px-2.5 py-[5px] rounded-[4px] hover:bg-[#1A5247] hover:-translate-y-px transition-all whitespace-nowrap"
-                                    >
-                                      {item.affiliate || item.bookingOptions ? 'Ver opciones' : 'Reservar'}
-                                    </button>
-                                    )}
+                                    {/* Opens booking modal — hidden for libre/free items.
+                                        Label is contextual per type ("Reservar mesa",
+                                        "Reservar traslado", …) and flips to "✓ Reservado"
+                                        once the matching check is ticked. */}
+                                    {item.type !== 'free' && (() => {
+                                      const itemIsBooked = doneCheckIds.has(`check-${item.id}`)
+                                      const ctaDict     = locale === 'en' ? BOOKING_CTA_EN : BOOKING_CTA_ES
+                                      const ctaFallback = locale === 'en' ? 'Book' : 'Reservar'
+                                      const buttonLabel = itemIsBooked
+                                        ? (locale === 'en' ? '✓ Booked' : '✓ Reservado')
+                                        : (ctaDict[item.type] ?? ctaFallback)
+                                      return (
+                                        <button
+                                          onClick={() => openBookingModal(item)}
+                                          className={[
+                                            'flex items-center gap-1 font-mono text-[10px] font-medium tracking-[.06em] uppercase px-2.5 py-[5px] rounded-[4px] hover:-translate-y-px whitespace-nowrap',
+                                            itemIsBooked
+                                              ? 'bg-[rgba(15,58,51,.08)] text-[#0F3A33] hover:bg-[rgba(15,58,51,.14)]'
+                                              : 'bg-[#0F3A33] text-white hover:bg-[#1A5247]',
+                                            'transition-all',
+                                          ].join(' ')}
+                                        >
+                                          {buttonLabel}
+                                        </button>
+                                      )
+                                    })()}
                                     <button
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#0F3A33] hover:bg-[rgba(15,58,51,.05)] transition-all"
                                       onClick={() => openEditModal(item, day.n)}

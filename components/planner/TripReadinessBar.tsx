@@ -72,7 +72,17 @@ export default function TripReadinessBar({
         : (isES ? `Te faltan ${pendingCount} pasos para viajar` : `${pendingCount} steps to go`)
 
   const nextLabel = isES ? 'Siguiente' : 'Next'
-  const ctaLabel  = isES ? 'Hacer →'    : 'Do now →'
+
+  // Contextual CTA verb — pulled from the leading word of nextCheck.text.
+  // E.g. "Reservar hotel" → "Reservar →"; "Confirmar reserva: X" → "Confirmar →".
+  // Falls back to generic "Hacer / Do now" when the verb isn't recognised.
+  const ctaLabel = (() => {
+    if (!nextCheck) return isES ? 'Hacer →' : 'Do now →'
+    const first = nextCheck.text.split(/\s+/)[0]
+    const knownVerbs = new Set(['Reservar', 'Confirmar', 'Empacar', 'Book', 'Confirm', 'Pack'])
+    if (knownVerbs.has(first)) return `${first} →`
+    return isES ? 'Hacer →' : 'Do now →'
+  })()
 
   return (
     <>

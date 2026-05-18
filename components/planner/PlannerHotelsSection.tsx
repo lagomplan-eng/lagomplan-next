@@ -140,7 +140,11 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx, hosp
     ? sectionHeadlineSingular(effectiveNights)
     : sectionHeadlinePlural(effectiveNights)
 
-  const ctaPrimary = locale === 'en' ? 'Find stays' : 'Ver opciones'
+  // Booked-aware CTA. Default = trip-progression action; booked state =
+  // a softer "view your booking" affordance so the card doesn't keep
+  // pushing a CTA the user already acted on.
+  const ctaPrimary = locale === 'en' ? 'Book for this trip' : 'Reservar para este viaje'
+  const ctaBooked  = locale === 'en' ? 'View booking'        : 'Ver reserva'
   const fallbackTagline = locale === 'en'
     ? 'Hand-picked area for this trip'
     : 'Zona recomendada para este viaje'
@@ -182,6 +186,7 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx, hosp
             typeLabel={typeLabel[acc.accommodationType]}
             priceLabel={priceLabel[acc.priceTier]}
             ctaText={ctaPrimary}
+            ctaBooked={ctaBooked}
             fallbackTagline={fallbackTagline}
             locale={locale}
             booked={!!hospedajeBooked}
@@ -201,6 +206,10 @@ interface CardProps {
   typeLabel:       string
   priceLabel:      string
   ctaText:         string
+  /** CTA label shown when `booked` is true. Lets the card swap from
+   *  the trip-progression action ("Reservar para este viaje") to a
+   *  softer post-booking affordance ("Ver reserva"). */
+  ctaBooked:       string
   fallbackTagline: string
   locale:          'es' | 'en'
   /** True when the Hospedaje milestone is done; flips the StatusPill. */
@@ -208,7 +217,7 @@ interface CardProps {
 }
 
 function AccommodationCard({
-  acc, ctx, tripId, typeLabel, priceLabel, ctaText, fallbackTagline, locale, booked,
+  acc, ctx, tripId, typeLabel, priceLabel, ctaText, ctaBooked, fallbackTagline, locale, booked,
 }: CardProps) {
   // Build the Stay22 Allez URL eagerly so the <a href> ships in HTML —
   // lets LetMeAllez see it on page load, and respects the user's "open
@@ -307,9 +316,14 @@ function AccommodationCard({
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={handleClick}
-          className="inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold text-white bg-[#0F3A33] px-4 py-2 rounded-md transition-colors hover:bg-[#2D6B5A]"
+          className={[
+            'inline-flex items-center gap-1.5 font-sans text-[12px] font-semibold px-4 py-2 rounded-md transition-colors',
+            booked
+              ? 'text-[#0F3A33] bg-[rgba(15,58,51,.08)] hover:bg-[rgba(15,58,51,.14)]'
+              : 'text-white bg-[#0F3A33] hover:bg-[#2D6B5A]',
+          ].join(' ')}
         >
-          {ctaText}
+          {booked ? ctaBooked : ctaText}
           <span aria-hidden>→</span>
         </a>
       </div>

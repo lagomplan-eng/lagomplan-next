@@ -62,6 +62,10 @@ export default function StatusPill({ status, locale, size = 'sm', glyphless }: P
       lineHeight:     1,
       whiteSpace:     'nowrap',
       letterSpacing:  cfg.tone === 'done' ? '.04em' : 0,
+      // Smooth color transition when status flips (recommended → booked,
+      // pending → completed, etc). Calm, sub-300 ms — enough to register
+      // the state change without distracting from the page.
+      transition:     'background-color .22s ease, color .22s ease, border-color .22s ease',
     }}>
       {!glyphless && (
         <span aria-hidden style={{ fontSize: sz.glyphSize, lineHeight: 1 }}>{cfg.glyph}</span>
