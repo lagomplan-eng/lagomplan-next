@@ -4,7 +4,7 @@
     "description": "Planificador de viajes con IA para quienes saben lo que quieren. Itinerario completo en minutos."
   },
   "nav": {
-    "planner": "Planificador",
+    "planner": "Mi Viaje",
     "guides": "Guías",
     "hotels": "Hoteles",
     "worldcup": "Mundial",
@@ -152,7 +152,7 @@
     "links": {
       "guides": "Guías de viaje",
       "hotels": "Hoteles",
-      "planner": "Planificador",
+      "planner": "Mi Viaje",
       "pricing": "Precios",
       "about": "Nosotras",
       "contact": "Contacto",
@@ -184,7 +184,7 @@
     "destinationDetail": "Destino",
     "hotelsIndex": "Hoteles",
     "hotelDetail": "Hotel",
-    "planner": "Planificador",
+    "planner": "Mi Viaje",
     "smartFindsIndex": "Productos de viaje",
     "smartFindDetail": "Producto",
     "about": "Nosotras",

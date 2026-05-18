@@ -4,7 +4,7 @@
     "description": "AI-powered travel planner for those who know what they want. Full itinerary in minutes."
   },
   "nav": {
-    "planner": "Planner",
+    "planner": "My Trip",
     "guides": "Guides",
     "hotels": "Hotels",
     "worldcup": "World Cup",
@@ -152,7 +152,7 @@
     "links": {
       "guides": "Travel guides",
       "hotels": "Hotels",
-      "planner": "Planner",
+      "planner": "My Trip",
       "pricing": "Pricing",
       "about": "About us",
       "contact": "Contact",
@@ -184,7 +184,7 @@
     "destinationDetail": "Destination",
     "hotelsIndex": "Hotels",
     "hotelDetail": "Hotel",
-    "planner": "Planner",
+    "planner": "My Trip",
     "smartFindsIndex": "Smart finds",
     "smartFindDetail": "Smart find",
     "about": "About",
