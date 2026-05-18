@@ -2556,7 +2556,7 @@ export default function TripResult({ params }: Props) {
   const milestones = useMemo(
     () => computeMilestones({
       daysCount: days.length,
-      checks: checks.map(c => ({ id: c.id, text: c.text, done: c.done })),
+      checks: checks.map(c => ({ id: c.id, text: c.text, done: c.done, icon: c.icon })),
     }),
     [days.length, checks],
   )

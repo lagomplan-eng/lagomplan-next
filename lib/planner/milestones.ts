@@ -40,9 +40,12 @@ export interface Milestone {
 }
 
 interface CheckInput {
-  id:   string
-  text: string
-  done: boolean
+  id:    string
+  text:  string
+  done:  boolean
+  /** Canonical icon emitted by deriveChecksFromDays — primary categorization
+   *  signal. Text matching is a fallback for checks that lack a known icon. */
+  icon?: string
 }
 
 const MILESTONE_DEFS: { id: MilestoneId; labelES: string; labelEN: string }[] = [
@@ -54,14 +57,33 @@ const MILESTONE_DEFS: { id: MilestoneId; labelES: string; labelEN: string }[] = 
 ]
 
 /**
- * Categorize a single check by its display text. Falls back to 'reservas'
- * (the broad activity-booking bucket) when nothing else matches — keeps
- * the UI honest, never produces an uncategorized check.
+ * Categorize a single check. Two-stage matching:
+ *
+ *   1. Icon (primary)  — deriveChecksFromDays emits canonical emoji per
+ *      check type (🏨 hotel · 🚗 transfer · 🎫 tour · 🍽 restaurant). When
+ *      present, the icon is the most reliable signal — no parsing
+ *      fragility from text like "Confirmar reserva: <hotel name>" which
+ *      doesn't carry the word "hotel".
+ *
+ *   2. Text (fallback) — for checks without a recognised icon (manually
+ *      authored or AI-emitted with custom labels), regex-match against
+ *      the lowercased text.
+ *
+ * Falls through to 'reservas' (the broad activity-booking bucket) when
+ * nothing else matches.
  */
-function categorizeCheck(text: string): MilestoneId {
-  const t = text.toLowerCase()
+function categorizeCheck(check: CheckInput): MilestoneId {
+  // Icon-driven first: deterministic and locale-agnostic.
+  switch (check.icon) {
+    case '🏨': return 'hospedaje'
+    case '🚗': return 'traslados'
+    case '🎫':
+    case '🍽': return 'reservas'
+  }
+  // Text-based fallback.
+  const t = check.text.toLowerCase()
   if (/\bhotel\b|hospedaj|alojam|airbnb|hostal|hostel|posada|lodging/.test(t)) return 'hospedaje'
-  if (/vuelo|traslado|uber|taxi|tren|metro|bus|renta de auto|car rental|transport|flight|airport|aeropuerto/.test(t)) return 'traslados'
+  if (/vuelo|traslado|transfer|uber|taxi|tren|metro|\bbus\b|renta de auto|car rental|transport|flight|airport|aeropuerto/.test(t)) return 'traslados'
   if (/pasaporte|visa|seguro|documento|passport|equipaje|empacar|maleta|check[-\s]in|packing|insurance/.test(t)) return 'listos'
   return 'reservas'
 }
@@ -87,7 +109,7 @@ export function computeMilestones({ daysCount, checks }: ComputeArgs): Milestone
     listos:    [],
   }
   for (const c of checks) {
-    const id = categorizeCheck(c.text)
+    const id = categorizeCheck(c)
     if (id !== 'itinerario') buckets[id].push(c)
   }
 
