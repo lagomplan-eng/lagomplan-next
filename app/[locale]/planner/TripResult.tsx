@@ -3263,6 +3263,11 @@ export default function TripResult({ params }: Props) {
                   : undefined,
                 locale:      locale === 'en' ? 'en' : 'es',
               } satisfies TripDestinationContext}
+              // Drives the accommodation StatusPill — recommended ↔ booked.
+              // Same milestone state that powers the top Readiness Bar, so
+              // both surfaces flip in sync when the user ticks the auto-
+              // injected "Reservar hotel" check.
+              hospedajeBooked={milestones.find(m => m.id === 'hospedaje')?.state === 'done'}
             />
 
             {/* Section header */}

@@ -36,12 +36,19 @@ import { effectiveAccommodations } from '../../lib/planner/use-effective-accommo
 import { titleCaseCity } from '../../lib/planner/format'
 import { buildAffiliateLink } from '../../lib/affiliate'
 import { events } from '../../lib/analytics'
+import StatusPill from './StatusPill'
 
 interface Props {
   tripId:           string | null
   accommodations:   Accommodation[] | undefined | null
   /** Server-derived trip context — destination + dates + nights. */
   ctx:              TripDestinationContext
+  /** When true, the Hospedaje milestone has completed (the auto-injected
+   *  "Reservar hotel" check is done). Flips every card's StatusPill from
+   *  'recommended' to 'booked'. Treats all accommodations on the trip as
+   *  a single booking unit — fine for the common 1-hotel trip; refine
+   *  per-card in a later phase if multi-city stays need independent state. */
+  hospedajeBooked?: boolean
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -77,7 +84,7 @@ const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
 
 const PRICE_TIER_LABEL_EN = PRICE_TIER_LABEL_ES
 
-export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Props) {
+export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
 
@@ -154,6 +161,7 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx }: Pr
             ctaText={ctaPrimary}
             fallbackTagline={fallbackTagline}
             locale={locale}
+            booked={!!hospedajeBooked}
           />
         ))}
       </div>
@@ -172,10 +180,12 @@ interface CardProps {
   ctaText:         string
   fallbackTagline: string
   locale:          'es' | 'en'
+  /** True when the Hospedaje milestone is done; flips the StatusPill. */
+  booked:          boolean
 }
 
 function AccommodationCard({
-  acc, ctx, tripId, typeLabel, priceLabel, ctaText, fallbackTagline, locale,
+  acc, ctx, tripId, typeLabel, priceLabel, ctaText, fallbackTagline, locale, booked,
 }: CardProps) {
   // Build the Stay22 Allez URL eagerly so the <a href> ships in HTML —
   // lets LetMeAllez see it on page load, and respects the user's "open
@@ -226,14 +236,29 @@ function AccommodationCard({
     <article
       data-accommodation-id={acc.id}
       data-accommodation-source={acc.source}
-      className="bg-white border border-[#E4DFD8] rounded-[18px] p-6 transition-colors hover:border-[#0F3A33]/30"
+      data-accommodation-status={booked ? 'booked' : 'recommended'}
+      className={[
+        'bg-white rounded-[18px] p-6 transition-colors',
+        booked
+          ? 'border border-[#0F3A33]/50 hover:border-[#0F3A33]'
+          : 'border border-[#E4DFD8] hover:border-[#0F3A33]/30',
+      ].join(' ')}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0">
-          <p className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1.5">
-            {typeLabel}
-            {acc.familyFriendly ? (locale === 'en' ? ' · Family' : ' · Familiar') : ''}
-          </p>
+          {/* Eyebrow row — type label + StatusPill. Pill flips to
+              'Reservado' when the Hospedaje milestone completes. */}
+          <div className="flex items-center gap-2 mb-1.5 flex-wrap">
+            <p className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF]">
+              {typeLabel}
+              {acc.familyFriendly ? (locale === 'en' ? ' · Family' : ' · Familiar') : ''}
+            </p>
+            <StatusPill
+              status={booked ? 'booked' : 'recommended'}
+              locale={locale}
+              size="xs"
+            />
+          </div>
           <h3 className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A] leading-tight">
             {heading}
           </h3>
