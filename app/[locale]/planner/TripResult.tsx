@@ -3426,9 +3426,10 @@ export default function TripResult({ params }: Props) {
                 </div>
                 <div className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
                   {isMultiCitySegments(segments)
-                    ? (locale === 'en'
-                        ? `${nightsNum} ${nightsNum === 1 ? 'day' : 'days'} · ${segments.length}-city journey`
-                        : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} · viaje por ${segments.length} ciudades`)
+                    // Multi-city: hero + chip row already convey duration and
+                    // the chain. The itinerary headline doesn't need to
+                    // restate either — keep it to a section label.
+                    ? (locale === 'en' ? 'Day by day, city by city' : 'Día a día, ciudad por ciudad')
                     : (locale === 'en'
                         ? `${nightsNum} ${nightsNum === 1 ? 'day' : 'days'} in ${titleCaseCity(prefDest) || 'your destination'}`
                         : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} en ${titleCaseCity(prefDest) || 'tu destino'}`)}

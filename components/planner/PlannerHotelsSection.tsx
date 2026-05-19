@@ -141,24 +141,17 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx, hosp
   const sectionHeadlinePlural   = (n: number) => locale === 'en'
     ? `${n} nights in ${cityDisplay}`
     : `${n} noches en ${cityDisplay}`
-  // Multi-city: swap the single-city "N nights in CityName" headline for a
-  // chain-aware variant. Per-card content already shows each segment's own
-  // city, so the section header just needs to communicate the chain shape.
-  const sectionHeadlineMultiCity = (n: number) => {
-    const segs = segmentCount ?? 0
-    if (locale === 'en') {
-      return segs >= 2
-        ? `${n} ${n === 1 ? 'night' : 'nights'} · ${segs}-city journey`
-        : `${n} ${n === 1 ? 'night' : 'nights'} · multi-city`
-    }
-    return segs >= 2
-      ? `${n} ${n === 1 ? 'noche' : 'noches'} · ${segs} ciudades`
-      : `${n} ${n === 1 ? 'noche' : 'noches'} · multi-ciudad`
-  }
+  // Multi-city: drop duration/city anchor from the headline entirely. The
+  // hero already shows both (chip row + date pill), and each card carries
+  // its own city + nights — repeating it here adds noise without info.
+  // The section just needs to say what's in it ("a hotel per leg").
+  const sectionHeadlineMultiCity = locale === 'en'
+    ? 'A stay for each city'
+    : 'Un hospedaje por tramo'
   // Use effectiveNights here too so the headline reads "4 noches en X"
   // rather than "0 noches en X" on the multi-city ctx.nights=0 path.
   const sectionHeadline = isMultiCity
-    ? sectionHeadlineMultiCity(effectiveNights)
+    ? sectionHeadlineMultiCity
     : effectiveNights === 1
       ? sectionHeadlineSingular(effectiveNights)
       : sectionHeadlinePlural(effectiveNights)
