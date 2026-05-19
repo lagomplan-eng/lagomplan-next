@@ -41,7 +41,6 @@ export default function PlacesInput({
 
   const inputRef     = useRef<HTMLInputElement>(null)
   const ddRef        = useRef<HTMLDivElement>(null)
-  const mapsReadyRef = useRef<boolean>(false)
   const sessionRef   = useRef<any>(null)
 
   const [predictions, setPredictions] = useState<any[]>([])
@@ -49,13 +48,18 @@ export default function PlacesInput({
   const [highlighted, setHighlighted] = useState(-1)
   const [loading,     setLoading]     = useState(false)
   const [hasValue,    setHasValue]    = useState(!!value)
+  // State (was a ref) so React re-renders when the SDK lands. Instances
+  // mounted mid-session (e.g. multi-city Segment 2+) used to early-return
+  // from fetchPredictions because the ref hadn't flipped by the time the
+  // user typed — state + a watcher effect below fixes the race.
+  const [mapsReady,   setMapsReady]   = useState(false)
 
   // ── Init Google Places ──────────────────────────────────────────
   useEffect(() => {
     loadGoogleMaps().then(() => {
       const g = (window as any).google
-      mapsReadyRef.current = true
-      sessionRef.current   = new g.maps.places.AutocompleteSessionToken()
+      sessionRef.current = new g.maps.places.AutocompleteSessionToken()
+      setMapsReady(true)
     }).catch((err) => {
       console.error('PlacesInput: Google Maps failed to load', err)
     })
@@ -65,7 +69,7 @@ export default function PlacesInput({
   const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
   const fetchPredictions = useCallback((input: string) => {
-    if (!mapsReadyRef.current || input.length < 2) {
+    if (!mapsReady || input.length < 2) {
       setPredictions([])
       setOpen(false)
       return
@@ -107,7 +111,25 @@ export default function PlacesInput({
         setOpen(false)
       }
     }, 200)
-  }, [types, locationBias])
+  }, [types, locationBias, mapsReady])
+
+  // ── Defensive re-fetch when the SDK lands mid-interaction ──────
+  // For multi-city Segment 2+ inputs that mount after the user has
+  // started typing, the SDK promise might resolve a tick or two after
+  // the first keystroke — without this effect, that first attempt
+  // early-returns and the dropdown never appears until the user types
+  // again. Triggers once per mapsReady flip when the input still has
+  // pending text + focus.
+  useEffect(() => {
+    if (!mapsReady) return
+    if (value.length < 2) return
+    if (typeof document !== 'undefined' && document.activeElement === inputRef.current) {
+      fetchPredictions(value)
+    }
+    // value intentionally NOT in deps — we only want this to fire once
+    // per "Maps just became ready" event, not on every keystroke.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mapsReady])
 
   // ── Resolve a prediction to full PlaceResult ────────────────────
   async function selectPrediction(suggestion: any) {
