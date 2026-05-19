@@ -327,6 +327,7 @@ function submit(e: React.FormEvent) {
                     </button>
                   </div>
                   <PlacesInput
+                    id={`destination-segment-${idx + 2}`}
                     locale={locale}
                     placeholder={t('destinationPlaceholder')}
                     value={seg.destination}
