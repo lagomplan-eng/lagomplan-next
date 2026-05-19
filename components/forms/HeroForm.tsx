@@ -225,12 +225,22 @@ function submit(e: React.FormEvent) {
         ]
     const segmentsParam = serializeSegments(fullSegments)
 
+    // Multi-city: the trip-level start/end/nights cover the FULL chain (first
+    // segment's start → last segment's end, sum of nights). Without this the
+    // hero date pill shows only Segment 1 and the Edge Fn receives a duration
+    // that contradicts the segments array — the AI then generates a too-short
+    // itinerary and the sync/async routing picks the wrong path.
+    const isMultiCity   = fullSegments.length > 0
+    const effectiveStart  = isMultiCity ? fullSegments[0].startDate                              : tripStartISO
+    const effectiveEnd    = isMultiCity ? fullSegments[fullSegments.length - 1].endDate          : tripEndISO
+    const effectiveNights = isMultiCity ? fullSegments.reduce((sum, s) => sum + s.nights, 0)     : dates.nights
+
     const params = new URLSearchParams({
       origin: originValue,
       destination: destValue,
-      start:       tripStartISO,
-      end:         tripEndISO,
-      nights:      String(dates.nights),
+      start:       effectiveStart,
+      end:         effectiveEnd,
+      nights:      String(effectiveNights),
       traveler:    traveler,
       interests:   [...interests, extra].filter(Boolean).join(', '),
       pace,
