@@ -219,11 +219,32 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
   let dayCounter = 0
   const days: any[] = []
   const accommodations: any[] = []
+
+  // Each segment is generated as an independent single-city call, so the
+  // AI numbers days from 1 *within* that segment. After we bump day_number
+  // to be cumulative across the trip, the AI-emitted strings ("Día 7 ·
+  // Gothenburg — ...") become inconsistent with the card header ("DÍA 17").
+  // Rewrite the leading "Día N" / "Day N" prefix in day_label + title so
+  // the displayed numbers line up. Match Spanish + English; case-insensitive
+  // on the day word; tolerate spaces around the dot separator.
+  const dayLeadRE = /^(D[ií]a|Day)\s+\d+/i
+  function renumberLeadingDay(s: unknown, n: number): string | undefined {
+    if (typeof s !== 'string' || !s) return s as undefined
+    return dayLeadRE.test(s)
+      ? s.replace(dayLeadRE, (m) => m.replace(/\d+/, String(n)))
+      : s
+  }
+
   for (const chunk of chunks) {
     const segmentDays = chunkDays(chunk)
     for (const day of segmentDays) {
       dayCounter += 1
-      days.push({ ...day, day_number: dayCounter })
+      days.push({
+        ...day,
+        day_number: dayCounter,
+        day_label:  renumberLeadingDay((day as any).day_label, dayCounter),
+        title:      renumberLeadingDay((day as any).title,     dayCounter),
+      })
     }
     // Multi-city: each chunk is a single-city call → exactly one
     // accommodation entry per chunk. Collect them all so the assembled
