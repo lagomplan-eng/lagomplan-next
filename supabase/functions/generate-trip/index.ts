@@ -285,6 +285,10 @@ ${lines}
     startDate:   string;
     endDate:     string;
     nights:      number;
+    /** Optional explicit origin for this segment. Persisted by the form
+     *  only when the user sets it to something other than the previous
+     *  segment's destination (i.e. the chain-implicit value). */
+    origin?:     string;
   }
 
   function isMultiCity(segments: unknown): segments is TripSegment[] {
@@ -297,9 +301,15 @@ ${lines}
 
   function buildSegmentsContext(segments: TripSegment[]): string {
     if (!segments || segments.length < 2) return "";
-    const chain = segments.map((s, i) =>
-      `      ${i + 1}) ${s.destination} · ${s.startDate} → ${s.endDate} (${s.nights} noche${s.nights === 1 ? "" : "s"})`
-    ).join("\n");
+    const chain = segments.map((s, i) => {
+      // If the segment carries an explicit origin (user set From to
+      // something other than the chain-implicit previous destination),
+      // show it as "from X to Y" so the AI accounts for the transit.
+      const where = s.origin
+        ? `de ${s.origin} a ${s.destination}`
+        : s.destination;
+      return `      ${i + 1}) ${where} · ${s.startDate} → ${s.endDate} (${s.nights} noche${s.nights === 1 ? "" : "s"})`;
+    }).join("\n");
     return `
 
   MULTI-CIUDAD (importante — el viaje tiene ${segments.length} tramos):

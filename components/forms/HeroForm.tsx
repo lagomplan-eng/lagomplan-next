@@ -126,13 +126,16 @@ const [submitted, setSubmitted] = useState(false)
 const [generating, setGenerating] = useState(false)
 
 // Multi-city — additional segments beyond the main destination. Each
-// segment carries its own full date range, matching Segment 1's input
-// shape (PlacesInput + DateRangePicker). Default start on add =
-// previous segment's end, so contiguous chains are one click; user can
-// override either date independently.
+// segment carries the same From + To + DateRangePicker shape as
+// Segment 1 (the trip's main "Where" + "When" rows). On add, the new
+// segment's From defaults to the previous segment's To and its start
+// defaults to the previous segment's end — contiguous chains are zero-
+// friction. User can override anything.
 type ExtraSegment = {
-  destination: string
+  destination: string                  // "To"
   destPlace:   PlaceResult | null
+  originDest:  string                  // "From" (this segment's origin)
+  originPlace: PlaceResult | null
   dates:       DateRange
 }
 const MAX_EXTRA_SEGMENTS = 4
@@ -140,15 +143,19 @@ const [additionalSegments, setAdditionalSegments] = useState<ExtraSegment[]>([])
 
 function addSegment() {
   if (additionalSegments.length >= MAX_EXTRA_SEGMENTS) return
-  // Seed the new segment's start with the previous segment's end (or the
-  // main trip's end for the first extra) so contiguous chains are zero-
-  // friction. User can still change either date.
-  const prevEnd: Date | null = additionalSegments.length === 0
-    ? dates.end
-    : (additionalSegments[additionalSegments.length - 1].dates.end ?? dates.end)
+  // Seed From = previous segment's To, start = previous segment's end.
+  const prevSeg     = additionalSegments[additionalSegments.length - 1]
+  const prevDestStr = prevSeg
+    ? (prevSeg.destPlace?.displayName ?? prevSeg.destination)
+    : destValue   // first extra → previous "To" is the main destination
+  const prevEnd: Date | null = prevSeg
+    ? (prevSeg.dates.end ?? dates.end)
+    : dates.end
   setAdditionalSegments(prev => [...prev, {
     destination: '',
     destPlace:   null,
+    originDest:  prevDestStr,
+    originPlace: null,
     dates:       { start: prevEnd, end: null, nights: 0 },
   }])
 }
@@ -191,14 +198,30 @@ function submit(e: React.FormEvent) {
     const fullSegments: TripSegment[] = validExtras.length === 0
       ? []
       : [
-          // Segment 1: main destination + dates from the top of the form
-          buildSegment(destValue, tripStartISO, tripEndISO),
-          // Segments 2..N: each row's own destination + date range
-          ...validExtras.map(extra => buildSegment(
-            extra.destPlace?.displayName ?? extra.destination,
-            isoFromDate(extra.dates.start),
-            isoFromDate(extra.dates.end),
-          )),
+          // Segment 1: main destination + dates + trip origin
+          buildSegment(destValue, tripStartISO, tripEndISO, originValue),
+          // Segments 2..N: each row's own from / to / date range. Origin
+          // is only persisted if the user changed it from the default
+          // (previous segment's destination) — otherwise it's implicit
+          // from the chain order.
+          ...validExtras.map((extra, i) => {
+            const segDest    = extra.destPlace?.displayName ?? extra.destination
+            const segOriginRaw = extra.originPlace?.displayName ?? extra.originDest
+            // Default From for this row = previous segment's destination.
+            // If it matches, don't persist (keeps URLs short + signal clean).
+            const prevDest = i === 0
+              ? destValue
+              : (validExtras[i - 1].destPlace?.displayName ?? validExtras[i - 1].destination)
+            const segOrigin = segOriginRaw && segOriginRaw.trim() !== prevDest.trim()
+              ? segOriginRaw
+              : undefined
+            return buildSegment(
+              segDest,
+              isoFromDate(extra.dates.start),
+              isoFromDate(extra.dates.end),
+              segOrigin,
+            )
+          }),
         ]
     const segmentsParam = serializeSegments(fullSegments)
 
@@ -315,7 +338,7 @@ function submit(e: React.FormEvent) {
               sits below. Empty array = single-city; nothing renders. */}
           {additionalSegments.map((seg, idx) => (
             <div key={idx} className={sectionDivider}>
-              <div className="flex items-baseline justify-between mb-2">
+              <div className="flex items-baseline justify-between mb-3">
                 <span className={sectionLabel}>
                   {locale === 'es' ? `Tramo ${idx + 2}` : `Segment ${idx + 2}`}
                 </span>
@@ -327,20 +350,36 @@ function submit(e: React.FormEvent) {
                   {locale === 'es' ? '× Quitar' : '× Remove'}
                 </button>
               </div>
-              <PlacesInput
-                id={`destination-segment-${idx + 2}`}
-                locale={locale}
-                placeholder={t('destinationPlaceholder')}
-                value={seg.destination}
-                onChange={(v) => updateSegment(idx, { destination: v, destPlace: null })}
-                onSelect={(p) => updateSegment(idx, { destPlace: p })}
-              />
-              <div className="mt-3">
-                <DateRangePicker
-                  value={seg.dates}
-                  onChange={(d) => updateSegment(idx, { dates: d })}
-                />
+              {/* From + To — same grid as Segment 1's "Where" row. From
+                  defaults to the previous segment's To but is editable. */}
+              <div className="grid grid-cols-2 gap-2.5 mb-3 max-[560px]:grid-cols-1">
+                <div>
+                  <label className={sectionLabel}>{t('origin')}</label>
+                  <PlacesInput
+                    id={`origin-segment-${idx + 2}`}
+                    locale={locale}
+                    placeholder={t('originPlaceholder')}
+                    value={seg.originDest}
+                    onChange={(v) => updateSegment(idx, { originDest: v, originPlace: null })}
+                    onSelect={(p) => updateSegment(idx, { originPlace: p })}
+                  />
+                </div>
+                <div>
+                  <label className={sectionLabel}>{t('destination')}</label>
+                  <PlacesInput
+                    id={`destination-segment-${idx + 2}`}
+                    locale={locale}
+                    placeholder={t('destinationPlaceholder')}
+                    value={seg.destination}
+                    onChange={(v) => updateSegment(idx, { destination: v, destPlace: null })}
+                    onSelect={(p) => updateSegment(idx, { destPlace: p })}
+                  />
+                </div>
               </div>
+              <DateRangePicker
+                value={seg.dates}
+                onChange={(d) => updateSegment(idx, { dates: d })}
+              />
             </div>
           ))}
           {additionalSegments.length < MAX_EXTRA_SEGMENTS && (
