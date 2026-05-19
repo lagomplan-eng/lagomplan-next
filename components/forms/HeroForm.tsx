@@ -125,21 +125,32 @@ const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
 const [submitted, setSubmitted] = useState(false)
 const [generating, setGenerating] = useState(false)
 
-// Multi-city — additional segments beyond the main destination. Each entry
-// captures a "switch date" (when the previous segment ends and this one
-// begins) + the next city's destination. Segment 1 is implicit (main dest +
-// dates.start). The last segment ends at dates.end. Empty array = single-city.
+// Multi-city — additional segments beyond the main destination. Each
+// segment carries its own full date range, matching Segment 1's input
+// shape (PlacesInput + DateRangePicker). Default start on add =
+// previous segment's end, so contiguous chains are one click; user can
+// override either date independently.
 type ExtraSegment = {
   destination: string
   destPlace:   PlaceResult | null
-  switchDate:  string   // YYYY-MM-DD — when this segment starts
+  dates:       DateRange
 }
 const MAX_EXTRA_SEGMENTS = 4
 const [additionalSegments, setAdditionalSegments] = useState<ExtraSegment[]>([])
 
 function addSegment() {
   if (additionalSegments.length >= MAX_EXTRA_SEGMENTS) return
-  setAdditionalSegments(prev => [...prev, { destination: '', destPlace: null, switchDate: '' }])
+  // Seed the new segment's start with the previous segment's end (or the
+  // main trip's end for the first extra) so contiguous chains are zero-
+  // friction. User can still change either date.
+  const prevEnd: Date | null = additionalSegments.length === 0
+    ? dates.end
+    : (additionalSegments[additionalSegments.length - 1].dates.end ?? dates.end)
+  setAdditionalSegments(prev => [...prev, {
+    destination: '',
+    destPlace:   null,
+    dates:       { start: prevEnd, end: null, nights: 0 },
+  }])
 }
 function removeSegment(idx: number) {
   setAdditionalSegments(prev => prev.filter((_, i) => i !== idx))
@@ -165,30 +176,29 @@ function submit(e: React.FormEvent) {
     // bare currency code with no number, which would confuse the model.
     const budgetWithCurrency = budget.trim() ? `${budget.trim()} ${budgetCurrency}` : ''
 
-    // Build the multi-city segments array (or [] for single-city). Segment 1
-    // is the main destination + dates; each additional row defines a switch
-    // date that splits the trip further. Invalid extras (missing destination
-    // or switchDate) are dropped silently.
+    // Build the multi-city segments array (or [] for single-city). Each
+    // segment now carries its own full date range (same shape as the main
+    // dates picker), so we read start + end directly per row. Invalid
+    // extras (missing destination or either date) are dropped silently.
     const tripStartISO = dates.start?.toISOString().split('T')[0] ?? ''
     const tripEndISO   = dates.end?.toISOString().split('T')[0]   ?? ''
+    const isoFromDate  = (d: Date | null): string =>
+      d ? d.toISOString().split('T')[0] : ''
     const validExtras  = additionalSegments.filter(s => {
       const dest = s.destPlace?.displayName ?? s.destination
-      return !!dest && !!s.switchDate
-        && s.switchDate > tripStartISO && s.switchDate <= tripEndISO
+      return !!dest && !!s.dates.start && !!s.dates.end
     })
     const fullSegments: TripSegment[] = validExtras.length === 0
       ? []
       : [
-          // Segment 1: main destination, from trip start to first extra's switch
-          buildSegment(destValue, tripStartISO, validExtras[0].switchDate),
-          // Segments 2..N: each starts at its row's switchDate, ends at the
-          // next switchDate (or tripEnd for the last).
-          ...validExtras.map((extra, i) => {
-            const segStart = extra.switchDate
-            const segEnd   = validExtras[i + 1]?.switchDate ?? tripEndISO
-            const segDest  = extra.destPlace?.displayName ?? extra.destination
-            return buildSegment(segDest, segStart, segEnd)
-          }),
+          // Segment 1: main destination + dates from the top of the form
+          buildSegment(destValue, tripStartISO, tripEndISO),
+          // Segments 2..N: each row's own destination + date range
+          ...validExtras.map(extra => buildSegment(
+            extra.destPlace?.displayName ?? extra.destination,
+            isoFromDate(extra.dates.start),
+            isoFromDate(extra.dates.end),
+          )),
         ]
     const segmentsParam = serializeSegments(fullSegments)
 
@@ -299,56 +309,42 @@ function submit(e: React.FormEvent) {
           </div>
 
           {/* ── 2b. Multi-city (optional) ───────────────────────────
-              Lets the user chain a second/third/... city onto the trip.
-              Each row picks the city + the date the traveler arrives
-              there (= the day the previous segment ends). The final
-              segment auto-ends at the main `dates.end`. Empty array =
-              single-city, the legacy form flow is byte-identical. */}
-          <div className={sectionDivider}>
-            {additionalSegments.map((seg, idx) => {
-              const isES = locale === 'es'
-              const tripStartISO = dates.start?.toISOString().split('T')[0] ?? ''
-              const tripEndISO   = dates.end?.toISOString().split('T')[0]   ?? ''
-              const prevSwitch   = idx === 0
-                ? tripStartISO
-                : additionalSegments[idx - 1].switchDate
-              return (
-                <div key={idx} className="mb-4 p-4 bg-[rgba(15,58,51,0.03)] border border-[#DDD8D2] rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="font-sans text-[11px] font-semibold tracking-[.12em] uppercase text-[#6B8F86]">
-                      {isES ? `Tramo ${idx + 2}` : `Segment ${idx + 2}`}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeSegment(idx)}
-                      className="font-sans text-[11px] text-[#9A9690] hover:text-[#E1615B] transition-colors"
-                    >
-                      {isES ? '× Quitar' : '× Remove'}
-                    </button>
-                  </div>
-                  <PlacesInput
-                    id={`destination-segment-${idx + 2}`}
-                    locale={locale}
-                    placeholder={t('destinationPlaceholder')}
-                    value={seg.destination}
-                    onChange={(v) => updateSegment(idx, { destination: v, destPlace: null })}
-                    onSelect={(p) => updateSegment(idx, { destPlace: p })}
-                  />
-                  <div className="mt-2 flex items-center gap-2 text-[12px] text-[#7A7773]">
-                    <span>{isES ? 'Llego el:' : 'Arriving:'}</span>
-                    <input
-                      type="date"
-                      value={seg.switchDate}
-                      min={prevSwitch || undefined}
-                      max={tripEndISO || undefined}
-                      onChange={(e) => updateSegment(idx, { switchDate: e.target.value })}
-                      className="border border-[#DDD8D2] rounded px-2 py-1 text-[13px] bg-white"
-                    />
-                  </div>
-                </div>
-              )
-            })}
-            {additionalSegments.length < MAX_EXTRA_SEGMENTS && (
+              Each extra segment renders as a sub-section with the SAME
+              input chrome as the main "To" + "Dates" pair above: a
+              PlacesInput + a DateRangePicker. The "+ Add city" button
+              sits below. Empty array = single-city; nothing renders. */}
+          {additionalSegments.map((seg, idx) => (
+            <div key={idx} className={sectionDivider}>
+              <div className="flex items-baseline justify-between mb-2">
+                <span className={sectionLabel}>
+                  {locale === 'es' ? `Tramo ${idx + 2}` : `Segment ${idx + 2}`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeSegment(idx)}
+                  className="font-sans text-[11px] text-[#9A9690] hover:text-[#E1615B] transition-colors"
+                >
+                  {locale === 'es' ? '× Quitar' : '× Remove'}
+                </button>
+              </div>
+              <PlacesInput
+                id={`destination-segment-${idx + 2}`}
+                locale={locale}
+                placeholder={t('destinationPlaceholder')}
+                value={seg.destination}
+                onChange={(v) => updateSegment(idx, { destination: v, destPlace: null })}
+                onSelect={(p) => updateSegment(idx, { destPlace: p })}
+              />
+              <div className="mt-3">
+                <DateRangePicker
+                  value={seg.dates}
+                  onChange={(d) => updateSegment(idx, { dates: d })}
+                />
+              </div>
+            </div>
+          ))}
+          {additionalSegments.length < MAX_EXTRA_SEGMENTS && (
+            <div className={sectionDivider}>
               <button
                 type="button"
                 onClick={addSegment}
@@ -360,8 +356,8 @@ function submit(e: React.FormEvent) {
               >
                 + {locale === 'es' ? 'Añadir ciudad' : 'Add city'}
               </button>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* ── 3. Who ───────────────────────────────────────────── */}
           <div className="mb-4">
