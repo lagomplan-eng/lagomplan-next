@@ -3408,16 +3408,30 @@ export default function TripResult({ params }: Props) {
               // trips with hydration hiccups), days.length keeps the
               // section from disappearing.
               daysCount={days.length}
+              // Multi-city signal — when present the section renders a
+              // chain-aware header ("N nights · 3-city journey") instead
+              // of anchoring to a single destination.
+              isMultiCity={isMultiCitySegments(segments)}
+              segmentCount={segments.length}
             />
 
-            {/* Section header */}
+            {/* Section header — locale + multi-city aware. For multi-city
+                trips we don't anchor the headline to one city ("30 días en
+                Copenhagen" is misleading when the trip covers Gothenburg
+                and Paris too); show the total + a chain hint instead. */}
             <div className="flex items-baseline justify-between mb-[18px]">
               <div>
                 <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
-                  Tu itinerario
+                  {locale === 'en' ? 'Your itinerary' : 'Tu itinerario'}
                 </div>
                 <div className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                  {nightsNum} {nightsNum === 1 ? 'día' : 'días'} en {titleCaseCity(prefDest) || 'tu destino'}
+                  {isMultiCitySegments(segments)
+                    ? (locale === 'en'
+                        ? `${nightsNum} ${nightsNum === 1 ? 'day' : 'days'} · ${segments.length}-city journey`
+                        : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} · viaje por ${segments.length} ciudades`)
+                    : (locale === 'en'
+                        ? `${nightsNum} ${nightsNum === 1 ? 'day' : 'days'} in ${titleCaseCity(prefDest) || 'your destination'}`
+                        : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} en ${titleCaseCity(prefDest) || 'tu destino'}`)}
                 </div>
               </div>
               <button

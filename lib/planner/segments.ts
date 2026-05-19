@@ -65,11 +65,19 @@ export function buildSegment(
  */
 export function serializeSegments(segments: TripSegment[]): string {
   if (!segments || segments.length === 0) return ''
+  // We deliberately DO NOT percent-encode here — the consumer (URLSearchParams
+  // or fetch body) handles transport-level encoding once. Encoding destination
+  // / origin here resulted in "Mexico City" → encoded to "Mexico%20City" by
+  // us, then encoded again by URLSearchParams to "Mexico%2520City". The fix
+  // is to keep the in-string format human-readable; we only need to defend
+  // against the field delimiters `|` and `;` appearing inside a city name,
+  // which is vanishingly rare. Replace those with U+FF5C / U+FF1B fullwidth
+  // variants if they ever do appear — Google Places never returns them.
+  const safeField = (s: string) => s.replace(/\|/g, '｜').replace(/;/g, '；')
   return segments
     .map(s => {
-      const base = `${encodeURIComponent(s.destination)}|${s.startDate}|${s.endDate}|${s.nights}`
-      // Append origin as a 5th field when set; old 4-field shape stays valid.
-      return s.origin ? `${base}|${encodeURIComponent(s.origin)}` : base
+      const base = `${safeField(s.destination)}|${s.startDate}|${s.endDate}|${s.nights}`
+      return s.origin ? `${base}|${safeField(s.origin)}` : base
     })
     .join(';')
 }
@@ -78,18 +86,25 @@ export function serializeSegments(segments: TripSegment[]): string {
  * Inverse of serializeSegments. Robust against missing fields — drops
  * any segment that doesn't have at least destination + both dates.
  * Accepts both the legacy 4-field shape and the new 5-field
- * destination+origin shape.
+ * destination+origin shape. Tolerates legacy URLs that ship with
+ * percent-encoded fields (from the previous encodeURIComponent-in-
+ * serializer behavior) by decoding when the field looks encoded.
  */
 export function deserializeSegments(raw: string | undefined | null): TripSegment[] {
   if (!raw || typeof raw !== 'string') return []
+  // Legacy compat: if the raw string contains percent-encoded sequences
+  // from the older serializer, decodeURIComponent handles them. Use a safe
+  // decode that returns the input unchanged on malformed input.
+  const safeDecode = (s: string | undefined) => {
+    if (!s) return ''
+    if (!s.includes('%')) return s
+    try { return decodeURIComponent(s) } catch { return s }
+  }
   return raw.split(';').map(part => {
-    const [destEnc, startDate, endDate, nightsStr, originEnc] = part.split('|')
-    const safeDecode = (s: string | undefined) => {
-      try { return decodeURIComponent(s ?? '') } catch { return '' }
-    }
-    const destination = safeDecode(destEnc)
+    const [destRaw, startDate, endDate, nightsStr, originRaw] = part.split('|')
+    const destination = safeDecode(destRaw)
     const nights = Number.isFinite(+nightsStr) ? +nightsStr : 0
-    const origin  = originEnc ? safeDecode(originEnc) : undefined
+    const origin  = originRaw ? safeDecode(originRaw) : undefined
     const seg: TripSegment = {
       destination,
       startDate: startDate ?? '',
