@@ -1053,6 +1053,15 @@ export default function TripResult({ params }: Props) {
   // cause the effect to re-run on every regeneration).
   const rawTripDataRef = useRef<any>(null)
 
+  // Fingerprint of the URL inputs that produced the current rawTripData. The
+  // generate effect re-runs on auth-state transitions (authToken changes),
+  // and we DON'T want to regenerate then — but we DO want to regenerate when
+  // navigation changes destination/dates/segments. Comparing fingerprints
+  // distinguishes the two: same fingerprint = no-op, different = regenerate
+  // and clear the stale state so the page doesn't render the previous trip
+  // under the new URL.
+  const lastGeneratedInputsRef = useRef<string | null>(null)
+
   // ── Access resolution gate ────────────────────────────────────────────────────
   // True once we know whether the user can generate (auth resolved + credits loaded).
   // Prevents the itinerary from rendering before the access check completes.
@@ -1228,10 +1237,35 @@ export default function TripResult({ params }: Props) {
       // Skip AI generation when loading an existing trip from DB
       if (savedTripId) return
 
-      // Skip if a trip is already displayed (post-generation URL update via
-      // history.replaceState doesn't flip savedTripId, so guard on state ref).
-      // Regenerations go through their own handlers, not this effect.
-      if (rawTripDataRef.current) return
+      // Fingerprint of the current URL inputs. If rawTripData already exists
+      // AND was generated for these exact inputs, skip — this handles the
+      // auth-state-transition re-runs without re-generating. If the inputs
+      // CHANGED (user submitted a new trip from the form), we proceed —
+      // clearing the stale state below so the loading branch renders cleanly
+      // instead of showing the previous trip's content under the new URL.
+      const currentFp = JSON.stringify({
+        destination, origin, start, end, nights, traveler, interests, pace, budget,
+        segments: segmentsParam,
+      })
+      if (rawTripDataRef.current && lastGeneratedInputsRef.current === currentFp) {
+        return
+      }
+
+      // Stale trip from a prior navigation — clear before proceeding so the
+      // page doesn't render the previous trip's title / days / hotels under
+      // the new URL params during the AI call.
+      if (rawTripDataRef.current) {
+        setRawTripData(null)
+        setDays([])
+        setAccommodations([])
+        setTripTitle('')
+        setTripSubtitle('')
+        setPacking([])
+        setBudgetRows([])
+        setVersions([])
+        setTripId(null)
+        setDoneCheckIds(new Set())
+      }
 
       // ── Auth / generation-count guard ─────────────────────────────────
       // authedUser is undefined while the session is still loading; wait for it.
@@ -1273,6 +1307,7 @@ export default function TripResult({ params }: Props) {
               console.log('[TripResult] cache hit — restoring trip, skipping AI call')
               const tripDataRaw = cached.tripData
               setRawTripData(tripDataRaw)
+              lastGeneratedInputsRef.current = currentFp
               const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
               setTripTitle(normalized.title)
               setTripSubtitle(normalized.subtitle)
@@ -1386,6 +1421,7 @@ export default function TripResult({ params }: Props) {
         sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
 
         setRawTripData(tripDataRaw)
+        lastGeneratedInputsRef.current = currentFp
         const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
