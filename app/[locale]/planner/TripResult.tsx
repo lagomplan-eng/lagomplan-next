@@ -3036,38 +3036,40 @@ export default function TripResult({ params }: Props) {
           }}
         >
           <div className="max-w-[1160px] mx-auto px-7 py-6">
-            {/* Multi-city chain summary — read-only for now. Lets the user see
-                that the drawer fields below act on the trip-level frame, while
-                each segment's own dates live in trip_data.segments. */}
+            {/* Multi-city chain editor — sits ABOVE the single grid when
+                there are ≥2 segments. Each row edits one segment's
+                destination + date range + (optionally) origin. After any
+                change, trip-level pref* state is recomputed from the chain
+                so the payload built by regenerate sees the full span. */}
             {isMultiCitySegments(segments) && (
-              <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
-                <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-2">
-                  Recorrido multi-ciudad
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
-                  {segments.map((seg, i) => (
-                    <div key={i} className="flex items-center gap-2">
-                      <div className="flex flex-col">
-                        <span className="font-sans text-[13px] font-medium text-[#0F3A33]">
-                          {seg.destination}
-                        </span>
-                        <span className="font-mono text-[10px] text-[#7A7A76]">
-                          {seg.startDate} → {seg.endDate} · {seg.nights}n
-                        </span>
-                      </div>
-                      {i < segments.length - 1 && (
-                        <span className="font-sans text-[14px] text-[#6B8F86] mx-1">→</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <div className="font-sans text-[11px] text-[#7A7A76] mt-2 italic">
-                  Los campos abajo se aplican a todo el viaje. La edición por tramo aún no está disponible.
-                </div>
-              </div>
+              <MultiCitySegmentEditor
+                segments={segments}
+                tripOrigin={prefOrigin}
+                onChange={(next) => {
+                  setSegments(next)
+                  if (next.length > 0) {
+                    const first = next[0]
+                    const last  = next[next.length - 1]
+                    setPrefStart(first.startDate)
+                    setPrefEnd(last.endDate)
+                    setPrefDest(first.destination)
+                    if (first.origin) setPrefOrigin(first.origin)
+                    if (first.startDate && last.endDate) {
+                      const s = new Date(`${first.startDate}T00:00:00`)
+                      const e = new Date(`${last.endDate}T00:00:00`)
+                      const totalNights = next.reduce((sum, x) => sum + x.nights, 0)
+                      setPrefDateRange({ start: s, end: e, nights: totalNights })
+                    }
+                  }
+                }}
+              />
             )}
             <div className="grid grid-cols-3 gap-4 max-[600px]:grid-cols-1">
 
+              {/* Origin / Destination / Dates — hidden for multi-city, where
+                  each segment carries its own copy in the editor above. */}
+              {!isMultiCitySegments(segments) && (
+                <>
               {/* Origin — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
@@ -3115,6 +3117,8 @@ export default function TripResult({ params }: Props) {
                   }}
                 />
               </div>
+                </>
+              )}
 
               {/* Pace */}
               <div>
@@ -4430,5 +4434,153 @@ export default function TripResult({ params }: Props) {
       />
 
     </main>
+  )
+}
+
+// ── Multi-city segment editor ─────────────────────────────────────────────────
+// Lives in the prefs drawer; lets the user edit per-segment destination +
+// dates + (optional) origin after generation, and add / remove segments.
+// Same shape as HeroForm's "+ Añadir ciudad" rows so the drawer is a true
+// post-gen analog of the form.
+
+interface MultiCitySegmentEditorProps {
+  segments:   TripSegment[]
+  /** Trip-level origin (Segment 0's chain-implicit origin if not explicit). */
+  tripOrigin: string
+  onChange:   (next: TripSegment[]) => void
+}
+
+function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySegmentEditorProps) {
+  const MAX_SEGMENTS = 5
+
+  function updateSegment(idx: number, patch: Partial<TripSegment>) {
+    const next = segments.map((s, i) => i === idx ? { ...s, ...patch } : s)
+    onChange(next)
+  }
+
+  function removeSegment(idx: number) {
+    if (segments.length <= 2) return // never drop below multi-city threshold
+    onChange(segments.filter((_, i) => i !== idx))
+  }
+
+  function addSegment() {
+    if (segments.length >= MAX_SEGMENTS) return
+    // Seed new segment: From = last segment's destination, dates start at
+    // last segment's end (contiguous chain), no destination yet.
+    const last = segments[segments.length - 1]
+    onChange([...segments, {
+      destination: '',
+      startDate:   last.endDate,
+      endDate:     '',
+      nights:      0,
+      origin:      last.destination,
+    }])
+  }
+
+  // Convert TripSegment <-> DateRange for the picker.
+  const toDateRange = (s: TripSegment): DateRange => {
+    const start = s.startDate ? new Date(`${s.startDate}T00:00:00`) : null
+    const end   = s.endDate   ? new Date(`${s.endDate}T00:00:00`)   : null
+    return { start, end, nights: s.nights }
+  }
+  const isoFromDate = (d: Date | null): string =>
+    d ? d.toISOString().slice(0, 10) : ''
+
+  return (
+    <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
+      <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-3">
+        Recorrido multi-ciudad
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {segments.map((seg, idx) => {
+          // Default From for this row = previous segment's destination (or
+          // tripOrigin for Segment 0). User can override via the input.
+          const defaultFrom = idx === 0
+            ? tripOrigin
+            : (segments[idx - 1].destination || '')
+          const displayOrigin = seg.origin ?? defaultFrom
+
+          return (
+            <div key={idx} className="bg-[#FAF8F5] border border-[#E4DFD8] rounded-[8px] p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33]">
+                  Tramo {idx + 1}
+                </span>
+                {segments.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSegment(idx)}
+                    className="font-mono text-[10px] text-[#B8B5AF] hover:text-[#3D3D3A] transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 mb-2.5 max-[600px]:grid-cols-1">
+                <div>
+                  <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                    Desde
+                  </label>
+                  <PlacesInput
+                    id={`pref-segment-${idx}-origin`}
+                    locale="es"
+                    placeholder="Origen"
+                    value={displayOrigin}
+                    onChange={(v) => updateSegment(idx, { origin: v })}
+                    onSelect={(p: PlaceResult) => updateSegment(idx, { origin: p.displayName })}
+                    locationBias="global"
+                  />
+                </div>
+                <div>
+                  <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                    Hasta
+                  </label>
+                  <PlacesInput
+                    id={`pref-segment-${idx}-dest`}
+                    locale="es"
+                    placeholder="Destino"
+                    value={seg.destination}
+                    onChange={(v) => updateSegment(idx, { destination: v })}
+                    onSelect={(p: PlaceResult) => updateSegment(idx, { destination: p.displayName })}
+                    locationBias="global"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                  Fechas
+                </label>
+                <DateRangePicker
+                  value={toDateRange(seg)}
+                  onChange={(r) => {
+                    const startDate = isoFromDate(r.start)
+                    const endDate   = isoFromDate(r.end)
+                    const nights    = r.nights
+                    updateSegment(idx, { startDate, endDate, nights })
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {segments.length < MAX_SEGMENTS && (
+        <button
+          type="button"
+          onClick={addSegment}
+          className="mt-3 font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] hover:text-[#1B4D3E] transition-colors"
+        >
+          + Añadir ciudad
+        </button>
+      )}
+
+      <div className="font-sans text-[11px] text-[#7A7A76] mt-3 italic">
+        Los demás campos (ritmo, presupuesto, intereses, viajeros) se aplican a todo el viaje.
+      </div>
+    </div>
   )
 }
