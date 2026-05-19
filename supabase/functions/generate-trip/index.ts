@@ -1,5 +1,6 @@
  // supabase/functions/generate-trip/index.ts                                                                 
-  import { serve } from "https://deno.land/std@0.168.0/http/server.ts";                                          
+  import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+  import { WC_2026_CALENDAR, WC_HOST_CITY_HINTS, type WcMatch } from "./wc-2026-calendar.ts";                                          
                                                             
   const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");                                                   
                                                                                                                  
@@ -206,6 +207,73 @@
     return `\n  - Días de la semana: ${items.join(" · ")}${suffix}`;
   }
 
+  // ── World Cup 2026 calendar helpers ─────────────────────────────────────────
+  // The calendar is generated from lib/worldcup/data/<city>.ts (editorial
+  // source of truth) by scripts/build-wc-calendar.mjs. The Edge Fn imports
+  // the flat list + a host-city-hint lookup, and only surfaces a prompt block
+  // when the trip overlaps a host city during the tournament window.
+
+  function resolveWcCityId(destination: string): string | null {
+    if (!destination) return null;
+    const d = destination.toLowerCase();
+    for (const [cityId, hints] of Object.entries(WC_HOST_CITY_HINTS)) {
+      if (hints.some(h => d.includes(h.toLowerCase()))) return cityId;
+    }
+    return null;
+  }
+
+  function findWcMatchesInRange(cityId: string, start: string, end: string): WcMatch[] {
+    if (!cityId || !start || !end) return [];
+    return WC_2026_CALENDAR.filter(m =>
+      m.cityId === cityId && m.date >= start && m.date <= end
+    );
+  }
+
+  /**
+   * Returns the full prompt fragment (data-block line + guidance block) when
+   * the destination matches a WC host city AND the trip window overlaps real
+   * matches. Empty string otherwise — non-WC trips don't see any of this
+   * context, so prompt length stays honest.
+   */
+  function buildWcContext(destination: string, start: string, end: string): string {
+    if (!destination || !start || !end) return "";
+    const cityId = resolveWcCityId(destination);
+    if (!cityId) return "";
+    const matches = findWcMatchesInRange(cityId, start, end);
+    if (matches.length === 0) return "";
+
+    const lines = matches.map(m => {
+      const teamsLabel = m.teams.some(t => t === "Por definir" || !t)
+        ? `${m.tag}`
+        : `${m.teamsLabel} — ${m.tag}`;
+      return `      · ${m.dateRaw} ${m.day} ${m.time} — ${teamsLabel} (${m.stadium})`;
+    }).join("\n");
+
+    return `
+
+  COPA MUNDIAL 2026 (importante — el viaje cae en sede mundialista):
+  Hay ${matches.length} partido${matches.length === 1 ? "" : "s"} confirmado${matches.length === 1 ? "" : "s"} en ${matches[0].cityDisplay} durante la estancia:
+${lines}
+
+  Aplica este contexto al armar el itinerario:
+    - HOSPEDAJE: la demanda y el precio son ALTOS en fechas de partido. Si el
+      viajero NO va al estadio, sugiere reservar con anticipación o barrios
+      alejados del recinto. Si va, hospedaje cerca del transit al estadio.
+    - TRANSPORTE: el día de partido hay surge alto en Uber/taxis y saturación
+      de transporte público alrededor del estadio (3 h antes / 2 h después).
+      Recomienda salir con margen o evitar la zona en esas ventanas.
+    - GASTRONOMÍA: restaurantes cerca del estadio y en zonas turísticas se
+      llenan antes/después del partido. Sugiere reservar mesa con anticipación
+      o pivotar a barrios alternativos.
+    - SI EL VIAJERO QUIERE IR AL PARTIDO: incluye el partido como un bloque
+      "tour" en el día correspondiente. Bloquea ~4 h alrededor (2 h antes,
+      2 h después) sin otros bookings, y describe el partido en el name del
+      bloque (ej. "Partido: México vs Sudáfrica en Estadio Banorte").
+    - SI NO VA AL PARTIDO: aprovecha que la atención local está en el estadio
+      para visitar atracciones tradicionalmente concurridas (museos, miradores)
+      con menos cola en la franja del partido.`;
+  }
+
   function buildPrompt(input: any): string {
     const d = input.duration_days as number;
     const interests = (input.interests || []).join(", ") || "(sin preferencias)";
@@ -289,6 +357,10 @@
     const seasonLine    = buildSeasonLine(start, input.destination);
     const weekdaysLine  = buildDayOfWeekLine(start, d);
 
+    // WC 2026 context — only fires when destination is a host city AND the
+    // trip window overlaps at least one real match. Empty for non-WC trips.
+    const wcContext     = buildWcContext(input.destination, start, end);
+
     // Layered temporal guidance — fires when we have a real start date.
     // Kept short on purpose; AI is smart enough to act on the structured
     // signal without a wall of instructions.
@@ -316,7 +388,7 @@
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
-  ${retryNote}${accommodationsBlock}${familyGuidance}${temporalGuidance}
+  ${retryNote}${accommodationsBlock}${familyGuidance}${temporalGuidance}${wcContext}
 
   TIPOS DE BLOQUE (CRÍTICO):
   Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:
