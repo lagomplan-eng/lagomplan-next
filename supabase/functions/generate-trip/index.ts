@@ -274,6 +274,101 @@ ${lines}
       con menos cola en la franja del partido.`;
   }
 
+  // ── Multi-city segments ─────────────────────────────────────────────────────
+  // When the trip carries a `segments` array (≥2 entries), the prompt switches
+  // from single-destination mode to a structured chain. Each segment has its
+  // own destination + dates + nights, and accommodations must be emitted one
+  // per segment.
+
+  interface TripSegment {
+    destination: string;
+    startDate:   string;
+    endDate:     string;
+    nights:      number;
+  }
+
+  function isMultiCity(segments: unknown): segments is TripSegment[] {
+    return Array.isArray(segments) && segments.length >= 2
+      && segments.every(s => s && typeof s === "object"
+        && typeof (s as TripSegment).destination === "string"
+        && typeof (s as TripSegment).startDate   === "string"
+        && typeof (s as TripSegment).endDate     === "string");
+  }
+
+  function buildSegmentsContext(segments: TripSegment[]): string {
+    if (!segments || segments.length < 2) return "";
+    const chain = segments.map((s, i) =>
+      `      ${i + 1}) ${s.destination} · ${s.startDate} → ${s.endDate} (${s.nights} noche${s.nights === 1 ? "" : "s"})`
+    ).join("\n");
+    return `
+
+  MULTI-CIUDAD (importante — el viaje tiene ${segments.length} tramos):
+${chain}
+
+  Aplica este contexto al armar el itinerario:
+    - DÍAS DE TRANSICIÓN: el día en que se cambia de ciudad NO debe ser intensivo.
+      Incluye el traslado como un bloque "transfer" temprano + 1-2 bloques opcionales
+      al llegar. Sin tours largos ni cenas formales tarde el día de transición.
+    - HOSPEDAJE POR TRAMO: DEBES emitir una entrada en "accommodations" POR CADA
+      tramo (${segments.length} en total). Ver bloque ALOJAMIENTO POR TRAMO más abajo.
+    - ITINERARIO POR TRAMO: respeta a qué ciudad pertenece cada día. No mezcles
+      restaurantes ni atracciones de una ciudad en días que pertenecen a otra.
+    - REPETICIONES: si una ciudad aparece más de una vez (base → escapada → base),
+      la segunda estancia debe ofrecer actividades distintas a la primera. No
+      repitas atracciones ni restaurantes.`;
+  }
+
+  // ── Jet-lag context ─────────────────────────────────────────────────────────
+  // Coarse "is this a long-haul flight from Mexico-base?" lookup. The Edge Fn
+  // serves a primarily Latin-American audience, so the heuristic assumes
+  // Americas-origin; trans-continental destinations get a relaxed-arrival
+  // prompt block. Future refinement: factor in true origin continent.
+
+  const LONG_HAUL_HINTS = [
+    // Europe
+    "paris", "parís", "london", "londres", "madrid", "barcelona", "rome", "roma",
+    "amsterdam", "berlin", "berlín", "lisbon", "lisboa", "milan", "milán",
+    "vienna", "viena", "prague", "praga", "athens", "atenas", "porto", "oporto",
+    "francia", "france", "italia", "italy", "españa", "spain", "alemania", "germany",
+    "portugal", "grecia", "greece", "reino unido", "united kingdom",
+    // Asia
+    "tokyo", "tokio", "kyoto", "osaka", "seoul", "seúl", "beijing", "pekín",
+    "shanghai", "shanghái", "bangkok", "singapore", "singapur", "hong kong",
+    "taipei", "bali", "dubai", "estambul", "istanbul",
+    "japon", "japón", "japan", "china", "tailandia", "thailand", "india",
+    "turquía", "turkey", "vietnam", "indonesia",
+    // Oceania
+    "sydney", "melbourne", "auckland", "wellington",
+    "australia", "nueva zelanda", "new zealand",
+    // Africa
+    "cape town", "ciudad del cabo", "el cairo", "cairo", "marrakech", "casablanca",
+    "sudáfrica", "south africa", "marruecos", "morocco", "egipto", "egypt",
+  ];
+
+  function isLongHaul(destination: string): boolean {
+    if (!destination) return false;
+    const d = destination.toLowerCase();
+    return LONG_HAUL_HINTS.some(h => d.includes(h));
+  }
+
+  function buildJetLagContext(destination: string, origin: string): string {
+    if (!isLongHaul(destination)) return "";
+    const originLabel = origin && origin.trim() ? origin.trim() : "México";
+    return `
+
+  VUELO LARGO (importante):
+  El destino implica un vuelo de larga distancia desde ${originLabel}. Suaviza
+  el día de llegada para acomodar jet-lag:
+    - Día 1: máximo 3-4 bloques, mayormente flexibles ("paseo ligero por el
+      barrio", "comida cercana al hotel"). Evita tours largos, museos extensos
+      o actividades que requieran energía alta o reservas con hora estricta.
+    - Cena del día 1: hora razonable (idealmente 19:30-20:30), restaurante a
+      ≤15 minutos del hotel, ambiente tranquilo.
+    - Día 2: ya puede tener intensidad normal.
+    - Día de regreso: si el vuelo es por la tarde/noche, también de menor
+      intensidad — deja 4-5 h libres antes del check-out al aeropuerto.`;
+  }
+
   function buildPrompt(input: any): string {
     const d = input.duration_days as number;
     const interests = (input.interests || []).join(", ") || "(sin preferencias)";
@@ -295,8 +390,28 @@ ${lines}
     const isRetryNoDays           = input.retryHint === "no_days_emitted";
     const isRetry                 = isRetryNoAccommodations || isRetryNoDays;
 
+    // Multi-city: one accommodation REQUIRED per segment. Single-city falls
+    // back to the original "at least 1 entry covering all nights" contract.
+    const multiCity = isMultiCity(input.segments) ? input.segments as TripSegment[] : null;
+
     const accommodationsBlock = overnight
-      ? `
+      ? multiCity
+        ? `
+  ALOJAMIENTO POR TRAMO (OBLIGATORIO):
+  Este viaje tiene ${multiCity.length} tramos. DEBES devolver "accommodations" con UNA entrada
+  POR CADA tramo (${multiCity.length} en total), en el mismo orden que los tramos:
+${multiCity.map((s, i) => `    Tramo ${i + 1}:
+      - city:         "${s.destination}"        ← usa esto exacto
+      - checkInDate:  "${s.startDate}"          ← usa esto exacto
+      - checkOutDate: "${s.endDate}"            ← usa esto exacto
+      - nights:       ${s.nights}`).join("\n")}
+  Cada entrada debe incluir además:
+    - neighborhood: zona concreta dentro de esa ciudad
+    - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
+    - rationale: 1 oración explicando por qué encaja con el tramo y el estilo
+    - priceTier: "budget" | "mid" | "upscale" | "luxury"
+    - familyFriendly: true | false`
+        : `
   ALOJAMIENTO (OBLIGATORIO):
   Este viaje incluye ${nights} noche(s). DEBES devolver "accommodations" con al menos 1 entrada
   que cubra TODAS las noches (del ${start} al ${end}). Cada entrada:
@@ -361,6 +476,15 @@ ${lines}
     // trip window overlaps at least one real match. Empty for non-WC trips.
     const wcContext     = buildWcContext(input.destination, start, end);
 
+    // Multi-city — fires only when input.segments has ≥2 contiguous entries.
+    // Empty for single-city trips (the default).
+    const segmentsContext = multiCity ? buildSegmentsContext(multiCity) : "";
+
+    // Jet-lag — fires only when destination is on the long-haul hint list
+    // (Europe / Asia / Oceania / Africa). Origin is surfaced in the prompt
+    // so the AI knows where the relaxed Day 1 is coming from.
+    const jetLagContext   = buildJetLagContext(input.destination, input.origin);
+
     // Layered temporal guidance — fires when we have a real start date.
     // Kept short on purpose; AI is smart enough to act on the structured
     // signal without a wall of instructions.
@@ -388,7 +512,7 @@ ${lines}
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
-  ${retryNote}${accommodationsBlock}${familyGuidance}${temporalGuidance}${wcContext}
+  ${retryNote}${accommodationsBlock}${segmentsContext}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
 
   TIPOS DE BLOQUE (CRÍTICO):
   Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:
