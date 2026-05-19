@@ -106,39 +106,92 @@ async function callGenerateTrip(payload: Record<string, any>, signal: AbortSigna
   }
 }
 
+type TripSegment = {
+  destination: string
+  startDate:   string
+  endDate:     string
+  nights:      number
+  origin?:     string
+}
+
+function getTripSegments(jobInputs: Record<string, any>): TripSegment[] | null {
+  const raw = jobInputs?.segments
+  if (!Array.isArray(raw) || raw.length < 2) return null
+  // Defensive validation — drop malformed entries rather than throwing,
+  // so a bad segment shape downgrades gracefully to single-city.
+  const valid = raw.filter(s => s && typeof s === 'object'
+    && typeof s.destination === 'string' && s.destination
+    && typeof s.startDate   === 'string' && s.startDate
+    && typeof s.endDate     === 'string' && s.endDate)
+  return valid.length >= 2 ? (valid as TripSegment[]) : null
+}
+
 async function generateSegment(jobInputs: Record<string, any>, segmentIndex: number, totalSegments: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
-  // Segment-scoped payload. Compute the date range and day count for this
-  // segment, then ask generate-trip for `duration_days = segmentDayCount`
-  // days starting at segmentStartDate. Last segment may be shorter than
-  // SEGMENT_DAYS if total trip length isn't a multiple of 10.
-  const totalDays      = Math.max(1, Math.min(30, Number(jobInputs.duration_days) || 1))
-  const segmentStartIdx = segmentIndex * SEGMENT_DAYS
-  const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
+  const multiCity = getTripSegments(jobInputs)
 
-  const tripStart = new Date(jobInputs.start)
-  const segmentStartDate = new Date(tripStart)
-  segmentStartDate.setDate(tripStart.getDate() + segmentStartIdx)
-  const segmentEndDate = new Date(segmentStartDate)
-  segmentEndDate.setDate(segmentStartDate.getDate() + segmentDayCount - 1)
+  let segmentPayload: Record<string, any>
 
-  const segmentPayload = {
-    ...jobInputs,
-    duration_days:        segmentDayCount,
-    segment_index:        segmentIndex,                  // informational, generate-trip currently ignores
-    total_segments:       totalSegments,                 // informational
-    previous_day_summary: prevSummary ?? undefined,      // continuity hint, generate-trip currently ignores
-    start: segmentStartDate.toISOString().slice(0, 10),
-    end:   segmentEndDate.toISOString().slice(0, 10),
+  if (multiCity) {
+    // ── Multi-city: one segment per chunk ───────────────────────────────────
+    // Build a CLEAN single-city payload for this segment. We strip the
+    // segments array so the AI prompts as single-city (no contradiction
+    // between "Destino: chain" and "Duración: N days") and gets the full
+    // 4-7 blocks per day budget for that segment's city.
+    const seg          = multiCity[segmentIndex]
+    // duration_days = nights + 1 (inclusive day count). Most segments have
+    // nights ≥ 1; same-day edge case still produces 1 day.
+    const segmentDays  = Math.max(1, seg.nights + 1)
+    const segOrigin    = seg.origin
+      ?? (segmentIndex === 0 ? jobInputs.origin : multiCity[segmentIndex - 1].destination)
+
+    // Strip segments + multi-city-only fields from the forwarded payload so
+    // the generate-trip Edge Function doesn't double-apply the multi-city
+    // prompt branch.
+    const { segments: _drop, ...singleCityBase } = jobInputs as any
+
+    segmentPayload = {
+      ...singleCityBase,
+      destination:  seg.destination,
+      origin:       segOrigin,
+      start:        seg.startDate,
+      end:          seg.endDate,
+      nights:       seg.nights,
+      duration_days: segmentDays,
+      // Continuity hint surfaces in prompt — informational; the
+      // generate-trip Edge Function ignores it today but it's logged.
+      previous_day_summary: prevSummary ?? undefined,
+      segment_index:  segmentIndex,
+      total_segments: totalSegments,
+    }
+  } else {
+    // ── Single-city: original day-block chunking ────────────────────────────
+    const totalDays      = Math.max(1, Math.min(30, Number(jobInputs.duration_days) || 1))
+    const segmentStartIdx = segmentIndex * SEGMENT_DAYS
+    const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
+
+    const tripStart = new Date(jobInputs.start)
+    const segmentStartDate = new Date(tripStart)
+    segmentStartDate.setDate(tripStart.getDate() + segmentStartIdx)
+    const segmentEndDate = new Date(segmentStartDate)
+    segmentEndDate.setDate(segmentStartDate.getDate() + segmentDayCount - 1)
+
+    segmentPayload = {
+      ...jobInputs,
+      duration_days:        segmentDayCount,
+      segment_index:        segmentIndex,
+      total_segments:       totalSegments,
+      previous_day_summary: prevSummary ?? undefined,
+      start: segmentStartDate.toISOString().slice(0, 10),
+      end:   segmentEndDate.toISOString().slice(0, 10),
+    }
   }
 
   const res = await callGenerateTrip(segmentPayload, signal)
   if (!res?.trip_data) throw new Error('segment response missing trip_data')
-  // Diagnostic — log shape on first segment so we can see exactly where
-  // the days array lives. The existing /generate-trip Edge Function
-  // doesn't have a documented contract; response shape was hand-rolled.
   if (segmentIndex === 0) {
     console.log('[worker] segment[0] keys:', Object.keys(res.trip_data || {}))
     console.log('[worker] segment[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
+    console.log('[worker] segment[0] mode:', multiCity ? 'multi-city' : 'single-city')
   }
   return res.trip_data
 }
@@ -157,32 +210,55 @@ function chunkDays(chunk: any): any[] {
 function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>): Record<string, any> {
   // Concatenate per-segment outputs into a single trip_data shape matching
   // what the sync endpoint returns. Each chunk is a segment containing up
-  // to SEGMENT_DAYS days. Day numbers are cumulative across segments —
-  // not segment-relative — so users see "Day 17" not "Segment 2 Day 7".
-  // Trip-level metadata (title, subtitle, budget, packing) comes from the
-  // first segment; subsequent segments' versions are discarded.
-  const first = chunks[0] ?? {}
+  // to SEGMENT_DAYS days (single-city) OR one segment of the chain (multi-
+  // city). Day numbers are cumulative across segments so users see "Day 17"
+  // not "Segment 2 Day 7". Trip-level metadata (title, subtitle, budget,
+  // packing) comes from the first segment; the rest are discarded.
+  const first     = chunks[0] ?? {}
+  const multiCity = getTripSegments(jobInputs)
   let dayCounter = 0
   const days: any[] = []
+  const accommodations: any[] = []
   for (const chunk of chunks) {
     const segmentDays = chunkDays(chunk)
     for (const day of segmentDays) {
       dayCounter += 1
       days.push({ ...day, day_number: dayCounter })
     }
+    // Multi-city: each chunk is a single-city call → exactly one
+    // accommodation entry per chunk. Collect them all so the assembled
+    // trip_data has one accommodation per segment (matches the per-segment
+    // hospedaje block expected on the result page).
+    if (Array.isArray((chunk as any)?.accommodations)) {
+      accommodations.push(...(chunk as any).accommodations)
+    }
   }
+
+  // Title for multi-city: prefer first segment's title (which the AI named
+  // for that city) but fall back to a chain summary.
+  const fallbackTitle = multiCity
+    ? `Viaje multi-ciudad: ${multiCity.map(s => s.destination).join(' → ')}`
+    : `Viaje a ${jobInputs.destination}`
+
   console.log('[worker] assembled result:', {
-    segments_count: chunks.length,
-    days_count:     days.length,
+    mode:               multiCity ? 'multi-city' : 'single-city',
+    segments_count:     chunks.length,
+    days_count:         days.length,
+    accommodations:     accommodations.length,
     first_segment_keys: Object.keys(first || {}),
   })
+
   return {
-    title:       (first as any).title       ?? `Viaje a ${jobInputs.destination}`,
-    subtitle:    (first as any).subtitle    ?? `${jobInputs.duration_days} días`,
-    destination: jobInputs.destination,
+    title:          (first as any).title       ?? fallbackTitle,
+    subtitle:       (first as any).subtitle    ?? `${jobInputs.duration_days} días`,
+    destination:    jobInputs.destination,
     days,
-    budget:      (first as any).budget      ?? null,
-    packing:     (first as any).packing     ?? null,
+    accommodations: accommodations.length > 0 ? accommodations : ((first as any).accommodations ?? null),
+    budget:         (first as any).budget      ?? null,
+    packing:        (first as any).packing     ?? null,
+    // Preserve segments on the saved trip_data so the result page hydrates
+    // the multi-city chip row + drawer summary on DB load.
+    ...(multiCity ? { segments: multiCity } : {}),
   }
 }
 

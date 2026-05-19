@@ -1329,12 +1329,11 @@ export default function TripResult({ params }: Props) {
         // Route long trips through the async job pipeline. Short trips stay
         // on the synchronous endpoint. The async path requires auth (anon
         // users always use sync — the jobs endpoint returns 401 for them).
-        // Multi-city trips currently bypass async because the worker chunks
-        // by raw day-count and doesn't slice the segments array per chunk —
-        // each chunk would see the full chain and double-cover cities. Keep
-        // them on sync until the worker is made segment-aware.
+        // Multi-city trips ALWAYS go through async (when authed): the worker
+        // is segment-aware and chunks one segment per call, which avoids the
+        // single-call resource limits multi-city megaprompts hit.
         const isMultiCityTrip = segments.length > 0
-        const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && !isMultiCityTrip
+        const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || isMultiCityTrip)
         setIsAsyncPath(useAsync)
 
         console.log('[TripResult] POST payload:', JSON.stringify(payload), 'async:', useAsync)
@@ -1852,9 +1851,9 @@ export default function TripResult({ params }: Props) {
 
       // Long-trip regen routes through async (same gate as initial-gen) — the
       // sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT for
-      // anything beyond ~14 days. Multi-city trips bypass async (see comment
-      // in initial-gen effect).
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && segments.length === 0
+      // anything beyond ~14 days. Multi-city ALWAYS uses async (segment-aware
+      // chunking).
+      const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
       const previousTripId = tripId   // capture before any setTripId mutation
 
       let tripDataRaw: any = null
@@ -2198,9 +2197,8 @@ export default function TripResult({ params }: Props) {
 
       // Long-trip replace routes through async (same gate as initial-gen) —
       // the sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT
-      // for anything beyond ~14 days. Multi-city trips bypass async (see
-      // comment in initial-gen effect).
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && segments.length === 0
+      // for anything beyond ~14 days. Multi-city ALWAYS uses async.
+      const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
       // Capture the predecessor before any setTripId mutation — needed for
       // the "delete the old row after the new one is saved" cleanup step.
       const previousTripId = tripId
