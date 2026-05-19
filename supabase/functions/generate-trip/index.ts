@@ -134,6 +134,78 @@
     },
   };                              
                                                                                                                  
+  // ── Temporal-context helpers ────────────────────────────────────────────────
+  // Pure date math. Derives the season + per-day weekday so the AI can pick
+  // climate-appropriate activities (indoor in winter, shaded in summer) and
+  // respect day-of-week realities (museum closures, market days). No external
+  // data, no API calls — runs entirely off `start` + destination text.
+
+  // Tiny lookup of destinations that fall in the southern hemisphere. Covers
+  // the bulk of Lagomplan's relevant non-northern destinations for a Mexico-
+  // based audience. Match is substring-based on lowercased destination text.
+  const SOUTHERN_HEMISPHERE_HINTS = [
+    "argentina", "buenos aires", "patagonia", "mendoza", "bariloche", "ushuaia", "iguazu",
+    "uruguay", "montevideo", "punta del este", "colonia del sacramento",
+    "chile", "santiago", "valparaíso", "atacama",
+    "perú", "peru", "lima", "cusco", "arequipa", "machu picchu",
+    "bolivia", "la paz", "sucre", "uyuni",
+    "paraguay", "asunción",
+    "brasil", "brazil", "río de janeiro", "rio de janeiro", "são paulo", "sao paulo", "salvador", "florianópolis", "florianopolis", "fortaleza",
+    "australia", "sydney", "melbourne", "brisbane", "perth",
+    "nueva zelanda", "new zealand", "auckland", "wellington", "queenstown",
+    "sudáfrica", "south africa", "cape town", "ciudad del cabo", "johannesburgo", "johannesburg",
+    "fiji", "tahití", "tahiti", "samoa",
+  ];
+
+  function isSouthernHemisphere(destination: string): boolean {
+    if (!destination) return false;
+    const d = destination.toLowerCase();
+    return SOUTHERN_HEMISPHERE_HINTS.some(h => d.includes(h));
+  }
+
+  // Month-index → season (0-indexed: Jan = 0). Equinox cutoffs are simplified
+  // (always month-boundary). Good enough for prompt context.
+  const SEASONS_NORTHERN_ES = [
+    "invierno", "invierno", "primavera", "primavera", "primavera",
+    "verano", "verano", "verano", "otoño", "otoño", "otoño", "invierno",
+  ];
+  const SEASONS_SOUTHERN_ES = [
+    "verano", "verano", "otoño", "otoño", "otoño",
+    "invierno", "invierno", "invierno", "primavera", "primavera", "primavera", "verano",
+  ];
+  const MONTH_NAMES_ES = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+  ];
+  const WEEKDAY_LABELS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+
+  function buildSeasonLine(start: string, destination: string): string {
+    if (!start) return "";
+    const date = new Date(`${start}T00:00:00Z`);
+    if (isNaN(date.getTime())) return "";
+    const m = date.getUTCMonth();
+    const southern = isSouthernHemisphere(destination);
+    const season = (southern ? SEASONS_SOUTHERN_ES : SEASONS_NORTHERN_ES)[m];
+    const hemi   = southern ? "hemisferio sur" : "hemisferio norte";
+    return `\n  - Estación en destino: ${season} (${hemi}, ${MONTH_NAMES_ES[m]})`;
+  }
+
+  function buildDayOfWeekLine(start: string, durationDays: number): string {
+    if (!start || !durationDays || durationDays <= 0) return "";
+    const d0 = new Date(`${start}T00:00:00Z`);
+    if (isNaN(d0.getTime())) return "";
+    // Cap at 14 days printed inline — beyond that the prompt gets noisy.
+    const cap = Math.min(durationDays, 14);
+    const items: string[] = [];
+    for (let i = 0; i < cap; i++) {
+      const d = new Date(d0);
+      d.setUTCDate(d0.getUTCDate() + i);
+      items.push(`Día ${i + 1} ${WEEKDAY_LABELS_ES[d.getUTCDay()]}`);
+    }
+    const suffix = durationDays > cap ? ` (… +${durationDays - cap} más)` : "";
+    return `\n  - Días de la semana: ${items.join(" · ")}${suffix}`;
+  }
+
   function buildPrompt(input: any): string {
     const d = input.duration_days as number;
     const interests = (input.interests || []).join(", ") || "(sin preferencias)";
@@ -213,16 +285,38 @@
     - No hagas el viaje exclusivamente para niños. Sigue siendo un viaje para todos.`
       : "";
 
+    // Temporal context — derived once per prompt, surfaces in the data block.
+    const seasonLine    = buildSeasonLine(start, input.destination);
+    const weekdaysLine  = buildDayOfWeekLine(start, d);
+
+    // Layered temporal guidance — fires when we have a real start date.
+    // Kept short on purpose; AI is smart enough to act on the structured
+    // signal without a wall of instructions.
+    const temporalGuidance = start
+      ? `
+
+  CONTEXTO TEMPORAL (importante):
+  Aplica la estación y los días de la semana al armar el itinerario:
+    - Estación: prioriza actividades apropiadas para el clima (interiores y
+      bebidas calientes en invierno, sombra y horarios tempranos en verano,
+      capas ligeras en transición). Refleja la ropa adecuada en el packing.
+    - Días de la semana: respeta cierres habituales. Muchos museos cierran
+      lunes (especialmente en Europa); mercados tradicionales suelen ser
+      sábado o domingo; bancos cerrados domingo; algunos restaurantes
+      tienen día de descanso (lunes o martes es lo común). Asigna cada
+      bloque al día concreto que le toca.`
+      : "";
+
     return `Genera un itinerario de viaje con estos datos:
   - Origen: ${input.origin ?? "(no especificado)"}
   - Destino: ${input.destination}
   - Duración: ${d} días${overnight ? ` (${nights} noche(s))` : " (sin pernocta)"}
-  - Fechas: ${start || "(no especificadas)"} → ${end || "(no especificadas)"}
+  - Fechas: ${start || "(no especificadas)"} → ${end || "(no especificadas)"}${seasonLine}${weekdaysLine}
   - Viajeros: ${input.travelers} persona(s)${familyLine}
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
-  ${retryNote}${accommodationsBlock}${familyGuidance}
+  ${retryNote}${accommodationsBlock}${familyGuidance}${temporalGuidance}
 
   TIPOS DE BLOQUE (CRÍTICO):
   Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:
