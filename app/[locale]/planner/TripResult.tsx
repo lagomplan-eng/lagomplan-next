@@ -21,6 +21,12 @@ import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSecti
 import TripReadinessBar from '../../../components/planner/TripReadinessBar'
 import StatusPill from '../../../components/planner/StatusPill'
 import { computeMilestones } from '../../../lib/planner/milestones'
+import {
+  type TripSegment,
+  deserializeSegments,
+  isMultiCitySegments,
+  formatSegmentChain,
+} from '../../../lib/planner/segments'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
@@ -856,6 +862,7 @@ export default function TripResult({ params }: Props) {
     currency: currencyParam = '',
     trip_id:  savedTripId = '',
     checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
+    segments: segmentsParam = '',    // pipe-delimited multi-city chain (deserializeSegments)
   } = params
 
   // ── Data state ──────────────────────────────────────────────────────────────
@@ -953,6 +960,12 @@ export default function TripResult({ params }: Props) {
   const [prefEnd, setPrefEnd]             = useState(end)
   const [prefTraveler, setPrefTraveler]   = useState(traveler)
   const [prefPace, setPrefPace]           = useState(pace)
+  // Multi-city segments. Hydrated from the URL ?segments= param on first
+  // render; replaced by trip_data.segments when an existing trip loads
+  // from DB. Empty array = single-city (legacy flow runs unchanged).
+  const [segments, setSegments]           = useState<TripSegment[]>(
+    () => deserializeSegments(segmentsParam),
+  )
   const [prefBudget, setPrefBudget]       = useState(budget)
   const [prefInterests, setPrefInterests] = useState(interests)
 
@@ -1079,6 +1092,12 @@ export default function TripResult({ params }: Props) {
         setDays(normalized.days); setAccommodations(normalized.accommodations)
         const doneChecksArr: string[] = Array.isArray(data.trip_data?.doneChecks) ? data.trip_data.doneChecks : []
         setDoneCheckIds(new Set(doneChecksArr))
+        // Multi-city segments — restore if the DB row carries them. Legacy
+        // single-city trips have no `segments` field; segments state stays
+        // at whatever the URL provided (typically empty for legacy URLs).
+        if (Array.isArray(data.trip_data?.segments) && data.trip_data.segments.length > 0) {
+          setSegments(data.trip_data.segments as TripSegment[])
+        }
         setBudgetRows(normalized.budgetRows)
         setPacking(normalized.packing)
         setVersions([{
@@ -1290,7 +1309,7 @@ export default function TripResult({ params }: Props) {
             : prefTraveler === 'amigos'
             ? { group_count: prefGroupCount }
             : undefined
-        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget }
+        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined }
 
         // Abort any in-flight generation from a prior effect run (auth state
         // transitions can retrigger this effect while the first fetch is still
@@ -1542,7 +1561,7 @@ export default function TripResult({ params }: Props) {
 
     const body = JSON.stringify({
       title:     tripTitle,
-      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr },
+      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined },
       // Phase 2B — traveler details flow through autosave so drawer edits
       // (e.g. pareja → familia + 2 kids) survive refresh without needing a
       // regenerate.
@@ -1652,7 +1671,7 @@ export default function TripResult({ params }: Props) {
           keepalive:   true,  // survives document unload (~64KB cap)
           body: JSON.stringify({
             title: s.tripTitle,
-            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr },
+            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined },
             travelers:            s.prefTraveler || null,
             traveler_adults:      s.prefAdults,
             traveler_children:    childrenSerial,
@@ -1823,6 +1842,7 @@ export default function TripResult({ params }: Props) {
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        segments: segments.length > 0 ? segments : undefined,
       }
 
       // Long-trip regen routes through async (same gate as initial-gen) — the
@@ -2167,6 +2187,7 @@ export default function TripResult({ params }: Props) {
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        segments: segments.length > 0 ? segments : undefined,
       }
 
       // Long-trip replace routes through async (same gate as initial-gen) —
@@ -2857,6 +2878,26 @@ export default function TripResult({ params }: Props) {
                   </h1>
                 )
               })()}
+
+              {/* Segment chain — only renders for multi-city trips. Sits
+                  between the H1 and the AI-generated subtitle so the eye
+                  picks it up before the meta pills. Single-city trips skip
+                  this entirely (legacy layout unchanged). */}
+              {isMultiCitySegments(segments) && (
+                <div
+                  data-trip-hero="segments"
+                  className="flex flex-wrap items-center gap-2 mb-3 font-sans text-[12px] font-medium tracking-[.04em] uppercase text-[#0F3A33]"
+                >
+                  {segments.map((s, i) => (
+                    <span key={`${s.destination}-${i}`} className="flex items-center gap-2">
+                      <span>{s.destination}</span>
+                      {i < segments.length - 1 && (
+                        <span aria-hidden className="text-[#9A9690]">→</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {/* Subtitle */}
               <p data-trip-hero="subtitle" className="text-[14px] font-light leading-[1.75] text-[#7A7A76] max-w-[420px] mb-6">
