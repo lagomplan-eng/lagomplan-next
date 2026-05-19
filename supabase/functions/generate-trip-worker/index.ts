@@ -126,23 +126,78 @@ function getTripSegments(jobInputs: Record<string, any>): TripSegment[] | null {
   return valid.length >= 2 ? (valid as TripSegment[]) : null
 }
 
-async function generateSegment(jobInputs: Record<string, any>, segmentIndex: number, totalSegments: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
+// Sub-chunk plan for multi-city jobs. A long segment (e.g. 23 days in
+// Gothenburg) won't fit a single Edge Fn call, so we further split each
+// segment into sub-chunks of at most SEGMENT_DAYS. Each plan entry
+// describes one Edge Fn call. Chunk indexing in the job table maps
+// directly to this array's index.
+type ChunkPlanEntry = {
+  segmentIndex: number   // which segment of the chain this chunk belongs to
+  subIndex:     number   // 0-indexed position within that segment
+  segSubCount:  number   // total sub-chunks for this segment (for the AI hint)
+  dayOffset:    number   // day offset within the segment (0-indexed)
+  subDays:      number   // number of days this chunk covers
+}
+
+function planMultiCityChunks(segments: TripSegment[]): ChunkPlanEntry[] {
+  const plan: ChunkPlanEntry[] = []
+  for (let segIdx = 0; segIdx < segments.length; segIdx++) {
+    // nights+1 = inclusive day count for the segment (check-in day through
+    // check-out day). Same-day segments still produce 1 day.
+    const segDays = Math.max(1, segments[segIdx].nights + 1)
+    const subCount = Math.ceil(segDays / SEGMENT_DAYS)
+    let offset = 0
+    for (let subIdx = 0; subIdx < subCount; subIdx++) {
+      const subDays = Math.min(SEGMENT_DAYS, segDays - offset)
+      plan.push({
+        segmentIndex: segIdx,
+        subIndex:     subIdx,
+        segSubCount:  subCount,
+        dayOffset:    offset,
+        subDays,
+      })
+      offset += subDays
+    }
+  }
+  return plan
+}
+
+// Pure helper exposed for the API route to compute chunks_total without
+// duplicating the planning logic. Returns the count (≥1).
+function countMultiCityChunks(segments: TripSegment[]): number {
+  return planMultiCityChunks(segments).length
+}
+
+function addDaysISO(isoDate: string, days: number): string {
+  const d = new Date(`${isoDate}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + days)
+  return d.toISOString().slice(0, 10)
+}
+
+async function generateSegment(jobInputs: Record<string, any>, chunkIndex: number, totalChunks: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
   const multiCity = getTripSegments(jobInputs)
 
   let segmentPayload: Record<string, any>
 
   if (multiCity) {
-    // ── Multi-city: one segment per chunk ───────────────────────────────────
-    // Build a CLEAN single-city payload for this segment. We strip the
-    // segments array so the AI prompts as single-city (no contradiction
-    // between "Destino: chain" and "Duración: N days") and gets the full
-    // 4-7 blocks per day budget for that segment's city.
-    const seg          = multiCity[segmentIndex]
-    // duration_days = nights + 1 (inclusive day count). Most segments have
-    // nights ≥ 1; same-day edge case still produces 1 day.
-    const segmentDays  = Math.max(1, seg.nights + 1)
-    const segOrigin    = seg.origin
-      ?? (segmentIndex === 0 ? jobInputs.origin : multiCity[segmentIndex - 1].destination)
+    // ── Multi-city: chunk = (segment, sub-range within segment) ─────────────
+    // Build the plan once per call (cheap, ≤ ~10 entries) and look up the
+    // entry for this chunk index. Long segments are split into multiple
+    // sub-chunks so each Edge Fn call stays under the resource budget.
+    const plan = planMultiCityChunks(multiCity)
+    if (chunkIndex >= plan.length) {
+      throw new Error(`chunk_index ${chunkIndex} out of range for multi-city plan (length ${plan.length})`)
+    }
+    const entry = plan[chunkIndex]
+    const seg   = multiCity[entry.segmentIndex]
+
+    const subStartDate = addDaysISO(seg.startDate, entry.dayOffset)
+    const subEndDate   = addDaysISO(seg.startDate, entry.dayOffset + entry.subDays - 1)
+
+    // Origin: explicit segment origin > previous segment's destination >
+    // jobInputs.origin (trip-level origin).
+    const segOrigin = seg.origin
+      ?? (entry.segmentIndex === 0 ? jobInputs.origin : multiCity[entry.segmentIndex - 1].destination)
 
     // Strip segments + multi-city-only fields from the forwarded payload so
     // the generate-trip Edge Function doesn't double-apply the multi-city
@@ -153,20 +208,24 @@ async function generateSegment(jobInputs: Record<string, any>, segmentIndex: num
       ...singleCityBase,
       destination:  seg.destination,
       origin:       segOrigin,
-      start:        seg.startDate,
-      end:          seg.endDate,
-      nights:       seg.nights,
-      duration_days: segmentDays,
-      // Continuity hint surfaces in prompt — informational; the
-      // generate-trip Edge Function ignores it today but it's logged.
+      start:        subStartDate,
+      end:          subEndDate,
+      nights:       Math.max(0, entry.subDays - 1),
+      duration_days: entry.subDays,
       previous_day_summary: prevSummary ?? undefined,
-      segment_index:  segmentIndex,
-      total_segments: totalSegments,
+      // Diagnostic / informational fields. generate-trip's prompt ignores
+      // these today, but they show up in logs and serve as a hook for
+      // future per-chunk prompt tuning ("Tell the AI this is sub-chunk 2
+      // of 3 for this segment").
+      segment_index:    entry.segmentIndex,
+      total_segments:   multiCity.length,
+      sub_chunk_index:  entry.subIndex,
+      sub_chunk_total:  entry.segSubCount,
     }
   } else {
     // ── Single-city: original day-block chunking ────────────────────────────
     const totalDays      = Math.max(1, Math.min(30, Number(jobInputs.duration_days) || 1))
-    const segmentStartIdx = segmentIndex * SEGMENT_DAYS
+    const segmentStartIdx = chunkIndex * SEGMENT_DAYS
     const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
 
     const tripStart = new Date(jobInputs.start)
@@ -178,8 +237,8 @@ async function generateSegment(jobInputs: Record<string, any>, segmentIndex: num
     segmentPayload = {
       ...jobInputs,
       duration_days:        segmentDayCount,
-      segment_index:        segmentIndex,
-      total_segments:       totalSegments,
+      segment_index:        chunkIndex,
+      total_segments:       totalChunks,
       previous_day_summary: prevSummary ?? undefined,
       start: segmentStartDate.toISOString().slice(0, 10),
       end:   segmentEndDate.toISOString().slice(0, 10),
@@ -188,10 +247,10 @@ async function generateSegment(jobInputs: Record<string, any>, segmentIndex: num
 
   const res = await callGenerateTrip(segmentPayload, signal)
   if (!res?.trip_data) throw new Error('segment response missing trip_data')
-  if (segmentIndex === 0) {
-    console.log('[worker] segment[0] keys:', Object.keys(res.trip_data || {}))
-    console.log('[worker] segment[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
-    console.log('[worker] segment[0] mode:', multiCity ? 'multi-city' : 'single-city')
+  if (chunkIndex === 0) {
+    console.log('[worker] chunk[0] keys:', Object.keys(res.trip_data || {}))
+    console.log('[worker] chunk[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
+    console.log('[worker] chunk[0] mode:', multiCity ? 'multi-city (sub-chunked)' : 'single-city')
   }
   return res.trip_data
 }
@@ -235,7 +294,15 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
       : s
   }
 
-  for (const chunk of chunks) {
+  // For multi-city: build chunk→segment mapping so we only count the FIRST
+  // sub-chunk of each segment for accommodations (a long segment splits
+  // into multiple sub-chunks, each of which would emit its own
+  // accommodation entry — we want one per segment, not one per sub-chunk).
+  const plan = multiCity ? planMultiCityChunks(multiCity) : null
+  const accommodationsSeenForSegment = new Set<number>()
+
+  for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
+    const chunk = chunks[chunkIdx]
     const segmentDays = chunkDays(chunk)
     for (const day of segmentDays) {
       dayCounter += 1
@@ -246,12 +313,22 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
         title:      renumberLeadingDay((day as any).title,     dayCounter),
       })
     }
-    // Multi-city: each chunk is a single-city call → exactly one
-    // accommodation entry per chunk. Collect them all so the assembled
-    // trip_data has one accommodation per segment (matches the per-segment
-    // hospedaje block expected on the result page).
-    if (Array.isArray((chunk as any)?.accommodations)) {
-      accommodations.push(...(chunk as any).accommodations)
+    // Accommodations: in single-city, every chunk's accommodation block
+    // describes the same lodging (or the AI's best guess each time); pick
+    // the first non-empty. In multi-city, take exactly one per segment —
+    // from the first sub-chunk of each segment — and skip duplicates from
+    // sub-chunks that re-emit the same hotel.
+    const chunkAccs = Array.isArray((chunk as any)?.accommodations) ? (chunk as any).accommodations : []
+    if (chunkAccs.length === 0) continue
+    if (plan) {
+      const segIdx = plan[chunkIdx]?.segmentIndex
+      if (segIdx !== undefined && !accommodationsSeenForSegment.has(segIdx)) {
+        accommodations.push(...chunkAccs)
+        accommodationsSeenForSegment.add(segIdx)
+      }
+    } else if (accommodations.length === 0) {
+      // Single-city: take the first non-empty accommodation block.
+      accommodations.push(...chunkAccs)
     }
   }
 
