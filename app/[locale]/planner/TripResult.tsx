@@ -1329,7 +1329,12 @@ export default function TripResult({ params }: Props) {
         // Route long trips through the async job pipeline. Short trips stay
         // on the synchronous endpoint. The async path requires auth (anon
         // users always use sync — the jobs endpoint returns 401 for them).
-        const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+        // Multi-city trips currently bypass async because the worker chunks
+        // by raw day-count and doesn't slice the segments array per chunk —
+        // each chunk would see the full chain and double-cover cities. Keep
+        // them on sync until the worker is made segment-aware.
+        const isMultiCityTrip = segments.length > 0
+        const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && !isMultiCityTrip
         setIsAsyncPath(useAsync)
 
         console.log('[TripResult] POST payload:', JSON.stringify(payload), 'async:', useAsync)
@@ -1847,8 +1852,9 @@ export default function TripResult({ params }: Props) {
 
       // Long-trip regen routes through async (same gate as initial-gen) — the
       // sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT for
-      // anything beyond ~14 days.
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      // anything beyond ~14 days. Multi-city trips bypass async (see comment
+      // in initial-gen effect).
+      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && segments.length === 0
       const previousTripId = tripId   // capture before any setTripId mutation
 
       let tripDataRaw: any = null
@@ -2192,8 +2198,9 @@ export default function TripResult({ params }: Props) {
 
       // Long-trip replace routes through async (same gate as initial-gen) —
       // the sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT
-      // for anything beyond ~14 days.
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      // for anything beyond ~14 days. Multi-city trips bypass async (see
+      // comment in initial-gen effect).
+      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD && segments.length === 0
       // Capture the predecessor before any setTripId mutation — needed for
       // the "delete the old row after the new one is saved" cleanup step.
       const previousTripId = tripId
@@ -3031,6 +3038,36 @@ export default function TripResult({ params }: Props) {
           }}
         >
           <div className="max-w-[1160px] mx-auto px-7 py-6">
+            {/* Multi-city chain summary — read-only for now. Lets the user see
+                that the drawer fields below act on the trip-level frame, while
+                each segment's own dates live in trip_data.segments. */}
+            {isMultiCitySegments(segments) && (
+              <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
+                <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-2">
+                  Recorrido multi-ciudad
+                </div>
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+                  {segments.map((seg, i) => (
+                    <div key={i} className="flex items-center gap-2">
+                      <div className="flex flex-col">
+                        <span className="font-sans text-[13px] font-medium text-[#0F3A33]">
+                          {seg.destination}
+                        </span>
+                        <span className="font-mono text-[10px] text-[#7A7A76]">
+                          {seg.startDate} → {seg.endDate} · {seg.nights}n
+                        </span>
+                      </div>
+                      {i < segments.length - 1 && (
+                        <span className="font-sans text-[14px] text-[#6B8F86] mx-1">→</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="font-sans text-[11px] text-[#7A7A76] mt-2 italic">
+                  Los campos abajo se aplican a todo el viaje. La edición por tramo aún no está disponible.
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-3 gap-4 max-[600px]:grid-cols-1">
 
               {/* Origin — typeahead */}

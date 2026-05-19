@@ -301,6 +301,14 @@ ${lines}
 
   function buildSegmentsContext(segments: TripSegment[]): string {
     if (!segments || segments.length < 2) return "";
+    // Build an explicit day-by-day → city mapping so the AI can't drift back
+    // to a single-city itinerary. day_number is 1-indexed and cumulative across
+    // segments. The check-out day belongs to the *next* segment (or is the
+    // final return day if it's the last segment) — but we just label it with
+    // the current segment's city since the actual transit block lives in the
+    // last day of the segment.
+    let dayCursor = 1;
+    const dayMap: string[] = [];
     const chain = segments.map((s, i) => {
       // If the segment carries an explicit origin (user set From to
       // something other than the chain-implicit previous destination),
@@ -308,21 +316,37 @@ ${lines}
       const where = s.origin
         ? `de ${s.origin} a ${s.destination}`
         : s.destination;
+      const dayCount = Math.max(1, s.nights || 0);
+      const dayStart = dayCursor;
+      const dayEnd   = dayCursor + dayCount - 1;
+      dayMap.push(dayCount === 1
+        ? `      • Día ${dayStart} → ${s.destination}`
+        : `      • Días ${dayStart}–${dayEnd} → ${s.destination}`);
+      dayCursor = dayEnd + 1;
       return `      ${i + 1}) ${where} · ${s.startDate} → ${s.endDate} (${s.nights} noche${s.nights === 1 ? "" : "s"})`;
     }).join("\n");
     return `
 
-  MULTI-CIUDAD (importante — el viaje tiene ${segments.length} tramos):
+  MULTI-CIUDAD (CRÍTICO — el viaje recorre ${segments.length} ciudades, NO una sola):
 ${chain}
 
+  MAPEO DÍA → CIUDAD (úsalo exacto; cada día del itinerario pertenece a UNA ciudad):
+${dayMap.join("\n")}
+
   Aplica este contexto al armar el itinerario:
-    - DÍAS DE TRANSICIÓN: el día en que se cambia de ciudad NO debe ser intensivo.
-      Incluye el traslado como un bloque "transfer" temprano + 1-2 bloques opcionales
-      al llegar. Sin tours largos ni cenas formales tarde el día de transición.
+    - CIUDADES MÚLTIPLES: el itinerario DEBE cubrir las ${segments.length} ciudades en el
+      orden mostrado. NO concentres todos los días en una sola ciudad.
+    - DÍA → CIUDAD: cada bloque "day" pertenece a la ciudad indicada en el mapeo
+      de arriba. Restaurantes, tours y barrios deben ser reales y ubicados EN esa
+      ciudad (no inventar ni mezclar).
+    - DÍAS DE TRANSICIÓN: el último día de cada tramo (excepto el final) incluye
+      el traslado a la siguiente ciudad como un bloque "transfer" temprano + 1-2
+      bloques opcionales al llegar al destino. Sin tours largos ni cenas formales
+      tarde el día de transición.
     - HOSPEDAJE POR TRAMO: DEBES emitir una entrada en "accommodations" POR CADA
-      tramo (${segments.length} en total). Ver bloque ALOJAMIENTO POR TRAMO más abajo.
-    - ITINERARIO POR TRAMO: respeta a qué ciudad pertenece cada día. No mezcles
-      restaurantes ni atracciones de una ciudad en días que pertenecen a otra.
+      tramo (${segments.length} en total). Ver bloque ALOJAMIENTO POR TRAMO.
+    - TÍTULO DEL DÍA: incluye la ciudad en day_label o title del día (ej. "Día 4 ·
+      Stockholm — primer paseo") para que el usuario vea claramente dónde está.
     - REPETICIONES: si una ciudad aparece más de una vez (base → escapada → base),
       la segunda estancia debe ofrecer actividades distintas a la primera. No
       repitas atracciones ni restaurantes.`;
@@ -513,9 +537,16 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
       bloque al día concreto que le toca.`
       : "";
 
+    // Multi-city: the top-line "Destino" can't be a single city or the AI
+    // anchors the whole plan there. Replace it with the chain summary so the
+    // primary frame is multi-city from the first token.
+    const destinationLine = multiCity
+      ? `- Destino: cadena multi-ciudad (${multiCity.map(s => s.destination).join(" → ")})`
+      : `- Destino: ${input.destination}`;
+
     return `Genera un itinerario de viaje con estos datos:
   - Origen: ${input.origin ?? "(no especificado)"}
-  - Destino: ${input.destination}
+  ${destinationLine}
   - Duración: ${d} días${overnight ? ` (${nights} noche(s))` : " (sin pernocta)"}
   - Fechas: ${start || "(no especificadas)"} → ${end || "(no especificadas)"}${seasonLine}${weekdaysLine}
   - Viajeros: ${input.travelers} persona(s)${familyLine}
@@ -543,8 +574,9 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   Regla clave: si el bloque es una comida en un lugar concreto, type DEBE ser "restaurant",
   NUNCA "free", "culture" o "nature". El usuario debe poder reservar mesa desde ese bloque.
 
-  Llama a la herramienta emit_trip con el itinerario completo. Usa lugares, restaurantes y rutas reales de
-  ${input.destination}. Incluye exactamente ${d} día(s). Cada día debe tener entre 4 y 7 bloques.`;
+  Llama a la herramienta emit_trip con el itinerario completo. ${multiCity
+    ? `Usa lugares, restaurantes y rutas reales en cada ciudad del recorrido (${multiCity.map(s => s.destination).join(" → ")}), respetando el MAPEO DÍA → CIUDAD de arriba. NO concentres todos los días en una sola ciudad.`
+    : `Usa lugares, restaurantes y rutas reales de ${input.destination}.`} Incluye exactamente ${d} día(s). Cada día debe tener entre 4 y 7 bloques.`;
   }                                                                                                            
                                                                                                                  
   serve(async (req) => {          
