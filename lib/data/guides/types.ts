@@ -147,6 +147,15 @@ export interface FlatHotel {
   /** Short pill text */
   tag: string
   affiliateUrl: string
+  /**
+   * Traveler archetypes this hotel suits. Drives the archetype filter on
+   * the Hotels page. Optional + array so legacy records keep validating.
+   * Initial values are derived from name/type/description/tag text; the
+   * editorial team is expected to override or augment per record.
+   * Active values today: 'Familias', 'Parejas'. Future: 'Pet Friendly',
+   * 'LGBTQ+ Friendly'.
+   */
+  archetypes?: string[]
 }
 
 export interface FlatExperience {

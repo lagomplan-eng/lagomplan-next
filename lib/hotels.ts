@@ -18,6 +18,7 @@
 import { getAllGuides }                        from './guides'
 import { getGuideUrl }                         from './routes'
 import { getAllFlatGuides, resolveCanonicalSlug } from './data/guides'
+import { getAllCityGuides, getCityHeroImage }  from './worldcup/data'
 import type { Locale }                         from '../i18n'
 
 // ── Types ──────────────────────────────────────────────────────────────────────
@@ -25,14 +26,114 @@ import type { Locale }                         from '../i18n'
 export type HotelListing = {
   id:          string
   name:        string
-  priceLevel:  '$' | '$$' | '$$$'
+  priceLevel:  '$' | '$$' | '$$$' | '$$$$'
   description: string
   tags:        string[]          // highlight pills from raw data
-  sourceGuide: string            // canonical guide key (e.g. 'cancun')
+  sourceGuide: string            // canonical guide key (e.g. 'cancun', 'cdmx')
+  source:      'guide' | 'worldcup'  // which corpus the record came from
   destination: string            // localised city/state label
-  cover_img:   string            // borrowed from rich guide
-  guideUrl:    string            // link to the parent guide detail page
+  cover_img:   string            // borrowed from rich guide or worldcup city hero
+  guideUrl:    string            // link to the parent guide / city page
   bookingUrl?: string            // direct booking link (affiliate URL)
+  archetypes?: string[]          // traveler archetypes (Familias, Parejas, …)
+}
+
+// ── Archetype filter config ───────────────────────────────────────────────────
+// One source of truth for the Hotels-page archetype filter row. Active filters
+// drive the actual filtering logic. `comingSoon` filters render in the UI as
+// disabled `próx.` pills — clicking shows a toast instead of filtering.
+
+export type ArchetypeId =
+  | 'Todos'
+  | 'Familias'
+  | 'Parejas'
+  | 'Solo'
+  | 'Negocios'
+  | 'Aventura'
+  | 'Bienestar'
+  | 'Workation'
+  | 'Eco'
+  | 'Pet Friendly'
+  | 'LGBTQ+ Friendly'
+
+export interface ArchetypeFilter {
+  id:         ArchetypeId
+  /** localised label */
+  labelES:    string
+  labelEN:    string
+  icon:       string
+  active:     boolean       // false = render in row but don't filter
+  comingSoon: boolean
+}
+
+export const ARCHETYPE_FILTERS: ArchetypeFilter[] = [
+  { id: 'Todos',           labelES: 'Todos',           labelEN: 'All',              icon: '',    active: true,  comingSoon: false },
+  { id: 'Familias',        labelES: 'Con niños',       labelEN: 'With kids',        icon: '👨‍👩‍👧', active: true,  comingSoon: false },
+  { id: 'Parejas',         labelES: 'Parejas',         labelEN: 'Couples',          icon: '💑',  active: true,  comingSoon: false },
+  { id: 'Solo',            labelES: 'Solo',            labelEN: 'Solo',             icon: '🎒',  active: true,  comingSoon: false },
+  { id: 'Negocios',        labelES: 'Negocios',        labelEN: 'Business',         icon: '💼',  active: true,  comingSoon: false },
+  { id: 'Aventura',        labelES: 'Aventura',        labelEN: 'Adventure',        icon: '🗺️',  active: true,  comingSoon: false },
+  { id: 'Bienestar',       labelES: 'Bienestar',       labelEN: 'Wellness',         icon: '🧘',  active: true,  comingSoon: false },
+  { id: 'Workation',       labelES: 'Workation',       labelEN: 'Workation',        icon: '💻',  active: true,  comingSoon: false },
+  { id: 'Eco',             labelES: 'Eco',             labelEN: 'Eco',              icon: '🌿',  active: true,  comingSoon: false },
+  { id: 'Pet Friendly',    labelES: 'Pet Friendly',    labelEN: 'Pet Friendly',     icon: '🐾',  active: false, comingSoon: true  },
+  { id: 'LGBTQ+ Friendly', labelES: 'LGBTQ+ Friendly', labelEN: 'LGBTQ+ Friendly',  icon: '🏳️‍🌈', active: false, comingSoon: true  },
+]
+
+// Price filter buckets — same trick: locale-aware label, single source.
+export interface PriceFilter {
+  id:      '$' | '$$' | '$$$'
+  labelES: string
+  labelEN: string
+}
+
+export const PRICE_FILTERS: PriceFilter[] = [
+  { id: '$',   labelES: 'Económico',  labelEN: 'Budget'    },
+  { id: '$$',  labelES: 'Intermedio', labelEN: 'Mid-range' },
+  { id: '$$$', labelES: 'Lujo',       labelEN: 'Luxury'    },
+]
+
+// ── Filter helpers ────────────────────────────────────────────────────────────
+
+export function matchesArchetype(hotel: HotelListing, archetype: ArchetypeId): boolean {
+  if (archetype === 'Todos') return true
+  return !!hotel.archetypes?.includes(archetype)
+}
+
+export function matchesPrice(hotel: HotelListing, price: '$' | '$$' | '$$$' | null): boolean {
+  if (!price) return true
+  // $$$ catches both $$$ and $$$$ ranges (luxury bucket).
+  if (price === '$$$') return hotel.priceLevel === '$$$' || hotel.priceLevel === '$$$$'
+  return hotel.priceLevel === price
+}
+
+export function matchesSearch(hotel: HotelListing, search: string): boolean {
+  if (!search) return true
+  const q = search.toLowerCase().trim()
+  return (
+    hotel.name.toLowerCase().includes(q) ||
+    hotel.destination.toLowerCase().includes(q) ||
+    hotel.sourceGuide.toLowerCase().includes(q)
+  )
+}
+
+/**
+ * Destination filter — exact-match on the localized destination label so
+ * the filter pill row matches whatever the user clicks. `null` = all.
+ */
+export function matchesDestination(hotel: HotelListing, destination: string | null): boolean {
+  if (!destination) return true
+  return hotel.destination === destination
+}
+
+/**
+ * Returns the deduped list of destinations present in a hotel set, sorted
+ * alphabetically. Feeds the "+ Destinos" expander pill row in the client.
+ */
+export function listDestinations(hotels: HotelListing[]): string[] {
+  const set = new Set<string>()
+  for (const h of hotels) set.add(h.destination)
+  return [...set].sort((a, b) => a.localeCompare(b))
 }
 
 // ── Utility ────────────────────────────────────────────────────────────────────
@@ -84,13 +185,77 @@ export function getAllHotelsFromGuides(locale: Locale): HotelListing[] {
         description: h.description,
         tags:        h.tag ? [h.tag] : [],
         sourceGuide: canonical,
+        source:      'guide',
         destination,
         cover_img:   richGuide?.cover_img ?? flat.hero.image,
         guideUrl:    richGuide ? getGuideUrl(locale, richGuide) : '#',
         bookingUrl:  h.affiliateUrl || undefined,
+        archetypes:  h.archetypes,
       })
     }
   }
 
   return hotels
+}
+
+/**
+ * Returns every stay from the worldcup city guides as a HotelListing. Each
+ * stay's affiliate URL comes from `stay.url` (Stay22 / Booking links the
+ * editorial team curated). Cover image falls back to the city's hero
+ * illustration in `/public/images/WC images/` since stays don't carry
+ * per-hotel imagery.
+ */
+export function getAllHotelsFromWorldcup(locale: Locale): HotelListing[] {
+  const out: HotelListing[] = []
+  const seen = new Set<string>()
+  const mundialSegment = locale === 'es' ? 'mundial' : 'worldcup'
+
+  for (const [cityId, city] of getAllCityGuides(locale)) {
+    const hero = getCityHeroImage(cityId) ?? ''
+    const cityUrl = `/${locale}/${mundialSegment}/${cityId}`
+    for (const stay of city.stays ?? []) {
+      const id = `wc-${cityId}-${slugifyHotelName(stay.name)}`
+      if (seen.has(id)) continue
+      seen.add(id)
+
+      // Worldcup `price` is one of '$' / '$$' / '$$$' / '$$$$'. Normalize to
+      // the HotelListing union (which now allows $$$$). Anything else falls
+      // back to '$$'.
+      const rawPrice = stay.price?.trim() as HotelListing['priceLevel']
+      const priceLevel: HotelListing['priceLevel'] =
+        rawPrice === '$' || rawPrice === '$$' || rawPrice === '$$$' || rawPrice === '$$$$'
+          ? rawPrice
+          : '$$'
+
+      out.push({
+        id,
+        name:        stay.name,
+        priceLevel,
+        description: stay.note,
+        tags:        Array.isArray(stay.tags) ? stay.tags.slice(0, 3) : [],
+        sourceGuide: cityId,
+        source:      'worldcup',
+        destination: city.city,
+        cover_img:   hero,
+        guideUrl:    cityUrl,
+        bookingUrl:  stay.url || stay.hotel_link || undefined,
+        archetypes:  stay.archetypes,
+      })
+    }
+  }
+
+  return out
+}
+
+/**
+ * Combined hotel feed for the Hotels index page. Pulls from the curated
+ * guides corpus + the worldcup city guides corpus and returns them as a
+ * single deduped list. The two corpora are the only sources of truth —
+ * no hallucinated or synthesized records.
+ */
+export function getAllHotels(locale: Locale): HotelListing[] {
+  return [
+    ...getAllHotelsFromGuides(locale),
+    ...getAllHotelsFromWorldcup(locale),
+  ]
 }

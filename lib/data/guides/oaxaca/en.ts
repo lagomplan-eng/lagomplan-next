@@ -137,6 +137,7 @@ export const guide: FlatGuide = {
       description: 'Located in the former Convent of Santa Catalina. Its gardens and pool are an absolute oasis after walking through the city center.',
       tag: 'History with a pool',
       affiliateUrl: '',
+      archetypes: [],
     },
     {
       name: 'Hotel con Corazón',
@@ -145,6 +146,7 @@ export const guide: FlatGuide = {
       description: 'A boutique hotel with a cause (supporting local education). It\'s modern, clean, and very welcoming. Breakfast in their courtyard is the perfect start to the day.',
       tag: 'Socially responsible',
       affiliateUrl: '',
+      archetypes: ['Parejas'],
     },
     {
       name: 'City Centro Oaxaca',
@@ -153,6 +155,7 @@ export const guide: FlatGuide = {
       description: 'Located in Barrio de Jalatlaco (the most colorful neighborhood). It has a very photogenic contemporary design and a small but effective pool for cooling off.',
       tag: 'Style in Jalatlaco',
       affiliateUrl: '',
+      archetypes: [],
     },
   ],
 

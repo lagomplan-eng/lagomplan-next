@@ -9,8 +9,11 @@
 import type { Metadata }                    from 'next'
 import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
-import { getAllHotelsFromGuides }            from '../../../lib/hotels'
+import { getAllHotels }                     from '../../../lib/hotels'
+import { getRenderableCityNeighborhoods }   from '../../../lib/hotels-neighborhoods'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
+import SmartFindsSection                    from '../../../components/hotels/SmartFindsSection'
+import PlannerBridgeCTA                     from '../../../components/hotels/PlannerBridgeCTA'
 import NewsletterEndOfGuide                 from '../../../components/newsletter/NewsletterEndOfGuide'
 
 type Props = { params: Promise<{ locale: Locale }> }
@@ -30,11 +33,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function HotelsIndexPage({ params }: Props) {
   const { locale } = await params
-  const hotels = getAllHotelsFromGuides(locale)
+  // Combined feed: curated guides + worldcup city stays. Both corpora are
+  // the only authoritative sources of hotel records.
+  const hotels        = getAllHotels(locale)
+  const neighborhoods = getRenderableCityNeighborhoods(locale)
 
   return (
-    <main className="pt-[100px]">
-      <HotelsClient hotels={hotels} locale={locale} />
+    // #FFF9F3 — same warm cream the planner, signup, and guide pages
+    // use. var(--sand) (#EDE7E1) was a different, darker bucket and
+    // made the Hotels page visually disconnected from the rest of
+    // the site. Set on <main> so bridge CTA + newsletter inherit.
+    <main className="pt-[100px] bg-[#FFF9F3]">
+      <HotelsClient
+        hotels={hotels}
+        neighborhoods={neighborhoods}
+        locale={locale}
+      />
+      <SmartFindsSection locale={locale} />
+      <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">
         <NewsletterEndOfGuide />
       </div>

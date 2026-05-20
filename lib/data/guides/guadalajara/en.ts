@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
       description: 'Located in La Colonia Americana (the coolest neighborhood). Retro-modern design with a rooftop pool perfect for pre-drinks with friends.',
       tag: 'Pure style and nightlife',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/Fa7ydor9Ks?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
+      archetypes: ['Parejas', 'Aventura'],
     },
     {
       name: 'Villa Ganz',
@@ -103,6 +104,7 @@ export const guide: FlatGuide = {
       description: 'An ancient mansion restored with impeccable taste. It feels like staying at a sophisticated friend\'s home. Perfect for those seeking classic comfort in the heart of the foodie zone.',
       tag: 'Warmth and sophistication',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/xtCO1IKwvn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
+      archetypes: ['Aventura'],
     },
     {
       name: 'Hilton DoubleTree Centro Histórico',
@@ -111,6 +113,7 @@ export const guide: FlatGuide = {
       description: 'The ideal balance between big-chain efficiency and the vibrant soul of the Tapatío center. Soundproofed rooms and a terrace with historic skyline views steps from the Cathedral.',
       tag: 'Reliability and premium location',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/PvecFbkHpn?aid=lagomplan&campaign=lagomplan-guadalajarafoodiesadventure&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Guadalajara%2C+Jalisco%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fguadalajara-foodies-adventure',
+      archetypes: ['Aventura'],
     },
   ],
 

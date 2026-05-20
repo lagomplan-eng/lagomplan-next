@@ -137,6 +137,7 @@ export const guide: FlatGuide = {
       description: 'Lujo absoluto integrado en la selva. Ubicado en una antigua hacienda, cuenta con su propio cenote, casitas con alberca privada y un programa para niños enfocado en la naturaleza y la cocina maya.',
       tag: 'El máximo santuario maya',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/psvzagFavR?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
+      archetypes: ['Familias', 'Parejas', 'Aventura'],
     },
     {
       name: 'Hacienda Xcanatun by Angsana',
@@ -145,6 +146,7 @@ export const guide: FlatGuide = {
       description: 'La elegancia histórica de una hacienda con amenidades modernas. Sus amplios jardines y piscinas son perfectos para que los peques corran libremente tras un día de exploración arqueológica.',
       tag: 'Confort clásico y jardines',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/GfhbF1Jslc?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
+      archetypes: ['Familias', 'Aventura'],
     },
     {
       name: 'Las Brisas',
@@ -153,6 +155,7 @@ export const guide: FlatGuide = {
       description: 'El balance perfecto entre lujo tradicional y practicidad urbana. Su alberca es de las mejores de la ciudad y su ubicación a pasos de Paseo de Montejo te permite disfrutar sin complicaciones.',
       tag: 'Confort icónico y ubicación',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/RPdo5xiEcV?aid=lagomplan&campaign=lagomplan-meridaselvaaventurafamiliar&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Merida%2C+Yucatan%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fmerida-selva-aventura-familiar',
+      archetypes: ['Familias', 'Parejas', 'Aventura'],
     },
   ],
 

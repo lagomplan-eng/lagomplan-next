@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
       description: 'Lujo sustentable en tiendas de campaña de alto diseño frente al mar. Ideal para una mujer sola por su ambiente comunitario, cenas compartidas y rituales de bienvenida.',
       tag: 'Eco-chic y conexión',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/KVQtrW7le8?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: ['Parejas', 'Eco'],
     },
     {
       name: 'Dune Boutique Hotel',
@@ -139,6 +140,7 @@ export const guide: FlatGuide = {
       description: 'Un santuario diseñado para el bienestar, donde puedes empezar el día con yoga frente al mar y explorarlo en bicicleta, para luego refugiarte en una atmósfera de diseño mediterráneo que se funde con la selva y el Caribe.',
       tag: 'Bienestar y lujo frente al mar',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: ['Parejas', 'Aventura', 'Bienestar'],
     },
     {
       name: 'Astral Tulum',
@@ -147,6 +149,7 @@ export const guide: FlatGuide = {
       description: 'Ubicado directamente en la zona hotelera (playa), ofrece suites privadas con estilo. Refugio perfecto para quienes buscan la estética del Caribe sin sacrificar la comodidad de servicios completos.',
       tag: 'Beachfront y versátil',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/EJggpc6mcr?aid=lagomplan&campaign=lagomplan-tulumsolosocialedition&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Tulum%2C+Quintana+Roo%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Ftulum-solo-social-edition',
+      archetypes: [],
     },
   ],
 

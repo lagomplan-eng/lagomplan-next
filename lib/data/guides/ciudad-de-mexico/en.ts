@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
       description: 'Luxury in the sky. Located on the upper floors of a Reforma skyscraper, it offers the most romantic views of Chapultepec Castle from your bed.',
       tag: 'Luxury in the clouds',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/2oeHmjK31f?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Brick Hotel',
@@ -103,6 +104,7 @@ export const guide: FlatGuide = {
       description: 'A gem in Roma Norte. Combines an early 20th-century façade with a modern, minimalist interior. The ideal starting point for exploring galleries on foot.',
       tag: 'Modern Heritage',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/4GOkOu55mT?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Casa Cuenca',
@@ -111,6 +113,7 @@ export const guide: FlatGuide = {
       description: 'A contemporary retreat that prioritizes rest and strategic location. Rooms designed for comfortable longer stays, complemented by a romantic restaurant.',
       tag: 'Unbeatable location and comfort',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/UifOIGl3dG?aid=lagomplan&campaign=lagomplan-ciudaddemexicoartemesa&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Mexico+City%2C+CDMX%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fciudad-de-mexico-arte-mesa',
+      archetypes: ['Parejas', 'Bienestar'],
     },
   ],
 

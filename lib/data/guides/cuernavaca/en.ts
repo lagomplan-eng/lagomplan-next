@@ -101,6 +101,7 @@ export const guide: FlatGuide = {
       description: 'The perfect meeting point between an Italian villa and Mexican modernism. Set on a historic property with an impeccable garden and designer pool, ideal for groups who appreciate art, exclusivity, and a world-class spa.',
       tag: 'Contemporary luxury and historic heritage',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A7eNLw3xb2?aid=lagomplan&campaign=lagomplan-cuernavacarefugiodeprimaveraestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Cuernavaca%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcuernavaca-refugio-de-primavera-estilo',
+      archetypes: ['Parejas', 'Bienestar'],
     },
     {
       name: 'Hacienda de Cortés',
@@ -109,6 +110,7 @@ export const guide: FlatGuide = {
       description: 'Sleep within 16th-century stone walls and gardens that seem pulled from a novel. The classic luxury experience in Morelos, with high ceilings and a stately atmosphere that transports you to another era.',
       tag: 'Colonial elegance and epic gardens',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/P9ggStKMTY',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Las Casas B+B',
@@ -117,6 +119,7 @@ export const guide: FlatGuide = {
       description: 'A boutique hotel with the soul of a private home in the heart of the city center. Minimalist design, local textiles, and excellent chef-driven cuisine. Ideal for groups preferring a more intimate and modern atmosphere.',
       tag: 'Sophisticated design and chic atmosphere',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/G43l9Zatec?aid=lagomplan&campaign=lagomplan-cuernavacarefugiodeprimaveraestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Cuernavaca%2C+Morelos%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fcuernavaca-refugio-de-primavera-estilo',
+      archetypes: ['Parejas'],
     },
   ],
 
