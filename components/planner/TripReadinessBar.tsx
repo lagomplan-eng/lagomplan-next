@@ -29,6 +29,14 @@ interface NextCheckInfo {
   id:   string
   text: string
   icon: string
+  /** Which milestone this check belongs to. Drives the "NEXT IN
+   *  [milestone]" eyebrow above the next-step block when present. */
+  milestoneLabel?: string
+  /** True when this check is the first pending check of its milestone
+   *  AND no checks in that milestone are done yet — i.e., the user is
+   *  starting a brand-new section of the trip prep. Surfaces a brief
+   *  "Now let's tackle X" line when true. */
+  startsMilestone?: boolean
 }
 
 interface Props {
@@ -246,12 +254,23 @@ export default function TripReadinessBar({
           <div className="flex items-center gap-3 pl-5 border-l border-white/10 shrink-0 max-w-[340px]">
             <div className="flex flex-col text-right min-w-0">
               <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-white/40">
-                {nextLabel}
+                {/* "NEXT" / "SIGUIENTE" → "NEXT · HOSPEDAJE" when we know
+                    which milestone bucket the next check belongs to.
+                    Lets the user see *where* they are in the journey
+                    without breaking the bar's compact layout. */}
+                {nextCheck.milestoneLabel
+                  ? `${nextLabel} · ${nextCheck.milestoneLabel}`
+                  : nextLabel}
               </span>
               <span className="font-sans text-[12px] text-white/85 truncate flex items-center gap-1.5 justify-end mt-[2px]">
                 <span aria-hidden>{nextCheck.icon}</span>
                 <span className="truncate">{nextCheck.text}</span>
               </span>
+              {nextCheck.startsMilestone && nextCheck.milestoneLabel && (
+                <span className="font-mono text-[9px] font-medium tracking-[.08em] text-[#A8C4BE] mt-[3px] truncate">
+                  {isES ? `Empieza con ${nextCheck.milestoneLabel}` : `Starting on ${nextCheck.milestoneLabel}`}
+                </span>
+              )}
             </div>
             <button
               type="button"

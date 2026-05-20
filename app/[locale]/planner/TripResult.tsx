@@ -20,7 +20,7 @@ import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import TripReadinessBar from '../../../components/planner/TripReadinessBar'
 import StatusPill from '../../../components/planner/StatusPill'
-import { computeMilestones } from '../../../lib/planner/milestones'
+import { computeMilestones, selectNextCheck } from '../../../lib/planner/milestones'
 import {
   type TripSegment,
   deserializeSegments,
@@ -2644,7 +2644,17 @@ export default function TripResult({ params }: Props) {
     }),
     [days.length, checks],
   )
-  const nextCheck   = checks.find(c => !c.done)
+  // Milestone-ordered next-check recommender (Phase 1.5). Walks milestones
+  // in tracker order so the user is nudged through Hospedaje → Traslados →
+  // Reservas → Listos instead of being told to pack the bag before the
+  // restaurants are booked.
+  const nextRec = useMemo(
+    () => selectNextCheck(checks.map(c => ({ id: c.id, text: c.text, done: c.done, icon: c.icon }))),
+    [checks],
+  )
+  const nextCheck = nextRec
+    ? checks.find(c => c.id === nextRec.check.id)
+    : undefined
   const checksBefore = checks.filter(c => !c.day)
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
 
@@ -3369,7 +3379,18 @@ export default function TripResult({ params }: Props) {
             doneChecks={doneChecks}
             pendingCount={pendingCount}
             milestones={milestones}
-            nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
+            nextCheck={nextCheck && nextRec ? {
+              id: nextCheck.id,
+              text: nextCheck.text,
+              icon: nextCheck.icon,
+              // Milestone label maps to the bar's current locale via the
+              // labels already on the milestone defs. Cheap lookup.
+              milestoneLabel: (() => {
+                const m = milestones.find(x => x.id === nextRec.milestoneId)
+                return m ? (locale === 'en' ? m.labelEN : m.labelES) : undefined
+              })(),
+              startsMilestone: nextRec.startsMilestone,
+            } : null}
             daysCount={days.length}
             locale={locale === 'en' ? 'en' : 'es'}
             // Time-to-trip drives the urgency strip under the readiness %.
