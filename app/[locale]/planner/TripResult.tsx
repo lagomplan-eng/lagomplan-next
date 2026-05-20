@@ -939,7 +939,12 @@ export default function TripResult({ params }: Props) {
   const [prefOpen, setPrefOpen]             = useState(false)
   const [collapsedDays, setCollapsedDays]   = useState<Set<number>>(new Set())
   const [collapsedCards, setCollapsedCards] = useState<Set<string>>(new Set())
+  // For sidebar "Por día" — expanded by default on short trips, collapsed
+  // by default on longer trips so a 30-day chain doesn't paint a 100+ row
+  // wall. One-shot init via a ref guard so user edits to the open/closed
+  // state aren't trampled by subsequent renders.
   const [collapsedDiaGroups, setCollapsedDiaGroups] = useState<Set<number>>(new Set())
+  const initialCollapsedDiaSetupRef = useRef(false)
   const [toast, setToast]     = useState<string | null>(null)
   const [packedSet, setPackedSet] = useState<Set<number>>(new Set())
   const [newPackingItem, setNewPackingItem] = useState('')
@@ -2669,6 +2674,21 @@ export default function TripResult({ params }: Props) {
   const checksBefore = checks.filter(c => !c.day)
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
 
+  // Trip length threshold for default-collapsing the sidebar's "Por día"
+  // section. Short trips stay fully expanded (the user can scan everything
+  // at once); longer trips start collapsed so the sidebar fits on screen.
+  // Fires once when checks first arrive — subsequent user toggles win.
+  const COLLAPSE_DAY_GROUPS_THRESHOLD = 7
+  useEffect(() => {
+    if (initialCollapsedDiaSetupRef.current) return
+    if (dayNums.length === 0) return  // wait for checks to populate
+    initialCollapsedDiaSetupRef.current = true
+    if (dayNums.length > COLLAPSE_DAY_GROUPS_THRESHOLD) {
+      setCollapsedDiaGroups(new Set(dayNums))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayNums.length])
+
   const budgetByCategory = budgetRows.reduce<Record<string, BudgetRow[]>>((acc, row) => {
     const cat = row.category || 'Otros'
     ;(acc[cat] = acc[cat] || []).push(row)
@@ -3759,7 +3779,12 @@ export default function TripResult({ params }: Props) {
 
                 <div
                   style={{
-                    maxHeight: collapsedCards.has('planning') ? '0' : '1200px',
+                    // Cap was 1200 px — fine for short trips, but clipped on
+                    // longer trips (30-day chains can have 100+ rows). Bumped
+                    // to a value comfortably above realistic max content so
+                    // the transition still animates from a number rather than
+                    // `none` (which CSS can't animate to from a fixed value).
+                    maxHeight: collapsedCards.has('planning') ? '0' : '12000px',
                     opacity: collapsedCards.has('planning') ? 0 : 1,
                     overflow: 'hidden',
                     transition: 'max-height 0.4s ease, opacity 0.3s',
@@ -3819,7 +3844,12 @@ export default function TripResult({ params }: Props) {
                               </div>
                               <div
                                 style={{
-                                  maxHeight: isCollDia ? '0' : '500px',
+                                  // Cap was 500 px — fine for a typical 4-5
+                                  // check day, but clipped when a day has
+                                  // many bookable blocks (multi-city
+                                  // transition days, packed itineraries).
+                                  // 4000 px easily fits 100+ rows.
+                                  maxHeight: isCollDia ? '0' : '4000px',
                                   opacity: isCollDia ? 0 : 1,
                                   overflow: 'hidden',
                                   transition: 'max-height 0.35s ease, opacity 0.25s',
