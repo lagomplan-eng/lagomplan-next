@@ -13,13 +13,20 @@
 
 import type { Metadata } from 'next'
 import type { Locale }   from '../../../../i18n'
-import { KITS }          from '../../../../lib/smart-finds'
+import { getKits }       from '../../../../lib/smart-finds'
 import FilterableKits    from '../../../../components/smart-finds/FilterableKits'
 import PainStrip, { type PainStripItem } from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
 import {
   PINE, SAGE, SAND, CREAM, MUTED, CARD_RADIUS,
 } from '../../../../components/smart-finds/tokens'
+
+// ISR — the catalog is editorial content that changes infrequently. One-hour
+// revalidation keeps Studio edits visible within an hour without thrashing
+// the cache on every request. Cmd: change a product in Studio → wait ≤1 h →
+// page reflects the new copy. Force a faster propagation by re-deploying or
+// hitting the revalidation endpoint if/when we add one.
+export const revalidate = 3600
 
 type Props = { params: Promise<{ locale: Locale }> }
 
@@ -47,6 +54,11 @@ const PAIN_TRIO: PainStripItem[] = [
 export default async function Page({ params }: Props) {
   const { locale } = await params
   const isES = locale === 'es'
+
+  // DB-backed catalog. Pulls from Supabase via the public-read RLS path —
+  // see lib/smart-finds/db.ts. With revalidate=3600 the result is cached at
+  // the edge for an hour; Studio edits propagate within that window.
+  const kits = await getKits()
 
   return (
     <main
@@ -157,12 +169,12 @@ export default async function Page({ params }: Props) {
             regardless of the FilterBar selection so the pain → audience
             mapping reads at the top of the page. */}
         <div style={{ marginBottom: 64 }}>
-          <PainStrip items={PAIN_TRIO} kits={KITS} />
+          <PainStrip items={PAIN_TRIO} kits={kits} />
         </div>
 
         {/* Filterable kit list — client island for the persona filter
             state. The masthead + planner CTA + newsletter stay server. */}
-        <FilterableKits kits={KITS} />
+        <FilterableKits kits={kits} />
 
         {/* PLANNER CTA — same Pine block treatment as Hotels' PlannerBridgeCTA,
             with the site-wide 14-px radius so the corner softness reads
