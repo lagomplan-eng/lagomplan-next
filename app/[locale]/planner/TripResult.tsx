@@ -3372,6 +3372,11 @@ export default function TripResult({ params }: Props) {
             nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
             daysCount={days.length}
             locale={locale === 'en' ? 'en' : 'es'}
+            // Time-to-trip drives the urgency strip under the readiness %.
+            // Falls back to the URL params if the user hasn't moved them in
+            // the drawer yet. Bar omits the strip if either is missing.
+            tripStart={prefStart || start || undefined}
+            tripEnd={prefEnd   || end   || undefined}
             // Bar CTA now marks the next check done directly. The bar shows
             // an inline "✓ Reservado · Deshacer" affordance for 4 s after
             // each click so mis-clicks are recoverable without leaving the
