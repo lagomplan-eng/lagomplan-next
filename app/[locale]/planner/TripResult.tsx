@@ -985,6 +985,13 @@ export default function TripResult({ params }: Props) {
   // state aren't trampled by subsequent renders.
   const [collapsedDiaGroups, setCollapsedDiaGroups] = useState<Set<number>>(new Set())
   const initialCollapsedDiaSetupRef = useRef(false)
+
+  // Engagement-event sampling: fire `day_expanded` + `check_toggled` once
+  // per surface key per trip session, otherwise toggling on/off would
+  // spam GA's event budget with no signal value. Keys are stringified
+  // primitives so resets are cheap when the trip changes.
+  const firedDayExpandsRef = useRef<Set<string>>(new Set())
+  const firedCheckTogglesRef = useRef<Set<string>>(new Set())
   const [toast, setToast]     = useState<string | null>(null)
   const [packedSet, setPackedSet] = useState<Set<number>>(new Set())
   const [newPackingItem, setNewPackingItem] = useState('')
@@ -2274,7 +2281,20 @@ export default function TripResult({ params }: Props) {
   }
 
   function toggleDay(n: number) {
-    setCollapsedDays(prev => { const s = new Set(prev); s.has(n) ? s.delete(n) : s.add(n); return s })
+    setCollapsedDays(prev => {
+      const s = new Set(prev)
+      const isExpanding = s.has(n)  // currently collapsed → will be expanded
+      s.has(n) ? s.delete(n) : s.add(n)
+      // Fire on EXPAND only (not collapse), once per day per trip session.
+      if (isExpanding) {
+        const key = `${tripId ?? 'unsaved'}:${n}`
+        if (!firedDayExpandsRef.current.has(key)) {
+          firedDayExpandsRef.current.add(key)
+          events.itineraryDayExpanded({ trip_id: tripId ?? undefined, day_number: n })
+        }
+      }
+      return s
+    })
   }
 
   function toggleCard(id: string) {
@@ -2292,6 +2312,20 @@ export default function TripResult({ params }: Props) {
       return s
     })
     setHasUserEdits(true)
+    // Fire once per check_id per trip session — symmetrical with
+    // itinerary_day_expanded. Toggling on/off is counted as one
+    // engagement event, not two.
+    const key = `${tripId ?? 'unsaved'}:${id}`
+    if (!firedCheckTogglesRef.current.has(key)) {
+      firedCheckTogglesRef.current.add(key)
+      // Best-effort milestone tag from the check ID prefix used by
+      // deriveChecksFromDays (pretrip-book-hotel, pretrip-pack, check-…).
+      const milestone =
+        id.startsWith('pretrip-book-hotel') ? 'hospedaje'
+        : id === 'pretrip-pack'             ? 'listos'
+        : undefined
+      events.checkToggled({ trip_id: tripId ?? undefined, check_id: id, milestone })
+    }
   }
 
   function deleteItem(itemId: string, dayN: number) {

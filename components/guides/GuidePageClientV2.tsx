@@ -34,12 +34,17 @@ import NewsletterPdfPrompt         from '../newsletter/NewsletterPdfPrompt'
 import type { GuidePageData } from '../../lib/data/guides/types'
 import { ROUTE_MAP }          from '../../lib/routes'
 
-// ── Analytics placeholder ──────────────────────────────────────────────────────
-// Replace with your analytics provider (GA4, Amplitude, Mixpanel, etc.)
+// ── Analytics ──────────────────────────────────────────────────────────────────
+// Fires events.contentViewed → Meta ViewContent + GA view_item. ViewContent
+// in Meta builds retargeting audiences ("anyone who viewed a guide in the
+// last 30 days"), which Lagomplan will want for paid acquisition.
+import { events } from '../../lib/analytics'
 function trackGuideView(slug: string, locale: string) {
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[analytics] guide_view', { slug, locale })
-  }
+  events.contentViewed({
+    content_type: 'guide',
+    content_id:   slug,
+    locale:       locale === 'en' ? 'en' : 'es',
+  })
 }
 
 // ── Props ──────────────────────────────────────────────────────────────────────

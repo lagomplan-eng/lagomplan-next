@@ -17,6 +17,7 @@ import { getKits }       from '../../../../lib/smart-finds'
 import FilterableKits    from '../../../../components/smart-finds/FilterableKits'
 import PainStrip, { type PainStripItem } from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
+import PageViewHook      from '../../../../components/smart-finds/PageViewHook'
 import {
   PINE, SAGE, SAND, CREAM, MUTED, CARD_RADIUS,
 } from '../../../../components/smart-finds/tokens'
@@ -65,6 +66,9 @@ export default async function Page({ params }: Props) {
       className="pt-[100px] min-h-screen"
       style={{ background: CREAM, color: PINE }}
     >
+      {/* Analytics: kit page view (Meta ViewContent + GA view_item) */}
+      <PageViewHook kitId="familias" locale={isES ? 'es' : 'en'} persona="familias" />
+
       {/* ── MASTHEAD ─────────────────────────────────────────────────── */}
       <header>
         <div className="page-inner">

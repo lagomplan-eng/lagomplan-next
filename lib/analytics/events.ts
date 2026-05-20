@@ -179,6 +179,79 @@ export const events = {
   },
 
   /**
+   * Fired when a content page (guide, kit) is viewed. Acquisition signal —
+   * lets the dashboard answer "which guides drive the most planner starts?"
+   * and "do Smart Finds kit views convert to affiliate clicks?"
+   *
+   * `view_item` is the GA4-recommended event for content engagement;
+   * ViewContent is the Meta canonical (used for retargeting audiences too).
+   *
+   * Meta: `ViewContent`  ·  GA: `view_item`.
+   */
+  contentViewed(params: {
+    content_type: 'guide' | 'kit' | 'hotel' | 'destination'
+    content_id:   string
+    locale:       'es' | 'en'
+    persona?:     string
+  }) {
+    metaTrack('ViewContent', {
+      content_name:     params.content_id,
+      content_category: params.content_type,
+    })
+    gaTrack('view_item', {
+      item_id:       params.content_id,
+      item_category: params.content_type,
+      locale:        params.locale,
+      persona:       params.persona,
+    })
+  },
+
+  /**
+   * Fired on the first input focus / first character typed in the planner
+   * form, before submit. Captures users who STARTED but didn't finish — the
+   * activation drop-off the form-submit `search` event can't see.
+   *
+   * Idempotent within a session via a useRef flag in HeroForm so it doesn't
+   * fire on every keystroke.
+   *
+   * Meta custom: `PlannerStarted`  ·  GA: `planner_started`.
+   */
+  plannerStarted(params?: { source?: string }) {
+    metaTrackCustom('PlannerStarted', params)
+    gaTrack('planner_started', params)
+  },
+
+  /**
+   * Fired the FIRST time a specific day card is expanded within a trip
+   * session. Sampled via a useRef set keyed by trip_id+day_number — if the
+   * user expands → collapses → expands the same day, only the first
+   * expansion fires. Otherwise we'd flood GA's event budget.
+   *
+   * Engagement-depth signal: trips with 80%+ of days expanded reach a
+   * different state of commitment than trips where the user only opened
+   * Day 1.
+   *
+   * Meta custom: `ItineraryDayExpanded`  ·  GA: `itinerary_day_expanded`.
+   */
+  itineraryDayExpanded(params: { trip_id?: string; day_number: number }) {
+    metaTrackCustom('ItineraryDayExpanded', params)
+    gaTrack('itinerary_day_expanded', params)
+  },
+
+  /**
+   * Fired the FIRST time a specific check is toggled (in either direction)
+   * within a trip session. Sampled like itineraryDayExpanded. Tracks active
+   * use of the readiness checklist — high check_toggled rate vs trip_saved
+   * means the user is actively planning, not just generating-and-leaving.
+   *
+   * Meta custom: `CheckToggled`  ·  GA: `check_toggled`.
+   */
+  checkToggled(params: { trip_id?: string; check_id: string; milestone?: string }) {
+    metaTrackCustom('CheckToggled', params)
+    gaTrack('check_toggled', params)
+  },
+
+  /**
    * Fired when the user explicitly regenerates an itinerary (regenerate
    * button OR drawer "Actualizar plan" save). Engagement-quality signal:
    * a high regen rate means the AI defaults are wrong for that cohort and

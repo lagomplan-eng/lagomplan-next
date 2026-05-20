@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useRouter } from '../../lib/navigation'
 import { useTranslations } from 'next-intl'
 import PlacesInput, { type PlaceResult } from './PlacesInput'
@@ -125,6 +125,17 @@ const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>('MXN')
 
 const [submitted, setSubmitted] = useState(false)
 const [generating, setGenerating] = useState(false)
+
+// Fires events.plannerStarted once per HeroForm mount, on the first
+// user-driven change to any input. Captures users who STARTED the form
+// but didn't submit — the activation-stage drop-off that the form-submit
+// `search` event can't see.
+const plannerStartedFiredRef = useRef(false)
+const fireStartedOnce = () => {
+  if (plannerStartedFiredRef.current) return
+  plannerStartedFiredRef.current = true
+  events.plannerStarted()
+}
 
 // Multi-city — additional segments beyond the main destination. Each
 // segment carries the same From + To + DateRangePicker shape as
@@ -334,8 +345,8 @@ function submit(e: React.FormEvent) {
                 locale={locale}
                 placeholder={t('destinationPlaceholder')}
                 value={destText}
-                onChange={(v) => { setDestText(v); if (!v) setDestPlace(null) }}
-                onSelect={setDestPlace}
+                onChange={(v) => { fireStartedOnce(); setDestText(v); if (!v) setDestPlace(null) }}
+                onSelect={(p) => { fireStartedOnce(); setDestPlace(p) }}
               />
               {submitted && !destValue && (
                 <FieldError msg={t('errorDestination')} />
