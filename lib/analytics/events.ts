@@ -97,9 +97,13 @@ export const events = {
    * Stripe webhook fulfilled — fired browser-side from the success
    * landing page. Eventually move to Conversions API for reliability;
    * see lib/analytics/meta.ts header for guidance.
+   *
+   * trip_id is included when the purchase was triggered from a trip
+   * context (paywall on planner page) so revenue can be attributed to
+   * the trip that drove it.
    * Meta: `Purchase`  ·  GA: `purchase`.
    */
-  purchase(params: CheckoutParams & { transaction_id?: string }) {
+  purchase(params: CheckoutParams & { transaction_id?: string; trip_id?: string }) {
     metaTrack('Purchase', params)
     gaTrack('purchase', params)
   },
@@ -118,15 +122,84 @@ export const events = {
   /**
    * AI itinerary generation completed successfully.
    * Meta custom: `ItineraryGenerated`  ·  GA: `itinerary_generated`.
+   *
+   * `trip_id` is optional because at firing-time the DB autosave hasn't
+   * happened yet — we get the real ID a few moments later via tripSaved.
+   * Pass a client-generated UUID (or whatever's in the URL/state) when
+   * available; analytics will resolve it server-side via the link emitted
+   * by tripSaved.
    */
   itineraryGenerated(params: {
     destination: string
     nights:      number
     locale:      'es' | 'en'
     traveler?:   string
+    trip_id?:    string
   }) {
     metaTrackCustom('ItineraryGenerated', params)
     gaTrack('itinerary_generated', params)
+  },
+
+  /**
+   * Fired the FIRST time a trip is persisted to the DB (autosave success).
+   * Carries the canonical DB trip_id so analytics can stitch this onto the
+   * preceding itineraryGenerated event. Fires once per trip — distinguishes
+   * "trips that survived past the result page" from "trips the user
+   * abandoned after one look."
+   * Meta custom: `TripSaved`  ·  GA: `trip_saved`.
+   */
+  tripSaved(params: { trip_id: string; signed_in: boolean }) {
+    metaTrackCustom('TripSaved', params)
+    gaTrack('trip_saved', params)
+  },
+
+  /**
+   * Fired when the user copies a share link from TripShareModal.
+   * Strong commitment signal — sharing implies the trip is "real enough"
+   * to send to friends/family.
+   * Meta custom: `TripShared`  ·  GA: `trip_shared`.
+   */
+  tripShared(params: { trip_id: string; audience?: 'link' | 'whatsapp' | 'email' }) {
+    metaTrackCustom('TripShared', params)
+    gaTrack('trip_shared', params)
+  },
+
+  /**
+   * Unified outbound affiliate click. Covers planner hotels, Smart Finds
+   * product cards, day-block booking CTAs, and any future affiliate surface.
+   *
+   * Use this rather than the older trackAffiliateClick in lib/booking.ts —
+   * that one was GA-only and bypassed the events abstraction.
+   *
+   * Meta custom: `AffiliateClicked`  ·  GA: `affiliate_clicked`.
+   */
+  affiliateClicked(params: {
+    /** Vendor / network the user is being sent to (booking, hotels, amazon, viator, stay22, …). */
+    provider:    string
+    /** What surface the click came from (planner-hotels, smart-finds-card, day-block-modal, …). */
+    surface:     string
+    /** Editorial category if relevant (hotel, tour, restaurant, product, …). */
+    category?:   string
+    /** Destination city when the click is trip-scoped. */
+    destination?: string
+    /** Trip-id stamp when available — None on Smart Finds pages, present on planner clicks. */
+    trip_id?:    string
+    /** Free-form metadata (product_id, kit_id, item_id, etc.). */
+    meta?:       Record<string, string | number | boolean | undefined>
+  }) {
+    metaTrackCustom('AffiliateClicked', {
+      provider: params.provider,
+      surface:  params.surface,
+      category: params.category,
+    })
+    gaTrack('affiliate_clicked', {
+      provider:    params.provider,
+      surface:     params.surface,
+      category:    params.category,
+      destination: params.destination,
+      trip_id:     params.trip_id,
+      ...params.meta,
+    })
   },
 
   /**
@@ -207,17 +280,42 @@ export const events = {
 
   /**
    * Fired when a user clicks any hotel/accommodation CTA in the planner.
-   * Pairs with events.hotelAffiliateClick (above) when the click is
-   * specifically on a Stay22 affiliate link.
+   * Pairs with events.affiliateClicked when the click is specifically on
+   * a Stay22 affiliate link — both fire together for hotel surfaces.
+   *
+   * tripId is accepted in the function signature for backward compat with
+   * existing call sites, but emitted to GA as the canonical snake_case
+   * `trip_id` so the custom dimension matches every other event.
    */
   plannerHotelClicked(params: {
-    tripId:       string | null
+    tripId:          string | null
     accommodationId: string
-    source:       'ai' | 'fallback'
-    provider:     string
-    city:         string
+    source:          'ai' | 'fallback'
+    provider:        string
+    city:            string
   }) {
     metaTrackCustom('PlannerHotelClicked', { provider: params.provider, city: params.city })
-    gaTrack('planner_hotel_clicked', params)
+    gaTrack('planner_hotel_clicked', {
+      trip_id:         params.tripId ?? undefined,
+      accommodationId: params.accommodationId,
+      source:          params.source,
+      provider:        params.provider,
+      city:            params.city,
+    })
+    // Also fire the unified affiliateClicked event so the monetization
+    // dashboard's "total affiliate clicks" rolls up consistently across
+    // surfaces. Both events together let the dashboard slice on either
+    // "hotel-specific" (planner_hotel_clicked) or "any affiliate"
+    // (affiliate_clicked).
+    metaTrackCustom('AffiliateClicked', { provider: params.provider, surface: 'planner-hotels' })
+    gaTrack('affiliate_clicked', {
+      provider:    params.provider,
+      surface:     'planner-hotels',
+      category:    'hotel',
+      destination: params.city,
+      trip_id:     params.tripId ?? undefined,
+      accommodation_id: params.accommodationId,
+      source:      params.source,
+    })
   },
 }

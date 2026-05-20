@@ -1276,6 +1276,7 @@ export default function TripResult({ params }: Props) {
     events.purchase({
       transaction_id: pendingSessionId,
       content_name:   fresh?.is_subscriber ? 'subscription' : 'trip-pack',
+      trip_id:        tripId ?? undefined,
     })
 
     setCheckoutConfirmed(true)
@@ -1538,6 +1539,11 @@ export default function TripResult({ params }: Props) {
             // tripId returned from polling instead of POSTing to /api/trips,
             // which would create a duplicate row.
             setTripId(asyncTripId)
+            // Trip is now persisted — fire the commitment signal. Fires
+            // exactly once per trip (on the INITIAL gen autosave). Carries
+            // the canonical DB trip_id so analytics can stitch this onto the
+            // preceding itinerary_generated event.
+            events.tripSaved({ trip_id: asyncTripId, signed_in: true })
             lastSavedContentRef.current = JSON.stringify({
               title: normalized.title, subtitle: normalized.subtitle,
               days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
@@ -1587,6 +1593,10 @@ export default function TripResult({ params }: Props) {
                 const autoSaveData = await autoSaveRes.json().catch(() => null)
                 if (autoSaveData?.success) {
                   setTripId(autoSaveData.trip_id)
+                  // Trip is now persisted via /api/trips POST — sync-path
+                  // mirror of the async tripSaved emit above. Fires exactly
+                  // once per trip on the initial gen autosave.
+                  events.tripSaved({ trip_id: autoSaveData.trip_id, signed_in: true })
                   // Baseline: now that the DB entry exists, mark current content as saved
                   // so autosave only fires if the user edited during the POST window
                   lastSavedContentRef.current = JSON.stringify({
@@ -2182,6 +2192,9 @@ export default function TripResult({ params }: Props) {
       console.log('[saveTrip] response data:', JSON.stringify(data))
       if (data.success) {
         setTripId(data.trip_id)
+        // Anon→signup→save flow ends here. Fire tripSaved with signed_in
+        // = true since the user authenticated to reach this branch.
+        events.tripSaved({ trip_id: data.trip_id, signed_in: true })
         sessionStorage.removeItem('tripCache')
         // Update URL so a browser refresh loads from DB instead of re-generating
         if (typeof window !== 'undefined') {
@@ -4537,6 +4550,20 @@ export default function TripResult({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
                     onClick={() => {
+                      // Unified affiliate click — fires to BOTH Meta + GA via
+                      // events.affiliateClicked, stamped with trip_id so the
+                      // monetization dashboard can attribute revenue back to
+                      // the trip that drove the click. Keep the legacy
+                      // trackAffiliateClick call until the dashboards that
+                      // depend on its `affiliate_click` event name migrate.
+                      events.affiliateClicked({
+                        provider:    opt.provider,
+                        surface:     'day-block-modal',
+                        category:    bookingModal.itemType,
+                        destination,
+                        trip_id:     tripId ?? undefined,
+                        meta:        { item_name: bookingModal.itemName },
+                      })
                       trackAffiliateClick(bookingModal.itemType, opt.provider, destination)
                       setBookingModal(null)
                     }}

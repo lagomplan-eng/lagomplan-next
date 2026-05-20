@@ -17,6 +17,8 @@ import type { Product } from '../../lib/smart-finds'
 import IconZone from './IconZone'
 import { PINE, SAGE, SURFACE, MUTED, BORDER, CARD_RADIUS } from './tokens'
 import { toSentenceCase } from './text'
+import { events } from '../../lib/analytics'
+import { providerFromUrl } from '../../lib/analytics/provider'
 
 interface Props {
   product: Product
@@ -92,6 +94,12 @@ export default function ProductCard({ product }: Props) {
             href={product.link}
             target="_blank"
             rel="noopener noreferrer sponsored"
+            onClick={() => events.affiliateClicked({
+              provider: providerFromUrl(product.link),
+              surface:  'smart-finds-card',
+              category: 'product',
+              meta:     { product_id: product.id, brand: product.brand },
+            })}
             style={{
               background: hov ? PINE : 'transparent',
               color:      hov ? '#FFFFFF' : PINE,
