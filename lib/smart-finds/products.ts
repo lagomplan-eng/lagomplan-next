@@ -1,6 +1,13 @@
 /**
  * lib/smart-finds/products.ts
  *
+ * DEPRECATED — kept as the seed source for Supabase until the cutover is
+ * complete. New consumers should fetch via the async resolver:
+ *   import { getProducts } from '@/lib/smart-finds'   // DB-backed
+ * The static `PRODUCTS` export still works (pages haven't migrated yet)
+ * but will be removed once every consumer has swapped over. Edits to
+ * product metadata should happen in Supabase Studio, not here.
+ *
  * The Smart Finds product catalog — single source of truth for every
  * product that can appear on a kit page (Familias) or the Hotels-page
  * strip. Lookup is keyed by stable kebab-case product ID so kit

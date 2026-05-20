@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "types": "supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/supabase/types.ts"
+    "types": "supabase gen types typescript --project-id YOUR_PROJECT_ID > lib/supabase/types.ts",
+    "seed:smart-finds": "tsx scripts/seed-smart-finds.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",
@@ -28,10 +29,12 @@
     "@types/react": "^18",
     "@types/react-dom": "^18",
     "autoprefixer": "^10.0.1",
+    "dotenv": "^16.4.5",
     "eslint": "^8",
     "eslint-config-next": "14.2.3",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
+    "tsx": "^4.19.0",
     "typescript": "^5"
   }
 }
