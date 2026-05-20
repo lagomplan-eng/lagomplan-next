@@ -2142,7 +2142,10 @@ export default function TripResult({ params }: Props) {
             window.history.replaceState({}, '', url.toString())
           }
           if (previousTripId && previousTripId !== asyncTripId) {
-            fetch(`/api/trips/${previousTripId}`, {
+            // ?replacement=<new> lets the server transfer share_id from
+            // the old row to the new one before deleting, so any shared
+            // links keep working across regeneration.
+            fetch(`/api/trips/${previousTripId}?replacement=${asyncTripId}`, {
               method: 'DELETE',
               credentials: 'include',
             }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
@@ -2188,7 +2191,8 @@ export default function TripResult({ params }: Props) {
                   window.history.replaceState({}, '', url.toString())
                 }
                 if (previousTripId && previousTripId !== regenData.trip_id) {
-                  fetch(`/api/trips/${previousTripId}`, {
+                  // ?replacement=<new> transfers share state to the new row.
+                  fetch(`/api/trips/${previousTripId}?replacement=${regenData.trip_id}`, {
                     method: 'DELETE',
                     credentials: 'include',
                   }).catch(e => console.warn('[regenerate] predecessor delete failed:', e))
@@ -2524,7 +2528,8 @@ export default function TripResult({ params }: Props) {
             window.history.replaceState({}, '', url.toString())
           }
           if (previousTripId && previousTripId !== asyncTripId) {
-            fetch(`/api/trips/${previousTripId}`, {
+            // ?replacement transfers share state — see DELETE handler comment.
+            fetch(`/api/trips/${previousTripId}?replacement=${asyncTripId}`, {
               method: 'DELETE',
               credentials: 'include',
             }).catch(e => console.warn('[replaceTrip] predecessor delete failed:', e))
@@ -2573,8 +2578,9 @@ export default function TripResult({ params }: Props) {
               }
               // Replacement semantics: drop the predecessor row so my-trips
               // shows one logical entry per trip (not one per regen).
+              // ?replacement transfers share state to the new row.
               if (previousTripId && previousTripId !== regenData.trip_id) {
-                fetch(`/api/trips/${previousTripId}`, {
+                fetch(`/api/trips/${previousTripId}?replacement=${regenData.trip_id}`, {
                   method: 'DELETE',
                   credentials: 'include',
                 }).catch(e => console.warn('[replaceTrip] predecessor delete failed:', e))
