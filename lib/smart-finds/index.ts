@@ -24,6 +24,19 @@ export { ICONS } from './icons'
 export { PRODUCTS, getProduct, getProductsBySurface } from './products'
 export { KITS, getKit, getKitsByPersona } from './kits'
 
+// ── DB-backed catalog (Supabase) ────────────────────────────────────────────
+// Same Kit / Product shape as the static exports above; available to
+// callers that want to fetch from the DB instead of importing the bundled
+// TS data. The static exports stay live during the cutover — pages migrate
+// one at a time. Once every consumer has moved to the async fetchers, the
+// static kits.ts + products.ts can be deleted.
+export {
+  getProducts,
+  getKits,
+  getKitById,
+  getKitsByPersona as getKitsByPersonaFromDb,
+} from './db'
+
 import type { Product, Kit, KitProductRef } from './types'
 import { getProduct } from './products'
 

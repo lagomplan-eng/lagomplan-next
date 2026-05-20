@@ -1,6 +1,13 @@
 /**
  * lib/smart-finds/kits.ts
  *
+ * DEPRECATED — kept as the seed source for Supabase until the cutover is
+ * complete. New consumers should fetch via the async resolver:
+ *   import { getKits } from '@/lib/smart-finds'   // DB-backed
+ * The static `KITS` export still works (pages haven't migrated yet) but
+ * will be removed once every consumer has swapped to `getKits()`. Edits
+ * to product metadata should happen in Supabase Studio, not here.
+ *
  * Smart Finds kit definitions. Each kit references products by stable ID
  * from PRODUCTS — never inlines them.
  *

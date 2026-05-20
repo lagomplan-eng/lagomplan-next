@@ -25,9 +25,11 @@
  *   - signup / login              — functional, not content
  *   - /trips/share/[shareId]      — private share URLs
  *   - destinations/[slug] / hotels/[slug] / smart-finds/[slug]
- *     — these routes exist but have no `generateStaticParams`, so the
- *       slug surface isn't enumerable today; revisit when those entity
- *       systems ship structured content.
+ *     — these dynamic routes exist but have no `generateStaticParams`,
+ *       so the slug surface isn't enumerable today; revisit when those
+ *       entity systems ship structured content. Smart Finds today has
+ *       one real static-segment kit page (familias / families) — that
+ *       single URL is included explicitly below.
  *
  * Future migration: when entity counts exceed ~5,000 we'll split into a
  * sitemap index (sitemap-static.xml, sitemap-guides.xml, etc.) per
@@ -163,6 +165,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   for (const slug of WORLDCUP_CITY_SLUGS) {
     entries.push(entityEntry('mundial', 'worldcup', slug, slug, 'weekly', 0.7))
   }
+
+  // 5. Smart Finds kit pages. Only the Familias kit has a real static
+  //    segment today (`app/[locale]/smart-finds/familias/page.tsx`).
+  //    Section prefix is `smart-finds` in both locales; only the leaf
+  //    is localized (familias ↔ families). Add more kits here as their
+  //    static segments ship — the other 8 kits currently use the
+  //    `[slug]` stub and aren't crawlable as real content.
+  entries.push(entityEntry('smart-finds', 'smart-finds', 'familias', 'families', 'monthly', 0.6))
 
   return entries
 }

@@ -26,8 +26,8 @@ export const ROUTE_MAP = {
   hotelsIndex:        { es: 'hoteles',           en: 'hotels'        },
   hotelDetail:        { es: 'hoteles',           en: 'hotels'        },
   planner:            { es: 'planificador',      en: 'planner'       },
-  smartFindsIndex:    { es: 'productos-viaje',   en: 'smart-finds'   },
-  smartFindDetail:    { es: 'productos-viaje',   en: 'smart-finds'   },
+  smartFindsIndex:    { es: 'smart-finds',       en: 'smart-finds'   },
+  smartFindDetail:    { es: 'smart-finds',       en: 'smart-finds'   },
   about:              { es: 'nosotras',          en: 'about'         },
   contact:            { es: 'contacto',          en: 'contact'       },
   myTrips:            { es: 'mis-viajes',        en: 'my-trips'      },
@@ -152,8 +152,8 @@ export function getHotelUrl(locale: Locale, entity: LocalizedEntity): string {
 }
 
 /**
- * getSmartFindUrl('es', item) → '/es/productos-viaje/mochila-ligera'
- * getSmartFindUrl('en', item) → '/en/smart-finds/lightweight-backpack'
+ * getSmartFindUrl('es', item) → '/es/smart-finds/<slug-es>'
+ * getSmartFindUrl('en', item) → '/en/smart-finds/<slug-en>'
  */
 export function getSmartFindUrl(locale: Locale, entity: LocalizedEntity): string {
   const segment = ROUTE_MAP.smartFindDetail[locale]
