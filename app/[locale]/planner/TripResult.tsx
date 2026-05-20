@@ -1309,6 +1309,14 @@ export default function TripResult({ params }: Props) {
       // Stale trip from a prior navigation — clear before proceeding so the
       // page doesn't render the previous trip's title / days / hotels under
       // the new URL params during the AI call.
+      //
+      // Flip loading + loadingKind to true ALONGSIDE the clear — not later,
+      // after the auth guards. If we waited, the auth guards' early-returns
+      // (while authedUser transitions or credits re-resolve) would briefly
+      // leave the page on `loading=false` + cleared state → empty chrome
+      // visible instead of the GenerationSurface. With loading=true here,
+      // the loading branch renders immediately and stays put until the next
+      // effect run picks up where this one left off.
       if (rawTripDataRef.current) {
         setRawTripData(null)
         setDays([])
@@ -1320,6 +1328,8 @@ export default function TripResult({ params }: Props) {
         setVersions([])
         setTripId(null)
         setDoneCheckIds(new Set())
+        setLoading(true)
+        setLoadingKind('generating')
       }
 
       // ── Auth / generation-count guard ─────────────────────────────────
