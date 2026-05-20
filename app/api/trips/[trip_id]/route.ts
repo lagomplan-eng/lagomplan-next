@@ -140,11 +140,24 @@ export async function PATCH(
 }
 
 export async function DELETE(
-  _req: NextRequest,
+  req: NextRequest,
   { params }: { params: Promise<{ trip_id: string }> },
 ) {
   const { trip_id } = await params
   if (!trip_id) return NextResponse.json({ error: 'Missing trip_id' }, { status: 400 })
+
+  // ── Share-link transfer on regenerate/replaceTrip ──────────────────────────
+  // The planner's regenerate/replaceTrip flows POST a new trip row, then
+  // DELETE the previous one. If the previous row had an active share link
+  // (share_id + is_shared=true), deleting it without transferring the share
+  // state breaks every existing /trips/share/<share_id> URL — recipients
+  // get redirected to home because the share lookup returns nothing.
+  //
+  // The FE passes `?replacement=<new_trip_id>` on the DELETE so we can
+  // atomically transfer share_id + is_shared from the old row to the new
+  // one before removing the old. The UNIQUE constraint on share_id means
+  // we have to clear it on the old row first, then set it on the new.
+  const replacement = req.nextUrl.searchParams.get('replacement') ?? null
 
   try {
     const supabase = await getSupabaseServer()
@@ -153,9 +166,51 @@ export async function DELETE(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
+    const admin = getSupabaseAdmin()
+
+    // If a replacement is named, look up the original's share state.
+    // Only meaningful when the original was actually shared — otherwise
+    // we skip the transfer entirely (no-op for never-shared trips).
+    if (replacement) {
+      const { data: shareRaw } = await admin
+        .from('trips')
+        .select('share_id, is_shared')
+        .eq('id', trip_id)
+        .eq('user_id', user.id)
+        .single()
+      const shareState = shareRaw as { share_id: string | null; is_shared: boolean } | null
+
+      if (shareState?.share_id && shareState.is_shared) {
+        // 1. Free the unique share_id from the old row so the new row can
+        //    take it. UNIQUE index on share_id WHERE share_id IS NOT NULL
+        //    blocks any other approach.
+        const { error: clearErr } = await (admin as any)
+          .from('trips')
+          .update({ share_id: null, is_shared: false })
+          .eq('id', trip_id)
+          .eq('user_id', user.id)
+        if (clearErr) {
+          console.error('[trips/delete] share-clear error:', clearErr.message)
+          return NextResponse.json({ error: clearErr.message }, { status: 500 })
+        }
+
+        // 2. Move the share state to the new row.
+        const { error: setErr } = await (admin as any)
+          .from('trips')
+          .update({ share_id: shareState.share_id, is_shared: true })
+          .eq('id', replacement)
+          .eq('user_id', user.id)
+        if (setErr) {
+          console.error('[trips/delete] share-transfer error:', setErr.message)
+          return NextResponse.json({ error: setErr.message }, { status: 500 })
+        }
+
+        console.log('[trips/delete] transferred share', shareState.share_id, 'from', trip_id, 'to', replacement)
+      }
+    }
+
     // Use admin client + explicit user_id guard so RLS can't silently no-op
     // and a different user's id in the URL can't delete someone else's row.
-    const admin = getSupabaseAdmin()
     const { data: deleted, error } = await admin
       .from('trips')
       .delete()
