@@ -32,6 +32,7 @@ import DateRangePicker, { type DateRange } from '../../../components/forms/DateR
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
 import { GenerationSurface } from '../../../components/generation/GenerationSurface'
 import { useGenerationSurface } from '../../../hooks/useGenerationSurface'
+import { events } from '../../../lib/analytics'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1261,6 +1262,22 @@ export default function TripResult({ params }: Props) {
           ? `🎉 ¡Pago confirmado! Ahora tienes ${fresh?.trips_remaining ?? 0} viajes disponibles`
           : `🎉 Payment confirmed! You now have ${fresh?.trips_remaining ?? 0} trips available`)
     showToast(msg)
+
+    // ── Analytics: revenue conversion ──────────────────────────────
+    // Fires AFTER the Stripe webhook has been confirmed via the
+    // PaymentPendingOverlay → onCredited path (i.e., the purchase is
+    // real, not a redirect-only success_url hit). Sends transaction_id
+    // so deduplication works in Meta / GA dashboards even if the user
+    // refreshes the page. Value is intentionally omitted — we don't
+    // have the price here, and GA's Ecommerce report will be
+    // populated later by the server-side webhook (Conversions API
+    // upgrade). For now this gets us a Purchase event in browser
+    // attribution so paid campaigns can optimize toward ROI.
+    events.purchase({
+      transaction_id: pendingSessionId,
+      content_name:   fresh?.is_subscriber ? 'subscription' : 'trip-pack',
+    })
+
     setCheckoutConfirmed(true)
     setGenerateKey(k => k + 1)
   }
@@ -1484,6 +1501,20 @@ export default function TripResult({ params }: Props) {
 
         // Persist so login redirect restores this exact trip
         sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
+
+        // ── Analytics: the most meaningful product signal ──────────
+        // Fires only on initial AI generation (not regen/replace, not
+        // cache-hit restores) so Meta optimization treats this as a
+        // top-of-funnel conversion. Pairs with the events.lead fired
+        // on form submit — together they let the campaign optimize
+        // for "users who actually got an itinerary" instead of just
+        // "users who clicked the ad."
+        events.itineraryGenerated({
+          destination,
+          nights:    durationDaysFromNights(nights),
+          locale:    locale === 'en' ? 'en' : 'es',
+          traveler:  prefTraveler || undefined,
+        })
 
         setRawTripData(tripDataRaw)
         lastGeneratedInputsRef.current = currentFp

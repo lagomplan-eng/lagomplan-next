@@ -7,6 +7,7 @@ import PlacesInput, { type PlaceResult } from './PlacesInput'
 import DateRangePicker, { type DateRange } from './DateRangePicker'
 import { buildSegment, serializeSegments, type TripSegment } from '../../lib/planner/segments'
 import { FREE_TRIPS_LIMIT } from '../../lib/plan/limits'
+import { events } from '../../lib/analytics'
 
 type Traveler = 'solo' | 'pareja' | 'familia' | 'amigos'
 
@@ -268,6 +269,18 @@ function submit(e: React.FormEvent) {
     if (traveler === 'amigos') {
       params.set('groupCount', String(groupCount))
     }
+
+    // ── Analytics ──────────────────────────────────────────────
+    // Fires before the router navigation so the events land in the
+    // current session before the result page mounts. Both pixels
+    // get the same intent signal in their own canonical shape:
+    //   events.search    → Meta 'Search', GA 'search'   (query term)
+    //   events.lead      → Meta 'Lead',   GA 'generate_lead' (top-of-funnel
+    //                       conversion — needed for Meta optimization)
+    // We tag content_name = "planner-form" so paid campaigns can target
+    // this specific surface separately from newsletter/PDF leads.
+    events.search({ search_string: destValue, destination: destValue })
+    events.lead({ content_name: 'planner-form' })
 
     router.push(`/planner?${params}` as any)
   }
