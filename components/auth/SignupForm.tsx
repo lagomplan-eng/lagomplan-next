@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Link, useRouter } from '../../lib/navigation'
 import { getSupabaseBrowser } from '../../lib/supabase/client'
+import { events } from '../../lib/analytics'
 
 export default function SignupForm() {
   const router = useRouter()
@@ -36,6 +37,14 @@ export default function SignupForm() {
       setError(authError.message)
       return
     }
+
+    // ── Analytics: account creation ──────────────────────────────
+    // Fires regardless of whether email confirmation is required.
+    // Counting the signup ATTEMPT (post-Supabase-accepted, pre-email-
+    // confirmation) is the right top-of-funnel signal — confirmation
+    // rate is a separate downstream measurement. method='email' for
+    // distinguishing from any future OAuth flow.
+    events.completeRegistration({ method: 'email' })
 
     // Auto-confirm OFF → Supabase sends a confirmation email, no session yet
     if (!data.session) {

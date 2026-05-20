@@ -1222,6 +1222,17 @@ export default function TripResult({ params }: Props) {
           days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
           doneChecks: doneChecksArr,
         })
+
+        // ── Analytics: retention signal ───────────────────────────────
+        // Fires every time a saved trip is loaded from DB. days_since
+        // creation lets dashboards distinguish "user navigated within
+        // an active session" (≤1 day) from "user came back to plan
+        // more" (>1 day) — the latter is the actual retention metric.
+        const createdAt = (data as any)?.created_at
+        const daysSince = typeof createdAt === 'string'
+          ? Math.max(0, Math.round((Date.now() - new Date(createdAt).getTime()) / 86_400_000))
+          : undefined
+        events.tripReopened({ trip_id: savedTripId, days_since_creation: daysSince })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido')
       } finally {
@@ -1950,6 +1961,19 @@ export default function TripResult({ params }: Props) {
       }
     }
 
+    // ── Analytics: regen quality signal ──────────────────────────
+    // `reason` distinguishes drawer-driven regen (user changed prefs)
+    // from manual retry. High drawer-edit regen rate → AI defaults
+    // miss the user's intent. High manual-retry rate → AI output
+    // quality is below expectations. Read prefOpen / regenConfirmOpen
+    // BEFORE the setX(false) calls below so we know which surface
+    // triggered this regen.
+    events.regenerateRequested({
+      trip_id:     tripId ?? undefined,
+      reason:      prefOpen || regenConfirmOpen ? 'drawer-edit' : 'manual',
+      destination: prefDest,
+      nights:      durationDaysFromNights(nights),
+    })
     setPrefOpen(false)
     setRegenConfirmOpen(false)
     // Snapshot the current working state before overwriting (preserves manual edits)
@@ -2308,6 +2332,16 @@ export default function TripResult({ params }: Props) {
     sessionStorage.removeItem('tripCache_key')
     sessionStorage.removeItem('tripCache_data')
     console.log('CACHE CLEARED')
+    // ── Analytics: replace = explicit "throw away and rebuild" intent ──
+    // Counted separately from regenerate() (reason='replace') so the
+    // dashboard can spot users churning through generations vs users
+    // iterating via the drawer.
+    events.regenerateRequested({
+      trip_id:     tripId ?? undefined,
+      reason:      'replace',
+      destination: prefDest,
+      nights:      durationDaysFromNights(nights),
+    })
     setLoading(true)
     setLoadingKind('generating')
     setError(null)

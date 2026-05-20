@@ -165,6 +165,41 @@ export const events = {
   },
 
   /**
+   * Fired when a previously-saved trip is loaded from the DB (loadFromDB
+   * success). Pure retention signal — fires once per DB load, regardless of
+   * how much time has passed since creation. The days_since_creation param
+   * lets dashboards split "just created moments ago" (still active session)
+   * from "returned after N days" (real retention).
+   *
+   * Meta custom: `TripReopened`  ·  GA: `trip_reopened`.
+   */
+  tripReopened(params: { trip_id: string; days_since_creation?: number }) {
+    metaTrackCustom('TripReopened', params)
+    gaTrack('trip_reopened', params)
+  },
+
+  /**
+   * Fired when the user explicitly regenerates an itinerary (regenerate
+   * button OR drawer "Actualizar plan" save). Engagement-quality signal:
+   * a high regen rate means the AI defaults are wrong for that cohort and
+   * we should look at the prompt / preferences UX.
+   *
+   * `reason` distinguishes manual retry from drawer-driven regen so the
+   * dashboard can split "AI quality" from "preference change" causes.
+   *
+   * Meta custom: `RegenerateRequested`  ·  GA: `regenerate_requested`.
+   */
+  regenerateRequested(params: {
+    trip_id?:    string
+    reason:      'manual' | 'drawer-edit' | 'replace'
+    destination: string
+    nights:      number
+  }) {
+    metaTrackCustom('RegenerateRequested', params)
+    gaTrack('regenerate_requested', params)
+  },
+
+  /**
    * Unified outbound affiliate click. Covers planner hotels, Smart Finds
    * product cards, day-block booking CTAs, and any future affiliate surface.
    *
