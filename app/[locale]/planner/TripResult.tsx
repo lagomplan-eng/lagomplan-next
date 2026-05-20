@@ -507,26 +507,42 @@ function activeAmount(row: BudgetRow): number {
   return row.actual ?? row.userEst ?? row.aiEst
 }
 
-function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): CheckItem[] {
+function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en'; segments?: TripSegment[] }): CheckItem[] {
   const locale = opts?.locale ?? 'es'
+  const segments = opts?.segments ?? []
+  const isMultiCity = segments.length >= 2
   const checks: CheckItem[] = []
-  const seenHotels = new Set<string>()
   const lastDayN = days.length > 0 ? days[days.length - 1].n : 0
 
-  // Universal pre-trip: book hotel. Always present on overnight trips
-  // (days.length > 1), even if the AI didn't emit per-day hotel items.
-  // Stable ID so done-state survives regenerate.
+  // Pre-trip lodging checks. Single-city → one "Reservar hotel". Multi-city
+  // → one "Reservar hotel · <city>" per segment so the user can mark each
+  // booking separately and see at a glance which segment is still pending.
+  // The per-day hotel-type checks (Confirmar reserva: ...) used to also
+  // surface here, but they duplicated the booking concept with AI-generated
+  // verbose names ("Check-in en Nyhavn", "Llegada y descanso", etc.) —
+  // dropped in favor of one canonical check per stay.
   if (days.length > 1) {
-    checks.push({
-      id:   'pretrip-book-hotel',
-      icon: '🏨',
-      text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
-      done: false,
-    })
+    if (isMultiCity) {
+      segments.forEach((seg, i) => {
+        const cityLabel = titleCaseCity(seg.destination)
+        checks.push({
+          id:   `pretrip-book-hotel-seg-${i}`,
+          icon: '🏨',
+          text: locale === 'en' ? `Book hotel · ${cityLabel}` : `Reservar hotel · ${cityLabel}`,
+          done: false,
+        })
+      })
+    } else {
+      checks.push({
+        id:   'pretrip-book-hotel',
+        icon: '🏨',
+        text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
+        done: false,
+      })
+    }
     // Universal pre-trip: pack. Without this auto-inject the `Listos`
     // milestone in the Readiness Bar perpetually shows as n/a (dimmed)
-    // because the AI rarely emits packing checks on its own. Same
-    // pattern as the hotel auto-inject — stable ID, locale-aware text.
+    // because the AI rarely emits packing checks on its own.
     checks.push({
       id:   'pretrip-pack',
       icon: '🧳',
@@ -540,19 +556,11 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
       const id = `check-${item.id}`   // stable: tied to item.id, not position
       switch (item.type) {
         case 'hotel':
-          // Skip check-out / departure items — the user never "confirms"
-          // a checkout the way they confirm a check-in. Check-in (or the
-          // pre-trip "Reservar hotel" auto-inject) is the actionable
-          // booking moment. The block still renders in the day card; we
-          // just don't add a check for it. Matches ES + EN keywords.
-          if (/check[\s-]?out|checkout|salida del hotel|salida hotel|departure|almacenamiento de equipaje|luggage storage/i.test(item.name)) {
-            break
-          }
-          // Deduplicate: same hotel across multiple days → one pre-trip confirmation
-          if (!seenHotels.has(item.name)) {
-            seenHotels.add(item.name)
-            checks.push({ id, icon: '🏨', text: `Confirmar reserva: ${item.name}`, done: false })
-          }
+          // Hotel-type blocks (check-in, check-out, descanso, etc.) no longer
+          // generate per-day checks — the pre-trip "Reservar hotel · <city>"
+          // injects above are the single canonical booking action per stay.
+          // The block still renders in the day card with its time and
+          // description.
           break
         case 'transfer':
           if (day.n === 1 || day.n === lastDayN) {
@@ -586,12 +594,13 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
 // the AI emits a new item, which is the correct outcome for activity-level
 // confirmations that no longer exist.
 function reconcileDoneChecks(
-  prev:   Set<string>,
-  days:   Day[],
-  locale: 'es' | 'en',
+  prev:    Set<string>,
+  days:    Day[],
+  locale:  'es' | 'en',
+  segments?: TripSegment[],
 ): Set<string> {
   if (prev.size === 0) return prev
-  const stillValid = new Set(deriveChecksFromDays(days, { locale }).map(c => c.id))
+  const stillValid = new Set(deriveChecksFromDays(days, { locale, segments }).map(c => c.id))
   const next = new Set<string>()
   prev.forEach(id => { if (stillValid.has(id)) next.add(id) })
   return next
@@ -1988,7 +1997,7 @@ export default function TripResult({ params }: Props) {
       // Keep done-state for checks that still exist after regen. Universal
       // pre-trip checks (stable IDs) survive; per-day item confirmations
       // drop because the new AI items have fresh IDs.
-      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en', segments))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       const newLabel = `v${nextIdx + 1}${prefPace ? ' · ' + (PACE_DISPLAY[prefPace] ?? prefPace) : ''}`
@@ -2334,7 +2343,7 @@ export default function TripResult({ params }: Props) {
       setDays(normalized.days); setAccommodations(normalized.accommodations)
       // Same reconciliation as regenerate() — universal checks survive,
       // per-day item confirmations drop.
-      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en', segments))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       // Write fresh cache so a subsequent login redirect restores this new trip
@@ -2648,8 +2657,8 @@ export default function TripResult({ params }: Props) {
 
   // ── Derived checklist — always reflects current days state ──────────────────
   const checks = useMemo(
-    () => deriveChecksFromDays(days, { locale: locale === 'en' ? 'en' : 'es' }).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
-    [days, doneCheckIds, locale],
+    () => deriveChecksFromDays(days, { locale: locale === 'en' ? 'en' : 'es', segments }).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
+    [days, doneCheckIds, locale, segments],
   )
 
   // ── Computed values ──────────────────────────────────────────────────────────
