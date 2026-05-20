@@ -29,6 +29,14 @@ interface NextCheckInfo {
   id:   string
   text: string
   icon: string
+  /** Which milestone this check belongs to. Drives the "NEXT IN
+   *  [milestone]" eyebrow above the next-step block when present. */
+  milestoneLabel?: string
+  /** True when this check is the first pending check of its milestone
+   *  AND no checks in that milestone are done yet — i.e., the user is
+   *  starting a brand-new section of the trip prep. Surfaces a brief
+   *  "Now let's tackle X" line when true. */
+  startsMilestone?: boolean
 }
 
 interface Props {
@@ -42,18 +50,70 @@ interface Props {
   nextCheck:    NextCheckInfo | null
   daysCount:    number
   locale:       'es' | 'en'
+  /** ISO YYYY-MM-DD trip start date. Drives the time-to-trip urgency line
+   *  under the readiness %. Optional — bar omits the line if absent or
+   *  unparseable. */
+  tripStart?:   string
+  /** ISO YYYY-MM-DD trip end date. Used to detect "trip in progress" and
+   *  "trip ended" states for the urgency line. */
+  tripEnd?:     string
   /** Toggle handler — the bar calls this with the next check's ID when the
    *  user clicks the CTA (mark done) or Deshacer (undo). Same handler
    *  handles both directions; toggleCheck in TripResult is idempotent. */
   onToggleCheck?: (checkId: string) => void
 }
 
+// Days from today to a target ISO date. Uses UTC midnight to avoid the
+// "off by one when the user is past midnight in their local timezone but
+// the server hasn't ticked over" issue. Returns null on malformed input.
+function daysFromToday(iso: string | undefined): number | null {
+  if (!iso) return null
+  const target = new Date(`${iso}T00:00:00Z`).getTime()
+  if (Number.isNaN(target)) return null
+  const now = new Date()
+  const today = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate())
+  return Math.round((target - today) / 86_400_000)
+}
+
 export default function TripReadinessBar({
   readinessPct, totalChecks, doneChecks, pendingCount,
-  milestones, nextCheck, daysCount, locale, onToggleCheck,
+  milestones, nextCheck, daysCount, locale, tripStart, tripEnd, onToggleCheck,
 }: Props) {
   const isES = locale === 'es'
   const [mobileOpen, setMobileOpen] = useState(false)
+
+  // Time-to-trip urgency. Three windows:
+  //   future (≤ 14 days): "Sales en N días" → "Sales mañana" → "Hoy"
+  //   in-progress (start ≤ today ≤ end): "Estás viajando"
+  //   past:    suppressed entirely (the bar of a finished trip shouldn't
+  //            keep harping; the user is looking at a memory at that point)
+  // ≤ 3 days → coral accent (#E1615B, same as the CTA), nudging without
+  // shouting. Otherwise sage tint so it reads as informational.
+  const daysToStart = daysFromToday(tripStart)
+  const daysToEnd   = daysFromToday(tripEnd)
+  const urgency = (() => {
+    if (daysToStart === null) return null
+    // Trip ended: don't show urgency. The page is essentially a record at
+    // this point.
+    if (daysToEnd !== null && daysToEnd < 0) return null
+    // In-progress: between start and end (inclusive).
+    if (daysToStart <= 0 && (daysToEnd === null || daysToEnd >= 0)) {
+      if (daysToStart === 0) {
+        return { text: isES ? '¡Hoy es el día!' : 'Today is the day!', tone: 'urgent' as const }
+      }
+      return { text: isES ? 'Estás viajando' : 'You’re traveling', tone: 'info' as const }
+    }
+    // Future, within the 14-day window.
+    if (daysToStart > 14) return null
+    if (daysToStart === 1) {
+      return { text: isES ? 'Sales mañana' : 'You leave tomorrow', tone: 'urgent' as const }
+    }
+    if (daysToStart <= 3) {
+      return { text: isES ? `Sales en ${daysToStart} días` : `You leave in ${daysToStart} days`, tone: 'urgent' as const }
+    }
+    return { text: isES ? `Sales en ${daysToStart} días` : `You leave in ${daysToStart} days`, tone: 'info' as const }
+  })()
+  const urgencyColor = urgency?.tone === 'urgent' ? '#E1615B' : '#A8C4BE'
 
   // Inline-undo banner: when the user marks the next check done, the right
   // zone shifts to a "✓ Reservado · Deshacer" affordance for 4 s. The
@@ -131,7 +191,7 @@ export default function TripReadinessBar({
       {/* ─────────────────────────── DESKTOP (≥820 px) ─────────────────── */}
       <div className="hidden min-[820px]:flex items-center h-[64px] gap-6">
 
-        {/* LEFT — readiness % + sub + progress bar */}
+        {/* LEFT — readiness % + sub + progress bar + urgency strip */}
         <div className="flex flex-col justify-center min-w-[220px] max-w-[280px] pr-5 border-r border-white/10">
           <div className="font-sans text-[13px] font-semibold text-white leading-tight">
             {headline}
@@ -145,6 +205,15 @@ export default function TripReadinessBar({
                 className="h-full bg-[#A8C4BE] rounded-full transition-all duration-700"
                 style={{ width: `${readinessPct}%` }}
               />
+            </div>
+          )}
+          {urgency && (
+            <div
+              className="font-mono text-[10px] font-medium tracking-[.08em] uppercase mt-[6px] flex items-center gap-1.5"
+              style={{ color: urgencyColor }}
+            >
+              <span className="inline-block w-1 h-1 rounded-full" style={{ background: urgencyColor }} aria-hidden />
+              {urgency.text}
             </div>
           )}
         </div>
@@ -185,12 +254,23 @@ export default function TripReadinessBar({
           <div className="flex items-center gap-3 pl-5 border-l border-white/10 shrink-0 max-w-[340px]">
             <div className="flex flex-col text-right min-w-0">
               <span className="font-mono text-[9px] font-medium tracking-[.14em] uppercase text-white/40">
-                {nextLabel}
+                {/* "NEXT" / "SIGUIENTE" → "NEXT · HOSPEDAJE" when we know
+                    which milestone bucket the next check belongs to.
+                    Lets the user see *where* they are in the journey
+                    without breaking the bar's compact layout. */}
+                {nextCheck.milestoneLabel
+                  ? `${nextLabel} · ${nextCheck.milestoneLabel}`
+                  : nextLabel}
               </span>
               <span className="font-sans text-[12px] text-white/85 truncate flex items-center gap-1.5 justify-end mt-[2px]">
                 <span aria-hidden>{nextCheck.icon}</span>
                 <span className="truncate">{nextCheck.text}</span>
               </span>
+              {nextCheck.startsMilestone && nextCheck.milestoneLabel && (
+                <span className="font-mono text-[9px] font-medium tracking-[.08em] text-[#A8C4BE] mt-[3px] truncate">
+                  {isES ? `Empieza con ${nextCheck.milestoneLabel}` : `Starting on ${nextCheck.milestoneLabel}`}
+                </span>
+              )}
             </div>
             <button
               type="button"
@@ -252,6 +332,15 @@ export default function TripReadinessBar({
                     className="h-full bg-[#A8C4BE] rounded-full transition-all duration-700"
                     style={{ width: `${readinessPct}%` }}
                   />
+                </div>
+              )}
+              {urgency && (
+                <div
+                  className="font-mono text-[10px] font-medium tracking-[.08em] uppercase mt-2 flex items-center gap-1.5"
+                  style={{ color: urgencyColor }}
+                >
+                  <span className="inline-block w-1 h-1 rounded-full" style={{ background: urgencyColor }} aria-hidden />
+                  {urgency.text}
                 </div>
               )}
             </div>

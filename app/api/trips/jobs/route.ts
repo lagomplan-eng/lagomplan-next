@@ -70,13 +70,28 @@ export async function POST(req: NextRequest) {
     }
 
     const durationDays = Math.min(Math.max(Number((body as any)?.duration_days) || 1, 1), 30)
-    // Segments of up to 10 days each. The worker generates one segment per
-    // generate-trip call. Was `chunksTotal = durationDays` (1 day per chunk),
-    // which made the self-reinvoke chain length 30 for a 30-day trip; the new
-    // shape is 3 segments for 30 days, 10x shorter chain, much more reliable.
-    // Keep this constant in sync with SEGMENT_DAYS in the worker.
+    // Multi-city: one chunk per SUB-CHUNK of a segment (long segments split
+    // into multiple Edge Fn calls). Each chunk calls generate-trip as a
+    // clean single-city request for that sub-range, and the worker assembles
+    // per-sub-chunk days + first-of-each-segment accommodations into the
+    // final trip_data. This avoids both (a) the multi-city megaprompt and
+    // (b) over-long single-segment calls blowing the Edge Fn's memory/time
+    // budget.
+    //
+    // Single-city: chunks of up to SEGMENT_DAYS each.
+    //
+    // Keep SEGMENT_DAYS + the per-segment sub-chunking math in sync with the
+    // worker's planMultiCityChunks(). The worker is the source of truth for
+    // chunk content; this computation just sizes chunks_total to match.
     const SEGMENT_DAYS = 10
-    const chunksTotal  = Math.ceil(durationDays / SEGMENT_DAYS)
+    const bodySegments = Array.isArray((body as any)?.segments) ? (body as any).segments : []
+    const isMultiCity  = bodySegments.length >= 2
+    const chunksTotal  = isMultiCity
+      ? bodySegments.reduce((sum: number, s: any) => {
+          const segDays = Math.max(1, (Number(s?.nights) || 0) + 1)
+          return sum + Math.ceil(segDays / SEGMENT_DAYS)
+        }, 0)
+      : Math.ceil(durationDays / SEGMENT_DAYS)
 
     const admin = getSupabaseAdmin()
 

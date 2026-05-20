@@ -147,3 +147,63 @@ export function computeMilestones({ daysCount, checks }: ComputeArgs): Milestone
     }
   })
 }
+
+// ── Next-check recommender ──────────────────────────────────────────────────
+// Returns the next check the user should tackle, ordered by MILESTONE
+// SEQUENCE (Itinerario → Hospedaje → Traslados → Reservas → Listos) rather
+// than by the flat insertion order of `checks`. This matters because
+// deriveChecksFromDays auto-injects "Empacar maleta" right after
+// "Reservar hotel" in the flat list — a naive `checks.find(!done)` after
+// the hotel is booked would push the user to pack before they've booked
+// transport or any restaurants, which is the wrong real-world sequence.
+//
+// Algorithm: walk milestones in their tracker order; for each milestone
+// that has any pending check, return that check (preserving the within-
+// milestone ordering deriveChecksFromDays produced — typically day-order).
+// Itinerario is virtual (no checks), so skipped.
+//
+// Returns the first matched CheckInput, or null when every check is done.
+export interface NextCheckResult {
+  check:        CheckInput
+  /** Which milestone bucket this check belongs to — useful for
+   *  contextual copy on the bar ("Next up in Hospedaje" etc.). */
+  milestoneId:  Exclude<MilestoneId, 'itinerario'>
+  /** True when this check is the FIRST pending check of its milestone
+   *  and no checks in that milestone are done yet — i.e., the user is
+   *  starting a brand-new milestone. UI can use this to show a "Now
+   *  let's tackle X" transition note. */
+  startsMilestone: boolean
+}
+
+export function selectNextCheck(checks: CheckInput[]): NextCheckResult | null {
+  // Same bucketing as computeMilestones — could share but the perf hit
+  // is negligible and keeping selectNextCheck self-contained makes it
+  // easier to use independently in tests.
+  const buckets: Record<Exclude<MilestoneId, 'itinerario'>, CheckInput[]> = {
+    hospedaje: [],
+    traslados: [],
+    reservas:  [],
+    listos:    [],
+  }
+  for (const c of checks) {
+    const id = categorizeCheck(c)
+    if (id !== 'itinerario') buckets[id].push(c)
+  }
+
+  const order: Exclude<MilestoneId, 'itinerario'>[] =
+    ['hospedaje', 'traslados', 'reservas', 'listos']
+
+  for (const id of order) {
+    const matched = buckets[id]
+    if (matched.length === 0) continue
+    const pending = matched.find(c => !c.done)
+    if (!pending) continue  // entire milestone done — advance to next
+    const doneInThisMilestone = matched.some(c => c.done)
+    return {
+      check:           pending,
+      milestoneId:     id,
+      startsMilestone: !doneInThisMilestone,
+    }
+  }
+  return null
+}

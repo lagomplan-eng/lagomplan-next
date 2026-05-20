@@ -168,11 +168,31 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
   const min     = startOfDay(minDate ?? new Date())
   const now     = new Date()
 
-  const [vy, setVy] = useState(now.getFullYear())
-  const [vm, setVm] = useState(now.getMonth())
+  // When the picker is seeded with a start date (multi-city: Segment 2+
+  // pre-fills start = previous segment's end), open the calendar at the
+  // start's month — not today's month — so the user sees their pre-filled
+  // value and only has to pick the end. Same logic for `phase`: if start
+  // is already set, the next click is the END, not a fresh start.
+  const initialAnchor = value.start ?? now
+  const initialPhase: 'start' | 'end' = value.start && !value.end ? 'end' : 'start'
+
+  const [vy, setVy] = useState(initialAnchor.getFullYear())
+  const [vm, setVm] = useState(initialAnchor.getMonth())
   const [hover,  setHover]  = useState<Date | null>(null)
-  const [phase,  setPhase]  = useState<'start' | 'end'>('start')
+  const [phase,  setPhase]  = useState<'start' | 'end'>(initialPhase)
   const [open,   setOpen]   = useState(false)
+
+  // Sync view + phase when value changes externally (parent re-seeds dates
+  // after the user opens a fresh segment row). Without this, a second
+  // `+ Add city` click on an existing picker that already navigated away
+  // wouldn't re-anchor to the new seed.
+  useEffect(() => {
+    if (value.start && !value.end) {
+      setVy(value.start.getFullYear())
+      setVm(value.start.getMonth())
+      setPhase('end')
+    }
+  }, [value.start?.getTime()])
 
   const popupRef = useRef<HTMLDivElement>(null)
   const wrapRef  = useRef<HTMLDivElement>(null)
@@ -290,6 +310,12 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
               {value.nights} {value.nights === 1 ? 'noche' : 'noches'}
             </span>
           </>
+        ) : value.start ? (
+          // Start is set but end isn't — multi-city seeds Segment 2+ this way.
+          // Show the start so the pre-filled value is visible at a glance.
+          <span className="flex-1 text-[#0F1A16]">
+            {fmtDate(value.start)} <span className="text-[#7A7A76]">— Elige regreso</span>
+          </span>
         ) : (
           <span className="flex-1 text-[#BDBDBD]">Selecciona tus fechas</span>
         )}

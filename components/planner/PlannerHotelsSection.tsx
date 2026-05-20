@@ -54,6 +54,13 @@ interface Props {
    *  daysCount - 1 to keep the section visible. Without this, multi-city
    *  trips like "Buenos Aires → Uruguay" silently lose their hotel CTA. */
   daysCount?:       number
+  /** Multi-city signal. When true, the section header swaps from "N nights
+   *  in CityName" (single-city) to a chain-aware variant ("N nights · 3-
+   *  city journey") since anchoring to ctx.destination misrepresents trips
+   *  that span multiple cities. The per-card content already carries the
+   *  correct city. */
+  isMultiCity?:     boolean
+  segmentCount?:    number
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -89,7 +96,7 @@ const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
 
 const PRICE_TIER_LABEL_EN = PRICE_TIER_LABEL_ES
 
-export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked, daysCount }: Props) {
+export default function PlannerHotelsSection({ tripId, accommodations, ctx, hospedajeBooked, daysCount, isMultiCity, segmentCount }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
 
@@ -134,11 +141,20 @@ export default function PlannerHotelsSection({ tripId, accommodations, ctx, hosp
   const sectionHeadlinePlural   = (n: number) => locale === 'en'
     ? `${n} nights in ${cityDisplay}`
     : `${n} noches en ${cityDisplay}`
+  // Multi-city: drop duration/city anchor from the headline entirely. The
+  // hero already shows both (chip row + date pill), and each card carries
+  // its own city + nights — repeating it here adds noise without info.
+  // The section just needs to say what's in it ("a hotel per leg").
+  const sectionHeadlineMultiCity = locale === 'en'
+    ? 'A stay for each city'
+    : 'Un hospedaje por tramo'
   // Use effectiveNights here too so the headline reads "4 noches en X"
   // rather than "0 noches en X" on the multi-city ctx.nights=0 path.
-  const sectionHeadline = effectiveNights === 1
-    ? sectionHeadlineSingular(effectiveNights)
-    : sectionHeadlinePlural(effectiveNights)
+  const sectionHeadline = isMultiCity
+    ? sectionHeadlineMultiCity
+    : effectiveNights === 1
+      ? sectionHeadlineSingular(effectiveNights)
+      : sectionHeadlinePlural(effectiveNights)
 
   // Booked-aware CTA. Default = trip-progression action; booked state =
   // a softer "view your booking" affordance so the card doesn't keep

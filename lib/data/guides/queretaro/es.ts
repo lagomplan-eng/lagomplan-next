@@ -119,6 +119,7 @@ export const guide: FlatGuide = {
       description: 'Una joya frente al Templo de San Agustín. Sus habitaciones son eclécticas y llenas de arte. El patio central es el lugar perfecto para el primer café del día.',
       tag: 'Arte y sofisticación',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/717u9iT-_f?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
+      archetypes: ['Parejas'],
     },
     {
       name: 'Hotel Danza del Sol',
@@ -127,6 +128,7 @@ export const guide: FlatGuide = {
       description: 'Amplio, con un aire de hacienda renovada y excelente servicio. Ideal si el grupo es grande y buscan comodidad sin complicaciones.',
       tag: 'Confort clásico',
       affiliateUrl: 'https://expedia.stay22.com/lagomplan/1im52898y3?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
+      archetypes: [],
     },
     {
       name: 'Morazul Hotel Boutique',
@@ -135,6 +137,7 @@ export const guide: FlatGuide = {
       description: 'Un refugio diseñado para quienes valoran la atención al detalle, a pasos de los templos más icónicos. Sus áreas exteriores ofrecen ese respiro de calma necesario para procesar la ciudad.',
       tag: 'Servicio curado y ubicación imbatible',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/_fF6NqiDqC?aid=lagomplan&campaign=lagomplan-queretaroamigosestilo&product=allez&habl=false&isinc=false&sid22=nB51ac2dT7PdXnNS&plng=en&pageCategory=travel&lmaID=69b992c248666aca4133dbbe&address=Santiago+de+Quer%C3%A9taro%2C+Qro.%2C+Mexico&source=direct&ref22=https%3A%2F%2Fwww.lagomplan.com%2Fguias%2Fqueretaro-amigos-estilo',
+      archetypes: ['Parejas'],
     },
   ],
 

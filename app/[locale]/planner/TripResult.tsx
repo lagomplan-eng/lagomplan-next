@@ -20,7 +20,7 @@ import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import TripReadinessBar from '../../../components/planner/TripReadinessBar'
 import StatusPill from '../../../components/planner/StatusPill'
-import { computeMilestones } from '../../../lib/planner/milestones'
+import { computeMilestones, selectNextCheck } from '../../../lib/planner/milestones'
 import {
   type TripSegment,
   deserializeSegments,
@@ -419,6 +419,37 @@ function normalizeCheckItem(raw: any, index: number): CheckItem {
   }
 }
 
+// Pull a numeric estimate from a value of arbitrary shape. The AI emits the
+// schema's `{label, range}` shape (range = string like "$4,000 - $6,000"),
+// but legacy outputs / fallbacks also surface plain numbers or amount keys.
+// Strategy: try every shape we've seen, return 0 when nothing parseable.
+function extractBudgetAmount(val: any): number {
+  if (val == null) return 0
+  if (typeof val === 'number') return val
+  if (typeof val === 'string') {
+    // Range string like "$4,000 - $6,000 USD" — take the UPPER bound as the
+    // estimate (most travelers pad their budget; the upper figure is the
+    // honest planning number). Falls through to the first numeric block if
+    // there's no range separator.
+    const numbers = val
+      .replace(/,/g, '')
+      .match(/\d+(\.\d+)?/g)
+      ?.map(Number)
+      .filter(n => !isNaN(n))
+    if (!numbers || numbers.length === 0) return 0
+    return Math.max(...numbers)
+  }
+  if (typeof val === 'object') {
+    // Schema shape: { label: "...", range: "$X - $Y" }
+    if (typeof val.range === 'string') return extractBudgetAmount(val.range)
+    // Other nested shapes we've seen
+    return extractBudgetAmount(
+      val.amount ?? val.cost ?? val.price ?? val.total ?? val.value ?? val.upper ?? null
+    )
+  }
+  return 0
+}
+
 function normalizeBudgetRow(raw: any, index: number): BudgetRow {
   // Already-normalized rows loaded from DB (autosave round-trip)
   if (typeof raw?.aiEst === 'number') {
@@ -434,11 +465,10 @@ function normalizeBudgetRow(raw: any, index: number): BudgetRow {
       actual:   typeof raw.actual  === 'number' ? raw.actual  : null,
     }
   }
-  // Raw AI response format
-  const rawAmount = raw?.amount ?? raw?.cost ?? raw?.price ?? raw?.total ?? 0
-  const aiEst = typeof rawAmount === 'number'
-    ? rawAmount
-    : parseFloat(String(rawAmount).replace(/[^0-9.]/g, '')) || 0
+  // Raw AI response: try common amount keys first; if any of them holds an
+  // object with `range`, extractBudgetAmount unwraps it.
+  const rawAmount = raw?.amount ?? raw?.cost ?? raw?.price ?? raw?.total ?? raw?.range ?? raw
+  const aiEst = extractBudgetAmount(rawAmount)
   return {
     id:       raw?.id       ?? `budget-${index}`,
     label:    raw?.label    ?? raw?.name ?? raw?.title ?? raw?.item ?? `Item ${index + 1}`,
@@ -477,26 +507,42 @@ function activeAmount(row: BudgetRow): number {
   return row.actual ?? row.userEst ?? row.aiEst
 }
 
-function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): CheckItem[] {
+function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en'; segments?: TripSegment[] }): CheckItem[] {
   const locale = opts?.locale ?? 'es'
+  const segments = opts?.segments ?? []
+  const isMultiCity = segments.length >= 2
   const checks: CheckItem[] = []
-  const seenHotels = new Set<string>()
   const lastDayN = days.length > 0 ? days[days.length - 1].n : 0
 
-  // Universal pre-trip: book hotel. Always present on overnight trips
-  // (days.length > 1), even if the AI didn't emit per-day hotel items.
-  // Stable ID so done-state survives regenerate.
+  // Pre-trip lodging checks. Single-city → one "Reservar hotel". Multi-city
+  // → one "Reservar hotel · <city>" per segment so the user can mark each
+  // booking separately and see at a glance which segment is still pending.
+  // The per-day hotel-type checks (Confirmar reserva: ...) used to also
+  // surface here, but they duplicated the booking concept with AI-generated
+  // verbose names ("Check-in en Nyhavn", "Llegada y descanso", etc.) —
+  // dropped in favor of one canonical check per stay.
   if (days.length > 1) {
-    checks.push({
-      id:   'pretrip-book-hotel',
-      icon: '🏨',
-      text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
-      done: false,
-    })
+    if (isMultiCity) {
+      segments.forEach((seg, i) => {
+        const cityLabel = titleCaseCity(seg.destination)
+        checks.push({
+          id:   `pretrip-book-hotel-seg-${i}`,
+          icon: '🏨',
+          text: locale === 'en' ? `Book hotel · ${cityLabel}` : `Reservar hotel · ${cityLabel}`,
+          done: false,
+        })
+      })
+    } else {
+      checks.push({
+        id:   'pretrip-book-hotel',
+        icon: '🏨',
+        text: locale === 'en' ? 'Book hotel' : 'Reservar hotel',
+        done: false,
+      })
+    }
     // Universal pre-trip: pack. Without this auto-inject the `Listos`
     // milestone in the Readiness Bar perpetually shows as n/a (dimmed)
-    // because the AI rarely emits packing checks on its own. Same
-    // pattern as the hotel auto-inject — stable ID, locale-aware text.
+    // because the AI rarely emits packing checks on its own.
     checks.push({
       id:   'pretrip-pack',
       icon: '🧳',
@@ -510,20 +556,23 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
       const id = `check-${item.id}`   // stable: tied to item.id, not position
       switch (item.type) {
         case 'hotel':
-          // Deduplicate: same hotel across multiple days → one pre-trip confirmation
-          if (!seenHotels.has(item.name)) {
-            seenHotels.add(item.name)
-            checks.push({ id, icon: '🏨', text: `Confirmar reserva: ${item.name}`, done: false })
-          }
+          // Hotel-type blocks (check-in, check-out, descanso, etc.) no longer
+          // generate per-day checks — the pre-trip "Reservar hotel · <city>"
+          // injects above are the single canonical booking action per stay.
+          // The block still renders in the day card with its time and
+          // description.
           break
         case 'transfer':
           if (day.n === 1 || day.n === lastDayN) {
-            // Arrival/departure transfer → pre-trip booking (Antes del viaje)
+            // Arrival/departure transfer → pre-trip booking. These are the
+            // ones the user actually books in advance (airport pickup,
+            // return ride, intercity flight).
             checks.push({ id, icon: '🚗', text: `Reservar transfer: ${item.name}`, done: false })
-          } else {
-            // Mid-trip transfer → day-specific
-            checks.push({ id, icon: '🚗', text: `Confirmar transfer: ${item.name}`, done: false, day: day.n })
           }
+          // Mid-trip transfers (excursion shuttles, in-city Ubers, returns
+          // from a day trip) are not pre-bookable in any meaningful sense —
+          // the user hails them or arranges in the moment. They still
+          // render in the day block; we just don't surface them as checks.
           break
         case 'tour':
           checks.push({ id, icon: '🎫', text: `Reservar: ${item.name}`, done: false, day: day.n })
@@ -545,12 +594,13 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
 // the AI emits a new item, which is the correct outcome for activity-level
 // confirmations that no longer exist.
 function reconcileDoneChecks(
-  prev:   Set<string>,
-  days:   Day[],
-  locale: 'es' | 'en',
+  prev:    Set<string>,
+  days:    Day[],
+  locale:  'es' | 'en',
+  segments?: TripSegment[],
 ): Set<string> {
   if (prev.size === 0) return prev
-  const stillValid = new Set(deriveChecksFromDays(days, { locale }).map(c => c.id))
+  const stillValid = new Set(deriveChecksFromDays(days, { locale, segments }).map(c => c.id))
   const next = new Set<string>()
   prev.forEach(id => { if (stillValid.has(id)) next.add(id) })
   return next
@@ -928,7 +978,12 @@ export default function TripResult({ params }: Props) {
   const [prefOpen, setPrefOpen]             = useState(false)
   const [collapsedDays, setCollapsedDays]   = useState<Set<number>>(new Set())
   const [collapsedCards, setCollapsedCards] = useState<Set<string>>(new Set())
+  // For sidebar "Por día" — expanded by default on short trips, collapsed
+  // by default on longer trips so a 30-day chain doesn't paint a 100+ row
+  // wall. One-shot init via a ref guard so user edits to the open/closed
+  // state aren't trampled by subsequent renders.
   const [collapsedDiaGroups, setCollapsedDiaGroups] = useState<Set<number>>(new Set())
+  const initialCollapsedDiaSetupRef = useRef(false)
   const [toast, setToast]     = useState<string | null>(null)
   const [packedSet, setPackedSet] = useState<Set<number>>(new Set())
   const [newPackingItem, setNewPackingItem] = useState('')
@@ -1052,6 +1107,15 @@ export default function TripResult({ params }: Props) {
   // is already displayed without having to depend on rawTripData (which would
   // cause the effect to re-run on every regeneration).
   const rawTripDataRef = useRef<any>(null)
+
+  // Fingerprint of the URL inputs that produced the current rawTripData. The
+  // generate effect re-runs on auth-state transitions (authToken changes),
+  // and we DON'T want to regenerate then — but we DO want to regenerate when
+  // navigation changes destination/dates/segments. Comparing fingerprints
+  // distinguishes the two: same fingerprint = no-op, different = regenerate
+  // and clear the stale state so the page doesn't render the previous trip
+  // under the new URL.
+  const lastGeneratedInputsRef = useRef<string | null>(null)
 
   // ── Access resolution gate ────────────────────────────────────────────────────
   // True once we know whether the user can generate (auth resolved + credits loaded).
@@ -1228,10 +1292,45 @@ export default function TripResult({ params }: Props) {
       // Skip AI generation when loading an existing trip from DB
       if (savedTripId) return
 
-      // Skip if a trip is already displayed (post-generation URL update via
-      // history.replaceState doesn't flip savedTripId, so guard on state ref).
-      // Regenerations go through their own handlers, not this effect.
-      if (rawTripDataRef.current) return
+      // Fingerprint of the current URL inputs. If rawTripData already exists
+      // AND was generated for these exact inputs, skip — this handles the
+      // auth-state-transition re-runs without re-generating. If the inputs
+      // CHANGED (user submitted a new trip from the form), we proceed —
+      // clearing the stale state below so the loading branch renders cleanly
+      // instead of showing the previous trip's content under the new URL.
+      const currentFp = JSON.stringify({
+        destination, origin, start, end, nights, traveler, interests, pace, budget,
+        segments: segmentsParam,
+      })
+      if (rawTripDataRef.current && lastGeneratedInputsRef.current === currentFp) {
+        return
+      }
+
+      // Stale trip from a prior navigation — clear before proceeding so the
+      // page doesn't render the previous trip's title / days / hotels under
+      // the new URL params during the AI call.
+      //
+      // Flip loading + loadingKind to true ALONGSIDE the clear — not later,
+      // after the auth guards. If we waited, the auth guards' early-returns
+      // (while authedUser transitions or credits re-resolve) would briefly
+      // leave the page on `loading=false` + cleared state → empty chrome
+      // visible instead of the GenerationSurface. With loading=true here,
+      // the loading branch renders immediately and stays put until the next
+      // effect run picks up where this one left off.
+      if (rawTripDataRef.current) {
+        setRawTripData(null)
+        setDays([])
+        setAccommodations([])
+        setTripTitle('')
+        setTripSubtitle('')
+        setPacking([])
+        setBudgetRows([])
+        setVersions([])
+        setTripId(null)
+        setDoneCheckIds(new Set())
+        setLoading(true)
+        setLoadingKind('generating')
+      }
 
       // ── Auth / generation-count guard ─────────────────────────────────
       // authedUser is undefined while the session is still loading; wait for it.
@@ -1273,6 +1372,7 @@ export default function TripResult({ params }: Props) {
               console.log('[TripResult] cache hit — restoring trip, skipping AI call')
               const tripDataRaw = cached.tripData
               setRawTripData(tripDataRaw)
+              lastGeneratedInputsRef.current = currentFp
               const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
               setTripTitle(normalized.title)
               setTripSubtitle(normalized.subtitle)
@@ -1309,7 +1409,7 @@ export default function TripResult({ params }: Props) {
             : prefTraveler === 'amigos'
             ? { group_count: prefGroupCount }
             : undefined
-        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined }
+        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined, locale }
 
         // Abort any in-flight generation from a prior effect run (auth state
         // transitions can retrigger this effect while the first fetch is still
@@ -1329,7 +1429,11 @@ export default function TripResult({ params }: Props) {
         // Route long trips through the async job pipeline. Short trips stay
         // on the synchronous endpoint. The async path requires auth (anon
         // users always use sync — the jobs endpoint returns 401 for them).
-        const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+        // Multi-city trips ALWAYS go through async (when authed): the worker
+        // is segment-aware and chunks one segment per call, which avoids the
+        // single-call resource limits multi-city megaprompts hit.
+        const isMultiCityTrip = segments.length > 0
+        const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || isMultiCityTrip)
         setIsAsyncPath(useAsync)
 
         console.log('[TripResult] POST payload:', JSON.stringify(payload), 'async:', useAsync)
@@ -1382,6 +1486,7 @@ export default function TripResult({ params }: Props) {
         sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
 
         setRawTripData(tripDataRaw)
+        lastGeneratedInputsRef.current = currentFp
         const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
         setTripTitle(normalized.title)
         setTripSubtitle(normalized.subtitle)
@@ -1843,12 +1948,14 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
         segments: segments.length > 0 ? segments : undefined,
+        locale,
       }
 
       // Long-trip regen routes through async (same gate as initial-gen) — the
       // sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT for
-      // anything beyond ~14 days.
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      // anything beyond ~14 days. Multi-city ALWAYS uses async (segment-aware
+      // chunking).
+      const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
       const previousTripId = tripId   // capture before any setTripId mutation
 
       let tripDataRaw: any = null
@@ -1900,7 +2007,7 @@ export default function TripResult({ params }: Props) {
       // Keep done-state for checks that still exist after regen. Universal
       // pre-trip checks (stable IDs) survive; per-day item confirmations
       // drop because the new AI items have fresh IDs.
-      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en', segments))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       const newLabel = `v${nextIdx + 1}${prefPace ? ' · ' + (PACE_DISPLAY[prefPace] ?? prefPace) : ''}`
@@ -2188,12 +2295,13 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
         segments: segments.length > 0 ? segments : undefined,
+        locale,
       }
 
       // Long-trip replace routes through async (same gate as initial-gen) —
       // the sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT
-      // for anything beyond ~14 days.
-      const useAsync = authedUser !== null && duration_days > ASYNC_THRESHOLD
+      // for anything beyond ~14 days. Multi-city ALWAYS uses async.
+      const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
       // Capture the predecessor before any setTripId mutation — needed for
       // the "delete the old row after the new one is saved" cleanup step.
       const previousTripId = tripId
@@ -2245,7 +2353,7 @@ export default function TripResult({ params }: Props) {
       setDays(normalized.days); setAccommodations(normalized.accommodations)
       // Same reconciliation as regenerate() — universal checks survive,
       // per-day item confirmations drop.
-      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en'))
+      setDoneCheckIds(prev => reconcileDoneChecks(prev, normalized.days, locale === 'es' ? 'es' : 'en', segments))
       setBudgetRows(normalized.budgetRows)
       setPacking(normalized.packing)
       // Write fresh cache so a subsequent login redirect restores this new trip
@@ -2559,8 +2667,8 @@ export default function TripResult({ params }: Props) {
 
   // ── Derived checklist — always reflects current days state ──────────────────
   const checks = useMemo(
-    () => deriveChecksFromDays(days, { locale: locale === 'en' ? 'en' : 'es' }).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
-    [days, doneCheckIds, locale],
+    () => deriveChecksFromDays(days, { locale: locale === 'en' ? 'en' : 'es', segments }).map(c => ({ ...c, done: doneCheckIds.has(c.id) })),
+    [days, doneCheckIds, locale, segments],
   )
 
   // ── Computed values ──────────────────────────────────────────────────────────
@@ -2603,9 +2711,37 @@ export default function TripResult({ params }: Props) {
     }),
     [days.length, checks],
   )
-  const nextCheck   = checks.find(c => !c.done)
+  // Milestone-ordered next-check recommender (Phase 1.5). Walks milestones
+  // in tracker order so the user is nudged through Hospedaje → Traslados →
+  // Reservas → Listos instead of being told to pack the bag before the
+  // restaurants are booked.
+  const nextRec = useMemo(
+    () => selectNextCheck(checks.map(c => ({ id: c.id, text: c.text, done: c.done, icon: c.icon }))),
+    [checks],
+  )
+  const nextCheck = nextRec
+    ? checks.find(c => c.id === nextRec.check.id)
+    : undefined
   const checksBefore = checks.filter(c => !c.day)
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
+
+  // Trip length threshold for default-collapsing the sidebar's "Por día"
+  // section. Short trips stay fully expanded; longer trips start with
+  // Day 1 open + the rest collapsed so the user has an entry point but
+  // the sidebar still fits on screen. Fires once when checks first
+  // arrive — subsequent user toggles win.
+  const COLLAPSE_DAY_GROUPS_THRESHOLD = 7
+  useEffect(() => {
+    if (initialCollapsedDiaSetupRef.current) return
+    if (dayNums.length === 0) return  // wait for checks to populate
+    initialCollapsedDiaSetupRef.current = true
+    if (dayNums.length > COLLAPSE_DAY_GROUPS_THRESHOLD) {
+      // Collapse everything except the first day so the user sees one
+      // sample of what's inside without scrolling through a wall.
+      setCollapsedDiaGroups(new Set(dayNums.slice(1)))
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dayNums.length])
 
   const budgetByCategory = budgetRows.reduce<Record<string, BudgetRow[]>>((acc, row) => {
     const cat = row.category || 'Otros'
@@ -3024,15 +3160,53 @@ export default function TripResult({ params }: Props) {
       <div data-trip="pref-drawer" className="border-b border-[#E4DFD8]">
         <div
           style={{
-            maxHeight: prefOpen ? '900px' : '0',
+            // Cap was 900 px — fine for single-city's 6-field grid. Multi-city
+            // adds an inline per-segment editor (up to 5 segment cards, each
+            // ~210 px tall) above the grid, easily blowing past 900 px and
+            // cutting off Cancelar / Actualizar plan at the bottom. Bumped to
+            // a value that comfortably fits the max segment count + all
+            // trip-level fields + the action buttons.
+            maxHeight: prefOpen ? '4000px' : '0',
             opacity: prefOpen ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.4s ease, opacity 0.3s ease',
           }}
         >
           <div className="max-w-[1160px] mx-auto px-7 py-6">
+            {/* Multi-city chain editor — sits ABOVE the single grid when
+                there are ≥2 segments. Each row edits one segment's
+                destination + date range + (optionally) origin. After any
+                change, trip-level pref* state is recomputed from the chain
+                so the payload built by regenerate sees the full span. */}
+            {isMultiCitySegments(segments) && (
+              <MultiCitySegmentEditor
+                segments={segments}
+                tripOrigin={prefOrigin}
+                onChange={(next) => {
+                  setSegments(next)
+                  if (next.length > 0) {
+                    const first = next[0]
+                    const last  = next[next.length - 1]
+                    setPrefStart(first.startDate)
+                    setPrefEnd(last.endDate)
+                    setPrefDest(first.destination)
+                    if (first.origin) setPrefOrigin(first.origin)
+                    if (first.startDate && last.endDate) {
+                      const s = new Date(`${first.startDate}T00:00:00`)
+                      const e = new Date(`${last.endDate}T00:00:00`)
+                      const totalNights = next.reduce((sum, x) => sum + x.nights, 0)
+                      setPrefDateRange({ start: s, end: e, nights: totalNights })
+                    }
+                  }
+                }}
+              />
+            )}
             <div className="grid grid-cols-3 gap-4 max-[600px]:grid-cols-1">
 
+              {/* Origin / Destination / Dates — hidden for multi-city, where
+                  each segment carries its own copy in the editor above. */}
+              {!isMultiCitySegments(segments) && (
+                <>
               {/* Origin — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
@@ -3080,6 +3254,8 @@ export default function TripResult({ params }: Props) {
                   }}
                 />
               </div>
+                </>
+              )}
 
               {/* Pace */}
               <div>
@@ -3286,7 +3462,7 @@ export default function TripResult({ params }: Props) {
           sticky positioning + visual continuity stay intact; bar internals
           now carry the 3-zone command-center layout (% / milestones /
           next-step CTA) on desktop and a collapsed pill on mobile. */}
-      <div data-trip="control-bar" className="bg-[#0F3A33]">
+      <div data-trip="control-bar" className="bg-[#0F3A33] sticky top-[100px] z-40 shadow-[0_2px_8px_rgba(15,58,51,.18)]">
         <div className="max-w-[1160px] mx-auto px-7">
           <TripReadinessBar
             readinessPct={progressPct}
@@ -3294,9 +3470,25 @@ export default function TripResult({ params }: Props) {
             doneChecks={doneChecks}
             pendingCount={pendingCount}
             milestones={milestones}
-            nextCheck={nextCheck ? { id: nextCheck.id, text: nextCheck.text, icon: nextCheck.icon } : null}
+            nextCheck={nextCheck && nextRec ? {
+              id: nextCheck.id,
+              text: nextCheck.text,
+              icon: nextCheck.icon,
+              // Milestone label maps to the bar's current locale via the
+              // labels already on the milestone defs. Cheap lookup.
+              milestoneLabel: (() => {
+                const m = milestones.find(x => x.id === nextRec.milestoneId)
+                return m ? (locale === 'en' ? m.labelEN : m.labelES) : undefined
+              })(),
+              startsMilestone: nextRec.startsMilestone,
+            } : null}
             daysCount={days.length}
             locale={locale === 'en' ? 'en' : 'es'}
+            // Time-to-trip drives the urgency strip under the readiness %.
+            // Falls back to the URL params if the user hasn't moved them in
+            // the drawer yet. Bar omits the strip if either is missing.
+            tripStart={prefStart || start || undefined}
+            tripEnd={prefEnd   || end   || undefined}
             // Bar CTA now marks the next check done directly. The bar shows
             // an inline "✓ Reservado · Deshacer" affordance for 4 s after
             // each click so mis-clicks are recoverable without leaving the
@@ -3373,16 +3565,31 @@ export default function TripResult({ params }: Props) {
               // trips with hydration hiccups), days.length keeps the
               // section from disappearing.
               daysCount={days.length}
+              // Multi-city signal — when present the section renders a
+              // chain-aware header ("N nights · 3-city journey") instead
+              // of anchoring to a single destination.
+              isMultiCity={isMultiCitySegments(segments)}
+              segmentCount={segments.length}
             />
 
-            {/* Section header */}
+            {/* Section header — locale + multi-city aware. For multi-city
+                trips we don't anchor the headline to one city ("30 días en
+                Copenhagen" is misleading when the trip covers Gothenburg
+                and Paris too); show the total + a chain hint instead. */}
             <div className="flex items-baseline justify-between mb-[18px]">
               <div>
                 <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
-                  Tu itinerario
+                  {locale === 'en' ? 'Your itinerary' : 'Tu itinerario'}
                 </div>
                 <div className="font-display text-[19px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                  {nightsNum} {nightsNum === 1 ? 'día' : 'días'} en {titleCaseCity(prefDest) || 'tu destino'}
+                  {isMultiCitySegments(segments)
+                    // Multi-city: hero + chip row already convey duration and
+                    // the chain. The itinerary headline doesn't need to
+                    // restate either — keep it to a section label.
+                    ? (locale === 'en' ? 'Day by day, city by city' : 'Día a día, ciudad por ciudad')
+                    : (locale === 'en'
+                        ? `${nightsNum} ${nightsNum === 1 ? 'day' : 'days'} in ${titleCaseCity(prefDest) || 'your destination'}`
+                        : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} en ${titleCaseCity(prefDest) || 'tu destino'}`)}
                 </div>
               </div>
               <button
@@ -3604,7 +3811,7 @@ export default function TripResult({ params }: Props) {
 
           {/* ── RIGHT: Sidebar cards ─────────────────────────────────────── */}
           <aside data-trip="sidebar" className="flex flex-col gap-2.5">
-            <div className="sticky top-[76px] flex flex-col gap-2.5">
+            <div className="sticky top-[176px] flex flex-col gap-2.5">
 
               {/* Planea tu viaje — checks */}
               <div data-trip="planning" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
@@ -3632,7 +3839,12 @@ export default function TripResult({ params }: Props) {
 
                 <div
                   style={{
-                    maxHeight: collapsedCards.has('planning') ? '0' : '1200px',
+                    // Cap was 1200 px — fine for short trips, but clipped on
+                    // longer trips (30-day chains can have 100+ rows). Bumped
+                    // to a value comfortably above realistic max content so
+                    // the transition still animates from a number rather than
+                    // `none` (which CSS can't animate to from a fixed value).
+                    maxHeight: collapsedCards.has('planning') ? '0' : '12000px',
                     opacity: collapsedCards.has('planning') ? 0 : 1,
                     overflow: 'hidden',
                     transition: 'max-height 0.4s ease, opacity 0.3s',
@@ -3692,7 +3904,12 @@ export default function TripResult({ params }: Props) {
                               </div>
                               <div
                                 style={{
-                                  maxHeight: isCollDia ? '0' : '500px',
+                                  // Cap was 500 px — fine for a typical 4-5
+                                  // check day, but clipped when a day has
+                                  // many bookable blocks (multi-city
+                                  // transition days, packed itineraries).
+                                  // 4000 px easily fits 100+ rows.
+                                  maxHeight: isCollDia ? '0' : '4000px',
                                   opacity: isCollDia ? 0 : 1,
                                   overflow: 'hidden',
                                   transition: 'max-height 0.35s ease, opacity 0.25s',
@@ -4380,5 +4597,153 @@ export default function TripResult({ params }: Props) {
       />
 
     </main>
+  )
+}
+
+// ── Multi-city segment editor ─────────────────────────────────────────────────
+// Lives in the prefs drawer; lets the user edit per-segment destination +
+// dates + (optional) origin after generation, and add / remove segments.
+// Same shape as HeroForm's "+ Añadir ciudad" rows so the drawer is a true
+// post-gen analog of the form.
+
+interface MultiCitySegmentEditorProps {
+  segments:   TripSegment[]
+  /** Trip-level origin (Segment 0's chain-implicit origin if not explicit). */
+  tripOrigin: string
+  onChange:   (next: TripSegment[]) => void
+}
+
+function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySegmentEditorProps) {
+  const MAX_SEGMENTS = 5
+
+  function updateSegment(idx: number, patch: Partial<TripSegment>) {
+    const next = segments.map((s, i) => i === idx ? { ...s, ...patch } : s)
+    onChange(next)
+  }
+
+  function removeSegment(idx: number) {
+    if (segments.length <= 2) return // never drop below multi-city threshold
+    onChange(segments.filter((_, i) => i !== idx))
+  }
+
+  function addSegment() {
+    if (segments.length >= MAX_SEGMENTS) return
+    // Seed new segment: From = last segment's destination, dates start at
+    // last segment's end (contiguous chain), no destination yet.
+    const last = segments[segments.length - 1]
+    onChange([...segments, {
+      destination: '',
+      startDate:   last.endDate,
+      endDate:     '',
+      nights:      0,
+      origin:      last.destination,
+    }])
+  }
+
+  // Convert TripSegment <-> DateRange for the picker.
+  const toDateRange = (s: TripSegment): DateRange => {
+    const start = s.startDate ? new Date(`${s.startDate}T00:00:00`) : null
+    const end   = s.endDate   ? new Date(`${s.endDate}T00:00:00`)   : null
+    return { start, end, nights: s.nights }
+  }
+  const isoFromDate = (d: Date | null): string =>
+    d ? d.toISOString().slice(0, 10) : ''
+
+  return (
+    <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
+      <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-3">
+        Recorrido multi-ciudad
+      </div>
+
+      <div className="flex flex-col gap-4">
+        {segments.map((seg, idx) => {
+          // Default From for this row = previous segment's destination (or
+          // tripOrigin for Segment 0). User can override via the input.
+          const defaultFrom = idx === 0
+            ? tripOrigin
+            : (segments[idx - 1].destination || '')
+          const displayOrigin = seg.origin ?? defaultFrom
+
+          return (
+            <div key={idx} className="bg-[#FAF8F5] border border-[#E4DFD8] rounded-[8px] p-3">
+              <div className="flex items-center justify-between mb-2">
+                <span className="font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33]">
+                  Tramo {idx + 1}
+                </span>
+                {segments.length > 2 && (
+                  <button
+                    type="button"
+                    onClick={() => removeSegment(idx)}
+                    className="font-mono text-[10px] text-[#B8B5AF] hover:text-[#3D3D3A] transition-colors"
+                  >
+                    Eliminar
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-2 gap-2.5 mb-2.5 max-[600px]:grid-cols-1">
+                <div>
+                  <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                    Desde
+                  </label>
+                  <PlacesInput
+                    id={`pref-segment-${idx}-origin`}
+                    locale="es"
+                    placeholder="Origen"
+                    value={displayOrigin}
+                    onChange={(v) => updateSegment(idx, { origin: v })}
+                    onSelect={(p: PlaceResult) => updateSegment(idx, { origin: p.displayName })}
+                    locationBias="global"
+                  />
+                </div>
+                <div>
+                  <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                    Hasta
+                  </label>
+                  <PlacesInput
+                    id={`pref-segment-${idx}-dest`}
+                    locale="es"
+                    placeholder="Destino"
+                    value={seg.destination}
+                    onChange={(v) => updateSegment(idx, { destination: v })}
+                    onSelect={(p: PlaceResult) => updateSegment(idx, { destination: p.displayName })}
+                    locationBias="global"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
+                  Fechas
+                </label>
+                <DateRangePicker
+                  value={toDateRange(seg)}
+                  onChange={(r) => {
+                    const startDate = isoFromDate(r.start)
+                    const endDate   = isoFromDate(r.end)
+                    const nights    = r.nights
+                    updateSegment(idx, { startDate, endDate, nights })
+                  }}
+                />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {segments.length < MAX_SEGMENTS && (
+        <button
+          type="button"
+          onClick={addSegment}
+          className="mt-3 font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] hover:text-[#1B4D3E] transition-colors"
+        >
+          + Añadir ciudad
+        </button>
+      )}
+
+      <div className="font-sans text-[11px] text-[#7A7A76] mt-3 italic">
+        Los demás campos (ritmo, presupuesto, intereses, viajeros) se aplican a todo el viaje.
+      </div>
+    </div>
   )
 }
