@@ -3361,7 +3361,7 @@ export default function TripResult({ params }: Props) {
           sticky positioning + visual continuity stay intact; bar internals
           now carry the 3-zone command-center layout (% / milestones /
           next-step CTA) on desktop and a collapsed pill on mobile. */}
-      <div data-trip="control-bar" className="bg-[#0F3A33]">
+      <div data-trip="control-bar" className="bg-[#0F3A33] sticky top-[100px] z-40 shadow-[0_2px_8px_rgba(15,58,51,.18)]">
         <div className="max-w-[1160px] mx-auto px-7">
           <TripReadinessBar
             readinessPct={progressPct}
@@ -3694,7 +3694,7 @@ export default function TripResult({ params }: Props) {
 
           {/* ── RIGHT: Sidebar cards ─────────────────────────────────────── */}
           <aside data-trip="sidebar" className="flex flex-col gap-2.5">
-            <div className="sticky top-[76px] flex flex-col gap-2.5">
+            <div className="sticky top-[176px] flex flex-col gap-2.5">
 
               {/* Planea tu viaje — checks */}
               <div data-trip="planning" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
