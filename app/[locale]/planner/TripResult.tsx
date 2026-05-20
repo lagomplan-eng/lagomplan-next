@@ -419,6 +419,37 @@ function normalizeCheckItem(raw: any, index: number): CheckItem {
   }
 }
 
+// Pull a numeric estimate from a value of arbitrary shape. The AI emits the
+// schema's `{label, range}` shape (range = string like "$4,000 - $6,000"),
+// but legacy outputs / fallbacks also surface plain numbers or amount keys.
+// Strategy: try every shape we've seen, return 0 when nothing parseable.
+function extractBudgetAmount(val: any): number {
+  if (val == null) return 0
+  if (typeof val === 'number') return val
+  if (typeof val === 'string') {
+    // Range string like "$4,000 - $6,000 USD" — take the UPPER bound as the
+    // estimate (most travelers pad their budget; the upper figure is the
+    // honest planning number). Falls through to the first numeric block if
+    // there's no range separator.
+    const numbers = val
+      .replace(/,/g, '')
+      .match(/\d+(\.\d+)?/g)
+      ?.map(Number)
+      .filter(n => !isNaN(n))
+    if (!numbers || numbers.length === 0) return 0
+    return Math.max(...numbers)
+  }
+  if (typeof val === 'object') {
+    // Schema shape: { label: "...", range: "$X - $Y" }
+    if (typeof val.range === 'string') return extractBudgetAmount(val.range)
+    // Other nested shapes we've seen
+    return extractBudgetAmount(
+      val.amount ?? val.cost ?? val.price ?? val.total ?? val.value ?? val.upper ?? null
+    )
+  }
+  return 0
+}
+
 function normalizeBudgetRow(raw: any, index: number): BudgetRow {
   // Already-normalized rows loaded from DB (autosave round-trip)
   if (typeof raw?.aiEst === 'number') {
@@ -434,11 +465,10 @@ function normalizeBudgetRow(raw: any, index: number): BudgetRow {
       actual:   typeof raw.actual  === 'number' ? raw.actual  : null,
     }
   }
-  // Raw AI response format
-  const rawAmount = raw?.amount ?? raw?.cost ?? raw?.price ?? raw?.total ?? 0
-  const aiEst = typeof rawAmount === 'number'
-    ? rawAmount
-    : parseFloat(String(rawAmount).replace(/[^0-9.]/g, '')) || 0
+  // Raw AI response: try common amount keys first; if any of them holds an
+  // object with `range`, extractBudgetAmount unwraps it.
+  const rawAmount = raw?.amount ?? raw?.cost ?? raw?.price ?? raw?.total ?? raw?.range ?? raw
+  const aiEst = extractBudgetAmount(rawAmount)
   return {
     id:       raw?.id       ?? `budget-${index}`,
     label:    raw?.label    ?? raw?.name ?? raw?.title ?? raw?.item ?? `Item ${index + 1}`,
@@ -2677,16 +2707,19 @@ export default function TripResult({ params }: Props) {
   const dayNums     = Array.from(new Set(checks.filter(c => c.day).map(c => c.day!))).sort((a, b) => a - b)
 
   // Trip length threshold for default-collapsing the sidebar's "Por día"
-  // section. Short trips stay fully expanded (the user can scan everything
-  // at once); longer trips start collapsed so the sidebar fits on screen.
-  // Fires once when checks first arrive — subsequent user toggles win.
+  // section. Short trips stay fully expanded; longer trips start with
+  // Day 1 open + the rest collapsed so the user has an entry point but
+  // the sidebar still fits on screen. Fires once when checks first
+  // arrive — subsequent user toggles win.
   const COLLAPSE_DAY_GROUPS_THRESHOLD = 7
   useEffect(() => {
     if (initialCollapsedDiaSetupRef.current) return
     if (dayNums.length === 0) return  // wait for checks to populate
     initialCollapsedDiaSetupRef.current = true
     if (dayNums.length > COLLAPSE_DAY_GROUPS_THRESHOLD) {
-      setCollapsedDiaGroups(new Set(dayNums))
+      // Collapse everything except the first day so the user sees one
+      // sample of what's inside without scrolling through a wall.
+      setCollapsedDiaGroups(new Set(dayNums.slice(1)))
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dayNums.length])

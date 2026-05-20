@@ -346,14 +346,21 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
     first_segment_keys: Object.keys(first || {}),
   })
 
+  // Budget: prefer the schema-canonical `budget_breakdown` (what the Edge Fn
+  // actually emits per its TRIP_SCHEMA). Fall back to legacy `budget` for
+  // safety. For multi-city, take the first chunk's breakdown — aggregating
+  // per-segment ranges is non-trivial (they're strings like "$4,000 - $6,000")
+  // and a single representative breakdown is better than empty.
+  const firstBudget = (first as any).budget_breakdown ?? (first as any).budget ?? null
+
   return {
-    title:          (first as any).title       ?? fallbackTitle,
-    subtitle:       (first as any).subtitle    ?? `${jobInputs.duration_days} días`,
-    destination:    jobInputs.destination,
+    title:            (first as any).title    ?? fallbackTitle,
+    subtitle:         (first as any).subtitle ?? `${jobInputs.duration_days} días`,
+    destination:      jobInputs.destination,
     days,
-    accommodations: accommodations.length > 0 ? accommodations : ((first as any).accommodations ?? null),
-    budget:         (first as any).budget      ?? null,
-    packing:        (first as any).packing     ?? null,
+    accommodations:   accommodations.length > 0 ? accommodations : ((first as any).accommodations ?? null),
+    budget_breakdown: firstBudget,
+    packing:          (first as any).packing  ?? null,
     // Preserve segments on the saved trip_data so the result page hydrates
     // the multi-city chip row + drawer summary on DB load.
     ...(multiCity ? { segments: multiCity } : {}),
