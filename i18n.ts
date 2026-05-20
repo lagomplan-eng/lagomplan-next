@@ -38,7 +38,7 @@ export const pathnames = {
   '/worldcup': { es: '/mundial', en: '/worldcup' },
   '/worldcup/[slug]': { es: '/mundial/[slug]', en: '/worldcup/[slug]' },
   '/smart-finds': { es: '/productos-viaje', en: '/smart-finds' },
-  '/smart-finds/familias': { es: '/productos-viaje/familias', en: '/smart-finds/familias' },
+  '/smart-finds/familias': { es: '/productos-viaje/familias', en: '/smart-finds/families' },
   '/smart-finds/[slug]': { es: '/productos-viaje/[slug]', en: '/smart-finds/[slug]' },
   '/about': { es: '/nosotras', en: '/about' },
   '/contact': { es: '/contacto', en: '/contact' },
