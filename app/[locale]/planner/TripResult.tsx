@@ -526,12 +526,15 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
           break
         case 'transfer':
           if (day.n === 1 || day.n === lastDayN) {
-            // Arrival/departure transfer → pre-trip booking (Antes del viaje)
+            // Arrival/departure transfer → pre-trip booking. These are the
+            // ones the user actually books in advance (airport pickup,
+            // return ride, intercity flight).
             checks.push({ id, icon: '🚗', text: `Reservar transfer: ${item.name}`, done: false })
-          } else {
-            // Mid-trip transfer → day-specific
-            checks.push({ id, icon: '🚗', text: `Confirmar transfer: ${item.name}`, done: false, day: day.n })
           }
+          // Mid-trip transfers (excursion shuttles, in-city Ubers, returns
+          // from a day trip) are not pre-bookable in any meaningful sense —
+          // the user hails them or arranges in the moment. They still
+          // render in the day block; we just don't surface them as checks.
           break
         case 'tour':
           checks.push({ id, icon: '🎫', text: `Reservar: ${item.name}`, done: false, day: day.n })
