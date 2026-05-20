@@ -3141,7 +3141,13 @@ export default function TripResult({ params }: Props) {
       <div data-trip="pref-drawer" className="border-b border-[#E4DFD8]">
         <div
           style={{
-            maxHeight: prefOpen ? '900px' : '0',
+            // Cap was 900 px — fine for single-city's 6-field grid. Multi-city
+            // adds an inline per-segment editor (up to 5 segment cards, each
+            // ~210 px tall) above the grid, easily blowing past 900 px and
+            // cutting off Cancelar / Actualizar plan at the bottom. Bumped to
+            // a value that comfortably fits the max segment count + all
+            // trip-level fields + the action buttons.
+            maxHeight: prefOpen ? '4000px' : '0',
             opacity: prefOpen ? 1 : 0,
             overflow: 'hidden',
             transition: 'max-height 0.4s ease, opacity 0.3s ease',
