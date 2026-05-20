@@ -1360,7 +1360,7 @@ export default function TripResult({ params }: Props) {
             : prefTraveler === 'amigos'
             ? { group_count: prefGroupCount }
             : undefined
-        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined }
+        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined, locale }
 
         // Abort any in-flight generation from a prior effect run (auth state
         // transitions can retrigger this effect while the first fetch is still
@@ -1899,6 +1899,7 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
         segments: segments.length > 0 ? segments : undefined,
+        locale,
       }
 
       // Long-trip regen routes through async (same gate as initial-gen) — the
@@ -2245,6 +2246,7 @@ export default function TripResult({ params }: Props) {
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
         nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
         segments: segments.length > 0 ? segments : undefined,
+        locale,
       }
 
       // Long-trip replace routes through async (same gate as initial-gen) —

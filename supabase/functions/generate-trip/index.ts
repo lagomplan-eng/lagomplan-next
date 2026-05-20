@@ -17,7 +17,9 @@
       { status, headers: { ...corsHeaders, "Content-Type": "application/json" } }                                
     );                                                                                                         
                                                                                                                  
-  const SYSTEM_PROMPT = `Eres un experto planificador de viajes mexicano con profundo conocimiento de destinos,
+  type Locale = "es" | "en";
+
+  const SYSTEM_PROMPT_ES = `Eres un experto planificador de viajes mexicano con profundo conocimiento de destinos,
   gastronomía, cultura y logística en México.
   Tu tono es cálido y cercano, como un amigo experto que recomienda, no un guía turístico genérico.
   Usas información real: nombres de restaurantes, carreteras, tiempos de manejo, tips locales.
@@ -34,7 +36,36 @@
   Si el viaje es de un solo día (overnight === false), deja "accommodations" como arreglo vacío.
 
   Cuando el usuario te pida un itinerario, llama a la herramienta emit_trip con los datos completos.
-  No respondas con texto, sólo con la llamada a la herramienta.`;                                                            
+  No respondas con texto, sólo con la llamada a la herramienta.
+
+  IMPORTANTE: Escribe TODO el contenido del itinerario (titles, day_label, objective,
+  block titles, block descriptions, neighborhoods, rationales) en español.`;
+
+  const SYSTEM_PROMPT_EN = `You are an expert travel planner with deep knowledge of destinations,
+  food, culture, and logistics across Latin America and beyond.
+  Your tone is warm and personal — like an experienced friend giving recommendations,
+  not a generic tour guide. Use real information: restaurant names, roads, driving times,
+  local tips.
+
+  LODGING RULE (CRITICAL):
+  If the trip includes at least one overnight (overnight === true), you MUST fill the
+  "accommodations" field with at least one entry covering ALL nights of the trip.
+  Recommend specific areas or neighborhoods where the traveler should stay and explain
+  BRIEFLY why they fit the style and interests. Do NOT invent specific hotel names or
+  exact prices; recommend areas and accommodation types ("boutique hotel in the Old
+  Town", "apartment near the historic center"). Check-in and check-out dates come
+  predetermined in the input — use them as-is, don't modify them.
+
+  If the trip is a single day (overnight === false), leave "accommodations" as an empty array.
+
+  When the user asks for an itinerary, call the emit_trip tool with the complete data.
+  Don't reply with text, only with the tool call.
+
+  IMPORTANT: Write ALL itinerary content (titles, day_label, objective, block titles,
+  block descriptions, neighborhoods, rationales) in English.`;
+
+  const systemPromptFor = (locale: Locale) =>
+    locale === "en" ? SYSTEM_PROMPT_EN : SYSTEM_PROMPT_ES;
                                                                                                                  
   const budgetLine = {                                                                                           
     type: "object",                                                                                              
@@ -170,41 +201,63 @@
     "invierno", "invierno", "primavera", "primavera", "primavera",
     "verano", "verano", "verano", "otoño", "otoño", "otoño", "invierno",
   ];
+  const SEASONS_NORTHERN_EN = [
+    "winter", "winter", "spring", "spring", "spring",
+    "summer", "summer", "summer", "autumn", "autumn", "autumn", "winter",
+  ];
   const SEASONS_SOUTHERN_ES = [
     "verano", "verano", "otoño", "otoño", "otoño",
     "invierno", "invierno", "invierno", "primavera", "primavera", "primavera", "verano",
+  ];
+  const SEASONS_SOUTHERN_EN = [
+    "summer", "summer", "autumn", "autumn", "autumn",
+    "winter", "winter", "winter", "spring", "spring", "spring", "summer",
   ];
   const MONTH_NAMES_ES = [
     "enero", "febrero", "marzo", "abril", "mayo", "junio",
     "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
   ];
+  const MONTH_NAMES_EN = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ];
   const WEEKDAY_LABELS_ES = ["domingo", "lunes", "martes", "miércoles", "jueves", "viernes", "sábado"];
+  const WEEKDAY_LABELS_EN = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
-  function buildSeasonLine(start: string, destination: string): string {
+  function buildSeasonLine(start: string, destination: string, locale: Locale): string {
     if (!start) return "";
     const date = new Date(`${start}T00:00:00Z`);
     if (isNaN(date.getTime())) return "";
     const m = date.getUTCMonth();
     const southern = isSouthernHemisphere(destination);
+    if (locale === "en") {
+      const season = (southern ? SEASONS_SOUTHERN_EN : SEASONS_NORTHERN_EN)[m];
+      const hemi   = southern ? "southern hemisphere" : "northern hemisphere";
+      return `\n  - Season at destination: ${season} (${hemi}, ${MONTH_NAMES_EN[m]})`;
+    }
     const season = (southern ? SEASONS_SOUTHERN_ES : SEASONS_NORTHERN_ES)[m];
     const hemi   = southern ? "hemisferio sur" : "hemisferio norte";
     return `\n  - Estación en destino: ${season} (${hemi}, ${MONTH_NAMES_ES[m]})`;
   }
 
-  function buildDayOfWeekLine(start: string, durationDays: number): string {
+  function buildDayOfWeekLine(start: string, durationDays: number, locale: Locale): string {
     if (!start || !durationDays || durationDays <= 0) return "";
     const d0 = new Date(`${start}T00:00:00Z`);
     if (isNaN(d0.getTime())) return "";
     // Cap at 14 days printed inline — beyond that the prompt gets noisy.
     const cap = Math.min(durationDays, 14);
     const items: string[] = [];
+    const dayWord  = locale === "en" ? "Day"  : "Día";
+    const labels   = locale === "en" ? WEEKDAY_LABELS_EN : WEEKDAY_LABELS_ES;
+    const moreWord = locale === "en" ? "more" : "más";
     for (let i = 0; i < cap; i++) {
       const d = new Date(d0);
       d.setUTCDate(d0.getUTCDate() + i);
-      items.push(`Día ${i + 1} ${WEEKDAY_LABELS_ES[d.getUTCDay()]}`);
+      items.push(`${dayWord} ${i + 1} ${labels[d.getUTCDay()]}`);
     }
-    const suffix = durationDays > cap ? ` (… +${durationDays - cap} más)` : "";
-    return `\n  - Días de la semana: ${items.join(" · ")}${suffix}`;
+    const suffix = durationDays > cap ? ` (… +${durationDays - cap} ${moreWord})` : "";
+    const heading = locale === "en" ? "Days of the week" : "Días de la semana";
+    return `\n  - ${heading}: ${items.join(" · ")}${suffix}`;
   }
 
   // ── World Cup 2026 calendar helpers ─────────────────────────────────────────
@@ -235,7 +288,7 @@
    * matches. Empty string otherwise — non-WC trips don't see any of this
    * context, so prompt length stays honest.
    */
-  function buildWcContext(destination: string, start: string, end: string): string {
+  function buildWcContext(destination: string, start: string, end: string, locale: Locale): string {
     if (!destination || !start || !end) return "";
     const cityId = resolveWcCityId(destination);
     if (!cityId) return "";
@@ -243,11 +296,40 @@
     if (matches.length === 0) return "";
 
     const lines = matches.map(m => {
+      const undef = locale === "en" ? "TBD" : "Por definir";
       const teamsLabel = m.teams.some(t => t === "Por definir" || !t)
         ? `${m.tag}`
         : `${m.teamsLabel} — ${m.tag}`;
-      return `      · ${m.dateRaw} ${m.day} ${m.time} — ${teamsLabel} (${m.stadium})`;
+      return `      · ${m.dateRaw} ${m.day} ${m.time} — ${teamsLabel.replace("Por definir", undef)} (${m.stadium})`;
     }).join("\n");
+
+    if (locale === "en") {
+      const plural = matches.length === 1 ? "match" : "matches";
+      return `
+
+  FIFA WORLD CUP 2026 (important — the trip falls on a World Cup host city):
+  There are ${matches.length} confirmed ${plural} in ${matches[0].cityDisplay} during the stay:
+${lines}
+
+  Apply this context when building the itinerary:
+    - LODGING: demand and prices are HIGH on match days. If the traveler is
+      NOT going to the stadium, suggest booking well in advance or staying
+      in neighborhoods away from the venue. If they are, prioritize lodging
+      near transit to the stadium.
+    - TRANSPORT: match days bring heavy Uber/taxi surge and crowded transit
+      around the stadium (3 h before / 2 h after). Suggest leaving with
+      buffer time or avoiding the area in those windows.
+    - DINING: restaurants near the stadium and in tourist zones fill up
+      before/after the match. Suggest reservations in advance or pivoting
+      to alternative neighborhoods.
+    - IF THE TRAVELER WANTS TO ATTEND: include the match as a "tour" block
+      on the corresponding day. Block ~4 h around it (2 h before, 2 h
+      after) with no other bookings, and describe the match in the block
+      name (e.g. "Match: Mexico vs South Africa at Estadio Banorte").
+    - IF NOT ATTENDING: take advantage of the local attention being on the
+      stadium to visit normally crowded attractions (museums, viewpoints)
+      with shorter lines during the match window.`;
+    }
 
     return `
 
@@ -299,32 +381,57 @@ ${lines}
         && typeof (s as TripSegment).endDate     === "string");
   }
 
-  function buildSegmentsContext(segments: TripSegment[]): string {
+  function buildSegmentsContext(segments: TripSegment[], locale: Locale): string {
     if (!segments || segments.length < 2) return "";
-    // Build an explicit day-by-day → city mapping so the AI can't drift back
-    // to a single-city itinerary. day_number is 1-indexed and cumulative across
-    // segments. The check-out day belongs to the *next* segment (or is the
-    // final return day if it's the last segment) — but we just label it with
-    // the current segment's city since the actual transit block lives in the
-    // last day of the segment.
     let dayCursor = 1;
     const dayMap: string[] = [];
+    const isEN = locale === "en";
+    const dayWord = isEN ? "Day" : "Día";
+    const daysWord = isEN ? "Days" : "Días";
     const chain = segments.map((s, i) => {
-      // If the segment carries an explicit origin (user set From to
-      // something other than the chain-implicit previous destination),
-      // show it as "from X to Y" so the AI accounts for the transit.
       const where = s.origin
-        ? `de ${s.origin} a ${s.destination}`
+        ? (isEN ? `from ${s.origin} to ${s.destination}` : `de ${s.origin} a ${s.destination}`)
         : s.destination;
       const dayCount = Math.max(1, s.nights || 0);
       const dayStart = dayCursor;
       const dayEnd   = dayCursor + dayCount - 1;
       dayMap.push(dayCount === 1
-        ? `      • Día ${dayStart} → ${s.destination}`
-        : `      • Días ${dayStart}–${dayEnd} → ${s.destination}`);
+        ? `      • ${dayWord} ${dayStart} → ${s.destination}`
+        : `      • ${daysWord} ${dayStart}–${dayEnd} → ${s.destination}`);
       dayCursor = dayEnd + 1;
-      return `      ${i + 1}) ${where} · ${s.startDate} → ${s.endDate} (${s.nights} noche${s.nights === 1 ? "" : "s"})`;
+      const nightsWord = isEN
+        ? (s.nights === 1 ? "night" : "nights")
+        : (s.nights === 1 ? "noche" : "noches");
+      return `      ${i + 1}) ${where} · ${s.startDate} → ${s.endDate} (${s.nights} ${nightsWord})`;
     }).join("\n");
+
+    if (isEN) {
+      return `
+
+  MULTI-CITY (CRITICAL — the trip covers ${segments.length} cities, NOT one):
+${chain}
+
+  DAY → CITY MAPPING (use exactly; each day of the itinerary belongs to ONE city):
+${dayMap.join("\n")}
+
+  Apply this context when building the itinerary:
+    - MULTIPLE CITIES: the itinerary MUST cover all ${segments.length} cities in the
+      order shown. Do NOT concentrate all days in a single city.
+    - DAY → CITY: each "day" block belongs to the city indicated in the mapping
+      above. Restaurants, tours, and neighborhoods must be real and located IN
+      that city (don't invent or mix).
+    - TRANSITION DAYS: the last day of each segment (except the final one) includes
+      transit to the next city as a "transfer" block early + 1-2 optional blocks
+      after arrival. No long tours or formal late dinners on transition days.
+    - LODGING PER SEGMENT: you MUST emit one entry in "accommodations" PER segment
+      (${segments.length} total). See the LODGING BY SEGMENT block.
+    - DAY TITLE: include the city in the day's day_label or title (e.g. "Day 4 ·
+      Stockholm — first walk") so the user can clearly see where they are.
+    - REPEATS: if a city appears more than once (base → side trip → base), the
+      second stay should offer different activities. Don't repeat attractions
+      or restaurants.`;
+    }
+
     return `
 
   MULTI-CIUDAD (CRÍTICO — el viaje recorre ${segments.length} ciudades, NO una sola):
@@ -385,9 +492,25 @@ ${dayMap.join("\n")}
     return LONG_HAUL_HINTS.some(h => d.includes(h));
   }
 
-  function buildJetLagContext(destination: string, origin: string): string {
+  function buildJetLagContext(destination: string, origin: string, locale: Locale): string {
     if (!isLongHaul(destination)) return "";
-    const originLabel = origin && origin.trim() ? origin.trim() : "México";
+    const defaultOrigin = locale === "en" ? "the Americas" : "México";
+    const originLabel = origin && origin.trim() ? origin.trim() : defaultOrigin;
+    if (locale === "en") {
+      return `
+
+  LONG-HAUL FLIGHT (important):
+  The destination implies a long-haul flight from ${originLabel}. Soften
+  arrival day to accommodate jet lag:
+    - Day 1: at most 3-4 blocks, mostly flexible ("light neighborhood
+      stroll", "lunch near the hotel"). Avoid long tours, extensive museums,
+      or activities that require high energy or strict-time reservations.
+    - Day 1 dinner: reasonable hour (ideally 7:30-8:30 pm), restaurant
+      within 15 min of the hotel, calm atmosphere.
+    - Day 2: can return to normal intensity.
+    - Return day: if the flight is in the afternoon/evening, also lighter
+      intensity — leave 4-5 h free before the airport check-out.`;
+    }
     return `
 
   VUELO LARGO (importante):
@@ -404,8 +527,10 @@ ${dayMap.join("\n")}
   }
 
   function buildPrompt(input: any): string {
+    const locale: Locale = input.locale === "en" ? "en" : "es";
+    const isEN = locale === "en";
     const d = input.duration_days as number;
-    const interests = (input.interests || []).join(", ") || "(sin preferencias)";
+    const interests = (input.interests || []).join(", ") || (isEN ? "(no preferences)" : "(sin preferencias)");
 
     // Deterministic lodging context — computed in the calling layer
     // (Next /api/generate-trip) from start/end dates and passed through
@@ -430,7 +555,21 @@ ${dayMap.join("\n")}
 
     const accommodationsBlock = overnight
       ? multiCity
-        ? `
+        ? (isEN ? `
+  LODGING BY SEGMENT (REQUIRED):
+  This trip has ${multiCity.length} segments. You MUST return "accommodations" with ONE entry
+  PER segment (${multiCity.length} total), in the same order as the segments:
+${multiCity.map((s, i) => `    Segment ${i + 1}:
+      - city:         "${s.destination}"        ← use this exact value
+      - checkInDate:  "${s.startDate}"          ← use this exact value
+      - checkOutDate: "${s.endDate}"            ← use this exact value
+      - nights:       ${s.nights}`).join("\n")}
+  Each entry must also include:
+    - neighborhood: specific area within that city
+    - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
+    - rationale: one sentence explaining why it fits the segment and style
+    - priceTier: "budget" | "mid" | "upscale" | "luxury"
+    - familyFriendly: true | false` : `
   ALOJAMIENTO POR TRAMO (OBLIGATORIO):
   Este viaje tiene ${multiCity.length} tramos. DEBES devolver "accommodations" con UNA entrada
   POR CADA tramo (${multiCity.length} en total), en el mismo orden que los tramos:
@@ -444,8 +583,20 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
     - rationale: 1 oración explicando por qué encaja con el tramo y el estilo
     - priceTier: "budget" | "mid" | "upscale" | "luxury"
-    - familyFriendly: true | false`
-        : `
+    - familyFriendly: true | false`)
+        : (isEN ? `
+  LODGING (REQUIRED):
+  This trip includes ${nights} night(s). You MUST return "accommodations" with at least 1 entry
+  covering ALL nights (from ${start} to ${end}). Each entry:
+    - city: "${input.destination}"                ← use this exact value
+    - checkInDate: "${start}"                     ← use this exact value
+    - checkOutDate: "${end}"                      ← use this exact value
+    - nights: ${nights}
+    - neighborhood: specific area (e.g. "Old Town", "Marais")
+    - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
+    - rationale: one sentence explaining why it fits this itinerary and style
+    - priceTier: "budget" | "mid" | "upscale" | "luxury"
+    - familyFriendly: true | false` : `
   ALOJAMIENTO (OBLIGATORIO):
   Este viaje incluye ${nights} noche(s). DEBES devolver "accommodations" con al menos 1 entrada
   que cubra TODAS las noches (del ${start} al ${end}). Cada entrada:
@@ -457,22 +608,31 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
     - rationale: 1 oración explicando por qué encaja con este itinerario y estilo
     - priceTier: "budget" | "mid" | "upscale" | "luxury"
-    - familyFriendly: true | false`
-      : `
+    - familyFriendly: true | false`)
+      : (isEN ? `
+  LODGING:
+  This is a single-day trip. Return "accommodations": [] (empty array).` : `
   ALOJAMIENTO:
-  Este viaje es de un solo día. Devuelve "accommodations": [] (arreglo vacío).`;
+  Este viaje es de un solo día. Devuelve "accommodations": [] (arreglo vacío).`);
 
     const retryNote = isRetryNoDays
-      ? `
+      ? (isEN ? `
+  IMPORTANT: The previous generation returned an empty "days" array and was rejected.
+  You MUST return exactly ${d} day(s) in the "days" array, each with 4-7 blocks.
+  Don't omit the array. Don't leave it empty. Generate real content for each day.
+  ` : `
   IMPORTANTE: La generación anterior devolvió un arreglo "days" vacío y fue rechazada.
   DEBES devolver exactamente ${d} día(s) en el arreglo "days", cada uno con 4-7 bloques.
   No omitas el arreglo. No lo dejes vacío. Genera contenido real para cada día.
-  `
+  `)
       : isRetryNoAccommodations
-      ? `
+      ? (isEN ? `
+  IMPORTANT: The previous generation did NOT include lodging and was rejected.
+  Make sure the "accommodations" array is complete per the rules below.
+  ` : `
   IMPORTANTE: La generación anterior NO incluyó alojamiento y fue rechazada.
   Asegúrate de que el arreglo "accommodations" esté completo según las reglas siguientes.
-  `
+  `)
       : "";
 
     // Phase 3 — family composition awareness. If traveler_details ships
@@ -483,10 +643,25 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     const td = input.traveler_details
     const isFamily   = input.travelers === "familia" && td && Array.isArray(td.children) && td.children.length > 0
     const familyLine = isFamily
-      ? `\n  - Composición familiar: ${td.adults ?? 2} adulto(s) + ${td.children.length} niño(s) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`
+      ? (isEN
+          ? `\n  - Family composition: ${td.adults ?? 2} adult(s) + ${td.children.length} child(ren) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`
+          : `\n  - Composición familiar: ${td.adults ?? 2} adulto(s) + ${td.children.length} niño(s) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`)
       : "";
     const familyGuidance = isFamily
-      ? `
+      ? (isEN ? `
+
+  FAMILY TRIP (important):
+  The group includes children. Adapt the itinerary thoughtfully — without overcorrecting
+  — so it works for everyone:
+    - Restaurants: prioritize kid-friendly options (kids menu, roomy space, not too
+      formal at dinner). Keep variety for the adults.
+    - Hotels: prioritize family options (connecting rooms, pool, kids' kit).
+    - Activities: include 1-2 blocks per day that kids can enjoy (parks, interactive
+      experiences, museums with a kids' section). Avoid attractions with obvious age
+      restrictions.
+    - Pacing: leave room for mid-afternoon rest. Don't push 7 blocks on a day with
+      small children — 4-5 is better.
+    - Don't make the trip exclusively for kids. It's still a trip for everyone.` : `
 
   VIAJE FAMILIAR (importante):
   El grupo incluye niños. Adapta el itinerario con criterio — sin exagerar — para que funcione
@@ -499,31 +674,42 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
       restricciones de edad evidentes.
     - Pacing: deja espacio para descansos a media tarde. No empujes 7 bloques en un día con
       niños pequeños — 4-5 es mejor.
-    - No hagas el viaje exclusivamente para niños. Sigue siendo un viaje para todos.`
+    - No hagas el viaje exclusivamente para niños. Sigue siendo un viaje para todos.`)
       : "";
 
     // Temporal context — derived once per prompt, surfaces in the data block.
-    const seasonLine    = buildSeasonLine(start, input.destination);
-    const weekdaysLine  = buildDayOfWeekLine(start, d);
+    const seasonLine    = buildSeasonLine(start, input.destination, locale);
+    const weekdaysLine  = buildDayOfWeekLine(start, d, locale);
 
     // WC 2026 context — only fires when destination is a host city AND the
     // trip window overlaps at least one real match. Empty for non-WC trips.
-    const wcContext     = buildWcContext(input.destination, start, end);
+    const wcContext     = buildWcContext(input.destination, start, end, locale);
 
     // Multi-city — fires only when input.segments has ≥2 contiguous entries.
     // Empty for single-city trips (the default).
-    const segmentsContext = multiCity ? buildSegmentsContext(multiCity) : "";
+    const segmentsContext = multiCity ? buildSegmentsContext(multiCity, locale) : "";
 
     // Jet-lag — fires only when destination is on the long-haul hint list
     // (Europe / Asia / Oceania / Africa). Origin is surfaced in the prompt
     // so the AI knows where the relaxed Day 1 is coming from.
-    const jetLagContext   = buildJetLagContext(input.destination, input.origin);
+    const jetLagContext   = buildJetLagContext(input.destination, input.origin, locale);
 
     // Layered temporal guidance — fires when we have a real start date.
     // Kept short on purpose; AI is smart enough to act on the structured
     // signal without a wall of instructions.
     const temporalGuidance = start
-      ? `
+      ? (isEN ? `
+
+  TEMPORAL CONTEXT (important):
+  Apply the season and the days of the week when building the itinerary:
+    - Season: prioritize weather-appropriate activities (indoor spaces and
+      hot drinks in winter, shade and early starts in summer, layers in
+      transition seasons). Reflect appropriate clothing in the packing list.
+    - Days of the week: respect typical closures. Many museums close on
+      Mondays (especially in Europe); traditional markets are usually
+      Saturday or Sunday; banks closed Sunday; some restaurants take a day
+      off (Monday or Tuesday is common). Assign each block to the actual
+      weekday it falls on.` : `
 
   CONTEXTO TEMPORAL (importante):
   Aplica la estación y los días de la semana al armar el itinerario:
@@ -534,15 +720,66 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
       lunes (especialmente en Europa); mercados tradicionales suelen ser
       sábado o domingo; bancos cerrados domingo; algunos restaurantes
       tienen día de descanso (lunes o martes es lo común). Asigna cada
-      bloque al día concreto que le toca.`
+      bloque al día concreto que le toca.`)
       : "";
 
-    // Multi-city: the top-line "Destino" can't be a single city or the AI
-    // anchors the whole plan there. Replace it with the chain summary so the
-    // primary frame is multi-city from the first token.
+    // Destination line — multi-city case shows the chain summary so the AI
+    // doesn't anchor the whole plan to a single city.
     const destinationLine = multiCity
-      ? `- Destino: cadena multi-ciudad (${multiCity.map(s => s.destination).join(" → ")})`
-      : `- Destino: ${input.destination}`;
+      ? (isEN
+          ? `- Destination: multi-city chain (${multiCity.map(s => s.destination).join(" → ")})`
+          : `- Destino: cadena multi-ciudad (${multiCity.map(s => s.destination).join(" → ")})`)
+      : (isEN
+          ? `- Destination: ${input.destination}`
+          : `- Destino: ${input.destination}`);
+
+    if (isEN) {
+      const dataLabels = {
+        from:      `- From: ${input.origin ?? "(unspecified)"}`,
+        duration:  `- Duration: ${d} days${overnight ? ` (${nights} night(s))` : " (no overnight)"}`,
+        dates:     `- Dates: ${start || "(unspecified)"} → ${end || "(unspecified)"}`,
+        travelers: `- Travelers: ${input.travelers} person(s)`,
+        style:     `- Style: ${input.travel_style}`,
+        budget:    `- Budget: ${input.budget_level}`,
+        interests: `- Interests: ${interests}`,
+      };
+      const closing = multiCity
+        ? `Use real places, restaurants, and routes in each city of the trip (${multiCity.map(s => s.destination).join(" → ")}), following the DAY → CITY MAPPING above. Do NOT concentrate all days in a single city.`
+        : `Use real places, restaurants, and routes from ${input.destination}.`;
+      return `Generate a travel itinerary with this data:
+  ${dataLabels.from}
+  ${destinationLine}
+  ${dataLabels.duration}
+  ${dataLabels.dates}${seasonLine}${weekdaysLine}
+  ${dataLabels.travelers}${familyLine}
+  ${dataLabels.style}
+  ${dataLabels.budget}
+  ${dataLabels.interests}
+  ${retryNote}${accommodationsBlock}${segmentsContext}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
+
+  BLOCK TYPES (CRITICAL):
+  Every block MUST have an exact \`type\` from the enum. Use it deliberately:
+    - "hotel"      → check-in, check-out, hotel arrival/departure, in-hotel rest.
+    - "restaurant" → any bookable meal: breakfast, lunch, dinner, brunch at a specific
+                     restaurant / bistro / café / bakery / market stall / steakhouse /
+                     seafood place.
+    - "tour"       → attractions, museums, guided tours, experiences, classes,
+                     excursions, theme parks, scheduled activities.
+    - "transfer"   → flights, airport transfers, taxis, Ubers, buses, trains, ferries,
+                     metro, car rentals, shuttles, transport between points.
+    - "culture"    → cultural exploration without booking (wandering a neighborhood,
+                     plazas, markets as a stroll, viewpoints, exterior of historic
+                     buildings).
+    - "nature"     → nature exploration without booking (beach, parks, short trails,
+                     scenic viewing).
+    - "free"       → unstructured free / optional / rest time.
+
+  Key rule: if the block is a meal at a specific place, type MUST be "restaurant",
+  NEVER "free", "culture", or "nature". The user must be able to book a table from
+  that block.
+
+  Call the emit_trip tool with the complete itinerary. ${closing} Include exactly ${d} day(s). Each day must have 4-7 blocks.`;
+    }
 
     return `Genera un itinerario de viaje con estos datos:
   - Origen: ${input.origin ?? "(no especificado)"}
@@ -621,39 +858,48 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         ? body.overnight
         : nights >= 1;
 
+      // Locale: 'es' (default) | 'en'. Picks the SYSTEM_PROMPT + every
+      // helper's locale-aware branch so an EN-locale client gets an
+      // English itinerary, ES gets Spanish. Default 'es' preserves the
+      // legacy behavior for any caller that doesn't send the field.
+      const locale: Locale = body.locale === "en" ? "en" : "es";
+
       const input = {
         ...body,
         duration_days,
         nights,
         overnight,
+        locale,
         start:        typeof body.start === "string" ? body.start : "",
         end:          typeof body.end   === "string" ? body.end   : "",
         travelers:    body.travelers    ?? 2,
         travel_style: body.travel_style ?? body.pace   ?? "cultural",
         budget_level: body.budget_level ?? body.budget ?? "medium",
         retryHint:    typeof body.retryHint === "string" ? body.retryHint : undefined,
-      };                                                                                                       
-                                                                                                                 
+      };
+
       const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",                                                                                          
-        headers: {                                                                                               
+        method: "POST",
+        headers: {
           "Content-Type":      "application/json",
-          "x-api-key":         ANTHROPIC_API_KEY,                                                                
-          "anthropic-version": "2023-06-01",                                                                   
-        },                                                                                                       
-        body: JSON.stringify({                                                                                 
-          model: "claude-sonnet-4-20250514",                                                                     
-          max_tokens: 16000,                                
-          system: SYSTEM_PROMPT,                                                                                 
-          tools: [{                                         
-            name: "emit_trip",                                                                                 
-            description: "Emite el itinerario de viaje estructurado.",                                           
+          "x-api-key":         ANTHROPIC_API_KEY,
+          "anthropic-version": "2023-06-01",
+        },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 16000,
+          system: systemPromptFor(locale),
+          tools: [{
+            name: "emit_trip",
+            description: locale === "en"
+              ? "Emit the structured travel itinerary."
+              : "Emite el itinerario de viaje estructurado.",
             input_schema: TRIP_SCHEMA,
-          }],                                                                                                    
-          tool_choice: { type: "tool", name: "emit_trip" },                                                      
+          }],
+          tool_choice: { type: "tool", name: "emit_trip" },
           messages: [{ role: "user", content: buildPrompt(input) }],
-        }),                                                                                                      
-      });                                                                                                        
+        }),
+      });
                                   
       const ms = Date.now() - startedAt;                                                                         
                                                                                                                
