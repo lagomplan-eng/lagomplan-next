@@ -103,11 +103,19 @@ export default function Nav() {
   // only controls whether the top-level link is rendered. One-line revert.
   const SHOW_MUNDIAL = true
 
+  // Smart Finds — hidden from the navbar while the catalog data is being
+  // updated in Supabase Studio. The route (/smart-finds/familias) and the
+  // page itself stay live; this only suppresses the top-level link. Flip
+  // to `true` to re-expose. One-line revert.
+  const SHOW_SMART_FINDS = false
+
   // ── Nav links (internal paths → next-intl translates) ─
   const navLinks = [
     { key: 'planner' as const,           label: t('planner')    },
     { key: 'guidesIndex' as const,       label: t('guides')     },
-    { key: 'smartFindsFamilias' as const, label: t('smartFinds') },
+    ...(SHOW_SMART_FINDS
+      ? [{ key: 'smartFindsFamilias' as const, label: t('smartFinds') }]
+      : []),
     { key: 'hotelsIndex' as const,       label: t('hotels')     },
     ...(SHOW_MUNDIAL
       ? [{ key: 'worldcupIndex' as const, label: t('worldcup') }]
