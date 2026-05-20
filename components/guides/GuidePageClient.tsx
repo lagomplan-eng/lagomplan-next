@@ -17,9 +17,10 @@
  *   font-display (Fraunces) · font-mono (JetBrains Mono)
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Image        from 'next/image'
 import { Link }     from '../../lib/navigation'
+import { events }   from '../../lib/analytics'
 import type {
   Guide,
   Itinerary,
@@ -677,6 +678,16 @@ export function GuidePageClient({ guide, locale }: Props) {
   const hotels      = guide.hotels      ?? []
   const tips        = (isES ? guide.tips_content_es : guide.tips_content_en) ?? []
   const qi          = guide.quick_info
+
+  // Acquisition signal: legacy guide page view. Mirrors the V2 client's
+  // analytics hook so we capture both guide-system surfaces uniformly.
+  useEffect(() => {
+    events.contentViewed({
+      content_type: 'guide',
+      content_id:   guide.slug_es || guide.slug_en || 'unknown',
+      locale:       locale === 'en' ? 'en' : 'es',
+    })
+  }, [guide.slug_es, guide.slug_en, locale])
 
   const tripType  = isES ? qi?.trip_type_es : qi?.trip_type_en
   const kicker    = tripType

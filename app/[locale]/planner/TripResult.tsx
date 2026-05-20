@@ -32,6 +32,7 @@ import DateRangePicker, { type DateRange } from '../../../components/forms/DateR
 import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
 import { GenerationSurface } from '../../../components/generation/GenerationSurface'
 import { useGenerationSurface } from '../../../hooks/useGenerationSurface'
+import { events } from '../../../lib/analytics'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -984,6 +985,13 @@ export default function TripResult({ params }: Props) {
   // state aren't trampled by subsequent renders.
   const [collapsedDiaGroups, setCollapsedDiaGroups] = useState<Set<number>>(new Set())
   const initialCollapsedDiaSetupRef = useRef(false)
+
+  // Engagement-event sampling: fire `day_expanded` + `check_toggled` once
+  // per surface key per trip session, otherwise toggling on/off would
+  // spam GA's event budget with no signal value. Keys are stringified
+  // primitives so resets are cheap when the trip changes.
+  const firedDayExpandsRef = useRef<Set<string>>(new Set())
+  const firedCheckTogglesRef = useRef<Set<string>>(new Set())
   const [toast, setToast]     = useState<string | null>(null)
   const [packedSet, setPackedSet] = useState<Set<number>>(new Set())
   const [newPackingItem, setNewPackingItem] = useState('')
@@ -1221,6 +1229,17 @@ export default function TripResult({ params }: Props) {
           days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
           doneChecks: doneChecksArr,
         })
+
+        // ── Analytics: retention signal ───────────────────────────────
+        // Fires every time a saved trip is loaded from DB. days_since
+        // creation lets dashboards distinguish "user navigated within
+        // an active session" (≤1 day) from "user came back to plan
+        // more" (>1 day) — the latter is the actual retention metric.
+        const createdAt = (data as any)?.created_at
+        const daysSince = typeof createdAt === 'string'
+          ? Math.max(0, Math.round((Date.now() - new Date(createdAt).getTime()) / 86_400_000))
+          : undefined
+        events.tripReopened({ trip_id: savedTripId, days_since_creation: daysSince })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Error desconocido')
       } finally {
@@ -1261,6 +1280,23 @@ export default function TripResult({ params }: Props) {
           ? `🎉 ¡Pago confirmado! Ahora tienes ${fresh?.trips_remaining ?? 0} viajes disponibles`
           : `🎉 Payment confirmed! You now have ${fresh?.trips_remaining ?? 0} trips available`)
     showToast(msg)
+
+    // ── Analytics: revenue conversion ──────────────────────────────
+    // Fires AFTER the Stripe webhook has been confirmed via the
+    // PaymentPendingOverlay → onCredited path (i.e., the purchase is
+    // real, not a redirect-only success_url hit). Sends transaction_id
+    // so deduplication works in Meta / GA dashboards even if the user
+    // refreshes the page. Value is intentionally omitted — we don't
+    // have the price here, and GA's Ecommerce report will be
+    // populated later by the server-side webhook (Conversions API
+    // upgrade). For now this gets us a Purchase event in browser
+    // attribution so paid campaigns can optimize toward ROI.
+    events.purchase({
+      transaction_id: pendingSessionId,
+      content_name:   fresh?.is_subscriber ? 'subscription' : 'trip-pack',
+      trip_id:        tripId ?? undefined,
+    })
+
     setCheckoutConfirmed(true)
     setGenerateKey(k => k + 1)
   }
@@ -1485,6 +1521,20 @@ export default function TripResult({ params }: Props) {
         // Persist so login redirect restores this exact trip
         sessionStorage.setItem('tripCache', JSON.stringify({ schemaVersion: TRIP_CACHE_SCHEMA, tripData: tripDataRaw, inputs: currentInputs }))
 
+        // ── Analytics: the most meaningful product signal ──────────
+        // Fires only on initial AI generation (not regen/replace, not
+        // cache-hit restores) so Meta optimization treats this as a
+        // top-of-funnel conversion. Pairs with the events.lead fired
+        // on form submit — together they let the campaign optimize
+        // for "users who actually got an itinerary" instead of just
+        // "users who clicked the ad."
+        events.itineraryGenerated({
+          destination,
+          nights:    durationDaysFromNights(nights),
+          locale:    locale === 'en' ? 'en' : 'es',
+          traveler:  prefTraveler || undefined,
+        })
+
         setRawTripData(tripDataRaw)
         lastGeneratedInputsRef.current = currentFp
         const normalized = normalizeTripData({ trip_data: tripDataRaw }, destination, nights, interests, locale === 'es' ? 'es' : 'en', { type: prefTraveler, childCount: prefChildren.length })
@@ -1507,6 +1557,11 @@ export default function TripResult({ params }: Props) {
             // tripId returned from polling instead of POSTing to /api/trips,
             // which would create a duplicate row.
             setTripId(asyncTripId)
+            // Trip is now persisted — fire the commitment signal. Fires
+            // exactly once per trip (on the INITIAL gen autosave). Carries
+            // the canonical DB trip_id so analytics can stitch this onto the
+            // preceding itinerary_generated event.
+            events.tripSaved({ trip_id: asyncTripId, signed_in: true })
             lastSavedContentRef.current = JSON.stringify({
               title: normalized.title, subtitle: normalized.subtitle,
               days: normalized.days, packing: normalized.packing, budgetRows: normalized.budgetRows,
@@ -1556,6 +1611,10 @@ export default function TripResult({ params }: Props) {
                 const autoSaveData = await autoSaveRes.json().catch(() => null)
                 if (autoSaveData?.success) {
                   setTripId(autoSaveData.trip_id)
+                  // Trip is now persisted via /api/trips POST — sync-path
+                  // mirror of the async tripSaved emit above. Fires exactly
+                  // once per trip on the initial gen autosave.
+                  events.tripSaved({ trip_id: autoSaveData.trip_id, signed_in: true })
                   // Baseline: now that the DB entry exists, mark current content as saved
                   // so autosave only fires if the user edited during the POST window
                   lastSavedContentRef.current = JSON.stringify({
@@ -1909,6 +1968,19 @@ export default function TripResult({ params }: Props) {
       }
     }
 
+    // ── Analytics: regen quality signal ──────────────────────────
+    // `reason` distinguishes drawer-driven regen (user changed prefs)
+    // from manual retry. High drawer-edit regen rate → AI defaults
+    // miss the user's intent. High manual-retry rate → AI output
+    // quality is below expectations. Read prefOpen / regenConfirmOpen
+    // BEFORE the setX(false) calls below so we know which surface
+    // triggered this regen.
+    events.regenerateRequested({
+      trip_id:     tripId ?? undefined,
+      reason:      prefOpen || regenConfirmOpen ? 'drawer-edit' : 'manual',
+      destination: prefDest,
+      nights:      durationDaysFromNights(nights),
+    })
     setPrefOpen(false)
     setRegenConfirmOpen(false)
     // Snapshot the current working state before overwriting (preserves manual edits)
@@ -2151,6 +2223,9 @@ export default function TripResult({ params }: Props) {
       console.log('[saveTrip] response data:', JSON.stringify(data))
       if (data.success) {
         setTripId(data.trip_id)
+        // Anon→signup→save flow ends here. Fire tripSaved with signed_in
+        // = true since the user authenticated to reach this branch.
+        events.tripSaved({ trip_id: data.trip_id, signed_in: true })
         sessionStorage.removeItem('tripCache')
         // Update URL so a browser refresh loads from DB instead of re-generating
         if (typeof window !== 'undefined') {
@@ -2206,7 +2281,20 @@ export default function TripResult({ params }: Props) {
   }
 
   function toggleDay(n: number) {
-    setCollapsedDays(prev => { const s = new Set(prev); s.has(n) ? s.delete(n) : s.add(n); return s })
+    setCollapsedDays(prev => {
+      const s = new Set(prev)
+      const isExpanding = s.has(n)  // currently collapsed → will be expanded
+      s.has(n) ? s.delete(n) : s.add(n)
+      // Fire on EXPAND only (not collapse), once per day per trip session.
+      if (isExpanding) {
+        const key = `${tripId ?? 'unsaved'}:${n}`
+        if (!firedDayExpandsRef.current.has(key)) {
+          firedDayExpandsRef.current.add(key)
+          events.itineraryDayExpanded({ trip_id: tripId ?? undefined, day_number: n })
+        }
+      }
+      return s
+    })
   }
 
   function toggleCard(id: string) {
@@ -2224,6 +2312,20 @@ export default function TripResult({ params }: Props) {
       return s
     })
     setHasUserEdits(true)
+    // Fire once per check_id per trip session — symmetrical with
+    // itinerary_day_expanded. Toggling on/off is counted as one
+    // engagement event, not two.
+    const key = `${tripId ?? 'unsaved'}:${id}`
+    if (!firedCheckTogglesRef.current.has(key)) {
+      firedCheckTogglesRef.current.add(key)
+      // Best-effort milestone tag from the check ID prefix used by
+      // deriveChecksFromDays (pretrip-book-hotel, pretrip-pack, check-…).
+      const milestone =
+        id.startsWith('pretrip-book-hotel') ? 'hospedaje'
+        : id === 'pretrip-pack'             ? 'listos'
+        : undefined
+      events.checkToggled({ trip_id: tripId ?? undefined, check_id: id, milestone })
+    }
   }
 
   function deleteItem(itemId: string, dayN: number) {
@@ -2264,6 +2366,16 @@ export default function TripResult({ params }: Props) {
     sessionStorage.removeItem('tripCache_key')
     sessionStorage.removeItem('tripCache_data')
     console.log('CACHE CLEARED')
+    // ── Analytics: replace = explicit "throw away and rebuild" intent ──
+    // Counted separately from regenerate() (reason='replace') so the
+    // dashboard can spot users churning through generations vs users
+    // iterating via the drawer.
+    events.regenerateRequested({
+      trip_id:     tripId ?? undefined,
+      reason:      'replace',
+      destination: prefDest,
+      nights:      durationDaysFromNights(nights),
+    })
     setLoading(true)
     setLoadingKind('generating')
     setError(null)
@@ -4506,6 +4618,20 @@ export default function TripResult({ params }: Props) {
                     rel="noopener noreferrer"
                     className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
                     onClick={() => {
+                      // Unified affiliate click — fires to BOTH Meta + GA via
+                      // events.affiliateClicked, stamped with trip_id so the
+                      // monetization dashboard can attribute revenue back to
+                      // the trip that drove the click. Keep the legacy
+                      // trackAffiliateClick call until the dashboards that
+                      // depend on its `affiliate_click` event name migrate.
+                      events.affiliateClicked({
+                        provider:    opt.provider,
+                        surface:     'day-block-modal',
+                        category:    bookingModal.itemType,
+                        destination,
+                        trip_id:     tripId ?? undefined,
+                        meta:        { item_name: bookingModal.itemName },
+                      })
                       trackAffiliateClick(bookingModal.itemType, opt.provider, destination)
                       setBookingModal(null)
                     }}

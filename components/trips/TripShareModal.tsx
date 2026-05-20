@@ -20,6 +20,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { useLocale } from 'next-intl'
+import { events } from '../../lib/analytics'
 
 // ── Icons (identical to CuratedGuideShareModal) ────────────────────────────────
 
@@ -130,6 +131,11 @@ export function TripShareModal({ tripId, destination, duration, isOpen, onClose 
     navigator.clipboard.writeText(shareUrl).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2200)
+      // Strong commitment signal — sharing a trip is one of the highest-
+      // intent actions a user takes. Stamped with trip_id so the
+      // monetization dashboard can see if shared trips have a higher
+      // booking-intent rate (hypothesis: yes, meaningfully).
+      events.tripShared({ trip_id: tripId, audience: 'link' })
     })
   }
 
