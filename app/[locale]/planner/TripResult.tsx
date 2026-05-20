@@ -510,6 +510,14 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en' }): Che
       const id = `check-${item.id}`   // stable: tied to item.id, not position
       switch (item.type) {
         case 'hotel':
+          // Skip check-out / departure items — the user never "confirms"
+          // a checkout the way they confirm a check-in. Check-in (or the
+          // pre-trip "Reservar hotel" auto-inject) is the actionable
+          // booking moment. The block still renders in the day card; we
+          // just don't add a check for it. Matches ES + EN keywords.
+          if (/check[\s-]?out|checkout|salida del hotel|salida hotel|departure|almacenamiento de equipaje|luggage storage/i.test(item.name)) {
+            break
+          }
           // Deduplicate: same hotel across multiple days → one pre-trip confirmation
           if (!seenHotels.has(item.name)) {
             seenHotels.add(item.name)
