@@ -541,15 +541,30 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en'; segmen
         done: false,
       })
     }
-    // Universal pre-trip: pack. Without this auto-inject the `Listos`
-    // milestone in the Readiness Bar perpetually shows as n/a (dimmed)
-    // because the AI rarely emits packing checks on its own.
-    checks.push({
-      id:   'pretrip-pack',
-      icon: '🧳',
-      text: locale === 'en' ? 'Pack bag' : 'Empacar maleta',
-      done: false,
-    })
+    // Universal pre-trip prep — the Listos milestone bucket. These exist
+    // because the AI doesn't emit pre-trip items; without them Listos
+    // shows 0/1 (just the packing check) and gets marked done with a
+    // single click, which feels wrong (the user expects pre-trip prep
+    // to be a real bucket, not a single item). Stable IDs so done-state
+    // survives regenerate. Icon '🧳' routes them all to Listos via the
+    // milestone categorizer's icon path.
+    const listosCopy = locale === 'en' ? {
+      pack:      'Pack bag',
+      documents: 'Confirm passport & documents',
+      offline:   'Save bookings on your phone',
+      devices:   'Charge devices and adapters',
+    } : {
+      pack:      'Empacar maleta',
+      documents: 'Confirmar pasaporte y documentos',
+      offline:   'Guardar reservas en el teléfono',
+      devices:   'Cargar dispositivos y adaptadores',
+    }
+    checks.push(
+      { id: 'pretrip-pack',      icon: '🧳', text: listosCopy.pack,      done: false },
+      { id: 'pretrip-documents', icon: '🧳', text: listosCopy.documents, done: false },
+      { id: 'pretrip-offline',   icon: '🧳', text: listosCopy.offline,   done: false },
+      { id: 'pretrip-devices',   icon: '🧳', text: listosCopy.devices,   done: false },
+    )
   }
 
   days.forEach(day => {

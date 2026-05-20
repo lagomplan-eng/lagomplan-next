@@ -353,6 +353,12 @@ function MilestonePill({
       ? 'bg-transparent text-white/85 border-white/20'
       : 'bg-transparent text-white/30 border-white/10'
 
+  // Progress count is shown on BOTH pending and done states so the user
+  // sees "4/4" on completion instead of an empty pill (which previously
+  // looked like a state change without confirmation of how many items
+  // were actually in the bucket).
+  const countColor = state === 'done' ? 'text-[#0F3A33]/60' : 'text-white/40'
+
   return (
     <div
       className={[
@@ -361,8 +367,8 @@ function MilestonePill({
       ].join(' ')}
     >
       <span className="font-sans text-[11px] font-medium whitespace-nowrap">{label}</span>
-      {progress && state === 'pending' && (
-        <span className="font-mono text-[9px] text-white/40 tabular-nums">{progress}</span>
+      {progress && state !== 'na' && (
+        <span className={`font-mono text-[9px] tabular-nums ${countColor}`}>{progress}</span>
       )}
     </div>
   )
