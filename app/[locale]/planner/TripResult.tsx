@@ -1297,6 +1297,23 @@ export default function TripResult({ params }: Props) {
       trip_id:        tripId ?? undefined,
     })
 
+    // ── Post-purchase gate cleanup ─────────────────────────────────
+    // When the user came back from Stripe with credits=0 (pre-purchase),
+    // the generate effect's paywall guard fired openPaywall() early,
+    // setting paywallOpen=true. After this credit refresh, the paywall
+    // has no reason to be open — but the (paywallOpen && !rawTripData)
+    // gate further down would otherwise render an empty page until the
+    // AI gen completes and triggers closePaywall via setRawTripData.
+    // That blank-page interval is what the user sees as "no thinking
+    // messages, just empty content then the trip pops in."
+    //
+    // Closing the paywall here AND pre-setting loadingKind='generating'
+    // means the next render falls straight into the loading branch with
+    // the GenerationSurface, no blank-page intermediate state.
+    closePaywall()
+    setLoading(true)
+    setLoadingKind('generating')
+
     setCheckoutConfirmed(true)
     setGenerateKey(k => k + 1)
   }
