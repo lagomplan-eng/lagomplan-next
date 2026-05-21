@@ -6,10 +6,14 @@
 // listeners antes de que el click pudiera completarse.
 
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useLocale } from 'next-intl'
 
-const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio',
-                'Agosto','Septiembre','Octubre','Noviembre','Diciembre']
-const DAYS   = ['Lu','Ma','Mi','Ju','Vi','Sá','Do']
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio',
+                   'Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+const MONTHS_EN = ['January','February','March','April','May','June','July',
+                   'August','September','October','November','December']
+const DAYS_ES   = ['Lu','Ma','Mi','Ju','Vi','Sá','Do']
+const DAYS_EN   = ['Mo','Tu','We','Th','Fr','Sa','Su']
 
 function startOfDay(d: Date) {
   const c = new Date(d); c.setHours(0,0,0,0); return c
@@ -20,8 +24,8 @@ function sameDay(a: Date | null, b: Date | null) {
 function nightsBetween(a: Date, b: Date) {
   return Math.round(Math.abs(b.getTime() - a.getTime()) / 86_400_000)
 }
-function fmtDate(d: Date) {
-  return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}. ${d.getFullYear()}`
+function fmtDate(d: Date, months: string[]) {
+  return `${d.getDate()} ${months[d.getMonth()].slice(0,3)}. ${d.getFullYear()}`
 }
 
 export interface DateRange {
@@ -51,7 +55,8 @@ function buildMonthGrid(
   container: HTMLDivElement,
   year: number,
   month: number,
-  minDate: Date
+  minDate: Date,
+  days: string[]
 ): Cell[] {
   const firstDay    = new Date(year, month, 1).getDay()
   const startOffset = firstDay === 0 ? 6 : firstDay - 1
@@ -63,7 +68,7 @@ function buildMonthGrid(
   // Day-of-week header
   const header = document.createElement('div')
   header.style.cssText = 'display:grid;grid-template-columns:repeat(7,1fr);margin-bottom:4px;'
-  DAYS.forEach(d => {
+  days.forEach(d => {
     const s = document.createElement('span')
     s.textContent = d
     s.style.cssText = 'font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;color:#A0A0A0;text-align:center;padding:3px 0;text-transform:uppercase;display:block;'
@@ -165,6 +170,30 @@ function applyClasses(
 
 // ── Main component ───────────────────────────────────────────────
 export default function DateRangePicker({ value, onChange, minDate }: Props) {
+  const localeRaw = useLocale()
+  const isES   = localeRaw !== 'en'
+  const MONTHS = isES ? MONTHS_ES : MONTHS_EN
+  const DAYS   = isES ? DAYS_ES   : DAYS_EN
+  // Locale-aware copy table — used for the trigger pill + popup hint.
+  const t = isES ? {
+    pickDates:    'Selecciona tus fechas',
+    pickStart:    'Selecciona la fecha de salida',
+    pickEnd:      'Ahora elige la fecha de regreso',
+    pickReturn:   'Elige regreso',
+    nightOne:     'noche seleccionada',
+    nightMany:    'noches seleccionadas',
+    nightShort:   'noche',
+    nightsShort:  'noches',
+  } : {
+    pickDates:    'Pick your dates',
+    pickStart:    'Pick your departure date',
+    pickEnd:      'Now pick your return date',
+    pickReturn:   'Pick return',
+    nightOne:     'night selected',
+    nightMany:    'nights selected',
+    nightShort:   'night',
+    nightsShort:  'nights',
+  }
   const min     = startOfDay(minDate ?? new Date())
   const now     = new Date()
 
@@ -214,8 +243,8 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
     if (!open) return
     if (!cal0Ref.current || !cal1Ref.current) return
 
-    cells0Ref.current = buildMonthGrid(cal0Ref.current, vy, vm, min)
-    cells1Ref.current = buildMonthGrid(cal1Ref.current, vy2, vm2, min)
+    cells0Ref.current = buildMonthGrid(cal0Ref.current, vy, vm, min, DAYS)
+    cells1Ref.current = buildMonthGrid(cal1Ref.current, vy2, vm2, min, DAYS)
 
     const allCells = [...cells0Ref.current, ...cells1Ref.current]
 
@@ -283,10 +312,10 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
   }
 
   const hint = !value.start
-    ? 'Selecciona la fecha de salida'
+    ? t.pickStart
     : !value.end
-      ? 'Ahora elige la fecha de regreso'
-      : `${value.nights} ${value.nights === 1 ? 'noche seleccionada' : 'noches seleccionadas'}`
+      ? t.pickEnd
+      : `${value.nights} ${value.nights === 1 ? t.nightOne : t.nightMany}`
 
   const triggerCls = [
     'w-full flex items-center gap-2 text-left font-sans text-[13px]',
@@ -304,20 +333,20 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
         {value.start && value.end ? (
           <>
             <span className="flex-1 text-[#0F1A16]">
-              {fmtDate(value.start)} — {fmtDate(value.end)}
+              {fmtDate(value.start, MONTHS)} — {fmtDate(value.end, MONTHS)}
             </span>
             <span className="font-mono text-[9px] text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(27,77,62,.2)] px-2 py-0.5 rounded-full whitespace-nowrap">
-              {value.nights} {value.nights === 1 ? 'noche' : 'noches'}
+              {value.nights} {value.nights === 1 ? t.nightShort : t.nightsShort}
             </span>
           </>
         ) : value.start ? (
           // Start is set but end isn't — multi-city seeds Segment 2+ this way.
           // Show the start so the pre-filled value is visible at a glance.
           <span className="flex-1 text-[#0F1A16]">
-            {fmtDate(value.start)} <span className="text-[#7A7A76]">— Elige regreso</span>
+            {fmtDate(value.start, MONTHS)} <span className="text-[#7A7A76]">— {t.pickReturn}</span>
           </span>
         ) : (
-          <span className="flex-1 text-[#BDBDBD]">Selecciona tus fechas</span>
+          <span className="flex-1 text-[#BDBDBD]">{t.pickDates}</span>
         )}
         <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${open ? 'text-[#1B4D3E]' : 'text-[#C8D9D3]'}`} viewBox="0 0 16 16" fill="currentColor">
           <path d="M5 1a1 1 0 00-1 1v1H3a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-1V2a1 1 0 00-2 0v1H6V2a1 1 0 00-1-1zM2 7h12v7H2V7z"/>

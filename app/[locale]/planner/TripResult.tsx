@@ -3754,7 +3754,7 @@ export default function TripResult({ params }: Props) {
                 className="font-mono text-[10px] font-medium tracking-[.06em] text-[#0F3A33]"
                 onClick={addDay}
               >
-                + Añadir día
+                {isES ? '+ Añadir día' : '+ Add day'}
               </button>
             </div>
 
@@ -3924,13 +3924,13 @@ export default function TripResult({ params }: Props) {
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#0F3A33] hover:bg-[rgba(15,58,51,.05)] transition-all"
                                       onClick={() => openEditModal(item, day.n)}
                                     >
-                                      Editar
+                                      {isES ? 'Editar' : 'Edit'}
                                     </button>
                                     <button
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#B94030] hover:bg-[rgba(185,64,48,.05)] transition-all"
                                       onClick={() => deleteItem(item.id, day.n)}
                                     >
-                                      Eliminar
+                                      {isES ? 'Eliminar' : 'Remove'}
                                     </button>
                                   </div>
                                 </div>
@@ -3944,7 +3944,7 @@ export default function TripResult({ params }: Props) {
                           <div className="flex items-center gap-[7px] mx-[18px] mb-3.5 px-3 py-2.5 bg-[rgba(107,143,134,.07)] border border-[rgba(107,143,134,.2)] rounded-[6px]">
                             <div className="w-[5px] h-[5px] rounded-full bg-[#6B8F86] shrink-0 animate-pulse" />
                             <div className="text-[11px] text-[#6B8F86] leading-[1.4]">
-                              <strong className="font-semibold">Siguiente paso:</strong> {dayNextCheck.text}
+                              <strong className="font-semibold">{isES ? 'Siguiente paso:' : 'Next step:'}</strong> {dayNextCheck.text}
                             </div>
                           </div>
                         )}
@@ -3957,7 +3957,9 @@ export default function TripResult({ params }: Props) {
                           <span className="w-[17px] h-[17px] rounded-full bg-[#E2DAD2] flex items-center justify-center text-[12px] text-[#3D3D3A] shrink-0">
                             +
                           </span>
-                          Añadir al {day.label || `Día ${day.n}`}
+                          {isES
+                            ? `Añadir al ${day.label || `Día ${day.n}`}`
+                            : `Add to ${day.label || `Day ${day.n}`}`}
                         </button>
                       </div>
                     </div>
@@ -3979,7 +3981,7 @@ export default function TripResult({ params }: Props) {
                 >
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Planea tu viaje
+                      {isES ? 'Planea tu viaje' : 'Plan your trip'}
                     </span>
                     {totalChecks > 0 && (
                       <span className="font-mono text-[9px] font-medium tracking-[.06em] text-[#6B8F86] bg-[rgba(107,143,134,.12)] px-[6px] py-px rounded-full shrink-0">
@@ -4013,7 +4015,7 @@ export default function TripResult({ params }: Props) {
                     {checksBefore.length > 0 && (
                       <>
                         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8]">
-                          Antes del viaje
+                          {isES ? 'Antes del viaje' : 'Before the trip'}
                         </div>
                         {checksBefore.map(check => (
                           <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
@@ -4024,7 +4026,7 @@ export default function TripResult({ params }: Props) {
                     {dayNums.length > 0 && (
                       <>
                         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8] mt-1.5">
-                          Por día
+                          {isES ? 'Por día' : 'By day'}
                         </div>
                         {dayNums.map(dayN => {
                           const dayChecks = checks.filter(c => c.day === dayN)
@@ -4040,7 +4042,7 @@ export default function TripResult({ params }: Props) {
                               >
                                 <div className="flex items-center gap-[7px]">
                                   <span className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76]">
-                                    Día {String(dayN).padStart(2, '0')}
+                                    {isES ? 'Día' : 'Day'} {String(dayN).padStart(2, '0')}
                                   </span>
                                   {dayData && (
                                     <span className="text-[11.5px] font-medium text-[#1C1C1A] truncate max-w-[110px]">
@@ -4086,7 +4088,7 @@ export default function TripResult({ params }: Props) {
 
                     {totalChecks === 0 && (
                       <p className="text-[11px] text-[#7A7A76] py-2">
-                        No hay elementos de planificación.
+                        {isES ? 'No hay elementos de planificación.' : 'No planning items yet.'}
                       </p>
                     )}
                   </div>
@@ -4101,7 +4103,7 @@ export default function TripResult({ params }: Props) {
                 >
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Qué llevar
+                      {isES ? 'Qué llevar' : 'What to pack'}
                     </span>
                     {packing.length > 0 && (
                       <span className="font-mono text-[9px] font-medium tracking-[.06em] text-[#6B8F86] bg-[rgba(107,143,134,.12)] px-[6px] py-px rounded-full shrink-0">
@@ -4131,7 +4133,7 @@ export default function TripResult({ params }: Props) {
                     <div className="px-4 pt-3 pb-2 flex flex-col gap-[5px]">
                       {packing.length === 0 && (
                         <p className="text-[11px] text-[#7A7A76] py-1">
-                          Sin items aún. Añade el primero abajo.
+                          {isES ? 'Sin items aún. Añade el primero abajo.' : 'No items yet. Add the first one below.'}
                         </p>
                       )}
                       {packing.map((item, i) => (
@@ -4166,7 +4168,7 @@ export default function TripResult({ params }: Props) {
                           <button
                             type="button"
                             onClick={() => removePackingItem(i)}
-                            aria-label="Eliminar item"
+                            aria-label={isES ? 'Eliminar item' : 'Remove item'}
                             className="w-4 h-4 rounded-[3px] flex items-center justify-center text-[9px] text-[#B8B5AF] hover:bg-[#E4DFD8] hover:text-[#A32D2D] transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
                           >
                             ✕
@@ -4183,7 +4185,7 @@ export default function TripResult({ params }: Props) {
                           value={newPackingItem}
                           onChange={e => setNewPackingItem(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addPackingItem() } }}
-                          placeholder="Añadir ítem…"
+                          placeholder={isES ? 'Añadir ítem…' : 'Add item…'}
                           className="flex-1 font-sans text-[11.5px] text-[#1C1C1A] bg-transparent border-none outline-none placeholder:text-[#B8B5AF]"
                         />
                         <button
@@ -4192,7 +4194,7 @@ export default function TripResult({ params }: Props) {
                           disabled={!newPackingItem.trim()}
                           className="font-mono text-[9px] font-medium tracking-[.04em] text-[#0F3A33] bg-[#EDE7E1] hover:bg-[#E0D9D1] disabled:opacity-40 disabled:cursor-not-allowed rounded-[4px] px-[8px] py-[4px] transition-colors shrink-0"
                         >
-                          + Añadir
+                          {isES ? '+ Añadir' : '+ Add'}
                         </button>
                       </div>
                     </div>
@@ -4211,7 +4213,7 @@ export default function TripResult({ params }: Props) {
                   <div className="flex items-center gap-2">
                     <span>💰</span>
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Presupuesto
+                      {isES ? 'Presupuesto' : 'Budget'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -4243,7 +4245,7 @@ export default function TripResult({ params }: Props) {
                     {budgetRows.length === 0 ? (
                       <div className="px-4 py-3">
                         <p className="text-[11px] text-[#7A7A76]">
-                          El plan no incluye desglose de presupuesto.
+                          {isES ? 'El plan no incluye desglose de presupuesto.' : 'The plan does not include a budget breakdown.'}
                         </p>
                       </div>
                     ) : (
@@ -4251,7 +4253,7 @@ export default function TripResult({ params }: Props) {
                         {/* ── Currency toggle ── */}
                         <div className="flex items-center justify-between px-4 py-[7px] border-b border-[#E4DFD8]">
                           <span className="font-mono text-[9px] text-[#B8B5AF]">
-                            Montos en {budgetCurrency} · sin conversión
+                            {isES ? `Montos en ${budgetCurrency} · sin conversión` : `Amounts in ${budgetCurrency} · no conversion`}
                           </span>
                           <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
                             {(['MXN', 'USD'] as const).map(c => (
@@ -4275,8 +4277,8 @@ export default function TripResult({ params }: Props) {
                         {/* ── Summary bar ── */}
                         <div className="grid grid-cols-2 border-b border-[#E4DFD8]">
                           {[
-                            { label: 'Estimado',   value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
-                            { label: 'Confirmado', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
+                            { label: isES ? 'Estimado'   : 'Estimated', value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
+                            { label: isES ? 'Confirmado' : 'Confirmed', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
                           ].map((col, ci) => (
                             <div
                               key={col.label}
@@ -4391,17 +4393,17 @@ export default function TripResult({ params }: Props) {
                         {/* ── Footer totals ── */}
                         <div className="px-4 pt-[10px] pb-[13px] border-t-[1.5px] border-[#CEC8C0]">
                           <div className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-[7px]">
-                            Resumen total · {budgetCurrency}
+                            {isES ? `Resumen total · ${budgetCurrency}` : `Total summary · ${budgetCurrency}`}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Estimado</span>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">{isES ? 'Estimado' : 'Estimated'}</span>
                               <span className="font-display text-[13px] text-[#0F3A33]">
                                 {fmtAmt(userTotal)}
                               </span>
                             </div>
                             <div>
-                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Confirmado</span>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">{isES ? 'Confirmado' : 'Confirmed'}</span>
                               <span className={`font-display ${hasActual ? 'text-[13px] text-[#2D6B57]' : 'text-[12px] text-[#B8B5AF]'}`}>
                                 {hasActual ? fmtAmt(actualTotal) : '—'}
                               </span>
@@ -4450,7 +4452,9 @@ export default function TripResult({ params }: Props) {
           >
             <div className="flex items-start justify-between mb-[18px]">
               <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                {editIsNew ? 'Añadir actividad' : 'Editar actividad'}
+                {editIsNew
+                  ? (isES ? 'Añadir actividad' : 'Add activity')
+                  : (isES ? 'Editar actividad' : 'Edit activity')}
               </h2>
               <button
                 className="w-6 h-6 rounded-[5px] bg-[#EDE7E1] flex items-center justify-center text-[12px] text-[#3D3D3A]"
