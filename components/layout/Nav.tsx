@@ -69,6 +69,12 @@ export default function Nav() {
   const pathname  = usePathname()
   const [open, setOpen]               = useState(false)
   const [dropdownOpen, setDropdownOpen] = useState(false)
+  // Locale-switch confirmation: when the user is on /planner with an UNSAVED
+  // generation in flight (destination params in URL, no trip_id), a locale
+  // switch triggers a fresh AI generation in the new language — which costs
+  // 1 credit and overwrites the current itinerary. We stash the target locale
+  // here, show a modal, and only proceed on confirm.
+  const [pendingLocale, setPendingLocale] = useState<Locale | null>(null)
   const user = useUser()
 
   // Close mobile drawer on route change
@@ -77,9 +83,7 @@ export default function Nav() {
   // ── Language switcher ──────────────────────────────────
   // Full page reload on locale switch so Google Maps (and other singleton SDKs)
   // are only ever initialized once per page load.
-  function switchLocale(target: Locale) {
-    if (target === locale) return
-
+  function performLocaleSwitch(target: Locale) {
     // 1. Entity detail pages render a hidden input with the pre-computed
     //    alternate-locale URL (different slug per locale). Use it when present.
     if (typeof document !== 'undefined') {
@@ -96,6 +100,28 @@ export default function Nav() {
     const basePath = realPath.replace(/^\/(en|es)/, '')
     const search   = typeof window !== 'undefined' ? window.location.search : ''
     window.location.href = `/${target}${basePath || '/'}${search}`
+  }
+
+  function switchLocale(target: Locale) {
+    if (target === locale) return
+
+    // Gate the planner unsaved-gen case behind a confirmation modal. The
+    // generate effect in TripResult re-fires on a fresh page load with form
+    // params but no trip_id, which means the locale switch silently consumes
+    // a credit. Saved trips (trip_id present) and other pages skip the modal.
+    if (typeof window !== 'undefined') {
+      const path = window.location.pathname
+      const params = new URLSearchParams(window.location.search)
+      const onPlanner   = /^\/(en|es)\/planner\/?$/.test(path)
+      const hasTripId   = params.has('trip_id')
+      const hasGenInput = params.has('destination')
+      if (onPlanner && !hasTripId && hasGenInput) {
+        setPendingLocale(target)
+        return
+      }
+    }
+
+    performLocaleSwitch(target)
   }
 
   // Feature flag — flip to `true` to re-expose the Mundial hub in the navbar.
@@ -304,6 +330,50 @@ export default function Nav() {
               Idioma / Language
             </span>
             <LangToggle locale={locale} onSwitch={switchLocale} />
+          </div>
+        </div>
+      )}
+
+      {/* ── Locale-switch confirmation (planner, unsaved gen) ─────────────── */}
+      {pendingLocale && (
+        <div
+          className="fixed inset-0 bg-black/40 backdrop-blur-[6px] z-[300] flex items-center justify-center p-[18px]"
+          onClick={() => setPendingLocale(null)}
+        >
+          <style>{`@keyframes navModalIn { from { opacity:0; transform:translateY(8px) scale(.98) } to { opacity:1; transform:none } }`}</style>
+          <div
+            className="bg-[#FAF8F5] rounded-[26px] p-[26px] w-full max-w-[440px] shadow-[0_8px_40px_rgba(15,58,51,.12)]"
+            style={{ animation: 'navModalIn .25s ease' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="mb-5">
+              <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-3">
+                {locale === 'es'
+                  ? `¿Cambiar idioma a ${pendingLocale === 'en' ? 'inglés' : 'español'}?`
+                  : `Switch language to ${pendingLocale === 'en' ? 'English' : 'Spanish'}?`}
+              </h2>
+              <p className="text-[13px] font-light text-[#7A7A76] leading-[1.65]">
+                {locale === 'es'
+                  ? <>Cambiar el idioma generará un nuevo itinerario en {pendingLocale === 'en' ? 'inglés' : 'español'} y consumirá <strong className="text-[#1C1C1A] font-medium">1 crédito</strong>. Los cambios que hayas hecho a este viaje se perderán.<br /><br />¿Quieres continuar?</>
+                  : <>Switching the language will generate a fresh itinerary in {pendingLocale === 'en' ? 'English' : 'Spanish'} and use <strong className="text-[#1C1C1A] font-medium">1 credit</strong>. Any edits you made to this trip will be lost.<br /><br />Continue?</>}
+              </p>
+            </div>
+            <div className="flex flex-col gap-2">
+              <button
+                onClick={() => { const target = pendingLocale; setPendingLocale(null); performLocaleSwitch(target) }}
+                className="text-[13px] font-medium text-white px-4 py-[9px] bg-[#0F3A33] rounded-[8px] w-full hover:bg-[#12453d] transition-colors"
+              >
+                {locale === 'es'
+                  ? `Sí, cambiar a ${pendingLocale === 'en' ? 'inglés' : 'español'}`
+                  : `Yes, switch to ${pendingLocale === 'en' ? 'English' : 'Spanish'}`}
+              </button>
+              <button
+                onClick={() => setPendingLocale(null)}
+                className="text-[13px] font-medium text-[#0F3A33] px-4 py-[9px] bg-white border border-[#CEC8C0] rounded-[8px] w-full hover:bg-[#EDE7E1] transition-colors"
+              >
+                {locale === 'es' ? 'Cancelar' : 'Cancel'}
+              </button>
+            </div>
           </div>
         </div>
       )}
