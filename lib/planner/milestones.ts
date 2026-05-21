@@ -114,6 +114,14 @@ export function computeMilestones({ daysCount, checks }: ComputeArgs): Milestone
     if (id !== 'itinerario') buckets[id].push(c)
   }
 
+  // Listos is the META milestone — semantically it means "the trip is ready
+  // to travel," not "the pre-trip checklist is done." So its 'done' state
+  // requires every check across every bucket to be complete, not just the
+  // four pretrip-* items routed into its own bucket. Without this guard,
+  // marking the four packing/docs/devices/offline checks would flip Listos
+  // green while 35+ booking checks were still pending — misleading.
+  const tripAllDone = checks.length > 0 && checks.every(c => c.done)
+
   return MILESTONE_DEFS.map<Milestone>(def => {
     if (def.id === 'itinerario') {
       return {
@@ -137,11 +145,17 @@ export function computeMilestones({ daysCount, checks }: ComputeArgs): Milestone
       }
     }
     const doneCount = matched.filter(c => c.done).length
+    const bucketDone = doneCount === matched.length
+    // Listos: filled only when the WHOLE trip is ready. Other milestones:
+    // filled when their own bucket is fully checked (existing behavior).
+    const state = def.id === 'listos'
+      ? (tripAllDone ? 'done' : 'pending')
+      : (bucketDone  ? 'done' : 'pending')
     return {
       id:            def.id,
       labelES:       def.labelES,
       labelEN:       def.labelEN,
-      state:         doneCount === matched.length ? 'done' : 'pending',
+      state,
       matchedChecks: matched.length,
       doneChecks:    doneCount,
     }
