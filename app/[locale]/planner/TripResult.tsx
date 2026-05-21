@@ -3304,7 +3304,7 @@ export default function TripResult({ params }: Props) {
                 className="flex items-center justify-center gap-1.5 mt-2.5 w-full font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] bg-transparent border border-[rgba(15,58,51,.2)] rounded-[8px] px-3.5 py-[7px] hover:bg-[rgba(15,58,51,.06)] transition-colors"
                 onClick={() => setPrefOpen(v => !v)}
               >
-                Ajustar preferencias{' '}
+                {isES ? 'Ajustar preferencias' : 'Adjust preferences'}{' '}
                 <span
                   className="inline-block transition-transform duration-300"
                   style={{ transform: prefOpen ? 'rotate(180deg)' : 'none' }}
@@ -3431,9 +3431,9 @@ export default function TripResult({ params }: Props) {
                     onChange={e => setPrefPace(e.target.value)}
                     className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#C8D9D3] rounded-[2px] px-3 py-2 pr-8 outline-none focus:border-[#0F3A33] focus:shadow-[0_0_0_3px_rgba(15,58,51,.06)] appearance-none transition-all"
                   >
-                    <option value="Relajado">Relajado · Pocas actividades</option>
-                    <option value="Equilibrado">Equilibrado</option>
-                    <option value="Activo">Activo · Máx. experiencias</option>
+                    <option value="Relajado">{isES ? 'Relajado · Pocas actividades' : 'Relaxed · Few activities'}</option>
+                    <option value="Equilibrado">{isES ? 'Equilibrado' : 'Balanced'}</option>
+                    <option value="Activo">{isES ? 'Activo · Máx. experiencias' : 'Active · Max. experiences'}</option>
                   </select>
                   <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#6B8F86]" viewBox="0 0 10 6" fill="none">
                     <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
