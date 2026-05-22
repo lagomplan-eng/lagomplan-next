@@ -46,29 +46,26 @@ export default function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label={isES ? 'Aviso de cookies' : 'Cookie notice'}
-      className="fixed top-0 left-0 right-0 z-[400] p-3 sm:p-5 print:hidden pointer-events-none"
+      className="fixed top-0 left-0 right-0 z-[400] print:hidden bg-white border-b border-[#E4DFD8] shadow-[0_4px_20px_rgba(15,58,51,.08)]"
     >
-      <div className="max-w-[680px] mx-auto bg-white border border-[#E4DFD8] rounded-[14px] shadow-[0_8px_32px_rgba(15,58,51,.15)] p-5 sm:p-6 pointer-events-auto">
-        <h3 className="font-display text-[17px] font-medium text-[#1C1C1A] mb-2 tracking-[-0.01em]">
-          {isES ? 'Tu privacidad importa' : 'Your privacy matters'}
-        </h3>
-        <p className="text-[13px] font-light text-[#5F5F5B] leading-[1.6] mb-4">
+      <div className="max-w-[1240px] mx-auto px-4 sm:px-6 py-3 sm:py-3.5 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5">
+        <p className="flex-1 text-[12.5px] sm:text-[13px] font-light text-[#5F5F5B] leading-[1.55]">
           {isES
-            ? <>Usamos cookies esenciales para que el sitio funcione (sesión, preferencias) y cookies opcionales para entender cómo se usa Lagomplan (Google Analytics, Meta Pixel). Tú decides.{' '}
+            ? <><span className="font-medium text-[#1C1C1A]">Tu privacidad importa.</span>{' '}Usamos cookies esenciales para que el sitio funcione y cookies opcionales para entender cómo se usa Lagomplan (Google Analytics, Meta Pixel).{' '}
                 <Link href="/privacy" className="underline text-[#0F3A33] hover:text-[#12453d]">Más información</Link>.</>
-            : <>We use essential cookies so the site works (session, preferences) and optional cookies to understand how Lagomplan is used (Google Analytics, Meta Pixel). You decide.{' '}
+            : <><span className="font-medium text-[#1C1C1A]">Your privacy matters.</span>{' '}We use essential cookies so the site works and optional cookies to understand how Lagomplan is used (Google Analytics, Meta Pixel).{' '}
                 <Link href="/privacy" className="underline text-[#0F3A33] hover:text-[#12453d]">Learn more</Link>.</>}
         </p>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex gap-2 flex-shrink-0">
           <button
             onClick={() => decide('essential')}
-            className="flex-1 bg-white text-[#0F3A33] text-[13px] font-medium px-4 py-[10px] rounded-[8px] border border-[#CEC8C0] hover:bg-[#EDE7E1] transition-colors"
+            className="flex-1 sm:flex-none bg-white text-[#0F3A33] text-[12.5px] font-medium px-4 py-[8px] rounded-[6px] border border-[#CEC8C0] hover:bg-[#EDE7E1] transition-colors whitespace-nowrap"
           >
             {isES ? 'Solo esenciales' : 'Essential only'}
           </button>
           <button
             onClick={() => decide('all')}
-            className="flex-1 bg-[#0F3A33] text-white text-[13px] font-medium px-4 py-[10px] rounded-[8px] hover:bg-[#12453d] transition-colors"
+            className="flex-1 sm:flex-none bg-[#0F3A33] text-white text-[12.5px] font-medium px-4 py-[8px] rounded-[6px] hover:bg-[#12453d] transition-colors whitespace-nowrap"
           >
             {isES ? 'Aceptar todas' : 'Accept all'}
           </button>
