@@ -161,8 +161,14 @@ export default function Nav() {
 
   return (
     <nav
-      className="fixed top-0 left-0 right-0 z-50 print:hidden"
+      className="fixed left-0 right-0 z-50 print:hidden"
       style={{
+        // CookieBanner publishes its own height into --cookie-banner-h
+        // while the consent prompt is visible. Nav offsets by that value
+        // so the bar physically sits above the nav instead of overlaying
+        // it. Once the user picks a path, the var is removed and Nav
+        // snaps back to top: 0.
+        top:                'var(--cookie-banner-h, 0px)',
         height:             100,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',

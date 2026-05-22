@@ -17,7 +17,7 @@
  * from lib/navigation so it routes through the i18n pathname table.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocale }           from 'next-intl'
 import { Link }                from '../../lib/navigation'
 import { getConsent, setConsent } from '../../lib/consent'
@@ -26,6 +26,7 @@ export default function CookieBanner() {
   const locale = useLocale()
   const isES   = locale === 'es'
   const [visible, setVisible] = useState(false)
+  const barRef                = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     // Defer the visibility check to the client — server render shouldn't
@@ -33,6 +34,27 @@ export default function CookieBanner() {
     // show only if no decision has been recorded yet.
     if (getConsent() === null) setVisible(true)
   }, [])
+
+  // While visible, publish the bar's height as a CSS variable on <html>.
+  // Nav reads it for its `top` offset and body uses it as padding-top so
+  // every page shifts down by the bar's height — making the bar truly
+  // sit ABOVE the nav rather than overlay it. ResizeObserver keeps the
+  // var in sync on viewport changes (mobile 2-row layout, copy edits).
+  useEffect(() => {
+    if (!visible) return
+    const el = barRef.current
+    if (!el) return
+    const update = () => {
+      document.documentElement.style.setProperty('--cookie-banner-h', `${el.offsetHeight}px`)
+    }
+    update()
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => {
+      ro.disconnect()
+      document.documentElement.style.removeProperty('--cookie-banner-h')
+    }
+  }, [visible])
 
   if (!visible) return null
 
@@ -43,6 +65,7 @@ export default function CookieBanner() {
 
   return (
     <div
+      ref={barRef}
       role="dialog"
       aria-live="polite"
       aria-label={isES ? 'Aviso de cookies' : 'Cookie notice'}
