@@ -20,7 +20,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocale }           from 'next-intl'
 import { Link }                from '../../lib/navigation'
-import { getConsent, setConsent } from '../../lib/consent'
+import { getConsent, setConsent, onConsentChange, isGPCEnabled } from '../../lib/consent'
 
 export default function CookieBanner() {
   const locale = useLocale()
@@ -30,9 +30,26 @@ export default function CookieBanner() {
 
   useEffect(() => {
     // Defer the visibility check to the client — server render shouldn't
-    // emit the banner since localStorage is unreachable. Once mounted,
-    // show only if no decision has been recorded yet.
-    if (getConsent() === null) setVisible(true)
+    // emit the banner since localStorage is unreachable.
+    if (getConsent() === null) {
+      // Honor Global Privacy Control silently. Browsers like Firefox,
+      // Brave, DuckDuckGo and most privacy extensions send this signal
+      // to mean "I do not want to be tracked." CCPA mandates honoring
+      // it; EU regulators treat it as a valid withdrawal of consent.
+      // We record an 'essential' decision so the banner never appears
+      // for this user — they explicitly told us their preference via
+      // the browser.
+      if (isGPCEnabled()) {
+        setConsent('essential')
+        return
+      }
+      setVisible(true)
+    }
+    // React to clearConsent() from the footer link: when state goes back
+    // to null, re-open the banner. The same subscription also catches
+    // setConsent() events but those flip the state to a non-null value,
+    // which means the user just chose — keep the banner hidden.
+    return onConsentChange(state => setVisible(state === null))
   }, [])
 
   // While visible, publish the bar's height as a CSS variable on <html>.

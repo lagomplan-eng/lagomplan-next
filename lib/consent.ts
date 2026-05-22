@@ -45,6 +45,39 @@ export function setConsent(value: Exclude<ConsentState, null>): void {
 }
 
 /**
+ * Wipes the stored decision so the banner can be re-shown. Wired to the
+ * footer "Cookie settings" link — GDPR Article 7(3) requires withdrawal
+ * to be as easy as granting consent. CookieBanner subscribes to the
+ * change event and re-renders itself when state becomes null again.
+ *
+ * Note: this only reopens the prompt. It does NOT retroactively delete
+ * cookies that GA/Meta already set during a prior 'all' session — for
+ * that the user would need to clear cookies in their browser too. The
+ * privacy policy says so explicitly.
+ */
+export function clearConsent(): void {
+  if (typeof window === 'undefined') return
+  try {
+    window.localStorage.removeItem(STORAGE_KEY)
+  } catch {}
+  window.dispatchEvent(new CustomEvent<ConsentState>(CHANGE_EVENT, { detail: null }))
+}
+
+/**
+ * Returns true when the user's browser is signaling "do not track me"
+ * via Global Privacy Control. CCPA explicitly requires honoring GPC,
+ * and EU regulators have indicated GPC counts as a withdrawal of
+ * consent. Treated as an implicit 'essential' choice — no banner
+ * shown, no analytics loaded.
+ *
+ * Spec: https://globalprivacycontrol.org/
+ */
+export function isGPCEnabled(): boolean {
+  if (typeof navigator === 'undefined') return false
+  return (navigator as Navigator & { globalPrivacyControl?: boolean }).globalPrivacyControl === true
+}
+
+/**
  * Subscribe to consent changes. Returns an unsubscribe function — pair
  * it with useEffect's cleanup.
  */
