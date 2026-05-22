@@ -42,6 +42,27 @@ export function setConsent(value: Exclude<ConsentState, null>): void {
     // simply won't survive a reload.
   }
   window.dispatchEvent(new CustomEvent<ConsentState>(CHANGE_EVENT, { detail: value }))
+
+  // Fire-and-forget audit log to the server. localStorage is the
+  // runtime source of truth; this row is the GDPR Article 7(1) paper
+  // trail. Failures are swallowed — the user's decision is already
+  // saved client-side, so a failed log entry mustn't surface as an
+  // error toast or block the UI. keepalive lets the request finish
+  // even if the page unloads immediately after (e.g. if setConsent
+  // is followed by a reload, as in DoNotSellLink).
+  try {
+    // Locale derived from the URL prefix — robust to the localStorage
+    // write happening before next-intl's client context has hydrated.
+    const localeMatch = window.location.pathname.match(/^\/(en|es)\b/)
+    const locale      = localeMatch?.[1] ?? null
+    fetch('/api/consent', {
+      method:      'POST',
+      headers:     { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      keepalive:   true,
+      body:        JSON.stringify({ choice: value, locale, gpc: isGPCEnabled() }),
+    }).catch(() => {})
+  } catch {}
 }
 
 /**
