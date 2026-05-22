@@ -12,6 +12,7 @@ import NextLink                    from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { Link }                    from '../../lib/navigation'
 import CookieSettingsLink          from './CookieSettingsLink'
+import DoNotSellLink               from './DoNotSellLink'
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -173,6 +174,7 @@ export default async function Footer() {
               {t('privacy')}
             </Link>
             <CookieSettingsLink />
+            <DoNotSellLink />
           </div>
         </div>
       </div>
