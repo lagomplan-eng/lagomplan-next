@@ -11,6 +11,8 @@ import Image                        from 'next/image'
 import NextLink                    from 'next/link'
 import { getLocale, getTranslations } from 'next-intl/server'
 import { Link }                    from '../../lib/navigation'
+import CookieSettingsLink          from './CookieSettingsLink'
+import DoNotSellLink               from './DoNotSellLink'
 
 function InstagramIcon({ className }: { className?: string }) {
   return (
@@ -158,7 +160,7 @@ export default async function Footer() {
           <p className="font-sans text-[11px] text-[#6B8F86]">
             {t('copyright', { year })}
           </p>
-          <div className="flex gap-4">
+          <div className="flex gap-4 flex-wrap">
             <Link
               href="/terms"
               className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors"
@@ -171,6 +173,8 @@ export default async function Footer() {
             >
               {t('privacy')}
             </Link>
+            <CookieSettingsLink />
+            <DoNotSellLink />
           </div>
         </div>
       </div>

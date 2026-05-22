@@ -290,9 +290,90 @@ export default async function PrivacyPage({
                 muestran publicidad relevante. Pueden compartir datos con redes
                 publicitarias. Requieren consentimiento explícito.</li>
           </ul>
+
+          <h3 className="mt-6 mb-3 font-semibold text-[#1F3D37]">8.1 Inventario de Cookies</h3>
+          <p>
+            La siguiente tabla enumera las cookies y tecnologías equivalentes que
+            puede encontrar al usar Lagomplan, con su propósito, proveedor, duración
+            y categoría:
+          </p>
+          <div className="overflow-x-auto mt-3">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="bg-[#E9E2D8] text-[#1F3D37]">
+                  <th className="text-left font-medium px-3 py-2 border border-[#D8CFC1]">Nombre</th>
+                  <th className="text-left font-medium px-3 py-2 border border-[#D8CFC1]">Proveedor</th>
+                  <th className="text-left font-medium px-3 py-2 border border-[#D8CFC1]">Propósito</th>
+                  <th className="text-left font-medium px-3 py-2 border border-[#D8CFC1]">Duración</th>
+                  <th className="text-left font-medium px-3 py-2 border border-[#D8CFC1]">Categoría</th>
+                </tr>
+              </thead>
+              <tbody className="align-top">
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">sb-*-auth-token</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Supabase</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Mantiene su sesión iniciada y el token de acceso seguro.</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Hasta 7 días</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Esencial</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">lagomplan-consent</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Lagomplan</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Guarda su elección sobre cookies opcionales (almacenamiento local del navegador).</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Persistente hasta que la borre</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Esencial</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">tripCache, pendingSave</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Lagomplan</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Cachean su itinerario en curso para que no se pierda al iniciar sesión.</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Sesión del navegador</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Esencial</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">_ga, _ga_*</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Google Analytics 4</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Distingue usuarios únicos y mide cómo se usa el sitio (eventos, embudos).</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">2 años</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Analítica (opcional)</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">_fbp</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Meta (Facebook Pixel)</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Identifica al navegador para medir conversiones publicitarias.</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">90 días</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Marketing (opcional)</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">fr</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Meta (facebook.com)</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Cookie de terceros usada por Meta para entregar y medir publicidad.</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">90 días</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Marketing (opcional)</td>
+                </tr>
+                <tr>
+                  <td className="px-3 py-2 border border-[#D8CFC1] font-mono text-xs">stay22_*</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Stay22 (LetMeAllez)</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Atribuye comisiones de afiliado cuando hace clic en enlaces de hoteles.</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">30 días</td>
+                  <td className="px-3 py-2 border border-[#D8CFC1]">Funcional</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-xs text-neutral-500 mt-3 italic">
+            Las cookies opcionales (analítica, marketing) solo se cargan después de
+            que usted seleccione "Aceptar todas" en el aviso de cookies. Si elige
+            "Solo esenciales" o si su navegador envía la señal Global Privacy
+            Control (GPC), no se carga ninguna cookie opcional. Los nombres exactos
+            de las cookies de terceros pueden variar levemente según las
+            actualizaciones de cada proveedor.
+          </p>
+
           <p>
             Puede modificar sus preferencias en cualquier momento desde el enlace
-            "Configuración de Cookies" en el pie de página.
+            "Configuración de cookies" en el pie de página, o eliminando todas las
+            cookies de este dominio desde la configuración de su navegador.
           </p>
 
           <h2 className="mt-10 mb-4 font-semibold text-[#1F3D37] text-xl">9. Medidas de Seguridad</h2>

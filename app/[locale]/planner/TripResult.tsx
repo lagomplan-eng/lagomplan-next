@@ -232,11 +232,17 @@ const LOGO_STYLE: Record<string, { bg: string; color: string; text: string }> = 
   manual:     { bg: '#EDE7E1', color: '#3D3D3A', text: '✓' },
 }
 
-const BOOKING_EYEBROW: Partial<Record<ItemType, string>> = {
+const BOOKING_EYEBROW_ES: Partial<Record<ItemType, string>> = {
   hotel:      'Reservar hospedaje',
   tour:       'Reservar experiencia',
   restaurant: 'Reservar mesa',
   transfer:   'Reservar transfer',
+}
+const BOOKING_EYEBROW_EN: Partial<Record<ItemType, string>> = {
+  hotel:      'Book lodging',
+  tour:       'Book experience',
+  restaurant: 'Book table',
+  transfer:   'Book transfer',
 }
 
 // Per-type day-item booking CTA labels. Replaces the old generic
@@ -583,19 +589,24 @@ function deriveChecksFromDays(days: Day[], opts?: { locale?: 'es' | 'en'; segmen
             // Arrival/departure transfer → pre-trip booking. These are the
             // ones the user actually books in advance (airport pickup,
             // return ride, intercity flight).
-            checks.push({ id, icon: '🚗', text: `Reservar transfer: ${item.name}`, done: false })
+            const prefix = locale === 'en' ? 'Book transfer' : 'Reservar transfer'
+            checks.push({ id, icon: '🚗', text: `${prefix}: ${item.name}`, done: false })
           }
           // Mid-trip transfers (excursion shuttles, in-city Ubers, returns
           // from a day trip) are not pre-bookable in any meaningful sense —
           // the user hails them or arranges in the moment. They still
           // render in the day block; we just don't surface them as checks.
           break
-        case 'tour':
-          checks.push({ id, icon: '🎫', text: `Reservar: ${item.name}`, done: false, day: day.n })
+        case 'tour': {
+          const prefix = locale === 'en' ? 'Book' : 'Reservar'
+          checks.push({ id, icon: '🎫', text: `${prefix}: ${item.name}`, done: false, day: day.n })
           break
-        case 'restaurant':
-          checks.push({ id, icon: '🍽', text: `Reservar mesa: ${item.name}`, done: false, day: day.n })
+        }
+        case 'restaurant': {
+          const prefix = locale === 'en' ? 'Book table' : 'Reservar mesa'
+          checks.push({ id, icon: '🍽', text: `${prefix}: ${item.name}`, done: false, day: day.n })
           break
+        }
         // free, relax → no checklist item
       }
     })
@@ -910,6 +921,7 @@ function BudgetEditPanel({
 
 export default function TripResult({ params }: Props) {
   const locale = useLocale()
+  const isES   = locale === 'es'
   const router = useRouter()
 
   const {
@@ -3292,7 +3304,7 @@ export default function TripResult({ params }: Props) {
                 className="flex items-center justify-center gap-1.5 mt-2.5 w-full font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] bg-transparent border border-[rgba(15,58,51,.2)] rounded-[8px] px-3.5 py-[7px] hover:bg-[rgba(15,58,51,.06)] transition-colors"
                 onClick={() => setPrefOpen(v => !v)}
               >
-                Ajustar preferencias{' '}
+                {isES ? 'Ajustar preferencias' : 'Adjust preferences'}{' '}
                 <span
                   className="inline-block transition-transform duration-300"
                   style={{ transform: prefOpen ? 'rotate(180deg)' : 'none' }}
@@ -3332,6 +3344,7 @@ export default function TripResult({ params }: Props) {
               <MultiCitySegmentEditor
                 segments={segments}
                 tripOrigin={prefOrigin}
+                locale={isES ? 'es' : 'en'}
                 onChange={(next) => {
                   setSegments(next)
                   if (next.length > 0) {
@@ -3360,12 +3373,12 @@ export default function TripResult({ params }: Props) {
               {/* Origin — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Ciudad de origen
+                  {isES ? 'Ciudad de origen' : 'City of origin'}
                 </label>
                 <PlacesInput
                   id="pref-origin"
-                  locale="es"
-                  placeholder="Ej. Ciudad de México"
+                  locale={isES ? 'es' : 'en'}
+                  placeholder={isES ? 'Ej. Ciudad de México' : 'e.g. Mexico City'}
                   value={prefOrigin}
                   onChange={setPrefOrigin}
                   onSelect={(p: PlaceResult) => setPrefOrigin(p.displayName)}
@@ -3376,12 +3389,12 @@ export default function TripResult({ params }: Props) {
               {/* Destination — typeahead */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Destino
+                  {isES ? 'Destino' : 'Destination'}
                 </label>
                 <PlacesInput
                   id="pref-dest"
-                  locale="es"
-                  placeholder="Ej. Puerto Vallarta"
+                  locale={isES ? 'es' : 'en'}
+                  placeholder={isES ? 'Ej. Puerto Vallarta' : 'e.g. Puerto Vallarta'}
                   value={prefDest}
                   onChange={setPrefDest}
                   onSelect={(p: PlaceResult) => setPrefDest(p.displayName)}
@@ -3392,7 +3405,7 @@ export default function TripResult({ params }: Props) {
               {/* Dates — calendar picker */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Fechas
+                  {isES ? 'Fechas' : 'Dates'}
                 </label>
                 <DateRangePicker
                   value={prefDateRange}
@@ -3410,7 +3423,7 @@ export default function TripResult({ params }: Props) {
               {/* Pace */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Ritmo
+                  {isES ? 'Ritmo' : 'Pace'}
                 </label>
                 <div className="relative">
                   <select
@@ -3418,9 +3431,9 @@ export default function TripResult({ params }: Props) {
                     onChange={e => setPrefPace(e.target.value)}
                     className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#C8D9D3] rounded-[2px] px-3 py-2 pr-8 outline-none focus:border-[#0F3A33] focus:shadow-[0_0_0_3px_rgba(15,58,51,.06)] appearance-none transition-all"
                   >
-                    <option value="Relajado">Relajado · Pocas actividades</option>
-                    <option value="Equilibrado">Equilibrado</option>
-                    <option value="Activo">Activo · Máx. experiencias</option>
+                    <option value="Relajado">{isES ? 'Relajado · Pocas actividades' : 'Relaxed · Few activities'}</option>
+                    <option value="Equilibrado">{isES ? 'Equilibrado' : 'Balanced'}</option>
+                    <option value="Activo">{isES ? 'Activo · Máx. experiencias' : 'Active · Max. experiences'}</option>
                   </select>
                   <svg className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 w-3 h-3 text-[#6B8F86]" viewBox="0 0 10 6" fill="none">
                     <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
@@ -3431,7 +3444,7 @@ export default function TripResult({ params }: Props) {
               {/* Budget */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Presupuesto
+                  {isES ? 'Presupuesto' : 'Budget'}
                 </label>
                 <div className="relative">
                   <select
@@ -3456,28 +3469,28 @@ export default function TripResult({ params }: Props) {
               {/* Interests */}
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  Intereses
+                  {isES ? 'Intereses' : 'Interests'}
                 </label>
                 <input
                   type="text"
                   value={prefInterests}
                   onChange={e => setPrefInterests(e.target.value)}
                   className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
-                  placeholder="playa, gastronomía, cultura…"
+                  placeholder={isES ? 'playa, gastronomía, cultura…' : 'beach, food, culture…'}
                 />
               </div>
 
               {/* Traveler chips + expanded detail */}
               <div className="col-span-3 max-[600px]:col-span-1">
                 <label className="block font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-1.5">
-                  ¿Quién viaja?
+                  {isES ? '¿Quién viaja?' : 'Who’s traveling?'}
                 </label>
                 <div className="grid grid-cols-4 gap-2 max-[480px]:grid-cols-2">
                   {[
-                    { key: 'pareja',  icon: '💑',        label: 'Pareja' },
-                    { key: 'solo',    icon: '🧳',        label: 'Solo' },
-                    { key: 'familia', icon: '👨‍👩‍👧‍👦', label: 'Familia' },
-                    { key: 'amigos',  icon: '🙌',        label: 'Amigos' },
+                    { key: 'pareja',  icon: '💑',        label: isES ? 'Pareja'  : 'Couple'  },
+                    { key: 'solo',    icon: '🧳',        label: isES ? 'Solo'    : 'Solo'    },
+                    { key: 'familia', icon: '👨‍👩‍👧‍👦', label: isES ? 'Familia' : 'Family'  },
+                    { key: 'amigos',  icon: '🙌',        label: isES ? 'Amigos'  : 'Friends' },
                   ].map(chip => (
                     <button
                       key={chip.key}
@@ -3499,7 +3512,7 @@ export default function TripResult({ params }: Props) {
                   <div className="mt-3 flex flex-col gap-2.5">
                     {/* Adults stepper */}
                     <div className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[10px] px-3 py-2.5">
-                      <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">Adultos</span>
+                      <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">{isES ? 'Adultos' : 'Adults'}</span>
                       <div className="flex">
                         <button
                           onClick={() => setPrefAdults(n => Math.max(1, n - 1))}
@@ -3516,7 +3529,7 @@ export default function TripResult({ params }: Props) {
                     </div>
                     {/* Children ages */}
                     <div>
-                      <p className="font-sans text-[12px] font-medium text-[#1C1C1A] mb-2">Edades de los niños</p>
+                      <p className="font-sans text-[12px] font-medium text-[#1C1C1A] mb-2">{isES ? 'Edades de los niños' : 'Children’s ages'}</p>
                       <div className="flex flex-wrap gap-1.5 items-center">
                         {prefChildren.map(child => (
                           <div key={child.id} className="flex items-center gap-1.5 bg-white border border-[#E4DFD8] rounded-full px-3 py-1.5">
@@ -3544,7 +3557,7 @@ export default function TripResult({ params }: Props) {
                           }}
                           className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[rgba(15,58,51,.04)] transition-all"
                         >
-                          + Añadir bebé
+                          {isES ? '+ Añadir bebé' : '+ Add baby'}
                         </button>
                         <button
                           onClick={() => {
@@ -3553,7 +3566,7 @@ export default function TripResult({ params }: Props) {
                           }}
                           className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[rgba(15,58,51,.04)] transition-all"
                         >
-                          + Añadir niño
+                          {isES ? '+ Añadir niño' : '+ Add child'}
                         </button>
                       </div>
                     </div>
@@ -3564,7 +3577,7 @@ export default function TripResult({ params }: Props) {
                 {prefTraveler === 'amigos' && (
                   <div className="mt-3">
                     <div className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[10px] px-3 py-2.5">
-                      <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">¿Cuántos viajan?</span>
+                      <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">{isES ? '¿Cuántos viajan?' : 'How many?'}</span>
                       <div className="flex">
                         <button
                           onClick={() => setPrefGroupCount(n => Math.max(2, n - 1))}
@@ -3741,7 +3754,7 @@ export default function TripResult({ params }: Props) {
                 className="font-mono text-[10px] font-medium tracking-[.06em] text-[#0F3A33]"
                 onClick={addDay}
               >
-                + Añadir día
+                {isES ? '+ Añadir día' : '+ Add day'}
               </button>
             </div>
 
@@ -3911,13 +3924,13 @@ export default function TripResult({ params }: Props) {
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#0F3A33] hover:bg-[rgba(15,58,51,.05)] transition-all"
                                       onClick={() => openEditModal(item, day.n)}
                                     >
-                                      Editar
+                                      {isES ? 'Editar' : 'Edit'}
                                     </button>
                                     <button
                                       className="font-mono text-[10px] text-[#B8B5AF] px-[6px] py-[3px] rounded-[4px] hover:text-[#B94030] hover:bg-[rgba(185,64,48,.05)] transition-all"
                                       onClick={() => deleteItem(item.id, day.n)}
                                     >
-                                      Eliminar
+                                      {isES ? 'Eliminar' : 'Remove'}
                                     </button>
                                   </div>
                                 </div>
@@ -3931,7 +3944,7 @@ export default function TripResult({ params }: Props) {
                           <div className="flex items-center gap-[7px] mx-[18px] mb-3.5 px-3 py-2.5 bg-[rgba(107,143,134,.07)] border border-[rgba(107,143,134,.2)] rounded-[6px]">
                             <div className="w-[5px] h-[5px] rounded-full bg-[#6B8F86] shrink-0 animate-pulse" />
                             <div className="text-[11px] text-[#6B8F86] leading-[1.4]">
-                              <strong className="font-semibold">Siguiente paso:</strong> {dayNextCheck.text}
+                              <strong className="font-semibold">{isES ? 'Siguiente paso:' : 'Next step:'}</strong> {dayNextCheck.text}
                             </div>
                           </div>
                         )}
@@ -3944,7 +3957,9 @@ export default function TripResult({ params }: Props) {
                           <span className="w-[17px] h-[17px] rounded-full bg-[#E2DAD2] flex items-center justify-center text-[12px] text-[#3D3D3A] shrink-0">
                             +
                           </span>
-                          Añadir al {day.label || `Día ${day.n}`}
+                          {isES
+                            ? `Añadir al ${day.label || `Día ${day.n}`}`
+                            : `Add to ${day.label || `Day ${day.n}`}`}
                         </button>
                       </div>
                     </div>
@@ -3966,7 +3981,7 @@ export default function TripResult({ params }: Props) {
                 >
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Planea tu viaje
+                      {isES ? 'Planea tu viaje' : 'Plan your trip'}
                     </span>
                     {totalChecks > 0 && (
                       <span className="font-mono text-[9px] font-medium tracking-[.06em] text-[#6B8F86] bg-[rgba(107,143,134,.12)] px-[6px] py-px rounded-full shrink-0">
@@ -4000,7 +4015,7 @@ export default function TripResult({ params }: Props) {
                     {checksBefore.length > 0 && (
                       <>
                         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8]">
-                          Antes del viaje
+                          {isES ? 'Antes del viaje' : 'Before the trip'}
                         </div>
                         {checksBefore.map(check => (
                           <CheckRow key={check.id} check={check} onToggle={toggleCheck} locale={locale === 'en' ? 'en' : 'es'} />
@@ -4011,7 +4026,7 @@ export default function TripResult({ params }: Props) {
                     {dayNums.length > 0 && (
                       <>
                         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8] mt-1.5">
-                          Por día
+                          {isES ? 'Por día' : 'By day'}
                         </div>
                         {dayNums.map(dayN => {
                           const dayChecks = checks.filter(c => c.day === dayN)
@@ -4027,7 +4042,7 @@ export default function TripResult({ params }: Props) {
                               >
                                 <div className="flex items-center gap-[7px]">
                                   <span className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76]">
-                                    Día {String(dayN).padStart(2, '0')}
+                                    {isES ? 'Día' : 'Day'} {String(dayN).padStart(2, '0')}
                                   </span>
                                   {dayData && (
                                     <span className="text-[11.5px] font-medium text-[#1C1C1A] truncate max-w-[110px]">
@@ -4073,7 +4088,7 @@ export default function TripResult({ params }: Props) {
 
                     {totalChecks === 0 && (
                       <p className="text-[11px] text-[#7A7A76] py-2">
-                        No hay elementos de planificación.
+                        {isES ? 'No hay elementos de planificación.' : 'No planning items yet.'}
                       </p>
                     )}
                   </div>
@@ -4088,7 +4103,7 @@ export default function TripResult({ params }: Props) {
                 >
                   <div className="flex items-center gap-2.5 flex-1 min-w-0">
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Qué llevar
+                      {isES ? 'Qué llevar' : 'What to pack'}
                     </span>
                     {packing.length > 0 && (
                       <span className="font-mono text-[9px] font-medium tracking-[.06em] text-[#6B8F86] bg-[rgba(107,143,134,.12)] px-[6px] py-px rounded-full shrink-0">
@@ -4118,7 +4133,7 @@ export default function TripResult({ params }: Props) {
                     <div className="px-4 pt-3 pb-2 flex flex-col gap-[5px]">
                       {packing.length === 0 && (
                         <p className="text-[11px] text-[#7A7A76] py-1">
-                          Sin items aún. Añade el primero abajo.
+                          {isES ? 'Sin items aún. Añade el primero abajo.' : 'No items yet. Add the first one below.'}
                         </p>
                       )}
                       {packing.map((item, i) => (
@@ -4153,7 +4168,7 @@ export default function TripResult({ params }: Props) {
                           <button
                             type="button"
                             onClick={() => removePackingItem(i)}
-                            aria-label="Eliminar item"
+                            aria-label={isES ? 'Eliminar item' : 'Remove item'}
                             className="w-4 h-4 rounded-[3px] flex items-center justify-center text-[9px] text-[#B8B5AF] hover:bg-[#E4DFD8] hover:text-[#A32D2D] transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
                           >
                             ✕
@@ -4170,7 +4185,7 @@ export default function TripResult({ params }: Props) {
                           value={newPackingItem}
                           onChange={e => setNewPackingItem(e.target.value)}
                           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addPackingItem() } }}
-                          placeholder="Añadir ítem…"
+                          placeholder={isES ? 'Añadir ítem…' : 'Add item…'}
                           className="flex-1 font-sans text-[11.5px] text-[#1C1C1A] bg-transparent border-none outline-none placeholder:text-[#B8B5AF]"
                         />
                         <button
@@ -4179,7 +4194,7 @@ export default function TripResult({ params }: Props) {
                           disabled={!newPackingItem.trim()}
                           className="font-mono text-[9px] font-medium tracking-[.04em] text-[#0F3A33] bg-[#EDE7E1] hover:bg-[#E0D9D1] disabled:opacity-40 disabled:cursor-not-allowed rounded-[4px] px-[8px] py-[4px] transition-colors shrink-0"
                         >
-                          + Añadir
+                          {isES ? '+ Añadir' : '+ Add'}
                         </button>
                       </div>
                     </div>
@@ -4198,7 +4213,7 @@ export default function TripResult({ params }: Props) {
                   <div className="flex items-center gap-2">
                     <span>💰</span>
                     <span className="font-display text-[14px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                      Presupuesto
+                      {isES ? 'Presupuesto' : 'Budget'}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -4230,7 +4245,7 @@ export default function TripResult({ params }: Props) {
                     {budgetRows.length === 0 ? (
                       <div className="px-4 py-3">
                         <p className="text-[11px] text-[#7A7A76]">
-                          El plan no incluye desglose de presupuesto.
+                          {isES ? 'El plan no incluye desglose de presupuesto.' : 'The plan does not include a budget breakdown.'}
                         </p>
                       </div>
                     ) : (
@@ -4238,7 +4253,7 @@ export default function TripResult({ params }: Props) {
                         {/* ── Currency toggle ── */}
                         <div className="flex items-center justify-between px-4 py-[7px] border-b border-[#E4DFD8]">
                           <span className="font-mono text-[9px] text-[#B8B5AF]">
-                            Montos en {budgetCurrency} · sin conversión
+                            {isES ? `Montos en ${budgetCurrency} · sin conversión` : `Amounts in ${budgetCurrency} · no conversion`}
                           </span>
                           <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
                             {(['MXN', 'USD'] as const).map(c => (
@@ -4262,8 +4277,8 @@ export default function TripResult({ params }: Props) {
                         {/* ── Summary bar ── */}
                         <div className="grid grid-cols-2 border-b border-[#E4DFD8]">
                           {[
-                            { label: 'Estimado',   value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
-                            { label: 'Confirmado', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
+                            { label: isES ? 'Estimado'   : 'Estimated', value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
+                            { label: isES ? 'Confirmado' : 'Confirmed', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
                           ].map((col, ci) => (
                             <div
                               key={col.label}
@@ -4378,17 +4393,17 @@ export default function TripResult({ params }: Props) {
                         {/* ── Footer totals ── */}
                         <div className="px-4 pt-[10px] pb-[13px] border-t-[1.5px] border-[#CEC8C0]">
                           <div className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#7A7A76] mb-[7px]">
-                            Resumen total · {budgetCurrency}
+                            {isES ? `Resumen total · ${budgetCurrency}` : `Total summary · ${budgetCurrency}`}
                           </div>
                           <div className="grid grid-cols-2 gap-4">
                             <div>
-                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Estimado</span>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">{isES ? 'Estimado' : 'Estimated'}</span>
                               <span className="font-display text-[13px] text-[#0F3A33]">
                                 {fmtAmt(userTotal)}
                               </span>
                             </div>
                             <div>
-                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">Confirmado</span>
+                              <span className="font-mono text-[8px] tracking-[.06em] text-[#B8B5AF] block mb-[2px]">{isES ? 'Confirmado' : 'Confirmed'}</span>
                               <span className={`font-display ${hasActual ? 'text-[13px] text-[#2D6B57]' : 'text-[12px] text-[#B8B5AF]'}`}>
                                 {hasActual ? fmtAmt(actualTotal) : '—'}
                               </span>
@@ -4437,7 +4452,9 @@ export default function TripResult({ params }: Props) {
           >
             <div className="flex items-start justify-between mb-[18px]">
               <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
-                {editIsNew ? 'Añadir actividad' : 'Editar actividad'}
+                {editIsNew
+                  ? (isES ? 'Añadir actividad' : 'Add activity')
+                  : (isES ? 'Editar actividad' : 'Edit activity')}
               </h2>
               <button
                 className="w-6 h-6 rounded-[5px] bg-[#EDE7E1] flex items-center justify-center text-[12px] text-[#3D3D3A]"
@@ -4634,13 +4651,13 @@ export default function TripResult({ params }: Props) {
             {/* Header */}
             <div className="px-[22px] pt-[18px] pb-[14px] border-b border-[#E4DFD8]">
               <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
-                {BOOKING_EYEBROW[bookingModal.itemType] ?? 'Reservar'}
+                {(isES ? BOOKING_EYEBROW_ES : BOOKING_EYEBROW_EN)[bookingModal.itemType] ?? (isES ? 'Reservar' : 'Book')}
               </div>
               <div className="font-display text-[17px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-[3px] leading-snug">
                 {bookingModal.itemName}
               </div>
               <div className="text-[12px] font-light text-[#7A7A76]">
-                Elige dónde buscar disponibilidad
+                {isES ? 'Elige dónde buscar disponibilidad' : 'Choose where to check availability'}
               </div>
             </div>
 
@@ -4769,11 +4786,39 @@ interface MultiCitySegmentEditorProps {
   segments:   TripSegment[]
   /** Trip-level origin (Segment 0's chain-implicit origin if not explicit). */
   tripOrigin: string
+  /** Locale of the parent page — drives the EN/ES copy table below. */
+  locale:     'es' | 'en'
   onChange:   (next: TripSegment[]) => void
 }
 
-function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySegmentEditorProps) {
+function MultiCitySegmentEditor({ segments, tripOrigin, locale, onChange }: MultiCitySegmentEditorProps) {
   const MAX_SEGMENTS = 5
+  const isES = locale === 'es'
+  // Per-instance locale copy — all visible strings here. Keeps the JSX
+  // legible vs threading isES checks through every label.
+  const t = isES ? {
+    heading:   'Recorrido multi-ciudad',
+    leg:       (n: number) => `Tramo ${n}`,
+    remove:    'Eliminar',
+    from:      'Desde',
+    to:        'Hasta',
+    fromPh:    'Origen',
+    toPh:      'Destino',
+    dates:     'Fechas',
+    addCity:   '+ Añadir ciudad',
+    footer:    'Los demás campos (ritmo, presupuesto, intereses, viajeros) se aplican a todo el viaje.',
+  } : {
+    heading:   'Multi-city journey',
+    leg:       (n: number) => `Leg ${n}`,
+    remove:    'Remove',
+    from:      'From',
+    to:        'To',
+    fromPh:    'Origin',
+    toPh:      'Destination',
+    dates:     'Dates',
+    addCity:   '+ Add city',
+    footer:    'The other fields (pace, budget, interests, travelers) apply to the whole trip.',
+  }
 
   function updateSegment(idx: number, patch: Partial<TripSegment>) {
     const next = segments.map((s, i) => i === idx ? { ...s, ...patch } : s)
@@ -4811,7 +4856,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
   return (
     <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
       <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-3">
-        Recorrido multi-ciudad
+        {t.heading}
       </div>
 
       <div className="flex flex-col gap-4">
@@ -4827,7 +4872,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
             <div key={idx} className="bg-[#FAF8F5] border border-[#E4DFD8] rounded-[8px] p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33]">
-                  Tramo {idx + 1}
+                  {t.leg(idx + 1)}
                 </span>
                 {segments.length > 2 && (
                   <button
@@ -4835,7 +4880,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
                     onClick={() => removeSegment(idx)}
                     className="font-mono text-[10px] text-[#B8B5AF] hover:text-[#3D3D3A] transition-colors"
                   >
-                    Eliminar
+                    {t.remove}
                   </button>
                 )}
               </div>
@@ -4843,12 +4888,12 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
               <div className="grid grid-cols-2 gap-2.5 mb-2.5 max-[600px]:grid-cols-1">
                 <div>
                   <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
-                    Desde
+                    {t.from}
                   </label>
                   <PlacesInput
                     id={`pref-segment-${idx}-origin`}
-                    locale="es"
-                    placeholder="Origen"
+                    locale={locale}
+                    placeholder={t.fromPh}
                     value={displayOrigin}
                     onChange={(v) => updateSegment(idx, { origin: v })}
                     onSelect={(p: PlaceResult) => updateSegment(idx, { origin: p.displayName })}
@@ -4857,12 +4902,12 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
                 </div>
                 <div>
                   <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
-                    Hasta
+                    {t.to}
                   </label>
                   <PlacesInput
                     id={`pref-segment-${idx}-dest`}
-                    locale="es"
-                    placeholder="Destino"
+                    locale={locale}
+                    placeholder={t.toPh}
                     value={seg.destination}
                     onChange={(v) => updateSegment(idx, { destination: v })}
                     onSelect={(p: PlaceResult) => updateSegment(idx, { destination: p.displayName })}
@@ -4873,7 +4918,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
 
               <div>
                 <label className="block font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76] mb-1">
-                  Fechas
+                  {t.dates}
                 </label>
                 <DateRangePicker
                   value={toDateRange(seg)}
@@ -4896,12 +4941,12 @@ function MultiCitySegmentEditor({ segments, tripOrigin, onChange }: MultiCitySeg
           onClick={addSegment}
           className="mt-3 font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] hover:text-[#1B4D3E] transition-colors"
         >
-          + Añadir ciudad
+          {t.addCity}
         </button>
       )}
 
       <div className="font-sans text-[11px] text-[#7A7A76] mt-3 italic">
-        Los demás campos (ritmo, presupuesto, intereses, viajeros) se aplican a todo el viaje.
+        {t.footer}
       </div>
     </div>
   )

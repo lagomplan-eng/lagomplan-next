@@ -61,6 +61,11 @@ body {
   color: var(--pine);
   -webkit-font-smoothing: antialiased;
   line-height: 1.55;
+  /* Shift the entire page down by the cookie banner's height while the
+     consent prompt is visible. Combined with Nav's matching `top` offset,
+     this makes the banner a true bar sitting above the nav rather than
+     a floating overlay. Falls back to 0 when no banner is mounted. */
+  padding-top: var(--cookie-banner-h, 0px);
 }
 
 /* ── Headings: design-system enforcement ───────────────────────────
