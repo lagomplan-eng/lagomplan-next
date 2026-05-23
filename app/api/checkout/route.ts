@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getSupabaseServer } from '../../../lib/supabase/server'
+import { parseGaClientId } from '../../../lib/analytics/ga-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -82,7 +83,17 @@ export async function POST(req: NextRequest) {
 
   customer_email: user.email,
   client_reference_id: user.id,
-  metadata: { user_id: user.id, plan },
+  // Stash the GA client_id in metadata so the Stripe webhook can fire
+  // a server-side `purchase` event with proper session attribution
+  // (see app/api/stripe-webhook + lib/analytics/ga-server). When the
+  // cookie is absent (Essential-only consent), gaClientId is null and
+  // the webhook just skips the server-side fire — exactly the privacy
+  // posture we want for Essential-only users.
+  metadata: {
+    user_id:       user.id,
+    plan,
+    ga_client_id:  parseGaClientId(req.cookies.get('_ga')?.value) ?? '',
+  },
 
   allow_promotion_codes: true,
 

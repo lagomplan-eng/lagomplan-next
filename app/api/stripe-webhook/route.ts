@@ -12,6 +12,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { getSupabaseAdmin } from '../../../lib/supabase/server'
+import { gaServerEvent } from '../../../lib/analytics/ga-server'
 
 export const dynamic = 'force-dynamic'
 
@@ -137,6 +138,36 @@ export async function POST(req: NextRequest) {
       if (error) console.error('[stripe-webhook] upsert credits error:', error.message)
       else       console.log(`[stripe-webhook] +${toAdd} credits for user:`, userId, '→', newRemaining)
     }
+
+    // ── Server-side purchase event (lossless backup for revenue attribution) ──
+    // The browser-side `events.purchase` in TripResult fires from the
+    // /planner?checkout=success landing page — but if the user closes
+    // the Stripe tab without ever loading that page, the event is lost
+    // (20-40% loss in the wild between iOS ATT, Safari ITP, ad blockers).
+    // This server-side fire ensures every settled checkout lands in GA
+    // exactly once, with full session attribution via the ga_client_id
+    // we stashed in metadata at checkout creation time.
+    //
+    // ga_client_id is empty for Essential-only users (no _ga cookie was
+    // ever set) — gaServerEvent skips them naturally, respecting the
+    // Consent Mode v2 denial. Fire-and-forget; we don't block the
+    // webhook on the analytics request.
+    const gaClientId = (session.metadata?.ga_client_id as string | undefined) || null
+    const valueInUnits = typeof session.amount_total === 'number'
+      ? session.amount_total / 100
+      : undefined
+    gaServerEvent({
+      clientId: gaClientId,
+      userId,
+      name: 'purchase',
+      params: {
+        transaction_id: session.id,
+        value:          valueInUnits,
+        currency:       session.currency ?? 'mxn',
+        plan,
+        source:         'webhook',
+      },
+    }).catch(err => console.error('[stripe-webhook] gaServerEvent failed:', err))
   }
 
   if (event.type === 'customer.subscription.deleted') {
