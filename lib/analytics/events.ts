@@ -94,6 +94,52 @@ export const events = {
   },
 
   /**
+   * Auth login completed. Fires on every Supabase SIGNED_IN event,
+   * including the one that follows a fresh sign-up (so signup users
+   * get BOTH completeRegistration + login — same as GA4's
+   * recommended sign_up / login pair).
+   *
+   * Distinguished from `completeRegistration` because GA4 cohort
+   * analysis ("new vs returning") depends on having BOTH events:
+   * sign_up fires once, login fires every session.
+   *
+   * Meta custom: `Login`  ·  GA: `login`.
+   */
+  login(params?: { method?: string }) {
+    metaTrackCustom('Login', params)
+    gaTrack('login', params)
+  },
+
+  /**
+   * Surface-agnostic error tracker. Fires to GA only (Meta marketing
+   * pixel has no useful event for failures). Use for: AI generation
+   * timeouts, validation gate failures, Stripe checkout creation
+   * errors, auth errors — anything the user encounters as a broken
+   * path that would otherwise only land in console.error.
+   *
+   * Keep `surface` short and stable so the dashboard can group by it
+   * (e.g. 'planner-generate', 'checkout-create', 'auth-signup').
+   *
+   * GA: `error_occurred`.
+   */
+  errorOccurred(params: {
+    surface:  string
+    code?:    string
+    message?: string
+    /** Optional extra context — destination, trip_id, plan, etc. */
+    meta?:    Record<string, string | number | boolean | undefined>
+  }) {
+    gaTrack('error_occurred', {
+      surface: params.surface,
+      code:    params.code,
+      // Truncate message — GA4 has per-parameter size limits and
+      // a stack trace would blow them out.
+      message: params.message?.slice(0, 100),
+      ...params.meta,
+    })
+  },
+
+  /**
    * Stripe webhook fulfilled — fired browser-side from the success
    * landing page. Eventually move to Conversions API for reliability;
    * see lib/analytics/meta.ts header for guidance.
