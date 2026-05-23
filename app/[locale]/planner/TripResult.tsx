@@ -1710,6 +1710,21 @@ export default function TripResult({ params }: Props) {
         setError(msg)
         setErrorStatus(genStatus)
         setErrorDurationMs(duration)
+        // Surface to analytics so the dashboard can track real failure
+        // rate (timeouts, Claude 5xx, validation gate fails, paywall).
+        // genStatus carries the HTTP status when the failure was a
+        // structured response; otherwise it's null and the message is
+        // the only signal we have.
+        events.errorOccurred({
+          surface: 'planner-generate',
+          code:    genStatus ? String(genStatus) : ((err as { code?: string })?.code ?? 'unknown'),
+          message: msg,
+          meta: {
+            destination,
+            nights,
+            duration_ms: duration ?? undefined,
+          },
+        })
       } finally {
         setLoading(false)
       }
@@ -2235,7 +2250,14 @@ export default function TripResult({ params }: Props) {
         }).catch(() => {})
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      setError(msg)
+      events.errorOccurred({
+        surface: 'planner-regenerate',
+        code:    (err as { code?: string })?.code ?? 'unknown',
+        message: msg,
+        meta: { destination: prefDest, trip_id: tripId ?? undefined },
+      })
     } finally {
       setLoading(false)
     }
@@ -2619,7 +2641,14 @@ export default function TripResult({ params }: Props) {
         }).catch(() => {})
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error')
+      const msg = err instanceof Error ? err.message : 'Unknown error'
+      setError(msg)
+      events.errorOccurred({
+        surface: 'planner-replace-trip',
+        code:    (err as { code?: string })?.code ?? 'unknown',
+        message: msg,
+        meta: { destination: prefDest, trip_id: tripId ?? undefined },
+      })
     } finally {
       setLoading(false)
     }
