@@ -33,6 +33,7 @@ import { MetaPixelTracker } from '../../components/analytics/MetaPixelTracker'
 import { GoogleAnalyticsTracker } from '../../components/analytics/GoogleAnalyticsTracker'
 import ConsentSync from '../../components/analytics/ConsentSync'
 import AuthEventsBridge from '../../components/analytics/AuthEventsBridge'
+import AttributionCapture from '../../components/analytics/AttributionCapture'
 import CookieBanner from '../../components/layout/CookieBanner'
 import '../globals.css'
 
@@ -216,6 +217,7 @@ export default async function RootLayout({
               <NewsletterPopup />
               <CookieBanner />
               <ConsentSync />
+              <AttributionCapture />
               <AuthEventsBridge />
               <GoogleAnalyticsTracker />
               <MetaPixelTracker />
