@@ -2399,10 +2399,20 @@ export default function TripResult({ params }: Props) {
   }
 
   function deleteItem(itemId: string, dayN: number) {
+    // Capture the item's type before we filter it out so the analytics
+    // payload can carry which block category was removed (hotel /
+    // restaurant / tour / …).
+    const removedItemType = days.find(d => d.n === dayN)?.items.find(it => it.id === itemId)?.type
     setDays(prev => prev.map(day =>
       day.n !== dayN ? day : { ...day, items: day.items.filter(it => it.id !== itemId) }
     ))
     setHasUserEdits(true)
+    events.itineraryEdited({
+      trip_id:    tripId ?? undefined,
+      day_number: dayN,
+      action:     'remove',
+      item_type:  removedItemType,
+    })
     showToast(locale === 'es' ? '✓ Actividad eliminada' : '✓ Activity removed')
   }
 
@@ -2827,6 +2837,12 @@ export default function TripResult({ params }: Props) {
     })
 
     setHasUserEdits(true)
+    events.itineraryEdited({
+      trip_id:    tripId ?? undefined,
+      day_number: editModalDayN,
+      action:     editIsNew ? 'add' : 'edit',
+      item_type:  editType,
+    })
     closeEditModal()
     showToast(locale === 'es' ? '✓ Cambios guardados' : '✓ Changes saved')
   }
@@ -2842,6 +2858,11 @@ export default function TripResult({ params }: Props) {
     }
     setDays(prev => [...prev, newDay])
     setHasUserEdits(true)
+    events.itineraryEdited({
+      trip_id:    tripId ?? undefined,
+      day_number: newN,
+      action:     'add_day',
+    })
     showToast(locale === 'es' ? `✓ Día ${newN} añadido` : `✓ Day ${newN} added`)
   }
 

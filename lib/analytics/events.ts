@@ -285,6 +285,34 @@ export const events = {
   },
 
   /**
+   * Fired when the user edits the itinerary: adds a new block, removes
+   * one, or modifies an existing one's details. Strong engagement
+   * signal — most trips never get edited; the ones that do are
+   * substantially more likely to be saved, shared, and reopened.
+   *
+   * `action` distinguishes the kind of edit so the dashboard can split
+   * "creators" (lots of adds) from "curators" (lots of edits) from
+   * "trimmers" (lots of removes). `item_type` carries the block type
+   * (hotel / restaurant / tour / transfer / culture / nature / free)
+   * when relevant; null for day-level operations.
+   *
+   * Fires per-action, NOT sampled — these are infrequent enough that
+   * flooding GA's event budget isn't a concern (a power user might
+   * edit 20 blocks in a session; 1000s of users isn't a problem).
+   *
+   * Meta custom: `ItineraryEdited`  ·  GA: `itinerary_edited`.
+   */
+  itineraryEdited(params: {
+    trip_id?:    string
+    day_number?: number
+    action:      'add' | 'remove' | 'edit' | 'add_day'
+    item_type?:  string
+  }) {
+    metaTrackCustom('ItineraryEdited', params)
+    gaTrack('itinerary_edited', params)
+  },
+
+  /**
    * Fired the FIRST time a specific check is toggled (in either direction)
    * within a trip session. Sampled like itineraryDayExpanded. Tracks active
    * use of the readiness checklist — high check_toggled rate vs trip_saved
