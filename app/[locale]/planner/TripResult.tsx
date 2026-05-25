@@ -2883,6 +2883,41 @@ export default function TripResult({ params }: Props) {
     [days, doneCheckIds, locale, segments],
   )
 
+  // ── Trip completeness analytics ──────────────────────────────────────────────
+  // Two outputs: a sticky GA user_property kept in sync on every change
+  // (for cohort filtering — "users who reached ≥80% completeness"),
+  // and a tripCompleteness event fired on pagehide (the snapshot
+  // commitment signal — what state did the user leave the trip in).
+  useEffect(() => {
+    if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
+    if (checks.length === 0) return
+    const done = checks.filter(c => c.done).length
+    const pct  = Math.round((done / checks.length) * 100)
+    // user_properties values are stringified by GA anyway; pass as
+    // string to control the format and avoid type-flapping in reports.
+    window.gtag('set', 'user_properties', { current_completeness: String(pct) })
+  }, [checks])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    if (checks.length === 0) return
+    function handlePageHide() {
+      const done = checks.filter(c => c.done).length
+      events.tripCompleteness({
+        trip_id:      tripId ?? undefined,
+        total_checks: checks.length,
+        done_checks:  done,
+        percentage:   Math.round((done / checks.length) * 100),
+      })
+    }
+    // pagehide is more reliable than beforeunload for analytics:
+    // fires on tab close, navigation, AND BFCache enter. GA4
+    // automatically uses sendBeacon when available so the request
+    // completes even when the page is being torn down.
+    window.addEventListener('pagehide', handlePageHide)
+    return () => window.removeEventListener('pagehide', handlePageHide)
+  }, [checks, tripId])
+
   // ── Computed values ──────────────────────────────────────────────────────────
   // Currency formatting — no conversion, toggle only changes the label shown
   function fmtAmt(n: number | null): string {

@@ -285,6 +285,28 @@ export const events = {
   },
 
   /**
+   * Trip completeness snapshot fired on page-hide (tab close, navigation
+   * away). Captures the % of checks done in the final state the user
+   * leaves the planner in for this session — the cleanest single
+   * commitment signal we have.
+   *
+   * Pairs with the live `current_completeness` user_property which is
+   * kept in sync on every check toggle for cohort filtering in GA
+   * reports ("users who reached ≥80% completeness").
+   *
+   * Meta custom: `TripCompleteness`  ·  GA: `trip_completeness`.
+   */
+  tripCompleteness(params: {
+    trip_id?:      string
+    total_checks:  number
+    done_checks:   number
+    percentage:    number
+  }) {
+    metaTrackCustom('TripCompleteness', params)
+    gaTrack('trip_completeness', params)
+  },
+
+  /**
    * Fired when the user edits the itinerary: adds a new block, removes
    * one, or modifies an existing one's details. Strong engagement
    * signal — most trips never get edited; the ones that do are
