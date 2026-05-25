@@ -17,6 +17,8 @@
  *   change (including the initial load) via usePathname/useSearchParams.
  */
 
+import { analyticsDebug } from './debug'
+
 declare global {
   interface Window {
     gtag?:      (command: string, ...args: unknown[]) => void
@@ -41,20 +43,24 @@ export function gaTrack(
   params?: object,
 ): void {
   if (typeof window === 'undefined') return
-  if (typeof window.gtag !== 'function') return
+  const gtagLoaded = typeof window.gtag === 'function'
+  analyticsDebug(`GA ${event}`, params ?? {}, { gtagLoaded })
+  if (!gtagLoaded) return
   if (params && Object.keys(params).length > 0) {
-    window.gtag('event', event, params)
+    window.gtag!('event', event, params)
   } else {
-    window.gtag('event', event)
+    window.gtag!('event', event)
   }
 }
 
 /** Fire a page_view event. Called by the route-change tracker. */
 export function gaPageView(path: string, title?: string): void {
   if (typeof window === 'undefined') return
-  if (typeof window.gtag !== 'function') return
+  const gtagLoaded = typeof window.gtag === 'function'
+  analyticsDebug(`GA page_view`, { path, title }, { gtagLoaded })
+  if (!gtagLoaded) return
   if (!MEASUREMENT_ID) return
-  window.gtag('event', 'page_view', {
+  window.gtag!('event', 'page_view', {
     page_path:     path,
     page_location: typeof window !== 'undefined' ? window.location.href : path,
     page_title:    title ?? (typeof document !== 'undefined' ? document.title : ''),

@@ -21,6 +21,8 @@
  *   https://developers.facebook.com/docs/meta-pixel/reference#events
  */
 
+import { analyticsDebug } from './debug'
+
 declare global {
   interface Window {
     fbq?:  (command: string, ...args: unknown[]) => void
@@ -69,11 +71,13 @@ export function metaTrack(
   params?: object,
 ): void {
   if (typeof window === 'undefined') return
-  if (typeof window.fbq !== 'function') return
+  const fbqLoaded = typeof window.fbq === 'function'
+  analyticsDebug(`Meta ${event}`, params ?? {}, { fbqLoaded })
+  if (!fbqLoaded) return
   if (params && Object.keys(params).length > 0) {
-    window.fbq('track', event, params)
+    window.fbq!('track', event, params)
   } else {
-    window.fbq('track', event)
+    window.fbq!('track', event)
   }
 }
 
@@ -83,11 +87,13 @@ export function metaTrackCustom(
   params?: object,
 ): void {
   if (typeof window === 'undefined') return
-  if (typeof window.fbq !== 'function') return
+  const fbqLoaded = typeof window.fbq === 'function'
+  analyticsDebug(`Meta custom ${event}`, params ?? {}, { fbqLoaded })
+  if (!fbqLoaded) return
   if (params && Object.keys(params).length > 0) {
-    window.fbq('trackCustom', event, params)
+    window.fbq!('trackCustom', event, params)
   } else {
-    window.fbq('trackCustom', event)
+    window.fbq!('trackCustom', event)
   }
 }
 
@@ -99,6 +105,8 @@ export function metaTrackCustom(
  */
 export function metaPageView(): void {
   if (typeof window === 'undefined') return
-  if (typeof window.fbq !== 'function') return
-  window.fbq('track', 'PageView')
+  const fbqLoaded = typeof window.fbq === 'function'
+  analyticsDebug(`Meta PageView`, {}, { fbqLoaded })
+  if (!fbqLoaded) return
+  window.fbq!('track', 'PageView')
 }
