@@ -31,12 +31,69 @@ import { events } from '../../lib/analytics'
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 const META_PIXEL_ID     = process.env.NEXT_PUBLIC_META_PIXEL_ID
 
+/**
+ * Queries Supabase for cohort-relevant user stats and sets them as
+ * GA4 user_properties. Once set they flow with every subsequent
+ * event in GA's reports — enabling cohort segments like "users with
+ * trip_count > 3" or "users who signed up in the last 7 days."
+ *
+ * Triggered once per page load (NOT on every TOKEN_REFRESHED event)
+ * so we don't hammer Supabase. RLS on the trips table restricts the
+ * query to the user's own rows.
+ */
+async function setUserCohortProperties(userId: string, signupISO: string | undefined) {
+  if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
+  if (!GA_MEASUREMENT_ID) return
+
+  try {
+    const supabase = getSupabaseBrowser()
+
+    // trip count via head:true so we don't transfer any rows.
+    const { count: tripCount } = await (supabase as any)
+      .from('trips')
+      .select('id', { count: 'exact', head: true })
+      .eq('user_id', userId)
+
+    // last_trip_at — only the timestamp, single row.
+    const { data: lastTripRow } = await (supabase as any)
+      .from('trips')
+      .select('created_at')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single()
+
+    const lastTripAt: string | undefined = (lastTripRow as { created_at?: string } | null)?.created_at
+
+    const daysSinceSignup = signupISO
+      ? Math.floor((Date.now() - new Date(signupISO).getTime()) / 86_400_000)
+      : undefined
+
+    window.gtag('set', 'user_properties', {
+      trip_count:        typeof tripCount === 'number' ? tripCount : 0,
+      days_since_signup: daysSinceSignup ?? 0,
+      // ISO truncated to date (10 chars) to fit GA's 36-char value limit
+      // and to avoid PII concerns about an exact second-level timestamp.
+      last_trip_at:      lastTripAt ? lastTripAt.slice(0, 10) : '',
+    })
+  } catch (err) {
+    // RLS may block the query for edge-case auth states (e.g.
+    // intermediate token refresh races). Don't break — cohort props
+    // can be re-set on the next event.
+    console.warn('[AuthEventsBridge] cohort props failed:', err)
+  }
+}
+
 export default function AuthEventsBridge() {
   // INITIAL_SESSION fires on every subscribe (page load with a stored
   // session). We must NOT treat that as a login event — it's just
   // hydration. This ref tracks whether we've consumed the initial
   // session signal so the first SIGNED_IN we forward is a true login.
   const initialSessionConsumed = useRef(false)
+  // Cohort properties fetch is one round-trip to Supabase — gate it
+  // to once per page load so TOKEN_REFRESHED / USER_UPDATED events
+  // don't repeatedly re-query.
+  const cohortPropsFetched = useRef(false)
 
   useEffect(() => {
     const supabase = getSupabaseBrowser()
@@ -62,6 +119,16 @@ export default function AuthEventsBridge() {
         // We pass it as-is since the UUID alone can't be reversed to
         // a real identity without DB access.
         window.fbq('init', META_PIXEL_ID, userId ? { external_id: userId } : {})
+      }
+
+      // ── Cohort user_properties (once per page load) ───────────────────────
+      // Fires for INITIAL_SESSION when there's an authed user, AND for
+      // SIGNED_IN events. Doesn't refire on TOKEN_REFRESHED or
+      // USER_UPDATED — those don't change trip_count meaningfully and
+      // we don't want to spam Supabase on every token refresh.
+      if (userId && !cohortPropsFetched.current && (event === 'INITIAL_SESSION' || event === 'SIGNED_IN')) {
+        cohortPropsFetched.current = true
+        setUserCohortProperties(userId, session?.user?.created_at)
       }
 
       // ── Login event (only on actual SIGNED_IN transitions) ────────────────
