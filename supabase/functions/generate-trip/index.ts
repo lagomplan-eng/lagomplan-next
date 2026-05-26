@@ -878,66 +878,179 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         retryHint:    typeof body.retryHint === "string" ? body.retryHint : undefined,
       };
 
-      const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: {
-          "Content-Type":      "application/json",
-          "x-api-key":         ANTHROPIC_API_KEY,
-          "anthropic-version": "2023-06-01",
-        },
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 16000,
-          system: systemPromptFor(locale),
-          tools: [{
-            name: "emit_trip",
-            description: locale === "en"
-              ? "Emit the structured travel itinerary."
-              : "Emite el itinerario de viaje estructurado.",
-            input_schema: TRIP_SCHEMA,
-          }],
-          tool_choice: { type: "tool", name: "emit_trip" },
-          messages: [{ role: "user", content: buildPrompt(input) }],
-        }),
-      });
-                                  
-      const ms = Date.now() - startedAt;                                                                         
-                                                                                                               
-      if (!claudeRes.ok) {                                                                                       
-        const errText = await claudeRes.text().catch(() => "");
-        console.error("[generate-trip] claude upstream", claudeRes.status, errText.slice(0, 500));               
-        return errorResponse(502, "claude_upstream_failed", `Claude API returned ${claudeRes.status}`, {       
-          status: claudeRes.status,                                                                              
-          body: errText.slice(0, 500),                                                                           
-        });                                                                                                      
-      }                                                                                                          
-                                                                                                                 
-      const claudeData = await claudeRes.json();            
-                                                                                                               
-      console.log("[generate-trip]", JSON.stringify({                                                            
-        stop_reason:   claudeData.stop_reason,
-        input_tokens:  claudeData.usage?.input_tokens,                                                           
-        output_tokens: claudeData.usage?.output_tokens,                                                        
-        ms,                                                                                                      
-      }));                                                                                                     
-                                                                                                                 
-      if (claudeData.stop_reason === "max_tokens") {        
-        return errorResponse(502, "llm_truncated", `La respuesta del modelo excedió el límite de tokens. Reduce  
-  la duración o los intereses e intenta de nuevo.`, {       
-          output_tokens: claudeData.usage?.output_tokens,                                                      
-        });                                                                                                      
-      }                                                                                                        
-                                                                                                                 
-      const toolUse = Array.isArray(claudeData.content)     
-        ? claudeData.content.find((c: any) => c?.type === "tool_use" && c?.name === "emit_trip")                 
-        : null;                                             
-                                                                                                               
-      if (!toolUse?.input) {                                                                                     
-        console.error("[generate-trip] no tool_use in response", JSON.stringify(claudeData).slice(0, 500));    
-        return errorResponse(502, "llm_no_tool_use", "El modelo no emitió la estructura esperada", {             
-          stop_reason: claudeData.stop_reason,                                                                 
-        });                                                                                                      
-      }                                                                                                          
+      // Model is read from a Supabase secret so we can flip between Sonnet
+      // 4.0 / 4.6 / future models instantly via `supabase secrets set` —
+      // no code change, no redeploy. Critical for the Sonnet 4.6
+      // migration's rollback path: if 4.6 misbehaves in prod, flip the
+      // secret back to claude-sonnet-4-20250514 and the next request
+      // uses 4.0 within ~30s of the secret propagating.
+      const MODEL = Deno.env.get("GENERATE_TRIP_MODEL") ?? "claude-sonnet-4-6";
+
+      // ── Single Claude call factored out so we can validate + retry once
+      // internally if the response is malformed. Validation + retry lives
+      // here (the Edge Fn) rather than in app/api/generate-trip/route.ts so
+      // BOTH the sync path and the async worker chunks benefit — the worker
+      // currently has no retry of its own, so any flaky-shape chunk would
+      // tank an entire long trip without this. The previous Sonnet 4.6
+      // attempt (commit e961006, reverted in bcfeea5) failed exactly this
+      // way: intermittent empty-days responses that the FE normalizer
+      // couldn't parse.
+      async function callClaudeOnce(retryHint?: string): Promise<{
+        ok:     boolean;
+        toolUse?: any;
+        stopReason?: string;
+        outputTokens?: number;
+        httpStatus?: number;
+        errorText?: string;
+      }> {
+        const callInput = retryHint ? { ...input, retryHint } : input;
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: {
+            "Content-Type":      "application/json",
+            "x-api-key":         ANTHROPIC_API_KEY,
+            "anthropic-version": "2023-06-01",
+          },
+          body: JSON.stringify({
+            model: MODEL,
+            max_tokens: 16000,
+            system: systemPromptFor(locale),
+            tools: [{
+              name: "emit_trip",
+              description: locale === "en"
+                ? "Emit the structured travel itinerary."
+                : "Emite el itinerario de viaje estructurado.",
+              input_schema: TRIP_SCHEMA,
+            }],
+            tool_choice: { type: "tool", name: "emit_trip" },
+            messages: [{ role: "user", content: buildPrompt(callInput) }],
+          }),
+        });
+        if (!res.ok) {
+          const errText = await res.text().catch(() => "");
+          return { ok: false, httpStatus: res.status, errorText: errText };
+        }
+        const data = await res.json();
+        const toolUse = Array.isArray(data.content)
+          ? data.content.find((c: any) => c?.type === "tool_use" && c?.name === "emit_trip")
+          : null;
+        return {
+          ok: true,
+          toolUse,
+          stopReason: data.stop_reason,
+          outputTokens: data.usage?.output_tokens,
+        };
+      }
+
+      // Returns true when the tool_use payload is genuinely missing the
+      // itinerary (empty days, or days with no blocks). These are the two
+      // shapes the FE normalizer can't handle — both surface as the
+      // "no itinerary days found in the expected format" error and are
+      // worth a one-shot retry with the tightened prompt.
+      function isInvalidShape(toolUseInput: any): boolean {
+        if (!toolUseInput) return true;
+        if (!Array.isArray(toolUseInput.days) || toolUseInput.days.length === 0) return true;
+        // Catch the variant where days exist but no day actually has blocks.
+        // A single day with blocks is enough to treat as valid (partial-day
+        // trips are real); we only flag fully-empty itineraries.
+        const anyDayHasBlocks = toolUseInput.days.some(
+          (d: any) => Array.isArray(d?.blocks) && d.blocks.length > 0
+        );
+        return !anyDayHasBlocks;
+      }
+
+      let attempt = await callClaudeOnce();
+      let attemptCount = 1;
+
+      // First attempt failed at the HTTP level (4xx/5xx from Anthropic).
+      // No retry — these are upstream errors, not shape problems; the
+      // retry prompt won't help and would just double the failure cost.
+      if (!attempt.ok) {
+        console.error("[generate-trip] claude upstream", attempt.httpStatus, attempt.errorText?.slice(0, 500));
+        return errorResponse(502, "claude_upstream_failed", `Claude API returned ${attempt.httpStatus}`, {
+          status: attempt.httpStatus,
+          body:   attempt.errorText?.slice(0, 500),
+        });
+      }
+
+      // Truncation is unrecoverable on a single retry — same prompt, same
+      // model, same max_tokens would truncate again. Return the user-
+      // facing error so they can shorten the trip.
+      if (attempt.stopReason === "max_tokens") {
+        return errorResponse(502, "llm_truncated",
+          `La respuesta del modelo excedió el límite de tokens. Reduce la duración o los intereses e intenta de nuevo.`,
+          { output_tokens: attempt.outputTokens }
+        );
+      }
+
+      // Shape validation + ONE internal retry. The retryHint hooks into
+      // buildPrompt's existing retry-aware tightening logic (search for
+      // `isRetryNoDays` in this file) which adds explicit "you returned
+      // an empty days array and were rejected — do it right this time"
+      // language. Empirically this catches the bulk of intermittent
+      // shape flakes without bouncing the failure back to the user.
+      if (!attempt.toolUse?.input || isInvalidShape(attempt.toolUse.input)) {
+        console.warn("[generate-trip] invalid shape on attempt 1, retrying with retryHint=no_days_emitted",
+          JSON.stringify({
+            had_tool_use: !!attempt.toolUse,
+            top_keys:     attempt.toolUse?.input ? Object.keys(attempt.toolUse.input) : [],
+            days_length:  Array.isArray(attempt.toolUse?.input?.days) ? attempt.toolUse.input.days.length : null,
+          })
+        );
+        attempt = await callClaudeOnce("no_days_emitted");
+        attemptCount = 2;
+        if (!attempt.ok) {
+          console.error("[generate-trip] claude upstream on retry", attempt.httpStatus, attempt.errorText?.slice(0, 500));
+          return errorResponse(502, "claude_upstream_failed_on_retry", `Claude API returned ${attempt.httpStatus} on retry`, {
+            status: attempt.httpStatus,
+            body:   attempt.errorText?.slice(0, 500),
+          });
+        }
+        if (attempt.stopReason === "max_tokens") {
+          return errorResponse(502, "llm_truncated_on_retry",
+            `La respuesta del modelo excedió el límite de tokens en el reintento.`,
+            { output_tokens: attempt.outputTokens }
+          );
+        }
+      }
+
+      const ms = Date.now() - startedAt;
+
+      console.log("[generate-trip]", JSON.stringify({
+        model:         MODEL,
+        stop_reason:   attempt.stopReason,
+        output_tokens: attempt.outputTokens,
+        attempts:      attemptCount,
+        ms,
+      }));
+
+      const toolUse = attempt.toolUse;
+
+      if (!toolUse?.input) {
+        console.error("[generate-trip] no tool_use in response after retries");
+        return errorResponse(502, "llm_no_tool_use", "El modelo no emitió la estructura esperada", {
+          stop_reason: attempt.stopReason,
+        });
+      }
+
+      // Shape still invalid after the retry — give up cleanly with a
+      // specific error code so callers (sync API route, async worker)
+      // can surface a useful message and the analytics layer's
+      // error_occurred event tags this distinctly from generic upstream
+      // failures.
+      if (isInvalidShape(toolUse.input)) {
+        console.error("[generate-trip] shape invalid after retry",
+          JSON.stringify({
+            top_keys:    Object.keys(toolUse.input),
+            days_length: Array.isArray(toolUse.input.days) ? toolUse.input.days.length : null,
+          })
+        );
+        return errorResponse(502, "llm_empty_days_after_retry",
+          "El modelo no produjo días de itinerario después del reintento.",
+          { stop_reason: attempt.stopReason }
+        );
+      }
+
                                                                                                                  
       return new Response(                                                                                       
         JSON.stringify({ success: true, trip_data: toolUse.input }),
