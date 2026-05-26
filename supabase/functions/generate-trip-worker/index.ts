@@ -590,6 +590,13 @@ serve(async (req: Request) => {
     // RLS misconfiguration), the function died with an unhandled exception
     // and the job sat in status='running' forever, never reaching the cron
     // reconciler's "rescue stuck jobs" heuristic. Mark failed instead.
+    // Reflect the new chunk in the in-memory map BEFORE the persist try
+    // block so the progressive partial-assembly inside it sees the latest
+    // chunk too. Persistence failures still mark the job failed below;
+    // they don't poison the in-memory state because the function returns
+    // immediately in that branch.
+    chunksByIndex.set(i, chunk)
+
     try {
       const { error: insertErr } = await admin
         .from('generation_chunks')
@@ -601,6 +608,37 @@ serve(async (req: Request) => {
         .update({ chunks_done: i + 1 })
         .eq('id', job.id)
       if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
+
+      // ── Progressive partial assembly (streaming-UI feature) ─────────────
+      // After every chunk completes, recompute assembleResult() over the
+      // chunks-so-far and write it to generation_jobs.partial_result. The
+      // polling endpoint exposes this column; TripResult.tsx renders
+      // whatever days exist while waiting for the rest. The user sees the
+      // first chunk's days at ~100s instead of waiting the full 10 min
+      // for a long trip.
+      //
+      // Inner try/catch is defensive: a failure to compute or write the
+      // partial_result must NOT fail the chunk persistence — partial is
+      // a UX enhancement, not load-bearing. If it fails, the client just
+      // shows the regular spinner until the next chunk lands, or until
+      // the final result is saved at completion.
+      try {
+        const chunksOrdered: ChunkContent[] = []
+        for (let idx = 0; idx <= i; idx++) {
+          const c = chunksByIndex.get(idx)
+          if (c) chunksOrdered.push(c)
+        }
+        const partial = assembleResult(chunksOrdered, job.inputs)
+        const { error: partialErr } = await admin
+          .from('generation_jobs')
+          .update({ partial_result: partial } as any)
+          .eq('id', job.id)
+        if (partialErr) {
+          console.warn('[worker] partial_result write failed at chunk', i, partialErr.message)
+        }
+      } catch (assemblyErr) {
+        console.warn('[worker] partial_result assembly threw at chunk', i, assemblyErr)
+      }
     } catch (persistErr) {
       console.error('[worker] chunk persist failed at index', i, persistErr)
       await admin
@@ -616,7 +654,6 @@ serve(async (req: Request) => {
       })
     }
 
-    chunksByIndex.set(i, chunk)
     prevSummary = shortSummary(chunk)
   }
 
