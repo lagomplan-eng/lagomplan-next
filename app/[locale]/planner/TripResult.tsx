@@ -962,6 +962,12 @@ export default function TripResult({ params }: Props) {
   const [asyncChunksDone,  setAsyncChunksDone]  = useState<number | null>(null)
   const [asyncChunksTotal, setAsyncChunksTotal] = useState<number | null>(null)
   const [isAsyncPath,      setIsAsyncPath]      = useState(false)
+  // True while we're rendering a progressively-assembled trip (worker has
+  // delivered ≥1 chunk via partial_result but the job is not yet completed).
+  // While true: trip content renders from partial data, but autosave + tripId
+  // setting stay suppressed because the trip isn't final yet. Resets to false
+  // when the job completes (or fails) and the caller writes the canonical data.
+  const [isStreamingPartial, setIsStreamingPartial] = useState(false)
   // Duration the active generation is producing for. Tracks the *new* value
   // during regenerate/replaceTrip (which derive from edited dates), not the
   // stale `nights` URL param. Used by the GenerationSurface so the waiting
@@ -2006,10 +2012,72 @@ export default function TripResult({ params }: Props) {
       if (typeof pollData.chunksDone === 'number')  setAsyncChunksDone(pollData.chunksDone)
       if (typeof pollData.chunksTotal === 'number') setAsyncChunksTotal(pollData.chunksTotal)
 
+      // ── Streaming UI: consume partial_result while the job is in flight ──
+      // Worker writes a progressive assembly after every chunk lands (see
+      // generate-trip-worker assembleResult write). When we see one, hydrate
+      // the trip state so the page renders whatever days exist and the user
+      // can start reading. Subsequent polls overwrite with fresh partials
+      // as more chunks land — UI grows naturally.
+      //
+      // We flip `loading=false` here so the GenerationSurface yields to the
+      // day-card view, but tripId stays null and `isStreamingPartial=true`,
+      // which gates autosave + share/regen logic from firing on incomplete
+      // data. Final completion (below) lets the caller set the canonical
+      // state + tripId, at which point autosave kicks in normally.
+      if (
+        pollData.partial_result &&
+        typeof pollData.partial_result === 'object' &&
+        Array.isArray((pollData.partial_result as any).days) &&
+        (pollData.partial_result as any).days.length > 0 &&
+        (pollData.status === 'queued' || pollData.status === 'running')
+      ) {
+        try {
+          const interestsStr = Array.isArray(payload?.interests)
+            ? payload.interests.join(', ')
+            : (typeof payload?.interests === 'string' ? payload.interests : '')
+          const partialNights = String(payload?.duration_days ?? payload?.nights ?? 1)
+          const partialLocale = payload?.locale === 'en' ? 'en' : 'es'
+          const childCount = Array.isArray(payload?.traveler_details?.children)
+            ? payload.traveler_details.children.length
+            : 0
+          const normalized = normalizeTripData(
+            { trip_data: pollData.partial_result },
+            payload?.destination ?? '',
+            partialNights,
+            interestsStr,
+            partialLocale,
+            { type: payload?.traveler, childCount },
+          )
+          setTripTitle(normalized.title)
+          setTripSubtitle(normalized.subtitle)
+          setDays(normalized.days)
+          setAccommodations(normalized.accommodations)
+          setPacking(normalized.packing)
+          setBudgetRows(normalized.budgetRows)
+          // Mirror rawTripData to the partial so the autosave + render
+          // pipelines that read it (e.g. generate-effect bail-out) see
+          // consistent data. Not the canonical row yet — that comes at
+          // completion.
+          setRawTripData(pollData.partial_result)
+          setIsStreamingPartial(true)
+          setLoading(false)
+        } catch (partialErr) {
+          // Partial rendering must never block generation completion —
+          // worst case the user keeps seeing the GenerationSurface until
+          // the final result lands.
+          console.warn('[runAsyncGeneration] partial normalize failed, ignoring', partialErr)
+        }
+      }
+
       if (pollData.status === 'completed' && pollData.trip_data) {
+        // Hand off canonical data to the caller. The caller's existing
+        // normalize → save → setTripId flow takes over from here. Streaming
+        // flag resets so any "more coming" UI cue disappears.
+        setIsStreamingPartial(false)
         return { tripDataRaw: pollData.trip_data, tripId: pollData.tripId ?? null }
       }
       if (pollData.status === 'failed') {
+        setIsStreamingPartial(false)
         throw new Error(typeof pollData.error === 'string' ? pollData.error : 'Generation failed')
       }
     }
@@ -4051,6 +4119,23 @@ export default function TripResult({ params }: Props) {
                     </div>
                   )
                 })
+              )}
+
+              {/* Streaming indicator: appears below the last rendered day
+                  while the worker is still producing more chunks. Reuses
+                  existing typography + color tokens (no new visual design)
+                  so the build communicates progress without ceremony. The
+                  flag clears when status='completed' arrives in polling. */}
+              {isStreamingPartial && (
+                <div className="flex items-center justify-center gap-2 py-4 font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#6B8F86]">
+                  <span className="w-[5px] h-[5px] rounded-full bg-[#6B8F86] animate-pulse" />
+                  <span>
+                    {isES ? 'Generando más días' : 'Generating more days'}
+                    {typeof asyncChunksDone === 'number' && typeof asyncChunksTotal === 'number' && asyncChunksTotal > 0
+                      ? ` · ${asyncChunksDone} / ${asyncChunksTotal}`
+                      : ''}
+                  </span>
+                </div>
               )}
             </div>
           </div>

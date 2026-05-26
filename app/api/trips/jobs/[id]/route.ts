@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     const admin = getSupabaseAdmin()
     const { data, error } = await (admin as any)
       .from('generation_jobs')
-      .select('id, user_id, status, chunks_total, chunks_done, result, error, trip_id, updated_at')
+      .select('id, user_id, status, chunks_total, chunks_done, result, partial_result, error, trip_id, updated_at')
       .eq('id', id)
       .single()
 
@@ -85,6 +85,13 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
       status:      data.status,
       chunksTotal: data.chunks_total,
       chunksDone:  data.chunks_done,
+    }
+    // Surface the progressive assembly while the job is still running so the
+    // client can render finished days as soon as each chunk lands (streaming
+    // UI). Only sent for in-flight jobs — once status='completed' the canonical
+    // result lives under `trip_data` and the partial column is irrelevant.
+    if ((data.status === 'queued' || data.status === 'running') && data.partial_result) {
+      payload.partial_result = data.partial_result
     }
     if (data.status === 'completed') {
       payload.trip_data = data.result
