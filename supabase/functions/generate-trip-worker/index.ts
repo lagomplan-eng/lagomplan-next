@@ -44,34 +44,35 @@ console.log('[worker] env check:', {
   legacy_starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
 })
 
-// Budget: Supabase Free Edge Functions cap at 150s. A 7-day segment on
-// Sonnet 4.6 takes ~140s (~50% slower per chunk than Sonnet 4.0 was —
-// see scripts/test-sonnet-4-6-shape.ts diagnostic results). BUDGET_FLOOR_MS
-// at 135_000 — high enough that we never START a segment we can't
-// reasonably complete. Effect: at most one segment per worker invocation
-// (then self-reinvoke / cron resumes). Predictable.
+// Budget: Supabase Free Edge Functions cap at 150s. A 5-day segment on
+// Sonnet 4.6 takes ~100s — ~45s margin under the 145s timeout — sized
+// for real-world variance, not the optimistic average. See history
+// below and scripts/test-sonnet-4-6-shape.ts for the diagnostic data.
+// BUDGET_FLOOR_MS at 135_000 — high enough that we never START a
+// segment we can't reasonably complete.
 const BUDGET_FLOOR_MS = 135_000
 
-// Per-segment LLM call timeout — must accommodate a 7-day segment on
-// Sonnet 4.6 with margin to spare. Empirically ~140s for 7 days; 145s
-// leaves ~5s before Supabase kills the function at 150s.
-// (Was 60s when we generated 1 day per call; raised to 145s when we
-// went to 10-day segments on Sonnet 4.0; held at 145s when we dropped
-// to 7-day segments on Sonnet 4.6 — same timeout, smaller segment to
-// stay under the Supabase cap.)
+// Per-segment LLM call timeout — sized for a 5-day segment on
+// Sonnet 4.6 with healthy margin. We abort at 145s, 5s before
+// Supabase kills the function at 150s, so the worker has time to
+// gracefully record the failure + refund the credit.
 const CHUNK_TIMEOUT_MS = 145_000
 
 // Segment size — number of days per generate-trip call. History:
 //   • Pre-2026-04: 1 day per call. 30-chunk chains were fragile.
 //   • 2026-04 → 2026-05-25: 10 days on Sonnet 4.0 (chunks ~130s, fit
 //     in Supabase Free's 150s cap with margin).
-//   • 2026-05-26 → today: 7 days on Sonnet 4.6 (chunks ~140s — 4.6 is
-//     ~50% slower per chunk so 10-day chunks blew the 150s cap with
-//     ~200s execution, broke all long-trip generations).
-// If we ever upgrade Supabase to Pro/Team (400s cap), we can return to
-// 10-day segments. Keep this in sync with `app/api/trips/jobs/route.ts`
+//   • 2026-05-26 morning: tried 7 days on Sonnet 4.6 (chunks ~135-140s
+//     in diagnostics, but real-world variance pushed it over 145s on
+//     prod runs — T1b 11-day Oaxaca aborted at chunk 0).
+//   • 2026-05-26 evening: dropped to 5 days on Sonnet 4.6 — chunks
+//     ~100s, ~45s safety margin. Adds ~1 chunk per 30-day trip vs
+//     the 7-day setting (was 5, now 6) but eliminates the timeout
+//     class of failures.
+// If we ever upgrade Supabase to Pro/Team (400s cap), we can return
+// to 10-day segments. Keep this in sync with `app/api/trips/jobs/route.ts`
 // which uses the same constant for chunks_total computation.
-const SEGMENT_DAYS = 7
+const SEGMENT_DAYS = 5
 
 type JobRow = {
   id:           string

@@ -83,10 +83,11 @@ export async function POST(req: NextRequest) {
     // Keep SEGMENT_DAYS + the per-segment sub-chunking math in sync with the
     // worker's planMultiCityChunks(). The worker is the source of truth for
     // chunk content; this computation just sizes chunks_total to match.
-    // Reduced 10 → 7 on 2026-05-26 when Sonnet 4.6 broke the 150s Supabase
-    // Free function cap on 10-day chunks. See the rationale block in
-    // supabase/functions/generate-trip-worker/index.ts.
-    const SEGMENT_DAYS = 7
+    // Reduced 10 → 7 (morning) → 5 (evening) on 2026-05-26: Sonnet 4.6
+    // broke the 150s Supabase Free function cap on 10-day chunks; 7-day
+    // chunks were still marginal in production. See the rationale block
+    // in supabase/functions/generate-trip-worker/index.ts.
+    const SEGMENT_DAYS = 5
     const bodySegments = Array.isArray((body as any)?.segments) ? (body as any).segments : []
     const isMultiCity  = bodySegments.length >= 2
     const chunksTotal  = isMultiCity

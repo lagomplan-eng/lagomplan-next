@@ -1966,11 +1966,12 @@ export default function TripResult({ params }: Props) {
     if (!jobId) throw new Error('Missing jobId from /api/trips/jobs')
 
     // 15 minutes. Was 10 min for Sonnet 4.0 (10-day chunks ~130s each).
-    // Sonnet 4.6 is ~50% slower per chunk; to keep each chunk under
-    // Supabase Free's 150s function cap we dropped to 7-day chunks
-    // (~140s/chunk on 4.6). 30-day trip: 5 chunks × ~140s + self-
-    // reinvoke handoffs ≈ ~12 min wall-clock. 900s gives ~25%
-    // headroom over that.
+    // Sonnet 4.6 is ~50% slower per chunk and 7-day chunks turned out
+    // marginal in production (real variance pushed past the 145s
+    // worker abort timeout), so we run 5-day chunks now — ~100s each
+    // with ~45s margin under the Supabase Free 150s cap. 30-day trip:
+    // 6 chunks × ~100s + self-reinvoke handoffs ≈ ~10-11 min wall-
+    // clock. 900s gives ~30% headroom over that.
     const HARD_TIMEOUT_MS = 900_000
     const POLL_INTERVAL_MS = 2_000
     const pollStart = performance.now()
