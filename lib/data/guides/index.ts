@@ -41,6 +41,24 @@ import { guide as tulumEn } from './tulum/en'
 import { guide as valledeBravoEs } from './valle-de-bravo/es'
 import { guide as valledeBravoEn } from './valle-de-bravo/en'
 
+// International guides (June 2026 batch — alphabetized for scannability)
+import { guide as atacamaEs } from './atacama/es'
+import { guide as atacamaEn } from './atacama/en'
+import { guide as cartagenaEs } from './cartagena/es'
+import { guide as cartagenaEn } from './cartagena/en'
+import { guide as cuscoMachuPicchuEs } from './cusco-machu-picchu/es'
+import { guide as cuscoMachuPicchuEn } from './cusco-machu-picchu/en'
+import { guide as guanacasteEs } from './guanacaste/es'
+import { guide as guanacasteEn } from './guanacaste/en'
+import { guide as guatemalaEs } from './guatemala/es'
+import { guide as guatemalaEn } from './guatemala/en'
+import { guide as norteDeArgentinaEs } from './norte-de-argentina/es'
+import { guide as norteDeArgentinaEn } from './norte-de-argentina/en'
+import { guide as rioDeJaneiroEs } from './rio-de-janeiro/es'
+import { guide as rioDeJaneiroEn } from './rio-de-janeiro/en'
+import { guide as uruguayEs } from './uruguay/es'
+import { guide as uruguayEn } from './uruguay/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -59,6 +77,15 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'tepoztlan': { es: tepoztlanEs, en: tepoztlanEn },
   'tulum': { es: tulumEs, en: tulumEn },
   'valle-de-bravo': { es: valledeBravoEs, en: valledeBravoEn },
+  // International guides (June 2026 batch)
+  'atacama':            { es: atacamaEs,           en: atacamaEn },
+  'cartagena':          { es: cartagenaEs,         en: cartagenaEn },
+  'cusco-machu-picchu': { es: cuscoMachuPicchuEs,  en: cuscoMachuPicchuEn },
+  'guanacaste':         { es: guanacasteEs,        en: guanacasteEn },
+  'guatemala':          { es: guatemalaEs,         en: guatemalaEn },
+  'norte-de-argentina': { es: norteDeArgentinaEs,  en: norteDeArgentinaEn },
+  'rio-de-janeiro':     { es: rioDeJaneiroEs,      en: rioDeJaneiroEn },
+  'uruguay':            { es: uruguayEs,           en: uruguayEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────

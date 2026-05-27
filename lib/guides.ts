@@ -864,6 +864,142 @@ const GUIDES: Guide[] = [
       },
     ],
   },
+
+  // ── International guides (June 2026 batch) ─────────────────────────────────
+  // Minimal listing entries. The full guide content lives in
+  // lib/data/guides/<slug>/{es,en}.ts (FlatGuide format) and is rendered via
+  // GuidePageClientV2. These entries exist purely so the guides surface in the
+  // /guides listing page (which reads from this legacy GUIDES array).
+  // `sections` is empty intentionally — the FlatGuide system supplies the
+  // detail-page content; the legacy section fallback never fires for these.
+
+  // ── Atacama ────────────────────────────────────────────────
+  {
+    slug_es: 'atacama',
+    slug_en: 'atacama',
+    title_es: 'San Pedro de Atacama, Chile',
+    title_en: 'San Pedro de Atacama, Chile',
+    excerpt_es: 'El desierto más seco del mundo tiene géiseres al amanecer, lagunas con flamencos rosados y un cielo nocturno que los niños van a recordar más que cualquier parque de atracciones. Y no requiere presupuesto de resort para vivirlo bien.',
+    excerpt_en: "The driest desert on earth has geysers at dawn, lagoons with pink flamingos, and a night sky that kids will remember longer than any theme park. And you don't need a resort budget to live it well.",
+    destination_es: 'San Pedro de Atacama',
+    destination_en: 'San Pedro de Atacama',
+    tags_es: ['Familia', 'Niños pequeños', 'Naturaleza', 'Presupuesto'],
+    tags_en: ['Family', 'Small kids', 'Nature', 'Budget'],
+    cover_img: '/images/guides/atacama.png',
+    sections: [],
+  },
+
+  // ── Cartagena ──────────────────────────────────────────────
+  {
+    slug_es: 'cartagena',
+    slug_en: 'cartagena',
+    title_es: 'Cartagena de Indias',
+    title_en: 'Cartagena de Indias',
+    excerpt_es: 'El corazón amurallado de Colombia. Una semana diseñada para descubrir tesoros piratas, islas de coral y la calidez del Caribe con el equilibrio exacto entre historia y descanso.',
+    excerpt_en: "Colombia's walled heart. A week designed to uncover pirate treasures, coral islands, and Caribbean warmth — with the right balance between history and rest.",
+    destination_es: 'Cartagena',
+    destination_en: 'Cartagena',
+    tags_es: ['Familia', 'Playa', 'Aventura', 'Historia'],
+    tags_en: ['Family', 'Beach', 'Adventure', 'History'],
+    cover_img: '/images/guides/cartagena.png',
+    sections: [],
+  },
+
+  // ── Cusco & Machu Picchu ───────────────────────────────────
+  {
+    slug_es: 'cusco-machu-picchu',
+    slug_en: 'cusco-machu-picchu',
+    title_es: 'Cusco & Machu Picchu, Perú',
+    title_en: 'Cusco & Machu Picchu, Peru',
+    excerpt_es: 'El viaje que tiene todo el sentido hacer solo: caminar a tu ritmo, comer sin negociar el restaurante, amanecer en la ciudadela antes de que lleguen los grupos de tour y regresar a Cusco con la cabeza llena de piedras incas y altitud.',
+    excerpt_en: 'The trip that makes the most sense to do alone: walk at your own pace, eat without negotiating the restaurant, watch dawn in the citadel before the tour groups arrive, and come back to Cusco with a head full of Inca stone and altitude.',
+    destination_es: 'Cusco',
+    destination_en: 'Cusco',
+    tags_es: ['Solo', 'Aventura', 'Caminata', 'Gastronomía'],
+    tags_en: ['Solo', 'Adventure', 'Trekking', 'Food'],
+    cover_img: '/images/guides/cusco-machu-picchu.png',
+    sections: [],
+  },
+
+  // ── Guanacaste ─────────────────────────────────────────────
+  {
+    slug_es: 'guanacaste',
+    slug_en: 'guanacaste',
+    title_es: 'Guanacaste, Costa Rica',
+    title_en: 'Guanacaste, Costa Rica',
+    excerpt_es: 'La provincia del Pacífico Norte que resuelve el fin de semana perfecto: playa sin masificación, puestas de sol que la gente fotografía durante veinte minutos seguidos y la posibilidad de hacer nada de forma elegante.',
+    excerpt_en: 'The Pacific-North province that solves the perfect weekend: beaches without the crowds, sunsets people photograph for twenty minutes straight, and the chance to do nothing — elegantly.',
+    destination_es: 'Guanacaste',
+    destination_en: 'Guanacaste',
+    tags_es: ['Amigos', 'Relax', 'Playa', 'Fin de semana'],
+    tags_en: ['Friends', 'Relaxation', 'Beach', 'Weekend'],
+    cover_img: '/images/guides/guanacaste.png',
+    sections: [],
+  },
+
+  // ── Guatemala ──────────────────────────────────────────────
+  {
+    slug_es: 'guatemala',
+    slug_en: 'guatemala',
+    title_es: 'Guatemala',
+    title_en: 'Guatemala',
+    excerpt_es: 'El corazón del mundo maya. Un viaje diseñado para perderse entre buganvilias, despertar frente a volcanes activos y navegar el lago más bello del mundo con el equilibrio perfecto entre confort y aventura.',
+    excerpt_en: 'The heart of the Maya world. A trip designed for getting lost among bougainvilleas, waking up to active volcanoes, and sailing the most beautiful lake on earth — with the perfect balance of comfort and adventure.',
+    destination_es: 'Guatemala',
+    destination_en: 'Guatemala',
+    tags_es: ['Parejas', 'Naturaleza', 'Lujo', 'Gastronomía'],
+    tags_en: ['Couples', 'Nature', 'Luxury', 'Food'],
+    cover_img: '/images/guides/guatemala.png',
+    sections: [],
+  },
+
+  // ── Norte de Argentina ─────────────────────────────────────
+  {
+    slug_es: 'norte-de-argentina',
+    slug_en: 'norte-de-argentina',
+    title_es: 'Norte de Argentina: Salta & Quebrada de Humahuaca',
+    title_en: 'Northern Argentina: Salta & Quebrada de Humahuaca',
+    excerpt_es: 'El noroeste argentino no necesita esforzarse para impresionar. Tiene montañas de catorce colores, pueblos de adobe con 400 años sin reformar, la mejor empanada del país y el silencio que la Patagonia tiene pero sin el frío.',
+    excerpt_en: 'Northwestern Argentina does not need to try to impress. It has fourteen-color mountains, adobe villages unchanged for 400 years, the best empanada in the country, and the same silence Patagonia offers — without the cold.',
+    destination_es: 'Salta',
+    destination_en: 'Salta',
+    tags_es: ['Amigas', 'Lujo', 'Relax', 'Arte'],
+    tags_en: ['Friends', 'Luxury', 'Relaxation', 'Art'],
+    cover_img: '/images/guides/norte-de-argentina.png',
+    sections: [],
+  },
+
+  // ── Rio de Janeiro ─────────────────────────────────────────
+  {
+    slug_es: 'rio-de-janeiro',
+    slug_en: 'rio-de-janeiro',
+    title_es: 'Río de Janeiro',
+    title_en: 'Rio de Janeiro',
+    excerpt_es: 'La ciudad más cinematográfica del mundo — y la que tiene más capas de las que cualquier guía puede cubrir en cuatro días. Esta es la versión para la familia que quiere playas, arte, gastronomía y el Corcovado desde la mejor perspectiva disponible.',
+    excerpt_en: 'The most cinematic city in the world — and one with more layers than any four-day guide can cover. This is the version for the family that wants beaches, art, food, and Corcovado from the best vantage point available.',
+    destination_es: 'Río de Janeiro',
+    destination_en: 'Rio de Janeiro',
+    tags_es: ['Familia', 'Adolescentes', 'Lujo', 'Gastronomía'],
+    tags_en: ['Family', 'Teenagers', 'Luxury', 'Food'],
+    cover_img: '/images/guides/rio-de-janeiro.png',
+    sections: [],
+  },
+
+  // ── Uruguay ────────────────────────────────────────────────
+  {
+    slug_es: 'uruguay',
+    slug_en: 'uruguay',
+    title_es: 'Uruguay',
+    title_en: 'Uruguay',
+    excerpt_es: 'El país más tranquilo de América del Sur. Un viaje pensado para familias que quieren aventura sin adrenalina innecesaria, historia que se puede tocar y el asado más honesto del continente.',
+    excerpt_en: 'The quietest country in South America. A trip designed for families that want adventure without unnecessary adrenaline, history you can touch, and the most honest asado on the continent.',
+    destination_es: 'Uruguay',
+    destination_en: 'Uruguay',
+    tags_es: ['Familia', 'Naturaleza', 'Historia', 'Calma'],
+    tags_en: ['Family', 'Nature', 'History', 'Calm'],
+    cover_img: '/images/guides/uruguay.png',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────
