@@ -6,6 +6,36 @@ For exhaustive detail on any change, follow the commit hash — full rationale l
 
 ---
 
+## 2026-05-26 — Reliability recovery + streaming UI + QA workflow foundation
+
+A heavy day mostly about closing reliability gaps that surfaced from yesterday's Sonnet 4.6 migration. Two latent RLS bugs unrelated to the migration also got fixed via audit. Day ended with the streaming generation UX live and the smoke-tests doc ready for a multi-agent QA workflow.
+
+### Shipped
+- **Share + claim routes — admin-client UPDATE** (`fc13a73`, `be28d2d`). Two production-breaking RLS traps fixed: both POST endpoints used the user-scoped Supabase client for UPDATEs that current RLS policies didn't permit. The writes silently succeeded with 0 rows affected — share URLs were generated and handed to clients but never persisted to DB (every recipient bounced to home), and signup-claim of anonymous trips never linked the row to the new user. Now both use admin client + explicit `eq('user_id', user.id)` ownership filters. Audited every write in `app/api/**` — these two were the only outliers, pattern is now consistent.
+- **Sonnet 4.6 worker fix — SEGMENT_DAYS 10 → 7 → 5** (`ccfc8e9`, then `52cb528`). Yesterday's migration shipped without adjusting the worker's per-chunk timeout assumptions. 10-day chunks on Sonnet 4.6 take ~200s, blew the 145s worker abort + 150s Supabase Free function cap. First fix dropped to 7 days but real-world variance still pushed past 145s in production. Second iteration to 5 days (~100s/chunk, 45s margin) stabilized it. T1b 15-day async trips now complete in ~6 min reliably. Root-cause lesson logged in the commit: diagnostic script's 3-sample-per-scenario was too few; need ≥10 samples + ≥30% margin over observed mean when tuning timing constants.
+- **Title day-count quirk fix** (`21c85d0`). For multi-chunk trips the worker took chunk 0's title verbatim — a 15-day Oaxaca trip displayed "5 Días en Oaxaca: Arte, Sabor y Tradición" because chunk 0 is a 5-day sub-chunk. Worker now patches the leading day count (regex match) while preserving the AI's creative subtitle (": Arte, Sabor y Tradición" stays put). Fallback title + subtitle also locale-aware now (were hardcoded Spanish for EN trips).
+- **Streaming trip generation** (`0485116`). Long trips now render progressively: first 5 days appear at ~100s when chunk 1 lands, then 6-10 at ~200s, etc. Worker writes a recomputed `assembleResult()` to a new `partial_result` JSONB column after each chunk; polling endpoint surfaces it; TripResult consumes it and flips `loading=false` while keeping `tripId` null + new `isStreamingPartial` state suppressing autosave/share/regen until the canonical row exists. Visual cue: tiny "Generando más días · N/M" indicator below the day cards in existing typography tokens (no new design pieces). Same Sonnet 4.6, same prompts — pure UX, quality untouched.
+- **`docs/SMOKE_TESTS.md`** (`aa58a89`). ~30 tests across 8 sections covering generation, lifecycle, consent, auth, monetization, engagement, locale parity, edge cases. Designed for a multi-agent QA workflow: QA Lead agent owns the file + runs the suite pre-merge; Dev Engineer agent automates highest-impact items as Playwright tests over time. Includes a "Recently discovered" append-only regression log so institutional memory lives in the repo across sessions.
+
+### Decisions
+- **Quality over speed.** Picked Option 2 (streaming UI) over Option 4 (hybrid Sonnet+Haiku) when choosing how to handle the slowdown from 4.6 + smaller chunks. Sonnet 4.6 everywhere; perceived speed gained through progressive rendering, not model substitution. Lagomplan's differentiator is editorial quality, not raw gen speed.
+- **Stayed on Supabase Free.** $25/mo Pro upgrade would have let us keep 10-day chunks on Sonnet 4.6 (400s function cap). Skipped for now — 5-day chunks + streaming UI gives equivalent user perception. Logged as "do when budget allows" — would also give headroom for future model migrations.
+- **Removed Edge Fn internal retry.** Yesterday's migration added a one-shot internal retry on shape validation failure. Doubled execution time, couldn't fit in 150s Supabase Free cap. Now Edge Fn does ONE call, validates, returns 502 with `llm_empty_days` code. Caller (sync route's existing retry-with-retryHint path) handles re-attempts on a fresh invocation with its own 150s budget.
+
+### Operational
+- **Sonnet 4.6 stayed on after rollback + re-promotion.** Brief rollback to 4.0 mid-day while fixing the worker; flipped back via `supabase secrets set GENERATE_TRIP_MODEL=claude-sonnet-4-6` once the worker fix deployed.
+- **Three Edge Function deploys today** via CLI (worker × 2 for SEGMENT_DAYS + title fix; generate-trip × 1 for migration removal). Confirms CI auto-deploy is still unreliable — every change needs manual `supabase functions deploy`.
+- **Memory updated**: `project_async_generation.md` notes the new SEGMENT_DAYS=5 reality + rollback command for `GENERATE_TRIP_MODEL`. Doesn't yet have a "use ≥10 samples when sizing timeouts" memo — worth adding before the next model migration.
+
+### Deferred (still pending)
+- **Worker-level retry on chunk shape failures.** Edge Fn now returns clean 502 with `llm_empty_days` on shape failure; worker just propagates as a chunk failure. Mirror sync's retry-with-retryHint behavior in the worker so async trips also get the safety net. Separate PR.
+- **Playwright smoke tests.** Manual checklist in `docs/SMOKE_TESTS.md` is the spec. Dev Engineer agent owns turning the top items into automated tests over the next 2-3 weeks.
+- **Intelligence Foundation Phase 1A** (kept getting bumped by reliability work). Backend foundation: schema migration + types + `lib/intelligence.ts` engine + AI prompt extension + Edge Fn integration. ~5 hrs focused work, queued for tomorrow.
+- **Supabase Pro upgrade** ($25/mo) — would unlock 400s function cap → 10-day or 15-day chunks → faster generation + headroom for next model migration. Worth doing when budget permits.
+- **DPAs walkthrough + `processors.md`** — still on the compliance backlog.
+
+---
+
 ## 2026-05-25 — Analytics Tier 3 + QA tool + Sonnet 4.6 migration
 
 ### Shipped
