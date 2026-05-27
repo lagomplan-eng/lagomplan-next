@@ -35,6 +35,17 @@
 
   Si el viaje es de un solo día (overnight === false), deja "accommodations" como arreglo vacío.
 
+  CAMPO "neighborhood" EN CADA BLOQUE (importante):
+  Para cada bloque del itinerario, incluye el campo opcional "neighborhood"
+  con el nombre del barrio o zona local en minúsculas y sin acentos
+  (por ejemplo: "polanco", "coyoacan", "centro historico", "trastevere",
+  "ipanema"). Este campo alimenta el cálculo de distancias internas
+  (caminar vs traslado entre actividades, cercanía hotel-actividades).
+  Si el bloque no tiene una ubicación clara (ej. "tarde libre"), omite
+  el campo en lugar de inventar. Usa el mismo barrio cuando varias
+  actividades están en la misma zona — la consistencia importa más que
+  la precisión absoluta.
+
   Cuando el usuario te pida un itinerario, llama a la herramienta emit_trip con los datos completos.
   No respondas con texto, sólo con la llamada a la herramienta.
 
@@ -57,6 +68,17 @@
   predetermined in the input — use them as-is, don't modify them.
 
   If the trip is a single day (overnight === false), leave "accommodations" as an empty array.
+
+  "neighborhood" FIELD ON EACH BLOCK (important):
+  For each itinerary block, include the optional "neighborhood" field with
+  the local neighborhood or area name in lowercase, without accents
+  (e.g. "polanco", "coyoacan", "centro historico", "trastevere",
+  "ipanema"). This field feeds internal distance calculations (walking
+  vs transit between activities, hotel-to-activity proximity). If a
+  block has no clear location (e.g. "free afternoon"), omit the field
+  rather than inventing one. Use the same neighborhood when several
+  activities are in the same area — consistency matters more than
+  absolute precision.
 
   When the user asks for an itinerary, call the emit_trip tool with the complete data.
   Don't reply with text, only with the tool call.
@@ -129,18 +151,24 @@
             day_label:  { type: "string" },                                                                      
             title:      { type: "string" },
             objective:  { type: "string" },                                                                      
-            blocks: {                                                                                            
-              type: "array",      
-              items: {                                                                                           
-                type: "object",                             
+            blocks: {
+              type: "array",
+              items: {
+                type: "object",
                 required: ["time", "title", "description", "type"],
                 properties: {
-                  time:        { type: "string" },                                                             
-                  title:       { type: "string" },                                                               
+                  time:        { type: "string" },
+                  title:       { type: "string" },
                   description: { type: "string" },
-                  type:        { type: "string", enum: ["hotel", "restaurant", "tour", "transfer", "culture", "nature", "free"] },                                                                                                    
-                },                                                                                             
-              },                                                                                                 
+                  type:        { type: "string", enum: ["hotel", "restaurant", "tour", "transfer", "culture", "nature", "free"] },
+                  // Optional neighborhood / area name for the Intelligence
+                  // Foundation engine (lib/intelligence.ts inferCoords).
+                  // Lowercased local neighborhood label — e.g. "polanco",
+                  // "trastevere", "ipanema". Powers per-day walking +
+                  // hotel-fit estimates without external geocoding APIs.
+                  neighborhood: { type: "string" },
+                },
+              },
             },                                              
           },                                                                                                     
         },                                                  

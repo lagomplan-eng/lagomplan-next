@@ -5,6 +5,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '../../../lib/supabase/server'
 import type { TravelerType, TravelStyle } from '../../../lib/supabase/types'
+import { computeTripIntelligence } from '../../../lib/intelligence'
+import type { TripIntelligence } from '../../../types/intelligence'
 
 const VALID_TRAVELER_TYPES: TravelerType[] = ['solo', 'pareja', 'familia', 'amigos']
 const VALID_TRAVEL_STYLES: TravelStyle[]   = ['relajado', 'equilibrado', 'activo']
@@ -28,6 +30,7 @@ export async function POST(req: NextRequest) {
       travelers, travel_style, budget_level, interests, trip_data,
       traveler_adults, traveler_children, traveler_group_count,
       currency,
+      walking_tolerance,
     } = body
 
     // ── Validation ────────────────────────────────────────────────────────────
@@ -100,6 +103,38 @@ export async function POST(req: NextRequest) {
 
     const slug = generateSlug(destination)
 
+    // walking_tolerance: enum-style TEXT ('low' | 'medium' | 'high'). Drives
+    // the energy_warning threshold inside computeTripIntelligence + the
+    // user-visible "ritmo" preference on the result page. Falls through to
+    // the column default ('medium') when the client doesn't send it.
+    const walkingToleranceValue: 'low' | 'medium' | 'high' | undefined =
+      walking_tolerance === 'low' || walking_tolerance === 'medium' || walking_tolerance === 'high'
+        ? walking_tolerance
+        : undefined
+
+    // ── Intelligence Foundation — compute + persist on save ──────────────────
+    // Pure computation (no I/O, no API calls). Wrapped in try/catch per the
+    // Intelligence spec: "Never block the user from seeing their itinerary
+    // because of an intelligence calculation error." On failure we save the
+    // trip with intelligence=null and log; the result page hides the badges
+    // when the field is null. Existing trips (pre-migration) read the same
+    // null path and behave identically.
+    let intelligence: TripIntelligence | null = null
+    try {
+      const tripDataAny = trip_data as Record<string, unknown> | null | undefined
+      intelligence = computeTripIntelligence({
+        days:              Array.isArray(tripDataAny?.days)            ? (tripDataAny!.days as any[])            : [],
+        accommodations:    Array.isArray(tripDataAny?.accommodations)  ? (tripDataAny!.accommodations as any[])  : [],
+        duration_days:     durationDaysValue ?? undefined,
+        walking_tolerance: walkingToleranceValue ?? 'medium',
+      })
+    } catch (intelErr) {
+      // Defensive — engine is designed not to throw, but if it does we
+      // proceed without intelligence rather than failing the save.
+      console.warn('[trips/post] intelligence computation failed:', intelErr instanceof Error ? intelErr.message : intelErr)
+      intelligence = null
+    }
+
     const insertPayload: Record<string, unknown> = {
       slug,
       title:        title && String(title).trim() ? String(title).trim() : null,
@@ -112,7 +147,9 @@ export async function POST(req: NextRequest) {
       interests:    interestsValue,
       trip_data,
       user_id:      user.id,
+      intelligence,
     }
+    if (walkingToleranceValue !== undefined) insertPayload.walking_tolerance = walkingToleranceValue
     if (adultsValue !== undefined)   insertPayload.traveler_adults      = adultsValue
     if (childrenValue !== undefined) insertPayload.traveler_children    = childrenValue
     if (groupValue !== undefined)    insertPayload.traveler_group_count = groupValue
