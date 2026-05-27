@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'La ciudad más cinematográfica del mundo — y la que tiene más capas de las que cualquier guía puede cubrir en cuatro días. Esta es la versión para la familia que quiere playas, arte, gastronomía y el Corcovado desde la mejor perspectiva disponible.',
     eyebrow: 'Guía curada · Familia con adolescentes · 4 días · Lujo',
     tags: ['Familia', 'Adolescentes', 'Lujo', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/rio-de-janeiro.png',
   },
 
   itinerary: [

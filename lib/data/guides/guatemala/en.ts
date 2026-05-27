@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The heart of the Maya world. A trip designed for getting lost among bougainvilleas, waking up to active volcanoes, and sailing the most beautiful lake on earth — with the perfect balance of comfort and adventure.',
     eyebrow: 'Curated guide · Romance & Nature · 5 days · Luxury, gastronomy',
     tags: ['Couples', 'Nature', 'Luxury', 'Food'],
-    image: '',
+    image: '/images/guides/guatemala.png',
   },
 
   itinerary: [

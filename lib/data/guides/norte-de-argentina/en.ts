@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Northwestern Argentina does not need to try to impress. It has fourteen-color mountains, adobe villages unchanged for 400 years, the best empanada in the country, and the same silence Patagonia offers — without the cold.',
     eyebrow: 'Curated guide · Girlfriends · 4 days · Luxury, relaxation, art',
     tags: ['Friends', 'Luxury', 'Relaxation', 'Art'],
-    image: '',
+    image: '/images/guides/norte-de-argentina.png',
   },
 
   itinerary: [

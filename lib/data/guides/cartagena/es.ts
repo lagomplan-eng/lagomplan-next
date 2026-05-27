@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El corazón amurallado de Colombia. Una semana diseñada para descubrir tesoros piratas, islas de coral y la calidez del Caribe con el equilibrio exacto entre historia y descanso.',
     eyebrow: 'Guía curada · Familia · 7 días · Playa, aventura',
     tags: ['Familia', 'Playa', 'Aventura', 'Historia'],
-    image: '',
+    image: '/images/guides/cartagena.png',
   },
 
   itinerary: [

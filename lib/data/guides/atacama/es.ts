@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El desierto más seco del mundo tiene géiseres al amanecer, lagunas con flamencos rosados y un cielo nocturno que los niños van a recordar más que cualquier parque de atracciones. Y no requiere presupuesto de resort para vivirlo bien.',
     eyebrow: 'Guía curada · Familia con niños pequeños · 5 días · Presupuesto limitado',
     tags: ['Familia', 'Niños pequeños', 'Naturaleza', 'Presupuesto'],
-    image: '',
+    image: '/images/guides/atacama.png',
   },
 
   itinerary: [

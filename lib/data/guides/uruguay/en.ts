@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The quietest country in South America. A trip designed for families that want adventure without unnecessary adrenaline, history you can touch, and the most honest asado on the continent.',
     eyebrow: 'Curated guide · Family & Nature · 6 days',
     tags: ['Family', 'Nature', 'History', 'Calm'],
-    image: '',
+    image: '/images/guides/uruguay.png',
   },
 
   itinerary: [
