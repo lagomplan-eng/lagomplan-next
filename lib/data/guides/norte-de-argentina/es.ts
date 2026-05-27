@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El noroeste argentino no necesita esforzarse para impresionar. Tiene montañas de catorce colores, pueblos de adobe con 400 años sin reformar, la mejor empanada del país y el silencio que la Patagonia tiene pero sin el frío.',
     eyebrow: 'Guía curada · Amigas · 4 días · Lujo, relax, arte',
     tags: ['Amigas', 'Lujo', 'Relax', 'Arte'],
-    image: '',
+    image: '/images/guides/norte-de-argentina.png',
   },
 
   itinerary: [

@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The trip that makes the most sense to do alone: walk at your own pace, eat without negotiating the restaurant, watch dawn in the citadel before the tour groups arrive, and come back to Cusco with a head full of Inca stone and altitude.',
     eyebrow: 'Curated guide · Solo traveler · 7 days · Adventure, trekking, food',
     tags: ['Solo', 'Adventure', 'Trekking', 'Food'],
-    image: '',
+    image: '/images/guides/cusco-machu-picchu.png',
   },
 
   itinerary: [

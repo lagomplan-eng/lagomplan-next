@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El país más tranquilo de América del Sur. Un viaje pensado para familias que quieren aventura sin adrenalina innecesaria, historia que se puede tocar y el asado más honesto del continente.',
     eyebrow: 'Guía curada · Familia & Naturaleza · 6 días',
     tags: ['Familia', 'Naturaleza', 'Historia', 'Calma'],
-    image: '',
+    image: '/images/guides/uruguay.png',
   },
 
   itinerary: [

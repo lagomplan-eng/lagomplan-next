@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The Pacific-North province that solves the perfect weekend: beaches without the crowds, sunsets people photograph for twenty minutes straight, and the chance to do nothing — elegantly.',
     eyebrow: 'Curated guide · Friends & Relaxation · Weekend',
     tags: ['Friends', 'Relaxation', 'Beach', 'Weekend'],
-    image: '',
+    image: '/images/guides/guanacaste.png',
   },
 
   itinerary: [

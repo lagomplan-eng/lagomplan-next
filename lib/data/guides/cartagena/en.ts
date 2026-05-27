@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'Colombia\'s walled heart. A week designed to uncover pirate treasures, coral islands, and Caribbean warmth — with the right balance between history and rest.',
     eyebrow: 'Curated guide · Family · 7 days · Beach, adventure',
     tags: ['Family', 'Beach', 'Adventure', 'History'],
-    image: '',
+    image: '/images/guides/cartagena.png',
   },
 
   itinerary: [

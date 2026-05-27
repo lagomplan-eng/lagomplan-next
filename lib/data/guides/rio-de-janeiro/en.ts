@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The most cinematic city in the world — and one with more layers than any four-day guide can cover. This is the version for the family that wants beaches, art, food, and Corcovado from the best vantage point available.',
     eyebrow: 'Curated guide · Family with teenagers · 4 days · Luxury',
     tags: ['Family', 'Teenagers', 'Luxury', 'Food'],
-    image: '',
+    image: '/images/guides/rio-de-janeiro.png',
   },
 
   itinerary: [

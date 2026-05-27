@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'La provincia del Pacífico Norte que resuelve el fin de semana perfecto: playa sin masificación, puestas de sol que la gente fotografía durante veinte minutos seguidos y la posibilidad de hacer nada de forma elegante.',
     eyebrow: 'Guía curada · Amigos & Relax · Fin de semana',
     tags: ['Amigos', 'Relax', 'Playa', 'Fin de semana'],
-    image: '',
+    image: '/images/guides/guanacaste.png',
   },
 
   itinerary: [

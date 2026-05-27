@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El corazón del mundo maya. Un viaje diseñado para perderse entre buganvilias, despertar frente a volcanes activos y navegar el lago más bello del mundo con el equilibrio perfecto entre confort y aventura.',
     eyebrow: 'Guía curada · Romance & Naturaleza · 5 días · Lujo, gastronomía',
     tags: ['Parejas', 'Naturaleza', 'Lujo', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/guatemala.png',
   },
 
   itinerary: [

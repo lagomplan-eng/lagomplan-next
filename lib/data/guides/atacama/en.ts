@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'The driest desert on earth has geysers at dawn, lagoons with pink flamingos, and a night sky that kids will remember longer than any theme park. And you don\'t need a resort budget to live it well.',
     eyebrow: 'Curated guide · Family with small kids · 5 days · Tight budget',
     tags: ['Family', 'Small kids', 'Nature', 'Budget'],
-    image: '',
+    image: '/images/guides/atacama.png',
   },
 
   itinerary: [

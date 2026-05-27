@@ -9,7 +9,7 @@ export const guide: FlatGuide = {
     subtitle: 'El viaje que tiene todo el sentido hacer solo: caminar a tu ritmo, comer sin negociar el restaurante, amanecer en la ciudadela antes de que lleguen los grupos de tour y regresar a Cusco con la cabeza llena de piedras incas y altitud.',
     eyebrow: 'Guía curada · Viajero solo · 7 días · Aventura, caminata, gastronomía',
     tags: ['Solo', 'Aventura', 'Caminata', 'Gastronomía'],
-    image: '',
+    image: '/images/guides/cusco-machu-picchu.png',
   },
 
   itinerary: [
