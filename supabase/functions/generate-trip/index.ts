@@ -554,6 +554,62 @@ ${dayMap.join("\n")}
       intensidad — deja 4-5 h libres antes del check-out al aeropuerto.`;
   }
 
+  // ── Chunk continuity ────────────────────────────────────────────────────────
+  // When the async worker splits a long trip into chunks, each call to this
+  // Edge Function only sees its own sub-range. Without the block below, the
+  // AI treats every chunk as a standalone trip and re-emits an arrival on
+  // day 1 + a departure on the last day — so the assembled itinerary reads
+  // "arrive → farewell → arrive again → farewell" instead of a continuous
+  // narrative. The fields are forwarded by generate-trip-worker on every
+  // chunk; absent on direct sync invocations (no-op).
+  function buildChunkContinuityBlock(input: any, locale: Locale): string {
+    const segIdx     = typeof input.segment_index   === "number" ? input.segment_index   : null;
+    const segTotal   = typeof input.total_segments  === "number" ? input.total_segments  : null;
+    const dayOffset  = typeof input.trip_day_offset === "number" ? input.trip_day_offset : null;
+    const tripTotal  = typeof input.trip_total_days === "number" ? input.trip_total_days : null;
+    const prev       = typeof input.previous_day_summary === "string" ? input.previous_day_summary : "";
+    if (segIdx === null || segTotal === null || segTotal <= 1) return "";
+
+    const isEN    = locale === "en";
+    const isFirst = segIdx === 0;
+    const isLast  = segIdx === segTotal - 1;
+    const startsAtDay = dayOffset !== null ? dayOffset + 1 : null;
+    const endsAtDay   = dayOffset !== null ? dayOffset + (input.duration_days as number) : null;
+
+    const rangeLine = (startsAtDay !== null && endsAtDay !== null && tripTotal !== null)
+      ? (isEN
+          ? `  Your chunk covers trip days ${startsAtDay}–${endsAtDay} of ${tripTotal}.`
+          : `  Tu chunk cubre los días ${startsAtDay}–${endsAtDay} del viaje de ${tripTotal} días.`)
+      : "";
+
+    const prevLine = prev
+      ? (isEN
+          ? `  Previously generated days: ${prev}`
+          : `  Días generados antes: ${prev}`)
+      : "";
+
+    let intent = "";
+    if (isFirst) {
+      intent = isEN
+        ? `  This is the FIRST chunk of a multi-chunk trip. You own the ARRIVAL on day 1 (jet-lag aware if relevant). Do NOT emit any farewell / departure narrative — that belongs to the LAST chunk only.`
+        : `  Este es el PRIMER chunk de un viaje multi-chunk. Tú manejas la LLEGADA en el día 1 (con jet-lag si aplica). NO incluyas despedidas ni narrativa de salida — eso le toca SOLO al último chunk.`;
+    } else if (isLast) {
+      intent = isEN
+        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from the previous chunk — do NOT re-emit an arrival, hotel check-in, or "first day" framing. Day 1 of YOUR chunk is a continuation day. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
+        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde el chunk anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El día 1 de TU chunk es un día de continuación. El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
+    } else {
+      intent = isEN
+        ? `  This is a MIDDLE chunk (${segIdx + 1} of ${segTotal}). The traveler is mid-trip — do NOT emit arrival, hotel check-in, "first day" framing, departure, or farewell. Every day is a continuation. Build on the rhythm of the previous chunk; vary neighborhoods and activity types so the trip doesn't feel repetitive.`
+        : `  Este es un chunk INTERMEDIO (${segIdx + 1} de ${segTotal}). El viajero está a media estancia — NO incluyas llegada, check-in, "primer día", despedida ni salida. Cada día es continuación. Construye sobre el ritmo del chunk anterior; varía barrios y tipos de actividad para que el viaje no se sienta repetitivo.`;
+    }
+
+    const header = isEN
+      ? "CHUNK CONTINUITY (critical — this is part of a longer trip):"
+      : "CONTINUIDAD DE CHUNK (crítico — esto es parte de un viaje más largo):";
+
+    return `\n\n  ${header}\n${rangeLine ? rangeLine + "\n" : ""}${prevLine ? prevLine + "\n" : ""}${intent}`;
+  }
+
   function buildPrompt(input: any): string {
     const locale: Locale = input.locale === "en" ? "en" : "es";
     const isEN = locale === "en";
@@ -581,7 +637,17 @@ ${dayMap.join("\n")}
     // back to the original "at least 1 entry covering all nights" contract.
     const multiCity = isMultiCity(input.segments) ? input.segments as TripSegment[] : null;
 
-    const accommodationsBlock = overnight
+    // Suppress the accommodations block on non-first single-city chunks. The
+    // worker's assembleResult() only keeps the first non-empty accommodation
+    // block anyway (single-city dedupe), so asking later chunks to emit a
+    // hotel for their sub-range just burns tokens and tempts the AI to weave
+    // a check-in narrative into a continuation day.
+    const segIdxNum    = typeof input.segment_index  === "number" ? input.segment_index  : null;
+    const segTotalNum  = typeof input.total_segments === "number" ? input.total_segments : null;
+    const isLaterChunk = segIdxNum !== null && segTotalNum !== null && segTotalNum > 1 && segIdxNum > 0;
+    const skipAccommodationsForChunk = isLaterChunk && !multiCity;
+
+    const accommodationsBlock = (overnight && !skipAccommodationsForChunk)
       ? multiCity
         ? (isEN ? `
   LODGING BY SEGMENT (REQUIRED):
@@ -717,10 +783,18 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     // Empty for single-city trips (the default).
     const segmentsContext = multiCity ? buildSegmentsContext(multiCity, locale) : "";
 
+    // Async-worker chunk continuity. Empty when the trip is a single
+    // standalone Edge Fn call (sync path, or async with total_segments=1).
+    const chunkContinuity = buildChunkContinuityBlock(input, locale);
+
     // Jet-lag — fires only when destination is on the long-haul hint list
     // (Europe / Asia / Oceania / Africa). Origin is surfaced in the prompt
-    // so the AI knows where the relaxed Day 1 is coming from.
-    const jetLagContext   = buildJetLagContext(input.destination, input.origin, locale);
+    // so the AI knows where the relaxed Day 1 is coming from. Gated to
+    // chunk 0 of a chunked trip: chunks 1+ are continuation days with no
+    // arrival to soften, so the prompt block would only confuse the model.
+    const jetLagContext   = isLaterChunk
+      ? ""
+      : buildJetLagContext(input.destination, input.origin, locale);
 
     // Layered temporal guidance — fires when we have a real start date.
     // Kept short on purpose; AI is smart enough to act on the structured
@@ -783,7 +857,7 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   ${dataLabels.style}
   ${dataLabels.budget}
   ${dataLabels.interests}
-  ${retryNote}${accommodationsBlock}${segmentsContext}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
+  ${retryNote}${accommodationsBlock}${segmentsContext}${chunkContinuity}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
 
   BLOCK TYPES (CRITICAL):
   Every block MUST have an exact \`type\` from the enum. Use it deliberately:
@@ -818,7 +892,7 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
   - Intereses: ${interests}
-  ${retryNote}${accommodationsBlock}${segmentsContext}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
+  ${retryNote}${accommodationsBlock}${segmentsContext}${chunkContinuity}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
 
   TIPOS DE BLOQUE (CRÍTICO):
   Cada bloque DEBE tener un \`type\` exacto del enum. Úsalo intencionalmente:

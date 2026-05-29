@@ -252,6 +252,15 @@ async function generateSegment(jobInputs: Record<string, any>, chunkIndex: numbe
       segment_index:        chunkIndex,
       total_segments:       totalChunks,
       previous_day_summary: prevSummary ?? undefined,
+      // Trip-level context — lets the prompt know where this chunk sits
+      // in the larger trip (so the AI doesn't restart the arrival
+      // narrative on chunk 1+ and knows the cumulative day offset for
+      // any "Día N" references it weaves into descriptions). Without
+      // these, every chunk reads as a standalone 5-day trip.
+      trip_day_offset: segmentStartIdx,
+      trip_total_days: totalDays,
+      trip_start_date: tripStart.toISOString().slice(0, 10),
+      trip_end_date:   addDaysISO(tripStart.toISOString().slice(0, 10), totalDays - 1),
       start: segmentStartDate.toISOString().slice(0, 10),
       end:   segmentEndDate.toISOString().slice(0, 10),
     }
