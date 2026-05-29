@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
     const rawDuration = Number(duration_days)
     const durationDaysValue: number = isNaN(rawDuration)
       ? 1
-      : Math.min(Math.max(rawDuration, 0), 30)
+      : Math.min(Math.max(rawDuration, 0), 35)
 
     // ── Traveler details (Phase 2B columns) ───────────────────────────────────
     // Each defaults to the column default if omitted from the request body, so

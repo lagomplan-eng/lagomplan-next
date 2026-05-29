@@ -135,7 +135,7 @@ function durationDaysFromNights(raw: string | number | null | undefined): number
   const n = typeof raw === 'number' ? raw : parseInt(String(raw ?? ''), 10)
   if (isNaN(n)) return 3                 // truly missing → product default
   if (n <= 0)  return 1                  // explicit same-day
-  return Math.min(Math.max(n, 1), 30)    // overnight: unchanged
+  return Math.min(Math.max(n, 1), 35)    // overnight: clamp mirrors HeroForm MAX_TRIP_DAYS
 }
 
 // ─── Display label maps ────────────────────────────────────────────────────────
@@ -1967,7 +1967,7 @@ export default function TripResult({ params }: Props) {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`
 
-    const duration = Math.min(Math.max(Number(payload?.duration_days) || 1, 1), 30)
+    const duration = Math.min(Math.max(Number(payload?.duration_days) || 1, 1), 35)
     // Worker generates segments of up to 10 days each. Initialize the
     // progress UI with the segment count (1-3 for 1-30 day trips) rather
     // than the day count, so the bar starts in the right shape; polling
