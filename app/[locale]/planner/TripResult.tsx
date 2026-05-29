@@ -20,6 +20,10 @@ import { classifyBlock, type ItemType as ClassifiedItemType } from '../../../lib
 import PlannerHotelsSection from '../../../components/planner/PlannerHotelsSection'
 import TripReadinessBar from '../../../components/planner/TripReadinessBar'
 import StatusPill from '../../../components/planner/StatusPill'
+import DayFlowBadge from '../../../components/intelligence/DayFlowBadge'
+import IntelligenceCallout from '../../../components/intelligence/IntelligenceCallout'
+import HotelFitBadge from '../../../components/intelligence/HotelFitBadge'
+import type { TripIntelligence } from '../../../types/intelligence'
 import { computeMilestones, selectNextCheck } from '../../../lib/planner/milestones'
 import {
   type TripSegment,
@@ -941,6 +945,7 @@ export default function TripResult({ params }: Props) {
     trip_id:  savedTripId = '',
     checkout: checkoutStatus = '',   // 'success' | 'cancelled' | ''
     segments: segmentsParam = '',    // pipe-delimited multi-city chain (deserializeSegments)
+    walkingTolerance: walkingToleranceParam = '',  // 'low' | 'medium' | 'high' from HeroForm
   } = params
 
   // ── Data state ──────────────────────────────────────────────────────────────
@@ -992,6 +997,21 @@ export default function TripResult({ params }: Props) {
   const [doneCheckIds, setDoneCheckIds] = useState<Set<string>>(new Set())
   const [budgetRows, setBudgetRows] = useState<BudgetRow[]>([])
   const [packing, setPacking]   = useState<string[]>([])
+
+  // Intelligence Foundation — computed at trip save time by lib/intelligence.ts
+  // and persisted to trips.intelligence (JSONB). null = no analysis yet
+  // (pre-migration trips, async/long trips, or computation failure). When
+  // populated, drives DayFlowBadge / IntelligenceCallout / HotelFitBadge.
+  const [intelligence, setIntelligence] = useState<TripIntelligence | null>(null)
+  // Walking tolerance — captured at trip creation form (HeroForm) and
+  // forwarded to /api/trips POST so the engine can apply the correct
+  // energy_warning threshold. Read from URL search params on first mount,
+  // overridden by DB load when an existing trip is opened.
+  const [walkingTolerance, setWalkingTolerance] = useState<'low' | 'medium' | 'high'>(
+    walkingToleranceParam === 'low' || walkingToleranceParam === 'medium' || walkingToleranceParam === 'high'
+      ? walkingToleranceParam
+      : 'medium'
+  )
 
   // ── Version state ────────────────────────────────────────────────────────────
   const [versions, setVersions]           = useState<TripVersion[]>([])
@@ -1205,6 +1225,17 @@ export default function TripResult({ params }: Props) {
         }
         setBudgetRows(normalized.budgetRows)
         setPacking(normalized.packing)
+        // Intelligence Foundation — hydrate the badges from the saved row
+        // (computed at save-time by /api/trips POST). null on pre-migration
+        // trips, async/long trips, or rows where computation failed silently.
+        if (data.intelligence && typeof data.intelligence === 'object') {
+          setIntelligence(data.intelligence as TripIntelligence)
+        } else {
+          setIntelligence(null)
+        }
+        if (data.walking_tolerance === 'low' || data.walking_tolerance === 'medium' || data.walking_tolerance === 'high') {
+          setWalkingTolerance(data.walking_tolerance)
+        }
         setVersions([{
           label: 'Versión original',
           tripTitle: normalized.title,
@@ -1648,6 +1679,7 @@ export default function TripResult({ params }: Props) {
                   traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
                   traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
                   currency:             budgetCurrency,
+                  walking_tolerance:    walkingTolerance,
                 }),
               })
               if (!autoSaveRes.ok) {
@@ -2264,6 +2296,7 @@ export default function TripResult({ params }: Props) {
               traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
               traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
               currency:             budgetCurrency,
+              walking_tolerance:    walkingTolerance,
             }
             console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
             const regenSaveRes = await fetch('/api/trips', {
@@ -2355,6 +2388,7 @@ export default function TripResult({ params }: Props) {
           budget_level: prefBudget,
           interests:    parsedInterests,
           trip_data:    rawTripData,
+          walking_tolerance: walkingTolerance,
         }),
       })
       console.log('[saveTrip] res.status:', res.status)
@@ -2666,6 +2700,7 @@ export default function TripResult({ params }: Props) {
             traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
             traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
             currency:             budgetCurrency,
+            walking_tolerance:    walkingTolerance,
           }
           console.log('[replaceTrip] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
           const regenSaveRes = await fetch('/api/trips', {
@@ -3850,6 +3885,14 @@ export default function TripResult({ params }: Props) {
                 overnight trip surfaces at least one hotel CTA.
                 Same-day trips (rare; planner enforces min 1 night)
                 render nothing. */}
+            {intelligence?.hotel_fit && (
+              <div className="mb-3">
+                <HotelFitBadge
+                  label={intelligence.hotel_fit.label}
+                  note={intelligence.hotel_fit.note}
+                />
+              </div>
+            )}
             <PlannerHotelsSection
               tripId={tripId}
               accommodations={accommodations}
@@ -3935,6 +3978,10 @@ export default function TripResult({ params }: Props) {
                 days.map((day) => {
                   const isCollapsed = collapsedDays.has(day.n)
                   const dayNextCheck = checks.find(c => c.day === day.n && !c.done)
+                  // Intelligence lookup is keyed by day_number (not array index)
+                  // because async generation can emit days non-sequentially and
+                  // the engine preserves the canonical numbering from the AI.
+                  const dayIntel = intelligence?.days.find(d => d.day_number === day.n) ?? null
 
                   return (
                     <div
@@ -3948,15 +3995,25 @@ export default function TripResult({ params }: Props) {
                         className="flex items-center justify-between px-[18px] py-3.5 cursor-pointer select-none border-b border-[#E4DFD8]"
                         onClick={() => toggleDay(day.n)}
                       >
-                        <div>
+                        <div className="min-w-0">
                           <div data-trip-day="label" className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-[3px]">
                             {day.label}
                           </div>
                           <div data-trip-day="title" className="font-display text-[15px] font-normal tracking-[-0.01em] text-[#1C1C1A]">
                             {day.title}
                           </div>
+                          {dayIntel && (
+                            <div className="mt-1.5">
+                              <DayFlowBadge
+                                label={dayIntel.day_label}
+                                walkingMin={dayIntel.estimated_walking_min}
+                                transitSegments={dayIntel.estimated_transit_segments}
+                                locale={locale === 'es' ? 'es' : 'en'}
+                              />
+                            </div>
+                          )}
                         </div>
-                        <div className="flex items-center gap-[9px]">
+                        <div className="flex items-center gap-[9px] shrink-0">
                           {day.progress > 0 && (
                             <span className="font-mono text-[9px] font-medium tracking-[.06em] text-[#6B8F86] bg-[rgba(107,143,134,.1)] px-[7px] py-px rounded-full">
                               {day.progress}% listo
@@ -4091,6 +4148,9 @@ export default function TripResult({ params }: Props) {
                               </div>
                             )
                           })}
+                          {dayIntel && dayIntel.flags.length > 0 && (
+                            <IntelligenceCallout flags={dayIntel.flags} />
+                          )}
                         </div>
 
                         {/* Next-step banner */}

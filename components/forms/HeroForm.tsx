@@ -43,6 +43,7 @@ type HeroFormProps = {
     interests?: string
     pace?: string
     budget?: string
+    walkingTolerance?: 'low' | 'medium' | 'high'
   }
 }
 
@@ -118,6 +119,14 @@ const [interests, setInterests] = useState<string[]>(knownInterests)
 const [extra, setExtra] = useState(extraInterests.join(', '))
 
 const [pace, setPace] = useState(initialValues?.pace ?? '')
+
+// Walking tolerance — captured at trip creation, drives the energy_warning
+// threshold in lib/intelligence.ts on the result page. Defaults to 'medium'
+// so users who skip the question still get a reasonable analysis.
+const [walkingTolerance, setWalkingTolerance] =
+  useState<'low' | 'medium' | 'high'>(initialValues?.walkingTolerance ?? 'medium')
+
+const isES = locale === 'es'
 const [budget, setBudget] = useState(initialValues?.budget ?? '')
 // Currency toggle for the budget field. The amount goes into the AI prompt as
 // a free-text string (e.g. "20,000 MXN") so the model sees the unit clearly.
@@ -261,6 +270,10 @@ function submit(e: React.FormEvent) {
       // budgetCurrency state without sniffing the budget string. DB load
       // will override this once the trip is saved.
       currency:    budgetCurrency,
+      // Walking tolerance — captured here, threaded to /planner so
+      // TripResult can pass it to /api/trips on save. Drives the
+      // Intelligence Foundation's energy_warning threshold.
+      walkingTolerance,
       // Multi-city chain (empty string for single-city trips → no-op).
       ...(segmentsParam ? { segments: segmentsParam } : {}),
     })
@@ -617,6 +630,39 @@ function submit(e: React.FormEvent) {
             {submitted && !pace && (
               <FieldError msg={t('errorPace')} />
             )}
+          </div>
+
+          {/* ── 4.5 Walking tolerance ───────────────────────────── */}
+          {/* Powers the Intelligence Foundation's energy_warning threshold.
+              Three options match the engine's 'low' | 'medium' | 'high' enum
+              one-to-one (see lib/intelligence.ts buildDayFlags). Default
+              'medium' is pre-selected so users who skip get a sensible
+              analysis instead of nothing. Same visual chrome as Pace. */}
+          <div className="mb-4">
+            <label className={sectionLabel}>
+              {isES ? '¿Cuánto caminas en un día típico de turismo?' : 'How much do you walk on a typical sightseeing day?'}
+            </label>
+            <div className="flex gap-1.5 max-[560px]:flex-col">
+              {([
+                ['low',    isES ? 'Poco · menos de 30 min'  : 'Light · under 30 min'  ],
+                ['medium', isES ? 'Moderado · 30 – 60 min'  : 'Moderate · 30 – 60 min'],
+                ['high',   isES ? 'Mucho · más de 60 min'   : 'A lot · over 60 min'   ],
+              ] as ['low' | 'medium' | 'high', string][]).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setWalkingTolerance(id)}
+                  className={[
+                    'flex-1 min-h-[44px] font-sans text-[13px] font-normal text-center py-2.5 px-4 border rounded-[10px] transition-all',
+                    walkingTolerance === id
+                      ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.24)] text-[#0F3A33]'
+                      : 'bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)] hover:bg-[#FAF8F4]',
+                  ].join(' ')}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           {/* ── 5. Budget ────────────────────────────────────────── */}
