@@ -236,7 +236,7 @@ async function generateSegment(jobInputs: Record<string, any>, chunkIndex: numbe
     }
   } else {
     // ── Single-city: original day-block chunking ────────────────────────────
-    const totalDays      = Math.max(1, Math.min(30, Number(jobInputs.duration_days) || 1))
+    const totalDays      = Math.max(1, Math.min(35, Number(jobInputs.duration_days) || 1))
     const segmentStartIdx = chunkIndex * SEGMENT_DAYS
     const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
 

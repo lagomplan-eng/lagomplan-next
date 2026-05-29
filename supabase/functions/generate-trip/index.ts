@@ -873,7 +873,7 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
       }                           
                                                                                                                  
       const rawDays = Number(body.duration_days ?? body.nights ?? 5);                                            
-      const duration_days = Math.min(Math.max(rawDays || 5, 1), 30);                                           
+      const duration_days = Math.min(Math.max(rawDays || 5, 1), 35);
                                                                                                                  
       // Nights / overnight are deterministic — computed by the calling
       // layer (Next /api/generate-trip) from the date range. The Edge

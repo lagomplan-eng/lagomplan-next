@@ -69,7 +69,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const durationDays = Math.min(Math.max(Number((body as any)?.duration_days) || 1, 1), 30)
+    const durationDays = Math.min(Math.max(Number((body as any)?.duration_days) || 1, 1), 35)
     // Multi-city: one chunk per SUB-CHUNK of a segment (long segments split
     // into multiple Edge Fn calls). Each chunk calls generate-trip as a
     // clean single-city request for that sub-range, and the worker assembles

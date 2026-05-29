@@ -160,6 +160,11 @@ type ExtraSegment = {
   dates:       DateRange
 }
 const MAX_EXTRA_SEGMENTS = 4
+// Hard cap on trip length. Tied to the worker's segment chain budget
+// (SEGMENT_DAYS=5 × ~7 chunks fits inside the cron-rescue window on
+// Supabase Free). Mirror constants in app/api/trips/jobs/route.ts and
+// supabase/functions/generate-trip-worker/index.ts.
+const MAX_TRIP_DAYS = 35
 const [additionalSegments, setAdditionalSegments] = useState<ExtraSegment[]>([])
 
 function addSegment() {
@@ -191,9 +196,31 @@ function updateSegment(idx: number, patch: Partial<ExtraSegment>) {
 const destValue = destPlace?.displayName ?? destText
 const datesValid = !!(dates.start && dates.end)
 
+// Total trip length across all segments. Single-city = dates.nights;
+// multi-city = sum of segment nights. Drives the MAX_TRIP_DAYS guard
+// rendered under the dates picker.
+const totalNights = dates.nights + additionalSegments.reduce(
+  (sum, s) => sum + (s.dates.nights || 0),
+  0,
+)
+const exceedsMax = totalNights > MAX_TRIP_DAYS
+
+// Snap the main dates picker to exactly MAX_TRIP_DAYS. Only meaningful
+// for single-city trips (multi-city users shorten individual segments
+// instead). Preserves the chosen start date.
+function trimToMax() {
+  if (!dates.start) return
+  const newEnd = new Date(dates.start)
+  newEnd.setDate(newEnd.getDate() + MAX_TRIP_DAYS)
+  setDates({ start: dates.start, end: newEnd, nights: MAX_TRIP_DAYS })
+}
+
 function submit(e: React.FormEvent) {
   e.preventDefault()
   setSubmitted(true)
+  // Hard-block over-cap submissions so the date range can never disagree
+  // with the duration the backend will actually generate.
+  if (exceedsMax) return
 
   if (!originValue || !destValue || !datesValid || !traveler || !pace) return
 
@@ -375,6 +402,29 @@ function submit(e: React.FormEvent) {
             <DateRangePicker value={dates} onChange={setDates} />
             {submitted && !datesValid && (
               <FieldError msg={t('errorDates')} />
+            )}
+            {exceedsMax && (
+              <div
+                role="status"
+                className="mt-2 px-3 py-2.5 rounded-[6px] bg-[rgba(218,165,32,.07)] border border-[rgba(218,165,32,.28)] border-l-[3px] border-l-[#D4A35E]"
+              >
+                <p className="font-sans text-[12px] leading-[1.5] text-[#5A4423]">
+                  {locale === 'es'
+                    ? `Por ahora generamos itinerarios de hasta ${MAX_TRIP_DAYS} días. Tu rango actual cubre ${totalNights} noches.`
+                    : `We currently plan trips of up to ${MAX_TRIP_DAYS} days. Your current range covers ${totalNights} nights.`}
+                </p>
+                {additionalSegments.length === 0 && dates.start && (
+                  <button
+                    type="button"
+                    onClick={trimToMax}
+                    className="mt-1.5 font-sans text-[12px] font-semibold text-[#0F3A33] underline underline-offset-2 hover:text-[#1A5247]"
+                  >
+                    {locale === 'es'
+                      ? `Ajustar a ${MAX_TRIP_DAYS} días`
+                      : `Trim to ${MAX_TRIP_DAYS} days`}
+                  </button>
+                )}
+              </div>
             )}
           </div>
 
