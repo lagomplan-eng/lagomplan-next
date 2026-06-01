@@ -885,8 +885,32 @@ function normalizeTripData(
     )
   })()
 
+  // Defensive title patch — mirrors the worker's patchTitleDayCount but at
+  // render time, so existing DB rows whose title was baked in by an old
+  // worker chunk-0 emit ("Lisboa en 5 días: …" on a 19-day trip) self-heal
+  // on load without needing a regeneration. Idempotent: titles that
+  // already match days.length are unchanged. Only patches the FIRST day-
+  // count phrase to avoid touching content after a ":" separator.
+  const rawTitle = row?.title ?? source.title
+  const patchedTitle = (() => {
+    if (typeof rawTitle !== 'string' || !rawTitle) return rawTitle
+    const target = normalizedDays.length
+    if (target < 1) return rawTitle
+    const esMatch = rawTitle.match(/\b\d+\s+d[ií]as?\b/i)
+    if (esMatch) {
+      const word = target === 1 ? 'día' : 'días'
+      return rawTitle.replace(esMatch[0], `${target} ${word}`)
+    }
+    const enMatch = rawTitle.match(/\b\d+\s+days?\b/i)
+    if (enMatch) {
+      const word = target === 1 ? 'day' : 'days'
+      return rawTitle.replace(enMatch[0], `${target} ${word}`)
+    }
+    return rawTitle
+  })()
+
   return {
-    title:          row?.title ?? source.title ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
+    title:          patchedTitle ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
     subtitle:       source.subtitle ?? 'AI-generated trip plan',
     days:           normalizedDays,
     checks:         normalizedChecks,
