@@ -143,36 +143,6 @@ export default async function HomePage({
                   ? 'Describe tu viaje — destino, días, quién va — y en 30 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
                   : "Describe your trip — destination, days, who's going — and in 30 seconds you get a complete itinerary with hotels, activities, and budget."}
               </p>
-
-              <div className="flex items-center gap-3">
-                <div className="flex">
-                  {REVIEWS.map((r) => (
-                    <div
-                      key={r.name}
-                      className="w-[30px] h-[30px] rounded-full border-[2.5px] overflow-hidden -mr-[9px] bg-[#C0D5CE] flex-shrink-0"
-                      style={{ borderColor: '#EDE7E1' }}
-                    >
-                      <Image
-                        src={r.img}
-                        alt={r.name}
-                        width={30}
-                        height={30}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="font-sans text-[11px] text-[#3E5F58] tracking-[.2px] ml-3 leading-[1.55]">
-                  <strong className="text-[#0F3A33] font-semibold">
-                    {isES ? '+400 itinerarios creados' : '+400 itineraries created'}
-                  </strong>{' '}
-                  {isES ? 'este mes' : 'this month'}
-                  <br />
-                  {isES
-                    ? 'parejas, familias y fans del Mundial'
-                    : 'couples, families, and World Cup fans'}
-                </p>
-              </div>
             </div>
 
             <HeroForm locale={locale} />
