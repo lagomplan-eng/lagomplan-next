@@ -127,6 +127,141 @@ export const NEIGHBORHOOD_COORDS: Record<string, [number, number]> = {
   'santa monica':          [34.0195, -118.4912],
   'hollywood':             [34.0928, -118.3287],
   'venice':                [33.9850, -118.4695],
+  // ── Japan ────────────────────────────────────────────────────────
+  'shinjuku':              [35.6938, 139.7034],
+  'shibuya':               [35.6580, 139.7016],
+  'ginza':                 [35.6717, 139.7649],
+  'asakusa':               [35.7148, 139.7967],
+  'roppongi':              [35.6627, 139.7314],
+  'akihabara':             [35.7022, 139.7741],
+  'harajuku':              [35.6702, 139.7029],
+  'tsukiji':               [35.6654, 139.7707],
+  'chiyoda':               [35.6938, 139.7536],
+  // Kyoto
+  'gion':                  [35.0036, 135.7780],
+  'higashiyama':           [34.9991, 135.7836],
+  'arashiyama':            [35.0094, 135.6669],
+  'kawaramachi':           [35.0046, 135.7689],
+  // ── Portugal ─────────────────────────────────────────────────────
+  // Lisbon
+  'chiado':                [38.7106, -9.1418],
+  'alfama':                [38.7110, -9.1296],
+  'baixa':                 [38.7099, -9.1389],
+  'principe real':         [38.7195, -9.1499],
+  'príncipe real':         [38.7195, -9.1499],
+  'bairro alto':           [38.7128, -9.1457],
+  'belem':                 [38.6975, -9.2030],
+  'belém':                 [38.6975, -9.2030],
+  // ── Spain (extended) ─────────────────────────────────────────────
+  // Madrid
+  'malasana':              [40.4258, -3.7036],
+  'malasaña':              [40.4258, -3.7036],
+  'chueca':                [40.4225, -3.6975],
+  'la latina':             [40.4108, -3.7099],
+  'salamanca madrid':      [40.4267, -3.6863],
+  'sol':                   [40.4169, -3.7035],
+  // ── Germany ──────────────────────────────────────────────────────
+  'mitte':                 [52.5219, 13.4132],
+  'kreuzberg':             [52.4988, 13.4031],
+  'prenzlauer berg':       [52.5391, 13.4243],
+  // ── Netherlands ──────────────────────────────────────────────────
+  'jordaan':               [52.3760, 4.8830],
+  'de pijp':               [52.3528, 4.8957],
+  'centrum amsterdam':     [52.3702, 4.8952],
+}
+
+// ── CITY CENTROIDS (coarse fallback) ─────────────────────────────────────────
+// When no specific neighborhood matches, fall back to the city's centroid.
+// This degrades intra-city geography (Shinjuku ↔ Asakusa = 0 km instead of
+// 7 km) but lets the engine still produce a coherent answer for trips whose
+// neighborhoods aren't in the specific table yet. The CITY_CENTROIDS table
+// is checked AFTER NEIGHBORHOOD_COORDS in inferCoords, so specific data
+// always wins when present.
+//
+// Includes both EN and ES spellings for major hubs ("tokyo"/"tokio",
+// "lisbon"/"lisboa") so the AI's locale-flexible output still matches.
+export const CITY_CENTROIDS: Record<string, [number, number]> = {
+  // ── Asia ─────────────────────────────────────────────────────────
+  'tokyo':                 [35.6762, 139.6503],
+  'tokio':                 [35.6762, 139.6503],
+  'kyoto':                 [35.0116, 135.7681],
+  'osaka':                 [34.6937, 135.5023],
+  'seoul':                 [37.5665, 126.9780],
+  'seúl':                  [37.5665, 126.9780],
+  'bangkok':               [13.7563, 100.5018],
+  'singapore':             [1.3521, 103.8198],
+  'singapur':              [1.3521, 103.8198],
+  'hong kong':             [22.3193, 114.1694],
+  'dubai':                 [25.2048, 55.2708],
+  // ── Europe ───────────────────────────────────────────────────────
+  'lisbon':                [38.7223, -9.1393],
+  'lisboa':                [38.7223, -9.1393],
+  'porto':                 [41.1579, -8.6291],
+  'oporto':                [41.1579, -8.6291],
+  'madrid':                [40.4168, -3.7038],
+  'sevilla':               [37.3886, -5.9823],
+  'seville':               [37.3886, -5.9823],
+  'valencia':              [39.4699, -0.3763],
+  'paris':                 [48.8566, 2.3522],
+  'parís':                 [48.8566, 2.3522],
+  'rome':                  [41.9028, 12.4964],
+  'roma':                  [41.9028, 12.4964],
+  'london':                [51.5074, -0.1278],
+  'londres':               [51.5074, -0.1278],
+  'amsterdam':             [52.3676, 4.9041],
+  'berlin':                [52.5200, 13.4050],
+  'berlín':                [52.5200, 13.4050],
+  'vienna':                [48.2082, 16.3738],
+  'viena':                 [48.2082, 16.3738],
+  'prague':                [50.0755, 14.4378],
+  'praga':                 [50.0755, 14.4378],
+  'budapest':              [47.4979, 19.0402],
+  'athens':                [37.9838, 23.7275],
+  'atenas':                [37.9838, 23.7275],
+  'istanbul':              [41.0082, 28.9784],
+  'estambul':              [41.0082, 28.9784],
+  // ── Latin America ────────────────────────────────────────────────
+  'mexico city':           [19.4326, -99.1332],
+  'ciudad de mexico':      [19.4326, -99.1332],
+  'cdmx':                  [19.4326, -99.1332],
+  'oaxaca':                [17.0594, -96.7216],
+  'merida':                [20.9674, -89.6237],
+  'guadalajara':           [20.6597, -103.3496],
+  'monterrey':             [25.6866, -100.3161],
+  'buenos aires':          [-34.6037, -58.3816],
+  'cusco':                 [-13.5170, -71.9785],
+  'lima':                  [-12.0464, -77.0428],
+  'rio de janeiro':        [-22.9068, -43.1729],
+  'rio':                   [-22.9068, -43.1729],
+  'sao paulo':             [-23.5505, -46.6333],
+  'são paulo':             [-23.5505, -46.6333],
+  'cartagena':             [10.3910, -75.4794],
+  'medellin':              [6.2476, -75.5709],
+  'medellín':              [6.2476, -75.5709],
+  'bogota':                [4.7110, -74.0721],
+  'bogotá':                [4.7110, -74.0721],
+  'santiago':              [-33.4489, -70.6693],
+  'panama city':           [8.9824, -79.5199],
+  'panamá':                [8.9824, -79.5199],
+  // ── North America ────────────────────────────────────────────────
+  'new york':              [40.7128, -74.0060],
+  'nueva york':            [40.7128, -74.0060],
+  'los angeles':           [34.0522, -118.2437],
+  'miami':                 [25.7617, -80.1918],
+  'chicago':               [41.8781, -87.6298],
+  'san francisco':         [37.7749, -122.4194],
+  'toronto':               [43.6532, -79.3832],
+  'vancouver':             [49.2827, -123.1207],
+  // ── Oceania ──────────────────────────────────────────────────────
+  'sydney':                [-33.8688, 151.2093],
+  'melbourne':             [-37.8136, 144.9631],
+  'auckland':              [-36.8485, 174.7633],
+  // ── Africa ───────────────────────────────────────────────────────
+  'cape town':             [-33.9249, 18.4241],
+  'ciudad del cabo':       [-33.9249, 18.4241],
+  'marrakech':             [31.6295, -7.9811],
+  'cairo':                 [30.0444, 31.2357],
+  'el cairo':              [30.0444, 31.2357],
 }
 
 // ── Distance + duration helpers ──────────────────────────────────────────────
@@ -165,6 +300,14 @@ export function transitMinutes(km: number): number {
  * Fuzzy-match free text against the NEIGHBORHOOD_COORDS keys. Returns
  * the first match (substring + case-insensitive) or null.
  *
+ * Lookup order:
+ *   1. NEIGHBORHOOD_COORDS — specific barrios / districts. Wins when
+ *      present so intra-city geography stays accurate.
+ *   2. CITY_CENTROIDS — coarse city-level fallback. Lets the engine
+ *      still produce coherent answers for trips whose neighborhoods
+ *      aren't mapped yet (e.g. an unfamiliar Lisbon barrio still hits
+ *      Lisbon's centroid).
+ *
  * Called with two preferred signals, in order:
  *   1. block.neighborhood (when the AI populates it correctly)
  *   2. block.title (fallback — sometimes the venue name carries the
@@ -175,6 +318,9 @@ export function inferCoords(text: string | null | undefined): [number, number] |
   const normalized = text.toLowerCase()
   for (const [key, coords] of Object.entries(NEIGHBORHOOD_COORDS)) {
     if (normalized.includes(key)) return coords
+  }
+  for (const [city, coords] of Object.entries(CITY_CENTROIDS)) {
+    if (normalized.includes(city)) return coords
   }
   return null
 }
@@ -378,20 +524,63 @@ function estimateDayMovement(
 
 // ── Public API ──────────────────────────────────────────────────────────────
 
+// Coverage thresholds for the confidence gate (see computeTripIntelligence).
+// When the engine can't resolve coordinates for enough blocks, surfacing
+// labels would mean writing confident-looking "Fluido"/"Manejable"/"Pesado"
+// on data the engine doesn't actually understand. Silently returning null
+// is safer — the UI already hides badges when intelligence is null (same
+// path as pre-migration trips).
+const MIN_COVERAGE_RATIO  = 0.3  // ≥30% of blocks must resolve coords
+const MIN_RESOLVED_BLOCKS = 3    // …AND at least 3 absolute (so a short
+                                 //    trip with 1 of 3 blocks resolved
+                                 //    doesn't slip past on percentage alone)
+
 /**
- * Compute trip intelligence from raw trip_data. Returns a valid (possibly
- * minimal) TripIntelligence object — never throws on bad input. Callers
- * can persist the result directly into trips.intelligence (JSONB column).
+ * Compute trip intelligence from raw trip_data. Returns either a populated
+ * TripIntelligence object OR null when the engine can't see enough of the
+ * trip's geography to produce trustworthy labels. Never throws on bad
+ * input. Callers persist the result directly into trips.intelligence
+ * (JSONB column); null means "no badges for this trip".
  *
- * Designed to fail SILENTLY rather than block trip save: a malformed input
- * gives back an empty-days + Funcional-hotel result. The user still sees
- * their itinerary; the intelligence layer just stays invisible.
+ * Why null instead of a soft default: writing "Funcional" / "Fluido"
+ * defaults onto trips whose neighborhoods we can't resolve was producing
+ * misleading badges on international long-tail destinations. Returning
+ * null falls through to the same code path as pre-migration trips —
+ * the badges simply don't render.
  */
-export function computeTripIntelligence(trip: IntelligenceInput): TripIntelligence {
+export function computeTripIntelligence(trip: IntelligenceInput): TripIntelligence | null {
   const tolerance: 'low' | 'medium' | 'high' = trip.walking_tolerance ?? 'medium'
 
   const safeDays = Array.isArray(trip.days) ? trip.days : []
   const accommodations = Array.isArray(trip.accommodations) ? trip.accommodations : []
+
+  // ── Confidence gate ────────────────────────────────────────────────────────
+  // Count how many of this trip's blocks have geography we can resolve. If
+  // it's too few — either absolute or as a ratio — bail with null so the
+  // UI hides the badges entirely instead of showing low-confidence labels.
+  let totalBlocks    = 0
+  let resolvedBlocks = 0
+  for (const d of safeDays) {
+    if (!Array.isArray(d.blocks)) continue
+    for (const b of d.blocks) {
+      totalBlocks += 1
+      if (coordsFromBlock(b)) resolvedBlocks += 1
+    }
+  }
+  if (totalBlocks > 0) {
+    const ratio = resolvedBlocks / totalBlocks
+    if (resolvedBlocks < MIN_RESOLVED_BLOCKS || ratio < MIN_COVERAGE_RATIO) {
+      // Log once per save so we can monitor coverage in dev/staging; this
+      // is the signal that tells us which destinations need neighborhood
+      // entries added to NEIGHBORHOOD_COORDS / CITY_CENTROIDS next.
+      console.warn('[intelligence] coverage below threshold — suppressing badges', {
+        resolvedBlocks,
+        totalBlocks,
+        ratio: Number(ratio.toFixed(2)),
+      })
+      return null
+    }
+  }
 
   // Trip-level inputs needed by the day loop.
   const totalDays    = typeof trip.duration_days === 'number' && trip.duration_days > 0
