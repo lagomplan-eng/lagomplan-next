@@ -824,7 +824,7 @@ function normalizeTripData(
   // we ship an empty array; Phase 2 adds a client-side derivation hook
   // that fills it from destination + dates when missing on legacy data.
   const rawAccommodations = Array.isArray(source.accommodations) ? source.accommodations : []
-  const normalizedAccommodations: Accommodation[] = rawAccommodations.map((raw: any, i: number) => ({
+  const baseAccommodations: Accommodation[] = rawAccommodations.map((raw: any, i: number) => ({
     id:                typeof raw?.id === 'string' ? raw.id : `acc-${i}`,
     city:              typeof raw?.city === 'string' ? raw.city : (destination ?? ''),
     neighborhood:      typeof raw?.neighborhood === 'string' ? raw.neighborhood : undefined,
@@ -838,6 +838,52 @@ function normalizeTripData(
     source:            raw?.source === 'fallback' ? 'fallback' : 'ai',
     fallback:          raw?.fallback === true || raw?.source === 'fallback',
   }))
+
+  // Defensive date patch — when the worker chunked a long trip it persisted
+  // the AI-emitted checkInDate/checkOutDate/nights from chunk 0's sub-range
+  // (e.g. "2026-06-01 → 2026-06-05, 4 noches") instead of the full segment
+  // or trip span. Even for trips generated after the worker-side fix lands,
+  // this guarantees the user-visible stay window matches the actual chain
+  // shape. Idempotent: writing correct dates over correct dates is a no-op.
+  const segmentsForPatch: Array<{ startDate?: string; endDate?: string; nights?: number }> | null =
+    Array.isArray(source.segments) && source.segments.length >= 2
+      ? source.segments
+      : null
+  const tripDayCount = normalizedDays.length
+  const normalizedAccommodations: Accommodation[] = (() => {
+    if (baseAccommodations.length === 0) return baseAccommodations
+    if (segmentsForPatch) {
+      // Multi-city: worker emits one accommodation per segment in order, so
+      // index → segment is the safe pairing. Extra entries (rare) pass through.
+      return baseAccommodations.map((a, i) => {
+        const seg = segmentsForPatch[i]
+        if (!seg) return a
+        const segNights = typeof seg.nights === 'number' && seg.nights >= 0 ? seg.nights : null
+        return {
+          ...a,
+          checkInDate:  typeof seg.startDate === 'string' && seg.startDate ? seg.startDate : a.checkInDate,
+          checkOutDate: typeof seg.endDate   === 'string' && seg.endDate   ? seg.endDate   : a.checkOutDate,
+          nights:       segNights !== null ? segNights : a.nights,
+        }
+      })
+    }
+    // Single-city: there should be exactly one stay spanning the full trip.
+    // Trust the first entry's checkInDate (chunk 0's sub-start = trip start)
+    // and extend checkOutDate + nights to cover every day in normalizedDays.
+    if (tripDayCount <= 1) return baseAccommodations
+    const first = baseAccommodations[0]
+    if (!first.checkInDate) return baseAccommodations
+    const startD = new Date(`${first.checkInDate}T00:00:00Z`)
+    if (isNaN(startD.getTime())) return baseAccommodations
+    const expectedNights = tripDayCount - 1
+    const endD = new Date(startD)
+    endD.setUTCDate(startD.getUTCDate() + expectedNights)
+    const tripEnd = endD.toISOString().slice(0, 10)
+    return baseAccommodations.map((a, i) => i === 0
+      ? { ...a, checkOutDate: tripEnd, nights: expectedNights }
+      : a
+    )
+  })()
 
   return {
     title:          row?.title ?? source.title ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
