@@ -73,33 +73,33 @@ const FEATURE_LABELS: Record<
     title_es: 'Guías curadas',
     title_en: 'Curated guides',
     body_es:
-      'Ideas claras para decidir rápido: qué vale la pena, qué saltarte y cómo vivir el destino con buen ritmo.',
+      'Destinos reales, sin relleno. Lo que vale la pena y lo que no — directo.',
     body_en:
-      "Clear ideas to decide fast: what's worth it, what to skip, and how to experience the destination at the right pace.",
+      "Real destinations, no filler. What's worth it and what isn't — straight to the point.",
   },
   itineraries: {
-    title_es: 'Itinerarios simples',
-    title_en: 'Simple itineraries',
+    title_es: 'Itinerario día por día',
+    title_en: 'Day-by-day itinerary',
     body_es:
-      'Pasa de inspiración a un plan por día en minutos. Sin Excel, sin mil tabs.',
+      'De inspiración a plan concreto. Tiempos, orden, qué hacer en cada momento.',
     body_en:
-      'Go from inspiration to a day-by-day plan in minutes. No Excel, no endless tabs.',
+      'From inspiration to a concrete plan. Times, order, what to do at each moment.',
   },
   personalized: {
-    title_es: 'Personalizado',
-    title_en: 'Personalized',
+    title_es: 'Hecho para ti',
+    title_en: 'Made for you',
     body_es:
-      'Familias, parejas, relax o aventura: sugerencias que se adaptan a tu forma de viajar.',
+      'Familia, pareja, ritmo relajado o intenso — el plan se adapta a cómo viajas tú.',
     body_en:
-      'Families, couples, relaxed or adventurous: suggestions that adapt to your travel style.',
+      'Family, couple, relaxed or intense pace — the plan adapts to how you travel.',
   },
   clarity: {
-    title_es: 'Claridad total',
-    title_en: 'Total clarity',
+    title_es: 'Sin parálisis',
+    title_en: 'No decision paralysis',
     body_es:
-      'Recomendaciones concretas y ordenadas para que planificar se sienta ligero.',
+      'Una recomendación clara, no 47 opciones. Planear se siente ligero.',
     body_en:
-      'Concrete, organized recommendations so planning feels effortless.',
+      'One clear recommendation, not 47 options. Planning feels light.',
   },
 }
 
@@ -130,49 +130,19 @@ export default async function HomePage({
             <div>
               <span className="sec-label">
                 {isES
-                  ? 'Planificador de viajes con IA'
-                  : 'AI-powered travel planner'}
+                  ? 'Planificador de viajes'
+                  : 'Trip planner'}
               </span>
               <h1 className="font-sans text-[60px] max-[768px]:text-[40px] font-bold text-[#0F3A33] leading-[1.05] tracking-[-1.5px] mb-5">
                 {isES
-                  ? 'Tu próxima aventura comienza aquí'
-                  : 'Your next adventure starts here'}
+                  ? 'Viaja bien. Planea menos.'
+                  : 'Travel well. Plan less.'}
               </h1>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full">
                 {isES
-                  ? 'Escribe a dónde quieres ir. En minutos tienes tu itinerario, hoteles recomendados y presupuesto listo.'
-                  : 'Tell us where you want to go. In minutes, get your itinerary, hotel picks, and budget ready.'}
+                  ? 'Describe tu viaje — destino, días, quién va — y en 30 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
+                  : "Describe your trip — destination, days, who's going — and in 30 seconds you get a complete itinerary with hotels, activities, and budget."}
               </p>
-
-              <div className="flex items-center gap-3">
-                <div className="flex">
-                  {REVIEWS.map((r) => (
-                    <div
-                      key={r.name}
-                      className="w-[30px] h-[30px] rounded-full border-[2.5px] overflow-hidden -mr-[9px] bg-[#C0D5CE] flex-shrink-0"
-                      style={{ borderColor: '#EDE7E1' }}
-                    >
-                      <Image
-                        src={r.img}
-                        alt={r.name}
-                        width={30}
-                        height={30}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
-                </div>
-                <p className="font-sans text-[11px] text-[#3E5F58] tracking-[.2px] ml-3">
-                  <strong className="text-[#0F3A33] font-semibold">
-                    {isES ? '+400 planes creados' : '+400 plans created'}
-                  </strong>{' '}
-                  {isES ? 'este mes' : 'this month'}
-                  <br />
-                  <span className="text-[#E1615B] tracking-[2.5px]">
-                    ★★★★★
-                  </span>
-                </p>
-              </div>
             </div>
 
             <HeroForm locale={locale} />
@@ -190,17 +160,17 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <span className="sec-label">
-            {isES ? 'Planificación integrada' : 'Integrated planning'}
+            {isES ? 'Cómo funciona' : 'How it works'}
           </span>
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4">
             {isES
-              ? 'Tu guía y tu plan en una sola vista'
-              : 'Your guide and plan in one view'}
+              ? 'Del destino al itinerario en 30 segundos.'
+              : 'From destination to itinerary in 30 seconds.'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14">
             {isES
-              ? 'Explora recomendaciones listas para usar y conviértelas en un itinerario simple, sin complicarte.'
-              : 'Explore ready-to-use recommendations and turn them into a simple itinerary, without the fuss.'}
+              ? 'Sin pestañas abiertas, sin hojas de cálculo, sin horas de investigación.'
+              : 'No open tabs, no spreadsheets, no hours of research.'}
           </p>
 
           <div className="grid grid-cols-4 max-[768px]:grid-cols-2 gap-6 max-[768px]:gap-6">
@@ -257,28 +227,28 @@ export default async function HomePage({
           <div className="grid md:grid-cols-2 gap-20 items-center max-[768px]:grid-cols-1 max-[768px]:gap-9">
             <div>
               <h2 className="font-sans text-[42px] max-[768px]:text-[32px] font-bold text-[#0F3A33] leading-[1.12] mb-6">
-                {isES ? 'Equilibrio en cada viaje' : 'Balance in every trip'}
+                {isES ? 'Ni demasiado, ni muy poco.' : 'Not too much, not too little.'}
               </h2>
               <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4">
                 {isES
-                  ? 'En LagomPlan, no creemos en los itinerarios imposibles ni en la parálisis que genera tener demasiadas opciones. Nacimos de una premisa simple: planificar un viaje debería sentirse tan bien como el destino mismo.'
-                  : "At LagomPlan, we don't believe in impossible itineraries or the paralysis that comes from too many options. We were born from a simple premise: planning a trip should feel as good as the destination itself."}
+                  ? 'Planificar un viaje no debería tomar más tiempo que el viaje mismo. Creemos que el mejor plan es el que llega justo — suficiente estructura para no perderse nada, suficiente espacio para dejarse sorprender.'
+                  : "Planning a trip shouldn't take longer than the trip itself. We believe the best plan is one that lands just right — enough structure to miss nothing, enough room to be surprised."}
               </p>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.8]">
                 {isES
-                  ? 'Nuestra filosofía se inspira en el concepto sueco '
-                  : 'Our philosophy draws from the Swedish concept '}
-                <strong className="text-[#0F3A33] font-semibold">Lagom</strong>
+                  ? 'El nombre viene del sueco: '
+                  : 'The name comes from Swedish: '}
+                <strong className="text-[#0F3A33] font-semibold">lagom</strong>
                 {isES
-                  ? ' —ni mucho, ni poco, lo justo—, buscando ese equilibrio perfecto entre la curiosidad por explorar y la necesidad de descansar.'
-                  : ' —not too much, not too little, just right— seeking the perfect balance between the curiosity to explore and the need to rest.'}
+                  ? '. Ni mucho, ni poco — lo justo. Eso es lo que hacemos con cada viaje: encontrar el punto exacto entre explorar todo y no agotarse en el intento.'
+                  : ". Not too much, not too little — just right. That's what we do with every trip: find the exact point between seeing everything and burning out trying."}
               </p>
               <div className="flex gap-3.5 mt-8 flex-wrap">
                 <Link href="/guides" className="btn-solid">
-                  {isES ? 'Guías de viaje' : 'Travel guides'}
+                  {isES ? 'Explorar destinos' : 'Explore destinations'}
                 </Link>
                 <a href="#nosotras" className="btn-outline">
-  {isES ? 'Nosotras' : 'About us'}
+  {isES ? 'Quiénes somos' : 'About us'}
 </a>
               </div>
             </div>
@@ -312,7 +282,7 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9">
-            {isES ? 'Nosotras' : 'About us'}
+            {isES ? 'Quiénes somos' : 'Who we are'}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-14 max-[768px]:grid-cols-1 max-[768px]:gap-10">
@@ -371,9 +341,14 @@ export default async function HomePage({
       >
         <div className="page-inner relative z-10">
           <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-12 max-[768px]:mb-8">
+          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-3 max-[768px]:mb-3">
             {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
           </h2>
+          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8">
+            {isES
+              ? 'Más de 400 planes creados — esto es lo que nos cuentan.'
+              : "Over 400 plans created — here's what people tell us."}
+          </p>
           <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
             {REVIEWS.map((r) => (
               <div
@@ -401,9 +376,6 @@ export default async function HomePage({
                     <p className="font-sans text-[13px] font-semibold text-[#0F3A33]">
                       {r.name}
                     </p>
-                    <p className="font-sans text-[10px] tracking-[2px] text-[#E1615B]">
-                      ★★★★★
-                    </p>
                   </div>
                 </div>
               </div>
@@ -422,29 +394,28 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4">
-            {isES ? 'Empieza a planificar' : 'Start planning'}
-            <br />
-            <span className="font-sans">
-              {isES ? 'tu próxima aventura' : 'your next adventure'}
-            </span>
+            {isES
+              ? 'Tu próximo viaje puede estar listo en 30 segundos.'
+              : 'Your next trip can be ready in 30 seconds.'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10">
             {isES
-              ? 'Explora guías curadas y conviértelas en un plan simple por día, en minutos.'
-              : 'Explore curated guides and turn them into a simple day-by-day plan, in minutes.'}
+              ? 'Gratis, sin tarjeta. Describe a dónde vas y la plataforma hace el resto.'
+              : "Free, no card needed. Describe where you're going and the platform does the rest."}
           </p>
           <div className="flex gap-3.5 justify-center flex-wrap max-[768px]:flex-col max-[768px]:items-center">
             <Link
               href="/planner"
               className="btn-solid max-[768px]:w-full max-[768px]:text-center"
             >
-              {isES ? 'Planificar' : 'Plan my trip'}
+              {isES ? 'Planear mi viaje gratis →' : 'Plan my trip free →'}
             </Link>
+            {/* TODO: update href to public sample itinerary page once created */}
             <Link
-              href="/guides"
+              href="/planner"
               className="btn-outline max-[768px]:w-full max-[768px]:text-center"
             >
-              {isES ? 'Explorar guías' : 'Explore guides'}
+              {isES ? 'Ver ejemplo de itinerario' : 'See a sample itinerary'}
             </Link>
           </div>
         </div>

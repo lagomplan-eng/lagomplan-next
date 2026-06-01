@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from '../../lib/navigation'
 import { useTranslations } from 'next-intl'
 import PlacesInput, { type PlaceResult } from './PlacesInput'
@@ -8,6 +9,15 @@ import DateRangePicker, { type DateRange } from './DateRangePicker'
 import { buildSegment, serializeSegments, type TripSegment } from '../../lib/planner/segments'
 import { FREE_TRIPS_LIMIT } from '../../lib/plan/limits'
 import { events } from '../../lib/analytics'
+
+// Same 3 reviewer photos used in the bottom Reviews section of the
+// homepage. Kept inline (rather than imported from the page) so this
+// form is portable to any host page without a cross-route coupling.
+const HERO_AVATARS = [
+  { name: 'Jorge', img: '/images/reviews/jorge.png' },
+  { name: 'Julia', img: '/images/reviews/julia.png' },
+  { name: 'Ana',   img: '/images/reviews/ana.png'   },
+] as const
 
 type Traveler = 'solo' | 'pareja' | 'familia' | 'amigos'
 
@@ -759,6 +769,38 @@ function submit(e: React.FormEvent) {
 
         {/* ── Footer / CTA ──────────────────────────────────────── */}
         <div className="bg-white border border-[#E5E5E5] border-t-0 rounded-[0_0_12px_12px] px-5 py-3 shadow-[0_4px_24px_rgba(15,58,51,.06)]">
+          {/* Social proof — moved here from the hero left column so it sits
+              directly above the CTA the visitor is about to click. Copy and
+              avatar dimensions match the previous placement exactly. */}
+          <div className="flex items-center gap-3" style={{ marginTop: 0, marginBottom: 16 }}>
+            <div className="flex">
+              {HERO_AVATARS.map((r) => (
+                <div
+                  key={r.name}
+                  className="w-[30px] h-[30px] rounded-full border-[2.5px] overflow-hidden -mr-[9px] bg-[#C0D5CE] flex-shrink-0"
+                  style={{ borderColor: '#EDE7E1' }}
+                >
+                  <Image
+                    src={r.img}
+                    alt={r.name}
+                    width={30}
+                    height={30}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+            <p className="font-sans text-[11px] text-[#3E5F58] tracking-[.2px] ml-3 leading-[1.55]">
+              <strong className="text-[#0F3A33] font-semibold">
+                {locale === 'es' ? '+400 itinerarios creados' : '+400 itineraries created'}
+              </strong>{' '}
+              {locale === 'es' ? 'este mes' : 'this month'}
+              <br />
+              {locale === 'es'
+                ? 'parejas, familias y fans del Mundial'
+                : 'couples, families, and World Cup fans'}
+            </p>
+          </div>
           <button
             type="submit"
             disabled={generating}
