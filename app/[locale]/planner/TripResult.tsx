@@ -1333,6 +1333,20 @@ export default function TripResult({ params }: Props) {
         }
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
+        // Hydrate prefStart/prefEnd from the normalized accommodations so the
+        // hero date pill renders "2026-06-01 — 2026-06-16" instead of falling
+        // through to "${nightsNum} noches" — which on multi-city trips ends
+        // up disagreeing with the subtitle because they read different fields.
+        // Reads from accommodations rather than a top-level start/end column
+        // (which the trips table doesn't have) — and after the defensive
+        // hotel-dates patch above, accommodations[0].checkInDate is the trip
+        // start and the last entry's checkOutDate is the trip end.
+        if (normalized.accommodations.length > 0) {
+          const firstIn  = normalized.accommodations[0].checkInDate
+          const lastOut  = normalized.accommodations[normalized.accommodations.length - 1].checkOutDate
+          if (firstIn  && !prefStart) setPrefStart(firstIn)
+          if (lastOut  && !prefEnd)   setPrefEnd(lastOut)
+        }
         // Baseline: marks this as already-in-DB so autosave only fires on real edits
         lastSavedContentRef.current = JSON.stringify({
           title: normalized.title, subtitle: normalized.subtitle,
@@ -3081,10 +3095,17 @@ export default function TripResult({ params }: Props) {
   const hasActual     = budgetRows.some(r => r.actual !== null)
   const actualTotal   = budgetRows.reduce((s, r) => r.actual !== null ? s + r.actual : s, 0)
 
-  // Prefer the most-recently-generated duration so the heading ("X días en …")
-  // reflects edits made in the prefs drawer. Falls back to the URL `nights`
-  // prop on first render before any generation has run in this session.
-  const nightsNum   = activeGenDuration ?? durationDaysFromNights(nights)
+  // Trip-length display value. Prefers the actual rendered day count
+  // (`days.length`) over the stored `duration_days` because long multi-
+  // city trips can land with the two desynced — the worker computes
+  // total inclusive days as Σ(segment.nights + 1) while `duration_days`
+  // sometimes holds a per-segment value from job creation. Day count is
+  // the only source of truth once the itinerary is rendered. Falls back
+  // to activeGenDuration / URL nights when days haven't loaded yet (very
+  // early streaming window).
+  const nightsNum   = days.length > 0
+    ? days.length
+    : (activeGenDuration ?? durationDaysFromNights(nights))
   // dateRange uses pref state so it reflects the most-recently-regenerated trip
   const dateRange   = prefStart && prefEnd ? `${prefStart} — ${prefEnd}` : `${nightsNum} noches`
   const doneChecks  = checks.filter(c => c.done).length
