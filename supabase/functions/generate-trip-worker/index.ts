@@ -339,17 +339,47 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
     // the first non-empty. In multi-city, take exactly one per segment —
     // from the first sub-chunk of each segment — and skip duplicates from
     // sub-chunks that re-emit the same hotel.
+    //
+    // Date rewrite: the AI emits checkInDate / checkOutDate / nights for
+    // whatever sub-range the chunk covered (often only 4-5 nights), so on
+    // multi-chunk trips the surviving hotel entry would say "4 noches"
+    // when the actual stay spans the full segment. Patch the dates to
+    // the TRIP-level (single-city) or SEGMENT-level (multi-city) span so
+    // the hotel card shows what the traveler actually books.
     const chunkAccs = Array.isArray((chunk as any)?.accommodations) ? (chunk as any).accommodations : []
     if (chunkAccs.length === 0) continue
     if (plan) {
       const segIdx = plan[chunkIdx]?.segmentIndex
       if (segIdx !== undefined && !accommodationsSeenForSegment.has(segIdx)) {
-        accommodations.push(...chunkAccs)
+        const seg = multiCity![segIdx]
+        const patched = chunkAccs.map((a: any) => ({
+          ...a,
+          checkInDate:  seg.startDate,
+          checkOutDate: seg.endDate,
+          nights:       Math.max(0, seg.nights),
+        }))
+        accommodations.push(...patched)
         accommodationsSeenForSegment.add(segIdx)
       }
     } else if (accommodations.length === 0) {
-      // Single-city: take the first non-empty accommodation block.
-      accommodations.push(...chunkAccs)
+      // Single-city: take the first non-empty accommodation block and
+      // rewrite its dates/nights to the full trip span. jobInputs holds
+      // the trip-level start / end / duration_days (the client passes
+      // these through unchanged on /api/trips/jobs creation).
+      const tripStart = typeof jobInputs.start === 'string' ? jobInputs.start : undefined
+      const tripEnd   = typeof jobInputs.end   === 'string' ? jobInputs.end   : undefined
+      const tripNights = (() => {
+        const fromInputs = Number(jobInputs.duration_days)
+        if (Number.isFinite(fromInputs) && fromInputs > 0) return Math.max(0, fromInputs - 1)
+        return 0
+      })()
+      const patched = chunkAccs.map((a: any) => ({
+        ...a,
+        ...(tripStart ? { checkInDate:  tripStart } : {}),
+        ...(tripEnd   ? { checkOutDate: tripEnd   } : {}),
+        ...(tripNights > 0 ? { nights: tripNights } : {}),
+      }))
+      accommodations.push(...patched)
     }
   }
 
@@ -375,23 +405,26 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
     return Number.isFinite(fromInputs) && fromInputs > 0 ? fromInputs : days.length
   })()
 
-  // ES patterns: "7 Días en X", "1 Día en X" (case-insensitive on the day word).
-  // EN patterns: "7 Days in X", "1 Day in X".
-  // Match only at start-of-string so we don't accidentally rewrite a "7-day"
-  // inside the middle of a title (rare but possible).
+  // ES patterns: "7 Días en X", "Tokio en 5 días: Cultura", "1 Día en X".
+  // EN patterns: "7 Days in X", "Tokyo in 5 days: Culture", "1 Day in X".
+  // Word-boundary match (not anchored to start) — chunk-0 titles in the
+  // wild come in both "<N días> en <city>" AND "<city> en <N días>"
+  // shapes depending on AI style, and the start-anchored version missed
+  // the second form. Replace only the FIRST occurrence to avoid touching
+  // ":" separators or anything past the colon.
   function patchTitleDayCount(raw: string | undefined): string | undefined {
     if (typeof raw !== 'string' || !raw) return undefined
-    const esMatch = raw.match(/^\d+\s+d[ií]as?/i)
+    const esMatch = raw.match(/\b\d+\s+d[ií]as?\b/i)
     if (esMatch) {
       const word = totalTripDays === 1 ? 'día' : 'días'
       return raw.replace(esMatch[0], `${totalTripDays} ${word}`)
     }
-    const enMatch = raw.match(/^\d+\s+days?/i)
+    const enMatch = raw.match(/\b\d+\s+days?\b/i)
     if (enMatch) {
-      const word = totalTripDays === 1 ? 'Day' : 'Days'
+      const word = totalTripDays === 1 ? 'day' : 'days'
       return raw.replace(enMatch[0], `${totalTripDays} ${word}`)
     }
-    return raw // no day-count prefix, leave as-is
+    return raw // no day-count phrase, leave as-is
   }
 
   const aiTitle      = (first as any).title as string | undefined
