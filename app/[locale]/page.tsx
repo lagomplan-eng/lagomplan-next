@@ -410,9 +410,16 @@ export default async function HomePage({
             >
               {isES ? 'Planear mi viaje gratis →' : 'Plan my trip free →'}
             </Link>
-            {/* TODO: update href to public sample itinerary page once created */}
+            {/* Sample-itinerary link. Set NEXT_PUBLIC_SAMPLE_TRIP_ID in Vercel
+                to any saved trip's UUID to feature it here. Anonymous visitors
+                can view it read-only because GET /api/trips/[trip_id] has no
+                auth requirement. When unset, the link falls back to the
+                planner form (same as the primary CTA next to it). */}
             <Link
-              href="/planner"
+              href={(process.env.NEXT_PUBLIC_SAMPLE_TRIP_ID
+                ? { pathname: '/planner' as const, query: { trip_id: process.env.NEXT_PUBLIC_SAMPLE_TRIP_ID } }
+                : { pathname: '/planner' as const }
+              ) as any}
               className="btn-outline max-[768px]:w-full max-[768px]:text-center"
             >
               {isES ? 'Ver ejemplo de itinerario' : 'See a sample itinerary'}
