@@ -11,14 +11,12 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
       <div className="flex items-end justify-between mb-8">
         <div>
           <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B8F86] mb-2">
-            {locale === 'es'
-              ? 'Inspiración para tu próximo viaje'
-              : 'Inspiration for your next trip'}
+            {locale === 'es' ? 'Destinos' : 'Destinations'}
           </p>
           <h2 className="text-[28px] md:text-[34px] leading-tight tracking-[-0.03em] text-[#0F3A33]">
             {locale === 'es'
-              ? 'Guías con una mirada más tranquila y mejor curada'
-              : 'Guides with a calmer, more curated point of view'}
+              ? 'Los destinos que vale la pena conocer — y cómo vivirlos bien.'
+              : 'The destinations worth knowing — and how to experience them right.'}
           </h2>
         </div>
 

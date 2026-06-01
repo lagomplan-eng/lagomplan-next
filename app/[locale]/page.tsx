@@ -312,7 +312,7 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9">
-            {isES ? 'Nosotras' : 'About us'}
+            {isES ? 'Quiénes somos' : 'Who we are'}
           </h2>
 
           <div className="grid md:grid-cols-2 gap-14 max-[768px]:grid-cols-1 max-[768px]:gap-10">
@@ -371,9 +371,14 @@ export default async function HomePage({
       >
         <div className="page-inner relative z-10">
           <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-12 max-[768px]:mb-8">
+          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-3 max-[768px]:mb-3">
             {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
           </h2>
+          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8">
+            {isES
+              ? 'Más de 400 planes creados — esto es lo que nos cuentan.'
+              : "Over 400 plans created — here's what people tell us."}
+          </p>
           <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
             {REVIEWS.map((r) => (
               <div
@@ -401,9 +406,6 @@ export default async function HomePage({
                     <p className="font-sans text-[13px] font-semibold text-[#0F3A33]">
                       {r.name}
                     </p>
-                    <p className="font-sans text-[10px] tracking-[2px] text-[#E1615B]">
-                      ★★★★★
-                    </p>
                   </div>
                 </div>
               </div>
@@ -422,29 +424,28 @@ export default async function HomePage({
       >
         <div className="page-inner">
           <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4">
-            {isES ? 'Empieza a planificar' : 'Start planning'}
-            <br />
-            <span className="font-sans">
-              {isES ? 'tu próxima aventura' : 'your next adventure'}
-            </span>
+            {isES
+              ? 'Tu próximo viaje puede estar listo en 30 segundos.'
+              : 'Your next trip can be ready in 30 seconds.'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10">
             {isES
-              ? 'Explora guías curadas y conviértelas en un plan simple por día, en minutos.'
-              : 'Explore curated guides and turn them into a simple day-by-day plan, in minutes.'}
+              ? 'Gratis, sin tarjeta. Describe a dónde vas y la plataforma hace el resto.'
+              : "Free, no card needed. Describe where you're going and the platform does the rest."}
           </p>
           <div className="flex gap-3.5 justify-center flex-wrap max-[768px]:flex-col max-[768px]:items-center">
             <Link
               href="/planner"
               className="btn-solid max-[768px]:w-full max-[768px]:text-center"
             >
-              {isES ? 'Planificar' : 'Plan my trip'}
+              {isES ? 'Planear mi viaje gratis →' : 'Plan my trip free →'}
             </Link>
+            {/* TODO: update href to public sample itinerary page once created */}
             <Link
-              href="/guides"
+              href="/planner"
               className="btn-outline max-[768px]:w-full max-[768px]:text-center"
             >
-              {isES ? 'Explorar guías' : 'Explore guides'}
+              {isES ? 'Ver ejemplo de itinerario' : 'See a sample itinerary'}
             </Link>
           </div>
         </div>
