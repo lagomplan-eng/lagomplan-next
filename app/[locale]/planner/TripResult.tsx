@@ -849,7 +849,14 @@ function normalizeTripData(
     Array.isArray(source.segments) && source.segments.length >= 2
       ? source.segments
       : null
-  const tripDayCount = normalizedDays.length
+  // Streaming-aware target: during async generation, normalizedDays grows
+  // from 0 → N as chunks land. If the hotel patch used normalizedDays.length
+  // alone, the card would render "4 noches → 9 noches → 14 noches → 30
+  // noches" as chunks streamed in. Lock onto the URL/DB target duration
+  // immediately so the surface stays stable through the entire stream.
+  // Once generation completes, normalizedDays.length === target so the
+  // max() picks either equally.
+  const tripDayCount = Math.max(normalizedDays.length, durationDaysFromNights(nights))
   const normalizedAccommodations: Accommodation[] = (() => {
     if (baseAccommodations.length === 0) return baseAccommodations
     if (segmentsForPatch) {
@@ -885,8 +892,38 @@ function normalizeTripData(
     )
   })()
 
+  // Defensive title patch — mirrors the worker's patchTitleDayCount but at
+  // render time. The worker patches at GENERATION time; for DB rows whose
+  // title was persisted by an older worker chunk-0 emit ("Kansas City en
+  // 5 días: …" on a 30-day trip), the only way to fix the title is to
+  // rewrite it here. Idempotent: titles whose day count already matches
+  // the target are unchanged.
+  //
+  // Same streaming-aware target as the accommodation patch above: locks
+  // onto the URL/DB target rather than normalizedDays.length, so the
+  // header doesn't flicker "5 días → 10 días → 30 días" as chunks land.
+  // Replaces only the FIRST day-count phrase to avoid touching content
+  // past a ":" separator.
+  const rawTitle = row?.title ?? source.title
+  const patchedTitle = (() => {
+    if (typeof rawTitle !== 'string' || !rawTitle) return rawTitle
+    const target = Math.max(normalizedDays.length, durationDaysFromNights(nights))
+    if (target < 1) return rawTitle
+    const esMatch = rawTitle.match(/\b\d+\s+d[ií]as?\b/i)
+    if (esMatch) {
+      const word = target === 1 ? 'día' : 'días'
+      return rawTitle.replace(esMatch[0], `${target} ${word}`)
+    }
+    const enMatch = rawTitle.match(/\b\d+\s+days?\b/i)
+    if (enMatch) {
+      const word = target === 1 ? 'day' : 'days'
+      return rawTitle.replace(enMatch[0], `${target} ${word}`)
+    }
+    return rawTitle
+  })()
+
   return {
-    title:          row?.title ?? source.title ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
+    title:          patchedTitle ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
     subtitle:       source.subtitle ?? 'AI-generated trip plan',
     days:           normalizedDays,
     checks:         normalizedChecks,
@@ -3095,17 +3132,20 @@ export default function TripResult({ params }: Props) {
   const hasActual     = budgetRows.some(r => r.actual !== null)
   const actualTotal   = budgetRows.reduce((s, r) => r.actual !== null ? s + r.actual : s, 0)
 
-  // Trip-length display value. Prefers the actual rendered day count
-  // (`days.length`) over the stored `duration_days` because long multi-
-  // city trips can land with the two desynced — the worker computes
-  // total inclusive days as Σ(segment.nights + 1) while `duration_days`
-  // sometimes holds a per-segment value from job creation. Day count is
-  // the only source of truth once the itinerary is rendered. Falls back
-  // to activeGenDuration / URL nights when days haven't loaded yet (very
-  // early streaming window).
-  const nightsNum   = days.length > 0
-    ? days.length
-    : (activeGenDuration ?? durationDaysFromNights(nights))
+  // Trip-length display value. Takes the MAX of the rendered day count
+  // and the trip's target duration so:
+  //   - Async streaming: target wins (days.length is partial 0 → N as
+  //     chunks land); the "25 días en X" section header doesn't tick up
+  //     from 5 → 30 while the user watches.
+  //   - Multi-city completed: days.length wins when worker's Σ(segment.
+  //     nights + 1) exceeded the per-segment duration_days stored on the
+  //     trip row — without this, the surface would underreport.
+  //   - Normal completed single-city: both equal, no-op.
+  const nightsNum   = Math.max(
+    days.length,
+    activeGenDuration ?? 0,
+    durationDaysFromNights(nights),
+  )
   // dateRange uses pref state so it reflects the most-recently-regenerated trip
   const dateRange   = prefStart && prefEnd ? `${prefStart} — ${prefEnd}` : `${nightsNum} noches`
   const doneChecks  = checks.filter(c => c.done).length
