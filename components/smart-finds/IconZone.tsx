@@ -34,14 +34,24 @@ export default function IconZone({
   const patternId  = `${idPrefix}${product.id}`
 
   // Real product photo — replaces the SVG glyph + dotted pattern.
-  // Object-cover so the image fills the slot edge-to-edge; assumes
-  // Amazon-style centred product shots where light cropping is safe.
-  // Pair with a generous height (≥180 px on ProductCard) to keep the
-  // crop honest.
+  //
+  // object-fit: contain (not cover) — this is a product catalog, not a
+  // hero photo. Showing the entire product (even with padding around it)
+  // wins over cropping out half the product to fill the slot edge-to-
+  // edge. Standard pattern for retail listings (Amazon / Shopify / Etsy
+  // all use contain on product tiles for the same reason).
+  //
+  // White background (NOT the caller-passed background) — product photos
+  // are overwhelmingly white-backgrounded (Amazon-style). Matching them
+  // with white removes the visible rectangle around the product that
+  // SAND created. The SVG-glyph branch below still uses SAND because
+  // those tiles ARE the decorative chrome, not a transparency layer.
+  //
+  // Padding gives the product breathing room against the card edges.
   if (product.image) {
     return (
       <div style={{
-        width: '100%', height, background,
+        width: '100%', height, background: '#FFFFFF',
         position: 'relative', overflow: 'hidden', flexShrink: 0,
       }}>
         <Image
@@ -49,7 +59,7 @@ export default function IconZone({
           alt={`${product.brand} ${product.name}`}
           fill
           sizes="(max-width: 720px) 100vw, (max-width: 1140px) 50vw, 360px"
-          style={{ objectFit: 'cover' }}
+          style={{ objectFit: 'contain', padding: 16 }}
         />
       </div>
     )

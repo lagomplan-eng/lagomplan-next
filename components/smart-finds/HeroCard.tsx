@@ -44,10 +44,15 @@ export default function HeroCard({ product }: Props) {
       }}
     >
       {/* Icon zone — left column, fixed 200px on desktop. On mobile the
-          parent flex-wraps and this becomes full-width on top. */}
+          parent flex-wraps and this becomes full-width on top.
+          Background: white when the product has a real photo (so the
+          white-background product photos blend seamlessly), SAND when
+          it's a decorative SVG glyph (which uses SAND as chrome). */}
       <div style={{
         width: 200, minWidth: 200, flexShrink: 0,
-        background: hov ? `${PINE}08` : SAND,
+        background: product.image
+          ? '#FFFFFF'
+          : (hov ? `${PINE}08` : SAND),
         transition: 'background .2s',
         flexGrow: 1, // lets it span when wrapped on mobile
       }}>

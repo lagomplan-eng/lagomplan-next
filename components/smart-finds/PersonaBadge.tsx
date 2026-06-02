@@ -12,7 +12,7 @@ import type { Persona } from '../../lib/smart-finds'
 
 const PALETTE: Record<Persona, { bg: string; fg: string; label: string }> = {
   familias: { bg: '#E1F5EE', fg: '#085041', label: 'Familias' },
-  parejas:  { bg: '#EEEDFE', fg: '#26215C', label: 'Parejas'  },
+  parejas:  { bg: '#EEEDFE', fg: '#26215C', label: 'Escapadas' },
   fan:      { bg: '#FAEEDA', fg: '#412402', label: 'Fan'      },
 }
 

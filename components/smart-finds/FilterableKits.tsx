@@ -16,7 +16,7 @@
  */
 
 import { useMemo, useState } from 'react'
-import type { Kit, Persona } from '../../lib/smart-finds'
+import type { Kit, Persona, Product } from '../../lib/smart-finds'
 import KitSection from './KitSection'
 import { PINE, SAND, MUTED, BORDER } from './tokens'
 
@@ -25,15 +25,16 @@ type FilterId = 'all' | Persona
 const FILTERS: { id: FilterId; label: string }[] = [
   { id: 'all',      label: 'Todos'    },
   { id: 'familias', label: 'Familias' },
-  { id: 'parejas',  label: 'Parejas'  },
+  { id: 'parejas',  label: 'Escapadas' },
   { id: 'fan',      label: 'Fans'     },
 ]
 
 interface Props {
-  kits: Kit[]
+  kits:          Kit[]
+  productsById?: Record<string, Product>
 }
 
-export default function FilterableKits({ kits }: Props) {
+export default function FilterableKits({ kits, productsById }: Props) {
   const [active, setActive] = useState<FilterId>('all')
 
   const visible = useMemo(
@@ -98,7 +99,7 @@ export default function FilterableKits({ kits }: Props) {
       ) : (
         visible.map((kit, i) => (
           <div key={kit.id}>
-            <KitSection kit={kit} isLast={i === visible.length - 1} />
+            <KitSection kit={kit} isLast={i === visible.length - 1} productsById={productsById} />
             {i < visible.length - 1 && (
               <div style={{
                 display: 'flex', justifyContent: 'center',

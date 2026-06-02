@@ -22,10 +22,11 @@ import { PINE, MUTED, BORDER } from './tokens'
 import type { Product } from '../../lib/smart-finds'
 
 interface Props {
-  kit: Kit
+  kit:           Kit
+  productsById?: Record<string, Product>
 }
 
-export default function MochilaKit({ kit }: Props) {
+export default function MochilaKit({ kit, productsById }: Props) {
   if (kit.content.type !== 'systems') return null
   const systems = kit.content.systems
   const [activeId, setActiveId] = useState(systems[0]?.id ?? '')
@@ -68,17 +69,23 @@ export default function MochilaKit({ kit }: Props) {
       </div>
 
       {/* Active system body */}
-      <SystemContent system={active} />
+      <SystemContent system={active} productsById={productsById} />
     </div>
   )
 }
 
 // ── System body ─────────────────────────────────────────────────────────────
 
-function SystemContent({ system }: { system: System }) {
+function SystemContent({
+  system,
+  productsById,
+}: {
+  system:        System
+  productsById?: Record<string, Product>
+}) {
   // Flat products at the system level
   const flatProducts = system.products
-    ? resolveProductRefs(system.products)
+    ? resolveProductRefs(system.products, productsById)
     : []
 
   // Sub-grouped products
@@ -98,7 +105,7 @@ function SystemContent({ system }: { system: System }) {
       )}
 
       {subSections.map(sub => {
-        const products = resolveProductRefs(sub.products)
+        const products = resolveProductRefs(sub.products, productsById)
         return (
           <div key={sub.label} style={{ marginBottom: 28 }}>
             <div style={{

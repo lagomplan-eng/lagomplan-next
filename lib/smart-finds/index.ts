@@ -51,13 +51,31 @@ export interface ResolvedProductRef {
 }
 
 /**
+ * Look up a product by ID — prefers a caller-provided map (DB-backed)
+ * over the static catalog. Lets pages that load kits from Supabase pass
+ * a fresh products map without us having to bake the new IDs into the
+ * deprecated static `PRODUCTS` constant.
+ */
+function lookupProduct(
+  id:           string,
+  productsById?: Record<string, Product>,
+): Product {
+  if (productsById && productsById[id]) return productsById[id]
+  return getProduct(id)
+}
+
+/**
  * Resolve a list of KitProductRef into hydrated products. The optional
  * `hero` flag carries through so the card row can pick which entry
- * renders as HeroCard.
+ * renders as HeroCard. Pass `productsById` to use a DB-backed catalog
+ * instead of the static `PRODUCTS` constant.
  */
-export function resolveProductRefs(refs: KitProductRef[]): ResolvedProductRef[] {
+export function resolveProductRefs(
+  refs:          KitProductRef[],
+  productsById?: Record<string, Product>,
+): ResolvedProductRef[] {
   return refs.map(ref => ({
-    product: getProduct(ref.productId),
+    product: lookupProduct(ref.productId, productsById),
     hero:    ref.hero === true,
   }))
 }
@@ -69,16 +87,22 @@ export function resolveProductRefs(refs: KitProductRef[]): ResolvedProductRef[] 
  *
  * For a systems kit: throws — callers must resolve per-system using
  * resolveProductRefs() inside each system.
+ *
+ * Pass `productsById` to use a DB-backed catalog instead of the static
+ * `PRODUCTS` constant.
  */
-export function resolveFlatKit(kit: Kit): { hero: Product; rest: Product[] } {
+export function resolveFlatKit(
+  kit:           Kit,
+  productsById?: Record<string, Product>,
+): { hero: Product; rest: Product[] } {
   if (kit.content.type !== 'flat') {
     throw new Error(`[smart-finds] resolveFlatKit called on non-flat kit '${kit.id}'`)
   }
   const refs   = kit.content.products
   const heroIx = refs.findIndex(r => r.hero) >= 0 ? refs.findIndex(r => r.hero) : 0
-  const hero   = getProduct(refs[heroIx].productId)
+  const hero   = lookupProduct(refs[heroIx].productId, productsById)
   const rest   = refs
     .filter((_, i) => i !== heroIx)
-    .map(r => getProduct(r.productId))
+    .map(r => lookupProduct(r.productId, productsById))
   return { hero, rest }
 }

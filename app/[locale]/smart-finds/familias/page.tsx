@@ -13,7 +13,7 @@
 
 import type { Metadata } from 'next'
 import type { Locale }   from '../../../../i18n'
-import { getKits }       from '../../../../lib/smart-finds'
+import { getKits, getProducts } from '../../../../lib/smart-finds'
 import FilterableKits    from '../../../../components/smart-finds/FilterableKits'
 import PainStrip, { type PainStripItem } from '../../../../components/smart-finds/PainStrip'
 import EmailSignup       from '../../../../components/smart-finds/EmailSignup'
@@ -59,7 +59,14 @@ export default async function Page({ params }: Props) {
   // DB-backed catalog. Pulls from Supabase via the public-read RLS path —
   // see lib/smart-finds/db.ts. With revalidate=3600 the result is cached at
   // the edge for an hour; Studio edits propagate within that window.
-  const kits = await getKits()
+  //
+  // Products are fetched in parallel with kits + indexed by ID. The resolver
+  // (resolveFlatKit / resolveProductRefs) prefers this map over the static
+  // PRODUCTS constant so the new DB-only product IDs (kits seeded
+  // 2026-06-01) resolve correctly.
+  const [kits, products] = await Promise.all([getKits(), getProducts()])
+  const productsById: Record<string, (typeof products)[number]> =
+    Object.fromEntries(products.map(p => [p.id, p]))
 
   return (
     <main
@@ -178,7 +185,7 @@ export default async function Page({ params }: Props) {
 
         {/* Filterable kit list — client island for the persona filter
             state. The masthead + planner CTA + newsletter stay server. */}
-        <FilterableKits kits={kits} />
+        <FilterableKits kits={kits} productsById={productsById} />
 
         {/* PLANNER CTA — same Pine block treatment as Hotels' PlannerBridgeCTA,
             with the site-wide 14-px radius so the corner softness reads
