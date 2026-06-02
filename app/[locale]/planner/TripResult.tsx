@@ -125,6 +125,29 @@ interface Props {
 // (e.g. accommodations introduced after the cache was written).
 const TRIP_CACHE_SCHEMA = 2
 
+// ─── Generation request — auto-retry once on transient upstream failure ────
+// Anthropic occasionally returns 529 (overloaded) or 500 during high-traffic
+// windows, and Supabase Edge Functions can cold-start with brief 502/503
+// hiccups. One silent retry after a short delay catches the majority of
+// these without surfacing the error panel — the user never sees the blip.
+// Subsequent failures fall through to the existing error UI so users can
+// still retry manually. AbortSignal is honored: if the caller aborts
+// between attempts, we don't retry.
+const TRANSIENT_STATUSES = new Set([500, 502, 503, 504, 529])
+const RETRY_DELAY_MS     = 1500
+
+async function fetchGenerationWithRetry(
+  input: RequestInfo,
+  init?: RequestInit,
+): Promise<Response> {
+  const res = await fetch(input, init)
+  if (!TRANSIENT_STATUSES.has(res.status)) return res
+  if (init?.signal && (init.signal as AbortSignal).aborted) return res
+  console.warn('[TripResult] generation got transient', res.status, '— retrying once')
+  await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
+  return fetch(input, init)
+}
+
 // ─── Duration normalization ───────────────────────────────────────────────────
 // nights=0 is a legal explicit value (same-day trip). The naive
 // `parseInt(nights, 10) || 3` pattern coerces 0 to 3 because `0 || x` returns
@@ -1670,7 +1693,7 @@ export default function TripResult({ params }: Props) {
           }
         } else {
           // ── Sync: existing /api/generate-trip path ────────────────────────
-          const genRes = await fetch('/api/generate-trip', {
+          const genRes = await fetchGenerationWithRetry('/api/generate-trip', {
             method: 'POST',
             headers: genHeaders,
             credentials: 'include',
@@ -2308,7 +2331,7 @@ export default function TripResult({ params }: Props) {
           throw e
         }
       } else {
-        const genRes  = await fetch('/api/generate-trip', {
+        const genRes  = await fetchGenerationWithRetry('/api/generate-trip', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
         })
         const genData = await genRes.json().catch(() => null)
@@ -2718,7 +2741,7 @@ export default function TripResult({ params }: Props) {
           throw e
         }
       } else {
-        const genRes  = await fetch('/api/generate-trip', {
+        const genRes  = await fetchGenerationWithRetry('/api/generate-trip', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
         })
         const genData = await genRes.json().catch(() => null)
