@@ -28,6 +28,26 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 
 ---
 
+## 🟣 Scheduled gates (time-bound, not optional)
+
+### 1.4 — Pre-paid-acquisition audit (late June 2026)
+**Slot:** end of Phase 1 — after 1.1 (Stay22 in plan) + 1.3 (Mobile trip view) ship. Adding as **1.4** on the external feature roadmap so it's visible alongside the journey items.
+
+**Why this slot:** 1.1 may add affiliate scripts that affect performance; 1.3 reshapes the primary mobile conversion surface. Auditing before they ship would measure stale state. Auditing after them measures what paid traffic will actually see.
+
+**What it gates:** paid-acquisition kickoff. Until 1.4 passes, no paid spend. After 1.4 passes, every ad dollar respects the work.
+
+**Scope (~half day):**
+- Lighthouse mobile + desktop on `/`, `/es/planificador`, `/en/planner`, `/es/hoteles`, `/es/smart-finds/familias`, top 2-3 guides
+- Target: Performance ≥85 mobile, Best Practices ≥95, SEO 100, LCP <2.5s, CLS <0.1, INP <200ms
+- SEO checklist per page: unique `<title>` (50-60 chars), `<meta description>` (~150 chars), OG image (1200×630 branded), canonical URL, hreflang ES↔EN, JSON-LD where it makes sense (Organization + WebSite on `/`, TouristAttraction/Article on guides, Product on pricing, TouristTrip on saved trips)
+
+**Output:** prioritized fix list with effort estimates. Then ~3-6 hours executing the fixes.
+
+**TODO:** add row "1.4 — Pre-traffic audit + fixes" to the external feature roadmap (the prioritized journey doc).
+
+---
+
 ## 🟡 Carried over (sized, ready to execute)
 
 - **Double `/api/generate-trip` POST** observed in Moscow trip console log today. Two `[TripResult] POST payload` lines before one status response. Costs an extra Anthropic call per sync gen if both actually hit. Worth investigating — race in the useEffect, or the auto-retry firing on transient failure that didn't surface in the log. ~1 hr.
@@ -39,9 +59,8 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 
 - **Smart Finds Phase 2 personas** ("The Kid" + "General") — needs schema decision (`persona_scopes TEXT[]` migration or fold into existing personas)
 - **Hotel cards inline options** — product question parked: keep neighborhood + Reservar (status quo) OR add 1–3 actual bookable Stay22 options inline?
-- **Security Phase 3** (next-intl 3 → 4 major) — defer until paid acquisition launches
-- **Security Phase 4** (`@supabase/ssr`) — same
-- **Pre-paid-acquisition Lighthouse + SEO audit** — page-load perf on `/`, `/planner`, `/hoteles`, `/smart-finds/familias`; OG image + JSON-LD per page
+- **Security Phase 3** (next-intl 3 → 4 major) — defer until paid acquisition launches; ideally before 1.4 gate
+- **Security Phase 4** (`@supabase/ssr`) — same; ideally before 1.4 gate
 
 ## ✅ Closed today (2026-06-02)
 
