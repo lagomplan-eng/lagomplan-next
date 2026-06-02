@@ -1,6 +1,6 @@
 # Tomorrow (2026-06-03)
 
-Active follow-ups carried from 2026-06-02. Refresh this file at the end of each session — items move to changelog when shipped, or stay here until they are.
+Active follow-ups. Refresh this file at the end of each session — items move to changelog when shipped, stay here until they are.
 
 ---
 
@@ -28,14 +28,12 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 
 ---
 
-## 🟡 Carried over from today
+## 🟡 Carried over (sized, ready to execute)
 
-- **Sample trip ID** — pick polished demo, set `NEXT_PUBLIC_SAMPLE_TRIP_ID` in Vercel + redeploy. SQL `UPDATE trips SET is_shared = true` already ran for `63a755fe-7740-416d-9a5f-f76b58869aa5`, so that one works as the placeholder until you pick something better.
-- **Manual smoke sweep** (11 human-interaction tests in `docs/SMOKE_TESTS.md`) — not done. Lower priority once Playwright covers the funnel, but worth running once on prod before any paid acquisition.
-- **Double `/api/generate-trip` POST** observed in Moscow trip console log today. Two `[TripResult] POST payload` lines before one status response. Costs an extra Anthropic call per sync gen if both actually hit. Worth investigating — race in the useEffect, or the auto-retry firing on transient failure that didn't surface.
-- **Analytics live verification** — Meta Pixel + GA DebugView walkthrough for the 10-step conversion path. Pixel ID `112397688953186` is now loading correctly post-consent; need to confirm each event lands as expected. Can be folded into the Playwright work since the assertions are programmable.
-- **Loading-state UX paper cut on sync trips** — chrome appears before content, looks like a result page rather than a clear "generating, please wait" overlay. Backlog item; add a sync-path GenerationSurface variant.
-- **Stripe test-mode on Vercel preview deploys** — production correctly uses live keys (test cards declined). Wire Stripe `pk_test_...` + `sk_test_...` env vars scoped to **Preview environment only** so future purchase-flow verification is free. ~20 min. Once in place, Playwright tests can run the `4242 4242 4242 4242` checkout flow in CI without touching real money.
+- **Double `/api/generate-trip` POST** observed in Moscow trip console log today. Two `[TripResult] POST payload` lines before one status response. Costs an extra Anthropic call per sync gen if both actually hit. Worth investigating — race in the useEffect, or the auto-retry firing on transient failure that didn't surface in the log. ~1 hr.
+- **Sample trip ID — pick a better one.** `63a755fe-7740-416d-9a5f-f76b58869aa5` is the Moscow placeholder. Replace with a polished 5–7 day trip to a well-mapped destination (CDMX / Tokyo / Lisbon — strong intelligence badges). Set `NEXT_PUBLIC_SAMPLE_TRIP_ID` in Vercel + run `UPDATE trips SET is_shared = true WHERE id = <new>` + redeploy. ~30 min.
+- **Stripe test-mode on Vercel preview deploys** — production correctly uses live keys. Wire `pk_test_...` + `sk_test_...` scoped to **Preview environment only** so Playwright + manual purchase-flow verification stops costing real money. ~20 min.
+- **Loading-state UX paper cut on sync trips** — chrome appears before content, looks like a result page rather than a clear "generating, please wait" overlay. Backlog item; add a sync-path GenerationSurface variant. ~30 min.
 
 ## 🟢 Strategic backlog (not tomorrow)
 
@@ -45,6 +43,19 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 - **Security Phase 4** (`@supabase/ssr`) — same
 - **Pre-paid-acquisition Lighthouse + SEO audit** — page-load perf on `/`, `/planner`, `/hoteles`, `/smart-finds/familias`; OG image + JSON-LD per page
 
+## ✅ Closed today (2026-06-02)
+
+- Smart Finds Phase 1 launch (nav flag flipped on after broader release deployed clean)
+- Long-trip pipeline reliability fixes (streaming-lock target, regen-modal on prefs change)
+- Sample-itinerary CTA wiring (plain `<a>` instead of next-intl typed Link)
+- Anonymous trip reads via `is_shared = true` (RLS bypass with explicit auth gate in route)
+- Auto-retry once on transient 5xx + 529 from generation
+- Manual smoke sweep — all 10 tests passed on prod
+- Analytics live verification: Pixel `112397688953186` firing, `Purchase` confirmed via real Stripe charge ($0.50 fee, refunded)
+- Tag `v-jun-2-2026` pushed for rollback safety
+- Memory refresh + `project_smart_finds.md` written
+- TOMORROW.md scaffolded
+
 ---
 
-_Update this file at start/end of every session. Items shipped → strike or remove. Items decided → move to backlog or close._
+_Update this file at start/end of every session. Items shipped → move to "Closed today" section before pushing the day's last commit. Items decided → move to backlog or close._
