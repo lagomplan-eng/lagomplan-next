@@ -129,14 +129,12 @@ export default function Nav() {
   // only controls whether the top-level link is rendered. One-line revert.
   const SHOW_MUNDIAL = true
 
-  // Smart Finds — re-exposed in the navbar 2026-05-27, then hidden again
-  // 2026-06-02 ahead of the production deploy so the broader release
-  // (Phase 1B, long-trip fixes, homepage refresh) can ship without
-  // also exposing the still-being-curated Smart Finds catalog. The
-  // route (/smart-finds/familias) and the page itself remain live so
-  // the team can preview by direct URL. Flip back to `true` when the
-  // catalog is launch-ready.
-  const SHOW_SMART_FINDS = false
+  // Smart Finds — launched 2026-06-02 evening after the broader release
+  // (Phase 1B, long-trip fixes, homepage refresh) settled on prod. The
+  // catalog seed + image normalization + hotels-strip cutover were
+  // applied in the same window. Flip back to `false` if a rollback
+  // is ever needed; the route + data remain in place.
+  const SHOW_SMART_FINDS = true
 
   // ── Nav links (internal paths → next-intl translates) ─
   const navLinks = [
