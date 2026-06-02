@@ -20,14 +20,12 @@
  * as the worldcup-stays data on the same page.
  */
 
+import Image from 'next/image'
 import {
-  getProductsBySurface,
+  getProducts,
   type Product as SmartFind,
   type SmartFindCategory,
 } from '../../lib/smart-finds'
-
-// Pre-resolve on import — server-component evaluation, no per-render cost.
-const SMART_FINDS = getProductsBySurface('hotels-strip')
 
 const PINE  = '#0F3A33'
 const SAGE  = '#6B8F86'
@@ -47,8 +45,15 @@ interface Props {
   locale: 'es' | 'en'
 }
 
-export default function SmartFindsSection({ locale }: Props) {
+export default async function SmartFindsSection({ locale }: Props) {
   const isES = locale === 'es'
+
+  // Pull every active product, then filter to the hotels-strip surface.
+  // Replaces the static `getProductsBySurface('hotels-strip')` call —
+  // editorial control now lives in Supabase Studio (toggle the
+  // `surfaces` array on sf_products to add/remove from this strip).
+  const allProducts = await getProducts()
+  const SMART_FINDS = allProducts.filter(p => p.surfaces?.includes('hotels-strip'))
 
   const L = {
     eyebrow:   isES ? 'Smart finds'                                       : 'Smart finds',
@@ -130,12 +135,28 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
         marginBottom: 14,
       }}>{categoryLabel}</p>
 
-      {/* Emoji + brand + name */}
-      {product.emoji && (
+      {/* Image / emoji glyph. New DB-seeded products carry `image`
+          (white-bg product shot); legacy hotels-strip products fall
+          back to the emoji glyph from the static catalog. */}
+      {product.image ? (
+        <div style={{
+          width: '100%', height: 140, position: 'relative',
+          background: WHITE, marginBottom: 14,
+          overflow: 'hidden',
+        }}>
+          <Image
+            src={product.image}
+            alt={`${product.brand} ${product.name}`}
+            fill
+            sizes="280px"
+            style={{ objectFit: 'contain', padding: 12 }}
+          />
+        </div>
+      ) : product.emoji ? (
         <div style={{ fontSize: 32, marginBottom: 12, lineHeight: 1 }}>
           {product.emoji}
         </div>
-      )}
+      ) : null}
       <p style={{
         fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 700,
         letterSpacing: '1.2px', textTransform: 'uppercase', color: SAGE,

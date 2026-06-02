@@ -129,12 +129,14 @@ export default function Nav() {
   // only controls whether the top-level link is rendered. One-line revert.
   const SHOW_MUNDIAL = true
 
-  // Smart Finds — re-exposed in the navbar 2026-05-27 after the Supabase
-  // catalog (sf_kits / sf_products) was updated. The route
-  // (/smart-finds/familias) and the page itself were always live; this
-  // flag only controls the top-level navbar link. Flip to `false` to
-  // hide again. One-line revert.
-  const SHOW_SMART_FINDS = true
+  // Smart Finds — re-exposed in the navbar 2026-05-27, then hidden again
+  // 2026-06-02 ahead of the production deploy so the broader release
+  // (Phase 1B, long-trip fixes, homepage refresh) can ship without
+  // also exposing the still-being-curated Smart Finds catalog. The
+  // route (/smart-finds/familias) and the page itself remain live so
+  // the team can preview by direct URL. Flip back to `true` when the
+  // catalog is launch-ready.
+  const SHOW_SMART_FINDS = false
 
   // ── Nav links (internal paths → next-intl translates) ─
   const navLinks = [

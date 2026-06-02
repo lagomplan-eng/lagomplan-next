@@ -12,18 +12,19 @@
  * Server component — no interactivity of its own.
  */
 
-import type { Kit } from '../../lib/smart-finds'
+import type { Kit, Product } from '../../lib/smart-finds'
 import FlatKit from './FlatKit'
 import MochilaKit from './MochilaKit'
 import PersonaBadge from './PersonaBadge'
 import { PINE, SAGE, SAND, MUTED } from './tokens'
 
 interface Props {
-  kit:    Kit
-  isLast: boolean
+  kit:           Kit
+  isLast:        boolean
+  productsById?: Record<string, Product>
 }
 
-export default function KitSection({ kit, isLast }: Props) {
+export default function KitSection({ kit, isLast, productsById }: Props) {
   return (
     <section
       id={kit.id}
@@ -87,8 +88,8 @@ export default function KitSection({ kit, isLast }: Props) {
       </div>
 
       {/* Content router */}
-      {kit.content.type === 'flat'    && <FlatKit    kit={kit} />}
-      {kit.content.type === 'systems' && <MochilaKit kit={kit} />}
+      {kit.content.type === 'flat'    && <FlatKit    kit={kit} productsById={productsById} />}
+      {kit.content.type === 'systems' && <MochilaKit kit={kit} productsById={productsById} />}
     </section>
   )
 }

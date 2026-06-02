@@ -9,18 +9,19 @@
  * Server component — no interaction state of its own.
  */
 
-import type { Kit } from '../../lib/smart-finds'
+import type { Kit, Product } from '../../lib/smart-finds'
 import { resolveFlatKit } from '../../lib/smart-finds'
 import HeroCard from './HeroCard'
 import ProductCard from './ProductCard'
 
 interface Props {
-  kit: Kit
+  kit:           Kit
+  productsById?: Record<string, Product>
 }
 
-export default function FlatKit({ kit }: Props) {
+export default function FlatKit({ kit, productsById }: Props) {
   if (kit.content.type !== 'flat') return null
-  const { hero, rest } = resolveFlatKit(kit)
+  const { hero, rest } = resolveFlatKit(kit, productsById)
 
   return (
     <div>
