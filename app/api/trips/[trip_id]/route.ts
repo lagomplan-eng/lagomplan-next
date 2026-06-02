@@ -20,9 +20,14 @@ export async function GET(
   console.log('[trips/get] fetching trip_id:', trip_id)
 
   try {
-    const supabase = await getSupabaseServer()
-
-    const { data, error } = await supabase
+    // Use admin client to bypass RLS on the read. Authorization is then
+    // gated explicitly below: anyone can read shared trips; only the
+    // owner can read private trips. Without this, anonymous visitors
+    // hitting public links (the homepage sample-itinerary CTA, the
+    // /trips/share/[shareId] page) silently got 404 because their user
+    // client couldn't see other users' rows.
+    const admin = getSupabaseAdmin()
+    const { data, error } = await (admin as any)
       .from('trips')
       .select('*')
       .eq('id', trip_id)
@@ -40,7 +45,18 @@ export async function GET(
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
 
-    console.log('[trips/get] found trip:', trip_id, '| title:', (data as any)?.title)
+    // Authorization: shared trips are public reads; private trips require
+    // the requester to be the owner. Falling back to 404 (not 403) so we
+    // don't leak the existence of private trips to UUID-guessers.
+    if (!(data as any).is_shared) {
+      const supabase = await getSupabaseServer()
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user || (data as any).user_id !== user.id) {
+        return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+      }
+    }
+
+    console.log('[trips/get] found trip:', trip_id, '| title:', (data as any)?.title, '| shared:', (data as any)?.is_shared)
     return NextResponse.json(data)
 
   } catch (err) {
