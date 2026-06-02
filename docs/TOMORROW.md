@@ -53,7 +53,6 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 - **Double `/api/generate-trip` POST** observed in Moscow trip console log today. Two `[TripResult] POST payload` lines before one status response. Costs an extra Anthropic call per sync gen if both actually hit. Worth investigating — race in the useEffect, or the auto-retry firing on transient failure that didn't surface in the log. ~1 hr.
 - **Sample trip ID — pick a better one.** `63a755fe-7740-416d-9a5f-f76b58869aa5` is the Moscow placeholder. Replace with a polished 5–7 day trip to a well-mapped destination (CDMX / Tokyo / Lisbon — strong intelligence badges). Set `NEXT_PUBLIC_SAMPLE_TRIP_ID` in Vercel + run `UPDATE trips SET is_shared = true WHERE id = <new>` + redeploy. ~30 min.
 - **Stripe test-mode on Vercel preview deploys** — production correctly uses live keys. Wire `pk_test_...` + `sk_test_...` scoped to **Preview environment only** so Playwright + manual purchase-flow verification stops costing real money. ~20 min.
-- **Loading-state UX paper cut on sync trips** — chrome appears before content, looks like a result page rather than a clear "generating, please wait" overlay. Backlog item; add a sync-path GenerationSurface variant. ~30 min.
 
 ## 🟢 Strategic backlog (not tomorrow)
 
@@ -74,6 +73,7 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 - Tag `v-jun-2-2026` pushed for rollback safety
 - Memory refresh + `project_smart_finds.md` written
 - TOMORROW.md scaffolded
+- Sync-trip loading UX paper cut — `loadingKind` initialized from URL intent so `<GenerationSurface>` renders from first paint when there's a destination param (no more skeleton flash before the phased "Generating..." UI)
 
 ---
 
