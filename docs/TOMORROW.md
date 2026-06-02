@@ -35,6 +35,7 @@ After lunch: ~3 more tests covering Stripe test-mode checkout + analytics event 
 - **Double `/api/generate-trip` POST** observed in Moscow trip console log today. Two `[TripResult] POST payload` lines before one status response. Costs an extra Anthropic call per sync gen if both actually hit. Worth investigating — race in the useEffect, or the auto-retry firing on transient failure that didn't surface.
 - **Analytics live verification** — Meta Pixel + GA DebugView walkthrough for the 10-step conversion path. Pixel ID `112397688953186` is now loading correctly post-consent; need to confirm each event lands as expected. Can be folded into the Playwright work since the assertions are programmable.
 - **Loading-state UX paper cut on sync trips** — chrome appears before content, looks like a result page rather than a clear "generating, please wait" overlay. Backlog item; add a sync-path GenerationSurface variant.
+- **Stripe test-mode on Vercel preview deploys** — production correctly uses live keys (test cards declined). Wire Stripe `pk_test_...` + `sk_test_...` env vars scoped to **Preview environment only** so future purchase-flow verification is free. ~20 min. Once in place, Playwright tests can run the `4242 4242 4242 4242` checkout flow in CI without touching real money.
 
 ## 🟢 Strategic backlog (not tomorrow)
 
