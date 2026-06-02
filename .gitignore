@@ -19,3 +19,9 @@ node_modules
 .vercel
 
 tsconfig.tsbuildinfo
+
+# Smart Finds prototype source material (raw image dumps + image
+# normalizer backups). Originals stay on disk for reference but
+# don't belong in the repo.
+prototypes/
+public/images/smart-finds/_backup/
