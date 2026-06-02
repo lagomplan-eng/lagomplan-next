@@ -1062,8 +1062,17 @@ export default function TripResult({ params }: Props) {
   //   'hydrating'  → fast restore (DB load, cache hit). Renders a calm skeleton.
   //   'generating' → AI call (initial gen, regenerate, replaceTrip). Renders
   //                  the existing GenerationSurface.
-  // Default 'hydrating' covers the first paint before we know which path runs.
-  const [loadingKind, setLoadingKind] = useState<'hydrating' | 'generating'>('hydrating')
+  //
+  // Initialized from URL intent so the FIRST PAINT already shows the right
+  // surface — previously this defaulted to 'hydrating' and only flipped to
+  // 'generating' after the useEffect's cache check ran (~1 frame later), so
+  // sync-path generations briefly flashed the skeleton instead of the
+  // phased "Generating your itinerary..." UI. With this lookup we pick the
+  // correct surface from mount: destination in URL = generation, trip_id =
+  // hydration. Anything else falls through to the safer 'hydrating' default.
+  const [loadingKind, setLoadingKind] = useState<'hydrating' | 'generating'>(() =>
+    (params.destination && !params.trip_id) ? 'generating' : 'hydrating'
+  )
   const [error, setError]     = useState<string | null>(null)
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [errorDurationMs, setErrorDurationMs] = useState<number | null>(null)
