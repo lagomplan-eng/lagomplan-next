@@ -2898,7 +2898,14 @@ export default function TripResult({ params }: Props) {
       setShowSaveModal(true)
       return
     }
-    if (hasUserEdits) {
+    // Confirm when either:
+    //   - The user has edited the displayed itinerary (`hasUserEdits`)
+    //   - OR the prefs drawer is open (they likely changed destination /
+    //     dates / traveler / pace, which `hasUserEdits` doesn't track —
+    //     prior gap allowed silent regens that consumed a credit and
+    //     overwrote a saved trip without warning).
+    // Toolbar's "Regenerate" button with no edits still skips the modal.
+    if (hasUserEdits || prefOpen) {
       setRegenConfirmOpen(true)
     } else {
       sessionStorage.removeItem('tripCache')
