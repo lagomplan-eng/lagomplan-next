@@ -119,48 +119,85 @@ This test verifies the **failure path** works cleanly. Skip in routine smoke run
 
 ---
 
-### T1-5: 35-day cap enforcement (~30s, no generation)
+### T1-5: 35-day cap enforcement (~45s, no live generation needed for steps 1-4)
 
-**Pre-condition:** Fresh visitor on `/es/` or `/en/` — no live AI call needed for this test.
+**Pre-condition:** Fresh visitor on `/es/` or `/en/` — steps 1-4 don't need a live AI call. Step 5 (follow-through) does.
 
 **Steps:**
 1. Open the homepage; the planner form is in the right column of the hero
 2. Fill origin + destination
 3. Open the date picker → pick a range spanning **40 nights**
 4. Click submit
+5. **Follow-through:** click the trim button → submit → confirm generation actually proceeds and lands on a result page
 
 **Pass criteria:**
-- Under the segment(s), an amber callout appears: *"Por ahora generamos itinerarios de hasta 35 días. Tu rango cubre 40 noches."* (or EN equivalent)
-- Single-city: a **"Ajustar a 35 días"** button appears below the callout. Clicking it snaps the end date so total = 35 nights and the callout disappears.
-- Multi-city (add an extra segment so total still >35): the callout shows the **total summed across all tramos** and the trim button is HIDDEN (multi-city users should shorten individual segments themselves).
-- Submit is hard-blocked while over cap — no navigation, no spinner, no `/api/generate-trip` POST in Network tab.
+- Under the segment(s), an amber callout appears with the exact text:
+  - ES: *"Por ahora generamos itinerarios de hasta 35 días. Tu rango cubre 40 noches."*
+  - EN: *"We currently plan trips of up to 35 days. Your range covers 40 nights."*
+- Single-city: a button labeled **"Ajustar a 35 días"** (ES) / **"Trim to 35 days"** (EN) appears below the callout. Clicking it snaps the end date so total = 35 nights and the callout disappears.
+- Multi-city (add an extra segment so total still >35): the callout shows the **total summed across all tramos** (e.g. *"Total del viaje: 38 noches sumando los 2 tramos."*) and the trim button is HIDDEN (multi-city users should shorten individual segments themselves).
+- Submit is hard-blocked while over cap — no navigation, no spinner, no `/api/generate-trip` POST in the Network tab.
 - Dropping to ≤35 nights → submit unlocks normally.
+- **Follow-through (step 5):** after trim + submit, generation proceeds end-to-end and the result page shows 35 days. No silent off-by-one (where the user thinks 35 but only 34 are generated).
+- **Mobile (375px):** the callout's left-border accent + button stack vertically below the text without overflow. Resize DevTools to 375px and re-trigger step 3.
+
+**Also check the prefs drawer post-generation.** After a saved trip, opening "Ajustar preferencias" exposes editable date / nights. The cap should hold there too — pushing dates past 35 should block the regenerate.
 
 **Common failure modes:**
-- Submit fires anyway → the `exceedsMax` guard in HeroForm.submit() is broken.
+- Submit fires anyway → the `exceedsMax` guard in `HeroForm.submit()` is broken.
 - Callout shows the wrong total → multi-city sum is reading the main segment only.
+- Callout text says "35 días" but UI generates 34 (off-by-one) → `MAX_TRIP_DAYS` constant disagreement between HeroForm + backend.
+- Trim button visible on multi-city → the `additionalSegments.length === 0` guard on the trim button has regressed.
+- Mobile layout breaks → the inline `style={{ marginTop: 0, marginBottom: 16 }}` on the social-proof block isn't honored, or the callout's flex layout is missing wrap behavior.
 
 ---
 
-### T1-6: Confidence gate suppresses badges on unmapped destinations (~2 min)
+### T1-6: Confidence gate suppresses badges on unmapped destinations (~3 min)
 
-**Pre-condition:** Logged in, has ≥1 trip credit. DevTools console open.
+**Pre-condition:** Logged in, has ≥1 trip credit. DevTools console open. Access to Supabase Studio.
+
+**Picking an unmapped destination — don't trust a static list.** Coverage expands over time, so before running this test, grep both tables to pick a city that's still uncovered:
+```
+grep -E "^\s*'<city>'" lib/intelligence.ts
+```
+A city that returns zero hits in `NEIGHBORHOOD_COORDS` AND `CITY_CENTROIDS` is a valid test target. Reasonable candidates as of 2026-06-01: **Riga, Tbilisi, Sarajevo, Yerevan, Vilnius, Tallinn, Bratislava**. Confirm with grep before relying on any of them.
 
 **Steps:**
-1. Generate a **5-day trip to an unmapped city** — try Riga, Tbilisi, Sarajevo, Yerevan, or any small destination not in `lib/intelligence.ts` (`NEIGHBORHOOD_COORDS` and `CITY_CENTROIDS`).
-2. Wait for generation to complete.
+1. Pick an unmapped destination per the grep above
+2. Generate a 5-day trip to that destination, walking tolerance = medium
+3. Wait for generation to complete
+4. Inspect DB: in Supabase Studio → SQL Editor:
+   ```sql
+   SELECT id, destination, intelligence
+   FROM trips
+   ORDER BY created_at DESC
+   LIMIT 1;
+   ```
 
 **Pass criteria:**
 - Result page renders normally (title, days, hotel section — everything visible)
 - **DayFlowBadge, IntelligenceCallout, and HotelFitBadge are ALL absent** — no qualitative labels on day headers, no notes below day items, no pill above hotels
-- Console contains a single warning: `[intelligence] coverage below threshold — suppressing badges` with `resolvedBlocks`, `totalBlocks`, `ratio` shown
-- DB: `trips.intelligence` column is `null` for this trip (not an empty object — actually null)
+- Console contains a single warning of the exact shape:
+  ```
+  [intelligence] coverage below threshold — suppressing badges
+    { resolvedBlocks: <small number>, totalBlocks: <larger number>, ratio: <0.NN> }
+  ```
+- DB query returns `intelligence: null` (literal null, not `{}` and not an object with zero days)
 
-**Counter-test:** Repeat with a covered destination (Tokyo, Lisbon, Madrid, CDMX). Badges should appear normally and console warning should NOT fire.
+**Counter-test (separate run, must also pass):** Generate a 5-day trip to **Tokyo** (well-mapped after Phase 2 — Shinjuku, Shibuya, Ginza, Asakusa all in NEIGHBORHOOD_COORDS).
+
+**Counter-test pass criteria:**
+- All three badges (DayFlow, Callout if applicable, HotelFit) render with qualitative labels
+- **No** `[intelligence] coverage below threshold` warning in console
+- DB query returns `intelligence` as a populated object with `days: [...]`, `hotel_fit: {...}`, `computed_at: <ISO timestamp>`
+
+**Mixed-coverage edge case (optional, more nuanced):** Generate a trip to a **partially-mapped** city — e.g. Marrakech (in CITY_CENTROIDS but no specific medina/Gueliz entries). Expected: badges DO render because the centroid fallback resolves every block to the same point. Intra-day walking distances may read as 0 km; that's the documented trade-off, not a bug.
 
 **Common failure modes:**
 - Badges appear with "Funcional"/"Manejable" defaults on the unmapped city → confidence gate not firing. Check thresholds (`MIN_COVERAGE_RATIO`, `MIN_RESOLVED_BLOCKS`) in `lib/intelligence.ts`.
-- No badges on a covered destination → engine is being too aggressive about suppression. Likely the AI emitted block.neighborhood as something that doesn't substring-match the table; consider adding the missing barrio.
+- No badges on a covered destination → engine is being too aggressive about suppression. Likely the AI emitted block.neighborhood as something that doesn't substring-match the table; check `console.warn` payload for which `totalBlocks` count is being computed.
+- DB `intelligence` column is `{}` or has empty `days: []` rather than `null` → the try/catch in `app/api/trips/route.ts` POST is catching too broadly or the engine's null return isn't propagating.
+- Counter-test fires the suppression warning → an expected covered city has dropped out of NEIGHBORHOOD_COORDS / CITY_CENTROIDS — grep + add the entry back.
 
 ---
 
