@@ -60,17 +60,20 @@ Run the relevant subset when:
 
 **Pass criteria:**
 - Initial loading screen appears
-- At ~100s: first 5 day cards appear with "Generando más días · 1/3" badge below
-- At ~200s: days 6-10 appear, badge updates to "2/3"
-- At ~300s: days 11-15 appear, badge disappears
+- **Header subtitle, itinerary section ("15 días en Oaxaca"), and trip title all show the FINAL day count (15) from the first paint — no flicker upward as chunks land.** Same for the hotel card: shows the full 14-night span from the moment the first card appears, not chunk-0's 4-night sub-range.
+- At ~100s: first 5 day cards appear with `Generando · 5 de 15 días listos` indicator below (day-count format — chunk-count format was retired 2026-06-01)
+- At ~200s: days 6-10 appear, indicator updates to `Generando · 10 de 15 días listos`
+- At ~300s: days 11-15 appear, indicator disappears
 - Final state: full 15 days, all in Spanish, accommodations have entries, trip saved (trip_id present in URL)
+- Title reads "Oaxaca en 15 días: …" — NOT "Oaxaca en 5 días" (chunk-0 day count leak — should be patched by both worker `patchTitleDayCount` AND client-side defensive patch in `normalizeTripData`)
 - Logs (`generate-trip-worker`): three sequential invocations with chunks landing
 - DB: `generation_jobs` row reaches `status='completed'`, `chunks_done=3, chunks_total=3`, `partial_result` exists (and is overwritten on completion by `result`)
 
 **Common failure modes:**
-- Job aborts at chunk 0 → worker per-chunk timeout. Check `SEGMENT_DAYS` constant.
+- Job aborts at chunk 0 → worker per-chunk timeout. Check `SEGMENT_DAYS` constant (currently 5; was 10 pre-2026-05-26).
 - Days appear all at once at the end → `partial_result` write is failing. Check worker logs for partial assembly warnings.
-- Badge stuck on "1/3" forever → polling endpoint isn't returning `partial_result`. Check `/api/trips/jobs/[id]/route.ts`.
+- Indicator stuck at "5 de 15 días listos" forever → polling endpoint isn't returning `partial_result`. Check `/api/trips/jobs/[id]/route.ts`.
+- Surfaces flicker through partial counts ("5 → 10 → 15 días") as chunks land → streaming-lock target broke. Verify `nightsNum` + accommodation patch + title patch in TripResult.tsx use `Math.max(days.length, durationDaysFromNights(nights))`, not `days.length` alone.
 
 ---
 
@@ -113,6 +116,51 @@ This test verifies the **failure path** works cleanly. Skip in routine smoke run
 - GA fires `error_occurred` event with `surface: planner-generate`
 
 **Cleanup:** flip the secret back to `claude-sonnet-4-6`.
+
+---
+
+### T1-5: 35-day cap enforcement (~30s, no generation)
+
+**Pre-condition:** Fresh visitor on `/es/` or `/en/` — no live AI call needed for this test.
+
+**Steps:**
+1. Open the homepage; the planner form is in the right column of the hero
+2. Fill origin + destination
+3. Open the date picker → pick a range spanning **40 nights**
+4. Click submit
+
+**Pass criteria:**
+- Under the segment(s), an amber callout appears: *"Por ahora generamos itinerarios de hasta 35 días. Tu rango cubre 40 noches."* (or EN equivalent)
+- Single-city: a **"Ajustar a 35 días"** button appears below the callout. Clicking it snaps the end date so total = 35 nights and the callout disappears.
+- Multi-city (add an extra segment so total still >35): the callout shows the **total summed across all tramos** and the trim button is HIDDEN (multi-city users should shorten individual segments themselves).
+- Submit is hard-blocked while over cap — no navigation, no spinner, no `/api/generate-trip` POST in Network tab.
+- Dropping to ≤35 nights → submit unlocks normally.
+
+**Common failure modes:**
+- Submit fires anyway → the `exceedsMax` guard in HeroForm.submit() is broken.
+- Callout shows the wrong total → multi-city sum is reading the main segment only.
+
+---
+
+### T1-6: Confidence gate suppresses badges on unmapped destinations (~2 min)
+
+**Pre-condition:** Logged in, has ≥1 trip credit. DevTools console open.
+
+**Steps:**
+1. Generate a **5-day trip to an unmapped city** — try Riga, Tbilisi, Sarajevo, Yerevan, or any small destination not in `lib/intelligence.ts` (`NEIGHBORHOOD_COORDS` and `CITY_CENTROIDS`).
+2. Wait for generation to complete.
+
+**Pass criteria:**
+- Result page renders normally (title, days, hotel section — everything visible)
+- **DayFlowBadge, IntelligenceCallout, and HotelFitBadge are ALL absent** — no qualitative labels on day headers, no notes below day items, no pill above hotels
+- Console contains a single warning: `[intelligence] coverage below threshold — suppressing badges` with `resolvedBlocks`, `totalBlocks`, `ratio` shown
+- DB: `trips.intelligence` column is `null` for this trip (not an empty object — actually null)
+
+**Counter-test:** Repeat with a covered destination (Tokyo, Lisbon, Madrid, CDMX). Badges should appear normally and console warning should NOT fire.
+
+**Common failure modes:**
+- Badges appear with "Funcional"/"Manejable" defaults on the unmapped city → confidence gate not firing. Check thresholds (`MIN_COVERAGE_RATIO`, `MIN_RESOLVED_BLOCKS`) in `lib/intelligence.ts`.
+- No badges on a covered destination → engine is being too aggressive about suppression. Likely the AI emitted block.neighborhood as something that doesn't substring-match the table; consider adding the missing barrio.
 
 ---
 
@@ -489,6 +537,14 @@ Append-only. Format: `YYYY-MM-DD · short description · fix commit · new test 
 - **Claim route silently failed for the same reason.** Anonymous-to-authed trip linking never worked. Fix: `be28d2d`. → Added **T2-1**.
 - **Sonnet 4.6 worker timeout.** 10-day chunks took ~200s on 4.6, exceeded the 145s worker timeout + 150s Supabase Free function cap. All long async trips broke. Fix: dropped `SEGMENT_DAYS` 10→7→5 across two iterations. → Added **T1-2**, **T1-4**.
 - **Title quirk: chunk 0's day count leaked to whole trip.** A 30-day trip with 5-day chunks displayed "5 Días en X" because the assembler took chunk 0's title verbatim. Fix: `21c85d0` patches the leading day count. → Covered by **T1-2** pass criteria.
+
+### 2026-06-01
+- **Title regex was anchored to start-of-string.** Patcher only matched "5 Días en X" (number-first), missed "X en 5 días" (city-first — the AI alternates between styles). PR #49 changes regex to word-boundary `\b\d+\s+d[ií]as?\b`. → Reflected in **T1-2** pass criteria.
+- **Accommodation dates came from chunk 0's sub-range.** "2026-07-01 → 2026-07-05 · 4 noches" on a 19-day Lisbon trip. Two-layer fix: worker rewrites at gen-time (PR #49) + client defensive patch in `normalizeTripData` self-heals existing DB rows at render-time (PRs #47, #48). → Reflected in **T1-2** pass criteria.
+- **Streaming flicker — surfaces tick up "5 → 10 → 15 días" as chunks land.** Hotel nights, itinerary section header, and AI-emitted title all read partial state during async streaming. Fix: lock to `Math.max(days.length, durationDaysFromNights(nights))` so target wins during streaming (PR pending — `fix/streaming-lock-target-duration`). → Added explicit "first paint" check to **T1-2** pass criteria.
+- **30-day cap rejected legitimate 35-day requests.** Lifted to 35 days end-to-end (6 clamps), added friendly HeroForm warning + trim affordance. → Added **T1-5**.
+- **Intelligence engine emitted misleading defaults for unmapped destinations.** Tokyo/Kyoto blocks resolved no coords → engine wrote "Funcional"/"Fluido" defaults that looked confident. Phase 2 fix: expanded NEIGHBORHOOD_COORDS (~50 international entries), added CITY_CENTROIDS fallback, plus a confidence gate that returns `null` when coverage < 30%. → Added **T1-6**.
+- **Streaming indicator showed chunk count, not days.** "Generando más días · 1/3" was an internal-implementation leak. Now reads "Generando · 5 de 15 días listos". → Reflected in **T1-2** pass criteria.
 
 ---
 
