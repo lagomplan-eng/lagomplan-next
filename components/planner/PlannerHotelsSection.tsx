@@ -12,17 +12,20 @@
  * advertorial. Reads as travel guidance, not as an OTA banner.
  *
  * "Ya reservé" confirmation flow (2026-06-03):
- *   Per-card state machine — `idle → prompted → form_open → confirmed`.
- *   Triggered 3s after the user clicks the Stay22 "Reservar" CTA so
- *   we can capture the confirmation number once they're back from
- *   Booking. Persisted to trip_data.accommodations[i].booking for
- *   authed users (via /api/trips/[trip_id]/booking-confirm), or to
- *   localStorage for anonymous trips. Survives page refresh. Per-id
- *   state means multi-city trips can confirm each segment
- *   independently.
+ *   Per-card state machine — `prompted → form_open → confirmed`.
+ *   The nudge is visible by default on every unconfirmed card so it
+ *   also serves users who booked outside the planner (or in a prior
+ *   session). Earlier revisions delayed it 3s after the Reservar
+ *   click, but background-tab `setTimeout` throttling made it
+ *   unreliable — the user would click Reservar, switch to the new
+ *   tab, and the prompt would never appear. Persisted to
+ *   trip_data.accommodations[i].booking for authed users (via
+ *   /api/trips/[trip_id]/booking-confirm), or to localStorage for
+ *   anonymous trips. Survives page refresh. Per-id state means
+ *   multi-city trips can confirm each segment independently.
  */
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useLocale } from 'next-intl'
 import type {
   Accommodation,
@@ -61,6 +64,12 @@ interface Props {
    *  POST to the trip's booking-confirm API; when false they go to
    *  localStorage keyed by tripId. Plumbed from TripResult's auth state. */
   isLoggedIn?:      boolean
+  /** Fired when the user saves a booking confirmation on a card. The
+   *  index is the accommodation's position in `effective` — single-city
+   *  trips will always pass 0; multi-city trips pass the segment index.
+   *  Wired upstream to flip the matching pre-trip "Reservar hotel" check
+   *  done, which rolls up into the Hospedaje milestone + progress bar. */
+  onBookingConfirmed?: (accommodationIndex: number) => void
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -97,11 +106,11 @@ const PRICE_TIER_LABEL_ES: Record<Accommodation['priceTier'], string> = {
 const PRICE_TIER_LABEL_EN = PRICE_TIER_LABEL_ES
 
 // ─── "Ya reservé" UI state machine ────────────────────────────────────────────
-//   idle       → only the Stay22 CTA is visible (default)
-//   prompted   → small inline nudge below the card ("¿Ya reservaste?")
+//   prompted   → small inline nudge below the CTA ("¿Ya reservaste?") — default
 //   form_open  → inline expand-down form with three fields
 //   confirmed  → booking saved; CTA replaced with "Ver en Booking →"
-type AccUIState = 'idle' | 'prompted' | 'form_open' | 'confirmed'
+//   dismissed  → user clicked × on the nudge; session-scoped, resets on reload
+type AccUIState = 'prompted' | 'form_open' | 'confirmed' | 'dismissed'
 
 // localStorage key for anonymous-trip persistence. The trip ID is part of
 // the key so trips can't leak each other's bookings across the same
@@ -118,6 +127,7 @@ export default function PlannerHotelsSection({
   daysCount,
   isMultiCity,
   isLoggedIn = false,
+  onBookingConfirmed,
 }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
@@ -147,8 +157,9 @@ export default function PlannerHotelsSection({
 
   // ── "Ya reservé" state, keyed by acc.id ─────────────────────────────────────
   // Initialised from `acc.booking?.confirmed` so confirmed entries survive
-  // page refresh. Set/derived in a useEffect so we can also rehydrate
-  // anonymous bookings from localStorage on mount.
+  // page refresh. Unconfirmed cards default to 'prompted' (nudge visible)
+  // so prior-reserved users see the affordance immediately. Anonymous
+  // localStorage rehydration runs in a useEffect below.
   const [accUIState, setAccUIState] = useState<Record<string, AccUIState>>(() => {
     const initial: Record<string, AccUIState> = {}
     for (const a of (accommodations ?? [])) {
@@ -162,10 +173,6 @@ export default function PlannerHotelsSection({
   // parent to re-fetch trip_data. Keyed by acc.id, merged into the
   // accommodation passed to the card.
   const [localBookings, setLocalBookings] = useState<Record<string, NonNullable<Accommodation['booking']>>>({})
-
-  // IDs the user explicitly dismissed via the nudge "×". Won't re-prompt
-  // this session — but a fresh page load resets it (per spec).
-  const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set())
 
   // Rehydrate anonymous bookings from localStorage on mount. Authed trips
   // already have `booking` baked into trip_data from the API.
@@ -188,6 +195,9 @@ export default function PlannerHotelsSection({
             code:        String(parsed.code),
             checkinTime: typeof parsed.checkinTime === 'string' ? parsed.checkinTime : '',
             notes:       typeof parsed.notes === 'string' ? parsed.notes : '',
+            ...(typeof parsed.bookingUrl === 'string' && parsed.bookingUrl
+              ? { bookingUrl: parsed.bookingUrl }
+              : {}),
           }
           updates[a.id] = 'confirmed'
         }
@@ -250,12 +260,7 @@ export default function PlannerHotelsSection({
   }
 
   function dismissPrompt(accId: string) {
-    setDismissedIds(prev => {
-      const next = new Set(prev)
-      next.add(accId)
-      return next
-    })
-    setAccUIState(prev => ({ ...prev, [accId]: 'idle' }))
+    setAccUIState(prev => ({ ...prev, [accId]: 'dismissed' }))
   }
 
   function applyLocalBooking(accId: string, booking: NonNullable<Accommodation['booking']>) {
@@ -288,7 +293,7 @@ export default function PlannerHotelsSection({
 
       {/* Cards stack vertically — same column treatment as days. */}
       <div className="flex flex-col gap-3.5">
-        {effective.map(acc => {
+        {effective.map((acc, idx) => {
           const mergedAcc: Accommodation = localBookings[acc.id]
             ? { ...acc, booking: localBookings[acc.id] }
             : acc
@@ -306,11 +311,11 @@ export default function PlannerHotelsSection({
               locale={locale}
               booked={!!hospedajeBooked}
               isLoggedIn={isLoggedIn}
-              uiState={accUIState[acc.id] ?? 'idle'}
-              dismissed={dismissedIds.has(acc.id)}
+              uiState={accUIState[acc.id] ?? 'prompted'}
               onUIStateChange={(next) => updateAccState(acc.id, next)}
               onDismissPrompt={() => dismissPrompt(acc.id)}
               onLocalBookingSaved={(b) => applyLocalBooking(acc.id, b)}
+              onConfirmed={() => onBookingConfirmed?.(idx)}
             />
           )
         })}
@@ -335,20 +340,23 @@ interface CardProps {
   booked:          boolean
   isLoggedIn:      boolean
   uiState:         AccUIState
-  dismissed:       boolean
   onUIStateChange: (next: AccUIState) => void
   onDismissPrompt: () => void
   onLocalBookingSaved: (booking: NonNullable<Accommodation['booking']>) => void
+  /** Fired after a successful save so the parent can tick the matching
+   *  pre-trip "Reservar hotel" check. Only fires on first confirmation,
+   *  not on edits. */
+  onConfirmed: () => void
 }
 
 function AccommodationCard({
   acc, ctx, tripId, typeLabel, priceLabel, ctaText, ctaBooked, fallbackTagline, locale, booked,
-  isLoggedIn, uiState, dismissed, onUIStateChange, onDismissPrompt, onLocalBookingSaved,
+  isLoggedIn, uiState, onUIStateChange, onDismissPrompt, onLocalBookingSaved, onConfirmed,
 }: CardProps) {
   // Build the Stay22 Allez URL eagerly so the <a href> ships in HTML —
   // lets LetMeAllez see it on page load, and respects the user's "open
   // in new tab via middle-click" instinct.
-  const href = useMemo(
+  const affiliateHref = useMemo(
     () => buildAffiliateLink('booking', {
       city:       acc.city,
       startDate:  acc.checkInDate,
@@ -359,10 +367,24 @@ function AccommodationCard({
     }),
     [acc.city, acc.checkInDate, acc.checkOutDate, ctx.adults, locale],
   )
+  // Once a user has confirmed their booking and pasted the link to it,
+  // jump them straight to their own reservation page. Falls back to the
+  // affiliate search URL for unconfirmed cards.
+  const customBookingUrl = acc.booking?.bookingUrl?.trim() || ''
+  const href = customBookingUrl || affiliateHref
 
   // Click telemetry — fires before the new tab opens so the event
-  // survives navigation. PRESERVED untouched per spec.
-  function handleClick() {
+  // survives navigation. Also re-shows the "¿Ya reservaste?" nudge if
+  // the user previously dismissed it on this card — clicking Reservar
+  // is a clear signal they're booking and may want to confirm shortly.
+  //
+  // When the user has saved their own bookingUrl, bypass Stay22's
+  // LetMeAllez script (loaded in app/[locale]/layout.tsx). LetMeAllez
+  // attaches a document-level click interceptor and redirects clicks
+  // on travel-card links through its own affiliate URL — even when our
+  // `<a href>` points at a non-booking domain. preventDefault + manual
+  // window.open routes around it.
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
     events.plannerHotelClicked({
       tripId,
       accommodationId: acc.id,
@@ -370,15 +392,13 @@ function AccommodationCard({
       provider:        'booking',
       city:            acc.city,
     })
-    // Schedule the "¿Ya reservaste?" nudge 3s after the user opens
-    // Booking. Skip when they're already past the prompt (form open
-    // or confirmed) or have dismissed it for this session.
-    if (uiState === 'idle' && !dismissed && !acc.booking?.confirmed) {
-      window.setTimeout(() => {
-        // Re-check via the ref-style closure: only promote to prompted
-        // if we're still idle by the time the timer fires.
-        onUIStateChange('prompted')
-      }, 3000)
+    if (uiState === 'dismissed') {
+      onUIStateChange('prompted')
+    }
+    if (customBookingUrl) {
+      e.preventDefault()
+      e.stopPropagation()
+      window.open(customBookingUrl, '_blank', 'noopener,noreferrer')
     }
   }
 
@@ -455,6 +475,7 @@ function AccommodationCard({
         <ConfirmedStrip
           booking={acc.booking}
           locale={locale}
+          onEdit={() => onUIStateChange('form_open')}
         />
       )}
 
@@ -486,15 +507,14 @@ function AccommodationCard({
         </a>
       </div>
 
-      {/* "Ya reservé" prompt — small nudge bar inside the card flow.
-          Slides in below the CTA row after the user clicks Reservar.
-          Auto-dismisses 10s later (handled via the prompt component). */}
+      {/* "Ya reservé" prompt — small nudge bar inside the card flow,
+          visible by default on unconfirmed cards. Persists until the
+          user opens the form, dismisses it, or completes confirmation. */}
       <PromptNudge
         visible={uiState === 'prompted'}
         locale={locale}
         onOpenForm={() => onUIStateChange('form_open')}
         onDismiss={onDismissPrompt}
-        onAutoDismiss={onDismissPrompt}
       />
 
       {/* "Ya reservé" inline form — expand-down using the codebase's
@@ -505,16 +525,27 @@ function AccommodationCard({
         accId={acc.id}
         tripId={tripId}
         isLoggedIn={isLoggedIn}
-        onCancel={() => onUIStateChange('prompted')}
+        initial={acc.booking}
+        onCancel={() => onUIStateChange(acc.booking?.confirmed ? 'confirmed' : 'prompted')}
         onSaved={(booking) => {
+          const wasEditing = !!acc.booking?.confirmed
           onLocalBookingSaved(booking)
           onUIStateChange('confirmed')
-          events.hotelBookingConfirmed({
-            tripId,
-            accommodationId: acc.id,
-            city:            acc.city,
-            provider:        'booking',
-          })
+          // onConfirmed is idempotent (parent skips the setter when the
+          // check is already ticked) so it's safe to fire on edits too —
+          // this auto-heals trips whose original confirmation predates
+          // the milestone wiring.
+          onConfirmed()
+          // Analytics-only gate — repeat edits shouldn't inflate the
+          // booking-confirmed funnel metric.
+          if (!wasEditing) {
+            events.hotelBookingConfirmed({
+              tripId,
+              accommodationId: acc.id,
+              city:            acc.city,
+              provider:        'booking',
+            })
+          }
         }}
         onPersistFailed={() => onUIStateChange('form_open')}
       />
@@ -527,25 +558,36 @@ function AccommodationCard({
 function ConfirmedStrip({
   booking,
   locale,
+  onEdit,
 }: {
   booking: NonNullable<Accommodation['booking']>
   locale:  'es' | 'en'
+  onEdit:  () => void
 }) {
   return (
     <div
       className="rounded-[10px] bg-[rgba(15,58,51,.06)] border border-[#0F3A33]/15 px-4 py-3 mb-5"
       data-state="confirmed"
     >
-      <div className="flex items-center gap-2 mb-1">
-        <span
-          aria-hidden
-          className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-[#0F3A33] text-white text-[11px] leading-none"
+      <div className="flex items-center justify-between gap-2 mb-1">
+        <div className="flex items-center gap-2">
+          <span
+            aria-hidden
+            className="inline-flex items-center justify-center w-[18px] h-[18px] rounded-full bg-[#0F3A33] text-white text-[11px] leading-none"
+          >
+            ✓
+          </span>
+          <span className="font-mono text-[10px] font-medium tracking-[.1em] uppercase text-[#0F3A33]">
+            {locale === 'en' ? 'Booked' : 'Reservado'}
+          </span>
+        </div>
+        <button
+          type="button"
+          onClick={onEdit}
+          className="font-sans text-[11px] text-[#0F3A33]/70 hover:text-[#0F3A33] underline-offset-2 hover:underline"
         >
-          ✓
-        </span>
-        <span className="font-mono text-[10px] font-medium tracking-[.1em] uppercase text-[#0F3A33]">
-          {locale === 'en' ? 'Booked' : 'Reservado'}
-        </span>
+          {locale === 'en' ? 'Edit' : 'Editar'}
+        </button>
       </div>
       <div className="font-sans text-[13px] text-[#1C1C1A] leading-[1.5]">
         <span className="font-mono font-medium">{booking.code}</span>
@@ -569,24 +611,12 @@ function PromptNudge({
   locale,
   onOpenForm,
   onDismiss,
-  onAutoDismiss,
 }: {
-  visible:       boolean
-  locale:        'es' | 'en'
-  onOpenForm:    () => void
-  onDismiss:     () => void
-  onAutoDismiss: () => void
+  visible:    boolean
+  locale:     'es' | 'en'
+  onOpenForm: () => void
+  onDismiss:  () => void
 }) {
-  // Auto-dismiss 10s after the nudge becomes visible. Cleans up on
-  // re-hide so a quick open/close doesn't double-fire.
-  const dismissRef = useRef(onAutoDismiss)
-  dismissRef.current = onAutoDismiss
-  useEffect(() => {
-    if (!visible) return
-    const t = window.setTimeout(() => dismissRef.current(), 10_000)
-    return () => window.clearTimeout(t)
-  }, [visible])
-
   return (
     <div
       style={{
@@ -632,6 +662,7 @@ function BookingConfirmForm({
   accId,
   tripId,
   isLoggedIn,
+  initial,
   onCancel,
   onSaved,
   onPersistFailed,
@@ -641,15 +672,45 @@ function BookingConfirmForm({
   accId:           string
   tripId:          string | null
   isLoggedIn:      boolean
+  initial?:        Accommodation['booking']
   onCancel:        () => void
   onSaved:         (booking: NonNullable<Accommodation['booking']>) => void
   onPersistFailed: () => void
 }) {
-  const [code, setCode]               = useState('')
-  const [checkinTime, setCheckinTime] = useState('')
-  const [notes, setNotes]             = useState('')
+  const [code, setCode]               = useState(initial?.code        ?? '')
+  const [checkinTime, setCheckinTime] = useState(initial?.checkinTime ?? '')
+  const [notes, setNotes]             = useState(initial?.notes       ?? '')
+  const [bookingUrl, setBookingUrl]   = useState(initial?.bookingUrl  ?? '')
   const [submitting, setSubmitting]   = useState(false)
   const [error, setError]             = useState<string | null>(null)
+
+  // Re-sync the form when the user opens it for edit. Without this,
+  // useState's initial values are captured once on mount, so the form
+  // would show empty fields the first time a user clicks Edit on a
+  // booking that loaded from the DB.
+  useEffect(() => {
+    if (!visible) return
+    setCode(initial?.code              ?? '')
+    setCheckinTime(initial?.checkinTime ?? '')
+    setNotes(initial?.notes            ?? '')
+    setBookingUrl(initial?.bookingUrl  ?? '')
+    setError(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [visible])
+
+  // Lightweight URL validation. Server re-validates with the URL
+  // constructor; this check keeps obvious typos from triggering a
+  // round-trip and surfaces a clear inline error.
+  function isValidUrl(raw: string): boolean {
+    const trimmed = raw.trim()
+    if (!trimmed) return true // empty is allowed (field is optional)
+    try {
+      const u = new URL(trimmed)
+      return u.protocol === 'https:' || u.protocol === 'http:'
+    } catch {
+      return false
+    }
+  }
 
   async function handleSubmit() {
     setError(null)
@@ -658,11 +719,19 @@ function BookingConfirmForm({
       setError(locale === 'en' ? 'Confirmation number is required.' : 'El nº de confirmación es obligatorio.')
       return
     }
-    const booking = {
+    const trimmedUrl = bookingUrl.trim()
+    if (trimmedUrl && !isValidUrl(trimmedUrl)) {
+      setError(locale === 'en'
+        ? 'That link doesn’t look valid. Paste a https:// URL.'
+        : 'Ese enlace no parece válido. Pega una URL https://.')
+      return
+    }
+    const booking: NonNullable<Accommodation['booking']> = {
       confirmed:   true,
       code:        trimmedCode.slice(0, 50),
       checkinTime: checkinTime.trim().slice(0, 10),
       notes:       notes.trim().slice(0, 280),
+      ...(trimmedUrl ? { bookingUrl: trimmedUrl.slice(0, 500) } : {}),
     }
 
     setSubmitting(true)
@@ -710,6 +779,8 @@ function BookingConfirmForm({
         timePlaceholder: '15:00',
         notesLabel:    'Note (optional)',
         notesPlaceholder: 'Ask for a higher floor',
+        urlLabel:      'Booking link (optional)',
+        urlPlaceholder: 'https://booking.com/...',
         submit:        'Save confirmation',
         cancel:        'Cancel',
       }
@@ -720,6 +791,8 @@ function BookingConfirmForm({
         timePlaceholder: '15:00',
         notesLabel:    'Nota (opcional)',
         notesPlaceholder: 'Pedir habitación alta',
+        urlLabel:      'Enlace de la reserva (opcional)',
+        urlPlaceholder: 'https://booking.com/...',
         submit:        'Guardar confirmación',
         cancel:        'Cancelar',
       }
@@ -727,7 +800,7 @@ function BookingConfirmForm({
   return (
     <div
       style={{
-        maxHeight:  visible ? 480 : 0,
+        maxHeight:  visible ? 600 : 0,
         opacity:    visible ? 1 : 0,
         overflow:   'hidden',
         transition: 'max-height 0.4s ease, opacity 0.3s ease',
@@ -774,6 +847,20 @@ function BookingConfirmForm({
             placeholder={L.notesPlaceholder}
             maxLength={280}
             className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
+          />
+        </label>
+        <label className="block mb-3">
+          <span className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] block mb-1">
+            {L.urlLabel}
+          </span>
+          <input
+            type="url"
+            inputMode="url"
+            value={bookingUrl}
+            onChange={e => setBookingUrl(e.target.value)}
+            placeholder={L.urlPlaceholder}
+            maxLength={500}
+            className="w-full font-mono text-[12px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
           />
         </label>
 

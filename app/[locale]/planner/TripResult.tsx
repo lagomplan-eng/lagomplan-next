@@ -847,20 +847,38 @@ function normalizeTripData(
   // we ship an empty array; Phase 2 adds a client-side derivation hook
   // that fills it from destination + dates when missing on legacy data.
   const rawAccommodations = Array.isArray(source.accommodations) ? source.accommodations : []
-  const baseAccommodations: Accommodation[] = rawAccommodations.map((raw: any, i: number) => ({
-    id:                typeof raw?.id === 'string' ? raw.id : `acc-${i}`,
-    city:              typeof raw?.city === 'string' ? raw.city : (destination ?? ''),
-    neighborhood:      typeof raw?.neighborhood === 'string' ? raw.neighborhood : undefined,
-    accommodationType: raw?.accommodationType ?? 'unspecified',
-    rationale:         typeof raw?.rationale === 'string' ? raw.rationale : '',
-    priceTier:         raw?.priceTier ?? 'mid',
-    familyFriendly:    raw?.familyFriendly === true,
-    checkInDate:       typeof raw?.checkInDate === 'string' ? raw.checkInDate : '',
-    checkOutDate:      typeof raw?.checkOutDate === 'string' ? raw.checkOutDate : '',
-    nights:            typeof raw?.nights === 'number' ? raw.nights : 0,
-    source:            raw?.source === 'fallback' ? 'fallback' : 'ai',
-    fallback:          raw?.fallback === true || raw?.source === 'fallback',
-  }))
+  const baseAccommodations: Accommodation[] = rawAccommodations.map((raw: any, i: number) => {
+    // Carry "Ya reservé" confirmation through normalization. Without this,
+    // booking persists to the DB but is dropped on reload, so the
+    // ConfirmedStrip never re-appears after refresh.
+    const rawBooking = raw?.booking
+    const booking = (rawBooking && rawBooking.confirmed === true && typeof rawBooking.code === 'string')
+      ? {
+          confirmed:   true,
+          code:        rawBooking.code,
+          checkinTime: typeof rawBooking.checkinTime === 'string' ? rawBooking.checkinTime : '',
+          notes:       typeof rawBooking.notes       === 'string' ? rawBooking.notes       : '',
+          ...(typeof rawBooking.bookingUrl === 'string' && rawBooking.bookingUrl
+            ? { bookingUrl: rawBooking.bookingUrl }
+            : {}),
+        }
+      : undefined
+    return {
+      id:                typeof raw?.id === 'string' ? raw.id : `acc-${i}`,
+      city:              typeof raw?.city === 'string' ? raw.city : (destination ?? ''),
+      neighborhood:      typeof raw?.neighborhood === 'string' ? raw.neighborhood : undefined,
+      accommodationType: raw?.accommodationType ?? 'unspecified',
+      rationale:         typeof raw?.rationale === 'string' ? raw.rationale : '',
+      priceTier:         raw?.priceTier ?? 'mid',
+      familyFriendly:    raw?.familyFriendly === true,
+      checkInDate:       typeof raw?.checkInDate === 'string' ? raw.checkInDate : '',
+      checkOutDate:      typeof raw?.checkOutDate === 'string' ? raw.checkOutDate : '',
+      nights:            typeof raw?.nights === 'number' ? raw.nights : 0,
+      source:            raw?.source === 'fallback' ? 'fallback' : 'ai',
+      fallback:          raw?.fallback === true || raw?.source === 'fallback',
+      ...(booking ? { booking } : {}),
+    }
+  })
 
   // Defensive date patch — when the worker chunked a long trip it persisted
   // the AI-emitted checkInDate/checkOutDate/nights from chunk 0's sub-range
@@ -1917,6 +1935,32 @@ export default function TripResult({ params }: Props) {
     saveTrip(authedUser.id)
   }, [authedUser, rawTripData])
 
+  // ── Booking-confirm → Hospedaje milestone auto-heal ─────────────────────────
+  // Trips where the user already confirmed a booking under an older
+  // build (or saved before the milestone wiring shipped) come back from
+  // the DB with `accommodations[i].booking.confirmed` but no matching
+  // `pretrip-book-hotel*` entry in doneCheckIds. Without this effect
+  // those trips render "Reservado" on the card but still show
+  // "Reservar hotel · Pendiente" in the right rail and 0% progress.
+  // Idempotent — only commits state when at least one check needs ticking.
+  useEffect(() => {
+    if (accommodations.length === 0) return
+    const isMulti = isMultiCitySegments(segments)
+    setDoneCheckIds(prev => {
+      let changed = false
+      const next = new Set(prev)
+      accommodations.forEach((a, i) => {
+        if (!a.booking?.confirmed) return
+        const checkId = isMulti ? `pretrip-book-hotel-seg-${i}` : 'pretrip-book-hotel'
+        if (!next.has(checkId)) {
+          next.add(checkId)
+          changed = true
+        }
+      })
+      return changed ? next : prev
+    })
+  }, [accommodations, segments])
+
   // ── Autosave — fires whenever content OR tripId changes ─────────────────────
   // tripId is intentionally in the deps: if the user edits before the initial
   // auto-save POST completes (tripId was null), those edits would have been
@@ -1951,7 +1995,10 @@ export default function TripResult({ params }: Props) {
 
     const body = JSON.stringify({
       title:     tripTitle,
-      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined },
+      // accommodations included so per-card "Ya reservé" bookings survive
+      // autosave — the /api/trips/[trip_id] PATCH overwrites trip_data
+      // wholesale, so any field omitted here is wiped from the DB row.
+      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined, accommodations },
       // Phase 2B — traveler details flow through autosave so drawer edits
       // (e.g. pareja → familia + 2 kids) survive refresh without needing a
       // regenerate.
@@ -2026,6 +2073,7 @@ export default function TripResult({ params }: Props) {
     days:          [] as Day[],
     packing:       [] as string[],
     budgetRows:    [] as BudgetRow[],
+    accommodations: [] as Accommodation[],
     doneCheckIds:  new Set<string>(),
     prefTraveler:  '',
     prefAdults:    2,
@@ -2035,7 +2083,7 @@ export default function TripResult({ params }: Props) {
   })
   useEffect(() => {
     flushSnapshotRef.current = {
-      tripId, tripTitle, tripSubtitle, days, packing, budgetRows, doneCheckIds,
+      tripId, tripTitle, tripSubtitle, days, packing, budgetRows, accommodations, doneCheckIds,
       prefTraveler, prefAdults, prefChildren, prefGroupCount, budgetCurrency,
     }
   })
@@ -2061,7 +2109,7 @@ export default function TripResult({ params }: Props) {
           keepalive:   true,  // survives document unload (~64KB cap)
           body: JSON.stringify({
             title: s.tripTitle,
-            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined },
+            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined, accommodations: s.accommodations },
             travelers:            s.prefTraveler || null,
             traveler_adults:      s.prefAdults,
             traveler_children:    childrenSerial,
@@ -4078,6 +4126,22 @@ export default function TripResult({ params }: Props) {
               // unauthenticated for this purpose (the form is only
               // reachable post-CTA-click, after auth has resolved).
               isLoggedIn={!!authedUser}
+              // Confirming a booking auto-ticks the matching pre-trip
+              // "Reservar hotel" check, which rolls into the Hospedaje
+              // milestone + progress bar — single-city → 'pretrip-book-
+              // hotel', multi-city → 'pretrip-book-hotel-seg-{idx}'.
+              onBookingConfirmed={(idx) => {
+                const checkId = isMultiCitySegments(segments)
+                  ? `pretrip-book-hotel-seg-${idx}`
+                  : 'pretrip-book-hotel'
+                setDoneCheckIds(prev => {
+                  if (prev.has(checkId)) return prev
+                  const next = new Set(prev)
+                  next.add(checkId)
+                  return next
+                })
+                setHasUserEdits(true)
+              }}
             />
 
             {/* Section header — locale + multi-city aware. For multi-city

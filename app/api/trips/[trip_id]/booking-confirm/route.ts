@@ -27,6 +27,23 @@ type BookingConfirmation = {
   code:        string
   checkinTime: string
   notes:       string
+  bookingUrl?: string
+}
+
+// Accept only http(s) URLs. javascript: / data: links would let an
+// attacker hijack the "Ver en Booking" CTA into running script in
+// the user's session, so we hard-reject anything else.
+function sanitizeBookingUrl(raw: unknown): string | undefined {
+  if (typeof raw !== 'string') return undefined
+  const trimmed = raw.trim().slice(0, 500)
+  if (!trimmed) return undefined
+  try {
+    const u = new URL(trimmed)
+    if (u.protocol !== 'https:' && u.protocol !== 'http:') return undefined
+    return u.toString()
+  } catch {
+    return undefined
+  }
 }
 
 type AccommodationLike = {
@@ -72,11 +89,13 @@ export async function PATCH(
       return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
     }
 
+    const bookingUrl = sanitizeBookingUrl((rawBooking as { bookingUrl?: unknown }).bookingUrl)
     const booking: BookingConfirmation = {
       confirmed:   true,
       code:        code.slice(0, 50),
       checkinTime: typeof rawBooking.checkinTime === 'string' ? rawBooking.checkinTime.trim().slice(0, 10) : '',
       notes:       typeof rawBooking.notes       === 'string' ? rawBooking.notes.trim().slice(0, 280) : '',
+      ...(bookingUrl ? { bookingUrl } : {}),
     }
 
     // ── 2. Fetch the trip via admin (bypass RLS for read; we gate below) ────
@@ -105,17 +124,27 @@ export async function PATCH(
 
     // ── 4. Find + merge the accommodation ───────────────────────────────────
     //
-    // ID resolution strategy:
-    //   1. Match by stored `id` field — happens when an earlier save
-    //      already stamped an id on this row.
-    //   2. Fallback: parse "acc-N" → use N as array index. The client
-    //      gets these ids from normalizeTripData which synthesizes them
-    //      from the position when raw AI output didn't include a
-    //      per-accommodation id. Without this fallback, the very first
-    //      "Ya reservé" save on a freshly-generated trip 404s.
+    // Two client id schemes exist:
+    //   - "acc-N"               position-indexed (TripResult.tsx:851)
+    //                           when the AI emitted accommodations
+    //   - "acc-fallback-{slug}" deterministic per-destination
+    //                           (lib/planner/fallback-accommodations.ts)
+    //                           when the AI emitted none and the client
+    //                           synthesized one
     //
-    // On save we ALSO stamp the resolved accommodationId onto the row
-    // so subsequent lookups can match by id directly.
+    // Resolution:
+    //   1. Match by stored `id` — happens when an earlier save stamped it.
+    //   2. "acc-N" → array index N (capped at 50 as a tamper guard).
+    //   3. Anything else (e.g. "acc-fallback-…") → append. The fallback
+    //      synthesizer only ever emits one entry, so there's no ambiguity
+    //      about which row the user is confirming.
+    //
+    // trip_data.accommodations may be MISSING entirely from the DB row.
+    // The hotel card the user clicked Reservar on can be rendered purely
+    // from client-side synthesis with no corresponding DB entry. We treat
+    // "missing or short" as "expand the array to fit and stamp the booking
+    // there" — the client owns city/dates rendering; persisting
+    // {id, booking} is enough for the booking to survive reloads.
     const accommodations = Array.isArray(trip.trip_data?.accommodations)
       ? trip.trip_data!.accommodations!
       : []
@@ -125,16 +154,18 @@ export async function PATCH(
       const positionMatch = accommodationId.match(/^acc-(\d+)$/)
       if (positionMatch) {
         const n = parseInt(positionMatch[1], 10)
-        if (Number.isFinite(n) && n >= 0 && n < accommodations.length) {
+        if (Number.isFinite(n) && n >= 0 && n < 50) {
           idx = n
         }
+      } else {
+        idx = accommodations.length
       }
     }
-    if (idx < 0) {
-      return NextResponse.json({ error: 'accommodation_not_found' }, { status: 404 })
+    const padded: AccommodationLike[] = accommodations.slice()
+    while (padded.length <= idx) {
+      padded.push({})
     }
-
-    const updatedAccommodations = accommodations.map((a, i) =>
+    const updatedAccommodations = padded.map((a, i) =>
       i === idx ? { ...a, id: accommodationId, booking } : a
     )
 
