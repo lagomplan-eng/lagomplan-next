@@ -4071,6 +4071,13 @@ export default function TripResult({ params }: Props) {
               // of anchoring to a single destination.
               isMultiCity={isMultiCitySegments(segments)}
               segmentCount={segments.length}
+              // Auth state — drives the "Ya reservé" persistence path:
+              // authed users PATCH the trip row; anonymous users save
+              // the confirmation to localStorage keyed by trip_id.
+              // `authedUser` is undefined while loading; treat that as
+              // unauthenticated for this purpose (the form is only
+              // reachable post-CTA-click, after auth has resolved).
+              isLoggedIn={!!authedUser}
             />
 
             {/* Section header — locale + multi-city aware. For multi-city

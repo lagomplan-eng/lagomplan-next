@@ -522,4 +522,30 @@ export const events = {
       source:      params.source,
     })
   },
+
+  /**
+   * User confirmed a hotel booking from the planner's "Ya reservé" form.
+   * Distinct from `plannerHotelClicked` (intent to book) — this is the
+   * realized conversion. Fired AFTER the booking metadata is saved
+   * (optimistic UI; analytics fires alongside the save).
+   *
+   * Meta custom: `HotelBookingConfirmed`  ·  GA: `hotel_booking_confirmed`.
+   */
+  hotelBookingConfirmed(params: {
+    tripId:          string | null
+    accommodationId: string
+    city:            string
+    provider:        string
+  }) {
+    metaTrackCustom('HotelBookingConfirmed', {
+      provider: params.provider,
+      city:     params.city,
+    })
+    gaTrack('hotel_booking_confirmed', {
+      trip_id:          params.tripId ?? undefined,
+      accommodation_id: params.accommodationId,
+      city:             params.city,
+      provider:         params.provider,
+    })
+  },
 }

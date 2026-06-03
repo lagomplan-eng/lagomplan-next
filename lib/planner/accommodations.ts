@@ -62,6 +62,24 @@ export interface Accommodation {
   source:           AccommodationSource
   /** Quick fallback predicate — equivalent to `source === 'fallback'`. */
   fallback:         boolean
+  /**
+   * User-confirmed booking metadata. Populated when the traveler ticks
+   * "Ya reservé" on the hotel card and saves a confirmation. Persisted
+   * inside trip_data.accommodations[i].booking via the
+   * /api/trips/[trip_id]/booking-confirm route. Absent for unconfirmed
+   * stays. Per-accommodation, so multi-city trips can confirm each
+   * segment independently.
+   */
+  booking?: {
+    /** Sentinel for "user has acted on this card". Always true when present. */
+    confirmed:   boolean
+    /** Provider's confirmation number / reservation code. Required. */
+    code:        string
+    /** Check-in time hint, e.g. "15:00". Optional. */
+    checkinTime: string
+    /** Free-text note from the user, e.g. "Pedir habitación alta". Max 280 chars. */
+    notes:       string
+  }
 }
 
 /**
