@@ -104,16 +104,38 @@ export async function PATCH(
     // Anonymous trip: user_id is null → allow update without auth.
 
     // ── 4. Find + merge the accommodation ───────────────────────────────────
+    //
+    // ID resolution strategy:
+    //   1. Match by stored `id` field — happens when an earlier save
+    //      already stamped an id on this row.
+    //   2. Fallback: parse "acc-N" → use N as array index. The client
+    //      gets these ids from normalizeTripData which synthesizes them
+    //      from the position when raw AI output didn't include a
+    //      per-accommodation id. Without this fallback, the very first
+    //      "Ya reservé" save on a freshly-generated trip 404s.
+    //
+    // On save we ALSO stamp the resolved accommodationId onto the row
+    // so subsequent lookups can match by id directly.
     const accommodations = Array.isArray(trip.trip_data?.accommodations)
       ? trip.trip_data!.accommodations!
       : []
-    const idx = accommodations.findIndex(a => a && a.id === accommodationId)
+
+    let idx = accommodations.findIndex(a => a && a.id === accommodationId)
+    if (idx < 0) {
+      const positionMatch = accommodationId.match(/^acc-(\d+)$/)
+      if (positionMatch) {
+        const n = parseInt(positionMatch[1], 10)
+        if (Number.isFinite(n) && n >= 0 && n < accommodations.length) {
+          idx = n
+        }
+      }
+    }
     if (idx < 0) {
       return NextResponse.json({ error: 'accommodation_not_found' }, { status: 404 })
     }
 
     const updatedAccommodations = accommodations.map((a, i) =>
-      i === idx ? { ...a, booking } : a
+      i === idx ? { ...a, id: accommodationId, booking } : a
     )
 
     const updatedTripData: TripDataLike = {
