@@ -584,7 +584,7 @@ function ConfirmedStrip({
         <button
           type="button"
           onClick={onEdit}
-          className="font-sans text-[11px] text-[#0F3A33]/70 hover:text-[#0F3A33] underline-offset-2 hover:underline"
+          className="font-sans text-[11px] text-[#0F3A33]/70 hover:text-[#0F3A33] underline-offset-2 hover:underline print:hidden"
         >
           {locale === 'en' ? 'Edit' : 'Editar'}
         </button>
@@ -619,6 +619,7 @@ function PromptNudge({
 }) {
   return (
     <div
+      className="print:hidden"
       style={{
         maxHeight:  visible ? 80 : 0,
         opacity:    visible ? 1 : 0,
@@ -799,6 +800,7 @@ function BookingConfirmForm({
 
   return (
     <div
+      className="print:hidden"
       style={{
         maxHeight:  visible ? 600 : 0,
         opacity:    visible ? 1 : 0,

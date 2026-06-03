@@ -299,6 +299,24 @@ const BUDGET_ICON: Record<string, string> = {
   Otros:       '🛍',
 }
 
+// Display labels for the budget category header. Decoupled from the
+// canonical category keys so the DB / row.category contract stays
+// stable while we evolve the user-facing wording. Also defensively
+// maps raw English keys ("accommodation", "food", …) for legacy trip
+// rows whose category never went through normalizeCategory().
+const BUDGET_CATEGORY_LABEL: Record<string, string> = {
+  Alojamiento:   'Hospedaje',
+  Actividades:   'Actividades',
+  Gastronomía:   'Gastronomía',
+  Traslados:     'Traslados',
+  Otros:         'Otros',
+  accommodation: 'Hospedaje',
+  food:          'Gastronomía',
+  activities:    'Actividades',
+  transport:     'Traslados',
+  other:         'Otros',
+}
+
 // ── Item type → canonical category ───────────────────────────────────────────
 const TYPE_TO_CATEGORY: Record<ItemType, string> = {
   hotel:      'Alojamiento',
@@ -965,7 +983,7 @@ function normalizeTripData(
 
   return {
     title:          patchedTitle ?? `${destination} · ${durationDaysFromNights(nights)} ${durationDaysFromNights(nights) === 1 ? 'day' : 'days'}`,
-    subtitle:       source.subtitle ?? 'AI-generated trip plan',
+    subtitle:       source.subtitle ?? (locale === 'es' ? 'Plan de viaje generado con IA' : 'AI-generated trip plan'),
     days:           normalizedDays,
     checks:         normalizedChecks,
     budgetRows:     normalizedBudget,
@@ -3553,7 +3571,7 @@ export default function TripResult({ params }: Props) {
                     {showDestLine && (
                       <>
                         <br />
-                        <span className="text-[#0F3A33]">{destDisplay}</span>
+                        <span data-trip-hero="dest-line" className="text-[#0F3A33]">{destDisplay}</span>
                       </>
                     )}
                   </h1>
@@ -4751,7 +4769,7 @@ export default function TripResult({ params }: Props) {
                               {/* Category header */}
                               <div className="flex items-center justify-between px-4 py-[5px] bg-[#EDE7E1]">
                                 <span className="font-mono text-[8px] font-medium tracking-[.12em] uppercase text-[#7A7A76]">
-                                  {cat}
+                                  {BUDGET_CATEGORY_LABEL[cat] ?? cat}
                                 </span>
                                 <span className="font-mono text-[10px] font-medium text-[#3D3D3A]">
                                   {fmtAmt(catTotal)}

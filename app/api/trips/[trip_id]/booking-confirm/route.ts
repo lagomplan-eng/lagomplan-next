@@ -21,6 +21,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../../lib/supabase/server'
+import { sanitizeBookingUrl, resolveAccommodationIndex } from '../../../../../lib/planner/booking'
 
 type BookingConfirmation = {
   confirmed:   boolean
@@ -28,22 +29,6 @@ type BookingConfirmation = {
   checkinTime: string
   notes:       string
   bookingUrl?: string
-}
-
-// Accept only http(s) URLs. javascript: / data: links would let an
-// attacker hijack the "Ver en Booking" CTA into running script in
-// the user's session, so we hard-reject anything else.
-function sanitizeBookingUrl(raw: unknown): string | undefined {
-  if (typeof raw !== 'string') return undefined
-  const trimmed = raw.trim().slice(0, 500)
-  if (!trimmed) return undefined
-  try {
-    const u = new URL(trimmed)
-    if (u.protocol !== 'https:' && u.protocol !== 'http:') return undefined
-    return u.toString()
-  } catch {
-    return undefined
-  }
 }
 
 type AccommodationLike = {
@@ -149,18 +134,7 @@ export async function PATCH(
       ? trip.trip_data!.accommodations!
       : []
 
-    let idx = accommodations.findIndex(a => a && a.id === accommodationId)
-    if (idx < 0) {
-      const positionMatch = accommodationId.match(/^acc-(\d+)$/)
-      if (positionMatch) {
-        const n = parseInt(positionMatch[1], 10)
-        if (Number.isFinite(n) && n >= 0 && n < 50) {
-          idx = n
-        }
-      } else {
-        idx = accommodations.length
-      }
-    }
+    const idx = resolveAccommodationIndex(accommodations, accommodationId)
     const padded: AccommodationLike[] = accommodations.slice()
     while (padded.length <= idx) {
       padded.push({})
