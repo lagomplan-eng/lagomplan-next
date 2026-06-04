@@ -126,14 +126,18 @@ interface Props {
 const TRIP_CACHE_SCHEMA = 2
 
 // ─── Generation request — auto-retry once on transient upstream failure ────
-// Anthropic occasionally returns 529 (overloaded) or 500 during high-traffic
-// windows, and Supabase Edge Functions can cold-start with brief 502/503
-// hiccups. One silent retry after a short delay catches the majority of
-// these without surfacing the error panel — the user never sees the blip.
-// Subsequent failures fall through to the existing error UI so users can
-// still retry manually. AbortSignal is honored: if the caller aborts
-// between attempts, we don't retry.
-const TRANSIENT_STATUSES = new Set([500, 502, 503, 504, 529])
+// 500/502/503/504 typically indicate cold-start / network blips on the
+// Supabase Edge Function path — a quick retry usually clears them.
+//
+// 529 is deliberately NOT in this list. Anthropic returns 529 when
+// their service is at capacity ("overloaded_error"); their queue does
+// not clear in 1.5s. Retrying just doubles the time the user waits to
+// see the error (~75s + retry → 150s+ on an 8-day trip). Fail fast on
+// 529 and let the user choose whether to retry once they're ready.
+//
+// AbortSignal is honored: if the caller aborts between attempts, we
+// don't retry.
+const TRANSIENT_STATUSES = new Set([500, 502, 503, 504])
 const RETRY_DELAY_MS     = 1500
 
 async function fetchGenerationWithRetry(
