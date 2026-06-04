@@ -5058,6 +5058,9 @@ export default function TripResult({ params }: Props) {
       {/* ── REGEN CONFIRM MODAL ──────────────────────────────────────────── */}
       {regenConfirmOpen && (
         <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="regen-confirm-title"
           className="fixed inset-0 bg-black/40 backdrop-blur-[6px] z-[200] flex items-center justify-center p-[18px]"
           onClick={() => setRegenConfirmOpen(false)}
         >
@@ -5067,7 +5070,10 @@ export default function TripResult({ params }: Props) {
             onClick={e => e.stopPropagation()}
           >
             <div className="mb-5">
-              <h2 className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-3">
+              <h2
+                id="regen-confirm-title"
+                className="font-display text-[18px] font-normal tracking-[-0.01em] text-[#1C1C1A] mb-3"
+              >
                 {locale === 'es' ? 'Vas a perder tus cambios' : 'You\u2019ll lose your changes'}
               </h2>
               <p className="text-[13px] font-light text-[#7A7A76] leading-[1.65]">
