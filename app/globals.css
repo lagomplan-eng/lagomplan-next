@@ -1163,6 +1163,15 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
     color: #0F3A33 !important;
   }
 
+  /* Hide the cover destination line — it's a secondary <span> inside
+     the H1 that only renders when the AI title doesn't textually
+     contain the pref destination (e.g. Spanish title + English pref
+     spelling). On screen the span adds a useful visual anchor; in
+     print it reads as a duplicated destination beneath the title. */
+  [data-trip-hero="dest-line"] {
+    display: none !important;
+  }
+
   /* Subtitle */
   [data-trip-hero="subtitle"] {
     font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
@@ -1209,6 +1218,21 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
     overflow: hidden !important;
     position: relative !important;
     background: transparent !important;
+  }
+
+  /* Strip overlays that don't translate cleanly to print:
+     - The bottom-fade gradient (the only direct <div> child of the
+       image card) renders unpredictably when the aspect ratio is
+       forced from 4:3 to ~2:1 — turns into a green band at the top.
+     - The "desde Origin" chip relies on backdrop-blur, which print
+       can't render, so it ends up as a solid translucent-pine pill
+       floating on the image. The origin is already in the eyebrow
+       ("ORIGIN → DESTINATION") so dropping the chip here is fine. */
+  [data-trip="hero"] > div > div > div:last-child:not(:first-child) > div:first-child > div {
+    display: none !important;
+  }
+  [data-trip="hero"] > div > div > div:last-child:not(:first-child) > div:first-child > span:not(:first-of-type) {
+    display: none !important;
   }
 
   /* Destination label on image */
@@ -1391,17 +1415,33 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
     letter-spacing: -0.01em !important;
   }
 
-  /* Activity description — body text, light */
+  /* Activity description — body text, light. text-transform: none is
+     defensive: no rule in this stylesheet uppercases descriptions, but
+     some Day 2+ items have rendered in ALL CAPS in past PDFs. If the
+     issue persists after this rule lands, the cause is the raw AI text
+     itself (i.e. the description string in trip_data is already in
+     caps) — fix that at generation time, not here. */
   [data-trip-item="desc"] {
     font-family: 'Inter', 'Helvetica Neue', sans-serif !important;
     font-size: 8.5pt !important;
     font-weight: 300 !important;
     color: #7A7A76 !important;
     line-height: 1.6 !important;
+    text-transform: none !important;
   }
 
   /* Hide "Añadir ítem" row at the bottom of each day body */
   [data-trip-day="body"] > div > div:last-child {
+    display: none !important;
+  }
+
+  /* Defensive: orphan bullets have been observed at the bottom of day
+     pages in some PDFs. Source is not pinned down in the component
+     tree (no <li> rendered by TripResult; the only literal `•` is a
+     TYPE_INFO fallback icon that's already hidden). Empty <li> or
+     <li> inside the itinerary block are hidden in case AI text or a
+     future addition introduces one. */
+  [data-trip="itinerary"] li:empty {
     display: none !important;
   }
 

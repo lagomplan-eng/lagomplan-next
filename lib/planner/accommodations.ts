@@ -79,6 +79,10 @@ export interface Accommodation {
     checkinTime: string
     /** Free-text note from the user, e.g. "Pedir habitación alta". Max 280 chars. */
     notes:       string
+    /** Direct link to the user's actual booking page. When present, the
+     *  "Ver en Booking" CTA opens this URL instead of the Stay22 affiliate
+     *  search — lets travelers jump straight to their confirmation. */
+    bookingUrl?: string
   }
 }
 
