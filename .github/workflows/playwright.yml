@@ -1,0 +1,63 @@
+name: Playwright E2E
+
+# Status: WARNING-ONLY for the first week (started 2026-06-04).
+# After ~7 days of green runs, promote this to a required check via
+# the GitHub branch protection settings. The workflow itself does not
+# need to change to flip — only the "Required status checks" list on
+# the main branch.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          # Bump the suffix when @playwright/test is updated to force a
+          # cache miss + reinstall of the matching browser bundle.
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browser (chromium only)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Playwright OS deps
+        # When the browser cache hits we still need the system libs
+        # (libnss3, fonts, etc.) on the GitHub runner image.
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7

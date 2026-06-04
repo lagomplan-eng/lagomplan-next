@@ -25,3 +25,8 @@ tsconfig.tsbuildinfo
 # don't belong in the repo.
 prototypes/
 public/images/smart-finds/_backup/
+
+# Playwright (e2e test suite)
+playwright-report/
+test-results/
+playwright/.cache/
