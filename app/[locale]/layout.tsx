@@ -35,6 +35,7 @@ import ConsentSync from '../../components/analytics/ConsentSync'
 import AuthEventsBridge from '../../components/analytics/AuthEventsBridge'
 import AttributionCapture from '../../components/analytics/AttributionCapture'
 import CookieBanner from '../../components/layout/CookieBanner'
+import DomMutationGuard from '../../components/util/DomMutationGuard'
 import '../globals.css'
 
 // GA4 loader stays in the layout (with Consent Mode v2 defaults set
@@ -210,6 +211,10 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <SupabaseProvider>
             <PlanProvider>
+              {/* Survives Chrome auto-translate / extension DOM mutation —
+                  must mount first so the removeChild/insertBefore patch is
+                  applied before any content renders. */}
+              <DomMutationGuard />
               {/* Nav is position:fixed — every first section needs pt-[100px] */}
               <Nav />
               {children}
