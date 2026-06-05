@@ -16,6 +16,7 @@ export interface Database {
           title:        string | null
           user_id:      string | null
           trip_data:    Json
+          trip_progress: Json     // companion-view progress; see lib/planner/progress.ts
           destination:  string | null
           origin:       string | null
           duration_days: number | null
@@ -33,6 +34,7 @@ export interface Database {
           title?:        string | null
           user_id?:      string | null
           trip_data:     Json
+          trip_progress?: Json
           destination?:  string | null
           origin?:       string | null
           duration_days?: number | null
