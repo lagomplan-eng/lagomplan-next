@@ -28,6 +28,7 @@ import { useUser } from '../../../../components/auth/SupabaseProvider'
 import { events } from '../../../../lib/analytics'
 import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../../../lib/planner/checks'
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
+import { buildAffiliateLink } from '../../../../lib/affiliate/build'
 
 // ── Local structural types (mirror the trip_data JSONB contract) ──────────────
 type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
@@ -61,21 +62,28 @@ interface BudgetRow {
   actual: number | null
 }
 
+interface Booking {
+  confirmed: boolean
+  code: string
+  checkinTime?: string
+  notes?: string
+  bookingUrl?: string
+}
+
 interface Accommodation {
   id?: string
   city?: string
   neighborhood?: string
   priceTier?: string
   checkInDate?: string
+  checkOutDate?: string
   nights?: number
-  booking?: {
-    confirmed: boolean
-    code: string
-    checkinTime?: string
-    notes?: string
-    bookingUrl?: string
-  }
+  booking?: Booking
 }
+
+// Same localStorage key the desktop "Ya reservé" flow uses, so a booking
+// confirmed on either surface shows on both (per device, for anon trips).
+const lsBookingKey = (tripId: string, accId: string) => `lagomplan_booking_${tripId}_${accId}`
 
 interface Segment { destination: string; startDate: string; endDate: string; nights: number }
 
@@ -109,6 +117,11 @@ const T = {
     linkPlaceholder: 'https://…',
     bookTable: 'Reservar mesa', getTickets: 'Comprar boletos', bookTransfer: 'Reservar transfer',
     seeBooking: 'Ver en Booking →', addLink: 'Agrega un enlace primero',
+    reserve: 'Reservar para este viaje', alreadyBooked: '¿Ya reservaste? Agregar confirmación →', edit: 'Editar',
+    bkCode: 'Nº de confirmación', bkCodePh: 'BK-483920', bkTime: 'Hora de check-in', bkTimePh: '15:00',
+    bkNotes: 'Nota (opcional)', bkNotesPh: 'Pedir habitación alta', bkUrl: 'Enlace de la reserva (opcional)', bkUrlPh: 'https://booking.com/...',
+    bkSave: 'Guardar confirmación', bkCancel: 'Cancelar', bkCheckin: 'Check-in',
+    bkCodeRequired: 'El nº de confirmación es obligatorio.', bkInvalidUrl: 'Ese enlace no parece válido. Pega una URL https://.', bkSaveFailed: 'No pudimos guardar. Intenta de nuevo.',
     confirmDoneRestaurant: '✓ Ya reservé', confirmDoneTour: '✓ Tengo entrada', confirmDoneGeneric: '✓ Listo',
     budget: 'Presupuesto', aiEstimated: 'IA estimó', yourEstimate: 'Tu estimado', confirmed: 'Confirmado',
     view: 'Ver:', total: 'Total', perPerson: 'Por persona', real: 'Real',
@@ -137,6 +150,11 @@ const T = {
     linkPlaceholder: 'https://…',
     bookTable: 'Book table', getTickets: 'Get tickets', bookTransfer: 'Book transfer',
     seeBooking: 'View on Booking →', addLink: 'Add a link first',
+    reserve: 'Book for this trip', alreadyBooked: 'Already booked? Add confirmation →', edit: 'Edit',
+    bkCode: 'Confirmation #', bkCodePh: 'BK-483920', bkTime: 'Check-in time', bkTimePh: '15:00',
+    bkNotes: 'Note (optional)', bkNotesPh: 'Ask for a higher floor', bkUrl: 'Booking link (optional)', bkUrlPh: 'https://booking.com/...',
+    bkSave: 'Save confirmation', bkCancel: 'Cancel', bkCheckin: 'Check-in',
+    bkCodeRequired: 'Confirmation number is required.', bkInvalidUrl: 'That link doesn’t look valid. Paste a https:// URL.', bkSaveFailed: "We couldn't save it. Try again.",
     confirmDoneRestaurant: '✓ Booked', confirmDoneTour: '✓ Got tickets', confirmDoneGeneric: '✓ Done',
     budget: 'Budget', aiEstimated: 'AI estimated', yourEstimate: 'Your estimate', confirmed: 'Confirmed',
     view: 'View:', total: 'Total', perPerson: 'Per person', real: 'Actual',
@@ -237,6 +255,11 @@ export default function MobileTripClient(props: Props) {
   const [nudgeIdx, setNudgeIdx] = useState(0)
   const [toast, setToast] = useState('')
   const [newsletterDone, setNewsletterDone] = useState(false)
+  const [bookings, setBookings] = useState<Record<string, Booking>>(() => {
+    const init: Record<string, Booking> = {}
+    for (const a of accommodations) if (a.id && a.booking?.confirmed) init[a.id] = a.booking
+    return init
+  })
 
   const captureRef = useRef<HTMLInputElement | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -282,6 +305,28 @@ export default function MobileTripClient(props: Props) {
           if (saved.budgetActuals) setBudgetActuals(prev => ({ ...prev, ...saved.budgetActuals }))
         }
       } catch { /* ignore */ }
+
+      // Rehydrate anon hotel bookings (same localStorage key the desktop
+      // "Ya reservé" flow uses).
+      const bRe: Record<string, Booking> = {}
+      for (const a of accommodations) {
+        if (!a.id || a.booking?.confirmed) continue
+        try {
+          const raw = localStorage.getItem(lsBookingKey(tripId, a.id))
+          if (!raw) continue
+          const pr = JSON.parse(raw)
+          if (pr && pr.confirmed === true && typeof pr.code === 'string') {
+            bRe[a.id] = {
+              confirmed: true,
+              code: String(pr.code),
+              checkinTime: typeof pr.checkinTime === 'string' ? pr.checkinTime : '',
+              notes: typeof pr.notes === 'string' ? pr.notes : '',
+              ...(typeof pr.bookingUrl === 'string' && pr.bookingUrl ? { bookingUrl: pr.bookingUrl } : {}),
+            }
+          }
+        } catch { /* ignore single-card parse failures */ }
+      }
+      if (Object.keys(bRe).length) setBookings(prev => ({ ...prev, ...bRe }))
     }
 
     events.mobileViewOpened({ tripId, isOwner, dayIndex: dayIdx })
@@ -403,6 +448,27 @@ export default function MobileTripClient(props: Props) {
   function openLink(url: string | undefined) {
     if (!url) { showToast(t.addLink); return }
     window.open(url, '_blank', 'noopener,noreferrer')
+  }
+  function confirmBooking(accId: string, city: string, booking: Booking) {
+    if (!canEdit) return
+    const wasConfirmed = !!bookings[accId]?.confirmed
+    setBookings(prev => ({ ...prev, [accId]: booking }))
+    // Reuse the existing booking-confirm endpoint (read-modify-write into
+    // trip_data.accommodations) for owners; localStorage for anon — exactly
+    // the desktop "Ya reservé" persistence model.
+    if (loggedIn && isOwner) {
+      fetch(`/api/trips/${encodeURIComponent(tripId)}/booking-confirm`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ accommodationId: accId, booking }),
+      }).catch(() => { /* optimistic; UI already updated */ })
+    } else {
+      try { localStorage.setItem(lsBookingKey(tripId, accId), JSON.stringify(booking)) } catch { /* ignore */ }
+    }
+    if (!wasConfirmed) {
+      events.hotelBookingConfirmed({ tripId, accommodationId: accId, city, provider: 'booking' })
+    }
   }
   function dismissNudge() {
     setNudgeDismissed(true)
@@ -561,6 +627,8 @@ export default function MobileTripClient(props: Props) {
             locale={locale}
             canEdit={canEdit}
             accommodations={accommodations}
+            bookings={bookings}
+            people={people}
             checks={dayChecks(day.n)}
             doneCheckIds={doneCheckIds}
             expanded={expanded}
@@ -572,6 +640,7 @@ export default function MobileTripClient(props: Props) {
             onToggleCheck={(id) => toggleCheck(id, currentDay)}
             onSaveAnnotation={saveAnnotation}
             onOpenLink={openLink}
+            onConfirmBooking={confirmBooking}
             onSubmitNewsletter={submitNewsletter}
           />
         )}
@@ -631,13 +700,15 @@ function shortLabel(d: Day, i: number, segments: Segment[], accommodations: Acco
 // ════════════════════════════════════════════════════════════════════════════
 function ItineraryTab(p: {
   day: Day; dayIndex: number; isToday: boolean; t: typeof T['es']; locale: 'es' | 'en'; canEdit: boolean
-  accommodations: Accommodation[]; checks: CheckItem[]; doneCheckIds: Set<string>
+  accommodations: Accommodation[]; bookings: Record<string, Booking>; people: number
+  checks: CheckItem[]; doneCheckIds: Set<string>
   expanded: Set<string>; annotations: Record<string, ItemAnnotation>; loggedIn: boolean
   newsletterDone: boolean; captureRef: React.RefObject<HTMLInputElement | null>
   onToggleExpand: (item: ItineraryItem) => void
   onToggleCheck: (id: string) => void
   onSaveAnnotation: (itemId: string, note: string, link: string) => void
   onOpenLink: (url: string | undefined) => void
+  onConfirmBooking: (accId: string, city: string, booking: Booking) => void
   onSubmitNewsletter: () => void
 }) {
   const { day, t, locale, canEdit } = p
@@ -678,40 +749,13 @@ function ItineraryTab(p: {
         <>
           <div className={secLbl}>{t.whereToStay}</div>
           <div className="px-[18px] pb-3">
-            <div className={card}>
-              <div className="flex justify-between items-center px-[14px] py-[10px] border-b border-[#E2DDD5]">
-                <span className={`font-mono text-[9px] font-medium px-[8px] py-[3px] rounded-[4px] tracking-[.04em] uppercase ${
-                  acc.booking?.confirmed ? 'bg-[#E4EFEC] text-[#0F3A33]' : 'bg-[#EDE7E1] text-[#8A8A8A]'
-                }`}>{acc.booking?.confirmed ? t.booked : t.pending}</span>
-                {acc.priceTier && <span className="font-mono text-[11px] text-[#8A8A8A]">{tierGlyph(acc.priceTier)}</span>}
-              </div>
-              <div className="font-display text-[15px] font-medium text-[#1A1A1A] px-[14px] pt-[10px] pb-[2px]">
-                {acc.city || (locale === 'es' ? 'Alojamiento' : 'Accommodation')}
-              </div>
-              {(acc.neighborhood || acc.nights) && (
-                <div className="text-[11px] text-[#8A8A8A] px-[14px] pb-[10px]">
-                  {[acc.neighborhood, acc.nights ? `${acc.nights} ${locale === 'es' ? 'noches' : 'nights'}` : null].filter(Boolean).join(' · ')}
-                </div>
-              )}
-              {acc.booking?.confirmed && (
-                <div className="mx-[14px] mb-[10px] px-[10px] py-[8px] bg-[#E4EFEC] rounded-[8px] font-mono text-[10px] text-[#0F3A33] leading-[1.75]">
-                  {locale === 'es' ? 'Conf.' : 'Conf.'} {acc.booking.code}
-                  {acc.booking.checkinTime ? ` · check-in ${acc.booking.checkinTime}` : ''}
-                  {acc.booking.notes ? <><br />{acc.booking.notes}</> : null}
-                </div>
-              )}
-              {acc.booking?.bookingUrl && (
-                <div className="px-[14px] pb-[14px]">
-                  {/* window.open preserves the user's actual booking URL — a raw
-                      anchor would be rewritten to a generic page by Stay22. */}
-                  <a href={acc.booking.bookingUrl}
-                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); p.onOpenLink(acc.booking?.bookingUrl) }}
-                     className="block text-center px-[12px] py-[9px] bg-[#0F3A33] text-white rounded-[8px] text-[12px] font-medium hover:opacity-85 transition-opacity cursor-pointer">
-                    {t.seeBooking}
-                  </a>
-                </div>
-              )}
-            </div>
+            <HotelCard
+              acc={acc}
+              booking={acc.id ? p.bookings[acc.id] : undefined}
+              t={t} locale={locale} canEdit={canEdit} people={p.people}
+              onConfirm={(b) => { if (acc.id) p.onConfirmBooking(acc.id, acc.city ?? '', b) }}
+              onOpenLink={p.onOpenLink}
+            />
           </div>
         </>
       )}
@@ -862,6 +906,162 @@ function ActivityRow(p: {
         )}
       </div>
       <div className={`text-[10px] text-[#BDBDBD] mt-[2px] shrink-0 transition-transform ${open ? 'rotate-90' : ''}`}>›</div>
+    </div>
+  )
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// Hotel card — confirmed state, "Reservar" CTA, and inline "Ya reservé" form
+// ════════════════════════════════════════════════════════════════════════════
+function HotelCard(p: {
+  acc: Accommodation; booking?: Booking; t: typeof T['es']; locale: 'es' | 'en'
+  canEdit: boolean; people: number
+  onConfirm: (booking: Booking) => void
+  onOpenLink: (url?: string) => void
+}) {
+  const { acc, booking, t, locale, canEdit } = p
+  const [formOpen, setFormOpen] = useState(false)
+  const confirmed = !!booking?.confirmed
+  const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
+
+  // Same Stay22 Allez deep link the desktop hotel card uses.
+  const reserveHref = buildAffiliateLink('booking', {
+    city:      acc.city ?? '',
+    startDate: acc.checkInDate,
+    endDate:   acc.checkOutDate,
+    adults:    p.people,
+    locale,
+    surface:   'planner',
+  })
+
+  return (
+    <div className={card}>
+      <div className="flex justify-between items-center px-[14px] py-[10px] border-b border-[#E2DDD5]">
+        <span className={`font-mono text-[9px] font-medium px-[8px] py-[3px] rounded-[4px] tracking-[.04em] uppercase ${
+          confirmed ? 'bg-[#E4EFEC] text-[#0F3A33]' : 'bg-[#EDE7E1] text-[#8A8A8A]'
+        }`}>{confirmed ? t.booked : t.pending}</span>
+        {acc.priceTier && <span className="font-mono text-[11px] text-[#8A8A8A]">{tierGlyph(acc.priceTier)}</span>}
+      </div>
+
+      <div className="font-display text-[15px] font-medium text-[#1A1A1A] px-[14px] pt-[10px] pb-[2px]">
+        {acc.city || (locale === 'es' ? 'Alojamiento' : 'Accommodation')}
+      </div>
+      {(acc.neighborhood || acc.nights) && (
+        <div className="text-[11px] text-[#8A8A8A] px-[14px] pb-[10px]">
+          {[acc.neighborhood, acc.nights ? `${acc.nights} ${locale === 'es' ? 'noches' : 'nights'}` : null].filter(Boolean).join(' · ')}
+        </div>
+      )}
+
+      {confirmed && booking && (
+        <div className="mx-[14px] mb-[10px] px-[10px] py-[8px] bg-[#E4EFEC] rounded-[8px]">
+          <div className="flex items-center justify-between mb-[2px]">
+            <span className="font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#0F3A33]">{t.booked}</span>
+            {canEdit && (
+              <button onClick={() => setFormOpen(o => !o)} className="font-sans text-[11px] text-[#0F3A33]/70 hover:text-[#0F3A33] underline-offset-2 hover:underline">{t.edit}</button>
+            )}
+          </div>
+          <div className="font-mono text-[10px] text-[#0F3A33] leading-[1.7]">
+            {booking.code}{booking.checkinTime ? ` · ${t.bkCheckin} ${booking.checkinTime}` : ''}
+            {booking.notes ? <><br />{booking.notes}</> : null}
+          </div>
+        </div>
+      )}
+
+      <div className="px-[14px] pb-[14px] flex flex-col gap-[8px]">
+        {confirmed ? (
+          booking?.bookingUrl && (
+            <a href={booking.bookingUrl}
+               onClick={(e) => { e.preventDefault(); e.stopPropagation(); p.onOpenLink(booking?.bookingUrl) }}
+               className="block text-center px-[12px] py-[9px] bg-transparent border border-[#0F3A33]/25 text-[#0F3A33] rounded-[8px] text-[12px] font-medium hover:bg-[rgba(15,58,51,.06)] transition-colors cursor-pointer">
+              {t.seeBooking}
+            </a>
+          )
+        ) : (
+          <>
+            {/* window.open bypasses the Stay22 anchor interceptor */}
+            <a href={reserveHref}
+               onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(reserveHref, '_blank', 'noopener,noreferrer') }}
+               className="block text-center px-[12px] py-[9px] bg-[#0F3A33] text-white rounded-[8px] text-[12px] font-medium hover:opacity-85 transition-opacity cursor-pointer">
+              {t.reserve} →
+            </a>
+            {canEdit && !formOpen && (
+              <button onClick={() => setFormOpen(true)} className="text-[12px] text-[#2D6B57] hover:text-[#0F3A33] transition-colors text-left">
+                {t.alreadyBooked}
+              </button>
+            )}
+          </>
+        )}
+      </div>
+
+      {canEdit && formOpen && (
+        <MobileBookingForm
+          t={t} initial={booking}
+          onCancel={() => setFormOpen(false)}
+          onSave={(b) => { p.onConfirm(b); setFormOpen(false) }}
+        />
+      )}
+    </div>
+  )
+}
+
+function MobileBookingForm(p: {
+  t: typeof T['es']; initial?: Booking
+  onCancel: () => void
+  onSave: (booking: Booking) => void
+}) {
+  const { t } = p
+  const [code, setCode] = useState(p.initial?.code ?? '')
+  const [checkinTime, setCheckinTime] = useState(p.initial?.checkinTime ?? '')
+  const [notes, setNotes] = useState(p.initial?.notes ?? '')
+  const [bookingUrl, setBookingUrl] = useState(p.initial?.bookingUrl ?? '')
+  const [error, setError] = useState<string | null>(null)
+
+  function isValidUrl(raw: string): boolean {
+    const v = raw.trim()
+    if (!v) return true
+    try { const u = new URL(v); return u.protocol === 'https:' || u.protocol === 'http:' } catch { return false }
+  }
+  function submit() {
+    setError(null)
+    const c = code.trim()
+    if (!c) { setError(t.bkCodeRequired); return }
+    const u = bookingUrl.trim()
+    if (u && !isValidUrl(u)) { setError(t.bkInvalidUrl); return }
+    p.onSave({
+      confirmed:   true,
+      code:        c.slice(0, 50),
+      checkinTime: checkinTime.trim().slice(0, 10),
+      notes:       notes.trim().slice(0, 280),
+      ...(u ? { bookingUrl: u.slice(0, 500) } : {}),
+    })
+  }
+
+  const field = 'w-full bg-white border border-[#E2DDD5] rounded-[7px] px-[10px] py-[7px] text-[12px] text-[#1A1A1A] outline-none focus:border-[#0F3A33]'
+  const lbl = 'font-mono text-[9px] font-medium tracking-[.1em] uppercase text-[#BDBDBD] block mb-[3px]'
+
+  return (
+    <div className="mx-[14px] mb-[14px] rounded-[10px] bg-[#F4F0E8] border border-[#E2DDD5] p-[12px]">
+      <label className="block mb-[8px]">
+        <span className={lbl}>{t.bkCode}</span>
+        <input className={`${field} font-mono`} value={code} onChange={e => setCode(e.target.value)} placeholder={t.bkCodePh} maxLength={50} />
+      </label>
+      <label className="block mb-[8px]">
+        <span className={lbl}>{t.bkTime}</span>
+        <input className={`${field} font-mono`} value={checkinTime} onChange={e => setCheckinTime(e.target.value)} placeholder={t.bkTimePh} maxLength={10} />
+      </label>
+      <label className="block mb-[8px]">
+        <span className={lbl}>{t.bkNotes}</span>
+        <input className={field} value={notes} onChange={e => setNotes(e.target.value)} placeholder={t.bkNotesPh} maxLength={280} />
+      </label>
+      <label className="block mb-[8px]">
+        <span className={lbl}>{t.bkUrl}</span>
+        <input className={`${field} font-mono`} type="url" inputMode="url" value={bookingUrl} onChange={e => setBookingUrl(e.target.value)} placeholder={t.bkUrlPh} maxLength={500} />
+      </label>
+      {error && <p className="text-[12px] text-[#B94030] mb-[8px] leading-snug">{error}</p>}
+      <div className="flex gap-[8px]">
+        <button onClick={submit} className="flex-1 px-[12px] py-[8px] bg-[#0F3A33] text-white rounded-[7px] text-[12px] font-medium hover:opacity-85 transition-opacity">{t.bkSave}</button>
+        <button onClick={p.onCancel} className="px-[12px] py-[8px] bg-[#EDE7E1] text-[#4A4A4A] rounded-[7px] font-mono text-[10px] font-medium hover:bg-[#E2DDD5] transition-colors">{t.bkCancel}</button>
+      </div>
     </div>
   )
 }
