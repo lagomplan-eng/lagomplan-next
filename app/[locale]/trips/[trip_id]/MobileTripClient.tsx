@@ -109,7 +109,7 @@ interface Props {
 // ── Copy ──────────────────────────────────────────────────────────────────────
 const T = {
   es: {
-    tabItin: 'Itinerario', tabBudget: 'Presupuesto', tabPacking: 'Qué llevar',
+    tabItin: 'Itinerario', tabBudget: 'Presupuesto', tabPacking: 'Qué llevar', tabPrep: 'Preparativos', beforeYouGo: 'Antes de salir',
     itinOfDay: 'Itinerario del día', whereToStay: 'Dónde quedarse',
     toDo: 'Por hacer', booked: '✓ Reservado', pending: 'Pendiente',
     note: 'Nota', link: 'Enlace', save: 'Guardar', saved: 'Guardado ✓',
@@ -142,7 +142,7 @@ const T = {
     login: 'Inicia sesión',
   },
   en: {
-    tabItin: 'Itinerary', tabBudget: 'Budget', tabPacking: 'What to pack',
+    tabItin: 'Itinerary', tabBudget: 'Budget', tabPacking: 'What to pack', tabPrep: 'Prep', beforeYouGo: 'Before you go',
     itinOfDay: "Today's itinerary", whereToStay: 'Where to stay',
     toDo: 'To do', booked: '✓ Booked', pending: 'Pending',
     note: 'Note', link: 'Link', save: 'Save', saved: 'Saved ✓',
@@ -374,10 +374,12 @@ export default function MobileTripClient(props: Props) {
     const list = dayChecks(dayN)
     return { done: list.filter(c => doneCheckIds.has(c.id)).length, total: list.length }
   }
+  // Pre-trip prep checks (book hotel, pack, documents, arrival/departure
+  // transfers) carry no day — surfaced in the Preparativos tab.
+  const prepChecks = useMemo(() => checks.filter(c => typeof c.day !== 'number'), [checks])
   const progress = useMemo(() => {
-    const dayed = checks.filter(c => typeof c.day === 'number')
-    const total = dayed.length + packing.length
-    const done = dayed.filter(c => doneCheckIds.has(c.id)).length + packedItems.size
+    const total = checks.length + packing.length
+    const done = checks.filter(c => doneCheckIds.has(c.id)).length + packedItems.size
     const pct = total > 0 ? Math.round((done / total) * 100) : 0
     return { total, done, pct }
   }, [checks, packing.length, doneCheckIds, packedItems])
@@ -579,7 +581,7 @@ export default function MobileTripClient(props: Props) {
               tab === tb ? 'text-[#0F3A33] border-[#0F3A33]' : 'text-[#8A8A8A] border-transparent hover:text-[#0F3A33]'
             }`}
           >
-            {tb === 'itin' ? t.tabItin : tb === 'budget' ? t.tabBudget : t.tabPacking}
+            {tb === 'itin' ? t.tabItin : tb === 'budget' ? t.tabBudget : t.tabPrep}
           </button>
         ))}
       </div>
@@ -655,8 +657,11 @@ export default function MobileTripClient(props: Props) {
         )}
 
         {tab === 'packing' && (
-          <PackingTab
-            t={t} packing={packing} packedItems={packedItems} canEdit={canEdit} onToggle={togglePacked}
+          <PrepTab
+            t={t} canEdit={canEdit}
+            prepChecks={prepChecks} doneCheckIds={doneCheckIds}
+            onToggleCheck={(id) => toggleCheck(id, -1)}
+            packing={packing} packedItems={packedItems} onTogglePacked={togglePacked}
           />
         )}
       </div>
@@ -1146,41 +1151,81 @@ function Total(p: { lbl: string; amt: string; cls: string; border?: boolean }) {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Packing tab
+// Preparativos tab — pre-trip checklist (book hotel / pack / documents /
+// arrival-departure transfers) + the packing list
 // ════════════════════════════════════════════════════════════════════════════
-function PackingTab(p: {
-  t: typeof T['es']; packing: string[]; packedItems: Set<number>; canEdit: boolean; onToggle: (i: number) => void
+function PrepTab(p: {
+  t: typeof T['es']; canEdit: boolean
+  prepChecks: CheckItem[]; doneCheckIds: Set<string>; onToggleCheck: (id: string) => void
+  packing: string[]; packedItems: Set<number>; onTogglePacked: (i: number) => void
 }) {
-  const { t } = p
-  const done = p.packedItems.size
+  const { t, canEdit } = p
   const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
+  const secLbl = 'font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
+  const cardHeader = 'flex justify-between items-center px-[14px] py-[10px] bg-[#F4F0E8] border-b border-[#E2DDD5]'
+  const headerTitle = 'font-mono text-[10px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase'
+  const headerCount = 'font-mono text-[10px] text-[#BDBDBD]'
+  const prepDone = p.prepChecks.filter(c => p.doneCheckIds.has(c.id)).length
+
   return (
     <>
-      <div className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2">{t.tabPacking}</div>
-      <div className="px-[18px] pb-[14px]">
-        <div className={card}>
-          <div className="flex justify-between items-center px-[14px] py-[10px] bg-[#F4F0E8] border-b border-[#E2DDD5]">
-            <span className="font-mono text-[10px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase">{t.packingList}</span>
-            <span className="font-mono text-[10px] text-[#BDBDBD]">{done}/{p.packing.length} {t.packed}</span>
+      {/* Pre-trip checklist */}
+      {p.prepChecks.length > 0 && (
+        <>
+          <div className={secLbl}>{t.beforeYouGo}</div>
+          <div className="px-[18px] pb-[6px]">
+            <div className={card}>
+              <div className={cardHeader}>
+                <span className={headerTitle}>{t.beforeYouGo}</span>
+                <span className={headerCount}>{prepDone}/{p.prepChecks.length}</span>
+              </div>
+              {p.prepChecks.map(c => {
+                const done = p.doneCheckIds.has(c.id)
+                return (
+                  <button key={c.id} disabled={!canEdit} onClick={() => p.onToggleCheck(c.id)}
+                    className={`w-full text-left flex items-start gap-[10px] px-[14px] py-[10px] border-b border-[#E2DDD5] last:border-b-0 transition-colors ${
+                      canEdit ? 'hover:bg-[#F4F0E8] cursor-pointer' : 'cursor-default'
+                    } ${done ? 'opacity-50' : ''}`}>
+                    <span className={`w-[18px] h-[18px] rounded-[5px] border-[1.5px] shrink-0 flex items-center justify-center text-[10px] text-white mt-[1px] ${
+                      done ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E2DDD5]'
+                    }`}>{done ? '✓' : ''}</span>
+                    <span className={`flex-1 text-[12px] font-medium leading-[1.3] ${done ? 'line-through text-[#BDBDBD]' : 'text-[#1A1A1A]'}`}>{c.icon} {c.text}</span>
+                  </button>
+                )
+              })}
+            </div>
           </div>
-          {p.packing.map((item, i) => {
-            const checked = p.packedItems.has(i)
-            return (
-              <button
-                key={i} disabled={!p.canEdit} onClick={() => p.onToggle(i)}
-                className={`w-full text-left flex items-center gap-[10px] px-[14px] py-[9px] border-b border-[#E2DDD5] last:border-b-0 transition-colors ${
-                  p.canEdit ? 'hover:bg-[#F4F0E8] cursor-pointer' : 'cursor-default'
-                }`}
-              >
-                <span className={`w-[16px] h-[16px] rounded-[4px] border-[1.5px] shrink-0 flex items-center justify-center text-[9px] text-white transition-colors ${
-                  checked ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E2DDD5]'
-                }`}>{checked ? '✓' : ''}</span>
-                <span className={`text-[12px] flex-1 ${checked ? 'line-through text-[#BDBDBD]' : 'text-[#1A1A1A]'}`}>{item}</span>
-              </button>
-            )
-          })}
-        </div>
-      </div>
+        </>
+      )}
+
+      {/* Packing list */}
+      {p.packing.length > 0 && (
+        <>
+          <div className={secLbl}>{t.tabPacking}</div>
+          <div className="px-[18px] pb-[14px]">
+            <div className={card}>
+              <div className={cardHeader}>
+                <span className={headerTitle}>{t.packingList}</span>
+                <span className={headerCount}>{p.packedItems.size}/{p.packing.length} {t.packed}</span>
+              </div>
+              {p.packing.map((item, i) => {
+                const checked = p.packedItems.has(i)
+                return (
+                  <button key={i} disabled={!canEdit} onClick={() => p.onTogglePacked(i)}
+                    className={`w-full text-left flex items-center gap-[10px] px-[14px] py-[9px] border-b border-[#E2DDD5] last:border-b-0 transition-colors ${
+                      canEdit ? 'hover:bg-[#F4F0E8] cursor-pointer' : 'cursor-default'
+                    }`}>
+                    <span className={`w-[16px] h-[16px] rounded-[4px] border-[1.5px] shrink-0 flex items-center justify-center text-[9px] text-white transition-colors ${
+                      checked ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E2DDD5]'
+                    }`}>{checked ? '✓' : ''}</span>
+                    <span className={`text-[12px] flex-1 ${checked ? 'line-through text-[#BDBDBD]' : 'text-[#1A1A1A]'}`}>{item}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </>
   )
 }
