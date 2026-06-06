@@ -30,6 +30,8 @@ import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
 import { buildAffiliateLink } from '../../../../lib/affiliate/build'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick, type BookingOption } from '../../../../lib/booking'
+import { effectiveAccommodations } from '../../../../lib/planner/use-effective-accommodations'
+import type { Accommodation as LibAccommodation } from '../../../../lib/planner/accommodations'
 import { TripShareModal } from '../../../../components/trips/TripShareModal'
 
 // ── Local structural types (mirror the trip_data JSONB contract) ──────────────
@@ -267,13 +269,24 @@ export default function MobileTripClient(props: Props) {
   const days     = useMemo(() => asArray<Day>(props.tripData?.days), [props.tripData])
   const packing  = useMemo(() => asArray<string>(props.tripData?.packing), [props.tripData])
   const segments = useMemo(() => asArray<Segment>(props.tripData?.segments), [props.tripData])
-  const accommodations = useMemo(() => asArray<Accommodation>(props.tripData?.accommodations), [props.tripData])
+  const people   = useMemo(() => parsePeopleCount(travelers), [travelers])
+  const rawAccommodations = useMemo(() => asArray<Accommodation>(props.tripData?.accommodations), [props.tripData])
+  // Mirror the desktop: synthesize a fallback hotel for overnight trips with no
+  // structured accommodations, so the "Reservar" CTA always shows (web parity).
+  const accommodations = useMemo<Accommodation[]>(() => {
+    const nights = Math.max(0, (props.durationDays ?? days.length) - 1)
+    const start = rawAccommodations[0]?.checkInDate || segments[0]?.startDate || ''
+    const end = rawAccommodations[rawAccommodations.length - 1]?.checkOutDate || segments[segments.length - 1]?.endDate || ''
+    return effectiveAccommodations(rawAccommodations as unknown as LibAccommodation[], {
+      destination: props.destination ?? rawAccommodations[0]?.city ?? '',
+      start, end, nights, adults: people, locale,
+    }) as unknown as Accommodation[]
+  }, [rawAccommodations, days.length, segments, props.durationDays, props.destination, people, locale])
   const baseBudget = useMemo(() => asArray<BudgetRow>(props.tripData?.budgetRows), [props.tripData])
   const checks = useMemo(
     () => deriveChecksFromDays(days as unknown as LibDay[], { locale, segments: segments as any }),
     [days, locale, segments],
   )
-  const people = useMemo(() => parsePeopleCount(travelers), [travelers])
 
   // ── State ──────────────────────────────────────────────────────────────────
   const [tab, setTab] = useState<Tab>('itin')
@@ -1142,7 +1155,7 @@ function HotelCard(p: {
             {/* window.open bypasses the Stay22 anchor interceptor */}
             <a href={reserveHref}
                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(reserveHref, '_blank', 'noopener,noreferrer') }}
-               className="block text-center px-[12px] py-[9px] bg-[#0F3A33] text-white rounded-[8px] text-[12px] font-medium hover:opacity-85 transition-opacity cursor-pointer">
+               className="block text-center px-[14px] py-[11px] bg-[#0F3A33] text-white rounded-[9px] text-[13px] font-semibold hover:opacity-85 transition-opacity cursor-pointer">
               {t.reserve} →
             </a>
             {canEdit && !formOpen && (
