@@ -29,6 +29,8 @@ import { events } from '../../../../lib/analytics'
 import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../../../lib/planner/checks'
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
 import { buildAffiliateLink } from '../../../../lib/affiliate/build'
+import { getBookingOptions, detectCountryGroup, trackAffiliateClick, type BookingOption } from '../../../../lib/booking'
+import { TripShareModal } from '../../../../components/trips/TripShareModal'
 
 // ── Local structural types (mirror the trip_data JSONB contract) ──────────────
 type ItemType = 'hotel' | 'tour' | 'restaurant' | 'free' | 'transfer'
@@ -133,6 +135,8 @@ const T = {
     invalidEmail: 'Ingresa un email válido',
     editPlan: 'Editar plan →', planYours: 'Planea el tuyo →',
     today: 'Hoy', tasks: 'tareas',
+    tripSaved: 'Guardado', share: 'Compartir', pdf: 'PDF', progressLabel: 'Progreso del viaje',
+    chooseProvider: 'Elige dónde buscar disponibilidad', book: 'Reservar', linkCopied: 'Enlace copiado ✓',
     nudge: [
       ['Guarda tu progreso', 'inicia sesión para no perder nada'],
       ['¿Ya reservaste algo?', 'inicia sesión para registrar la confirmación'],
@@ -166,6 +170,8 @@ const T = {
     invalidEmail: 'Enter a valid email',
     editPlan: 'Edit plan →', planYours: 'Plan yours →',
     today: 'Today', tasks: 'tasks',
+    tripSaved: 'Saved', share: 'Share', pdf: 'PDF', progressLabel: 'Trip progress',
+    chooseProvider: 'Choose where to check availability', book: 'Book', linkCopied: 'Link copied ✓',
     nudge: [
       ['Save your progress', 'log in so you never lose anything'],
       ['Booked something already?', 'log in to record the confirmation'],
@@ -208,6 +214,42 @@ function actionForType(type: ItemType, t: typeof T['es']): { label: string | nul
 
 const ITEM_ICON: Record<ItemType, string> = {
   restaurant: '🍽', tour: '🎫', transfer: '🚗', hotel: '🏨', free: '📍',
+}
+
+// Booking-option provider chips — same palette/labels as the desktop modal.
+const LOGO_STYLE: Record<string, { bg: string; color: string; text: string }> = {
+  gyg:        { bg: '#FFF0E6', color: '#C04020', text: 'GYG' },
+  hotels:     { bg: '#EBF4FF', color: '#004A96', text: 'Hotels\n.com' },
+  booking:    { bg: '#F0F4FF', color: '#003580', text: 'book\ning' },
+  expedia:    { bg: '#EEF4FF', color: '#1A4FBA', text: 'EXPE\nDIA' },
+  opentable:  { bg: '#FFF0F0', color: '#DA3743', text: 'OPEN\nTABLE' },
+  resy:       { bg: '#FFF5F0', color: '#C94A23', text: 'RESY' },
+  thefork:    { bg: '#F0FBF7', color: '#007E5D', text: 'THE\nFORK' },
+  googlemaps: { bg: '#F5F5F5', color: '#444444', text: 'G\nMaps' },
+  uber:       { bg: '#1C1C1C', color: '#FFFFFF', text: 'UBER' },
+  manual:     { bg: '#EDE7E1', color: '#3D3D3A', text: '✓' },
+}
+
+// "Reservar X" CTA copy per type (mirrors the desktop action-verb labels).
+const RESERVE_VERB: Record<'es' | 'en', Partial<Record<ItemType, string>>> = {
+  es: { hotel: 'Reservar hotel', tour: 'Reservar tour', restaurant: 'Reservar mesa', transfer: 'Reservar traslado' },
+  en: { hotel: 'Book hotel', tour: 'Book tour', restaurant: 'Book table', transfer: 'Book transfer' },
+}
+
+type BookingDrawerState = { itemName: string; itemType: ItemType; options: BookingOption[] } | null
+
+function providerFromUrl(url: string): string {
+  const u = url.toLowerCase()
+  if (u.includes('getyourguide')) return 'gyg'
+  if (u.includes('booking.com')) return 'booking'
+  if (u.includes('hotels.com')) return 'hotels'
+  if (u.includes('expedia')) return 'expedia'
+  if (u.includes('opentable')) return 'opentable'
+  if (u.includes('resy')) return 'resy'
+  if (u.includes('thefork')) return 'thefork'
+  if (u.includes('uber')) return 'uber'
+  if (u.includes('google.')) return 'googlemaps'
+  return 'manual'
 }
 
 export default function MobileTripClient(props: Props) {
@@ -260,6 +302,8 @@ export default function MobileTripClient(props: Props) {
     for (const a of accommodations) if (a.id && a.booking?.confirmed) init[a.id] = a.booking
     return init
   })
+  const [bookingDrawer, setBookingDrawer] = useState<BookingDrawerState>(null)
+  const [shareOpen, setShareOpen] = useState(false)
 
   const captureRef = useRef<HTMLInputElement | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
@@ -472,6 +516,51 @@ export default function MobileTripClient(props: Props) {
       events.hotelBookingConfirmed({ tripId, accommodationId: accId, city, provider: 'booking' })
     }
   }
+
+  // ── Booking options drawer (per itinerary item — same resolution as desktop) ──
+  function openBookingDrawer(item: ItineraryItem) {
+    const city = props.destination || accommodations[0]?.city || ''
+    const startISO = accommodations[0]?.checkInDate || segments[0]?.startDate || ''
+    const endISO = accommodations[accommodations.length - 1]?.checkOutDate || segments[segments.length - 1]?.endDate || ''
+    const ctx = { city, country: detectCountryGroup(city), startDate: startISO, endDate: endISO, adults: people, locale }
+    let options: BookingOption[] = []
+    if (item.bookingOptions && item.bookingOptions.length > 0) {
+      options = item.bookingOptions                                   // hand-authored (guide system)
+    } else if (item.type === 'hotel' || item.type === 'tour') {
+      options = getBookingOptions(item, ctx)                          // Stay22 affiliate links
+    } else if (item.affiliate) {
+      options = [{ id: 'aff-0', provider: providerFromUrl(item.affiliate), name: item.name, desc: '', url: item.affiliate }]
+    } else {
+      options = getBookingOptions(item, ctx)                          // restaurant/transfer search links
+    }
+    if (options.length === 0) { showToast(t.addLink); return }
+    setBookingDrawer({ itemName: item.name, itemType: item.type, options })
+  }
+  function onBookingOptionClick(opt: BookingOption, itemType: ItemType, itemName: string) {
+    const city = props.destination || accommodations[0]?.city || ''
+    events.affiliateClicked({
+      provider: opt.provider, surface: 'mobile-view', category: itemType,
+      destination: city, trip_id: tripId, meta: { item_name: itemName },
+    })
+    trackAffiliateClick(itemType, opt.provider, city)
+    setBookingDrawer(null)
+    window.open(opt.url, '_blank', 'noopener,noreferrer')
+  }
+
+  // ── Save / Share / PDF toolbar ───────────────────────────────────────────────
+  function shareTrip() {
+    if (isOwner) { setShareOpen(true); return }
+    const url = typeof window !== 'undefined' ? window.location.href : ''
+    if (typeof navigator !== 'undefined' && navigator.share) {
+      navigator.share({ title, url }).catch(() => { /* user cancelled */ })
+    } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => showToast(t.linkCopied)).catch(() => { /* ignore */ })
+    }
+  }
+  function printPdf() {
+    showToast(locale === 'es' ? '📄 Generando PDF…' : '📄 Generating PDF…')
+    setTimeout(() => window.print(), 300)
+  }
   function dismissNudge() {
     setNudgeDismissed(true)
     try { sessionStorage.setItem(`lagomplan_nudge_dismissed_${tripId}`, '1') } catch { /* ignore */ }
@@ -542,8 +631,8 @@ export default function MobileTripClient(props: Props) {
 
   return (
     <main className="min-h-screen bg-[#F4F0E8] pt-[100px] pb-[80px]">
-      {/* ── Trip subheader ── */}
-      <div className="sticky top-[100px] z-[40] bg-[#FFF9F3] border-b border-[#E2DDD5] px-[18px] pt-[10px] pb-2">
+      {/* ── Trip subheader (scrolls away; tabs + day pills stay pinned) ── */}
+      <div className="bg-[#FFF9F3] border-b border-[#E2DDD5] px-[18px] pt-[10px] pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-display text-[15px] font-medium text-[#1A1A1A] leading-[1.3] truncate">{title}</div>
@@ -562,17 +651,35 @@ export default function MobileTripClient(props: Props) {
             {isOwner ? t.editPlan : t.planYours}
           </a>
         </div>
-        {/* progress */}
-        <div className="flex items-center gap-2 mt-[6px]">
-          <div className="flex-1 h-[2px] bg-[#EDE7E1] rounded-[2px] overflow-hidden">
-            <div className="h-full bg-[#0F3A33] rounded-[2px] transition-[width] duration-300" style={{ width: `${progress.pct}%` }} />
+        {/* progress — prominent label + percentage + thicker bar */}
+        <div className="mt-[8px]">
+          <div className="flex items-center justify-between mb-[4px]">
+            <span className="font-mono text-[9px] tracking-[.08em] uppercase text-[#8A8A8A]">{t.progressLabel}</span>
+            <span className="font-mono text-[10px] font-medium text-[#0F3A33]">{progress.pct}% · {progress.done}/{progress.total} {t.tasks}</span>
           </div>
-          <div className="font-mono text-[9px] text-[#BDBDBD] whitespace-nowrap">{progress.done}/{progress.total} {t.tasks}</div>
+          <div className="h-[5px] bg-[#EDE7E1] rounded-full overflow-hidden">
+            <div className="h-full bg-[#0F3A33] rounded-full transition-[width] duration-500" style={{ width: `${progress.pct}%` }} />
+          </div>
+        </div>
+
+        {/* actions — Save status / Share / PDF (hidden in print) */}
+        <div className="flex items-center gap-[16px] mt-[10px] print:hidden">
+          {isOwner && (
+            <span className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#2D6B57]">
+              <span>✔</span> {t.tripSaved}
+            </span>
+          )}
+          <button onClick={shareTrip} className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] hover:text-[#0F3A33] transition-colors">
+            <span>↗</span> {t.share}
+          </button>
+          <button onClick={printPdf} className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] hover:text-[#0F3A33] transition-colors">
+            <span>⬇</span> {t.pdf}
+          </button>
         </div>
       </div>
 
       {/* ── Section tabs ── */}
-      <div className="sticky top-[152px] z-[39] flex border-b border-[#E2DDD5] bg-[#FFF9F3]">
+      <div className="sticky top-[100px] z-[39] flex border-b border-[#E2DDD5] bg-[#FFF9F3]">
         {(['itin', 'budget', 'packing'] as Tab[]).map(tb => (
           <button
             key={tb}
@@ -588,7 +695,7 @@ export default function MobileTripClient(props: Props) {
 
       {/* ── Day selector (Itinerario only) ── */}
       {tab === 'itin' && days.length > 0 && (
-        <div className="sticky top-[191px] z-[38] bg-[#FFF9F3] border-b border-[#E2DDD5]">
+        <div className="sticky top-[139px] z-[38] bg-[#FFF9F3] border-b border-[#E2DDD5]">
           <div className="flex gap-[6px] px-[18px] py-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {days.map((d, i) => {
               const c = dayCounts(d.n)
@@ -642,6 +749,7 @@ export default function MobileTripClient(props: Props) {
             onToggleCheck={(id) => toggleCheck(id, currentDay)}
             onSaveAnnotation={saveAnnotation}
             onOpenLink={openLink}
+            onBook={openBookingDrawer}
             onConfirmBooking={confirmBooking}
             onSubmitNewsletter={submitNewsletter}
           />
@@ -679,9 +787,53 @@ export default function MobileTripClient(props: Props) {
         </div>
       )}
 
+      {/* ── Booking options drawer (bottom sheet) ── */}
+      {bookingDrawer && (
+        <div className="fixed inset-0 z-[80] flex flex-col justify-end print:hidden" onClick={() => setBookingDrawer(null)}>
+          <div className="absolute inset-0 bg-black/40" />
+          <div className="relative bg-[#FFF9F3] rounded-t-[20px] max-h-[75vh] overflow-y-auto shadow-[0_-12px_40px_rgba(15,58,51,.18)]" onClick={e => e.stopPropagation()}>
+            <div className="sticky top-0 bg-[#FFF9F3] px-[20px] pt-[12px] pb-[12px] border-b border-[#E2DDD5]">
+              <div className="w-[36px] h-[4px] bg-[#E2DDD5] rounded-full mx-auto mb-[12px]" />
+              <div className="font-display text-[16px] text-[#1A1A1A] leading-snug">{bookingDrawer.itemName}</div>
+              <div className="text-[12px] text-[#8A8A8A] mt-[2px]">{t.chooseProvider}</div>
+            </div>
+            <div className="pb-[20px]">
+              {bookingDrawer.options.map(opt => {
+                const ls = LOGO_STYLE[opt.provider] ?? LOGO_STYLE.manual
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => onBookingOptionClick(opt, bookingDrawer.itemType, bookingDrawer.itemName)}
+                    className="w-full text-left flex items-center gap-[11px] px-[20px] py-[12px] border-b border-[#E2DDD5] last:border-b-0 hover:bg-[#EDE7E1] transition-colors"
+                  >
+                    <span className="w-[38px] h-[38px] rounded-[6px] flex items-center justify-center shrink-0 font-mono font-bold text-[9px] text-center leading-[1.2] whitespace-pre" style={{ background: ls.bg, color: ls.color }}>{ls.text}</span>
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-[13px] font-medium text-[#1A1A1A]">{opt.name}</span>
+                      {opt.desc && <span className="block text-[11px] text-[#8A8A8A] leading-[1.4]">{opt.desc}</span>}
+                    </span>
+                    <span className="text-[13px] text-[#BDBDBD] shrink-0">→</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Share modal (owners generate a proper share link) ── */}
+      {isOwner && (
+        <TripShareModal
+          tripId={tripId}
+          destination={props.destination ?? ''}
+          duration={props.durationDays}
+          isOpen={shareOpen}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
+
       {/* ── Toast ── */}
       {toast && (
-        <div className="fixed bottom-[70px] left-1/2 -translate-x-1/2 z-[70] bg-[#1A1A1A] text-white text-[11px] font-medium px-[14px] py-[7px] rounded-[20px] whitespace-nowrap shadow-lg">
+        <div className="fixed bottom-[70px] left-1/2 -translate-x-1/2 z-[90] bg-[#1A1A1A] text-white text-[11px] font-medium px-[14px] py-[7px] rounded-[20px] whitespace-nowrap shadow-lg">
           {toast}
         </div>
       )}
@@ -713,6 +865,7 @@ function ItineraryTab(p: {
   onToggleCheck: (id: string) => void
   onSaveAnnotation: (itemId: string, note: string, link: string) => void
   onOpenLink: (url: string | undefined) => void
+  onBook: (item: ItineraryItem) => void
   onConfirmBooking: (accId: string, city: string, booking: Booking) => void
   onSubmitNewsletter: () => void
 }) {
@@ -736,15 +889,15 @@ function ItineraryTab(p: {
       <div className="px-[18px]">
         {day.items.map(item => (
           <ActivityRow
-            key={item.id} item={item} t={t} canEdit={canEdit}
+            key={item.id} item={item} t={t} locale={locale} canEdit={canEdit}
             open={p.expanded.has(item.id)}
-            checkId={`check-${item.id}`}
             done={p.doneCheckIds.has(`check-${item.id}`)}
             annotation={p.annotations[item.id]}
             onToggleExpand={() => p.onToggleExpand(item)}
             onConfirm={() => p.onToggleCheck(`check-${item.id}`)}
             onSave={(note, link) => p.onSaveAnnotation(item.id, note, link)}
             onOpenLink={p.onOpenLink}
+            onBook={() => p.onBook(item)}
           />
         ))}
       </div>
@@ -830,14 +983,15 @@ function ItineraryTab(p: {
 }
 
 function ActivityRow(p: {
-  item: ItineraryItem; t: typeof T['es']; canEdit: boolean; open: boolean; checkId: string; done: boolean
+  item: ItineraryItem; t: typeof T['es']; locale: 'es' | 'en'; canEdit: boolean; open: boolean; done: boolean
   annotation?: ItemAnnotation
   onToggleExpand: () => void; onConfirm: () => void
   onSave: (note: string, link: string) => void; onOpenLink: (url: string | undefined) => void
+  onBook: () => void
 }) {
-  const { item, t, canEdit, open, done } = p
+  const { item, t, locale, canEdit, open, done } = p
   const action = actionForType(item.type, t)
-  const actionUrl = item.affiliate || item.bookingOptions?.[0]?.url
+  const reserveLabel = RESERVE_VERB[locale][item.type]   // undefined for 'free'
   const [note, setNote] = useState(p.annotation?.note ?? '')
   const [link, setLink] = useState(p.annotation?.link ?? '')
 
@@ -855,18 +1009,20 @@ function ActivityRow(p: {
 
         {open && (
           <div className="pt-[10px] mt-2 border-t border-[#E2DDD5]" onClick={(e) => e.stopPropagation()}>
-            {canEdit && (
+            {(reserveLabel || canEdit) && (
               <div className="flex gap-[6px] mb-2 flex-wrap">
-                {action.label && (
-                  <button onClick={() => p.onOpenLink(actionUrl)}
+                {reserveLabel && (
+                  <button onClick={p.onBook}
                     className="font-sans text-[11px] font-medium px-[12px] py-[7px] rounded-[7px] bg-[#0F3A33] text-white hover:bg-[#2D6B57] transition-colors whitespace-nowrap">
-                    {action.label} →
+                    {reserveLabel} →
                   </button>
                 )}
-                <button onClick={p.onConfirm}
-                  className={`font-sans text-[11px] font-medium px-[12px] py-[7px] rounded-[7px] border border-[#0F3A33]/20 bg-[#E4EFEC] text-[#0F3A33] hover:bg-[#d4eae4] transition-colors whitespace-nowrap ${done ? 'opacity-60' : ''}`}>
-                  {action.confirm}
-                </button>
+                {canEdit && (
+                  <button onClick={p.onConfirm}
+                    className={`font-sans text-[11px] font-medium px-[12px] py-[7px] rounded-[7px] border border-[#0F3A33]/20 bg-[#E4EFEC] text-[#0F3A33] hover:bg-[#d4eae4] transition-colors whitespace-nowrap ${done ? 'opacity-60' : ''}`}>
+                    {action.confirm}
+                  </button>
+                )}
               </div>
             )}
 
@@ -886,7 +1042,7 @@ function ActivityRow(p: {
                       value={link} onChange={(e) => setLink(e.target.value)} type="url" placeholder={t.linkPlaceholder}
                       className="flex-1 min-w-0 px-[9px] py-[6px] border border-[#E2DDD5] rounded-[7px] text-[11px] text-[#1A1A1A] bg-[#F4F0E8] outline-none focus:border-[#6B8F86]"
                     />
-                    <button onClick={() => p.onOpenLink(link.trim() || actionUrl)}
+                    <button onClick={() => p.onOpenLink(link.trim() || item.affiliate)}
                       className="w-[30px] h-[30px] shrink-0 flex items-center justify-center bg-[#E4EFEC] border border-[#6B8F86] rounded-[7px] text-[13px] text-[#0F3A33] hover:bg-[#0F3A33] hover:text-white transition-colors">↗</button>
                   </div>
                 </div>
