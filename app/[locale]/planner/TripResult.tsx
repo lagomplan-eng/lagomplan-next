@@ -3555,17 +3555,22 @@ export default function TripResult({ params }: Props) {
                   <span>⬇</span> PDF
                 </button>
                 <span className="text-[#CEC8C0] pr-[15px] text-[10px]">·</span>
-                {/* Mobile companion view — read-mostly trip view for use on a phone. */}
+                {/* Mobile companion view — read-mostly trip view for use on a phone.
+                    Always preventDefault + window.open: the Stay22 LetMeAllez script
+                    intercepts raw anchor clicks and rewrites them to Booking.com, so
+                    a plain <a> here gets hijacked. Opening via window.open with a
+                    literal URL bypasses the interceptor. */}
                 <a
                   href={tripId ? `/${locale}/trips/${tripId}` : undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] hover:text-[#0F3A33] transition-colors cursor-pointer"
                   onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
                     if (!tripId) {
-                      e.preventDefault()
                       showToast(locale === 'es' ? '🔖 Guarda el viaje primero' : '🔖 Save the trip first')
+                      return
                     }
+                    window.open(`/${locale}/trips/${tripId}`, '_blank', 'noopener,noreferrer')
                   }}
                 >
                   <span>📱</span> {locale === 'es' ? 'Vista móvil' : 'Mobile view'}

@@ -484,9 +484,12 @@ export default function MobileTripClient(props: Props) {
                 .filter(Boolean).join(' · ')}
             </div>
           </div>
+          {/* preventDefault + router.push bypasses the Stay22 click interceptor,
+              which otherwise rewrites raw anchor clicks to Booking.com. */}
           <a
             href={isOwner ? editPlanUrl : planYoursUrl}
-            className="shrink-0 font-mono text-[10px] font-medium text-[#0F3A33] border border-[#6B8F86] rounded-[6px] px-[10px] py-[4px] whitespace-nowrap hover:bg-[#E4EFEC] transition-colors"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(isOwner ? editPlanUrl : planYoursUrl) }}
+            className="shrink-0 font-mono text-[10px] font-medium text-[#0F3A33] border border-[#6B8F86] rounded-[6px] px-[10px] py-[4px] whitespace-nowrap hover:bg-[#E4EFEC] transition-colors cursor-pointer"
           >
             {isOwner ? t.editPlan : t.planYours}
           </a>
@@ -699,8 +702,11 @@ function ItineraryTab(p: {
               )}
               {acc.booking?.bookingUrl && (
                 <div className="px-[14px] pb-[14px]">
-                  <a href={acc.booking.bookingUrl} target="_blank" rel="noopener noreferrer"
-                     className="block text-center px-[12px] py-[9px] bg-[#0F3A33] text-white rounded-[8px] text-[12px] font-medium hover:opacity-85 transition-opacity">
+                  {/* window.open preserves the user's actual booking URL — a raw
+                      anchor would be rewritten to a generic page by Stay22. */}
+                  <a href={acc.booking.bookingUrl}
+                     onClick={(e) => { e.preventDefault(); e.stopPropagation(); p.onOpenLink(acc.booking?.bookingUrl) }}
+                     className="block text-center px-[12px] py-[9px] bg-[#0F3A33] text-white rounded-[8px] text-[12px] font-medium hover:opacity-85 transition-opacity cursor-pointer">
                     {t.seeBooking}
                   </a>
                 </div>
@@ -845,7 +851,9 @@ function ActivityRow(p: {
                 <div className="flex flex-col gap-1 text-[11px] text-[#4A4A4A]">
                   {p.annotation?.note && <div>{p.annotation.note}</div>}
                   {p.annotation?.link && (
-                    <a href={p.annotation.link} target="_blank" rel="noopener noreferrer" className="text-[#0F3A33] underline break-all">{p.annotation.link}</a>
+                    <a href={p.annotation.link}
+                       onClick={(e) => { e.preventDefault(); e.stopPropagation(); p.onOpenLink(p.annotation?.link) }}
+                       className="text-[#0F3A33] underline break-all cursor-pointer">{p.annotation.link}</a>
                   )}
                 </div>
               )

@@ -93,7 +93,7 @@ export default async function MobileTripPage({ params }: Props) {
       durationDays={trip!.duration_days}
       tripData={trip!.trip_data ?? {}}
       tripProgress={normalizeTripProgress(trip!.trip_progress)}
-      editPlanUrl={`${plannerBase}?trip_id=${trip!.id}`}
+      editPlanUrl={`${plannerBase}?trip_id=${trip!.id}&full=1`}
       planYoursUrl={plannerBase}
       loginUrl={getRoute(locale, 'login')}
       currentPath={`/${locale}/trips/${trip!.id}`}
