@@ -32,6 +32,7 @@ import { buildAffiliateLink } from '../../../../lib/affiliate/build'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick, type BookingOption } from '../../../../lib/booking'
 import { effectiveAccommodations } from '../../../../lib/planner/use-effective-accommodations'
 import type { Accommodation as LibAccommodation } from '../../../../lib/planner/accommodations'
+import { parsePeopleCount, getTodayDayIndex } from '../../../../lib/planner/mobile-view'
 import { TripShareModal } from '../../../../components/trips/TripShareModal'
 
 // ── Local structural types (mirror the trip_data JSONB contract) ──────────────
@@ -187,17 +188,6 @@ const T = {
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function asArray<T>(v: unknown): T[] { return Array.isArray(v) ? (v as T[]) : [] }
 
-function parsePeopleCount(travelers: string | null): number {
-  if (!travelers) return 2
-  const num = parseInt(travelers, 10)
-  if (!isNaN(num) && num > 0) return num
-  const t = travelers.toLowerCase()
-  if (/(solo|sola|single|1)/.test(t)) return 1
-  if (/(pareja|couple|2)/.test(t)) return 2
-  if (/(familia|family|group|grupo)/.test(t)) return 4
-  return 2
-}
-
 function tripStartDate(accommodations: Accommodation[], segments: Segment[]): Date | null {
   const iso = accommodations[0]?.checkInDate || segments[0]?.startDate
   if (!iso) return null
@@ -333,16 +323,10 @@ export default function MobileTripClient(props: Props) {
 
   // ── Mount: default day from today, nudge dismiss state, localStorage rehydrate, open event ──
   useEffect(() => {
-    // Default day: today relative to trip start.
-    let dayIdx = 0
-    const start = tripStartDate(accommodations, segments)
-    if (start && days.length > 0) {
-      const today = new Date()
-      const diff = Math.floor((today.getTime() - start.getTime()) / 86400000)
-      if (diff < 0) dayIdx = 0
-      else if (diff >= days.length) dayIdx = days.length - 1
-      else { dayIdx = diff; setTodayIndex(diff) }
-    }
+    // Default day: today relative to trip start (see lib/planner/mobile-view).
+    const startISO = accommodations[0]?.checkInDate || segments[0]?.startDate || null
+    const { dayIndex: dayIdx, isToday } = getTodayDayIndex(startISO, days.length, new Date())
+    if (isToday) setTodayIndex(dayIdx)
     setCurrentDay(dayIdx)
 
     // Session-scoped nudge dismissal.
