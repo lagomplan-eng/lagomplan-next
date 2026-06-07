@@ -128,7 +128,7 @@ const T = {
     bkCodeRequired: 'El nº de confirmación es obligatorio.', bkInvalidUrl: 'Ese enlace no parece válido. Pega una URL https://.', bkSaveFailed: 'No pudimos guardar. Intenta de nuevo.',
     confirmDoneRestaurant: '✓ Ya reservé', confirmDoneTour: '✓ Tengo entrada', confirmDoneGeneric: '✓ Listo',
     budget: 'Presupuesto', aiEstimated: 'IA estimó', yourEstimate: 'Tu estimado', confirmed: 'Confirmado',
-    view: 'Ver:', total: 'Total', perPerson: 'Por persona', real: 'Real',
+    view: 'Ver:', total: 'Total', perPerson: 'Por persona', real: 'Real', estShort: 'Tu',
     packingList: 'Lista de equipaje', packed: 'empacado',
     newsletterEyebrow: '¿Te gustó este plan?', newsletterTitle: 'Recibe ideas así cada semana',
     newsletterSub: 'Destinos, guías y rutas para parejas y familias en México y LATAM — sin spam.',
@@ -163,7 +163,7 @@ const T = {
     bkCodeRequired: 'Confirmation number is required.', bkInvalidUrl: 'That link doesn’t look valid. Paste a https:// URL.', bkSaveFailed: "We couldn't save it. Try again.",
     confirmDoneRestaurant: '✓ Booked', confirmDoneTour: '✓ Got tickets', confirmDoneGeneric: '✓ Done',
     budget: 'Budget', aiEstimated: 'AI estimated', yourEstimate: 'Your estimate', confirmed: 'Confirmed',
-    view: 'View:', total: 'Total', perPerson: 'Per person', real: 'Actual',
+    view: 'View:', total: 'Total', perPerson: 'Per person', real: 'Actual', estShort: 'Est.',
     packingList: 'Packing list', packed: 'packed',
     newsletterEyebrow: 'Liked this plan?', newsletterTitle: 'Get ideas like this every week',
     newsletterSub: 'Destinations, guides and routes for couples and families across Mexico & LATAM — no spam.',
@@ -305,6 +305,9 @@ export default function MobileTripClient(props: Props) {
   const [budgetActuals, setBudgetActuals] = useState<Record<string, number | null>>(
     () => Object.fromEntries(baseBudget.map(r => [r.id, r.actual])),
   )
+  const [budgetEstimates, setBudgetEstimates] = useState<Record<string, number | null>>(
+    () => Object.fromEntries(baseBudget.map(r => [r.id, r.userEst])),
+  )
   const [budgetView, setBudgetView] = useState<'total' | 'persona'>('total')
   const [nudgeDismissed, setNudgeDismissed] = useState(false)
   const [nudgeIdx, setNudgeIdx] = useState(0)
@@ -323,9 +326,9 @@ export default function MobileTripClient(props: Props) {
   const persistTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // Latest persistable state, read by the debounced writer to avoid stale closures.
-  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals })
+  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates })
   useEffect(() => {
-    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals }
+    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates }
   })
 
   // ── Mount: default day from today, nudge dismiss state, localStorage rehydrate, open event ──
@@ -405,6 +408,7 @@ export default function MobileTripClient(props: Props) {
       progress: { annotations: s.annotations, packedItems: Array.from(s.packedItems) } as TripProgress,
       doneChecks: Array.from(s.doneCheckIds),
       budgetActuals: s.budgetActuals,
+      budgetUserEsts: s.budgetEstimates,
     }
     if (loggedIn && isOwner) {
       fetch(`/api/trips/${encodeURIComponent(tripId)}/companion`, {
@@ -489,6 +493,12 @@ export default function MobileTripClient(props: Props) {
     setBudgetActuals(prev => ({ ...prev, [id]: Number.isFinite(v as number) ? v : null }))
     schedulePersist()
   }
+  function setBudgetUserEst(id: string, raw: string) {
+    if (!canEdit) return
+    const v = raw.trim() === '' ? null : Math.max(0, Math.round(Number(raw)))
+    setBudgetEstimates(prev => ({ ...prev, [id]: Number.isFinite(v as number) ? v : null }))
+    schedulePersist()
+  }
   function saveAnnotation(itemId: string, note: string, link: string) {
     if (!canEdit) return
     const clean: ItemAnnotation = {}
@@ -530,11 +540,35 @@ export default function MobileTripClient(props: Props) {
     }
   }
 
+  // ── Multi-city: map a day → its date → the accommodation covering that night ──
+  function dateForDayIndex(i: number): Date | null {
+    const s = tripStartDate(accommodations, segments)
+    return s ? new Date(s.getTime() + i * 86400000) : null
+  }
+  function accommodationForDayIndex(i: number): Accommodation | undefined {
+    if (accommodations.length <= 1) return accommodations[0]
+    const d = dateForDayIndex(i)
+    if (!d) return accommodations[0]
+    const ms = d.getTime()
+    let fallback: Accommodation | undefined  // latest stay already ended → checkout / last day
+    for (const a of accommodations) {
+      if (!a.checkInDate) continue
+      const ci = new Date(a.checkInDate + 'T00:00:00').getTime()
+      const co = a.checkOutDate
+        ? new Date(a.checkOutDate + 'T00:00:00').getTime()
+        : ci + (a.nights ?? 1) * 86400000
+      if (ms >= ci && ms < co) return a
+      if (ms >= co) fallback = a
+    }
+    return fallback ?? accommodations[0]
+  }
+
   // ── Booking options drawer (per itinerary item — same resolution as desktop) ──
   function openBookingDrawer(item: ItineraryItem) {
-    const city = props.destination || accommodations[0]?.city || ''
-    const startISO = accommodations[0]?.checkInDate || segments[0]?.startDate || ''
-    const endISO = accommodations[accommodations.length - 1]?.checkOutDate || segments[segments.length - 1]?.endDate || ''
+    const dayAcc = accommodationForDayIndex(currentDay)
+    const city = dayAcc?.city || props.destination || ''
+    const startISO = dayAcc?.checkInDate || accommodations[0]?.checkInDate || segments[0]?.startDate || ''
+    const endISO = dayAcc?.checkOutDate || accommodations[accommodations.length - 1]?.checkOutDate || segments[segments.length - 1]?.endDate || ''
     const ctx = { city, country: detectCountryGroup(city), startDate: startISO, endDate: endISO, adults: people, locale }
     let options: BookingOption[] = []
     if (item.bookingOptions && item.bookingOptions.length > 0) {
@@ -571,8 +605,10 @@ export default function MobileTripClient(props: Props) {
     }
   }
   function printPdf() {
-    showToast(locale === 'es' ? '📄 Generando PDF…' : '📄 Generating PDF…')
-    setTimeout(() => window.print(), 300)
+    // Route through the desktop planner's print-tuned layout (full=1 skips the
+    // mobile redirect; print=1 makes that page auto-open the print dialog).
+    showToast(locale === 'es' ? '📄 Abriendo versión imprimible…' : '📄 Opening printable version…')
+    window.open(`/${locale}/planner?trip_id=${encodeURIComponent(tripId)}&full=1&print=1`, '_blank', 'noopener,noreferrer')
   }
   function dismissNudge() {
     setNudgeDismissed(true)
@@ -616,18 +652,21 @@ export default function MobileTripClient(props: Props) {
   }
   const effectiveActual = (r: BudgetRow) =>
     budgetActuals[r.id] !== undefined ? budgetActuals[r.id] : r.actual
+  const effectiveEstimate = (r: BudgetRow) =>
+    budgetEstimates[r.id] !== undefined ? budgetEstimates[r.id] : r.userEst
   const budgetTotals = useMemo(() => {
     let ai = 0, usr = 0, act = 0, hasUser = false, hasActual = false
     baseBudget.forEach(r => {
       ai += r.aiEst
-      usr += r.userEst != null ? r.userEst : r.aiEst
-      if (r.userEst != null) hasUser = true
+      const est = effectiveEstimate(r)
+      usr += est != null ? est : r.aiEst
+      if (est != null) hasUser = true
       const a = effectiveActual(r)
       if (a != null) { act += a; hasActual = true }
     })
     return { ai, usr, act, hasUser, hasActual }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [baseBudget, budgetActuals])
+  }, [baseBudget, budgetActuals, budgetEstimates])
   const budgetCategories = useMemo(() => {
     const map = new Map<string, BudgetRow[]>()
     baseBudget.forEach(r => {
@@ -639,6 +678,7 @@ export default function MobileTripClient(props: Props) {
   }, [baseBudget])
 
   const day = days[currentDay]
+  const dayAcc = accommodationForDayIndex(currentDay)
   const showNudge = !loggedIn && !nudgeDismissed
   const nudgeCopy = t.nudge[nudgeIdx % t.nudge.length]
 
@@ -748,8 +788,8 @@ export default function MobileTripClient(props: Props) {
             t={t}
             locale={locale}
             canEdit={canEdit}
-            accommodations={accommodations}
-            bookings={bookings}
+            accommodation={dayAcc}
+            booking={dayAcc?.id ? bookings[dayAcc.id] : undefined}
             people={people}
             checks={dayChecks(day.n)}
             doneCheckIds={doneCheckIds}
@@ -772,8 +812,8 @@ export default function MobileTripClient(props: Props) {
           <BudgetTab
             t={t} categories={budgetCategories} totals={budgetTotals}
             budgetView={budgetView} setBudgetView={setBudgetView}
-            fmt={fmt} effectiveActual={effectiveActual} canEdit={canEdit}
-            onSetActual={setBudgetActual}
+            fmt={fmt} effectiveActual={effectiveActual} effectiveEstimate={effectiveEstimate} canEdit={canEdit}
+            onSetActual={setBudgetActual} onSetEstimate={setBudgetUserEst}
           />
         )}
 
@@ -870,7 +910,7 @@ function shortLabel(d: Day, i: number, segments: Segment[], accommodations: Acco
 // ════════════════════════════════════════════════════════════════════════════
 function ItineraryTab(p: {
   day: Day; dayIndex: number; isToday: boolean; t: typeof T['es']; locale: 'es' | 'en'; canEdit: boolean
-  accommodations: Accommodation[]; bookings: Record<string, Booking>; people: number
+  accommodation?: Accommodation; booking?: Booking; people: number
   checks: CheckItem[]; doneCheckIds: Set<string>
   expanded: Set<string>; annotations: Record<string, ItemAnnotation>; loggedIn: boolean
   newsletterDone: boolean; captureRef: React.RefObject<HTMLInputElement | null>
@@ -883,7 +923,7 @@ function ItineraryTab(p: {
   onSubmitNewsletter: () => void
 }) {
   const { day, t, locale, canEdit } = p
-  const acc = p.accommodations[0]
+  const acc = p.accommodation
   const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
   const secLbl = 'font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
 
@@ -922,7 +962,7 @@ function ItineraryTab(p: {
           <div className="px-[18px] pb-3">
             <HotelCard
               acc={acc}
-              booking={acc.id ? p.bookings[acc.id] : undefined}
+              booking={p.booking}
               t={t} locale={locale} canEdit={canEdit} people={p.people}
               onConfirm={(b) => { if (acc.id) p.onConfirmBooking(acc.id, acc.city ?? '', b) }}
               onOpenLink={p.onOpenLink}
@@ -1247,8 +1287,12 @@ function BudgetTab(p: {
   t: typeof T['es']; categories: [string, BudgetRow[]][]
   totals: { ai: number; usr: number; act: number; hasUser: boolean; hasActual: boolean }
   budgetView: 'total' | 'persona'; setBudgetView: (v: 'total' | 'persona') => void
-  fmt: (n: number | null) => string; effectiveActual: (r: BudgetRow) => number | null
-  canEdit: boolean; onSetActual: (id: string, raw: string) => void
+  fmt: (n: number | null) => string
+  effectiveActual: (r: BudgetRow) => number | null
+  effectiveEstimate: (r: BudgetRow) => number | null
+  canEdit: boolean
+  onSetActual: (id: string, raw: string) => void
+  onSetEstimate: (id: string, raw: string) => void
 }) {
   const { t, totals, fmt } = p
   const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
@@ -1277,7 +1321,7 @@ function BudgetTab(p: {
           </div>
           {/* categories */}
           {p.categories.map(([cat, rows]) => {
-            const catTotal = rows.reduce((s, r) => s + (p.effectiveActual(r) ?? r.userEst ?? r.aiEst), 0)
+            const catTotal = rows.reduce((s, r) => s + (p.effectiveActual(r) ?? p.effectiveEstimate(r) ?? r.aiEst), 0)
             return (
               <div key={cat} className="border-b border-[#E2DDD5] last:border-b-0">
                 <div className="flex justify-between items-center px-[14px] py-2 bg-[#F4F0E8]">
@@ -1285,19 +1329,34 @@ function BudgetTab(p: {
                   <span className="font-mono text-[10px] text-[#4A4A4A]">{fmt(catTotal)}</span>
                 </div>
                 {rows.map(r => (
-                  <div key={r.id} className="flex items-center gap-2 px-[14px] py-2 border-t border-[#E2DDD5]">
-                    {r.icon && <span className="text-[13px] shrink-0">{r.icon}</span>}
-                    <span className="text-[11px] text-[#1A1A1A] flex-1 min-w-0 truncate">{r.label}</span>
-                    <span className="font-mono text-[10px] text-[#BDBDBD] shrink-0">{fmt(r.aiEst)}</span>
+                  <div key={r.id} className="px-[14px] py-2 border-t border-[#E2DDD5]">
+                    <div className="flex items-center gap-2 mb-[6px]">
+                      {r.icon && <span className="text-[13px] shrink-0">{r.icon}</span>}
+                      <span className="text-[11px] text-[#1A1A1A] flex-1 min-w-0 truncate">{r.label}</span>
+                      <span className="font-mono text-[9px] text-[#BDBDBD] shrink-0">{t.aiEstimated} {fmt(r.aiEst)}</span>
+                    </div>
                     {p.canEdit ? (
-                      <input
-                        type="number" inputMode="numeric" placeholder={t.real}
-                        defaultValue={p.effectiveActual(r) ?? ''}
-                        onBlur={(e) => p.onSetActual(r.id, e.target.value)}
-                        className="w-[72px] px-[6px] py-1 border border-[#E2DDD5] rounded-[5px] font-mono text-[10px] text-[#1A1A1A] bg-[#FFF9F3] outline-none text-right shrink-0 focus:border-[#6B8F86]"
-                      />
+                      <div className="flex gap-[8px] pl-[21px]">
+                        <label className="flex items-center gap-[5px]">
+                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#BDBDBD]">{t.estShort}</span>
+                          <input type="number" inputMode="numeric" placeholder="—"
+                            defaultValue={p.effectiveEstimate(r) ?? ''}
+                            onBlur={(e) => p.onSetEstimate(r.id, e.target.value)}
+                            className="w-[64px] px-[6px] py-1 border border-[#E2DDD5] rounded-[5px] font-mono text-[10px] text-[#2D6B57] bg-[#FFF9F3] outline-none text-right focus:border-[#6B8F86]" />
+                        </label>
+                        <label className="flex items-center gap-[5px]">
+                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#BDBDBD]">{t.real}</span>
+                          <input type="number" inputMode="numeric" placeholder="—"
+                            defaultValue={p.effectiveActual(r) ?? ''}
+                            onBlur={(e) => p.onSetActual(r.id, e.target.value)}
+                            className="w-[64px] px-[6px] py-1 border border-[#E2DDD5] rounded-[5px] font-mono text-[10px] text-[#0F3A33] bg-[#FFF9F3] outline-none text-right focus:border-[#6B8F86]" />
+                        </label>
+                      </div>
                     ) : (
-                      <span className="w-[72px] font-mono text-[10px] text-[#0F3A33] text-right shrink-0">{fmt(p.effectiveActual(r))}</span>
+                      <div className="flex gap-[14px] pl-[21px] font-mono text-[10px]">
+                        <span className="text-[#2D6B57]">{t.estShort} {fmt(p.effectiveEstimate(r))}</span>
+                        <span className="text-[#0F3A33]">{t.real} {fmt(p.effectiveActual(r))}</span>
+                      </div>
                     )}
                   </div>
                 ))}

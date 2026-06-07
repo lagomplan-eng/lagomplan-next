@@ -57,6 +57,7 @@ export async function PATCH(
       progress?: unknown
       doneChecks?: unknown
       budgetActuals?: unknown
+      budgetUserEsts?: unknown
     } | null
 
     if (!body || typeof body !== 'object') {
@@ -65,7 +66,7 @@ export async function PATCH(
 
     const hasProgress = body.progress !== undefined
     const hasDoneChecks = body.doneChecks !== undefined
-    const hasBudget = body.budgetActuals !== undefined
+    const hasBudget = body.budgetActuals !== undefined || body.budgetUserEsts !== undefined
     if (!hasProgress && !hasDoneChecks && !hasBudget) {
       return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
     }
@@ -125,14 +126,17 @@ export async function PATCH(
           : []
       }
 
-      if (hasBudget && body.budgetActuals && typeof body.budgetActuals === 'object') {
-        const actuals = body.budgetActuals as Record<string, unknown>
+      if (hasBudget) {
+        const actuals = (body.budgetActuals && typeof body.budgetActuals === 'object') ? body.budgetActuals as Record<string, unknown> : {}
+        const ests    = (body.budgetUserEsts && typeof body.budgetUserEsts === 'object') ? body.budgetUserEsts as Record<string, unknown> : {}
+        const coerce = (v: unknown): number | null => (typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round(v) : null)
         const rows = Array.isArray(nextTripData.budgetRows) ? nextTripData.budgetRows : []
         nextTripData.budgetRows = rows.map(row => {
-          if (!row || typeof row.id !== 'string' || !(row.id in actuals)) return row
-          const v = actuals[row.id]
-          const actual = typeof v === 'number' && isFinite(v) && v >= 0 ? Math.round(v) : null
-          return { ...row, actual }
+          if (!row || typeof row.id !== 'string') return row
+          let next = row
+          if (row.id in actuals) next = { ...next, actual:  coerce(actuals[row.id]) }
+          if (row.id in ests)    next = { ...next, userEst: coerce(ests[row.id]) }
+          return next
         })
       }
 

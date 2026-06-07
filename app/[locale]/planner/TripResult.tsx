@@ -1016,6 +1016,20 @@ export default function TripResult({ params }: Props) {
   const [tripTitle, setTripTitle]     = useState('')
   const [tripSubtitle, setTripSubtitle] = useState('')
   const [days, setDays]         = useState<Day[]>([])
+
+  // Auto-print hook: the mobile companion view's "PDF" action opens this page
+  // with ?print=1 so the user gets the print-tuned desktop layout. Fire once,
+  // after the itinerary has rendered.
+  const hasAutoPrintedRef = useRef(false)
+  useEffect(() => {
+    if (hasAutoPrintedRef.current) return
+    if (params.print !== '1') return
+    if (days.length === 0) return
+    hasAutoPrintedRef.current = true
+    const id = setTimeout(() => { try { window.print() } catch { /* ignore */ } }, 900)
+    return () => clearTimeout(id)
+  }, [params.print, days.length])
+
   /**
    * Structured accommodations from the server pipeline. Mirrors how
    * `days` is wired: same lifecycle, set wherever `setDays(normalized.days); setAccommodations(normalized.accommodations)`
