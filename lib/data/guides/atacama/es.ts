@@ -195,7 +195,7 @@ export const guide: FlatGuide = {
     },
     {
       name: 'Lodge Quelana',
-      type: 'Hotel · San Pedro de Atacama',
+      type: 'Hotel · Solor, San Pedro de Atacama',
       priceTier: '$$',
       description: 'Para las familias con el presupuesto más ajustado: habitaciones privadas con baño, patio interior tranquilo y desayuno casero incluido. A 15 minutos caminando del centro — distancia que con niños pequeños puede resolverse en tuk-tuk por $2. La propietaria adapta el desayuno para salidas de madrugada con algo para llevar. La opción más honesta del rango bajo en San Pedro.',
       tag: 'La opción más honesta del rango bajo',
