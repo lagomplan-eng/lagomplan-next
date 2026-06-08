@@ -14,6 +14,7 @@
 
 import { normalizeTripProgress, sanitizeAnnotation } from '../lib/planner/progress'
 import { deriveChecksFromDays, type Day } from '../lib/planner/checks'
+import type { TripSegment } from '../lib/planner/segments'
 
 type Result = { name: string; pass: boolean; detail?: string }
 const results: Result[] = []
@@ -97,6 +98,39 @@ expectEq('free item yields no check',
 
 expectEq('multi-day trip injects the pre-trip "book hotel" check',
   checks.some(c => c.id === 'pretrip-book-hotel'),
+  true)
+
+// U-09 — multi-city injects one `pretrip-book-hotel-seg-N` per segment
+// (and NOT the single-city `pretrip-book-hotel`).
+const segments: TripSegment[] = [
+  { destination: 'Mexico City', startDate: '2026-04-12', endDate: '2026-04-14', nights: 2 },
+  { destination: 'Oaxaca',      startDate: '2026-04-14', endDate: '2026-04-17', nights: 3 },
+]
+const multiCityChecks = deriveChecksFromDays(days, { locale: 'en', segments })
+
+expectEq('U-09 multi-city injects one pretrip-book-hotel-seg-N per segment',
+  segments.map((_, i) => multiCityChecks.some(c => c.id === `pretrip-book-hotel-seg-${i}`)),
+  [true, true])
+
+expectEq('U-09 multi-city does NOT inject the single-city pretrip-book-hotel',
+  multiCityChecks.some(c => c.id === 'pretrip-book-hotel'),
+  false)
+
+// U-10 — single-day trip injects NO pre-trip checks (the `days.length > 1`
+// guard). Only per-day item checks survive.
+const singleDay: Day[] = [
+  { n: 1, label: 'Day 1', title: 'Day trip', progress: 0, items: [
+    { id: 's1', type: 'restaurant', time: '13:00', name: 'Contramar', desc: '' },
+  ] },
+]
+const singleDayChecks = deriveChecksFromDays(singleDay, { locale: 'en' })
+
+expectEq('U-10 single-day trip injects no pre-trip checks',
+  singleDayChecks.some(c => c.id.startsWith('pretrip-')),
+  false)
+
+expectEq('U-10 single-day trip still derives its per-day item check',
+  singleDayChecks.some(c => c.id === 'check-s1' && c.day === 1),
   true)
 
 // ───────── tally + exit ─────────
