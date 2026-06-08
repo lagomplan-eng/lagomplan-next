@@ -12,7 +12,7 @@
  * Exit 0 on all-pass, 1 if anything failed.
  */
 
-import { normalizeTripProgress, sanitizeAnnotation } from '../lib/planner/progress'
+import { normalizeTripProgress, sanitizeAnnotation, coerceCurrency } from '../lib/planner/progress'
 import { deriveChecksFromDays, type Day } from '../lib/planner/checks'
 import type { TripSegment } from '../lib/planner/segments'
 
@@ -132,6 +132,18 @@ expectEq('U-10 single-day trip injects no pre-trip checks',
 expectEq('U-10 single-day trip still derives its per-day item check',
   singleDayChecks.some(c => c.id === 'check-s1' && c.day === 1),
   true)
+
+// ───────── coerceCurrency (companion currency persistence) ─────────
+// U-23: valid enums pass through; U-24: everything else → null so the
+// endpoint ignores it (never a 400) and leaves currency untouched.
+expectEq('U-23a coerceCurrency keeps MXN', coerceCurrency('MXN'), 'MXN')
+expectEq('U-23b coerceCurrency keeps USD', coerceCurrency('USD'), 'USD')
+expectEq('U-24a coerceCurrency rejects lowercase', coerceCurrency('usd'), null)
+expectEq('U-24b coerceCurrency rejects unknown code', coerceCurrency('EUR'), null)
+expectEq('U-24c coerceCurrency rejects empty string', coerceCurrency(''), null)
+expectEq('U-24d coerceCurrency rejects null/number/object',
+  [coerceCurrency(null), coerceCurrency(2), coerceCurrency({})],
+  [null, null, null])
 
 // ───────── tally + exit ─────────
 

@@ -36,7 +36,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../../lib/supabase/server'
-import { normalizeTripProgress } from '../../../../../lib/planner/progress'
+import { normalizeTripProgress, coerceCurrency } from '../../../../../lib/planner/progress'
 
 type TripDataLike = {
   doneChecks?: unknown
@@ -72,8 +72,7 @@ export async function PATCH(
 
     // Currency is a strict enum; anything else is ignored (not a 400) so a
     // stale/garbage value never blocks an otherwise-valid save.
-    const currency: 'MXN' | 'USD' | null =
-      body.currency === 'USD' ? 'USD' : body.currency === 'MXN' ? 'MXN' : null
+    const currency = coerceCurrency(body.currency)
 
     const hasProgress = body.progress !== undefined
     const hasDoneChecks = body.doneChecks !== undefined

@@ -24,6 +24,19 @@ export interface TripProgress {
 
 export const EMPTY_PROGRESS: TripProgress = { annotations: {}, packedItems: [] }
 
+/** The two budget currencies the planner supports (label only — no conversion). */
+export type Currency = 'MXN' | 'USD'
+
+/**
+ * Coerce an arbitrary value into a valid budget Currency, or null if it isn't
+ * one. Used by the companion PATCH endpoint: an unrecognized value is ignored
+ * (the save proceeds without touching currency) rather than rejected — a stale
+ * or garbage currency must never block an otherwise-valid progress write.
+ */
+export function coerceCurrency(raw: unknown): Currency | null {
+  return raw === 'USD' ? 'USD' : raw === 'MXN' ? 'MXN' : null
+}
+
 const NOTE_MAX = 500          // generous; matches the booking-URL cap in booking.ts
 const MAX_PACKING = 1000      // tamper guard — packing lists are never this long
 

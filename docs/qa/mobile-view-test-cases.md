@@ -172,6 +172,12 @@ export const TRIP_NO_ACCOMMODATIONS = (() => {
 | U-21 | `isOwner = false` for anonymous trip (`user_id = null`) — but `canEdit = true` | Auto |
 | U-22 | `isOwner = false` when no session | Auto |
 
+### 1.6 `lib/planner/progress.ts` — `coerceCurrency` (`tests/progress.test.ts`)
+| ID | Test | Type |
+|----|------|------|
+| U-23 | `coerceCurrency` keeps `'MXN'` / `'USD'` unchanged | Auto ✅ |
+| U-24 | `coerceCurrency` returns null for anything else (`'usd'`, `'EUR'`, `''`, null, number, object) → endpoint ignores it, no 400 | Auto ✅ |
+
 ---
 
 ## 2 — Integration tests (API)
@@ -225,6 +231,16 @@ export const TRIP_NO_ACCOMMODATIONS = (() => {
 | I-28 | Mobile UA → `/{locale}/planner?trip_id=X&full=1` | **no redirect** (full planner loads) |
 | I-29 | Desktop UA → `/{locale}/planner?trip_id=X` | no redirect |
 | I-30 | Mobile UA → `/{locale}/planner` (no trip_id, creating) | no redirect |
+
+### 2.5 Currency persistence — `PATCH /api/trips/{trip_id}/companion`
+Currency is one trip-wide setting **shared with the desktop planner**. The desktop reads the top-level **`currency` column** on hydrate; the mobile view reads **`trip_data.currency`**. The endpoint writes **both together** so they can never drift. **Auto: not implemented** (no API integration harness yet — `seedTrip` is unwired). **Manually verified live on 2026-06-08** (owner login + real trip `a0ff75bc…`): flip→USD set both copies to `USD`, restore→MXN set both to `MXN`; a trip that began with `column=MXN, trip_data.currency=undefined` ended up in sync.
+| ID | Test | Expected | Status |
+|----|------|----------|--------|
+| I-31 | `currency: 'USD'` writes the top-level **`currency` column** | 200; column = `'USD'` | Manual ✅ / Auto ⬜ |
+| I-32 | `currency: 'USD'` mirrors into **`trip_data.currency`** via read-modify-write (other trip_data fields preserved) | 200; both copies `'USD'`, days/budgetRows intact | Manual ✅ / Auto ⬜ |
+| I-33 | Invalid currency (`'EUR'`, `'usd'`, number) → **ignored, not 400**; any other fields in the body still save | 200; currency untouched | Auto ✅ (unit U-24) + Manual |
+| I-34 | Currency-only body (no progress/doneChecks/budget) → still a valid write | 200; both copies updated | Manual ✅ / Auto ⬜ |
+| I-35 | Column and `trip_data.currency` are **always written together** (never one without the other) → web + mobile always agree | both equal after any write | Manual ✅ / Auto ⬜ |
 
 ---
 
@@ -333,6 +349,17 @@ export const TRIP_NO_ACCOMMODATIONS = (() => {
 | E-64 | `mobile_view_newsletter_captured` on valid email submit | Mobile |
 | E-65 | Booking drawer option tap fires `affiliate_click` (legacy) + `AffiliateClicked` | Mobile |
 
+### 3.10 UX-fix regressions (2026-06-08 batch) — across specs
+Behaviors added/fixed this batch. **Playwright stubs: not yet written** (suite still gated on `seedTrip`/`loginAs`). All were **manually verified live on 2026-06-08** via a throwaway fixture page + a real owner-login run at iPhone 14 viewport.
+| ID | Test | Status |
+|----|------|--------|
+| E-66 | Activity confirm-done button shows a **distinct filled state** (solid green + ✓ checkbox) when done vs light/outlined when not; toggling also ticks the matching day task (counter +1) | Manual ✅ / Auto ⬜ |
+| E-67 | Saving a note/link **collapses the activity row** and shows a 📝/🔗 **indicator** on the collapsed row; "Guardado ✓" toast appears | Manual ✅ / Auto ⬜ |
+| E-68 | Budget shows **"Montos en {MXN\|USD} · sin conversión"** + a MXN/USD toggle; flipping **relabels only — totals unchanged** (no conversion) | Manual ✅ / Auto ⬜ |
+| E-69 | Preparativos **"Antes de salir"** and **"Qué llevar"** sections **collapse/expand** via their headers (chevron) | Manual ✅ / Auto ⬜ |
+| E-70 | Currency choice **persists across reload**: anonymous → localStorage, owner → DB (round-trip confirmed) | Manual ✅ / Auto ⬜ |
+| E-71 | Currency set on mobile is the **same value desktop reads** (both `currency` column and `trip_data.currency` updated) | Manual ✅ / Auto ⬜ |
+
 ---
 
 ## 4 — Manual [MANUAL]
@@ -394,12 +421,14 @@ export const TRIP_NO_ACCOMMODATIONS = (() => {
 
 | Layer | Cases | Auto | Manual | Notes |
 |-------|-------|------|--------|-------|
-| Unit | 22 | 22 | 0 | U-01..U-08 already implemented; U-11..U-18 need helper extraction |
-| Integration | 30 | 30 | 0 | one `companion` endpoint + `booking-confirm` + route redirects + auto-redirect |
-| E2E | 65 | 64 | 1 | E-48 part-manual |
+| Unit | 24 | 24 | 0 | U-01..U-10 in `progress.test.ts`; U-11..U-18 in `mobile-view.test.ts`; U-23..U-24 (`coerceCurrency`) |
+| Integration | 35 | 30 | 5 | I-31..I-35 (currency) manually verified live, not yet automated (`seedTrip` unwired) |
+| E2E | 71 | 64 | 7 | E-48 part-manual; E-66..E-71 (2026-06-08 batch) manually verified, stubs pending |
 | Manual | 14 | 0 | 14 | |
 | Edge | 12 | 10 | 2 | |
 | Regression | 8 | 6 | 2 | |
-| **Total** | **151** | **132** | **19** | |
+| **Total** | **164** | **134** | **30** | |
+
+> **Automation status (2026-06-08):** the only *currently-running* automated suites are the framework-free unit tests under `tests/` (`progress` 22/22, `mobile-view` 17/17, `booking`, `classify-block`) — run with `npx tsx`. Every "Auto" mark in the Integration/E2E layers is *intended* automation; those suites are still `test.fixme` stubs gated on `seedTrip`/`loginAs`. The 2026-06-08 currency + UX-fix batch was verified by **live runtime observation** (Playwright drive + direct DB assertions), not by committed automated tests.
 
 **Removed from the original draft (no longer valid):** slug-based routing, 404 page, trip "expiry" (no such concept), `days[i].items[j].userNote` storage, stored `checks[]` array, per-concern PATCH endpoints (save/tasks/packing/budget), "transfer has no action button", "hotel note textarea on confirmed card", budget-validation-returns-400.
