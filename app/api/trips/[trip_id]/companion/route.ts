@@ -11,10 +11,13 @@
 //                    from the client's full progress state. The desktop
 //                    planner never touches this column.
 //
-//   trip_data      ← doneChecks (task completion) + budgetRows[].actual.
-//                    These already round-trip through the planner's autosave,
-//                    so we read-modify-write the blob (preserve every other
-//                    field) to keep a single source of truth shared with desktop.
+//   trip_data      ← doneChecks (task completion) + budgetRows[].actual +
+//                    currency. These already round-trip through the planner's
+//                    autosave, so we read-modify-write the blob (preserve every
+//                    other field) to keep a single source of truth shared with
+//                    desktop. Currency is ALSO written to the top-level `currency`
+//                    column (the field the desktop reads on hydrate) so the two
+//                    copies never drift — web and mobile always show the same one.
 //
 // Auth model mirrors booking-confirm exactly:
 //   - Authenticated trip (user_id set): caller must be the owner.
@@ -26,7 +29,9 @@
 //   {
 //     progress?:      { annotations?: { [itemId]: { note?, link? } }, packedItems?: number[] },
 //     doneChecks?:    string[],
-//     budgetActuals?: { [rowId: string]: number | null }
+//     budgetActuals?: { [rowId: string]: number | null },
+//     budgetUserEsts?:{ [rowId: string]: number | null },
+//     currency?:      'MXN' | 'USD'
 //   }
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -58,16 +63,23 @@ export async function PATCH(
       doneChecks?: unknown
       budgetActuals?: unknown
       budgetUserEsts?: unknown
+      currency?: unknown
     } | null
 
     if (!body || typeof body !== 'object') {
       return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
     }
 
+    // Currency is a strict enum; anything else is ignored (not a 400) so a
+    // stale/garbage value never blocks an otherwise-valid save.
+    const currency: 'MXN' | 'USD' | null =
+      body.currency === 'USD' ? 'USD' : body.currency === 'MXN' ? 'MXN' : null
+
     const hasProgress = body.progress !== undefined
     const hasDoneChecks = body.doneChecks !== undefined
     const hasBudget = body.budgetActuals !== undefined || body.budgetUserEsts !== undefined
-    if (!hasProgress && !hasDoneChecks && !hasBudget) {
+    const hasCurrency = currency !== null
+    if (!hasProgress && !hasDoneChecks && !hasBudget && !hasCurrency) {
       return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
     }
 
@@ -101,7 +113,11 @@ export async function PATCH(
     // Anonymous trip: user_id is null → allow update without auth.
 
     // ── 4. Build column updates ─────────────────────────────────────────────
-    const updatePayload: { trip_progress?: unknown; trip_data?: TripDataLike } = {}
+    const updatePayload: { trip_progress?: unknown; trip_data?: TripDataLike; currency?: 'MXN' | 'USD' } = {}
+
+    // 4-cur. Currency → top-level column (the field desktop reads on hydrate).
+    //        Also mirrored into trip_data below so the mobile read-path agrees.
+    if (hasCurrency) updatePayload.currency = currency!
 
     // 4a. trip_progress — replace wholesale from the client's full state. The
     //     normalizer sanitizes notes (trim+cap) and links (scheme/length check
@@ -111,8 +127,12 @@ export async function PATCH(
     }
 
     // 4b. trip_data — read-modify-write so we never drop days/packing/etc.
-    if (hasDoneChecks || hasBudget) {
+    if (hasDoneChecks || hasBudget || hasCurrency) {
       const nextTripData: TripDataLike = { ...(trip.trip_data ?? {}) }
+
+      // Mirror currency into the blob so the mobile read-path (trip_data.currency)
+      // matches the top-level column desktop reads. Always written together.
+      if (hasCurrency) nextTripData.currency = currency!
 
       if (hasDoneChecks) {
         nextTripData.doneChecks = Array.isArray(body.doneChecks)

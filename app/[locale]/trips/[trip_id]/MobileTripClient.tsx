@@ -321,9 +321,9 @@ export default function MobileTripClient(props: Props) {
   const persistTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
 
   // Latest persistable state, read by the debounced writer to avoid stale closures.
-  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates })
+  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency })
   useEffect(() => {
-    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates }
+    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency }
   })
 
   // ── Mount: default day from today, nudge dismiss state, localStorage rehydrate, open event ──
@@ -347,11 +347,14 @@ export default function MobileTripClient(props: Props) {
         if (raw) {
           const saved = JSON.parse(raw) as {
             progress?: TripProgress; doneChecks?: string[]; budgetActuals?: Record<string, number | null>
+            budgetUserEsts?: Record<string, number | null>; currency?: 'MXN' | 'USD'
           }
           if (saved.progress?.annotations) setAnnotations(saved.progress.annotations)
           if (Array.isArray(saved.progress?.packedItems)) setPackedItems(new Set(saved.progress!.packedItems))
           if (Array.isArray(saved.doneChecks)) setDoneCheckIds(new Set(saved.doneChecks))
           if (saved.budgetActuals) setBudgetActuals(prev => ({ ...prev, ...saved.budgetActuals }))
+          if (saved.budgetUserEsts) setBudgetEstimates(prev => ({ ...prev, ...saved.budgetUserEsts }))
+          if (saved.currency === 'USD' || saved.currency === 'MXN') setCurrency(saved.currency)
         }
       } catch { /* ignore */ }
 
@@ -398,6 +401,7 @@ export default function MobileTripClient(props: Props) {
       doneChecks: Array.from(s.doneCheckIds),
       budgetActuals: s.budgetActuals,
       budgetUserEsts: s.budgetEstimates,
+      currency: s.currency,
     }
     if (loggedIn && isOwner) {
       fetch(`/api/trips/${encodeURIComponent(tripId)}/companion`, {
@@ -486,6 +490,14 @@ export default function MobileTripClient(props: Props) {
     if (!canEdit) return
     const v = raw.trim() === '' ? null : Math.max(0, Math.round(Number(raw)))
     setBudgetEstimates(prev => ({ ...prev, [id]: Number.isFinite(v as number) ? v : null }))
+    schedulePersist()
+  }
+  // Currency is one trip-wide setting shared with desktop. Persisting it writes
+  // both the top-level `currency` column and trip_data.currency (server-side),
+  // so web and mobile always read the same value.
+  function changeCurrency(c: 'MXN' | 'USD') {
+    if (!canEdit) return
+    setCurrency(c)
     schedulePersist()
   }
   function saveAnnotation(itemId: string, note: string, link: string) {
@@ -801,7 +813,7 @@ export default function MobileTripClient(props: Props) {
           <BudgetTab
             t={t} categories={budgetCategories} totals={budgetTotals}
             budgetView={budgetView} setBudgetView={setBudgetView}
-            currency={currency} setCurrency={setCurrency}
+            currency={currency} setCurrency={changeCurrency}
             fmt={fmt} effectiveActual={effectiveActual} effectiveEstimate={effectiveEstimate} canEdit={canEdit}
             onSetActual={setBudgetActual} onSetEstimate={setBudgetUserEst}
           />
