@@ -166,7 +166,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'A 1930s mansion in Salta\'s historic center turned into an eleven-room boutique hotel — each suite named after a figure from Argentine history. Library with leather armchairs, jasmine-filled inner courtyard, pillow menu and a buffet breakfast with artisanal yogurt. Just 500 meters from Plaza 9 de Julio, away from street noise. Estimated price: $160–300 USD/night.',
       tag: '1930s mansion with character',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/BXLpR7YhAQ',
       archetypes: ['Couples'],
     },
     {
@@ -175,7 +175,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'A garden-and-pool boutique in Tilcara, the village in the Quebrada de Humahuaca at 2,461 meters above sea level. Buffet breakfast included, terrace with views of the multicolored hill, and a more intimate scale than any chain. Four blocks from the main square. Estimated price: $120–200 USD/night.',
       tag: 'Gardens and a pool in the Quebrada',
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.booking.com/hotel/ar/casacalma-tilcara.en-gb.html?aid=311984&label=casacalma-tilcara-2bgwmtcgvdW91HTtP__cZQS675444454441%3Apl%3Ata%3Ap1%3Ap2%3Aac%3Aap%3Aneg%3Afi%3Atiaud-2393881721446%3Akwd-2485497643367%3Alp9047093%3Ali%3Adec%3Adm%3Appccp%3DUmFuZG9tSVYkc2RlIyh9YboIMJYQAPicrzwdxpGM5o8&sid=ce3990bc71d7c5bd11b7b98f41809970&age=1&all_sr_blocks=945359105_367026340_2_34_0&checkin=2026-06-23&checkout=2026-06-26&dest_id=-1016953&dest_type=city&dist=0&group_adults=2&group_children=0&hapos=1&highlighted_blocks=945359105_367026340_2_34_0&hpos=1&matching_block_id=945359105_367026340_2_34_0&no_rooms=1&req_adults=2&req_children=0&room1=A%2CA&sb_price_type=total&sr_order=popularity&sr_pri_blocks=945359105_367026340_2_34_0__19038&srepoch=1779193813&srpvid=9fa757dffa4e0c52&type=total&ucfs=1&',
       archetypes: ['Couples'],
     },
     {
@@ -184,7 +184,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'The top-rated hotel in Tilcara four years running — number 1 on TripAdvisor out of 21 options — set in a house built with local stone and wood. Twelve rooms with private terrace, panoramic views of the multicolored hills, spa with hydromassage, seasonal outdoor pool and a restaurant with an Andean menu. Three blocks from Tilcara\'s main square. Estimated price: $150–200 USD/night.',
       tag: 'Views, spa and Andean cuisine',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/w_BaYY9D-S',
       archetypes: ['Couples', 'Wellness'],
     },
   ],
@@ -202,13 +202,13 @@ export const guide: FlatGuide = {
       name: 'Tren a las Nubes (optional, subject to availability)',
       description: 'The train climbing from Salta to the La Polvorilla viaduct at 4,200 meters runs irregularly — check availability on the official site before building the itinerary around it. If it runs: one of the most spectacular railway journeys in South America.',
       tags: ['Train', 'Altitude', 'Landscape'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/j4LbWaVi1o',
     },
     {
       name: 'Driving tour of the Quebrada de Humahuaca',
       description: 'The 155-kilometer stretch between Jujuy and Humahuaca was declared a UNESCO World Heritage Site in 2003. Purmamarca (the Seven-Color Hill), Tilcara (the Pucará and the crafts market), Humahuaca (the cabildo and the charango players on the square) and the Serranía de Hornocal (the Fourteen-Color Hill, 70 kilometers from Humahuaca) are the four stops that justify the detour north.',
       tags: ['UNESCO', 'Culture', 'Landscape'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://www.getyourguide.com/es-mx/capital-l1153/salta-quebrada-de-humahuaca-t476303/?ranking_uuid=1c537976-cb7c-48b1-9ef4-09a014a70f1f',
     },
   ],
 

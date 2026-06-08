@@ -154,7 +154,7 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'An icon of Guatemalan hospitality built over the ruins of the 17th-century Convento de Santo Domingo. A "museum hotel" where contemporary luxury weaves into colonial walls, archaeological crypts, and secret gardens lit by hundreds of candles at dusk. Perfect for travelers who want a deep dive into Antigua\'s history and sacred art without leaving their refuge.',
       tag: 'Colonial splendor and luxury archaeology',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/c-2gW8Gp-L',
       archetypes: ['Couples'],
     },
     {
@@ -163,7 +163,17 @@ export const guide: FlatGuide = {
       priceTier: '$$$',
       description: 'Set in the hills above Santa Catarina Palopó. A private villa with impeccable service, fine-craft Guatemalan décor, and an infinity pool that melts into the blue of the lake. Probably the most romantic place in Central America.',
       tag: 'Dream views and exclusivity',
-      affiliateUrl: '',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/C6_K1iudtq',
+      archetypes: ['Couples', 'Wellness'],
+    },
+    {
+      name: 'Mesón Panza Verde',
+      type: 'Boutique villa · Antigua',
+      priceTier: '$$$',
+      description: 'Antigua\'s first European-style boutique hotel—established in 1986 and still looking fresh. Nine suites with fireplaces surround a colonial garden with a fountain. The restaurant, with its vaulted ceilings and extensive wine list, is considered one of the best in the country. Breakfast is included. Four blocks from Central Park.',
+      tag: 'One of the best in the country',
+      // TODO: replace with Mesón Panza Verde's own Stay22 link (currently duplicates Casa Palopó's)
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/C6_K1iudtq',
       archetypes: ['Couples', 'Wellness'],
     },
   ],
