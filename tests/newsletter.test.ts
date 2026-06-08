@@ -26,6 +26,7 @@ expectEq('N-02b rejects missing domain dot', isValidNewsletterEmail('elena@yahoo
 expectEq('N-02c rejects internal whitespace', isValidNewsletterEmail('el ena@yahoo.com'), false)
 expectEq('N-03 rejects empty string', isValidNewsletterEmail(''), false)
 expectEq('N-04 rejects null/undefined', [isValidNewsletterEmail(null), isValidNewsletterEmail(undefined)], [false, false])
+expectEq('N-04b accepts plus-tag + subdomain', isValidNewsletterEmail('elena+news@mail.lagomplan.com'), true)
 
 // ───────── readMailchimpConfig (N-05..N-09) — the "Server configuration error" guard ─────────
 const FULL = { MAILCHIMP_API_KEY: 'abcdef1234567890-us13', MAILCHIMP_LIST_ID: '71a26fbc9a', MAILCHIMP_TAG: 'homepage' } as any
@@ -45,6 +46,9 @@ expectEq('N-08 returns null when list id missing (→ Server configuration error
 
 expectEq('N-08b returns null when both empty strings (the non-main-preview case)',
   readMailchimpConfig({ MAILCHIMP_API_KEY: '', MAILCHIMP_LIST_ID: '' } as any), null)
+
+expectEq('N-08c returns null when values are whitespace-only (trim guard)',
+  readMailchimpConfig({ MAILCHIMP_API_KEY: '   ', MAILCHIMP_LIST_ID: '\t' } as any), null)
 
 expectEq('N-09 tag is optional — config still returned without it',
   readMailchimpConfig({ MAILCHIMP_API_KEY: 'k-us5', MAILCHIMP_LIST_ID: 'abc' } as any),
