@@ -197,9 +197,9 @@ export const guide: FlatGuide = {
       name: 'Lodge Quelana',
       type: 'Hotel · Solor,San Pedro de Atacama',
       priceTier: '$$',
-      description: 'Buffet breakfast included, free Wi-Fi and a location 300 meters from Calle Caracoles — the village\'s main artery. Rooms for up to four. The hotel keeps a temperature and oxygen monitor at the front desk for altitude — a detail that reassures parents traveling with small kids. Family-run, with staff that knows every local tour agency. Estimated price: $70–110 USD/night for a family room.',
-      tag: 'Family-run with altitude-aware touches',
-      affiliateUrl: 'https://booking.stay22.com/lagomplan/_Rk0FuD10c ',
+      description: 'For families on the tightest budget: private rooms with a bathroom, a quiet inner courtyard, and homemade breakfast included. A 15-minute walk from the center — a distance that, with small kids, can be solved by tuk-tuk for $2. The owner adapts breakfast for early-morning departures with something to take along. The most honest option in the low range in San Pedro.',
+      tag: 'The most honest option in the low range',
+      affiliateUrl: 'https://booking.stay22.com/lagomplan/_Rk0FuD10c',
       archetypes: ['Families'],
     },
     {
