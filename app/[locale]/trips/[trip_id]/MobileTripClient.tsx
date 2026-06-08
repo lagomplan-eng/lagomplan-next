@@ -130,6 +130,7 @@ const T = {
     confirmDoneRestaurant: '✓ Ya reservé', confirmDoneTour: '✓ Tengo entrada', confirmDoneGeneric: '✓ Listo',
     budget: 'Presupuesto', aiEstimated: 'IA estimó', yourEstimate: 'Tu estimado', confirmed: 'Confirmado',
     view: 'Ver:', total: 'Total', perPerson: 'Por persona', real: 'Real', estShort: 'Tu',
+    amountsIn: 'Montos en', noConversion: 'sin conversión',
     packingList: 'Lista de equipaje', packed: 'empacado',
     newsletterEyebrow: '¿Te gustó este plan?', newsletterTitle: 'Recibe ideas así cada semana',
     newsletterSub: 'Destinos, guías y rutas para parejas y familias en México y LATAM — sin spam.',
@@ -165,6 +166,7 @@ const T = {
     confirmDoneRestaurant: '✓ Booked', confirmDoneTour: '✓ Got tickets', confirmDoneGeneric: '✓ Done',
     budget: 'Budget', aiEstimated: 'AI estimated', yourEstimate: 'Your estimate', confirmed: 'Confirmed',
     view: 'View:', total: 'Total', perPerson: 'Per person', real: 'Actual', estShort: 'Est.',
+    amountsIn: 'Amounts in', noConversion: 'no conversion',
     packingList: 'Packing list', packed: 'packed',
     newsletterEyebrow: 'Liked this plan?', newsletterTitle: 'Get ideas like this every week',
     newsletterSub: 'Destinations, guides and routes for couples and families across Mexico & LATAM — no spam.',
@@ -299,6 +301,9 @@ export default function MobileTripClient(props: Props) {
     () => Object.fromEntries(baseBudget.map(r => [r.id, r.userEst])),
   )
   const [budgetView, setBudgetView] = useState<'total' | 'persona'>('total')
+  // Mirrors the desktop budget currency. Read-only relabel (no conversion),
+  // seeded from trip_data.currency; the planner owns persistence of this field.
+  const [currency, setCurrency] = useState<'MXN' | 'USD'>(props.tripData?.currency === 'USD' ? 'USD' : 'MXN')
   const [nudgeDismissed, setNudgeDismissed] = useState(false)
   const [nudgeIdx, setNudgeIdx] = useState(0)
   const [toast, setToast] = useState('')
@@ -796,6 +801,7 @@ export default function MobileTripClient(props: Props) {
           <BudgetTab
             t={t} categories={budgetCategories} totals={budgetTotals}
             budgetView={budgetView} setBudgetView={setBudgetView}
+            currency={currency} setCurrency={setCurrency}
             fmt={fmt} effectiveActual={effectiveActual} effectiveEstimate={effectiveEstimate} canEdit={canEdit}
             onSetActual={setBudgetActual} onSetEstimate={setBudgetUserEst}
           />
@@ -1043,6 +1049,12 @@ function ActivityRow(p: {
         {item.price && (
           <div className="inline-flex items-center gap-1 font-mono text-[9px] font-medium px-[6px] py-[2px] rounded-[4px] mt-[5px] bg-[#EDE7E1] text-[#4A4A4A]">{item.price}</div>
         )}
+        {!open && (p.annotation?.note || p.annotation?.link) && (
+          <div className="flex items-center gap-[5px] mt-[5px] text-[10px] text-[#6B8F86]">
+            {p.annotation?.note && <span className="truncate">📝 {p.annotation.note}</span>}
+            {p.annotation?.link && <span className="shrink-0">🔗</span>}
+          </div>
+        )}
 
         {open && (
           <div className="pt-[10px] mt-2 border-t border-[#E2DDD5]" onClick={(e) => e.stopPropagation()}>
@@ -1056,8 +1068,16 @@ function ActivityRow(p: {
                 )}
                 {canEdit && (
                   <button onClick={p.onConfirm}
-                    className={`font-sans text-[11px] font-medium px-[12px] py-[7px] rounded-[7px] border border-[#0F3A33]/20 bg-[#E4EFEC] text-[#0F3A33] hover:bg-[#d4eae4] transition-colors whitespace-nowrap ${done ? 'opacity-60' : ''}`}>
-                    {action.confirm}
+                    aria-pressed={done}
+                    className={`font-sans text-[11px] font-medium px-[12px] py-[7px] rounded-[7px] border transition-colors whitespace-nowrap inline-flex items-center gap-[5px] ${
+                      done
+                        ? 'border-[#0F3A33] bg-[#0F3A33] text-white'
+                        : 'border-[#0F3A33]/20 bg-[#E4EFEC] text-[#0F3A33] hover:bg-[#d4eae4]'
+                    }`}>
+                    <span className={`w-[14px] h-[14px] rounded-[4px] border-[1.5px] shrink-0 flex items-center justify-center text-[9px] ${
+                      done ? 'bg-white border-white text-[#0F3A33]' : 'border-[#0F3A33]/40 text-transparent'
+                    }`}>✓</span>
+                    {action.confirm.replace(/^✓\s*/, '')}
                   </button>
                 )}
               </div>
@@ -1083,7 +1103,7 @@ function ActivityRow(p: {
                       className="w-[30px] h-[30px] shrink-0 flex items-center justify-center bg-[#E4EFEC] border border-[#6B8F86] rounded-[7px] text-[13px] text-[#0F3A33] hover:bg-[#0F3A33] hover:text-white transition-colors">↗</button>
                   </div>
                 </div>
-                <button onClick={() => p.onSave(note, link)}
+                <button onClick={() => { p.onSave(note, link); p.onToggleExpand() }}
                   className="self-start mt-[2px] font-mono text-[10px] font-medium text-[#0F3A33] px-[14px] py-[6px] border border-[#6B8F86] rounded-[7px] hover:bg-[#E4EFEC] transition-colors">
                   {t.save}
                 </button>
@@ -1271,6 +1291,7 @@ function BudgetTab(p: {
   t: typeof T['es']; categories: [string, BudgetRow[]][]
   totals: { ai: number; usr: number; act: number; hasUser: boolean; hasActual: boolean }
   budgetView: 'total' | 'persona'; setBudgetView: (v: 'total' | 'persona') => void
+  currency: 'MXN' | 'USD'; setCurrency: (c: 'MXN' | 'USD') => void
   fmt: (n: number | null) => string
   effectiveActual: (r: BudgetRow) => number | null
   effectiveEstimate: (r: BudgetRow) => number | null
@@ -1291,6 +1312,18 @@ function BudgetTab(p: {
               <Total lbl={t.aiEstimated} amt={fmt(totals.ai)} cls="text-[#8A8A8A]" border />
               <Total lbl={t.yourEstimate} amt={totals.hasUser ? fmt(totals.usr) : '—'} cls={totals.hasUser ? 'text-[#2D6B57]' : 'text-[#BDBDBD]'} border />
               <Total lbl={t.confirmed} amt={totals.hasActual ? fmt(totals.act) : '—'} cls={totals.hasActual ? 'text-[#0F3A33]' : 'text-[#BDBDBD]'} />
+            </div>
+          </div>
+          {/* currency toggle — relabel only, no conversion (desktop parity) */}
+          <div className="flex justify-between items-center px-[14px] py-2 border-b border-[#E2DDD5]">
+            <span className="font-mono text-[9px] text-[#BDBDBD]">{t.amountsIn} {p.currency} · {t.noConversion}</span>
+            <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
+              {(['MXN', 'USD'] as const).map(c => (
+                <button key={c} onClick={() => p.setCurrency(c)}
+                  className={`font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] transition-colors ${
+                    p.currency === c ? 'bg-[#0F3A33] text-white' : 'text-[#7A7A76] hover:text-[#0F3A33]'
+                  }`}>{c}</button>
+              ))}
             </div>
           </div>
           {/* view toggle */}
@@ -1374,10 +1407,12 @@ function PrepTab(p: {
   const { t, canEdit } = p
   const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
   const secLbl = 'font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
-  const cardHeader = 'flex justify-between items-center px-[14px] py-[10px] bg-[#F4F0E8] border-b border-[#E2DDD5]'
+  const cardHeader = 'w-full flex justify-between items-center px-[14px] py-[10px] bg-[#F4F0E8] border-b border-[#E2DDD5] cursor-pointer hover:bg-[#EFEAE1] transition-colors'
   const headerTitle = 'font-mono text-[10px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase'
   const headerCount = 'font-mono text-[10px] text-[#BDBDBD]'
   const prepDone = p.prepChecks.filter(c => p.doneCheckIds.has(c.id)).length
+  const [openBefore, setOpenBefore] = useState(true)
+  const [openPacking, setOpenPacking] = useState(true)
 
   return (
     <>
@@ -1387,11 +1422,14 @@ function PrepTab(p: {
           <div className={secLbl}>{t.beforeYouGo}</div>
           <div className="px-[18px] pb-[6px]">
             <div className={card}>
-              <div className={cardHeader}>
+              <button type="button" className={cardHeader} onClick={() => setOpenBefore(o => !o)} aria-expanded={openBefore}>
                 <span className={headerTitle}>{t.beforeYouGo}</span>
-                <span className={headerCount}>{prepDone}/{p.prepChecks.length}</span>
-              </div>
-              {p.prepChecks.map(c => {
+                <span className="flex items-center gap-2">
+                  <span className={headerCount}>{prepDone}/{p.prepChecks.length}</span>
+                  <span className={`text-[10px] text-[#BDBDBD] transition-transform ${openBefore ? 'rotate-90' : ''}`}>›</span>
+                </span>
+              </button>
+              {openBefore && p.prepChecks.map(c => {
                 const done = p.doneCheckIds.has(c.id)
                 return (
                   <button key={c.id} disabled={!canEdit} onClick={() => p.onToggleCheck(c.id)}
@@ -1416,11 +1454,14 @@ function PrepTab(p: {
           <div className={secLbl}>{t.tabPacking}</div>
           <div className="px-[18px] pb-[14px]">
             <div className={card}>
-              <div className={cardHeader}>
+              <button type="button" className={cardHeader} onClick={() => setOpenPacking(o => !o)} aria-expanded={openPacking}>
                 <span className={headerTitle}>{t.packingList}</span>
-                <span className={headerCount}>{p.packedItems.size}/{p.packing.length} {t.packed}</span>
-              </div>
-              {p.packing.map((item, i) => {
+                <span className="flex items-center gap-2">
+                  <span className={headerCount}>{p.packedItems.size}/{p.packing.length} {t.packed}</span>
+                  <span className={`text-[10px] text-[#BDBDBD] transition-transform ${openPacking ? 'rotate-90' : ''}`}>›</span>
+                </span>
+              </button>
+              {openPacking && p.packing.map((item, i) => {
                 const checked = p.packedItems.has(i)
                 return (
                   <button key={i} disabled={!canEdit} onClick={() => p.onTogglePacked(i)}
