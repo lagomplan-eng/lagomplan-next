@@ -5,13 +5,14 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import type { Database } from './types'
+import { supabaseUrl, supabaseAnonKey, supabaseServiceRoleKey } from './env'
 
 export async function getSupabaseServer() {
   const cookieStore = await cookies()
 
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl(),
+    supabaseAnonKey(),
     {
       cookies: {
         get(name: string)               { return cookieStore.get(name)?.value },
@@ -26,8 +27,8 @@ export async function getSupabaseServer() {
 // NEVER expose to client
 export function getSupabaseAdmin() {
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    supabaseUrl(),
+    supabaseServiceRoleKey(),
     { cookies: { get: () => '', set: () => {}, remove: () => {} } }
   )
 }
