@@ -118,6 +118,23 @@ confirm:
    even with the guard, the tagging is cosmetic and the content-consistency
    finding above is moot.
 
+### Observed 2026-06-09 (dashboard screenshots)
+
+- **Funnel view (Loads/Clicks):** Jun 9 showed **37 Loads, 3 Clicks**, 0 Views /
+  Interactions / Transactions. → Clicks **are tracked to our account**; combined
+  with `aid=lagomplan` + the same `lmaID` on the links, this points to **same
+  account, no leak to a stranger**. (One of the 3 clicks is likely the Test C
+  click from this session.)
+- **Page Analytics (commission) view:** **empty** — "Your analytics will show up
+  here after your first booking." Domain filter already recognizes
+  `lagomplan.com`. → Empty because **0 bookings have happened yet**, NOT because
+  attribution is broken (consistent with Transactions=0 in the funnel).
+- **Therefore the *money* question is currently unanswerable** — there is no
+  commission to attribute until a real booking lands. Action: (a) confirm domain
+  is fully added in Stay22 settings so the first booking attributes; (b) revisit
+  Page Analytics **after the first booking** to close the same-account/payout
+  check definitively.
+
 ---
 
 ## Summary
@@ -127,7 +144,7 @@ confirm:
 | A | What attribution each link form carries | ✅ inventoried; inconsistent across surfaces |
 | B | Guard preserves the exact tagged URL | ✅ byte-equal, params intact, all surfaces |
 | C | Cost of the hijack (real LetMeAllez) | ✅ destination kept, **campaign flattened** (not money lost) |
-| D | Same account / payout (dashboard) | ⏳ **pending — your dashboard check** |
+| D | Same account / payout (dashboard) | 🟡 **partial** — clicks tracked to our account; transactions=0, so commission/payout unverifiable until the first booking |
 
 The engineering side is validated. The only open item is **Test D**, which only
 the Stay22 dashboard can answer.
