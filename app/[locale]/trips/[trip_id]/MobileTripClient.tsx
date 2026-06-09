@@ -1208,8 +1208,11 @@ function HotelCard(p: {
           )
         ) : (
           <>
-            {/* window.open bypasses the Stay22 anchor interceptor */}
+            {/* window.open bypasses the Stay22 anchor interceptor.
+                data-lma-managed tells Stay22Guard to skip this anchor so the
+                click doesn't open twice (this handler already opens it). */}
             <a href={reserveHref}
+               data-lma-managed
                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(reserveHref, '_blank', 'noopener,noreferrer') }}
                className="block text-center px-[14px] py-[11px] bg-[#0F3A33] text-white rounded-[9px] text-[13px] font-semibold hover:opacity-85 transition-opacity cursor-pointer">
               {t.reserve} →
