@@ -1,0 +1,36 @@
+name: Reconcile stuck trip jobs
+
+# Vercel Hobby can't run sub-daily crons, so we drive the reconcile
+# endpoint from GitHub Actions instead. It re-invokes the worker for any
+# async generation job stuck >2 min — the backstop for users who close the
+# tab mid-generation (the in-app poll only covers tab-open sessions).
+#
+# Caveats: GitHub's scheduled runs fire at most every ~5 min and can be
+# delayed minutes under load; the schedule is paused after 60 days of repo
+# inactivity. Good enough for a backstop, not a hard real-time guarantee.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'   # every ~5 minutes (GitHub's practical minimum)
+  workflow_dispatch: {}       # manual "Run workflow" button for testing
+
+# Don't pile up overlapping runs if one is slow.
+concurrency:
+  group: reconcile-stuck-jobs
+  cancel-in-progress: false
+
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping reconcile endpoint
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          code=$(curl -sS -o /tmp/body -w '%{http_code}' \
+            -H "Authorization: Bearer ${CRON_SECRET}" \
+            https://www.lagomplan.com/api/trips/jobs/reconcile)
+          echo "HTTP ${code}"
+          cat /tmp/body; echo
+          # Fail the run (visible red X) on any non-2xx so problems surface.
+          test "${code}" -ge 200 -a "${code}" -lt 300
