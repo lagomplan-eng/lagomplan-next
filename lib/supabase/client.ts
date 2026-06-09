@@ -4,6 +4,7 @@
 
 import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from './types'
+import { supabaseUrl, supabaseAnonKey } from './env'
 
 // Singleton so we don't create multiple clients
 let client: ReturnType<typeof createBrowserClient<Database>> | null = null
@@ -11,8 +12,8 @@ let client: ReturnType<typeof createBrowserClient<Database>> | null = null
 export function getSupabaseBrowser() {
   if (client) return client
   client = createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    supabaseUrl(),
+    supabaseAnonKey()
   )
   // Mirror existing convention: window.LAGOMPLAN.supabase
   if (typeof window !== 'undefined') {
