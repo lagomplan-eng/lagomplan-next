@@ -548,4 +548,71 @@ export const events = {
       provider:         params.provider,
     })
   },
+
+  // ── Mobile companion view (app/[locale]/trips/[trip_id]) ──────────────────
+  // The read-mostly trip view a traveler opens on their phone. These events
+  // track engagement with that surface specifically, separate from the desktop
+  // planner's lifecycle events above.
+
+  /** Companion view loaded. `dayIndex` is the day auto-selected from today's date. */
+  mobileViewOpened(params: { tripId: string; isOwner: boolean; dayIndex: number }) {
+    metaTrackCustom('MobileViewOpened', { is_owner: params.isOwner })
+    gaTrack('mobile_view_opened', {
+      trip_id:   params.tripId,
+      is_owner:  params.isOwner,
+      day_index: params.dayIndex,
+    })
+  },
+
+  /** Traveler tapped a different day pill on the Itinerario tab. */
+  mobileViewDaySwitched(params: { tripId: string; dayIndex: number }) {
+    metaTrackCustom('MobileViewDaySwitched')
+    gaTrack('mobile_view_day_switched', {
+      trip_id:   params.tripId,
+      day_index: params.dayIndex,
+    })
+  },
+
+  /** Traveler switched between Itinerario / Presupuesto / Qué llevar. */
+  mobileViewTabSwitched(params: { tripId: string; tab: 'itin' | 'budget' | 'packing' }) {
+    metaTrackCustom('MobileViewTabSwitched', { tab: params.tab })
+    gaTrack('mobile_view_tab_switched', { trip_id: params.tripId, tab: params.tab })
+  },
+
+  /** Traveler expanded an activity to reveal its actions/notes. */
+  mobileViewActivityExpanded(params: { tripId: string; activityType: string; dayIndex: number }) {
+    metaTrackCustom('MobileViewActivityExpanded', { activity_type: params.activityType })
+    gaTrack('mobile_view_activity_expanded', {
+      trip_id:       params.tripId,
+      activity_type: params.activityType,
+      day_index:     params.dayIndex,
+    })
+  },
+
+  /** Traveler saved a note and/or link on an activity. */
+  mobileViewNoteSaved(params: { tripId: string; activityId: string; hasNote: boolean; hasLink: boolean }) {
+    metaTrackCustom('MobileViewNoteSaved', { has_note: params.hasNote, has_link: params.hasLink })
+    gaTrack('mobile_view_note_saved', {
+      trip_id:     params.tripId,
+      activity_id: params.activityId,
+      has_note:    params.hasNote,
+      has_link:    params.hasLink,
+    })
+  },
+
+  /** Anonymous traveler subscribed via the in-view newsletter card. Also a Lead. */
+  mobileViewNewsletterCaptured(params: { tripId: string }) {
+    metaTrack('Lead', { content_name: 'mobile-view-newsletter' })
+    gaTrack('mobile_view_newsletter_captured', { trip_id: params.tripId })
+  },
+
+  /** Traveler checked off a per-day task. */
+  mobileViewTaskCompleted(params: { tripId: string; taskId: string; dayIndex: number }) {
+    metaTrackCustom('MobileViewTaskCompleted')
+    gaTrack('mobile_view_task_completed', {
+      trip_id:   params.tripId,
+      task_id:   params.taskId,
+      day_index: params.dayIndex,
+    })
+  },
 }

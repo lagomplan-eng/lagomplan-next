@@ -11,13 +11,16 @@
  *
  * Optional env vars:
  *   MAILCHIMP_TAG       — tag name to apply on subscribe (e.g. "homepage")
+ *
+ * ⚠️ Vercel scoping gotcha: these vars must be available to EVERY Preview
+ * branch, not just `Preview (main)`. If they're scoped to main-only, every
+ * feature-branch preview returns 500 "Server configuration error" from the
+ * guard below (Production is unaffected). See lib/newsletter.ts for the
+ * unit-tested config reader.
  */
 
 import { NextRequest, NextResponse } from 'next/server'
-
-const API_KEY = process.env.MAILCHIMP_API_KEY ?? ''
-const LIST_ID = process.env.MAILCHIMP_LIST_ID ?? ''
-const TAG     = process.env.MAILCHIMP_TAG     ?? ''
+import { isValidNewsletterEmail, readMailchimpConfig, mailchimpMembersUrl } from '../../../lib/newsletter'
 
 export async function POST(req: NextRequest) {
   // ── 1. Parse & validate ──────────────────────────────────────────────────
@@ -31,12 +34,13 @@ export async function POST(req: NextRequest) {
 
   const email = body.email?.trim().toLowerCase()
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+  if (!isValidNewsletterEmail(email)) {
     return NextResponse.json({ error: 'Valid email required' }, { status: 422 })
   }
 
-  // ── 2. Guard: env vars ───────────────────────────────────────────────────
-  if (!API_KEY || !LIST_ID) {
+  // ── 2. Guard: env vars (read at request time) ────────────────────────────
+  const cfg = readMailchimpConfig()
+  if (!cfg) {
     console.error('[subscribe] Missing MAILCHIMP_API_KEY or MAILCHIMP_LIST_ID')
     return NextResponse.json(
       { error: 'Server configuration error' },
@@ -45,18 +49,16 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 3. Call Mailchimp Marketing API ──────────────────────────────────────
-  // API key format: "<key>-<datacenter>"  →  e.g. "abc123-us13"
-  const dc  = API_KEY.split('-').pop()
-  const url = `https://${dc}.api.mailchimp.com/3.0/lists/${LIST_ID}/members`
-  const auth = Buffer.from(`anystring:${API_KEY}`).toString('base64')
+  const url  = mailchimpMembersUrl(cfg)
+  const auth = Buffer.from(`anystring:${cfg.apiKey}`).toString('base64')
 
   const payload: Record<string, unknown> = {
     email_address: email,
     status:        'subscribed',
   }
 
-  if (TAG) {
-    payload.tags = [TAG]
+  if (cfg.tag) {
+    payload.tags = [cfg.tag]
   }
 
   let mcRes: Response
