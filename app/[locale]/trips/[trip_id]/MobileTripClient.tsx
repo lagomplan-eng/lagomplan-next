@@ -28,6 +28,7 @@ import { useUser } from '../../../../components/auth/SupabaseProvider'
 import { events } from '../../../../lib/analytics'
 import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../../../lib/planner/checks'
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
+import { resolveTripCurrency } from '../../../../lib/planner/progress'
 import { buildAffiliateLink } from '../../../../lib/affiliate/build'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick, type BookingOption } from '../../../../lib/booking'
 import { effectiveAccommodations } from '../../../../lib/planner/use-effective-accommodations'
@@ -103,6 +104,8 @@ interface Props {
   destination: string | null
   travelers: string | null
   durationDays: number | null
+  /** Authoritative top-level `currency` column (the field desktop persists). */
+  currency: string | null
   tripData: any
   tripProgress: TripProgress
   editPlanUrl: string
@@ -307,9 +310,14 @@ export default function MobileTripClient(props: Props) {
     () => Object.fromEntries(baseBudget.map(r => [r.id, r.userEst])),
   )
   const [budgetView, setBudgetView] = useState<'total' | 'persona'>('total')
-  // Mirrors the desktop budget currency. Read-only relabel (no conversion),
-  // seeded from trip_data.currency; the planner owns persistence of this field.
-  const [currency, setCurrency] = useState<'MXN' | 'USD'>(props.tripData?.currency === 'USD' ? 'USD' : 'MXN')
+  // Mirrors the desktop budget currency. Read-only relabel (no conversion).
+  // Prefer the AUTHORITATIVE top-level `currency` column — the desktop autosave
+  // writes currency there but omits it from its wholesale trip_data bundle, so
+  // trip_data.currency goes stale after any desktop edit (and the currency
+  // chosen at creation only ever lands top-level). See resolveTripCurrency.
+  const [currency, setCurrency] = useState<'MXN' | 'USD'>(
+    () => resolveTripCurrency(props.currency, props.tripData?.currency),
+  )
   const [nudgeDismissed, setNudgeDismissed] = useState(false)
   const [nudgeIdx, setNudgeIdx] = useState(0)
   const [toast, setToast] = useState('')

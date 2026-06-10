@@ -39,6 +39,7 @@ type TripRow = {
   destination:   string | null
   duration_days: number | null
   travelers:     string | null
+  currency:      string | null
   is_shared:     boolean
 }
 
@@ -46,7 +47,7 @@ async function loadTrip(trip_id: string): Promise<TripRow | null> {
   const admin = getSupabaseAdmin()
   const { data, error } = await admin
     .from('trips')
-    .select('id, title, user_id, trip_data, trip_progress, destination, duration_days, travelers, is_shared')
+    .select('id, title, user_id, trip_data, trip_progress, destination, duration_days, travelers, currency, is_shared')
     .eq('id', trip_id)
     .single()
   if (error || !data) return null
@@ -91,6 +92,7 @@ export default async function MobileTripPage({ params }: Props) {
       destination={trip!.destination}
       travelers={trip!.travelers}
       durationDays={trip!.duration_days}
+      currency={trip!.currency}
       tripData={trip!.trip_data ?? {}}
       tripProgress={normalizeTripProgress(trip!.trip_progress)}
       editPlanUrl={`${plannerBase}?trip_id=${trip!.id}&full=1`}
