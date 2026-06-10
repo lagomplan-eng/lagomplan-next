@@ -37,6 +37,26 @@ export function coerceCurrency(raw: unknown): Currency | null {
   return raw === 'USD' ? 'USD' : raw === 'MXN' ? 'MXN' : null
 }
 
+/**
+ * Resolve the trip currency from candidate sources in priority order, falling
+ * back to 'MXN'. The mobile companion uses this with the AUTHORITATIVE top-level
+ * `currency` column first, then the `trip_data.currency` mirror.
+ *
+ * Why it matters (web↔mobile parity): the desktop autosave writes currency only
+ * to the top-level column — its wholesale `trip_data` bundle omits `currency`,
+ * so `trip_data.currency` is wiped on every desktop save. If mobile read only
+ * `trip_data.currency` it would revert to MXN after any desktop edit (and never
+ * see the currency chosen at creation, which also lands top-level only). Reading
+ * the top-level column first keeps both surfaces in agreement.
+ */
+export function resolveTripCurrency(...candidates: unknown[]): Currency {
+  for (const c of candidates) {
+    const cur = coerceCurrency(c)
+    if (cur) return cur
+  }
+  return 'MXN'
+}
+
 const NOTE_MAX = 500          // generous; matches the booking-URL cap in booking.ts
 const MAX_PACKING = 1000      // tamper guard — packing lists are never this long
 

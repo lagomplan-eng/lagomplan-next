@@ -12,7 +12,7 @@
  * Exit 0 on all-pass, 1 if anything failed.
  */
 
-import { normalizeTripProgress, sanitizeAnnotation, coerceCurrency } from '../lib/planner/progress'
+import { normalizeTripProgress, sanitizeAnnotation, coerceCurrency, resolveTripCurrency } from '../lib/planner/progress'
 import { deriveChecksFromDays, type Day } from '../lib/planner/checks'
 import type { TripSegment } from '../lib/planner/segments'
 
@@ -144,6 +144,26 @@ expectEq('U-24c coerceCurrency rejects empty string', coerceCurrency(''), null)
 expectEq('U-24d coerceCurrency rejects null/number/object',
   [coerceCurrency(null), coerceCurrency(2), coerceCurrency({})],
   [null, null, null])
+
+// ── resolveTripCurrency — web↔mobile parity guard ─────────────────────────────
+// Mobile must prefer the authoritative top-level `currency` column over the
+// (desktop-wiped) trip_data.currency mirror, falling back to MXN.
+expectEq('resolveTripCurrency: top-level wins over trip_data mirror',
+  resolveTripCurrency('USD', 'MXN'), 'USD')
+expectEq('resolveTripCurrency: falls back to trip_data when top-level missing',
+  resolveTripCurrency(null, 'USD'), 'USD')
+expectEq('resolveTripCurrency: falls back to trip_data when top-level undefined',
+  resolveTripCurrency(undefined, 'USD'), 'USD')
+expectEq('resolveTripCurrency: both missing → MXN',
+  resolveTripCurrency(null, undefined), 'MXN')
+expectEq('resolveTripCurrency: no args → MXN',
+  resolveTripCurrency(), 'MXN')
+expectEq('resolveTripCurrency: garbage top-level skips to valid trip_data',
+  resolveTripCurrency('EUR', 'USD'), 'USD')
+expectEq('resolveTripCurrency: all garbage → MXN',
+  resolveTripCurrency('EUR', 42, {}), 'MXN')
+expectEq('resolveTripCurrency: explicit MXN top-level honored',
+  resolveTripCurrency('MXN', 'USD'), 'MXN')
 
 // ───────── tally + exit ─────────
 
