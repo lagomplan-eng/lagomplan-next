@@ -147,7 +147,7 @@
 |-----|-------------|---------------------|--------|----------|
 | AFF-01 | Affiliate links use the canonical Stay22 `allez` form with address/dates/adults/campaign. | Built via `buildAffiliateLink`; never throws on bad input. | ✅ | `lib/affiliate/build.ts:28-91` |
 | AFF-02 | Providers: booking, hotels.com, getyourguide, expedia. | Each maps to an allez slug + category. | ✅ | `lib/affiliate/providers.ts:27-52` |
-| AFF-03 | Stay22 LetMeAllez auto-intercept loads site-wide; app-owned links bypass hijack via preventDefault+window.open. | Owned links land on intended URL, not Booking.com. | ✅ ⚠️ | `layout.tsx:182-201`; memory `project_stay22-letmeallez-intercept`; verify per surface |
+| AFF-03 | Stay22 LetMeAllez auto-intercept loads site-wide; **every** app-owned `stay22.com` link is protected globally so LetMeAllez can never re-wrap it. | Owned links land on intended `lagomplan` URL with full campaign attribution, not the bare site `lmaID`; no double-tab; non-stay22 + modifier clicks unaffected. | ✅ 🔵 | `components/affiliate/Stay22Guard.tsx` (capture-phase site-wide guard, mounted in `layout.tsx`); supersedes the per-anchor pattern. **Verified live 2026-06-09** (Playwright: cdmx + oaxaca surfaces, guard won the race vs a simulated bubble-phase interceptor; probes for scope/skip-marker/modifier-click passed). memory `project_stay22-letmeallez-intercept` |
 | AFF-04 | Booking confirmation ("Ya reservé") stored with code/checkin/notes/url (url sanitized). | Confirmed card shows code; bad URL scheme stripped. | ✅ | `booking-confirm/route.ts:77-82` |
 | AFF-05 | Affiliate clicks emit `affiliateClicked` (+ hotel-specific events). | provider/surface/category/trip_id captured. | ✅ | `lib/analytics/events.ts:380-407` |
 
@@ -302,7 +302,7 @@
 | Entitlements & payments | 9 | 1 | 1 |
 | Mobile companion | 9 | 2 | 0 |
 | Budget & currency | 6 | 0 | 0 |
-| Hotels & affiliate | 4 | 1 | 0 |
+| Hotels & affiliate | 5 | 0 | 0 |
 | Content: guides | 4 | 1 | 0 |
 | Content: world cup | 3 | 0 | 1 |
 | Content: smart finds | 0 | 2 | 1 |

@@ -36,6 +36,7 @@ import AuthEventsBridge from '../../components/analytics/AuthEventsBridge'
 import AttributionCapture from '../../components/analytics/AttributionCapture'
 import CookieBanner from '../../components/layout/CookieBanner'
 import DomMutationGuard from '../../components/util/DomMutationGuard'
+import Stay22Guard from '../../components/affiliate/Stay22Guard'
 import '../globals.css'
 
 // GA4 loader stays in the layout (with Consent Mode v2 defaults set
@@ -215,6 +216,9 @@ export default async function RootLayout({
                   must mount first so the removeChild/insertBefore patch is
                   applied before any content renders. */}
               <DomMutationGuard />
+              {/* Protects already-built stay22.com affiliate links from the
+                  LetMeAllez interceptor site-wide (see Stay22Guard). */}
+              <Stay22Guard />
               {/* Nav is position:fixed — every first section needs pt-[100px] */}
               <Nav />
               {children}
