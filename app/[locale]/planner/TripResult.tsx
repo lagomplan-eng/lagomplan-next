@@ -14,6 +14,7 @@ import { TripShareModal } from '../../../components/trips/TripShareModal'
 // Check (task) derivation is shared with the mobile companion view so both
 // derive the identical task list from the same itinerary — see lib/planner/checks.ts.
 import { deriveChecksFromDays, reconcileDoneChecks, normalizeCheckItem } from '../../../lib/planner/checks'
+import { buildPlannerTripData } from '../../../lib/planner/persist'
 import Image from 'next/image'
 import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
 import type { Accommodation, TripDestinationContext } from '../../../lib/planner/accommodations'
@@ -1910,7 +1911,7 @@ export default function TripResult({ params }: Props) {
       // accommodations included so per-card "Ya reservé" bookings survive
       // autosave — the /api/trips/[trip_id] PATCH overwrites trip_data
       // wholesale, so any field omitted here is wiped from the DB row.
-      trip_data: { title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined, accommodations },
+      trip_data: buildPlannerTripData({ title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr, segments, accommodations }),
       // Phase 2B — traveler details flow through autosave so drawer edits
       // (e.g. pareja → familia + 2 kids) survive refresh without needing a
       // regenerate.
@@ -2021,7 +2022,7 @@ export default function TripResult({ params }: Props) {
           keepalive:   true,  // survives document unload (~64KB cap)
           body: JSON.stringify({
             title: s.tripTitle,
-            trip_data: { title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr, segments: segments.length > 0 ? segments : undefined, accommodations: s.accommodations },
+            trip_data: buildPlannerTripData({ title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr, segments, accommodations: s.accommodations }),
             travelers:            s.prefTraveler || null,
             traveler_adults:      s.prefAdults,
             traveler_children:    childrenSerial,

@@ -1,0 +1,62 @@
+name: CI
+
+# Gate every PR (and main pushes) on: typecheck, unit tests, a production
+# build, and — critically — proof that NEXT_PUBLIC_* vars still inline into the
+# client bundle. The last check exists because a dynamic `process.env[name]`
+# lookup silently broke client-side env reads (dev passed; only a prod build
+# exposes it). See docs/qa/trip-planner-test-coverage.md.
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Placeholder NEXT_PUBLIC values so `next build` succeeds without real secrets
+# AND so the inlining guard below has a known string to look for. These are not
+# secrets — NEXT_PUBLIC vars ship to the browser by design. Pages are
+# force-dynamic, so the build never actually connects to Supabase.
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Unit tests (framework-free tsx)
+        run: |
+          fail=0
+          for f in tests/*.ts; do
+            echo "▶ $f"
+            npx tsx "$f" || fail=1
+          done
+          exit $fail
+
+      - name: Production build
+        run: npm run build
+
+      - name: Guard — NEXT_PUBLIC vars must inline into the client bundle
+        run: |
+          if grep -rq "ci-placeholder.supabase.co" .next/static/chunks; then
+            echo "✅ NEXT_PUBLIC_SUPABASE_URL inlined into the client bundle"
+          else
+            echo "❌ NEXT_PUBLIC_SUPABASE_URL did NOT inline client-side."
+            echo "   Likely a dynamic process.env[name] lookup — read NEXT_PUBLIC vars"
+            echo "   as literals (process.env.NEXT_PUBLIC_X). See lib/supabase/env.ts."
+            exit 1
+          fi
