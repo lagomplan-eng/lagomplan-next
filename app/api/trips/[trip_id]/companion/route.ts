@@ -25,18 +25,28 @@
 //                                        write (URL-knowledge-gated, same as the
 //                                        public trip read).
 //
+//   trip_data.days ← itinerary edits from the mobile inline editor (day titles +
+//                    per-activity time/name/description). Read-modify-write like
+//                    the other trip_data fields: only `days` is replaced, every
+//                    other key is preserved. The client round-trips the full raw
+//                    day/item objects (changing only text), and we clamp string
+//                    lengths + cap counts here; item `id` is preserved so derived
+//                    done-checks (`check-${item.id}`) stay matched.
+//
 // Body shape (all fields optional — send only what changed):
 //   {
 //     progress?:      { annotations?: { [itemId]: { note?, link? } }, packedItems?: number[] },
 //     doneChecks?:    string[],
 //     budgetActuals?: { [rowId: string]: number | null },
 //     budgetUserEsts?:{ [rowId: string]: number | null },
-//     currency?:      'MXN' | 'USD'
+//     currency?:      'MXN' | 'USD',
+//     itinerary?:     Array<Day>   // full days array; replaces trip_data.days
 //   }
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../../lib/supabase/server'
 import { normalizeTripProgress, coerceCurrency } from '../../../../../lib/planner/progress'
+import { sanitizeItineraryDays } from '../../../../../lib/planner/itinerary-edit'
 
 type TripDataLike = {
   doneChecks?: unknown
@@ -64,6 +74,7 @@ export async function PATCH(
       budgetActuals?: unknown
       budgetUserEsts?: unknown
       currency?: unknown
+      itinerary?: unknown
     } | null
 
     if (!body || typeof body !== 'object') {
@@ -74,11 +85,19 @@ export async function PATCH(
     // stale/garbage value never blocks an otherwise-valid save.
     const currency = coerceCurrency(body.currency)
 
+    // Itinerary: present-but-not-an-array is a malformed deliberate edit → 400
+    // (unlike currency, we don't silently drop a plan-structure write).
+    const itineraryDays = body.itinerary !== undefined ? sanitizeItineraryDays(body.itinerary) : null
+    if (body.itinerary !== undefined && itineraryDays === null) {
+      return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
+    }
+
     const hasProgress = body.progress !== undefined
     const hasDoneChecks = body.doneChecks !== undefined
     const hasBudget = body.budgetActuals !== undefined || body.budgetUserEsts !== undefined
     const hasCurrency = currency !== null
-    if (!hasProgress && !hasDoneChecks && !hasBudget && !hasCurrency) {
+    const hasItinerary = itineraryDays !== null
+    if (!hasProgress && !hasDoneChecks && !hasBudget && !hasCurrency && !hasItinerary) {
       return NextResponse.json({ error: 'invalid_payload' }, { status: 400 })
     }
 
@@ -126,12 +145,15 @@ export async function PATCH(
     }
 
     // 4b. trip_data — read-modify-write so we never drop days/packing/etc.
-    if (hasDoneChecks || hasBudget || hasCurrency) {
+    if (hasDoneChecks || hasBudget || hasCurrency || hasItinerary) {
       const nextTripData: TripDataLike = { ...(trip.trip_data ?? {}) }
 
       // Mirror currency into the blob so the mobile read-path (trip_data.currency)
       // matches the top-level column desktop reads. Always written together.
       if (hasCurrency) nextTripData.currency = currency!
+
+      // Itinerary edits replace only `days`; every other trip_data key is kept.
+      if (hasItinerary) nextTripData.days = itineraryDays!
 
       if (hasDoneChecks) {
         nextTripData.doneChecks = Array.isArray(body.doneChecks)

@@ -123,6 +123,7 @@ const T = {
     bookTable: 'Reservar mesa', getTickets: 'Comprar boletos', bookTransfer: 'Reservar transfer',
     seeBooking: 'Ver en Booking →', addLink: 'Agrega un enlace primero',
     reserve: 'Reservar para este viaje', alreadyBooked: '¿Ya reservaste? Agregar confirmación →', edit: 'Editar',
+    fldDayTitle: 'Título del día', fldTime: 'Hora', fldName: 'Actividad', fldDesc: 'Descripción', editActivity: 'Editar actividad',
     bkCode: 'Nº de confirmación', bkCodePh: 'BK-483920', bkTime: 'Hora de check-in', bkTimePh: '15:00',
     bkNotes: 'Nota (opcional)', bkNotesPh: 'Pedir habitación alta', bkUrl: 'Enlace de la reserva (opcional)', bkUrlPh: 'https://booking.com/...',
     bkSave: 'Guardar confirmación', bkCancel: 'Cancelar', bkCheckin: 'Check-in',
@@ -159,6 +160,7 @@ const T = {
     bookTable: 'Book table', getTickets: 'Get tickets', bookTransfer: 'Book transfer',
     seeBooking: 'View on Booking →', addLink: 'Add a link first',
     reserve: 'Book for this trip', alreadyBooked: 'Already booked? Add confirmation →', edit: 'Edit',
+    fldDayTitle: 'Day title', fldTime: 'Time', fldName: 'Activity', fldDesc: 'Description', editActivity: 'Edit activity',
     bkCode: 'Confirmation #', bkCodePh: 'BK-483920', bkTime: 'Check-in time', bkTimePh: '15:00',
     bkNotes: 'Note (optional)', bkNotesPh: 'Ask for a higher floor', bkUrl: 'Booking link (optional)', bkUrlPh: 'https://booking.com/...',
     bkSave: 'Save confirmation', bkCancel: 'Cancel', bkCheckin: 'Check-in',
@@ -258,7 +260,11 @@ export default function MobileTripClient(props: Props) {
   const canEdit = isOwner || isAnonTrip
 
   // ── Parse trip_data once ───────────────────────────────────────────────────
-  const days     = useMemo(() => asArray<Day>(props.tripData?.days), [props.tripData])
+  // `days` is editable (inline itinerary editor) so it's state, not a memo. It
+  // holds the RAW item objects from trip_data — edits spread the original so we
+  // never drop fields the mobile view doesn't model (price/affiliate/etc.), and
+  // item `id` is preserved so derived done-checks (`check-${item.id}`) stay matched.
+  const [days, setDays] = useState<Day[]>(() => asArray<Day>(props.tripData?.days))
   const packing  = useMemo(() => asArray<string>(props.tripData?.packing), [props.tripData])
   const segments = useMemo(() => asArray<Segment>(props.tripData?.segments), [props.tripData])
   const people   = useMemo(() => parsePeopleCount(travelers), [travelers])
@@ -319,11 +325,14 @@ export default function MobileTripClient(props: Props) {
   const captureRef = useRef<HTMLInputElement | null>(null)
   const toastTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const persistTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
+  // Set when the itinerary is edited, cleared on a successful save — so a routine
+  // checkmark save doesn't re-write trip_data.days, and a failed save retries.
+  const itineraryDirtyRef = useRef(false)
 
   // Latest persistable state, read by the debounced writer to avoid stale closures.
-  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency })
+  const stateRef = useRef({ annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency, days })
   useEffect(() => {
-    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency }
+    stateRef.current = { annotations, packedItems, doneCheckIds, budgetActuals, budgetEstimates, currency, days }
   })
 
   // ── Mount: default day from today, nudge dismiss state, localStorage rehydrate, open event ──
@@ -393,6 +402,14 @@ export default function MobileTripClient(props: Props) {
   }
 
   // ── Persistence ─────────────────────────────────────────────────────────────
+  function patchCompanion(body: object, onOk: () => void) {
+    fetch(`/api/trips/${encodeURIComponent(tripId)}/companion`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify(body),
+    }).then(res => { if (res.ok) onOk() }).catch(() => { /* best-effort; UI is optimistic */ })
+  }
   function persistNow() {
     if (!canEdit) return
     const s = stateRef.current
@@ -403,23 +420,54 @@ export default function MobileTripClient(props: Props) {
       budgetUserEsts: s.budgetEstimates,
       currency: s.currency,
     }
+    // Itinerary edits live in trip_data (shared plan), so they always go to the
+    // server — for the owner alongside progress (one PATCH = one read-modify-write,
+    // no race), for anon trips as their own PATCH (the route allows anon writes;
+    // anon progress stays per-device in localStorage).
+    const sendItinerary = itineraryDirtyRef.current
     if (loggedIn && isOwner) {
-      fetch(`/api/trips/${encodeURIComponent(tripId)}/companion`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(payload),
-      }).catch(() => { /* best-effort; UI is optimistic */ })
+      patchCompanion(
+        sendItinerary ? { ...payload, itinerary: s.days } : payload,
+        () => { if (sendItinerary) itineraryDirtyRef.current = false },
+      )
     } else {
       try {
         localStorage.setItem(`lagomplan_companion_${tripId}`, JSON.stringify(payload))
       } catch { /* quota/private mode — ignore */ }
+      if (isAnonTrip && sendItinerary) {
+        patchCompanion({ itinerary: s.days }, () => { itineraryDirtyRef.current = false })
+      }
     }
   }
   function schedulePersist() {
     if (!canEdit) return
     clearTimeout(persistTimer.current)
     persistTimer.current = setTimeout(persistNow, 700)
+  }
+
+  // ── Inline itinerary editing (day title + activity time/name/desc) ──────────
+  // Edits spread the original object so unmodeled fields (price/affiliate/
+  // bookingOptions/id) survive the round-trip; the companion route RMW-merges
+  // these back into trip_data.days, preserving every other trip_data field.
+  function editDayTitle(dayIndex: number, title: string) {
+    if (!canEdit) return
+    setDays(prev => prev.map((d, i) => (i === dayIndex ? { ...d, title } : d)))
+    itineraryDirtyRef.current = true
+    schedulePersist()
+  }
+  function editItem(
+    dayIndex: number,
+    itemId: string,
+    patch: Partial<Pick<ItineraryItem, 'time' | 'name' | 'desc'>>,
+  ) {
+    if (!canEdit) return
+    setDays(prev => prev.map((d, i) => (
+      i === dayIndex
+        ? { ...d, items: d.items.map(it => (it.id === itemId ? { ...it, ...patch } : it)) }
+        : d
+    )))
+    itineraryDirtyRef.current = true
+    schedulePersist()
   }
 
   // ── Derived counts ──────────────────────────────────────────────────────────
@@ -806,6 +854,8 @@ export default function MobileTripClient(props: Props) {
             onBook={openBookingDrawer}
             onConfirmBooking={confirmBooking}
             onSubmitNewsletter={submitNewsletter}
+            onEditDayTitle={(title) => editDayTitle(currentDay, title)}
+            onEditItem={(itemId, patch) => editItem(currentDay, itemId, patch)}
           />
         )}
 
@@ -910,6 +960,57 @@ function shortLabel(d: Day, i: number, segments: Segment[], accommodations: Acco
 // ════════════════════════════════════════════════════════════════════════════
 // Itinerary tab
 // ════════════════════════════════════════════════════════════════════════════
+
+// Tap-to-edit inline text. Shows the value with a subtle ✎; tapping swaps to an
+// input/textarea that commits on blur or Enter (Escape cancels). Used for the
+// day title; only mounted when the viewer canEdit.
+function EditableText(p: {
+  value: string
+  onCommit: (v: string) => void
+  ariaLabel: string
+  multiline?: boolean
+  className?: string
+  placeholder?: string
+}) {
+  const [editing, setEditing] = useState(false)
+  const [draft, setDraft] = useState(p.value)
+  function commit() {
+    setEditing(false)
+    const v = draft.trim()
+    if (v !== p.value) p.onCommit(v)
+  }
+  function cancel() { setDraft(p.value); setEditing(false) }
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        aria-label={p.ariaLabel}
+        onClick={(e) => { e.stopPropagation(); setDraft(p.value); setEditing(true) }}
+        className={`group inline-flex items-start gap-[6px] text-left w-full ${p.className ?? ''}`}
+      >
+        <span className="flex-1 min-w-0">{p.value || p.placeholder}</span>
+        <span className="font-mono text-[10px] text-[#BDBDBD] not-italic shrink-0 opacity-60 group-hover:opacity-100 mt-[2px]">✎</span>
+      </button>
+    )
+  }
+
+  const cls = `w-full px-[8px] py-[5px] border border-[#6B8F86] rounded-[7px] bg-[#F4F0E8] outline-none ${p.className ?? ''}`
+  return p.multiline ? (
+    <textarea
+      autoFocus value={draft} rows={2} placeholder={p.placeholder} className={`${cls} resize-none`}
+      onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+      onKeyDown={(e) => { if (e.key === 'Escape') cancel() }}
+    />
+  ) : (
+    <input
+      autoFocus value={draft} placeholder={p.placeholder} className={cls}
+      onChange={(e) => setDraft(e.target.value)} onBlur={commit}
+      onKeyDown={(e) => { if (e.key === 'Enter') commit(); if (e.key === 'Escape') cancel() }}
+    />
+  )
+}
+
 function ItineraryTab(p: {
   day: Day; dayIndex: number; isToday: boolean; t: typeof T['es']; locale: 'es' | 'en'; canEdit: boolean
   accommodation?: Accommodation; booking?: Booking; people: number
@@ -923,6 +1024,8 @@ function ItineraryTab(p: {
   onBook: (item: ItineraryItem) => void
   onConfirmBooking: (accId: string, city: string, booking: Booking) => void
   onSubmitNewsletter: () => void
+  onEditDayTitle: (title: string) => void
+  onEditItem: (itemId: string, patch: Partial<Pick<ItineraryItem, 'time' | 'name' | 'desc'>>) => void
 }) {
   const { day, t, locale, canEdit } = p
   const acc = p.accommodation
@@ -936,7 +1039,17 @@ function ItineraryTab(p: {
         <div className="font-mono text-[9px] text-[#E1615B] tracking-[.1em] uppercase mb-[3px]">
           {p.isToday ? `● ${t.today} · ` : ''}{day.label}
         </div>
-        <div className="font-display text-[17px] italic text-[#1A1A1A] leading-[1.25]">{day.title}</div>
+        {canEdit ? (
+          <EditableText
+            value={day.title}
+            onCommit={(v) => p.onEditDayTitle(v)}
+            ariaLabel={t.fldDayTitle}
+            multiline
+            className="font-display text-[17px] italic text-[#1A1A1A] leading-[1.25]"
+          />
+        ) : (
+          <div className="font-display text-[17px] italic text-[#1A1A1A] leading-[1.25]">{day.title}</div>
+        )}
       </div>
 
       {/* Activities */}
@@ -953,6 +1066,7 @@ function ItineraryTab(p: {
             onSave={(note, link) => p.onSaveAnnotation(item.id, note, link)}
             onOpenLink={p.onOpenLink}
             onBook={() => p.onBook(item)}
+            onEditItem={(patch) => p.onEditItem(item.id, patch)}
           />
         ))}
       </div>
@@ -1043,6 +1157,7 @@ function ActivityRow(p: {
   onToggleExpand: () => void; onConfirm: () => void
   onSave: (note: string, link: string) => void; onOpenLink: (url: string | undefined) => void
   onBook: () => void
+  onEditItem: (patch: Partial<Pick<ItineraryItem, 'time' | 'name' | 'desc'>>) => void
 }) {
   const { item, t, locale, canEdit, open, done } = p
   const action = actionForType(item.type, t)
@@ -1097,6 +1212,31 @@ function ActivityRow(p: {
 
             {canEdit ? (
               <div className="flex flex-col gap-2">
+                {/* Inline itinerary editing — live-edits trip_data.days (debounced
+                    save via the companion route; item.id preserved). */}
+                <div className="flex gap-[6px]">
+                  <div className="flex flex-col gap-[3px] w-[88px] shrink-0">
+                    <label className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.08em] uppercase">{t.fldTime}</label>
+                    <input
+                      value={item.time} onChange={(e) => p.onEditItem({ time: e.target.value })} placeholder="09:00"
+                      className="px-[9px] py-[6px] border border-[#E2DDD5] rounded-[7px] text-[11px] text-[#1A1A1A] bg-[#F4F0E8] outline-none focus:border-[#6B8F86]"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-[3px] flex-1 min-w-0">
+                    <label className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.08em] uppercase">{t.fldName}</label>
+                    <input
+                      value={item.name} onChange={(e) => p.onEditItem({ name: e.target.value })}
+                      className="px-[9px] py-[6px] border border-[#E2DDD5] rounded-[7px] text-[11px] font-medium text-[#1A1A1A] bg-[#F4F0E8] outline-none focus:border-[#6B8F86]"
+                    />
+                  </div>
+                </div>
+                <div className="flex flex-col gap-[3px]">
+                  <label className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.08em] uppercase">{t.fldDesc}</label>
+                  <textarea
+                    value={item.desc} onChange={(e) => p.onEditItem({ desc: e.target.value })} rows={2}
+                    className="px-[9px] py-[6px] border border-[#E2DDD5] rounded-[7px] text-[11px] text-[#1A1A1A] bg-[#F4F0E8] outline-none resize-none leading-[1.4] focus:border-[#6B8F86]"
+                  />
+                </div>
                 <div className="flex flex-col gap-[3px]">
                   <label className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.08em] uppercase">{t.note}</label>
                   <textarea
