@@ -11,6 +11,7 @@
 
 import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
+import { createServerClient } from '@supabase/ssr'
 import { locales, defaultLocale, pathnames } from './i18n'
 
 const intlMiddleware = createMiddleware({
@@ -33,8 +34,28 @@ const LEGACY_REDIRECTS: Record<string, string> = {
   '/crear-cuenta':    '/es/crear-cuenta',
 }
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
+
+  // Protect /founder — skip intl routing, require a valid Supabase session
+  if (pathname.startsWith('/founder')) {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get: (name) => req.cookies.get(name)?.value ?? '',
+          set:    () => {},
+          remove: () => {},
+        },
+      },
+    )
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) {
+      return NextResponse.redirect(new URL('/es/login', req.url))
+    }
+    return NextResponse.next()
+  }
 
   // 301 legacy redirects — check exact match first, then prefix match for slugs
   if (LEGACY_REDIRECTS[pathname]) {
