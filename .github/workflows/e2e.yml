@@ -1,0 +1,66 @@
+name: E2E
+
+# Runs the Playwright suite against a PRODUCTION build (`npm run start`), so it
+# catches build-only failures (e.g. NEXT_PUBLIC inlining) that dev never shows.
+# Smoke-only for now (the mobile-view specs are still test.fixme); promote to a
+# required check once the suite is fleshed out + stable. See
+# docs/qa/MASTER-TEST-PLAN.md and the roadmap board (#74).
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+# Placeholder NEXT_PUBLIC values so the build succeeds + inlines without real
+# secrets (these ship to the browser by design; pages are force-dynamic so the
+# build never connects to Supabase).
+env:
+  NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
+  SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Cache Playwright browser
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Chromium (+ OS deps)
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Install Chromium OS deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+
+      - name: Build
+        run: npm run build
+
+      - name: E2E smoke (desktop-chrome, against the production build)
+        run: npx playwright test --project=desktop-chrome
+        env:
+          CI: 'true'
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
