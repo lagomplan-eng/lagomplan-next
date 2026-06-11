@@ -1053,10 +1053,10 @@ function ItineraryTab(p: {
             onCommit={(v) => p.onEditDayTitle(v)}
             ariaLabel={t.fldDayTitle}
             multiline
-            className="font-display text-[17px] italic text-[#1A1A1A] leading-[1.25]"
+            className="font-display text-[17px] text-[#1A1A1A] leading-[1.25]"
           />
         ) : (
-          <div className="font-display text-[17px] italic text-[#1A1A1A] leading-[1.25]">{day.title}</div>
+          <div className="font-display text-[17px] text-[#1A1A1A] leading-[1.25]">{day.title}</div>
         )}
       </div>
 
@@ -1132,13 +1132,13 @@ function ItineraryTab(p: {
         <div className="mx-[18px] mt-2 mb-1 bg-[#0F3A33] rounded-[14px] px-4 pt-4 pb-[14px] overflow-hidden">
           {p.newsletterDone ? (
             <>
-              <div className="font-display text-[15px] italic text-white mb-1">{t.newsletterDone}</div>
+              <div className="font-display text-[15px] text-white mb-1">{t.newsletterDone}</div>
               <div className="text-[11px] text-white/70 leading-[1.5]">{t.newsletterDoneSub}</div>
             </>
           ) : (
             <>
               <div className="font-mono text-[9px] text-white/50 tracking-[.1em] uppercase mb-[6px]">{t.newsletterEyebrow}</div>
-              <div className="font-display text-[16px] italic text-white leading-[1.3] mb-1">{t.newsletterTitle}</div>
+              <div className="font-display text-[16px] text-white leading-[1.3] mb-1">{t.newsletterTitle}</div>
               <div className="text-[11px] text-white/65 leading-[1.5] mb-3">{t.newsletterSub}</div>
               <div className="flex gap-[6px]">
                 <input
