@@ -17,11 +17,21 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
-  reporter: 'list',
+  reporter: process.env.CI ? [['list'], ['html', { open: 'never' }]] : 'list',
   use: {
     baseURL: process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000',
     trace: 'on-first-retry',
     locale: 'es-MX',
+  },
+  // Boot the app for local/CI runs; against a deployed preview
+  // (PLAYWRIGHT_BASE_URL set) we hit the remote URL instead. CI runs a
+  // PRODUCTION build (`npm run start`) so e2e catches build-only failures —
+  // e.g. NEXT_PUBLIC inlining — that `npm run dev` never reproduces.
+  webServer: process.env.PLAYWRIGHT_BASE_URL ? undefined : {
+    command: process.env.CI ? 'npm run start' : 'npm run dev',
+    url: 'http://localhost:3000/es',
+    timeout: 120_000,
+    reuseExistingServer: !process.env.CI,
   },
   projects: [
     { name: 'mobile-safari', use: { ...devices['iPhone 14'] } },      // primary mobile target (WebKit)
