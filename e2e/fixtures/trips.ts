@@ -9,7 +9,8 @@
 // live in the separate trip_progress column.
 
 export type Fixture = {
-  id: string
+  // No `id` — seedTrip() inserts the row and the DB generates the UUID, which
+  // it returns. Fixtures describe trip *content*, not ids.
   user_id: string | null
   destination: string
   duration_days: number
@@ -20,7 +21,6 @@ export type Fixture = {
 }
 
 export const TRIP_OWNER: Fixture = {
-  id: 'e2e-owner-1',
   user_id: 'e2e-user-abc',
   destination: 'Mexico City',
   duration_days: 3,
@@ -65,7 +65,6 @@ export const TRIP_OWNER: Fixture = {
 // Confirmed-hotel variant
 export const TRIP_OWNER_BOOKED: Fixture = (() => {
   const t: Fixture = JSON.parse(JSON.stringify(TRIP_OWNER))
-  t.id = 'e2e-owner-booked'
   t.trip_data.accommodations[0].booking = {
     confirmed: true, code: 'BK-483920', checkinTime: '15:00', notes: 'Vista al patio', bookingUrl: 'https://booking.com/r/abc',
   }
@@ -73,14 +72,14 @@ export const TRIP_OWNER_BOOKED: Fixture = (() => {
 })()
 
 // Anonymous trip — accessible to anyone, editable (writes go to localStorage)
-export const TRIP_ANONYMOUS: Fixture = { ...JSON.parse(JSON.stringify(TRIP_OWNER)), id: 'e2e-anon', user_id: null }
+export const TRIP_ANONYMOUS: Fixture = { ...JSON.parse(JSON.stringify(TRIP_OWNER)), user_id: null }
 
 // Shared trip — a logged-in non-owner sees it read-only
-export const TRIP_SHARED: Fixture = { ...JSON.parse(JSON.stringify(TRIP_OWNER)), id: 'e2e-shared', is_shared: true }
+export const TRIP_SHARED: Fixture = { ...JSON.parse(JSON.stringify(TRIP_OWNER)), is_shared: true }
 
 // Multi-city CDMX → Oaxaca (two stays + segments)
 export const TRIP_MULTICITY: Fixture = {
-  id: 'e2e-multicity', user_id: 'e2e-user-abc', destination: 'Mexico City',
+  user_id: 'e2e-user-abc', destination: 'Mexico City',
   duration_days: 5, travelers: 'pareja', is_shared: false,
   trip_data: {
     title: 'CDMX y Oaxaca', subtitle: '',
@@ -104,7 +103,6 @@ export const TRIP_MULTICITY: Fixture = {
 // Overnight trip with NO structured accommodations → exercises fallback hotel
 export const TRIP_NO_ACCOMMODATIONS: Fixture = (() => {
   const t: Fixture = JSON.parse(JSON.stringify(TRIP_OWNER))
-  t.id = 'e2e-noacc'
   t.trip_data.accommodations = []
   return t
 })()

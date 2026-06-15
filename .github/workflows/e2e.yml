@@ -1,10 +1,10 @@
 name: E2E
 
-# Runs the Playwright suite against a PRODUCTION build (`npm run start`), so it
-# catches build-only failures (e.g. NEXT_PUBLIC inlining) that dev never shows.
-# Smoke-only for now (the mobile-view specs are still test.fixme); promote to a
-# required check once the suite is fleshed out + stable. See
-# docs/qa/MASTER-TEST-PLAN.md and the roadmap board (#74).
+# Runs the Playwright suite against a PRODUCTION build talking to a throwaway
+# LOCAL Supabase spun up in the runner. This (a) catches build-only failures
+# like NEXT_PUBLIC inlining that dev never shows, and (b) gives DB-backed specs
+# (mobile-view) a real database to seed — the route loads trips server-side, so
+# page.route() can't fake them. See docs/qa/MASTER-TEST-PLAN.md + board #74.
 
 on:
   pull_request:
@@ -12,18 +12,18 @@ on:
   push:
     branches: [main]
 
-# Placeholder NEXT_PUBLIC values so the build succeeds + inlines without real
-# secrets (these ship to the browser by design; pages are force-dynamic so the
-# build never connects to Supabase).
+# Point everything at the LOCAL Supabase. These are the fixed Supabase local-dev
+# demo keys — NOT secrets (identical on every machine). The build inlines the
+# NEXT_PUBLIC_* values; the server + seedTrip use the service-role key.
 env:
-  NEXT_PUBLIC_SUPABASE_URL: https://ci-placeholder.supabase.co
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-placeholder-anon-key
-  SUPABASE_SERVICE_ROLE_KEY: ci-placeholder-service-key
+  NEXT_PUBLIC_SUPABASE_URL: http://127.0.0.1:54321
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0
+  SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -33,6 +33,14 @@ jobs:
           cache: npm
 
       - run: npm ci
+
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Start local Supabase (applies migrations → builds the schema)
+        run: supabase start
 
       - name: Cache Playwright browser
         id: pw-cache
@@ -49,10 +57,10 @@ jobs:
         if: steps.pw-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
 
-      - name: Build
+      - name: Build (against local Supabase)
         run: npm run build
 
-      - name: E2E smoke (desktop-chrome, against the production build)
+      - name: E2E (desktop-chrome) — prod build + local Supabase
         run: npx playwright test --project=desktop-chrome
         env:
           CI: 'true'
@@ -64,3 +72,7 @@ jobs:
           name: playwright-report
           path: playwright-report/
           retention-days: 7
+
+      - name: Stop local Supabase
+        if: ${{ always() }}
+        run: supabase stop || true
