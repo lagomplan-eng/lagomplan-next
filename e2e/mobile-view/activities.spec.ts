@@ -29,13 +29,14 @@ test.describe('mobile-view · activities & booking drawer', () => {
     while (created.length) await deleteTrip(created.pop() as string)
   })
 
-  test('E-14: tapping an activity expands it; Guardar collapses it', async ({ page }) => {
+  test('E-14: tapping an activity expands it; tapping again collapses it', async ({ page }) => {
     const id = await seed(TRIP_ACTIVITIES)
     await gotoTrip(page, id)
-    await page.getByText('Comida en Pujol', { exact: true }).click()
+    const name = page.getByText('Comida en Pujol', { exact: true })
+    await name.click()
     await expect(page.getByRole('button', { name: /Reservar mesa →/ })).toBeVisible()
-    // The header stays open while editing — the single Guardar is the collapse.
-    await page.getByRole('button', { name: 'Guardar', exact: true }).click()
+    // Re-tapping the header collapses it (the editor body opts out of the toggle).
+    await name.click()
     await expect(page.getByRole('button', { name: /Reservar mesa →/ })).toHaveCount(0)
   })
 

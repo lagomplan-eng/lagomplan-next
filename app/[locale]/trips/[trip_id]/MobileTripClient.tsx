@@ -1174,8 +1174,8 @@ function ActivityRow(p: {
   const [link, setLink] = useState(p.annotation?.link ?? '')
 
   return (
-    <div className={`flex gap-[10px] py-[11px] border-b border-[#E2DDD5] last:border-b-0 ${open ? '' : 'cursor-pointer'}`}
-         onClick={() => { if (!open) p.onToggleExpand() }}>
+    <div className="flex gap-[10px] py-[11px] border-b border-[#E2DDD5] last:border-b-0 cursor-pointer"
+         onClick={() => p.onToggleExpand()}>
       <div className="font-mono text-[10px] text-[#BDBDBD] min-w-[36px] pt-[1px] text-right shrink-0">{item.time}</div>
       <div className="w-[26px] h-[26px] rounded-[7px] flex items-center justify-center text-[12px] shrink-0 bg-[#EDE7E1]">{ITEM_ICON[item.type]}</div>
       <div className="flex-1 min-w-0">
@@ -1192,7 +1192,9 @@ function ActivityRow(p: {
         )}
 
         {open && (
-          <div className="pt-[10px] mt-2 border-t border-[#E2DDD5]" onClick={(e) => e.stopPropagation()}>
+          // Tapping the header (above) toggles the row; the editor below opts
+          // out so interacting with its fields doesn't collapse it mid-edit.
+          <div className="pt-[10px] mt-2 border-t border-[#E2DDD5] cursor-default" onClick={(e) => e.stopPropagation()}>
             {(reserveLabel || canEdit) && (
               <div className="flex gap-[6px] mb-2 flex-wrap">
                 {reserveLabel && (
