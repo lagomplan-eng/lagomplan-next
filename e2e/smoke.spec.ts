@@ -22,9 +22,12 @@ for (const path of ['/es', '/en']) {
     const pageErrors: string[] = []
     page.on('pageerror', (e) => pageErrors.push(e.message))
 
-    await page.goto(path, { waitUntil: 'networkidle' })
-    // Let SupabaseProvider's useEffect run — that's where the client is created
-    // and where the env guard would throw if a var didn't inline.
+    // 'domcontentloaded' not 'networkidle': the homepage keeps long-lived
+    // connections (analytics/web-vitals) so it rarely reaches idle within the
+    // 30s cap under CI parallel load — a flaky timeout unrelated to the env
+    // fatal this guards. The 1500ms settle below still lets SupabaseProvider's
+    // useEffect run (where the client is created and the env guard would throw).
+    await page.goto(path, { waitUntil: 'domcontentloaded' })
     await page.waitForTimeout(1500)
 
     const body = await page.evaluate(() => document.body.innerText)
@@ -35,7 +38,8 @@ for (const path of ['/es', '/en']) {
 }
 
 test('E-SMOKE: a static content page (World Cup city) renders', async ({ page }) => {
-  await page.goto('/es/mundial/cdmx', { waitUntil: 'networkidle' })
+  await page.goto('/es/mundial/cdmx', { waitUntil: 'domcontentloaded' })
+  await page.waitForTimeout(1000)
   const body = await page.evaluate(() => document.body.innerText)
   expect(body, 'no fatal error on a static content page').not.toMatch(FATAL)
 })
