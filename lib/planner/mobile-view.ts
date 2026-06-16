@@ -36,12 +36,16 @@ export function parseTripDate(iso: string | null | undefined): Date | null {
  *
  *   today before the trip  → day 0,            isToday: false
  *   today within the trip  → that day index,   isToday: true
- *   today after the trip   → last day,         isToday: false
+ *   today after the trip   → day 0,            isToday: false
  *   no derivable start     → day 0,            isToday: false
+ *
+ * Only an in-progress trip jumps to "today"; a not-yet-started OR already-
+ * finished trip opens on day 1 — landing a reviewer on the last day of a
+ * completed trip was disorienting.
  *
  * Both dates are normalized to local midnight before differencing, so the
  * result is unaffected by time-of-day or DST. `dayCount` is the number of
- * days in the itinerary; the returned index is clamped to [0, dayCount-1].
+ * days in the itinerary; the returned index is always within [0, dayCount-1].
  */
 export function getTodayDayIndex(
   startISO: string | null | undefined,
@@ -55,7 +59,7 @@ export function getTodayDayIndex(
   const nowMid   = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
   const diff = Math.floor((nowMid - startMid) / 86400000)
 
-  if (diff < 0) return { dayIndex: 0, isToday: false }
-  if (diff >= dayCount) return { dayIndex: dayCount - 1, isToday: false }
-  return { dayIndex: diff, isToday: true }
+  if (diff < 0) return { dayIndex: 0, isToday: false }        // trip hasn't started → day 1
+  if (diff >= dayCount) return { dayIndex: 0, isToday: false } // trip already ended → day 1
+  return { dayIndex: diff, isToday: true }                    // mid-trip → today
 }

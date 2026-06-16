@@ -32,9 +32,9 @@ expectEq('U-13: before the trip → clamp day 0, not today',
   getTodayDayIndex(START, 3, new Date('2026-04-01T12:00:00')),
   { dayIndex: 0, isToday: false })
 
-expectEq('U-14: after the trip → clamp last day, not today',
+expectEq('U-14: after the trip → day 0, not today',
   getTodayDayIndex(START, 3, new Date('2026-04-20T12:00:00')),
-  { dayIndex: 2, isToday: false })
+  { dayIndex: 0, isToday: false })
 
 expectEq('U-15: late-evening local time on start day stays day 0 (no off-by-one)',
   getTodayDayIndex(START, 3, new Date('2026-04-12T23:59:00')),
