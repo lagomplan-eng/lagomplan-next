@@ -90,24 +90,50 @@ export async function deleteTrip(id: string): Promise<void> {
 
 /**
  * Log in as a test user through the REAL login UI (so @supabase/ssr sets its own
- * cookies — more robust than hand-crafting them). Creates the user if needed
- * (idempotent). Returns the user's id (use as a trip's user_id for owner cases).
+ * cookies — more robust than hand-crafting them). Returns the user's id (use as
+ * a trip's user_id for owner cases).
+ *
+ * The user is created via the public signUp endpoint (anon key), NOT the admin
+ * API: local Supabase (CLI ≥ 2.7x) signs JWTs asymmetrically, so the legacy
+ * HS256 service-role key — fine for PostgREST — is rejected by GoTrue's admin
+ * Bearer. signUp needs no admin auth and works under any scheme; local config
+ * has enable_confirmations=false, so the account is immediately usable.
  */
 export async function loginAs(
   page: Page,
   email = 'e2e-owner@test.local',
   password = 'e2e-password-123',
 ): Promise<string> {
-  const { data: created } = await admin().auth.admin.createUser({ email, password, email_confirm: true })
-  let userId = created?.user?.id
-  if (!userId) {
-    const { data: list } = await admin().auth.admin.listUsers()
-    userId = list?.users?.find((u: { email?: string }) => u.email === email)?.id
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  if (!url || !anon) {
+    throw new Error('loginAs needs NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY in env')
   }
+  const pub = createClient(url, anon, { auth: { persistSession: false } })
+
+  // Create (idempotent — ignore "already registered"); then resolve the id.
+  const { data: su, error } = await pub.auth.signUp({ email, password })
+  if (error && !/already|registered|exists/i.test(error.message)) {
+    throw new Error(`loginAs signUp failed: ${error.message}`)
+  }
+  let userId = su?.user?.id
+  if (!userId) {
+    const { data: si } = await pub.auth.signInWithPassword({ email, password })
+    userId = si?.user?.id
+  }
+  if (!userId) throw new Error('loginAs could not resolve a user id')
+
+  // trips.user_id → profiles(id). In prod an auth.users trigger creates the
+  // profile row on signup, but that trigger lives in the auth schema and isn't
+  // captured by the public-schema dump (#78 baseline), so seed it ourselves.
+  const { error: profErr } = await admin().from('profiles').upsert({ id: userId, email }, { onConflict: 'id' })
+  if (profErr) throw new Error(`loginAs could not seed profile: ${profErr.message}`)
+
+  // Sign in through the UI so the app's @supabase/ssr client writes its cookies.
   await page.goto(`/${LOCALE}/login`)
   await page.locator('input[type="email"]').first().fill(email)
   await page.locator('input[type="password"]').first().fill(password)
   await page.getByRole('button', { name: /iniciar sesión|sign in|entrar|continuar/i }).first().click()
-  await page.waitForLoadState('networkidle')
-  return userId as string
+  await page.waitForURL((u) => !u.pathname.endsWith('/login'), { timeout: 15_000 })
+  return userId
 }
