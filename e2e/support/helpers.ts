@@ -57,6 +57,41 @@ export async function captureGaEvents(page: Page) {
 }
 
 /**
+ * Capture window.open() calls. Stubs window.open BEFORE any app script runs and
+ * records every requested URL into window.__opened. Returns a reader.
+ *
+ * The mobile view opens affiliate/booking links via window.open(url, '_blank')
+ * — both the per-item booking drawer and the hotel "Reservar" CTA do this to
+ * bypass the Stay22 anchor interceptor. Stubbing window.open lets us assert the
+ * intended target (host, not Booking.com) without a real cross-site navigation.
+ *
+ * Usage:
+ *   const opened = await captureWindowOpen(page)
+ *   await gotoTrip(page, id)
+ *   // …click a Reservar button…
+ *   expect(await opened.last()).toContain('stay22.com')
+ */
+export async function captureWindowOpen(page: Page) {
+  await page.addInitScript(() => {
+    ;(window as any).__opened = []
+    ;(window as any).open = (url?: string | URL) => {
+      ;(window as any).__opened.push(String(url ?? ''))
+      return null // the app discards the return value
+    }
+  })
+  return {
+    /** Every URL passed to window.open so far. */
+    all: async () => page.evaluate(() => (window as any).__opened ?? []),
+    /** The most recent window.open URL, or null. */
+    last: async () =>
+      page.evaluate(() => {
+        const a = (window as any).__opened ?? []
+        return a.length ? a[a.length - 1] : null
+      }),
+  }
+}
+
+/**
  * Insert a fixture trip and return its DB-generated id. The route loads trips
  * server-side, so the row must exist in the DB the app reads — we don't pass an
  * id (Postgres generates the UUID and we hand it back). Clean up with deleteTrip.
@@ -99,35 +134,55 @@ export async function deleteTrip(id: string): Promise<void> {
  * Bearer. signUp needs no admin auth and works under any scheme; local config
  * has enable_confirmations=false, so the account is immediately usable.
  */
-export async function loginAs(
-  page: Page,
+/**
+ * Create a profile-backed test user (no UI session) and return its id. Use to
+ * seed a trip owner who is NOT the logged-in viewer (read-only / shared cases).
+ *
+ * The account is made via the public signUp endpoint (anon key), NOT the admin
+ * API: local Supabase (CLI ≥ 2.7x) signs JWTs asymmetrically, so the legacy
+ * HS256 service-role key — fine for PostgREST — is rejected by GoTrue's admin
+ * Bearer. signUp needs no admin auth and works under any scheme; local config
+ * has enable_confirmations=false, so the account is immediately usable.
+ *
+ * trips.user_id → profiles(id), and profiles.id → auth.users(id). In prod an
+ * auth.users trigger creates the profile on signup, but that trigger lives in
+ * the auth schema and isn't captured by the public-schema dump (#78 baseline),
+ * so we seed the profiles row ourselves.
+ */
+export async function createTestUser(
   email = 'e2e-owner@test.local',
   password = 'e2e-password-123',
 ): Promise<string> {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL
   const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
   if (!url || !anon) {
-    throw new Error('loginAs needs NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY in env')
+    throw new Error('createTestUser needs NEXT_PUBLIC_SUPABASE_URL + NEXT_PUBLIC_SUPABASE_ANON_KEY in env')
   }
   const pub = createClient(url, anon, { auth: { persistSession: false } })
 
   // Create (idempotent — ignore "already registered"); then resolve the id.
   const { data: su, error } = await pub.auth.signUp({ email, password })
   if (error && !/already|registered|exists/i.test(error.message)) {
-    throw new Error(`loginAs signUp failed: ${error.message}`)
+    throw new Error(`createTestUser signUp failed: ${error.message}`)
   }
   let userId = su?.user?.id
   if (!userId) {
     const { data: si } = await pub.auth.signInWithPassword({ email, password })
     userId = si?.user?.id
   }
-  if (!userId) throw new Error('loginAs could not resolve a user id')
+  if (!userId) throw new Error('createTestUser could not resolve a user id')
 
-  // trips.user_id → profiles(id). In prod an auth.users trigger creates the
-  // profile row on signup, but that trigger lives in the auth schema and isn't
-  // captured by the public-schema dump (#78 baseline), so seed it ourselves.
   const { error: profErr } = await admin().from('profiles').upsert({ id: userId, email }, { onConflict: 'id' })
-  if (profErr) throw new Error(`loginAs could not seed profile: ${profErr.message}`)
+  if (profErr) throw new Error(`createTestUser could not seed profile: ${profErr.message}`)
+  return userId
+}
+
+export async function loginAs(
+  page: Page,
+  email = 'e2e-owner@test.local',
+  password = 'e2e-password-123',
+): Promise<string> {
+  const userId = await createTestUser(email, password)
 
   // Sign in through the UI so the app's @supabase/ssr client writes its cookies.
   await page.goto(`/${LOCALE}/login`)
