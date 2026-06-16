@@ -1,12 +1,67 @@
-import { test } from '@playwright/test'
+import { test, expect } from '@playwright/test'
+import { gotoTrip, seedTrip, deleteTrip } from '../support/helpers'
+import { TRIP_ANONYMOUS } from '../fixtures/trips'
 
 // Preparativos (pre-trip checklist + packing) — QA cases E-37..E-42.
-// See docs/qa/mobile-view-test-cases.md.
+// Anonymous fixture: canEdit=true, persistence is localStorage (same browser
+// context survives reload). The seeded trip derives 5 pre-trip checks
+// (book-hotel pre-done → 1/5) and a 4-item packing list with [0,2] pre-packed
+// → 2/4. Header progress starts at 4/14 (10 checks + 4 packing, 4 done).
+// E-41's owner/DB persistence is covered here via the anon/localStorage path.
 test.describe('mobile-view · preparativos', () => {
-  test.fixme('E-37: tab "Preparativos" shows "Antes de salir" + "Qué llevar" sections', async () => {})
-  test.fixme('E-38: "Antes de salir" lists pre-trip checks (Reservar hotel, Empacar maleta, …)', async () => {})
-  test.fixme('E-39: checking a pre-trip item persists and updates the header progress bar', async () => {})
-  test.fixme('E-40: packing items render; tapping toggles packed; counter X/Y updates', async () => {})
-  test.fixme('E-41: packing/pre-trip state persists after reload (owner)', async () => {})
-  test.fixme('E-42: empty packing list → packing section omitted (no crash)', async () => {})
+  let tripId: string
+  test.beforeEach(async ({ page }) => {
+    tripId = await seedTrip(TRIP_ANONYMOUS)
+    await gotoTrip(page, tripId)
+    await page.getByRole('button', { name: 'Preparativos' }).click()
+  })
+  test.afterEach(async () => { if (tripId) await deleteTrip(tripId) })
+
+  test('E-37: tab "Preparativos" shows "Antes de salir" + packing sections', async ({ page }) => {
+    await expect(page.getByText('Antes de salir').first()).toBeVisible()
+    await expect(page.getByText('Lista de equipaje')).toBeVisible()
+  })
+
+  test('E-38: "Antes de salir" lists pre-trip checks (book hotel, pack, …)', async ({ page }) => {
+    await expect(page.getByText('Reservar hotel')).toBeVisible()
+    // Header counter reflects 5 derived pre-trip checks, 1 pre-done.
+    await expect(page.getByText('1/5')).toBeVisible()
+  })
+
+  test('E-39: checking a pre-trip item updates the header progress bar', async ({ page }) => {
+    const header = page.getByText(/% · \d+\/\d+ tareas/)
+    await expect(header).toContainText('4/14')
+    // "Reservar hotel" is pre-done; toggle an unchecked item so done increments.
+    await page.getByRole('button').filter({ hasText: 'Empacar maleta' }).first().click()
+    await expect(header).toContainText('5/14')
+  })
+
+  test('E-40: packing items render; tapping toggles packed; counter X/Y updates', async ({ page }) => {
+    await expect(page.getByText('2/4 empacado')).toBeVisible()
+    await page.getByRole('button').filter({ hasText: 'Paraguas' }).click()   // index 1, unpacked
+    await expect(page.getByText('3/4 empacado')).toBeVisible()
+  })
+
+  test('E-41: packing state persists after reload (anon → localStorage)', async ({ page }) => {
+    await page.getByRole('button').filter({ hasText: 'Paraguas' }).click()
+    await expect(page.getByText('3/4 empacado')).toBeVisible()
+    await page.waitForTimeout(1000)   // debounced localStorage write (700ms)
+    await page.reload()
+    await page.getByRole('button', { name: 'Preparativos' }).click()
+    await expect(page.getByText('3/4 empacado')).toBeVisible()
+  })
+
+  test('E-42: empty packing list → packing section omitted (no crash)', async ({ page }) => {
+    const noPacking = JSON.parse(JSON.stringify(TRIP_ANONYMOUS))
+    noPacking.trip_data.packing = []
+    const id = await seedTrip(noPacking)
+    try {
+      await gotoTrip(page, id)
+      await page.getByRole('button', { name: 'Preparativos' }).click()
+      await expect(page.getByText('Antes de salir').first()).toBeVisible()   // still renders
+      await expect(page.getByText('Lista de equipaje')).toHaveCount(0)        // packing omitted
+    } finally {
+      await deleteTrip(id)
+    }
+  })
 })
