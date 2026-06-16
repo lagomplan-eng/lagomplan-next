@@ -106,3 +106,33 @@ export const TRIP_NO_ACCOMMODATIONS: Fixture = (() => {
   t.trip_data.accommodations = []
   return t
 })()
+
+// Activities-focused fixture — day 1 carries one of every itinerary type so the
+// activities spec can assert the per-type "Reservar" verb (restaurant→mesa,
+// tour→tour, transfer→traslado, free→none) and the booking drawer in one trip.
+// Anonymous (canEdit=true) so no login is needed for the owner-editable cases;
+// derived per-day checks come from the tour + restaurant items.
+export const TRIP_ACTIVITIES: Fixture = {
+  user_id: null,
+  destination: 'Mexico City',
+  duration_days: 1,
+  travelers: 'pareja',
+  is_shared: false,
+  trip_data: {
+    title: 'Un día en CDMX',
+    subtitle: '',
+    days: [
+      { n: 1, label: 'DÍA 01', title: 'Sabores y rutas', progress: 0, items: [
+        { id: 'act-tour',     type: 'tour',       name: 'Tour a Teotihuacán',     time: '09:00', price: '$250 MXN', desc: 'Pirámides del Sol y la Luna.' },
+        { id: 'act-rest',     type: 'restaurant', name: 'Comida en Pujol',        time: '14:00', price: '$1200 MXN', desc: 'Menú degustación.' },
+        { id: 'act-transfer', type: 'transfer',   name: 'Traslado al aeropuerto', time: '20:00', price: '$350 MXN', desc: 'Llegada AICM.' },
+        { id: 'act-free',     type: 'free',       name: 'Caminata por la Roma',   time: '17:00', desc: 'Paseo libre por la colonia.' },
+      ]},
+    ],
+    accommodations: [],
+    budgetRows: [],
+    packing: [],
+    doneChecks: [],
+  },
+  trip_progress: { annotations: {}, packedItems: [] },
+}
