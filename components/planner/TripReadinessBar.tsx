@@ -49,6 +49,9 @@ interface Props {
   milestones:   Milestone[]
   nextCheck:    NextCheckInfo | null
   daysCount:    number
+  /** Whole days until departure (parsed from the trip start). null when there's
+   *  no start date or it's in the past — drives the countdown/urgency copy. */
+  daysUntilTrip?: number | null
   locale:       'es' | 'en'
   /** Toggle handler — the bar calls this with the next check's ID when the
    *  user clicks the CTA (mark done) or Deshacer (undo). Same handler
@@ -58,7 +61,7 @@ interface Props {
 
 export default function TripReadinessBar({
   readinessPct, totalChecks, doneChecks, pendingCount,
-  milestones, nextCheck, daysCount, locale, onToggleCheck,
+  milestones, nextCheck, daysCount, daysUntilTrip, locale, onToggleCheck,
 }: Props) {
   const isES = locale === 'es'
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -113,13 +116,32 @@ export default function TripReadinessBar({
       ? (isES ? `${daysCount} ${daysCount === 1 ? 'día' : 'días'} planificados` : `${daysCount} ${daysCount === 1 ? 'day' : 'days'} planned`)
       : (isES ? `Tu viaje está ${readinessPct}% listo` : `Your trip is ${readinessPct}% ready`)
 
-  const sub = tripReady
+  // Countdown to departure — turns the readiness number into something
+  // time-bound ("Faltan 5 días"). Escalates emotionally (⏳) inside the last
+  // week. null/past dates fall back to the plain step framing below.
+  const d = daysUntilTrip
+  const countdown = d == null ? null
+    : d === 0 ? (isES ? 'Hoy es el día ✈️'      : "Today's the day ✈️")
+    : d === 1 ? (isES ? 'Falta 1 día'           : '1 day to go')
+    :           (isES ? `Faltan ${d} días`      : `${d} days to go`)
+  const urgent = d != null && d > 0 && d <= 7
+
+  // Steps half of the sub line (countdown is prepended when present).
+  const steps = tripReady
     ? (isES ? 'Todo confirmado'                    : 'All confirmed')
     : totalChecks === 0
       ? (isES ? 'Listo para empezar'              : 'Ready to plan')
       : pendingCount === 1
-        ? (isES ? 'Te falta 1 paso para viajar'   : '1 step to go')
-        : (isES ? `Te faltan ${pendingCount} pasos para viajar` : `${pendingCount} steps to go`)
+        ? (isES ? 'Te falta 1 paso'               : '1 step to go')
+        : (isES ? `Te faltan ${pendingCount} pasos` : `${pendingCount} steps to go`)
+
+  // When there's no countdown, keep the original standalone "…para viajar"
+  // framing; with a countdown the date already carries the urgency.
+  const sub = countdown
+    ? `${urgent ? '⏳ ' : ''}${countdown} · ${steps}`
+    : (totalChecks > 0 && !tripReady
+        ? (isES ? `${steps} para viajar` : steps)
+        : steps)
 
   const nextLabel = isES ? 'Siguiente' : 'Next'
 

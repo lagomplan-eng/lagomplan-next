@@ -3153,6 +3153,19 @@ export default function TripResult({ params }: Props) {
   const progressPct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0
   const pendingCount = totalChecks - doneChecks
 
+  // Days until departure — drives the urgency copy in the readiness bar. Parses
+  // the trip start (prefStart, YYYY-MM-DD) as LOCAL midnight to avoid the
+  // classic UTC off-by-one. null when there's no start date or it's in the past.
+  const daysUntilTrip = useMemo(() => {
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(prefStart ?? '')
+    if (!m) return null
+    const start = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])).getTime()
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const diff = Math.round((start - today) / 86400000)
+    return diff >= 0 ? diff : null
+  }, [prefStart])
+
   // Set of check IDs — lets each day-item lookup in O(1) whether it has
   // a corresponding bookable check (StatusPill visibility) and whether
   // that check is done (recommended ↔ booked transition).
@@ -3963,6 +3976,7 @@ export default function TripResult({ params }: Props) {
               startsMilestone: nextRec.startsMilestone,
             } : null}
             daysCount={days.length}
+            daysUntilTrip={daysUntilTrip}
             locale={locale === 'en' ? 'en' : 'es'}
             // Bar CTA now marks the next check done directly. The bar shows
             // an inline "✓ Reservado · Deshacer" affordance for 4 s after
