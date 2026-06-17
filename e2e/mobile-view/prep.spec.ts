@@ -6,8 +6,9 @@ import { TRIP_ANONYMOUS } from '../fixtures/trips'
 // Anonymous fixture: canEdit=true, persistence is localStorage (same browser
 // context survives reload). The seeded trip derives 5 pre-trip checks
 // (book-hotel pre-done → 1/5) and a 4-item packing list with [0,2] pre-packed
-// → 2/4. Header progress starts at 4/14 (10 checks + 4 packing, 4 done).
-// E-41's owner/DB persistence is covered here via the anon/localStorage path.
+// → 2/4. The Trip Readiness header (checks-only) starts at 20% · "Te faltan 8
+// pasos" (10 checks, 2 done); the packing list has its own counter and does NOT
+// move readiness. E-41's owner/DB persistence is covered via the anon path.
 test.describe('mobile-view · preparativos', () => {
   let tripId: string
   test.beforeEach(async ({ page }) => {
@@ -23,17 +24,18 @@ test.describe('mobile-view · preparativos', () => {
   })
 
   test('E-38: "Antes de salir" lists pre-trip checks (book hotel, pack, …)', async ({ page }) => {
-    await expect(page.getByText('Reservar hotel')).toBeVisible()
-    // Header counter reflects 5 derived pre-trip checks, 1 pre-done.
-    await expect(page.getByText('1/5')).toBeVisible()
+    // Scope to the prep card — "1/5" also appears in the readiness milestone pills.
+    const card = page.getByTestId('prep-before')
+    await expect(card.getByText('Reservar hotel')).toBeVisible()
+    await expect(card.getByText('1/5')).toBeVisible()   // 5 pre-trip checks, 1 pre-done
   })
 
-  test('E-39: checking a pre-trip item updates the header progress bar', async ({ page }) => {
-    const header = page.getByText(/% · \d+\/\d+ tareas/)
-    await expect(header).toContainText('4/14')
+  test('E-39: checking a pre-trip item updates the readiness header', async ({ page }) => {
+    const sub = page.getByTestId('readiness').getByText(/Te faltan \d+ pasos/)
+    await expect(sub).toContainText('8')   // 10 checks, 2 done
     // "Reservar hotel" is pre-done; toggle an unchecked item so done increments.
     await page.getByRole('button').filter({ hasText: 'Empacar maleta' }).first().click()
-    await expect(header).toContainText('5/14')
+    await expect(sub).toContainText('7')
   })
 
   test('E-40: packing items render; tapping toggles packed; counter X/Y updates', async ({ page }) => {

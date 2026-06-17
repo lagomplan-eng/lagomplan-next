@@ -5,11 +5,13 @@ import { TRIP_ANONYMOUS, TRIP_OWNER } from '../fixtures/trips'
 // Progress bar + Save/Share/PDF toolbar — QA cases E-43..E-48.
 // See docs/qa/mobile-view-test-cases.md.
 //
-// TRIP_ANONYMOUS seeds 10 derived checks + a 4-item packing list, 4 done
-// (pretrip-book-hotel + check-item-2 + packed [0,2]) → header starts at
-// "29% · 4/14 tareas". The progress bar lives in the trip subheader (above the
-// tabs) so it stays visible across tab switches. The "Guardado" indicator is
-// owner-only; Compartir + PDF show for everyone.
+// TRIP_ANONYMOUS seeds 10 derived checks, 2 done (pretrip-book-hotel +
+// check-item-2) → the Trip Readiness header starts at "Tu viaje está 20% listo
+// · Te faltan 8 pasos". Readiness is CHECKS-only (parity with the planner bar);
+// the packing list has its own counter in Preparativos and does NOT move the
+// readiness number. The header lives in the trip subheader (above the tabs) so
+// it stays attached across tab switches. "Guardado" is owner-only; Compartir +
+// PDF show for everyone.
 test.describe('mobile-view · header & toolbar', () => {
   const created: string[] = []
   async function seed(fixture: Parameters<typeof seedTrip>[0]) {
@@ -21,27 +23,28 @@ test.describe('mobile-view · header & toolbar', () => {
     while (created.length) await deleteTrip(created.pop() as string)
   })
 
-  test('E-43: progress bar shows the label, percentage and done/total', async ({ page }) => {
+  test('E-43: readiness header shows the % and remaining steps', async ({ page }) => {
     const id = await seed(TRIP_ANONYMOUS)
     await gotoTrip(page, id)
-    await expect(page.getByText('Progreso del viaje')).toBeVisible()
-    await expect(page.getByText(/% · \d+\/\d+ tareas/)).toContainText('29% · 4/14 tareas')
+    await expect(page.getByText('Tu viaje está 20% listo')).toBeVisible()
+    await expect(page.getByText(/Te faltan 8 pasos/)).toBeVisible()
   })
 
-  test('E-44: progress aggregates per-day + pre-trip + packing into one counter', async ({ page }) => {
+  test('E-44: readiness aggregates checks (per-day + pre-trip), not packing', async ({ page }) => {
     const id = await seed(TRIP_ANONYMOUS)
     await gotoTrip(page, id)
-    const stat = page.getByText(/% · \d+\/\d+ tareas/)
-    await expect(stat).toContainText('4/14')
-    // per-day check (Itinerario, day 1)
+    const sub = page.getByText(/Te faltan \d+ pasos/)
+    await expect(sub).toContainText('8')
+    // per-day check (Itinerario, day 1) → readiness drops a step
     await page.getByRole('button').filter({ hasText: 'Reservar mesa: Cena en El Cardenal' }).click()
-    await expect(stat).toContainText('5/14')
-    // pre-trip check + packing item (Preparativos) — same header counter
+    await expect(sub).toContainText('7')
+    // pre-trip check (Preparativos) → also counts
     await page.getByRole('button', { name: 'Preparativos' }).click()
     await page.getByRole('button').filter({ hasText: 'Empacar maleta' }).first().click()
-    await expect(stat).toContainText('6/14')
+    await expect(sub).toContainText('6')
+    // packing item toggles its own counter but NOT readiness (checks-only)
     await page.getByRole('button').filter({ hasText: 'Paraguas' }).click()
-    await expect(stat).toContainText('7/14')
+    await expect(sub).toContainText('6')
   })
 
   test('E-45: owner sees Guardado + Compartir + PDF', async ({ page }) => {

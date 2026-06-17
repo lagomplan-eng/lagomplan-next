@@ -55,9 +55,11 @@ test.describe('mobile-view · activities & booking drawer', () => {
     const id = await seed(TRIP_ACTIVITIES)
     await gotoTrip(page, id)
     await page.getByText('Caminata por la Roma', { exact: true }).click()
-    // It expanded (editor present) but offers no reserve CTA.
+    // It expanded (editor present) but offers no reserve CTA. (Match the
+    // activity verbs specifically — the readiness next-step CTA in the header
+    // also contains "Reservar … →".)
     await expect(page.getByRole('button', { name: 'Guardar', exact: true })).toBeVisible()
-    await expect(page.getByRole('button', { name: /Reservar .* →/ })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Reservar (tour|mesa|traslado) →/ })).toHaveCount(0)
   })
 
   test('E-17: Reservar opens the booking drawer with provider options', async ({ page }) => {
