@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/server'
+import { computeTripIntelligence } from '../../../../lib/intelligence'
 
 export async function GET(
   _req: NextRequest,
@@ -53,6 +54,28 @@ export async function GET(
       const { data: { user } } = await supabase.auth.getUser()
       if (!user || (data as any).user_id !== user.id) {
         return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
+      }
+    }
+
+    // ── Intelligence fallback — compute on read when the stored value is null ─
+    // The async worker inserts trips without computing intelligence, and rows
+    // created before the Intelligence migration have null too. Rather than
+    // leave those trips badge-less, compute it on read from trip_data (a pure,
+    // sub-millisecond function) so the planner always has it. We don't persist
+    // here (GET stays a read) — the next autosave PATCH writes it back. Only
+    // fills when genuinely missing, so normal sync trips keep their stored value.
+    if (((data as any).intelligence == null) && Array.isArray((data as any).trip_data?.days)) {
+      try {
+        const td = (data as any).trip_data as Record<string, unknown>
+        const wt = (data as any).walking_tolerance
+        ;(data as any).intelligence = computeTripIntelligence({
+          days:              td.days as any[],
+          accommodations:    Array.isArray(td.accommodations) ? (td.accommodations as any[]) : [],
+          duration_days:     (data as any).duration_days ?? undefined,
+          walking_tolerance: wt === 'low' || wt === 'medium' || wt === 'high' ? wt : 'medium',
+        })
+      } catch (intelErr) {
+        console.warn('[trips/get] intelligence fallback failed:', intelErr instanceof Error ? intelErr.message : intelErr)
       }
     }
 
@@ -128,6 +151,38 @@ export async function PATCH(
     // Use admin client for the write so RLS policies don't silently block the
     // UPDATE. Ownership is already verified above via getUser() + eq('user_id').
     const admin = getSupabaseAdmin()
+
+    // ── Intelligence Foundation — recompute on every content edit ────────────
+    // POST computes intelligence on first save, but the autosave path (this
+    // PATCH) didn't — so the planner's badges drifted to the pre-edit state
+    // after any change, and trips created by the async worker (which doesn't
+    // compute it) never got badges at all until their first edit. Recompute
+    // here whenever trip_data is part of the update. walking_tolerance +
+    // duration_days come from the existing row (the autosave body doesn't carry
+    // them). Pure computation, wrapped per the Intelligence spec: a failure
+    // must never break the save, so on error we leave the stored value
+    // untouched rather than wiping it.
+    if (updatePayload.trip_data !== undefined) {
+      try {
+        const { data: existing } = await admin
+          .from('trips')
+          .select('walking_tolerance, duration_days')
+          .eq('id', trip_id)
+          .single()
+        const td = updatePayload.trip_data as Record<string, unknown> | null | undefined
+        const wt = (existing as { walking_tolerance?: string } | null)?.walking_tolerance
+        updatePayload.intelligence = computeTripIntelligence({
+          days:              Array.isArray(td?.days)           ? (td!.days as any[])           : [],
+          accommodations:    Array.isArray(td?.accommodations) ? (td!.accommodations as any[]) : [],
+          duration_days:     (existing as { duration_days?: number } | null)?.duration_days ?? undefined,
+          walking_tolerance: wt === 'low' || wt === 'medium' || wt === 'high' ? wt : 'medium',
+        })
+      } catch (intelErr) {
+        // Engine is designed not to throw; if it does, preserve the existing
+        // stored intelligence (don't add the key to the update payload).
+        console.warn('[trips/patch] intelligence recompute failed:', intelErr instanceof Error ? intelErr.message : intelErr)
+      }
+    }
     const { data: updated, error } = await admin
       .from('trips')
       .update(updatePayload as unknown as never)
