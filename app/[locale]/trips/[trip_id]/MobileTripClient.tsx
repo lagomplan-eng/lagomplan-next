@@ -27,6 +27,8 @@ import { useRouter } from 'next/navigation'
 import { useUser } from '../../../../components/auth/SupabaseProvider'
 import { events } from '../../../../lib/analytics'
 import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../../../lib/planner/checks'
+import { computeMilestones, selectNextCheck } from '../../../../lib/planner/milestones'
+import { readinessCopy } from '../../../../lib/planner/readiness-copy'
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
 import { resolveTripCurrency } from '../../../../lib/planner/progress'
 import { buildAffiliateLink } from '../../../../lib/affiliate/build'
@@ -487,12 +489,46 @@ export default function MobileTripClient(props: Props) {
   // Pre-trip prep checks (book hotel, pack, documents, arrival/departure
   // transfers) carry no day — surfaced in the Preparativos tab.
   const prepChecks = useMemo(() => checks.filter(c => typeof c.day !== 'number'), [checks])
-  const progress = useMemo(() => {
-    const total = checks.length + packing.length
-    const done = checks.filter(c => doneCheckIds.has(c.id)).length + packedItems.size
-    const pct = total > 0 ? Math.round((done / total) * 100) : 0
-    return { total, done, pct }
-  }, [checks, packing.length, doneCheckIds, packedItems])
+  // ── Trip Readiness (shared logic + copy with the planner's TripReadinessBar) ──
+  // Readiness is checks-only (the milestone framework is check-based); the
+  // packing LIST is represented inside the "Listos" milestone via its pretrip
+  // checks, so we don't double-count packed items here.
+  const checksForReadiness = useMemo(
+    () => checks.map(c => ({ id: c.id, text: c.text, done: doneCheckIds.has(c.id), icon: c.icon })),
+    [checks, doneCheckIds],
+  )
+  const readinessTotal = checksForReadiness.length
+  const readinessDone  = checksForReadiness.filter(c => c.done).length
+  const readinessPct   = readinessTotal > 0 ? Math.round((readinessDone / readinessTotal) * 100) : 0
+  const milestones = useMemo(
+    () => computeMilestones({ daysCount: days.length, checks: checksForReadiness }),
+    [days.length, checksForReadiness],
+  )
+  const nextRec = useMemo(() => selectNextCheck(checksForReadiness), [checksForReadiness])
+  const nextCheckItem = nextRec ? checks.find(c => c.id === nextRec.check.id) : undefined
+  const nextMilestoneLabel = nextRec
+    ? (() => { const m = milestones.find(x => x.id === nextRec.milestoneId); return m ? (locale === 'en' ? m.labelEN : m.labelES) : undefined })()
+    : undefined
+  const daysUntilTrip = useMemo(() => {
+    const s = tripStartDate(accommodations, segments)
+    if (!s) return null
+    const now = new Date()
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+    const start = new Date(s.getFullYear(), s.getMonth(), s.getDate()).getTime()
+    const diff = Math.round((start - today) / 86400000)
+    return diff >= 0 ? diff : null
+  }, [accommodations, segments])
+  const readiness = readinessCopy({
+    readinessPct, totalChecks: readinessTotal, pendingCount: readinessTotal - readinessDone,
+    daysCount: days.length, daysUntilTrip, locale,
+  })
+  // Contextual CTA verb for the next-step button (mirrors the planner bar).
+  const nextCtaLabel = (() => {
+    if (!nextCheckItem) return ''
+    const first = nextCheckItem.text.split(/\s+/)[0]
+    const known = new Set(['Reservar', 'Confirmar', 'Empacar', 'Book', 'Confirm', 'Pack'])
+    return known.has(first) ? `${first} →` : (locale === 'es' ? 'Hecho →' : 'Done →')
+  })()
 
   // ── Interactions ─────────────────────────────────────────────────────────────
   function switchTab(next: Tab) {
@@ -579,6 +615,28 @@ export default function MobileTripClient(props: Props) {
     if (!canEdit) return
     const wasConfirmed = !!bookings[accId]?.confirmed
     setBookings(prev => ({ ...prev, [accId]: booking }))
+
+    // Connect readiness to reservations: confirming a stay auto-completes its
+    // "Reservar hotel" readiness check (single-city → pretrip-book-hotel;
+    // multi-city → pretrip-book-hotel-seg-<i>, indexed by accommodation order),
+    // so the progress bar + milestones move when the user actually books —
+    // they don't have to also tick the checklist by hand. Only marks (never
+    // un-marks) and only when the check actually exists for this trip.
+    if (booking.confirmed) {
+      const idx = accommodations.findIndex(a => a.id === accId)
+      const hotelCheckId = segments.length >= 2 && idx >= 0
+        ? `pretrip-book-hotel-seg-${idx}`
+        : 'pretrip-book-hotel'
+      if (checks.some(c => c.id === hotelCheckId)) {
+        setDoneCheckIds(prev => {
+          if (prev.has(hotelCheckId)) return prev
+          const next = new Set(prev)
+          next.add(hotelCheckId)
+          return next
+        })
+        schedulePersist()
+      }
+    }
     // Reuse the existing booking-confirm endpoint (read-modify-write into
     // trip_data.accommodations) for owners; localStorage for anon — exactly
     // the desktop "Ya reservé" persistence model.
@@ -761,15 +819,63 @@ export default function MobileTripClient(props: Props) {
             {isOwner ? t.editPlan : t.planYours}
           </a>
         </div>
-        {/* progress — prominent label + percentage + thicker bar */}
-        <div className="mt-[8px]">
-          <div className="flex items-center justify-between mb-[4px]">
-            <span className="font-mono text-[9px] tracking-[.08em] uppercase text-[#8A8A8A]">{t.progressLabel}</span>
-            <span className="font-mono text-[10px] font-medium text-[#0F3A33]">{progress.pct}% · {progress.done}/{progress.total} {t.tasks}</span>
+        {/* Trip Readiness — headline + countdown, progress bar, milestone
+            pills, and the next-step CTA (parity with the planner's bar). */}
+        <div className="mt-[8px]" data-testid="readiness">
+          <div className="flex items-baseline justify-between gap-2 mb-[5px]">
+            <span className="font-sans text-[13px] font-semibold text-[#1A1A1A] leading-tight truncate">{readiness.headline}</span>
+            {readinessTotal > 0 && (
+              <span className="font-mono text-[11px] font-medium text-[#0F3A33] shrink-0">{readinessPct}%</span>
+            )}
           </div>
-          <div className="h-[5px] bg-[#EDE7E1] rounded-full overflow-hidden">
-            <div className="h-full bg-[#0F3A33] rounded-full transition-[width] duration-500" style={{ width: `${progress.pct}%` }} />
+          {readinessTotal > 0 && (
+            <div className="h-[5px] bg-[#EDE7E1] rounded-full overflow-hidden">
+              <div className="h-full bg-[#0F3A33] rounded-full transition-[width] duration-500" style={{ width: `${readinessPct}%` }} />
+            </div>
+          )}
+          <div className={`font-mono text-[9px] mt-[5px] ${readiness.urgent ? 'text-[#C0392B] font-medium' : 'text-[#8A8A8A]'}`}>
+            {readiness.sub}
           </div>
+
+          {/* Milestone pills */}
+          {milestones.length > 0 && (
+            <div className="flex gap-[5px] mt-[8px] overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {milestones.map(m => {
+                const label = locale === 'en' ? m.labelEN : m.labelES
+                const cls = m.state === 'done'
+                  ? 'bg-[#0F3A33] text-white border-transparent'
+                  : m.state === 'pending'
+                    ? 'bg-transparent text-[#4A4A4A] border-[#E2DDD5]'
+                    : 'bg-transparent text-[#BDBDBD] border-[#EDE7E1]'
+                return (
+                  <span key={m.id} className={`flex items-center gap-[4px] px-[8px] py-[3px] rounded-full border text-[10px] font-medium whitespace-nowrap shrink-0 ${cls}`}>
+                    {label}
+                    {m.matchedChecks > 0 && m.state !== 'na' && (
+                      <span className={`font-mono text-[8px] ${m.state === 'done' ? 'text-white/60' : 'text-[#BDBDBD]'}`}>{m.doneChecks}/{m.matchedChecks}</span>
+                    )}
+                  </span>
+                )
+              })}
+            </div>
+          )}
+
+          {/* Next step — tap to mark it done (mirrors the planner bar CTA) */}
+          {canEdit && nextCheckItem && (
+            <button
+              onClick={() => toggleCheck(nextCheckItem.id, nextCheckItem.day ?? -1)}
+              className="mt-[8px] w-full flex items-center justify-between gap-2 px-[10px] py-[8px] rounded-[9px] bg-[#E4EFEC] border border-[#0F3A33]/15 hover:bg-[#d4eae4] transition-colors text-left"
+            >
+              <span className="min-w-0">
+                <span className="block font-mono text-[8px] tracking-[.1em] uppercase text-[#0F3A33]/55">
+                  {(locale === 'es' ? 'Siguiente' : 'Next')}{nextMilestoneLabel ? ` · ${nextMilestoneLabel}` : ''}
+                </span>
+                <span className="block text-[12px] text-[#0F3A33] truncate mt-[1px]">{nextCheckItem.icon} {nextCheckItem.text}</span>
+              </span>
+              <span className="font-sans text-[11px] font-semibold text-white bg-[#0F3A33] px-[10px] py-[5px] rounded-[6px] whitespace-nowrap shrink-0">
+                {nextCtaLabel}
+              </span>
+            </button>
+          )}
         </div>
 
         {/* actions — Save status / Share / PDF (hidden in print) */}
@@ -1586,7 +1692,7 @@ function PrepTab(p: {
         <>
           <div className={secLbl}>{t.beforeYouGo}</div>
           <div className="px-[18px] pb-[6px]">
-            <div className={card}>
+            <div className={card} data-testid="prep-before">
               <button type="button" className={cardHeader} onClick={() => setOpenBefore(o => !o)} aria-expanded={openBefore}>
                 <span className={headerTitle}>{t.beforeYouGo}</span>
                 <span className="flex items-center gap-2">

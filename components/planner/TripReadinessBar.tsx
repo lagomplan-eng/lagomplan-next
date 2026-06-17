@@ -24,6 +24,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import type { Milestone, MilestoneState } from '../../lib/planner/milestones'
+import { readinessCopy } from '../../lib/planner/readiness-copy'
 
 interface NextCheckInfo {
   id:   string
@@ -109,39 +110,10 @@ export default function TripReadinessBar({
   const tripReady   = totalChecks > 0 && pendingCount === 0
   const hasItinerary = daysCount > 0
 
-  // ── Copy ────────────────────────────────────────────────────────────────
-  const headline = tripReady
-    ? (isES ? '✓ Tu viaje está listo'                : '✓ Your trip is ready')
-    : totalChecks === 0
-      ? (isES ? `${daysCount} ${daysCount === 1 ? 'día' : 'días'} planificados` : `${daysCount} ${daysCount === 1 ? 'day' : 'days'} planned`)
-      : (isES ? `Tu viaje está ${readinessPct}% listo` : `Your trip is ${readinessPct}% ready`)
-
-  // Countdown to departure — turns the readiness number into something
-  // time-bound ("Faltan 5 días"). Escalates emotionally (⏳) inside the last
-  // week. null/past dates fall back to the plain step framing below.
-  const d = daysUntilTrip
-  const countdown = d == null ? null
-    : d === 0 ? (isES ? 'Hoy es el día ✈️'      : "Today's the day ✈️")
-    : d === 1 ? (isES ? 'Falta 1 día'           : '1 day to go')
-    :           (isES ? `Faltan ${d} días`      : `${d} days to go`)
-  const urgent = d != null && d > 0 && d <= 7
-
-  // Steps half of the sub line (countdown is prepended when present).
-  const steps = tripReady
-    ? (isES ? 'Todo confirmado'                    : 'All confirmed')
-    : totalChecks === 0
-      ? (isES ? 'Listo para empezar'              : 'Ready to plan')
-      : pendingCount === 1
-        ? (isES ? 'Te falta 1 paso'               : '1 step to go')
-        : (isES ? `Te faltan ${pendingCount} pasos` : `${pendingCount} steps to go`)
-
-  // When there's no countdown, keep the original standalone "…para viajar"
-  // framing; with a countdown the date already carries the urgency.
-  const sub = countdown
-    ? `${urgent ? '⏳ ' : ''}${countdown} · ${steps}`
-    : (totalChecks > 0 && !tripReady
-        ? (isES ? `${steps} para viajar` : steps)
-        : steps)
+  // ── Copy ── shared with the mobile companion view (single voice) ──────────
+  const { headline, sub } = readinessCopy({
+    readinessPct, totalChecks, pendingCount, daysCount, daysUntilTrip, locale,
+  })
 
   const nextLabel = isES ? 'Siguiente' : 'Next'
 
