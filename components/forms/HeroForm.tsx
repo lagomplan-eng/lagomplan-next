@@ -413,29 +413,6 @@ function submit(e: React.FormEvent) {
             {submitted && !datesValid && (
               <FieldError msg={t('errorDates')} />
             )}
-            {exceedsMax && (
-              <div
-                role="status"
-                className="mt-2 px-3 py-2.5 rounded-[6px] bg-[rgba(218,165,32,.07)] border border-[rgba(218,165,32,.28)] border-l-[3px] border-l-[#D4A35E]"
-              >
-                <p className="font-sans text-[12px] leading-[1.5] text-[#5A4423]">
-                  {locale === 'es'
-                    ? `Por ahora generamos itinerarios de hasta ${MAX_TRIP_DAYS} días. Tu rango actual cubre ${totalNights} noches.`
-                    : `We currently plan trips of up to ${MAX_TRIP_DAYS} days. Your current range covers ${totalNights} nights.`}
-                </p>
-                {additionalSegments.length === 0 && dates.start && (
-                  <button
-                    type="button"
-                    onClick={trimToMax}
-                    className="mt-1.5 font-sans text-[12px] font-semibold text-[#0F3A33] underline underline-offset-2 hover:text-[#1A5247]"
-                  >
-                    {locale === 'es'
-                      ? `Ajustar a ${MAX_TRIP_DAYS} días`
-                      : `Trim to ${MAX_TRIP_DAYS} days`}
-                  </button>
-                )}
-              </div>
-            )}
           </div>
 
           {/* ── 2b. Multi-city (optional) ───────────────────────────
@@ -489,6 +466,52 @@ function submit(e: React.FormEvent) {
               />
             </div>
           ))}
+          {/* Trip-total summary + over-cap warning. Lives below ALL segments so
+              the count is unambiguous about what it sums. Calm grey row when
+              under cap; amber when over. The trim affordance only renders for
+              single-city — multi-city users shorten an individual segment
+              instead (auto-trimming would silently drop one). */}
+          {datesValid && (additionalSegments.length > 0 || exceedsMax) && (
+            <div className={sectionDivider}>
+              <div
+                role="status"
+                className={[
+                  'px-3 py-2.5 rounded-[6px] border border-l-[3px]',
+                  exceedsMax
+                    ? 'bg-[rgba(218,165,32,.07)] border-[rgba(218,165,32,.28)] border-l-[#D4A35E]'
+                    : 'bg-[#F5F1EB] border-[#E4DFD8] border-l-[#B89F7D]',
+                ].join(' ')}
+              >
+                <p className={`font-sans text-[12px] leading-[1.5] ${exceedsMax ? 'text-[#5A4423]' : 'text-[#5B4F3F]'}`}>
+                  {locale === 'es'
+                    ? (additionalSegments.length > 0
+                        ? `Total del viaje: ${totalNights} ${totalNights === 1 ? 'noche' : 'noches'} sumando los ${additionalSegments.length + 1} tramos.`
+                        : `Tu rango cubre ${totalNights} ${totalNights === 1 ? 'noche' : 'noches'}.`)
+                    : (additionalSegments.length > 0
+                        ? `Trip total: ${totalNights} ${totalNights === 1 ? 'night' : 'nights'} across ${additionalSegments.length + 1} segments.`
+                        : `Your range covers ${totalNights} ${totalNights === 1 ? 'night' : 'nights'}.`)}
+                </p>
+                {exceedsMax && (
+                  <p className="font-sans text-[12px] leading-[1.5] mt-1 text-[#5A4423]">
+                    {locale === 'es'
+                      ? `Por ahora generamos itinerarios de hasta ${MAX_TRIP_DAYS} días${additionalSegments.length > 0 ? ' en total' : ''}. Ajusta las fechas para continuar.`
+                      : `We currently plan trips of up to ${MAX_TRIP_DAYS} days${additionalSegments.length > 0 ? ' total' : ''}. Adjust your dates to continue.`}
+                  </p>
+                )}
+                {exceedsMax && additionalSegments.length === 0 && dates.start && (
+                  <button
+                    type="button"
+                    onClick={trimToMax}
+                    className="mt-1.5 font-sans text-[12px] font-semibold text-[#0F3A33] underline underline-offset-2 hover:text-[#1A5247]"
+                  >
+                    {locale === 'es'
+                      ? `Ajustar a ${MAX_TRIP_DAYS} días`
+                      : `Trim to ${MAX_TRIP_DAYS} days`}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
           {additionalSegments.length < MAX_EXTRA_SEGMENTS && (
             <div className={sectionDivider}>
               <button
