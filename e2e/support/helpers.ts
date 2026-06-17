@@ -39,13 +39,24 @@ export async function gotoTrip(page: Page, tripId: string) {
  */
 export async function captureGaEvents(page: Page) {
   await page.addInitScript(() => {
+    // Intercept dataLayer.push rather than stubbing window.gtag: when
+    // NEXT_PUBLIC_GA_MEASUREMENT_ID is set the real gtag.js loads and
+    // overwrites any window.gtag stub, but every gtag('event', …) call still
+    // funnels through dataLayer.push(arguments) — and that happens regardless
+    // of consent state (consent only gates network/cookies, not the push).
     ;(window as any).__gaEvents = []
-    ;(window as any).gtag = (...args: any[]) => { (window as any).__gaEvents.push(args) }
-    // dataLayer fallback some GA wrappers use
-    ;(window as any).dataLayer = (window as any).dataLayer || []
+    const dl: any[] = ((window as any).dataLayer = (window as any).dataLayer || [])
+    const origPush = dl.push.bind(dl)
+    dl.push = (...items: any[]) => {
+      for (const it of items) (window as any).__gaEvents.push(Array.from(it ?? []))
+      return origPush(...items)
+    }
+    // Fallback gtag for runs where gtag.js never loads (no GA id) — the real
+    // loader will replace this, but its calls still hit our patched push.
+    ;(window as any).gtag = (window as any).gtag || function () { dl.push(arguments) }
   })
   return {
-    /** All ['event', name, params] tuples recorded so far. */
+    /** All recorded gtag tuples (e.g. ['event', name, params]). */
     all: async () => page.evaluate(() => (window as any).__gaEvents ?? []),
     /** First params object logged for a given GA event name, or null. */
     find: async (name: string) =>
