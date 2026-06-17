@@ -4341,10 +4341,23 @@ export default function TripResult({ params }: Props) {
                 <div className="flex items-center justify-center gap-2 py-4 font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#6B8F86]">
                   <span className="w-[5px] h-[5px] rounded-full bg-[#6B8F86] animate-pulse" />
                   <span>
-                    {isES ? 'Generando más días' : 'Generating more days'}
-                    {typeof asyncChunksDone === 'number' && typeof asyncChunksTotal === 'number' && asyncChunksTotal > 0
-                      ? ` · ${asyncChunksDone} / ${asyncChunksTotal}`
-                      : ''}
+                    {(() => {
+                      // Surface DAY progress ("5 de 35 días listos") instead of
+                      // the internal chunk count — users care which days are
+                      // ready, not how the worker batched them. Show the target
+                      // only when it's known to exceed what's already rendered,
+                      // so multi-city trips (where the URL `nights` can
+                      // under-count the true span) never show a misleading
+                      // "N de N" while still streaming.
+                      const ready = days.length
+                      const total = durationDaysFromNights(nights)
+                      if (total > ready) {
+                        return isES
+                          ? `Generando · ${ready} de ${total} días listos`
+                          : `Generating · ${ready} of ${total} days ready`
+                      }
+                      return isES ? `Generando · ${ready} días listos` : `Generating · ${ready} days ready`
+                    })()}
                   </span>
                 </div>
               )}
