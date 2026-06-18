@@ -9,7 +9,6 @@ import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import type { Trip } from '../../../lib/supabase/types'
 import type { Locale } from '../../../i18n'
 import GuidesPreview from '../../../components/GuidesPreview'
-import { computeTripReadiness } from '../../../lib/planner/readiness'
 
 // ─── Brand cover gradient — single consistent tone ────────────────────────────
 
@@ -43,19 +42,15 @@ function deriveChips(trip: Trip): string[] {
 interface TripCardProps {
   trip: Trip
   isActive: boolean
-  locale: 'es' | 'en'
   onClick: () => void
 }
 
-function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
-  const name      = trip.destination || 'Viaje'
-  const days      = trip.duration_days ? `${trip.duration_days} días` : ''
-  const tagline   = isActive ? 'En progreso' : 'Itinerario guardado'
-  const chips     = deriveChips(trip)
-  const initials  = name.substring(0, 2).toUpperCase()
-  // Reuse the canonical readiness summary — same deriveChecksFromDays +
-  // selectNextCheck the planner bar / mobile header use, never a parallel formula.
-  const readiness = computeTripReadiness((trip as { trip_data?: unknown }).trip_data, locale)
+function TripCard({ trip, isActive, onClick }: TripCardProps) {
+  const name     = trip.destination || 'Viaje'
+  const days     = trip.duration_days ? `${trip.duration_days} días` : ''
+  const tagline  = isActive ? 'En progreso' : 'Itinerario guardado'
+  const chips    = deriveChips(trip)
+  const initials = name.substring(0, 2).toUpperCase()
 
   return (
     <div
@@ -101,6 +96,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
       {/* CONTENT */}
       <div className="p-5 flex flex-col gap-2">
         <h3 className="font-sans text-lg">{name}</h3>
+        <p className="text-sm text-[#6B7280]">Ver itinerario →</p>
         {(days || tagline) && (
           <p className="text-xs text-[#1B4D3E]/70">
             {[days, tagline].filter(Boolean).join(' • ')}
@@ -108,7 +104,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
         )}
 
         {chips.length > 0 && (
-          <div className="flex flex-wrap gap-2 text-[11px] mt-1">
+          <div className="flex flex-wrap gap-2 text-[11px] mt-2">
             {chips.map((chip) => (
               <span
                 key={chip}
@@ -118,50 +114,6 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
               </span>
             ))}
           </div>
-        )}
-
-        {/* TRIP READINESS — re-engagement (Zeigarnik): show how close this trip
-            is to ready + a one-tap path back to the first incomplete step.
-            Readiness is reused from computeTripReadiness (same as the trip view). */}
-        {readiness.total > 0 ? (
-          <div className="mt-3">
-            <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-[#1B4D3E]">
-                {readiness.ready
-                  ? (locale === 'es' ? '✓ Listo para viajar' : '✓ Ready to go')
-                  : (locale === 'es' ? `${readiness.pct}% listo` : `${readiness.pct}% ready`)}
-              </span>
-              <span className="text-[11px] text-[#6B7280]">{readiness.done}/{readiness.total}</span>
-            </div>
-            <div className="h-[5px] bg-[#E5E0D6] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#1B4D3E] rounded-full transition-[width] duration-500"
-                style={{ width: `${readiness.pct}%` }}
-              />
-            </div>
-
-            {!readiness.ready && readiness.nextCheck ? (
-              <>
-                <p className="text-[11px] text-[#6B7280] mt-2 truncate">
-                  {locale === 'es' ? 'Siguiente' : 'Next'}: {readiness.nextCheck.icon} {readiness.nextCheck.text}
-                </p>
-                <button
-                  onClick={(e) => { e.stopPropagation(); onClick() }}
-                  className="mt-2 w-full text-center bg-[#1B4D3E] text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#163d31] transition"
-                >
-                  {locale === 'es' ? 'Continuar planeando →' : 'Continue planning →'}
-                </button>
-              </>
-            ) : (
-              <p className="text-sm text-[#1B4D3E]/70 mt-2">
-                {locale === 'es' ? 'Ver itinerario →' : 'View itinerary →'}
-              </p>
-            )}
-          </div>
-        ) : (
-          <p className="text-sm text-[#6B7280] mt-1">
-            {locale === 'es' ? 'Ver itinerario →' : 'View itinerary →'}
-          </p>
         )}
       </div>
     </div>
@@ -301,7 +253,6 @@ export default function MyTripsClient() {
                 key={trip.id}
                 trip={trip}
                 isActive={i === 0}
-                locale={locale === 'es' ? 'es' : 'en'}
                 onClick={() => goToTrip(trip)}
               />
             ))}
