@@ -200,22 +200,3 @@ export function getBookingOptions(
       return []
   }
 }
-
-// ── Click tracking ────────────────────────────────────────────────────────────
-
-export function trackAffiliateClick(category: string, provider: string, city: string) {
-  try {
-    if (typeof window !== 'undefined' && typeof (window as any).gtag === 'function') {
-      ;(window as any).gtag('event', 'affiliate_click', {
-        event_category: category,
-        event_label: provider,
-        city,
-      })
-    }
-    if (process.env.NODE_ENV !== 'production') {
-      console.log('[affiliate_click]', { category, provider, city })
-    }
-  } catch {
-    // never throw from tracking
-  }
-}

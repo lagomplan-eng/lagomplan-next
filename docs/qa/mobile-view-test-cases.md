@@ -347,7 +347,7 @@ Currency is one trip-wide setting **shared with the desktop planner**. The deskt
 | E-62 | `mobile_view_note_saved` with `has_note`/`has_link` flags | Mobile |
 | E-63 | `mobile_view_task_completed` with `task_id` on check | Mobile |
 | E-64 | `mobile_view_newsletter_captured` on valid email submit | Mobile |
-| E-65 | Booking drawer option tap fires `affiliate_click` (legacy) + `AffiliateClicked` | Mobile |
+| E-65 | Booking drawer option tap fires `affiliate_clicked` (GA) + `AffiliateClicked` (Meta) | Mobile |
 
 ### 3.10 UX-fix regressions (2026-06-08 batch) — across specs
 Behaviors added/fixed this batch. **Playwright stubs: not yet written** (suite still gated on `seedTrip`/`loginAs`). All were **manually verified live on 2026-06-08** via a throwaway fixture page + a real owner-login run at iPhone 14 viewport.
