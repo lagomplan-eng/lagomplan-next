@@ -371,9 +371,9 @@ export const events = {
   /**
    * Unified outbound affiliate click. Covers planner hotels, Smart Finds
    * product cards, day-block booking CTAs, and any future affiliate surface.
-   *
-   * Use this rather than the older trackAffiliateClick in lib/booking.ts —
-   * that one was GA-only and bypassed the events abstraction.
+   * This is the ONLY affiliate-click emitter — the older GA-only
+   * trackAffiliateClick (which fired a duplicate `affiliate_click`, no "d")
+   * was removed in favor of this single canonical event.
    *
    * Meta custom: `AffiliateClicked`  ·  GA: `affiliate_clicked`.
    */

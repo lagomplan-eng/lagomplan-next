@@ -16,7 +16,7 @@ import { TripShareModal } from '../../../components/trips/TripShareModal'
 import { deriveChecksFromDays, reconcileDoneChecks, normalizeCheckItem } from '../../../lib/planner/checks'
 import { buildPlannerTripData } from '../../../lib/planner/persist'
 import Image from 'next/image'
-import { getBookingOptions, detectCountryGroup, trackAffiliateClick } from '../../../lib/booking'
+import { getBookingOptions, detectCountryGroup } from '../../../lib/booking'
 import type { Accommodation, TripDestinationContext } from '../../../lib/planner/accommodations'
 import { computeNights } from '../../../lib/planner/accommodations'
 import { titleCaseCity } from '../../../lib/planner/format'
@@ -5083,11 +5083,10 @@ export default function TripResult({ params }: Props) {
                     className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
                     onClick={() => {
                       // Unified affiliate click — fires to BOTH Meta + GA via
-                      // events.affiliateClicked, stamped with trip_id so the
-                      // monetization dashboard can attribute revenue back to
-                      // the trip that drove the click. Keep the legacy
-                      // trackAffiliateClick call until the dashboards that
-                      // depend on its `affiliate_click` event name migrate.
+                      // events.affiliateClicked (canonical GA `affiliate_clicked`
+                      // + Meta `AffiliateClicked`), stamped with trip_id so the
+                      // monetization dashboard can attribute revenue back to the
+                      // trip that drove the click.
                       events.affiliateClicked({
                         provider:    opt.provider,
                         surface:     'day-block-modal',
@@ -5096,7 +5095,6 @@ export default function TripResult({ params }: Props) {
                         trip_id:     tripId ?? undefined,
                         meta:        { item_name: bookingModal.itemName },
                       })
-                      trackAffiliateClick(bookingModal.itemType, opt.provider, destination)
                       setBookingModal(null)
                     }}
                   >

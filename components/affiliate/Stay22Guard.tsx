@@ -33,9 +33,9 @@
  * - CAPTURE phase: we run before the anchor's own React onClick AND
  *   before LetMeAllez's document listener, so we win the click.
  * - We DON'T stopImmediatePropagation: the anchor's own onClick still
- *   fires, so per-click analytics (events.affiliateClicked /
- *   trackAffiliateClick) keep working. We only neutralize the default
- *   navigation, which is what LetMeAllez piggybacks on.
+ *   fires, so per-click analytics (events.affiliateClicked) keep
+ *   working. We only neutralize the default navigation, which is what
+ *   LetMeAllez piggybacks on.
  * - We skip clicks an anchor already manages itself (it calls
  *   window.open in its own handler) via the `data-lma-managed`
  *   attribute, so those don't open twice. Today only the mobile

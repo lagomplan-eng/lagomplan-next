@@ -32,7 +32,7 @@ import { readinessCopy } from '../../../../lib/planner/readiness-copy'
 import type { TripProgress, ItemAnnotation } from '../../../../lib/planner/progress'
 import { resolveTripCurrency } from '../../../../lib/planner/progress'
 import { buildAffiliateLink } from '../../../../lib/affiliate/build'
-import { getBookingOptions, detectCountryGroup, trackAffiliateClick, type BookingOption } from '../../../../lib/booking'
+import { getBookingOptions, detectCountryGroup, type BookingOption } from '../../../../lib/booking'
 import { effectiveAccommodations } from '../../../../lib/planner/use-effective-accommodations'
 import type { Accommodation as LibAccommodation } from '../../../../lib/planner/accommodations'
 import { parsePeopleCount, getTodayDayIndex } from '../../../../lib/planner/mobile-view'
@@ -704,7 +704,6 @@ export default function MobileTripClient(props: Props) {
       provider: opt.provider, surface: 'mobile-view', category: itemType,
       destination: city, trip_id: tripId, meta: { item_name: itemName },
     })
-    trackAffiliateClick(itemType, opt.provider, city)
     setBookingDrawer(null)
     window.open(opt.url, '_blank', 'noopener,noreferrer')
   }
