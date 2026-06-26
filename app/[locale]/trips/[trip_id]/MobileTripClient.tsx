@@ -237,6 +237,55 @@ const RESERVE_VERB: Record<'es' | 'en', Partial<Record<ItemType, string>>> = {
   en: { hotel: 'Book hotel', tour: 'Book tour', restaurant: 'Book table', transfer: 'Book transfer' },
 }
 
+// Translates common English AI-generated budget row labels to Spanish.
+// Only applied when locale === 'es'. Partial match on lowercase key.
+const BUDGET_LABEL_ES: Record<string, string> = {
+  accommodation: 'Alojamiento', hotel: 'Hotel', lodging: 'Alojamiento',
+  food: 'Comida', meals: 'Comidas', restaurant: 'Restaurante', dining: 'Restaurantes',
+  activities: 'Actividades', activity: 'Actividad', tours: 'Tours', tour: 'Tour',
+  transport: 'Traslados', transfer: 'Traslado', transportation: 'Traslados',
+  flight: 'Vuelo', flights: 'Vuelos',
+  entertainment: 'Entretenimiento', shopping: 'Compras', other: 'Otros',
+}
+
+function translateBudgetLabel(label: string, locale: 'es' | 'en'): string {
+  if (locale !== 'es') return label
+  return BUDGET_LABEL_ES[label.toLowerCase().trim()] ?? label
+}
+
+// Mirrors TripResult.tsx — canonical Spanish display label per category.
+const BUDGET_CATEGORY_LABEL: Record<string, string> = {
+  Alojamiento: 'Hospedaje', Actividades: 'Actividades', Gastronomía: 'Gastronomía',
+  Traslados: 'Traslados', Otros: 'Otros',
+  accommodation: 'Hospedaje', food: 'Gastronomía', activities: 'Actividades',
+  transport: 'Traslados', other: 'Otros',
+}
+
+function normalizeCategory(raw: string | undefined | null): string {
+  const s = (raw ?? '').toLowerCase().trim()
+  if (!s) return 'Otros'
+  if (/hotel|hospedaje|alojamiento|accomod|lodg|habitaci/.test(s)) return 'Alojamiento'
+  if (/tour|actividad|excursi|experiencia|activ|entrad|ticket/.test(s)) return 'Actividades'
+  if (/restaur|gastro|comida|food|cena|almuerz|desayun|drink|bar/.test(s)) return 'Gastronomía'
+  if (/transfer|traslado|transport|taxi|uber|vuelo|flight|avion|aeropuerto/.test(s)) return 'Traslados'
+  return 'Otros'
+}
+
+// Matches TripResult.tsx — left accent rail color per activity type.
+const TYPE_BORDER: Record<ItemType, string> = {
+  hotel:      '#0F3A33',
+  tour:       '#6B8F86',
+  restaurant: '#C49B6E',
+  free:       '#DDD8D2',
+  transfer:   '#7A8B9A',
+}
+
+// Type label shown in the badge above the item name (mirrors TripResult.tsx).
+const TYPE_LABEL: Record<'es' | 'en', Record<ItemType, string>> = {
+  es: { hotel: 'Hotel', tour: 'Tour', restaurant: 'Restaurante', free: 'Libre', transfer: 'Transfer' },
+  en: { hotel: 'Hotel', tour: 'Tour', restaurant: 'Restaurant', free: 'Free', transfer: 'Transfer' },
+}
+
 type BookingDrawerState = { itemName: string; itemType: ItemType; options: BookingOption[] } | null
 
 function providerFromUrl(url: string): string {
@@ -784,7 +833,7 @@ export default function MobileTripClient(props: Props) {
   const budgetCategories = useMemo(() => {
     const map = new Map<string, BudgetRow[]>()
     baseBudget.forEach(r => {
-      const key = r.category || 'Otros'
+      const key = normalizeCategory(r.category)
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(r)
     })
@@ -797,9 +846,9 @@ export default function MobileTripClient(props: Props) {
   const nudgeCopy = t.nudge[nudgeIdx % t.nudge.length]
 
   return (
-    <main className="min-h-screen bg-[#F4F0E8] pt-[100px] pb-[80px]">
+    <div className="min-h-screen bg-[#FAF8F5] pb-[120px]"><main className="bg-white pt-[100px] pb-[24px] max-w-[430px] mx-auto">
       {/* ── Trip subheader (scrolls away; tabs + day pills stay pinned) ── */}
-      <div className="bg-[#FFF9F3] border-b border-[#E2DDD5] px-[18px] pt-[10px] pb-2">
+      <div className="bg-white border-b border-[#E4DFD8] px-[18px] pt-[10px] pb-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <div className="font-display text-[15px] font-medium text-[#1A1A1A] leading-[1.3] truncate">{title}</div>
@@ -894,7 +943,16 @@ export default function MobileTripClient(props: Props) {
       </div>
 
       {/* ── Section tabs ── */}
-      <div className="sticky top-[100px] z-[39] flex border-b border-[#E2DDD5] bg-[#FFF9F3]">
+      <div className="sticky top-[100px] z-[39] flex items-stretch border-b border-[#E4DFD8] bg-white">
+        {/* Back to planner — always visible so users can switch back after scrolling */}
+        <a
+          href={isOwner ? editPlanUrl : planYoursUrl}
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); router.push(isOwner ? editPlanUrl : planYoursUrl) }}
+          className="flex items-center px-[13px] font-mono text-[13px] text-[#B8B5AF] hover:text-[#0F3A33] border-r border-[#E4DFD8] shrink-0 transition-colors cursor-pointer"
+          title={isOwner ? t.editPlan : t.planYours}
+        >
+          ←
+        </a>
         {(['itin', 'budget', 'packing'] as Tab[]).map(tb => (
           <button
             key={tb}
@@ -910,7 +968,7 @@ export default function MobileTripClient(props: Props) {
 
       {/* ── Day selector (Itinerario only) ── */}
       {tab === 'itin' && days.length > 0 && (
-        <div className="sticky top-[139px] z-[38] bg-[#FFF9F3] border-b border-[#E2DDD5]">
+        <div className="sticky top-[139px] z-[38] bg-white border-b border-[#E4DFD8]">
           <div className="flex gap-[6px] px-[18px] py-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {days.map((d, i) => {
               const c = dayCounts(d.n)
@@ -920,18 +978,18 @@ export default function MobileTripClient(props: Props) {
                   key={d.n}
                   onClick={() => switchDay(i)}
                   className={`relative flex flex-col items-center gap-[2px] px-[10px] py-[6px] rounded-[9px] border shrink-0 min-w-[54px] transition-colors ${
-                    active ? 'bg-[#0F3A33] border-[#0F3A33]' : 'bg-[#FFF9F3] border-[#E2DDD5] hover:border-[#6B8F86] hover:bg-[#F4F0E8]'
+                    active ? 'bg-[#0F3A33] border-[#0F3A33]' : 'bg-white border-[#E4DFD8] hover:border-[#B8B3AB] hover:bg-[#F4F0E8]'
                   }`}
                 >
                   {i === todayIndex && (
                     <span className={`absolute top-[4px] right-[5px] w-[4px] h-[4px] rounded-full ${active ? 'bg-white/70' : 'bg-[#E1615B]'}`} />
                   )}
-                  <span className={`font-mono text-[8px] tracking-[.05em] uppercase ${active ? 'text-white/50' : 'text-[#BDBDBD]'}`}>
+                  <span className={`font-mono text-[9px] font-medium tracking-[.12em] uppercase ${active ? 'text-white/50' : 'text-[#B8B5AF]'}`}>
                     {locale === 'es' ? 'Día' : 'Day'} {d.n}
                   </span>
-                  <span className={`text-[12px] font-medium ${active ? 'text-white' : 'text-[#1A1A1A]'}`}>{shortLabel(d, i, segments, accommodations, locale)}</span>
+                  <span className={`text-[12px] font-medium ${active ? 'text-white' : 'text-[#1C1C1A]'}`}>{shortLabel(d, i, segments, accommodations, locale)}</span>
                   <span className={`font-mono text-[8px] mt-[1px] ${
-                    active ? (c.done > 0 ? 'text-white/75' : 'text-white/45') : (c.done > 0 ? 'text-[#2D6B57]' : 'text-[#BDBDBD]')
+                    active ? (c.done > 0 ? 'text-white/75' : 'text-white/45') : (c.done > 0 ? 'text-[#2D6B57]' : 'text-[#B8B5AF]')
                   }`}>{c.done}/{c.total}</span>
                 </button>
               )
@@ -974,7 +1032,7 @@ export default function MobileTripClient(props: Props) {
 
         {tab === 'budget' && (
           <BudgetTab
-            t={t} categories={budgetCategories} totals={budgetTotals}
+            t={t} locale={locale} categories={budgetCategories} totals={budgetTotals}
             budgetView={budgetView} setBudgetView={setBudgetView}
             currency={currency} setCurrency={changeCurrency}
             fmt={fmt} effectiveActual={effectiveActual} effectiveEstimate={effectiveEstimate} canEdit={canEdit}
@@ -994,7 +1052,7 @@ export default function MobileTripClient(props: Props) {
 
       {/* ── Persistent login nudge ── */}
       {showNudge && (
-        <div className="fixed bottom-0 left-0 right-0 z-[60] bg-[#0F3A33] px-[18px] py-2 flex items-center gap-[10px] print:hidden">
+        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] z-[60] bg-[#0F3A33] px-[18px] py-2 flex items-center gap-[10px] print:hidden">
           <div className="flex-1 text-[11px] text-white/80 leading-[1.4]">
             <strong className="text-white font-semibold">{nudgeCopy[0]}</strong> — {nudgeCopy[1]}
           </div>
@@ -1055,7 +1113,7 @@ export default function MobileTripClient(props: Props) {
           {toast}
         </div>
       )}
-    </main>
+    </main></div>
   )
 }
 
@@ -1142,13 +1200,13 @@ function ItineraryTab(p: {
 }) {
   const { day, t, locale, canEdit } = p
   const acc = p.accommodation
-  const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
-  const secLbl = 'font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
+  const card = 'border border-[#E4DFD8] rounded-[12px] overflow-hidden bg-white'
+  const secLbl = 'font-mono text-[9px] font-medium text-[#B8B5AF] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
 
   return (
     <>
       {/* Day hero */}
-      <div className="px-[18px] pt-1 pb-3 border-b border-[#E2DDD5]">
+      <div className="px-[18px] pt-1 pb-3 border-b border-[#E4DFD8]">
         <div className="font-mono text-[9px] text-[#E1615B] tracking-[.1em] uppercase mb-[3px]">
           {p.isToday ? `● ${t.today} · ` : ''}{day.label}
         </div>
@@ -1212,12 +1270,12 @@ function ItineraryTab(p: {
                   <button
                     key={c.id} disabled={!canEdit}
                     onClick={() => p.onToggleCheck(c.id)}
-                    className={`w-full text-left flex items-start gap-[10px] px-[14px] py-[10px] border-b border-[#E2DDD5] last:border-b-0 transition-colors ${
-                      canEdit ? 'hover:bg-[#F4F0E8] cursor-pointer' : 'cursor-default'
+                    className={`w-full text-left flex items-start gap-[10px] px-[14px] py-[10px] border-b border-[#E4DFD8] last:border-b-0 transition-colors ${
+                      canEdit ? 'hover:bg-[#EDE7E1] cursor-pointer' : 'cursor-default'
                     } ${done ? 'opacity-50' : ''}`}
                   >
                     <span className={`w-[18px] h-[18px] rounded-[5px] border-[1.5px] shrink-0 flex items-center justify-center text-[10px] text-white mt-[1px] ${
-                      done ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E2DDD5]'
+                      done ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E4DFD8]'
                     }`}>{done ? '✓' : ''}</span>
                     <span className="flex-1 min-w-0">
                       <span className={`block text-[12px] font-medium leading-[1.3] ${done ? 'line-through text-[#BDBDBD]' : 'text-[#1A1A1A]'}`}>
@@ -1278,14 +1336,25 @@ function ActivityRow(p: {
   const [note, setNote] = useState(p.annotation?.note ?? '')
   const [link, setLink] = useState(p.annotation?.link ?? '')
 
+  const accentColor = TYPE_BORDER[item.type] ?? '#DDD8D2'
+  const typeLabel   = TYPE_LABEL[locale][item.type]
+
   return (
-    <div className="flex gap-[10px] py-[11px] border-b border-[#E2DDD5] last:border-b-0 cursor-pointer"
-         onClick={() => p.onToggleExpand()}>
-      <div className="font-mono text-[10px] text-[#BDBDBD] min-w-[36px] pt-[1px] text-right shrink-0">{item.time}</div>
+    <div
+      className="flex gap-[10px] py-[11px] border-b border-[#E4DFD8] last:border-b-0 cursor-pointer pl-[10px] -ml-[10px] border-l-[3px]"
+      style={{ borderLeftColor: accentColor }}
+      onClick={() => p.onToggleExpand()}
+    >
+      <div className="font-mono text-[10px] text-[#B8B5AF] min-w-[36px] pt-[1px] text-right shrink-0">{item.time}</div>
       <div className="w-[26px] h-[26px] rounded-[7px] flex items-center justify-center text-[12px] shrink-0 bg-[#EDE7E1]">{ITEM_ICON[item.type]}</div>
       <div className="flex-1 min-w-0">
-        <div className="text-[13px] font-medium text-[#1A1A1A] mb-[2px] leading-[1.3]">{item.name}</div>
-        <div className={`text-[11px] text-[#8A8A8A] leading-[1.5] ${open ? '' : 'line-clamp-2'}`}>{item.desc}</div>
+        <div className="flex items-center gap-[5px] flex-wrap mb-[3px]">
+          <span className="font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#7A7A76]">
+            {ITEM_ICON[item.type]} {typeLabel}
+          </span>
+        </div>
+        <div className="text-[13px] font-medium text-[#1C1C1A] mb-[2px] leading-[1.3]">{item.name}</div>
+        <div className={`text-[11px] font-light text-[#7A7A76] leading-[1.6] ${open ? '' : 'line-clamp-2'}`}>{item.desc}</div>
         {item.price && (
           <div className="inline-flex items-center gap-1 font-mono text-[9px] font-medium px-[6px] py-[2px] rounded-[4px] mt-[5px] bg-[#EDE7E1] text-[#4A4A4A]">{item.price}</div>
         )}
@@ -1299,7 +1368,7 @@ function ActivityRow(p: {
         {open && (
           // Tapping the header (above) toggles the row; the editor below opts
           // out so interacting with its fields doesn't collapse it mid-edit.
-          <div className="pt-[10px] mt-2 border-t border-[#E2DDD5] cursor-default" onClick={(e) => e.stopPropagation()}>
+          <div className="pt-[10px] mt-2 border-t border-[#E4DFD8] cursor-default" onClick={(e) => e.stopPropagation()}>
             {(reserveLabel || canEdit) && (
               <div className="flex gap-[6px] mb-2 flex-wrap">
                 {reserveLabel && (
@@ -1407,7 +1476,7 @@ function HotelCard(p: {
   const { acc, booking, t, locale, canEdit } = p
   const [formOpen, setFormOpen] = useState(false)
   const confirmed = !!booking?.confirmed
-  const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
+  const card = 'border border-[#E4DFD8] rounded-[12px] overflow-hidden bg-white'
 
   // Same Stay22 Allez deep link the desktop hotel card uses.
   const reserveHref = buildAffiliateLink('booking', {
@@ -1421,9 +1490,9 @@ function HotelCard(p: {
 
   return (
     <div className={card}>
-      <div className="flex justify-between items-center px-[14px] py-[10px] border-b border-[#E2DDD5]">
+      <div className="flex justify-between items-center px-[14px] py-[10px] border-b border-[#E4DFD8]">
         <span className={`font-mono text-[9px] font-medium px-[8px] py-[3px] rounded-[4px] tracking-[.04em] uppercase ${
-          confirmed ? 'bg-[#E4EFEC] text-[#0F3A33]' : 'bg-[#EDE7E1] text-[#8A8A8A]'
+          confirmed ? 'bg-[#E4EFEC] text-[#0F3A33]' : 'bg-[#EDE7E1] text-[#7A7A76]'
         }`}>{confirmed ? t.booked : t.pending}</span>
         {acc.priceTier && <span className="font-mono text-[11px] text-[#8A8A8A]">{tierGlyph(acc.priceTier)}</span>}
       </div>
@@ -1558,7 +1627,7 @@ function MobileBookingForm(p: {
 // Budget tab
 // ════════════════════════════════════════════════════════════════════════════
 function BudgetTab(p: {
-  t: typeof T['es']; categories: [string, BudgetRow[]][]
+  t: typeof T['es']; locale: 'es' | 'en'; categories: [string, BudgetRow[]][]
   totals: { ai: number; usr: number; act: number; hasUser: boolean; hasActual: boolean }
   budgetView: 'total' | 'persona'; setBudgetView: (v: 'total' | 'persona') => void
   currency: 'MXN' | 'USD'; setCurrency: (c: 'MXN' | 'USD') => void
@@ -1570,23 +1639,23 @@ function BudgetTab(p: {
   onSetEstimate: (id: string, raw: string) => void
 }) {
   const { t, totals, fmt } = p
-  const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
+  const card = 'border border-[#E4DFD8] rounded-[12px] overflow-hidden bg-white'
   return (
     <>
-      <div className="font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2">{t.budget}</div>
+      <div className="font-mono text-[9px] font-medium text-[#B8B5AF] tracking-[.12em] uppercase px-[18px] pt-4 pb-2">{t.budget}</div>
       <div className="px-[18px] pb-[14px]">
         <div className={card}>
           {/* totals */}
-          <div className="px-[14px] py-3 border-b border-[#E2DDD5]">
+          <div className="px-[14px] py-3 border-b border-[#E4DFD8]">
             <div className="grid grid-cols-3">
               <Total lbl={t.aiEstimated} amt={fmt(totals.ai)} cls="text-[#8A8A8A]" border />
-              <Total lbl={t.yourEstimate} amt={totals.hasUser ? fmt(totals.usr) : '—'} cls={totals.hasUser ? 'text-[#2D6B57]' : 'text-[#BDBDBD]'} border />
-              <Total lbl={t.confirmed} amt={totals.hasActual ? fmt(totals.act) : '—'} cls={totals.hasActual ? 'text-[#0F3A33]' : 'text-[#BDBDBD]'} />
+              <Total lbl={t.yourEstimate} amt={totals.hasUser ? fmt(totals.usr) : '—'} cls={totals.hasUser ? 'text-[#2D6B57]' : 'text-[#B8B5AF]'} border />
+              <Total lbl={t.confirmed} amt={totals.hasActual ? fmt(totals.act) : '—'} cls={totals.hasActual ? 'text-[#0F3A33]' : 'text-[#B8B5AF]'} />
             </div>
           </div>
           {/* currency toggle — relabel only, no conversion (desktop parity) */}
-          <div className="flex justify-between items-center px-[14px] py-2 border-b border-[#E2DDD5]">
-            <span className="font-mono text-[9px] text-[#BDBDBD]">{t.amountsIn} {p.currency} · {t.noConversion}</span>
+          <div className="flex justify-between items-center px-[14px] py-2 border-b border-[#E4DFD8]">
+            <span className="font-mono text-[9px] text-[#B8B5AF]">{t.amountsIn} {p.currency} · {t.noConversion}</span>
             <div className="flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]">
               {(['MXN', 'USD'] as const).map(c => (
                 <button key={c} onClick={() => p.setCurrency(c)}
@@ -1597,12 +1666,12 @@ function BudgetTab(p: {
             </div>
           </div>
           {/* view toggle */}
-          <div className="flex gap-2 px-[14px] py-2 border-b border-[#E2DDD5] items-center">
-            <span className="font-mono text-[9px] text-[#BDBDBD] tracking-[.06em] uppercase mr-1">{t.view}</span>
+          <div className="flex gap-2 px-[14px] py-2 border-b border-[#E4DFD8] items-center">
+            <span className="font-mono text-[9px] text-[#B8B5AF] tracking-[.06em] uppercase mr-1">{t.view}</span>
             {(['total', 'persona'] as const).map(v => (
               <button key={v} onClick={() => p.setBudgetView(v)}
                 className={`font-mono text-[9px] font-medium px-[8px] py-[3px] rounded-[4px] border transition-colors ${
-                  p.budgetView === v ? 'bg-[#0F3A33] text-white border-[#0F3A33]' : 'border-[#E2DDD5] text-[#8A8A8A]'
+                  p.budgetView === v ? 'bg-[#0F3A33] text-white border-[#0F3A33]' : 'border-[#E4DFD8] text-[#8A8A8A]'
                 }`}>{v === 'total' ? t.total : t.perPerson}</button>
             ))}
           </div>
@@ -1610,33 +1679,33 @@ function BudgetTab(p: {
           {p.categories.map(([cat, rows]) => {
             const catTotal = rows.reduce((s, r) => s + (p.effectiveActual(r) ?? p.effectiveEstimate(r) ?? r.aiEst), 0)
             return (
-              <div key={cat} className="border-b border-[#E2DDD5] last:border-b-0">
-                <div className="flex justify-between items-center px-[14px] py-2 bg-[#F4F0E8]">
-                  <span className="font-mono text-[9px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase">{cat}</span>
+              <div key={cat} className="border-b border-[#E4DFD8] last:border-b-0">
+                <div className="flex justify-between items-center px-[14px] py-2 bg-[#EDE7E1]">
+                  <span className="font-mono text-[9px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase">{BUDGET_CATEGORY_LABEL[cat] ?? cat}</span>
                   <span className="font-mono text-[10px] text-[#4A4A4A]">{fmt(catTotal)}</span>
                 </div>
                 {rows.map(r => (
-                  <div key={r.id} className="px-[14px] py-2 border-t border-[#E2DDD5]">
+                  <div key={r.id} className="px-[14px] py-2 border-t border-[#E4DFD8]">
                     <div className="flex items-center gap-2 mb-[6px]">
                       {r.icon && <span className="text-[13px] shrink-0">{r.icon}</span>}
-                      <span className="text-[11px] text-[#1A1A1A] flex-1 min-w-0 truncate">{r.label}</span>
-                      <span className="font-mono text-[9px] text-[#BDBDBD] shrink-0">{t.aiEstimated} {fmt(r.aiEst)}</span>
+                      <span className="text-[11px] text-[#1A1A1A] flex-1 min-w-0 truncate">{translateBudgetLabel(r.label, p.locale)}</span>
+                      <span className="font-mono text-[9px] text-[#B8B5AF] shrink-0">{t.aiEstimated} {fmt(r.aiEst)}</span>
                     </div>
                     {p.canEdit ? (
                       <div className="flex gap-[8px] pl-[21px]">
                         <label className="flex items-center gap-[5px]">
-                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#BDBDBD]">{t.estShort}</span>
+                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#B8B5AF]">{t.estShort}</span>
                           <input type="number" inputMode="numeric" placeholder="—"
                             defaultValue={p.effectiveEstimate(r) ?? ''}
                             onBlur={(e) => p.onSetEstimate(r.id, e.target.value)}
-                            className="w-[64px] px-[6px] py-1 border border-[#E2DDD5] rounded-[5px] font-mono text-[10px] text-[#2D6B57] bg-[#FFF9F3] outline-none text-right focus:border-[#6B8F86]" />
+                            className="w-[64px] px-[6px] py-1 border border-[#E4DFD8] rounded-[5px] font-mono text-[10px] text-[#2D6B57] bg-white outline-none text-right focus:border-[#6B8F86]" />
                         </label>
                         <label className="flex items-center gap-[5px]">
-                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#BDBDBD]">{t.real}</span>
+                          <span className="font-mono text-[8px] tracking-[.06em] uppercase text-[#B8B5AF]">{t.real}</span>
                           <input type="number" inputMode="numeric" placeholder="—"
                             defaultValue={p.effectiveActual(r) ?? ''}
                             onBlur={(e) => p.onSetActual(r.id, e.target.value)}
-                            className="w-[64px] px-[6px] py-1 border border-[#E2DDD5] rounded-[5px] font-mono text-[10px] text-[#0F3A33] bg-[#FFF9F3] outline-none text-right focus:border-[#6B8F86]" />
+                            className="w-[64px] px-[6px] py-1 border border-[#E4DFD8] rounded-[5px] font-mono text-[10px] text-[#0F3A33] bg-white outline-none text-right focus:border-[#6B8F86]" />
                         </label>
                       </div>
                     ) : (
@@ -1658,8 +1727,8 @@ function BudgetTab(p: {
 
 function Total(p: { lbl: string; amt: string; cls: string; border?: boolean }) {
   return (
-    <div className={`px-3 py-2 text-center ${p.border ? 'border-r border-[#E2DDD5]' : ''}`}>
-      <span className="block font-mono text-[8px] text-[#BDBDBD] tracking-[.06em] uppercase mb-[3px]">{p.lbl}</span>
+    <div className={`px-3 py-2 text-center ${p.border ? 'border-r border-[#E4DFD8]' : ''}`}>
+      <span className="block font-mono text-[8px] text-[#B8B5AF] tracking-[.06em] uppercase mb-[3px]">{p.lbl}</span>
       <span className={`font-mono text-[13px] font-medium ${p.cls}`}>{p.amt}</span>
     </div>
   )
@@ -1675,9 +1744,9 @@ function PrepTab(p: {
   packing: string[]; packedItems: Set<number>; onTogglePacked: (i: number) => void
 }) {
   const { t, canEdit } = p
-  const card = 'border border-[#E2DDD5] rounded-[12px] overflow-hidden bg-[#FFF9F3]'
-  const secLbl = 'font-mono text-[9px] font-medium text-[#BDBDBD] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
-  const cardHeader = 'w-full flex justify-between items-center px-[14px] py-[10px] bg-[#F4F0E8] border-b border-[#E2DDD5] cursor-pointer hover:bg-[#EFEAE1] transition-colors'
+  const card = 'border border-[#E4DFD8] rounded-[12px] overflow-hidden bg-white'
+  const secLbl = 'font-mono text-[9px] font-medium text-[#B8B5AF] tracking-[.12em] uppercase px-[18px] pt-4 pb-2'
+  const cardHeader = 'w-full flex justify-between items-center px-[14px] py-[10px] bg-[#EDE7E1] border-b border-[#E4DFD8] cursor-pointer hover:bg-[#E4DFD8] transition-colors'
   const headerTitle = 'font-mono text-[10px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase'
   const headerCount = 'font-mono text-[10px] text-[#BDBDBD]'
   const prepDone = p.prepChecks.filter(c => p.doneCheckIds.has(c.id)).length
@@ -1703,11 +1772,11 @@ function PrepTab(p: {
                 const done = p.doneCheckIds.has(c.id)
                 return (
                   <button key={c.id} disabled={!canEdit} onClick={() => p.onToggleCheck(c.id)}
-                    className={`w-full text-left flex items-start gap-[10px] px-[14px] py-[10px] border-b border-[#E2DDD5] last:border-b-0 transition-colors ${
-                      canEdit ? 'hover:bg-[#F4F0E8] cursor-pointer' : 'cursor-default'
+                    className={`w-full text-left flex items-start gap-[10px] px-[14px] py-[10px] border-b border-[#E4DFD8] last:border-b-0 transition-colors ${
+                      canEdit ? 'hover:bg-[#EDE7E1] cursor-pointer' : 'cursor-default'
                     } ${done ? 'opacity-50' : ''}`}>
                     <span className={`w-[18px] h-[18px] rounded-[5px] border-[1.5px] shrink-0 flex items-center justify-center text-[10px] text-white mt-[1px] ${
-                      done ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E2DDD5]'
+                      done ? 'bg-[#0F3A33] border-[#0F3A33]' : 'border-[#E4DFD8]'
                     }`}>{done ? '✓' : ''}</span>
                     <span className={`flex-1 text-[12px] font-medium leading-[1.3] ${done ? 'line-through text-[#BDBDBD]' : 'text-[#1A1A1A]'}`}>{c.icon} {c.text}</span>
                   </button>

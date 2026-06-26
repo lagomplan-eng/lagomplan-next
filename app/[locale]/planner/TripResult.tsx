@@ -3963,27 +3963,30 @@ export default function TripResult({ params }: Props) {
             doneChecks={doneChecks}
             pendingCount={pendingCount}
             milestones={milestones}
-            nextCheck={nextCheck && nextRec ? {
-              id: nextCheck.id,
-              text: nextCheck.text,
-              icon: nextCheck.icon,
-              // Milestone label maps to the bar's current locale via the
-              // labels already on the milestone defs. Cheap lookup.
-              milestoneLabel: (() => {
-                const m = milestones.find(x => x.id === nextRec.milestoneId)
-                return m ? (locale === 'en' ? m.labelEN : m.labelES) : undefined
-              })(),
-              startsMilestone: nextRec.startsMilestone,
-            } : null}
+            nextCheck={nextCheck && nextRec ? (() => {
+              const rawItemId = nextCheck.id.startsWith('check-') ? nextCheck.id.slice(6) : null
+              const linkedItem = rawItemId ? days.flatMap(d => d.items).find(it => it.id === rawItemId) : null
+              return {
+                id: nextCheck.id,
+                text: nextCheck.text,
+                icon: nextCheck.icon,
+                itemId: linkedItem ? linkedItem.id : undefined,
+                isBookable: linkedItem ? linkedItem.type !== 'free' : false,
+                milestoneLabel: (() => {
+                  const m = milestones.find(x => x.id === nextRec.milestoneId)
+                  return m ? (locale === 'en' ? m.labelEN : m.labelES) : undefined
+                })(),
+                startsMilestone: nextRec.startsMilestone,
+              }
+            })() : null}
             daysCount={days.length}
             daysUntilTrip={daysUntilTrip}
             locale={locale === 'en' ? 'en' : 'es'}
-            // Bar CTA now marks the next check done directly. The bar shows
-            // an inline "✓ Reservado · Deshacer" affordance for 4 s after
-            // each click so mis-clicks are recoverable without leaving the
-            // top of the page. toggleCheck is idempotent — same handler
-            // services both the mark-done and the undo paths.
             onToggleCheck={toggleCheck}
+            onOpenItemBooking={(itemId) => {
+              const item = days.flatMap(d => d.items).find(it => it.id === itemId)
+              if (item) openBookingModal(item)
+            }}
           />
         </div>
       </div>

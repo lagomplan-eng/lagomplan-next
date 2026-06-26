@@ -240,11 +240,9 @@ async function generateSegment(jobInputs: Record<string, any>, chunkIndex: numbe
     const segmentStartIdx = chunkIndex * SEGMENT_DAYS
     const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
 
-    const tripStart = new Date(jobInputs.start)
-    const segmentStartDate = new Date(tripStart)
-    segmentStartDate.setDate(tripStart.getDate() + segmentStartIdx)
-    const segmentEndDate = new Date(segmentStartDate)
-    segmentEndDate.setDate(segmentStartDate.getDate() + segmentDayCount - 1)
+    const tripStartISO    = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
+    const segmentStartISO = addDaysISO(tripStartISO, segmentStartIdx)
+    const segmentEndISO   = addDaysISO(tripStartISO, segmentStartIdx + segmentDayCount - 1)
 
     segmentPayload = {
       ...jobInputs,
@@ -259,10 +257,10 @@ async function generateSegment(jobInputs: Record<string, any>, chunkIndex: numbe
       // these, every chunk reads as a standalone 5-day trip.
       trip_day_offset: segmentStartIdx,
       trip_total_days: totalDays,
-      trip_start_date: tripStart.toISOString().slice(0, 10),
-      trip_end_date:   addDaysISO(tripStart.toISOString().slice(0, 10), totalDays - 1),
-      start: segmentStartDate.toISOString().slice(0, 10),
-      end:   segmentEndDate.toISOString().slice(0, 10),
+      trip_start_date: tripStartISO,
+      trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
+      start: segmentStartISO,
+      end:   segmentEndISO,
     }
   }
 
@@ -465,6 +463,9 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
 
   return {
     title:            patchedTitle ?? fallbackTitle,
+    tagline:          (first as any).tagline       ?? null,
+    hero_tags:        (first as any).hero_tags     ?? null,
+    before_you_go:    (first as any).before_you_go ?? null,
     subtitle:         (first as any).subtitle ?? fallbackSubtitle,
     destination:      jobInputs.destination,
     days,

@@ -627,7 +627,7 @@ function PromptNudge({
         transition: 'max-height 0.35s ease, opacity 0.25s ease',
       }}
     >
-      <div className="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[8px] bg-[#FAF5EC] border border-[#E4DFD8]">
+      <div className="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[8px] bg-[#F4F0E8] border border-[#E4DFD8]">
         <p className="font-sans text-[12px] text-[#4A5568] leading-[1.4]">
           {locale === 'en'
             ? <>Already booked? <span className="text-[#9CA3AF]">Add your confirmation</span></>

@@ -30,6 +30,10 @@ interface NextCheckInfo {
   id:   string
   text: string
   icon: string
+  /** ItineraryItem.id linked to this check (undefined for pre-trip checks). */
+  itemId?: string
+  /** True when the linked item supports booking (hotel/tour/restaurant/transfer). */
+  isBookable?: boolean
   /** Which milestone this check belongs to. Drives the "NEXT IN
    *  [milestone]" eyebrow above the next-step block when present. */
   milestoneLabel?: string
@@ -54,15 +58,17 @@ interface Props {
    *  no start date or it's in the past — drives the countdown/urgency copy. */
   daysUntilTrip?: number | null
   locale:       'es' | 'en'
-  /** Toggle handler — the bar calls this with the next check's ID when the
-   *  user clicks the CTA (mark done) or Deshacer (undo). Same handler
-   *  handles both directions; toggleCheck in TripResult is idempotent. */
+  /** Toggle handler — mark done / undo. Called for non-bookable checks and the
+   *  undo action after a booking-modal flow. */
   onToggleCheck?: (checkId: string) => void
+  /** Opens the booking modal for the given ItineraryItem.id. Called when the
+   *  CTA is for a bookable item (hotel/tour/restaurant/transfer). */
+  onOpenItemBooking?: (itemId: string) => void
 }
 
 export default function TripReadinessBar({
   readinessPct, totalChecks, doneChecks, pendingCount,
-  milestones, nextCheck, daysCount, daysUntilTrip, locale, onToggleCheck,
+  milestones, nextCheck, daysCount, daysUntilTrip, locale, onToggleCheck, onOpenItemBooking,
 }: Props) {
   const isES = locale === 'es'
   const [mobileOpen, setMobileOpen] = useState(false)
@@ -94,6 +100,15 @@ export default function TripReadinessBar({
       setRecent(null)
       undoTimer.current = null
     }, 4000)
+  }
+
+  function handleCta() {
+    if (!nextCheck) return
+    if (nextCheck.isBookable && nextCheck.itemId && onOpenItemBooking) {
+      onOpenItemBooking(nextCheck.itemId)
+    } else {
+      handleMarkDone()
+    }
   }
 
   function handleUndo() {
@@ -207,7 +222,7 @@ export default function TripReadinessBar({
             </div>
             <button
               type="button"
-              onClick={handleMarkDone}
+              onClick={handleCta}
               className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
             >
               {ctaLabel}
@@ -312,7 +327,7 @@ export default function TripReadinessBar({
                 </div>
                 <button
                   type="button"
-                  onClick={handleMarkDone}
+                  onClick={handleCta}
                   className="font-sans text-[12px] font-semibold text-white bg-[#E1615B] hover:bg-[#C94F49] transition-colors px-3.5 py-2 rounded-[4px] whitespace-nowrap shrink-0"
                 >
                   {ctaLabel}
