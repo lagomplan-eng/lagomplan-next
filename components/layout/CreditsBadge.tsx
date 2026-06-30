@@ -1,14 +1,16 @@
 'use client'
 
 import { useLocale } from 'next-intl'
+import { useRouter } from 'next/navigation'
 import { useUser } from '../auth/SupabaseProvider'
 import { usePlan } from '../plan/PlanProvider'
 import { resolvePlanCopy, planToneClass } from '../../lib/plan/copy'
 
 export function CreditsBadge() {
   const user = useUser()
-  const { planCredits, openPaywall } = usePlan()
+  const { planCredits } = usePlan()
   const locale = useLocale() as 'es' | 'en'
+  const router = useRouter()
 
   if (!user) return null
 
@@ -21,7 +23,7 @@ export function CreditsBadge() {
     return (
       <button
         type="button"
-        onClick={openPaywall}
+        onClick={() => router.push(`/${locale}/precios`)}
         className={`${base} ${planToneClass(copy.tone)} border-none`}
         aria-label={copy.label}
       >

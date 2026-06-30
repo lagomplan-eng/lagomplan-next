@@ -75,25 +75,27 @@ export function GuideFreeIndicator({ slug }: { slug: string }) {
 
   // over-limit
   return (
-    <div className="w-full bg-[#F7E7C9] border-b border-[#EBD8A8]">
-      <div className="page-inner py-3 flex items-center justify-center gap-4 text-center flex-wrap">
-        <span className="font-sans text-[12px] font-medium text-[#7A4A13]">
+    <div className="w-full bg-[#EDE7E1] border-b border-[#D8D0C8]">
+      <div className="page-inner py-2.5 flex items-center justify-center gap-3 flex-wrap">
+        <span className="font-sans text-[12px] font-medium text-[#0F3A33]">
           {isES
-            ? '🔒 Has usado tu guía gratis · Crea tu cuenta gratis para seguir explorando'
-            : '🔒 You’ve used your free guide · Create a free account to keep exploring'}
+            ? ‘🔒 Has usado tu guía gratis · Crea tu cuenta gratis para seguir explorando’
+            : ‘🔒 You’ve used your free guide · Create a free account to keep exploring’}
         </span>
-        <Link
-          href="/signup"
-          className="font-sans text-[12px] font-semibold bg-[#0F3A33] text-white px-3 py-1.5 rounded-full hover:bg-[#12453d] transition-colors whitespace-nowrap"
-        >
-          {isES ? 'Crear cuenta gratis' : 'Sign up free'}
-        </Link>
-        <Link
-          href="/login"
-          className="font-sans text-[11px] font-medium text-[#7A4A13] underline underline-offset-2 hover:text-[#4A2B06] whitespace-nowrap"
-        >
-          {isES ? 'Iniciar sesión' : 'Log in'}
-        </Link>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <Link
+            href="/signup"
+            className="font-sans text-[12px] font-semibold bg-[#0F3A33] text-white px-4 py-1.5 rounded-md hover:bg-[#12453d] transition-colors whitespace-nowrap"
+          >
+            {isES ? ‘Crear cuenta gratis’ : ‘Sign up free’}
+          </Link>
+          <Link
+            href="/login"
+            className="font-sans text-[12px] font-medium text-[#6B8F86] hover:text-[#0F3A33] transition-colors whitespace-nowrap"
+          >
+            {isES ? ‘Iniciar sesión’ : ‘Log in’}
+          </Link>
+        </div>
       </div>
     </div>
   )

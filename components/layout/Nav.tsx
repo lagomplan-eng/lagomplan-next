@@ -76,9 +76,16 @@ export default function Nav() {
   // here, show a modal, and only proceed on confirm.
   const [pendingLocale, setPendingLocale] = useState<Locale | null>(null)
   const user = useUser()
+  const [isResultPage, setIsResultPage] = useState(false)
 
-  // Close mobile drawer on route change
-  useEffect(() => { setOpen(false) }, [pathname])
+  // Close mobile drawer on route change; re-evaluate result-page state.
+  useEffect(() => {
+    setOpen(false)
+    setIsResultPage(
+      /\/planner\/?$/.test(window.location.pathname) &&
+      new URLSearchParams(window.location.search).has('trip_id')
+    )
+  }, [pathname])
 
   // ── Language switcher ──────────────────────────────────
   // Full page reload on locale switch so Google Maps (and other singleton SDKs)
@@ -220,7 +227,7 @@ export default function Nav() {
         {/* ── Desktop right ─────────────────────────────── */}
         <div className="hide-mobile flex items-center gap-3 flex-shrink-0">
           <LangToggle locale={locale} onSwitch={switchLocale} />
-          <CreditsBadge />
+          {!isResultPage && <CreditsBadge />}
           {user ? (
             <div className="relative">
               <button
@@ -301,7 +308,7 @@ export default function Nav() {
           {user ? (
             <div className="mt-5 flex flex-col gap-1">
               <p className="text-[11px] text-[#6B8F86] px-1 truncate">{user.email}</p>
-              <div className="px-1 py-2"><CreditsBadge /></div>
+              {!isResultPage && <div className="px-1 py-2"><CreditsBadge /></div>}
               <Link
                 href="/my-trips"
                 className="font-sans text-[14px] font-medium text-[#0F3A33] py-2.5 border-b border-[rgba(107,143,134,.2)]"

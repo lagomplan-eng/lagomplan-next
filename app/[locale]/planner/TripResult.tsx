@@ -3152,6 +3152,7 @@ export default function TripResult({ params }: Props) {
   const totalChecks = checks.length
   const progressPct = totalChecks > 0 ? Math.round((doneChecks / totalChecks) * 100) : 0
   const pendingCount = totalChecks - doneChecks
+  const showHeroReadiness = totalChecks > 0 && progressPct < 100
 
   // Days until departure — drives the urgency copy in the readiness bar. Parses
   // the trip start (prefStart, YYYY-MM-DD) as LOCAL midnight to avoid the
@@ -3512,7 +3513,7 @@ export default function TripResult({ params }: Props) {
               </p>
 
               {/* Meta pills — all from pref state so they reflect regeneration */}
-              <div data-trip-hero="chips" className="flex flex-wrap gap-1.5 mb-7">
+              <div data-trip-hero="chips" className={`flex flex-wrap gap-1.5 ${showHeroReadiness ? 'mb-4' : 'mb-7'}`}>
                 <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
                   <span>📅</span> {dateRange}
                 </span>
@@ -3537,6 +3538,28 @@ export default function TripResult({ params }: Props) {
                   </span>
                 )}
               </div>
+
+              {/* Hero readiness indicator — shown above the fold when plan is incomplete */}
+              {showHeroReadiness && (
+                <div data-trip-hero="readiness" className="mb-6">
+                  <div className="flex items-baseline justify-between mb-[7px]">
+                    <span className="font-mono text-[10px] tracking-[.06em] text-[#0F3A33] font-semibold">
+                      {progressPct}%{' '}{locale === 'es' ? 'listo' : 'complete'}
+                    </span>
+                    <span className="font-mono text-[10px] tracking-[.04em] text-[#7A7A76]">
+                      {pendingCount}{' '}{locale === 'es'
+                        ? `paso${pendingCount !== 1 ? 's' : ''} pendiente${pendingCount !== 1 ? 's' : ''}`
+                        : `step${pendingCount !== 1 ? 's' : ''} remaining`}
+                    </span>
+                  </div>
+                  <div className="h-[3px] bg-[#EDE7E1] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-[#0F3A33] rounded-full transition-[width] duration-500"
+                      style={{ width: `${progressPct}%` }}
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Action row */}
               <div data-trip="action-row" className="flex items-center pt-[18px] border-t border-[#E4DFD8]">

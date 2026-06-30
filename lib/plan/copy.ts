@@ -1,7 +1,7 @@
 import type { PlanState } from '../../components/plan/PlanProvider'
 import { FREE_TRIPS_LIMIT } from './limits'
 
-export type PlanUiState = 'subscriber' | 'plenty' | 'last' | 'empty'
+export type PlanUiState = 'plenty' | 'last' | 'empty'
 export type PlanTone = 'celebratory' | 'neutral' | 'soft-warn' | 'action'
 
 export type PlanCopy = {
@@ -17,22 +17,16 @@ export function resolvePlanCopy(
   if (!plan || plan === 'loading') return null
   const isES = locale === 'es'
 
-  // Unlimited subscribers — ambient celebratory pill.
-  if (plan.is_subscriber) {
-    return {
-      state: 'subscriber',
-      label: isES ? '✨ Ilimitado' : '✨ Unlimited',
-      tone: 'celebratory',
-    }
-  }
+  // Subscribers have no trip limit — hide the pill entirely.
+  if (plan.is_subscriber) return null
 
   const remaining = plan.trips_remaining
 
-  // Out of trips — call-to-action (clickable badge opens paywall).
+  // Out of trips — call-to-action navigates to the pricing page.
   if (remaining === 0) {
     return {
       state: 'empty',
-      label: isES ? '🔒 Sin viajes — desbloquea más' : '🔒 No trips — get more',
+      label: isES ? '🔒 Desbloquea más viajes →' : '🔒 Unlock more trips →',
       tone: 'action',
     }
   }
@@ -44,13 +38,10 @@ export function resolvePlanCopy(
 
   if (isFreeTier) {
     const used = Math.max(0, FREE_TRIPS_LIMIT - remaining)
-    // Last free trip: keep soft-warn tone so it stands out visually.
     if (remaining === 1) {
       return {
         state: 'last',
-        label: isES
-          ? `🎒 ${used} / ${FREE_TRIPS_LIMIT} · último viaje gratis`
-          : `🎒 ${used} / ${FREE_TRIPS_LIMIT} · last free trip`,
+        label: isES ? '⚠️ 1 viaje disponible' : '⚠️ 1 trip remaining',
         tone: 'soft-warn',
       }
     }
@@ -67,7 +58,7 @@ export function resolvePlanCopy(
   if (remaining === 1) {
     return {
       state: 'last',
-      label: isES ? '🎒 Te queda 1 viaje' : '🎒 1 trip left',
+      label: isES ? '⚠️ 1 viaje disponible' : '⚠️ 1 trip remaining',
       tone: 'soft-warn',
     }
   }
