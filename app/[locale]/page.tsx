@@ -135,13 +135,13 @@ export default async function HomePage({
               </span>
               <h1 className="font-sans text-[60px] max-[768px]:text-[40px] font-bold text-[#0F3A33] leading-[1.05] tracking-[-1.5px] mb-5">
                 {isES
-                  ? 'Viaja bien. Planea menos.'
-                  : 'Travel well. Plan less.'}
+                  ? '40 pestañas abiertas no son un plan.'
+                  : '40 open tabs are not a plan.'}
               </h1>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full">
                 {isES
-                  ? 'Describe tu viaje — destino, días, quién va — y en 30 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
-                  : "Describe your trip — destination, days, who's going — and in 30 seconds you get a complete itinerary with hotels, activities, and budget."}
+                  ? 'Lagomplan te da una recomendación clara — no 47 opciones — y te explica por qué es la correcta para ti. En 60 segundos.'
+                  : 'Lagomplan gives you one clear recommendation — not 47 options — and the why behind it. In 60 seconds.'}
               </p>
             </div>
 
