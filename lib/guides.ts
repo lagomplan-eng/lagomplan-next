@@ -1000,6 +1000,54 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/uruguay.png',
     sections: [],
   },
+
+  // ── Azores ─────────────────────────────────────────────────
+  {
+    slug_es: 'azores',
+    slug_en: 'azores',
+    title_es: 'Azores',
+    title_en: 'Azores',
+    excerpt_es: 'El archipiélago volcánico en medio del Atlántico que lleva años siendo el secreto mejor guardado de Europa. Una semana diseñada para descubrir lagos dentro de cráteres, bañarse en piscinas termales y ver ballenas desde un catamarán con el Atlántico como único horizonte.',
+    excerpt_en: 'The volcanic archipelago in the middle of the Atlantic that has spent years being Europe\'s best-kept secret. A week designed to discover lakes inside craters, soak in thermal pools, and watch whales from a catamaran with the Atlantic as the only horizon.',
+    destination_es: 'Azores, Portugal',
+    destination_en: 'Azores, Portugal',
+    tags_es: ['Pareja', 'Relax', 'Playa', 'Naturaleza'],
+    tags_en: ['Couple', 'Relax', 'Beach', 'Nature'],
+    cover_img: '/images/guides/azores.jpg',
+    sections: [],
+  },
+
+  // ── Copenhague ─────────────────────────────────────────────
+  {
+    slug_es: 'copenhague',
+    slug_en: 'copenhague',
+    title_es: 'Copenhague',
+    title_en: 'Copenhagen',
+    excerpt_es: 'La capital nórdica que tiene más restaurantes con estrellas Michelin por kilómetro cuadrado que cualquier ciudad de Escandinavia, el barrio de fiesta más honesto de Europa en el Meatpacking District y una cultura del café que convierte el desayuno en el primer plan del día.',
+    excerpt_en: 'The Nordic capital with more Michelin-starred restaurants per square kilometer than any other city in Scandinavia, the most honest party neighborhood in Europe in the Meatpacking District, and a coffee culture that turns breakfast into the first plan of the day.',
+    destination_es: 'Copenhague, Dinamarca',
+    destination_en: 'Copenhagen, Denmark',
+    tags_es: ['Grupo de amigos', 'Gastronomía', 'Fiesta'],
+    tags_en: ['Group of friends', 'Food', 'Nightlife'],
+    cover_img: '/images/guides/copenhague.jpg',
+    sections: [],
+  },
+
+  // ── País Vasco ─────────────────────────────────────────────
+  {
+    slug_es: 'pais-vasco',
+    slug_en: 'pais-vasco',
+    title_es: 'País Vasco',
+    title_en: 'Basque Country',
+    excerpt_es: 'La región con más estrellas Michelin por kilómetro cuadrado del mundo. Cuatro días diseñados para tres parejas que quieren comer en serio, beber txakoli en la orilla del Cantábrico y descubrir que la diferencia entre un pintxo y una tapa no es solo el palillo que lo sostiene — es una filosofía entera.',
+    excerpt_en: 'The region with more Michelin stars per square kilometer than anywhere else in the world. Four days designed for three couples who want to eat seriously, drink txakoli on the shore of the Cantabrian Sea, and discover that the difference between a pintxo and a tapa isn\'t just the toothpick holding it together — it\'s an entire philosophy.',
+    destination_es: 'País Vasco, España y Francia',
+    destination_en: 'Basque Country, Spain and France',
+    tags_es: ['Parejas', 'Gastronomía', 'Vino', 'Relax'],
+    tags_en: ['Couples', 'Food', 'Wine', 'Relaxation'],
+    cover_img: '/images/guides/pais-vasco.jpg',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────

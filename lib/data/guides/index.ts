@@ -59,6 +59,14 @@ import { guide as rioDeJaneiroEn } from './rio-de-janeiro/en'
 import { guide as uruguayEs } from './uruguay/es'
 import { guide as uruguayEn } from './uruguay/en'
 
+// International guides (July 2026 batch — Europe)
+import { guide as azoresEs } from './azores/es'
+import { guide as azoresEn } from './azores/en'
+import { guide as copenhagueEs } from './copenhague/es'
+import { guide as copenhagueEn } from './copenhague/en'
+import { guide as paisVascoEs } from './pais-vasco/es'
+import { guide as paisVascoEn } from './pais-vasco/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -86,6 +94,10 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'norte-de-argentina': { es: norteDeArgentinaEs,  en: norteDeArgentinaEn },
   'rio-de-janeiro':     { es: rioDeJaneiroEs,      en: rioDeJaneiroEn },
   'uruguay':            { es: uruguayEs,           en: uruguayEn },
+  // International guides (July 2026 batch — Europe)
+  'azores':             { es: azoresEs,            en: azoresEn },
+  'copenhague':         { es: copenhagueEs,         en: copenhagueEn },
+  'pais-vasco':         { es: paisVascoEs,          en: paisVascoEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────
