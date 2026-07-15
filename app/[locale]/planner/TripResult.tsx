@@ -2069,6 +2069,20 @@ export default function TripResult({ params }: Props) {
     setAsyncChunksTotal(initialSegmentCount)
     setAsyncChunksDone(0)
 
+    // Progressive partial reveal (flip out of the GenerationSurface to a
+    // filling-in day view mid-generation) is only worth it for long trips:
+    // a 3+ chunk job (>10 days) takes 3-4 min, so streaming days as they
+    // land beats a frozen thinking screen. Shorter async trips (6-10 days =
+    // 2 chunks) stay on the GenerationSurface until the job COMPLETES, then
+    // reveal the full trip — matching the single-screen wait users expect
+    // (and had on the sync path before ASYNC_THRESHOLD dropped to 5). Without
+    // this gate, lowering the threshold made 7-day trips bounce to a 5-day
+    // partial, which read as "it skipped the thinking screen."
+    const STREAM_MIN_CHUNKS = 3
+    // Authoritative chunk count from the job row (accounts for multi-city
+    // sub-chunking); seeded with the UI estimate, corrected on first poll.
+    let jobChunksTotal = initialSegmentCount
+
     const createRes = await fetch('/api/trips/jobs', {
       method: 'POST',
       headers,
@@ -2132,7 +2146,7 @@ export default function TripResult({ params }: Props) {
       const pollData = await pollRes.json().catch(() => null)
       if (!pollData) continue
       if (typeof pollData.chunksDone === 'number')  setAsyncChunksDone(pollData.chunksDone)
-      if (typeof pollData.chunksTotal === 'number') setAsyncChunksTotal(pollData.chunksTotal)
+      if (typeof pollData.chunksTotal === 'number') { setAsyncChunksTotal(pollData.chunksTotal); jobChunksTotal = pollData.chunksTotal }
 
       // ── Streaming UI: consume partial_result while the job is in flight ──
       // Worker writes a progressive assembly after every chunk lands (see
@@ -2147,6 +2161,7 @@ export default function TripResult({ params }: Props) {
       // data. Final completion (below) lets the caller set the canonical
       // state + tripId, at which point autosave kicks in normally.
       if (
+        jobChunksTotal >= STREAM_MIN_CHUNKS &&
         pollData.partial_result &&
         typeof pollData.partial_result === 'object' &&
         Array.isArray((pollData.partial_result as any).days) &&
