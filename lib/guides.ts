@@ -1048,6 +1048,54 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/pais-vasco.jpg',
     sections: [],
   },
+
+  // ── Albania ────────────────────────────────────────────────
+  {
+    slug_es: 'albania',
+    slug_en: 'albania',
+    title_es: 'Albania',
+    title_en: 'Albania',
+    excerpt_es: 'El último secreto de los Balcanes. Dos semanas diseñadas para descubrir castillos medievales con historia real, playas del Adriático sin sombrilla reservada y una hospitalidad que convierte a los desconocidos en anfitriones en menos de diez minutos.',
+    excerpt_en: 'The Balkans\' last secret. Two weeks designed to discover medieval castles with real history, Adriatic beaches with no reserved umbrella, and a hospitality that turns strangers into hosts in under ten minutes.',
+    destination_es: 'Albania',
+    destination_en: 'Albania',
+    tags_es: ['Familia con adolescentes', 'Aventura', 'Historia'],
+    tags_en: ['Family with teenagers', 'Adventure', 'History'],
+    cover_img: '/images/guides/albania.jpg',
+    sections: [],
+  },
+
+  // ── Eslovenia ──────────────────────────────────────────────
+  {
+    slug_es: 'eslovenia',
+    slug_en: 'eslovenia',
+    title_es: 'Eslovenia',
+    title_en: 'Slovenia',
+    excerpt_es: 'El país más pequeño y más denso de los Alpes. Un roadtrip de diez días con el carro alquilado más barato de Europa Central, un lago que parece inventado, un río tan verde que parece Photoshop y hostales que llevan años recibiendo a viajeros solos con la misma energía de bienvenida.',
+    excerpt_en: 'The smallest and densest country in the Alps. A ten-day road trip with the cheapest rental car in Central Europe, a lake that looks invented, a river so green it looks Photoshopped, and hostels that have spent years welcoming solo travelers with the same warmth.',
+    destination_es: 'Eslovenia',
+    destination_en: 'Slovenia',
+    tags_es: ['Viajero solo', 'Backpacking', 'Roadtrip', 'Naturaleza'],
+    tags_en: ['Solo traveler', 'Backpacking', 'Road trip', 'Nature'],
+    cover_img: '/images/guides/eslovenia.jpg',
+    sections: [],
+  },
+
+  // ── Islas Feroe ────────────────────────────────────────────
+  {
+    slug_es: 'islas-feroe',
+    slug_en: 'islas-feroe',
+    title_es: 'Islas Feroe',
+    title_en: 'Faroe Islands',
+    excerpt_es: '18 islas volcánicas entre Noruega e Islandia donde los tejados son de hierba, las cascadas caen directamente al Atlántico y los frailecillos aterrizan a un metro de donde está sentado el visitante. El destino más fotogénico de Europa que ningún influencer ha conseguido masificar todavía.',
+    excerpt_en: '18 volcanic islands between Norway and Iceland where the roofs are grass, the waterfalls fall straight into the Atlantic, and puffins land a meter away from wherever the visitor happens to be sitting. Europe\'s most photogenic destination that no influencer has managed to overrun yet.',
+    destination_es: 'Islas Feroe, Dinamarca',
+    destination_en: 'Faroe Islands, Denmark',
+    tags_es: ['Familia', 'Niños pequeños', 'Naturaleza'],
+    tags_en: ['Family', 'Young kids', 'Nature'],
+    cover_img: '/images/guides/islas-feroe.jpg',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────

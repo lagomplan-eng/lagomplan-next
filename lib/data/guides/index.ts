@@ -66,6 +66,12 @@ import { guide as copenhagueEs } from './copenhague/es'
 import { guide as copenhagueEn } from './copenhague/en'
 import { guide as paisVascoEs } from './pais-vasco/es'
 import { guide as paisVascoEn } from './pais-vasco/en'
+import { guide as albaniaEs } from './albania/es'
+import { guide as albaniaEn } from './albania/en'
+import { guide as esloveniaEs } from './eslovenia/es'
+import { guide as esloveniaEn } from './eslovenia/en'
+import { guide as islasFeroeEs } from './islas-feroe/es'
+import { guide as islasFeroeEn } from './islas-feroe/en'
 
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
@@ -98,6 +104,9 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'azores':             { es: azoresEs,            en: azoresEn },
   'copenhague':         { es: copenhagueEs,         en: copenhagueEn },
   'pais-vasco':         { es: paisVascoEs,          en: paisVascoEn },
+  'albania':            { es: albaniaEs,            en: albaniaEn },
+  'eslovenia':          { es: esloveniaEs,          en: esloveniaEn },
+  'islas-feroe':        { es: islasFeroeEs,         en: islasFeroeEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────
