@@ -3,6 +3,7 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { useUser } from '../auth/SupabaseProvider'
+import { getSupabaseBrowser } from '../../lib/supabase/client'
 import PaywallModal from '../PaywallModal'
 
 export type PlanState = {
@@ -36,12 +37,32 @@ export function PlanProvider({ children }: { children: React.ReactNode }) {
 
   const refreshPlanCredits = useCallback(async () => {
     try {
-      const res = await fetch('/api/me/plan', { cache: 'no-store' })
-      if (!res.ok) return null
+      // Bearer fallback mirrors TripResult's generate-trip call: on a
+      // freshly-logged-in tab the cookie may not have propagated yet, so
+      // send the access_token explicitly too. /api/me/plan now accepts
+      // either (see its resolveUser()).
+      const supabase = getSupabaseBrowser()
+      const { data: { session } } = await supabase.auth.getSession()
+      const headers: Record<string, string> = {}
+      if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`
+
+      const res = await fetch('/api/me/plan', { cache: 'no-store', headers })
+      if (!res.ok) {
+        // Must not leave planCredits stuck at 'loading' — TripResult's
+        // generate effect gates on `planCredits !== 'loading'` to decide
+        // isAccessResolved, and a permanent 'loading' silently blocks all
+        // trip generation for the session with no visible error. Treat a
+        // failed check as "unknown" (null) rather than hanging forever —
+        // server-side entitlement in /api/generate-trip is the real
+        // security boundary, this is just a UX-side paywall hint.
+        setPlanCredits(null)
+        return null
+      }
       const data = (await res.json()) as PlanState
       setPlanCredits(data)
       return data
     } catch {
+      setPlanCredits(null)
       return null
     }
   }, [])
