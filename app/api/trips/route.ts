@@ -3,9 +3,11 @@
 // Called only when the user explicitly clicks "Save".
 
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { getSupabaseServer } from '../../../lib/supabase/server'
 import type { TravelerType, TravelStyle } from '../../../lib/supabase/types'
 import { computeTripIntelligence } from '../../../lib/intelligence'
+import { REF_COOKIE, sanitizeRefSource } from '../../../lib/attribution/ref-source'
 import type { TripIntelligence } from '../../../types/intelligence'
 
 const VALID_TRAVELER_TYPES: TravelerType[] = ['solo', 'pareja', 'familia', 'amigos']
@@ -157,6 +159,13 @@ export async function POST(req: NextRequest) {
     // currency: enum-style TEXT ('USD' | 'MXN'). Invalid values fall back to
     // the column default rather than 400ing the request.
     if (currency === 'USD' || currency === 'MXN') insertPayload.currency = currency
+
+    // Partner referral stamp (see lib/attribution/ref-source.ts). Read once,
+    // server-side, from the first-party lagom_ref cookie the guest guide
+    // dropped — so every sync-create call site is covered without threading a
+    // field through the client. Null for organic trips.
+    const refSource = sanitizeRefSource((await cookies()).get(REF_COOKIE)?.value)
+    if (refSource) insertPayload.ref_source = refSource
 
     console.log('[trips/post] inserting:', {
       ...insertPayload,

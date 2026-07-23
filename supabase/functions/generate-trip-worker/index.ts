@@ -798,6 +798,8 @@ serve(async (req: Request) => {
     travel_style:  travelStyleValue,
     budget_level:  (job.inputs as any).budget ?? null,
     interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
+    // Partner referral stamp folded into job.inputs by /api/trips/jobs.
+    ref_source:    (job.inputs as any).ref_source ?? null,
   }
 
   // Check for insert errors instead of silently swallowing — the previous

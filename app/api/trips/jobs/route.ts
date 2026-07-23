@@ -4,9 +4,11 @@
 // done asynchronously. Endpoint boundary = billing boundary (same rule).
 
 import { NextRequest, NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import type { User } from '@supabase/supabase-js'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../../lib/entitlements'
 import { getSupabaseAdmin, getSupabaseServer } from '../../../../lib/supabase/server'
+import { REF_COOKIE, sanitizeRefSource } from '../../../../lib/attribution/ref-source'
 
 export const maxDuration = 15
 export const dynamic = 'force-dynamic'
@@ -99,13 +101,19 @@ export async function POST(req: NextRequest) {
 
     const admin = getSupabaseAdmin()
 
+    // Partner referral stamp (see lib/attribution/ref-source.ts). Captured from
+    // the lagom_ref cookie and folded into the stored job inputs so the worker
+    // persists it on the trip row it inserts at completion. Null for organic.
+    const refSource = sanitizeRefSource((await cookies()).get(REF_COOKIE)?.value)
+    const jobInputs = refSource ? { ...body, ref_source: refSource } : body
+
     // Insert the job row BEFORE anything else so a worker invocation has state to read.
     const { data: jobRow, error: insertErr } = await (admin as any)
       .from('generation_jobs')
       .insert({
         user_id:      user.id,
         status:       'queued',
-        inputs:       body,
+        inputs:       jobInputs,
         chunks_total: chunksTotal,
         chunks_done:  0,
       })
