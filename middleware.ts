@@ -36,6 +36,15 @@ const LEGACY_REDIRECTS: Record<string, string> = {
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
 
+  // Co-branded guest guide (/guia/[partner]) is locale-agnostic — one URL with
+  // an in-page ES/EN toggle, no /es|/en prefix. Bypass next-intl so
+  // /guia/lupito is served as-is instead of redirected to /es/guia/lupito.
+  // Note: this is the singular /guia; the plural /guias legacy redirect below
+  // is unaffected.
+  if (pathname === '/guia' || pathname.startsWith('/guia/')) {
+    return NextResponse.next()
+  }
+
   // 301 legacy redirects — check exact match first, then prefix match for slugs
   if (LEGACY_REDIRECTS[pathname]) {
     return NextResponse.redirect(
