@@ -11,6 +11,15 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
   },
+  // Guest-guide slug → current path redirect map. A printed QR encodes the
+  // short slug (lagomplan.com/lupito); if the canonical path ever changes,
+  // only this entry moves, so the QR never 404s. non-permanent (307) so the
+  // mapping stays repointable. Add one line per partner.
+  async redirects() {
+    return [
+      { source: '/lupito', destination: '/guia/lupito', permanent: false },
+    ]
+  },
 }
 
 export default withNextIntl(nextConfig)
