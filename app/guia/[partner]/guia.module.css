@@ -7,6 +7,7 @@
 .page {
   /* local surfaces the exported design pulled from the DS stylesheet */
   --paper: #ffffff;
+  text-wrap: pretty;
   --sage-soft: #a9c3bb;
   --radius-xl: 16px;
   --shadow-card: 0 1px 2px rgba(15, 58, 51, .04), 0 8px 24px rgba(15, 58, 51, .06);
@@ -102,7 +103,21 @@
   overflow: hidden;
 }
 .heroImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.heroOverlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15, 58, 51, 0) 40%, rgba(15, 58, 51, .72) 100%); }
+/* Strong Pine scrim: the top stays clear so the illustration reads, while the
+   bottom — where the eyebrow/title/sub/CTA sit — resolves to near-solid Pine,
+   so the cream text is legible (cream-on-pine is the brand pairing). A faint
+   flat wash unifies the light illustration with the brand palette. */
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg,
+      rgba(15, 58, 51, 0)    0%,
+      rgba(15, 58, 51, .12) 32%,
+      rgba(15, 58, 51, .62) 66%,
+      rgba(15, 58, 51, .95) 100%),
+    linear-gradient(0deg, rgba(15, 58, 51, .14), rgba(15, 58, 51, .14));
+}
 .heroContent { position: relative; max-width: 640px; margin: 0 auto; width: 100%; padding: 0 24px 64px; color: var(--cream); }
 .heroEyebrow { display: block; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); opacity: .8; margin-bottom: 14px; }
 .heroTitle {
@@ -227,6 +242,12 @@
 
 .footer { padding: 32px 24px; text-align: center; }
 .footerText { font-size: 12px; color: var(--sage); }
+
+/* ── Typography niceties ────────────────────────────────── */
+/* Balance headings (no lone last word like "Roma / Norte") and let body copy
+   avoid orphans. Element selectors stay un-hashed in CSS modules. */
+.page h1, .page h2 { text-wrap: balance; }
+.page p, .page .lede { text-wrap: pretty; overflow-wrap: break-word; }
 
 /* ── Accessibility ──────────────────────────────────────── */
 .page :focus-visible {

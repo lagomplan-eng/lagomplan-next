@@ -11,8 +11,8 @@ const MAPS = (query: string) =>
 
 export const cdmx: City = {
   id: 'cdmx',
-  heroImage: '/images/guides/cdmx.jpg',
-  neighborhoodOrder: ['Roma Norte', 'Condesa', 'Polanco'],
+  heroImage: '/images/guia/cdmx-banner.jpg',
+  neighborhoodOrder: ['Roma Norte', 'Condesa', 'Polanco', 'Centro'],
 
   neighborhoods: {
     'Roma Norte': {
@@ -137,6 +137,32 @@ export const cdmx: City = {
         ],
       },
     },
+
+    'Centro': {
+      name: 'Centro',
+      mapUrl: MAPS('Centro+Historico+Ciudad+de+Mexico'),
+      spots: {
+        es: [
+          { icon: 'coffee',     name: 'Café El Popular',         distance: 'en el Centro', note: 'Abierto casi 24 horas, café de olla y pan dulce.' },
+          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'en el Centro', note: 'Desde 1912, cocina mexicana en un salón de azulejos.' },
+          { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'en el Centro', note: 'El mercado gourmet de la ciudad, para probar de todo.' },
+          { icon: 'landmark',   name: 'Templo Mayor',            distance: 'en el Centro', note: 'Ruinas mexicas a un costado de la Catedral.' },
+          { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'en el Centro', note: 'El teatro más bello del país, murales incluidos.' },
+          { icon: 'cross',      name: 'El Moro',                 distance: 'en el Centro', note: 'Churros y chocolate desde 1935, abierto toda la noche.' },
+        ],
+        en: [
+          { icon: 'coffee',     name: 'Café El Popular',         distance: 'in the Centro', note: 'Open nearly 24 hours, café de olla and sweet bread.' },
+          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'in the Centro', note: 'Since 1912, Mexican cooking in a tiled dining room.' },
+          { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'in the Centro', note: 'The city\'s gourmet market, taste a bit of everything.' },
+          { icon: 'landmark',   name: 'Templo Mayor',            distance: 'in the Centro', note: 'Aztec ruins right beside the Cathedral.' },
+          { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'in the Centro', note: 'The country\'s most beautiful theater, murals included.' },
+          { icon: 'cross',      name: 'El Moro',                 distance: 'in the Centro', note: 'Churros and chocolate since 1935, open all night.' },
+        ],
+      },
+      // Source has no perfect-day for Centro; only the home colonia's perfect
+      // day is ever rendered, so this stays empty.
+      perfectDay: { es: [], en: [] },
+    },
   },
 
   destinations: [
@@ -158,7 +184,7 @@ export const cdmx: City = {
       beforeH2: 'Un inicio tranquilo para tu viaje',
       beforeLede: 'Lo básico y práctico, para que dejes de pensar en logística en cuanto aterrices.',
       arrivalItems: [
-        { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}.' },
+        { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}. Podemos ofrecerte también transporte privado.' },
         { icon: 'car',       title: 'Transporte',      body: 'Usa Uber o Didi, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. O si prefieres podemos coordinar transporte para ti.' },
         { icon: 'cloudSun',  title: 'Clima',           body: 'Julio es temporada de lluvias, mañanas soleadas, lluvias breves por la tarde. Lleva capas y una chamarra ligera para la lluvia.' },
         { icon: 'banknote',  title: 'Dinero',          body: 'Las tarjetas se aceptan ampliamente. Lleva algo de efectivo en pesos para mercados, propinas y comida callejera. En restaurantes, la propina recomendada es 10–15%; redondea en taxis y puestos casuales.' },
@@ -261,7 +287,7 @@ export const cdmx: City = {
       beforeH2: 'A calm start to your trip',
       beforeLede: 'The practical basics, so you can stop thinking about logistics the moment you land.',
       arrivalItems: [
-        { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}.' },
+        { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}. We can also offer you private transportation.' },
         { icon: 'car',       title: 'Transportation', body: 'Use Uber or Didi, cheaper and safer than hailing on the street. The Metro is excellent if you\'re comfortable with crowds. Or if you\'d prefer, we can arrange transportation for you.' },
         { icon: 'cloudSun',  title: 'Weather',        body: 'July is rainy season, sunny mornings, brief afternoon showers. Pack layers and a light rain jacket.' },
         { icon: 'banknote',  title: 'Money',          body: 'Cards are widely accepted. Keep some pesos in cash for markets, tips, and street food. In restaurants, 10–15% is the recommended tip; round up for taxis and casual spots.' },
