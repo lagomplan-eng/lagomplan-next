@@ -191,17 +191,14 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {partner.hostLetterSignature && (
         <section className={styles.section}>
           <div className={styles.container}>
-            <div className={styles.letterGrid}>
-              <div className={styles.letterMain}>
-                <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{t.hostLetter.eyebrow}</span>
-                <p className={styles.hostQuote}>{'“'}{t.hostLetter.quote}{'”'}</p>
-              </div>
-              <div className={styles.letterAside}>
-                <p className={styles.lede}>{t.hostLetter.body}</p>
-                <div className={styles.hostSig}>
-                  <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
-                  <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
-                </div>
+            <div className={styles.letterCard}>
+              <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{t.hostLetter.eyebrow}</span>
+              <p className={styles.hostQuote}>{t.hostLetter.quote}</p>
+              <div className={styles.letterDivider} />
+              <p className={styles.letterBody}>{t.hostLetter.body}</p>
+              <div className={styles.hostSig}>
+                <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
+                <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
               </div>
             </div>
           </div>

@@ -165,29 +165,23 @@
 }
 
 /* ── Host letter ────────────────────────────────────────── */
-/* Two-column editorial layout: the pull-quote on the left, the paragraph +
-   signature on the right, so the section fills the width. Stacks on mobile. */
-.letterGrid { display: block; }
-@media (min-width: 900px) {
-  .letterGrid {
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 24px 64px;
-    align-items: start;
-  }
-}
-.letterAside .lede { max-width: 520px; margin: 0; }
+/* Centered editorial letter: eyebrow, quote, coral rule, body, signature. */
+.letterCard { max-width: 860px; margin: 0 auto; text-align: center; }
+.letterCard .eyebrow { margin-bottom: 22px; }
 .hostQuote {
-  font-family: var(--font-display), 'Fraunces', Georgia, serif;
-  font-style: italic;
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
   font-weight: 500;
-  line-height: 1.2;
+  line-height: 1.32;
+  letter-spacing: -.01em;
   color: var(--pine);
-  font-size: clamp(1.5rem, 4vw, 2.25rem);
-  margin: 0 0 24px;
+  font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+  max-width: 720px;
+  margin: 0 auto;
   text-wrap: balance;
 }
-.hostSig { margin-top: 28px; }
+.letterDivider { width: 48px; height: 2px; background: var(--coral); border-radius: 2px; margin: 28px auto; }
+.letterBody { font-size: 15px; line-height: 1.85; color: var(--sage); max-width: 680px; margin: 0 auto; }
+.hostSig { margin-top: 32px; }
 .hostSigName { font-size: 16px; font-weight: 700; color: var(--pine); margin-bottom: 4px; }
 
 /* ── Before you arrive ──────────────────────────────────── */
