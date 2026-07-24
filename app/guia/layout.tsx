@@ -38,7 +38,7 @@ export const metadata: Metadata = {
 export default function GuiaLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
-      lang="es"
+      lang="en"
       className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}
       suppressHydrationWarning
     >

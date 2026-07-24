@@ -138,6 +138,13 @@ export interface CityCopy {
   discoverEyebrow: string
   discoverH2: string
   footer: string
+  /** Host letter (city-level copy; the signature name comes from the partner). */
+  hostLetter: {
+    eyebrow: string
+    quote: string
+    body: string
+    roleLabel: string
+  }
 }
 
 export interface City {
@@ -170,6 +177,8 @@ export interface Partner {
   edition?: Record<Lang, string>
   /** utm_campaign value for the planner CTA. */
   plannerCampaign: string
+  /** Signature name for the host letter. When set, the letter section renders. */
+  hostLetterSignature?: string
   /**
    * Insiders section. Publishes ONLY when publish === true AND items exist,
    * so a partner without bespoke copy unpublishes cleanly (no empty hole).

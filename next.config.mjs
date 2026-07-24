@@ -17,7 +17,7 @@ const nextConfig = {
   // mapping stays repointable. Add one line per partner.
   async redirects() {
     return [
-      { source: '/lupito', destination: '/guia/lupito', permanent: false },
+      { source: '/livin', destination: '/guia/livin', permanent: false },
     ]
   },
 }

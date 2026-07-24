@@ -275,6 +275,12 @@ export const cdmx: City = {
       discoverEyebrow: 'Descubre más',
       discoverH2: 'Lagomplan va más allá de esta ciudad',
       footer: 'lagomplan · experiencia de huésped',
+      hostLetter: {
+        eyebrow: 'Una carta de tu anfitrión',
+        quote: 'La Ciudad de México no se visita, se recorre dos veces, y aún faltan calles.',
+        body: 'Esta guía nació de una pregunta que me hacen mis huéspedes cada semana: ¿a dónde voy hoy? No es una lista exhaustiva, es un recorte curado de lo que de verdad vale la pena. Cada recomendación la caminé, la comí y la comprobé yo mismo.',
+        roleLabel: 'Tu anfitrión',
+      },
     },
 
     en: {
@@ -378,6 +384,12 @@ export const cdmx: City = {
       discoverEyebrow: 'Discover more',
       discoverH2: 'Lagomplan goes further than this city',
       footer: 'lagomplan · guest stay experience',
+      hostLetter: {
+        eyebrow: 'A letter from your host',
+        quote: 'Mexico City isn\'t visited, it\'s walked twice, and there are still streets left.',
+        body: 'This guide came from a question my guests ask every week: where do I go today? It isn\'t exhaustive, it\'s a curated cut of what\'s truly worth it. I walked, ate, and checked every recommendation myself.',
+        roleLabel: 'Your host',
+      },
     },
   },
 }

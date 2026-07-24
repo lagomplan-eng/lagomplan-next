@@ -23,10 +23,10 @@ export async function generateMetadata(
   if (!guide) return {}
 
   const { partner } = guide
-  // Page defaults to Spanish (matches the design's lang: 'es').
-  const title = `${partner.displayName} · Guía de tu estancia`
+  // Page defaults to English (in-page toggle switches to Spanish).
+  const title = `${partner.displayName} · Your stay guide`
   const description =
-    `Tu guía de estancia en la Ciudad de México, curada por ${partner.hostName} y potenciada por Lagomplan.`
+    `Your guest guide to Mexico City, curated by ${partner.hostName} and powered by Lagomplan.`
 
   return {
     title,

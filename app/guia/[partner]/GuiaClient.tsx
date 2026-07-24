@@ -51,7 +51,7 @@ const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
 export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
-  const [lang, setLang] = useState<Lang>('es')
+  const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [browseNb, setBrowseNb] = useState<string>(partner.homeNeighborhood)
   const insidersRef = useRef<HTMLElement | null>(null)
@@ -75,6 +75,11 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
     } catch { /* cookies disabled */ }
     gaTrack('host_guide_view', { partner: partner.slug, city: city.id })
   }, [partner.slug, city.id])
+
+  // Keep the document language in sync with the toggle (a11y / SEO).
+  useEffect(() => {
+    document.documentElement.lang = lang
+  }, [lang])
 
   // ── Insiders section in-viewport event (published partners only) ──────────
   const insidersPublished = !!partner.insiders?.publish && !!partner.insiders?.items?.[lang]?.length
@@ -118,7 +123,21 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── Header ─────────────────────────────────────────── */}
       <header className={styles.header}>
         <div className={styles.headerRow}>
-          <span className={styles.brand}>lagomplan</span>
+          <span className={styles.brand}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/logo.png"
+              alt="Lagomplan"
+              className={styles.brandLogo}
+              onError={(e) => {
+                const img = e.currentTarget
+                img.style.display = 'none'
+                const fb = img.nextElementSibling as HTMLElement | null
+                if (fb) fb.style.display = 'inline'
+              }}
+            />
+            <span className={styles.brandFallback}>lagomplan</span>
+          </span>
           <div className={styles.navRight}>
             <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.navLabel}</span>
             <div className={styles.langGroup} role="group" aria-label={lang === 'es' ? 'Idioma' : 'Language'}>
@@ -153,6 +172,21 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           </a>
         </div>
       </section>
+
+      {/* ── Host letter (renders when the partner provides a signature) ── */}
+      {partner.hostLetterSignature && (
+        <section className={styles.section}>
+          <div className={styles.container}>
+            <span className={styles.eyebrow}>{t.hostLetter.eyebrow}</span>
+            <p className={styles.hostQuote}>{'“'}{t.hostLetter.quote}{'”'}</p>
+            <p className={styles.lede} style={{ maxWidth: 560 }}>{t.hostLetter.body}</p>
+            <div className={styles.hostSig}>
+              <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
+              <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── 2. Before you arrive ───────────────────────────── */}
       <section id="before" className={styles.section}>
