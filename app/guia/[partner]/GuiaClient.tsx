@@ -3,22 +3,24 @@
 /**
  * app/guia/[partner]/GuiaClient.tsx
  *
- * Renders one co-branded guest guide = city layer + partner layer. Ported
- * from the exported design (prototypes/Guest Stay Experience Design). Copy is
- * verbatim from /content; this file is presentation + interaction only.
+ * Renders one co-branded guest guide = city layer + partner layer. Copy is
+ * ported verbatim from /content; this file is presentation + interaction only.
+ *
+ * Layout: matches the lagomplan.com standard — a ~1160px container with an
+ * editorial two-column section grid (intro left, content right) that stacks to
+ * a single column on mobile.
  *
  * Interaction:
- *   • In-page ES/EN toggle (default ES). No /en route — same URL.
+ *   • In-page ES/EN toggle (default EN). No /en route — same URL.
  *   • Chip nav swaps the "your neighborhood" list per colonia; "a perfect day"
  *     stays pinned to the partner's home colonia.
  *   • Mood picker expands an inline panel.
  *
  * Attribution + analytics:
- *   • localStorage lagom_ref = "host:<slug>" on load (planner reads at trip
- *     creation).
- *   • GA4 (existing gtag setup): host_guide_view on load,
- *     host_guide_insiders_view when the insiders section enters the viewport,
- *     host_guide_planner_click on the planner CTA.
+ *   • localStorage lagom_ref + first-party cookie = "host:<slug>" on load
+ *     (planner reads at trip creation → trips.ref_source).
+ *   • GA4: host_guide_view on load, host_guide_insiders_view when the insiders
+ *     section enters the viewport, host_guide_planner_click on the planner CTA.
  */
 
 import { useEffect, useRef, useState } from 'react'
@@ -47,6 +49,17 @@ function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size
   return <Cmp size={size} color={color} strokeWidth={1.8} aria-hidden />
 }
 
+/** Left column of an editorial section: eyebrow + heading + optional lede. */
+function SectionHead({ eyebrow, title, lede }: { eyebrow: string; title?: string; lede?: string }) {
+  return (
+    <div className={styles.secHead}>
+      <span className={styles.eyebrow}>{eyebrow}</span>
+      {title && <h2 className={styles.h2}>{title}</h2>}
+      {lede && <p className={styles.lede}>{lede}</p>}
+    </div>
+  )
+}
+
 const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
@@ -63,12 +76,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   // ── Attribution flag + view event (once on load) ──────────────────────────
   useEffect(() => {
     const ref = `host:${partner.slug}`
-    // localStorage: consent-neutral flag (kept for parity / client reads).
     try { window.localStorage.setItem('lagom_ref', ref) } catch { /* private mode */ }
-    // First-party cookie: read server-side at trip creation to stamp
-    // trips.ref_source for partner reporting/payouts (see lib/attribution/
-    // ref-source.ts). 180-day window; Lax so it survives the same-site
-    // navigation to the planner; Secure in production.
     try {
       const secure = window.location.protocol === 'https:' ? '; Secure' : ''
       document.cookie = `lagom_ref=${encodeURIComponent(ref)}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`
@@ -101,10 +109,6 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   }, [insidersPublished, partner.slug, city.id])
 
   // ── Planner CTA ───────────────────────────────────────────────────────────
-  // Build the planner path with the SAME getRoute() helper the rest of the
-  // site uses, so this link resolves to the real production planner
-  // (es → /es/planificador, en → /en/planner) and can never drift if those
-  // localized paths change. UTMs per spec.
   const plannerBase = getRoute(lang, 'planner')
   const plannerHref =
     `${plannerBase}?destino=${city.id}&utm_source=host&utm_medium=guia&utm_campaign=${partner.plannerCampaign}`
@@ -177,12 +181,14 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {partner.hostLetterSignature && (
         <section className={styles.section}>
           <div className={styles.container}>
-            <span className={styles.eyebrow}>{t.hostLetter.eyebrow}</span>
-            <p className={styles.hostQuote}>{'“'}{t.hostLetter.quote}{'”'}</p>
-            <p className={styles.lede} style={{ maxWidth: 560 }}>{t.hostLetter.body}</p>
-            <div className={styles.hostSig}>
-              <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
-              <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
+            <div className={styles.letterInner}>
+              <span className={styles.eyebrow}>{t.hostLetter.eyebrow}</span>
+              <p className={styles.hostQuote}>{'“'}{t.hostLetter.quote}{'”'}</p>
+              <p className={styles.lede} style={{ maxWidth: 640 }}>{t.hostLetter.body}</p>
+              <div className={styles.hostSig}>
+                <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
+                <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
+              </div>
             </div>
           </div>
         </section>
@@ -191,25 +197,27 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 2. Before you arrive ───────────────────────────── */}
       <section id="before" className={styles.section}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.beforeEyebrow}</span>
-          <h2 className={styles.h2}>{t.beforeH2}</h2>
-          <p className={styles.lede}>{t.beforeLede}</p>
-          <div className={styles.cardGrid}>
-            {t.arrivalItems.map((item, i) => (
-              <div className={styles.card} key={i}>
-                <div className={styles.iconChip}><Icon name={item.icon} color={CREAM} /></div>
-                <h4 className={styles.h4}>{item.title}</h4>
-                <p className={styles.cardBody}>
-                  {interp(item.body)}
-                  {item.link && (
-                    <>
-                      <a className={styles.link} href={item.link.href} target="_blank" rel="noopener noreferrer">{item.link.text}</a>
-                      {item.link.after}
-                    </>
-                  )}
-                </p>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.beforeEyebrow} title={t.beforeH2} lede={t.beforeLede} />
+            <div className={styles.secBody}>
+              <div className={styles.cardGrid}>
+                {t.arrivalItems.map((item, i) => (
+                  <div className={styles.card} key={i}>
+                    <div className={styles.iconChip}><Icon name={item.icon} color={CREAM} /></div>
+                    <h4 className={styles.h4}>{item.title}</h4>
+                    <p className={styles.cardBody}>
+                      {interp(item.body)}
+                      {item.link && (
+                        <>
+                          <a className={styles.link} href={item.link.href} target="_blank" rel="noopener noreferrer">{item.link.text}</a>
+                          {item.link.after}
+                        </>
+                      )}
+                    </p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -217,39 +225,45 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.neighborhoodEyebrow}</span>
-          <h2 className={styles.h2}>{t.neighborhoodH2Prefix}{browseNb}</h2>
-          <p className={styles.lede}>{t.neighborhoodLede}</p>
-          <div className={styles.nbControls}>
-            <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
-              {city.neighborhoodOrder.map((name) => (
-                <button
-                  key={name}
-                  type="button"
-                  role="tab"
-                  aria-selected={name === browseNb}
-                  className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
-                  onClick={() => setBrowseNb(name)}
-                >{name}</button>
-              ))}
-            </div>
-            <a className={styles.mapsLink} href={browseNbData.mapUrl} target="_blank" rel="noopener noreferrer">
-              {t.openInMapsLabel} →
-            </a>
-          </div>
-          <div className={styles.spotList}>
-            {spots.map((spot, i) => (
-              <div className={styles.spotRow} key={`${browseNb}-${i}`}>
-                <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
-                <div>
-                  <div className={styles.spotHead}>
-                    <h5 className={styles.h5}>{spot.name}</h5>
-                    <span className={styles.spotDist}>{spot.distance}</span>
-                  </div>
-                  <p className={styles.spotNote}>{spot.note}</p>
+          <div className={styles.secGrid}>
+            <SectionHead
+              eyebrow={t.neighborhoodEyebrow}
+              title={`${t.neighborhoodH2Prefix}${browseNb}`}
+              lede={t.neighborhoodLede}
+            />
+            <div className={styles.secBody}>
+              <div className={styles.nbControls}>
+                <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
+                  {city.neighborhoodOrder.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      role="tab"
+                      aria-selected={name === browseNb}
+                      className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
+                      onClick={() => setBrowseNb(name)}
+                    >{name}</button>
+                  ))}
                 </div>
+                <a className={styles.mapsLink} href={browseNbData.mapUrl} target="_blank" rel="noopener noreferrer">
+                  {t.openInMapsLabel} →
+                </a>
               </div>
-            ))}
+              <div className={styles.spotList}>
+                {spots.map((spot, i) => (
+                  <div className={styles.spotRow} key={`${browseNb}-${i}`}>
+                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
+                    <div>
+                      <div className={styles.spotHead}>
+                        <h5 className={styles.h5}>{spot.name}</h5>
+                        <span className={styles.spotDist}>{spot.distance}</span>
+                      </div>
+                      <p className={styles.spotNote}>{spot.note}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -257,19 +271,21 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 4. A perfect day ───────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.perfectDayEyebrow}</span>
-          <h2 className={styles.h2}>{t.perfectDayH2}</h2>
-          <p className={styles.lede}>{t.perfectDayLede}</p>
-          <div className={styles.spotList}>
-            {perfectDay.map((m, i) => (
-              <div className={styles.momentRow} key={i}>
-                <span className={`${styles.eyebrowMono} ${styles.momentTime}`}>{m.time}</span>
-                <div>
-                  <h4 className={styles.h4}>{m.title}</h4>
-                  <p className={styles.momentBody}>{m.body}</p>
-                </div>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.perfectDayEyebrow} title={t.perfectDayH2} lede={t.perfectDayLede} />
+            <div className={styles.secBody}>
+              <div className={styles.spotList}>
+                {perfectDay.map((m, i) => (
+                  <div className={styles.momentRow} key={i}>
+                    <span className={`${styles.eyebrowMono} ${styles.momentTime}`}>{m.time}</span>
+                    <div>
+                      <h4 className={styles.h4}>{m.title}</h4>
+                      <p className={styles.momentBody}>{m.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -277,64 +293,69 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 5. Explore by mood ─────────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.moodEyebrow}</span>
-          <h2 className={styles.h2}>{t.moodH2}</h2>
-          <p className={styles.lede}>{t.moodLede}</p>
-          <div className={styles.moodGrid}>
-            {t.moods.map((m) => (
-              <button
-                key={m.id}
-                type="button"
-                aria-pressed={mood === m.id}
-                className={`${styles.moodBtn} ${mood === m.id ? styles.moodBtnActive : ''}`}
-                onClick={() => setMood(m.id)}
-              >
-                <Icon name={m.icon} color={PINE} />
-                <div className={styles.moodLabel}>{m.label}</div>
-              </button>
-            ))}
-          </div>
-          {selectedMood && (
-            <div className={`${styles.moodPanel} ${styles.fade}`}>
-              <div className={styles.moodPanelHead}>
-                <h4 className={styles.h4}>{selectedMood.title}</h4>
-                <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
-              </div>
-              <div className={styles.moodItems}>
-                {selectedMood.items.map((it, i) => (
-                  <div key={i}>
-                    <div className={styles.moodItemName}>{it.name}</div>
-                    <div className={styles.moodItemNote}>{it.note}</div>
-                  </div>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
+            <div className={styles.secBody}>
+              <div className={styles.moodGrid}>
+                {t.moods.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={mood === m.id}
+                    className={`${styles.moodBtn} ${mood === m.id ? styles.moodBtnActive : ''}`}
+                    onClick={() => setMood(m.id)}
+                  >
+                    <Icon name={m.icon} color={PINE} />
+                    <div className={styles.moodLabel}>{m.label}</div>
+                  </button>
                 ))}
               </div>
+              {selectedMood && (
+                <div className={`${styles.moodPanel} ${styles.fade}`}>
+                  <div className={styles.moodPanelHead}>
+                    <h4 className={styles.h4}>{selectedMood.title}</h4>
+                    <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
+                  </div>
+                  <div className={styles.moodItems}>
+                    {selectedMood.items.map((it, i) => (
+                      <div key={i}>
+                        <div className={styles.moodItemName}>{it.name}</div>
+                        <div className={styles.moodItemNote}>{it.note}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
       </section>
 
       {/* ── 6. Today ───────────────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.todayDateLabel}</span>
-          <h2 className={styles.h2}>{t.todayH2}</h2>
-          <div className={styles.weatherCard}>
-            <Icon name="cloudRain" size={30} color={CREAM} />
-            <div>
-              <div className={styles.weatherTemp}>{t.weatherTemp}</div>
-              <div className={styles.weatherBody}>{t.weatherBody}</div>
-            </div>
-          </div>
-          <div className={styles.spotList}>
-            {t.todayItems.map((ti, i) => (
-              <div className={styles.todayRow} key={i}>
-                <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
+            <div className={styles.secBody}>
+              <div className={styles.weatherCard}>
+                <Icon name="cloudRain" size={30} color={CREAM} />
                 <div>
-                  <div className={styles.todayTitle}>{ti.title}</div>
-                  <div className={styles.todayBody}>{interp(ti.body)}</div>
+                  <div className={styles.weatherTemp}>{t.weatherTemp}</div>
+                  <div className={styles.weatherBody}>{t.weatherBody}</div>
                 </div>
               </div>
-            ))}
+              <div className={styles.spotList}>
+                {t.todayItems.map((ti, i) => (
+                  <div className={styles.todayRow} key={i}>
+                    <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
+                    <div>
+                      <div className={styles.todayTitle}>{ti.title}</div>
+                      <div className={styles.todayBody}>{interp(ti.body)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -342,19 +363,21 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 7. Experiences ─────────────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.expEyebrow}</span>
-          <h2 className={styles.h2}>{t.expH2}</h2>
-          <p className={styles.lede}>{t.expLede}</p>
-          <div className={styles.expGrid}>
-            {t.experiences.map((exp) => (
-              <div className={styles.expCard} key={exp.id}>
-                <div className={styles.expThumb}>{exp.title}</div>
-                <div className={styles.expBody}>
-                  <h5 className={styles.h5}>{exp.title}</h5>
-                  <p className={styles.expNote}>{exp.body}</p>
-                </div>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.expEyebrow} title={t.expH2} lede={t.expLede} />
+            <div className={styles.secBody}>
+              <div className={styles.expGrid}>
+                {t.experiences.map((exp) => (
+                  <div className={styles.expCard} key={exp.id}>
+                    <div className={styles.expThumb}>{exp.title}</div>
+                    <div className={styles.expBody}>
+                      <h5 className={styles.h5}>{exp.title}</h5>
+                      <p className={styles.expNote}>{exp.body}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -362,17 +385,19 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       {/* ── 8. Food ────────────────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <span className={styles.eyebrow}>{t.foodEyebrow}</span>
-          <h2 className={styles.h2}>{t.foodH2}</h2>
-          <p className={styles.lede}>{t.foodLede}</p>
-          <div className={styles.foodGrid}>
-            {t.foodCollections.map((col, i) => (
-              <div className={styles.foodCard} key={i}>
-                <span className={styles.eyebrowMono} style={{ color: 'var(--coral)' }}>{col.tag}</span>
-                <h5 className={`${styles.h5} ${styles.foodName}`}>{col.name}</h5>
-                <p className={styles.foodNote}>{col.note}</p>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.foodEyebrow} title={t.foodH2} lede={t.foodLede} />
+            <div className={styles.secBody}>
+              <div className={styles.foodGrid}>
+                {t.foodCollections.map((col, i) => (
+                  <div className={styles.foodCard} key={i}>
+                    <span className={styles.eyebrowMono} style={{ color: 'var(--coral)' }}>{col.tag}</span>
+                    <h5 className={`${styles.h5} ${styles.foodName}`}>{col.name}</h5>
+                    <p className={styles.foodNote}>{col.note}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -385,15 +410,18 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           style={{ paddingTop: 88, paddingBottom: 88 }}
         >
           <div className={styles.container}>
-            <span className={styles.eyebrow}>{insiders.eyebrow?.[lang] ?? partner.displayName}</span>
-            {insiders.h2?.[lang] && <h2 className={styles.h2}>{insiders.h2[lang]}</h2>}
-            <div className={styles.insiderGrid}>
-              {insiders.items[lang].map((it, i) => (
-                <div className={styles.insiderCard} key={i}>
-                  <h5 className={styles.h5}>{it.name}</h5>
-                  <p className={styles.insiderNote}>{it.note}</p>
+            <div className={styles.secGrid}>
+              <SectionHead eyebrow={insiders.eyebrow?.[lang] ?? partner.displayName} title={insiders.h2?.[lang]} />
+              <div className={styles.secBody}>
+                <div className={styles.insiderGrid}>
+                  {insiders.items[lang].map((it, i) => (
+                    <div className={styles.insiderCard} key={i}>
+                      <h5 className={styles.h5}>{it.name}</h5>
+                      <p className={styles.insiderNote}>{it.note}</p>
+                    </div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           </div>
         </section>

@@ -40,7 +40,9 @@
   justify-content: space-between;
 }
 .brand { display: inline-flex; align-items: center; }
-.brandLogo { height: 40px; width: auto; display: block; }
+/* mix-blend multiply drops the logo PNG's white background into the light
+   header (white → transparent over cream, dark-green marks stay). */
+.brandLogo { height: 40px; width: auto; display: block; mix-blend-mode: multiply; }
 .brandFallback { display: none; font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--pine); }
 .navRight { display: flex; align-items: center; gap: 14px; }
 
@@ -61,8 +63,31 @@
 .section { padding: 72px 0; }
 .sectionAlt { background: var(--sand); }
 .sectionPine { background: var(--pine); color: var(--cream); }
-.container { max-width: 640px; margin: 0 auto; padding: 0 24px; }
-.containerWide { max-width: 900px; margin: 0 auto; padding: 0 24px; }
+/* Match the site standard: ~1160px content, 24px gutters (20px on mobile). */
+.container { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+.containerWide { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+@media (max-width: 768px) {
+  .container, .containerWide { padding: 0 20px; }
+}
+
+/* Editorial two-column section: intro on the left, content on the right.
+   Stacks to a single column below 900px. */
+.secGrid { display: grid; grid-template-columns: 1fr; gap: 24px; }
+.secBody { min-width: 0; }
+@media (min-width: 900px) {
+  .secGrid {
+    grid-template-columns: minmax(240px, 300px) 1fr;
+    gap: 32px 64px;
+    align-items: start;
+  }
+  .secHead { position: sticky; top: 84px; }
+}
+/* In the two-column layout the intro column is already narrow, so the lede
+   doesn't need its own cap; keep one for the stacked (mobile) view. */
+.secHead .lede { max-width: none; margin-bottom: 0; }
+@media (max-width: 899px) {
+  .secHead .lede { max-width: 520px; }
+}
 
 .eyebrow {
   display: block;
@@ -120,7 +145,8 @@
       rgba(15, 58, 51, .95) 100%),
     linear-gradient(0deg, rgba(15, 58, 51, .14), rgba(15, 58, 51, .14));
 }
-.heroContent { position: relative; max-width: 640px; margin: 0 auto; width: 100%; padding: 0 24px 64px; color: var(--cream); }
+.heroContent { position: relative; max-width: 1160px; margin: 0 auto; width: 100%; padding: 0 24px 56px; color: var(--cream); }
+@media (max-width: 768px) { .heroContent { padding: 0 20px 48px; } }
 .heroEyebrow { display: block; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); opacity: .8; margin-bottom: 14px; }
 .heroTitle {
   font-family: var(--font-display), 'Fraunces', Georgia, serif;
@@ -147,6 +173,7 @@
 }
 
 /* ── Host letter ────────────────────────────────────────── */
+.letterInner { max-width: 760px; }
 .hostQuote {
   font-family: var(--font-display), 'Fraunces', Georgia, serif;
   font-style: italic;
