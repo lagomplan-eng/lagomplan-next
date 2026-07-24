@@ -165,7 +165,18 @@
 }
 
 /* ── Host letter ────────────────────────────────────────── */
-.letterInner { max-width: 760px; }
+/* Two-column editorial layout: the pull-quote on the left, the paragraph +
+   signature on the right, so the section fills the width. Stacks on mobile. */
+.letterGrid { display: block; }
+@media (min-width: 900px) {
+  .letterGrid {
+    display: grid;
+    grid-template-columns: 1.1fr 0.9fr;
+    gap: 24px 64px;
+    align-items: start;
+  }
+}
+.letterAside .lede { max-width: 520px; margin: 0; }
 .hostQuote {
   font-family: var(--font-display), 'Fraunces', Georgia, serif;
   font-style: italic;
