@@ -23,13 +23,14 @@
   position: sticky;
   top: 0;
   z-index: 50;
-  height: 60px;
+  height: 88px;
   display: flex;
   align-items: center;
   background: rgba(255, 249, 243, .85);
   backdrop-filter: blur(14px);
   border-bottom: 1px solid rgba(107, 143, 134, .18);
 }
+@media (max-width: 768px) { .header { height: 68px; } }
 .headerRow {
   max-width: 1160px;
   margin: 0 auto;
@@ -43,7 +44,8 @@
 .brand { display: inline-flex; align-items: center; }
 /* mix-blend multiply drops the logo PNG's white background into the light
    header (white → transparent over cream, dark-green marks stay). */
-.brandLogo { height: 40px; width: auto; display: block; mix-blend-mode: multiply; }
+.brandLogo { height: 70px; width: auto; display: block; mix-blend-mode: multiply; }
+@media (max-width: 768px) { .brandLogo { height: 50px; } }
 .brandFallback { display: none; font-size: 14px; font-weight: 700; letter-spacing: -.01em; color: var(--pine); }
 .navRight { display: flex; align-items: center; gap: 14px; }
 
@@ -81,7 +83,7 @@
     gap: 32px 64px;
     align-items: start;
   }
-  .secHead { position: sticky; top: 84px; }
+  .secHead { position: sticky; top: 108px; }
 }
 /* In the two-column layout the intro column is already narrow, so the lede
    doesn't need its own cap; keep one for the stacked (mobile) view. */
