@@ -241,6 +241,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
               eyebrow={t.neighborhoodEyebrow}
               title={`${t.neighborhoodH2Prefix}${browseNb}`}
               lede={t.neighborhoodLede}
+              eyebrowColor="var(--pine)"
             />
             <div className={styles.secBody}>
               <div className={styles.nbControls}>
