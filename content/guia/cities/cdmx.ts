@@ -185,7 +185,7 @@ export const cdmx: City = {
       beforeLede: 'Lo básico y práctico, para que dejes de pensar en logística en cuanto aterrices.',
       arrivalItems: [
         { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}. Podemos ofrecerte también transporte privado.' },
-        { icon: 'car',       title: 'Transporte',      body: 'Usa Uber o Didi, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. O si prefieres podemos coordinar transporte para ti.' },
+        { icon: 'car',       title: 'Transporte',      body: 'Usa Uber o Didi, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. Podemos ofrecerte también transporte privado.' },
         { icon: 'cloudSun',  title: 'Clima',           body: 'Julio es temporada de lluvias, mañanas soleadas, lluvias breves por la tarde. Lleva capas y una chamarra ligera para la lluvia.' },
         { icon: 'banknote',  title: 'Dinero',          body: 'Las tarjetas se aceptan ampliamente. Lleva algo de efectivo en pesos para mercados, propinas y comida callejera. En restaurantes, la propina recomendada es 10–15%; redondea en taxis y puestos casuales.' },
         { icon: 'wifi',      title: 'Conectividad',    body: 'Un eSIM se activa en minutos. ', link: { text: 'Consigue el tuyo con Airalo aquí', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. El wifi es confiable en la propiedad y en la mayoría de los cafés.' } },
@@ -295,7 +295,7 @@ export const cdmx: City = {
       beforeLede: 'The practical basics, so you can stop thinking about logistics the moment you land.',
       arrivalItems: [
         { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}. We can also offer you private transportation.' },
-        { icon: 'car',       title: 'Transportation', body: 'Use Uber or Didi, cheaper and safer than hailing on the street. The Metro is excellent if you\'re comfortable with crowds. Or if you\'d prefer, we can arrange transportation for you.' },
+        { icon: 'car',       title: 'Transportation', body: 'Use Uber or Didi, cheaper and safer than hailing on the street. The Metro is excellent if you\'re comfortable with crowds. We can also offer you private transportation.' },
         { icon: 'cloudSun',  title: 'Weather',        body: 'July is rainy season, sunny mornings, brief afternoon showers. Pack layers and a light rain jacket.' },
         { icon: 'banknote',  title: 'Money',          body: 'Cards are widely accepted. Keep some pesos in cash for markets, tips, and street food. In restaurants, 10–15% is the recommended tip; round up for taxis and casual spots.' },
         { icon: 'wifi',      title: 'Connectivity',   body: 'An eSIM activates in minutes. ', link: { text: 'Get yours through Airalo here', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. Wi-Fi is reliable at the property and most cafés.' } },

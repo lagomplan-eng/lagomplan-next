@@ -49,11 +49,12 @@ function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size
   return <Cmp size={size} color={color} strokeWidth={1.8} aria-hidden />
 }
 
-/** Left column of an editorial section: eyebrow + heading + optional lede. */
-function SectionHead({ eyebrow, title, lede }: { eyebrow: string; title?: string; lede?: string }) {
+/** Section header: eyebrow + heading + optional lede. `eyebrowColor` overrides
+ *  the default coral eyebrow (applies to both languages — it's just styling). */
+function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; title?: string; lede?: string; eyebrowColor?: string }) {
   return (
     <div className={styles.secHead}>
-      <span className={styles.eyebrow}>{eyebrow}</span>
+      <span className={styles.eyebrow} style={eyebrowColor ? { color: eyebrowColor } : undefined}>{eyebrow}</span>
       {title && <h2 className={styles.h2}>{title}</h2>}
       {lede && <p className={styles.lede}>{lede}</p>}
     </div>
@@ -207,7 +208,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       <section id="before" className={styles.section}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.beforeEyebrow} title={t.beforeH2} lede={t.beforeLede} />
+            <SectionHead eyebrow={t.beforeEyebrow} title={t.beforeH2} lede={t.beforeLede} eyebrowColor="var(--pine)" />
             <div className={styles.secBody}>
               <div className={styles.cardGrid}>
                 {t.arrivalItems.map((item, i) => (
