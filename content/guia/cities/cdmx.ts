@@ -20,20 +20,18 @@ export const cdmx: City = {
       mapUrl: MAPS('Roma+Norte+Ciudad+de+Mexico'),
       spots: {
         es: [
-          { icon: 'coffee',     name: 'Café Avellaneda',       distance: '4 min caminando',  note: 'Café de lote pequeño, del que regresas dos veces.' },
+          { icon: 'croissant',  name: 'Panadería Gala',        distance: '4 min caminando',  note: 'Pan y repostería recién horneados, para empezar bien la mañana.' },
           { icon: 'croissant',  name: 'Panadería Rosetta',     distance: '6 min caminando',  note: 'Los panes de guayaba se acaban antes de las 10am, llega temprano.' },
           { icon: 'utensilsSm', name: 'Contramar',             distance: '10 min caminando', note: 'Las tostadas de atún ya valen el viaje. No se necesita reservación en la comida.' },
-          { icon: 'basket',     name: 'Mercado Roma',          distance: '8 min caminando',  note: 'Un mercado gourmet para una comida rápida o vino por la tarde.' },
-          { icon: 'trees',      name: 'Parque México',         distance: '3 min caminando',  note: 'Bancas art déco, paseadores de perros, y el mejor lugar para observar gente.' },
-          { icon: 'cross',      name: 'Farmacias del Ahorro',  distance: '5 min caminando',  note: 'Abierto hasta tarde, para lo que se te olvidó empacar.' },
+          { icon: 'basket',     name: 'Mercado de Medellín',   distance: '8 min caminando',  note: 'Mercado de barrio con puestos caribeños y sudamericanos, para probar de todo.' },
+          { icon: 'trees',      name: 'Plaza Río de Janeiro',  distance: '3 min caminando',  note: 'Una plaza arbolada con la fuente del David, rodeada de cafés y casonas.' },
         ],
         en: [
-          { icon: 'coffee',     name: 'Café Avellaneda',       distance: '4 min walk',  note: 'Small-batch coffee, the kind of place you return to twice.' },
+          { icon: 'croissant',  name: 'Panadería Gala',        distance: '4 min walk',  note: 'Fresh-baked bread and pastries, a good way to start the morning.' },
           { icon: 'croissant',  name: 'Panadería Rosetta',     distance: '6 min walk',  note: 'Guava rolls sell out by 10am, go early.' },
           { icon: 'utensilsSm', name: 'Contramar',             distance: '10 min walk', note: 'The tuna tostadas alone are worth the trip. No reservations needed at lunch.' },
-          { icon: 'basket',     name: 'Mercado Roma',          distance: '8 min walk',  note: 'A gourmet market for a quick, easy lunch or evening wine.' },
-          { icon: 'trees',      name: 'Parque México',         distance: '3 min walk',  note: 'Art deco benches, dog walkers, and the best people-watching in the city.' },
-          { icon: 'cross',      name: 'Farmacias del Ahorro',  distance: '5 min walk',  note: 'Open late, for anything you forgot to pack.' },
+          { icon: 'basket',     name: 'Mercado de Medellín',   distance: '8 min walk',  note: 'A neighborhood market with Caribbean and South American stalls, taste a bit of everything.' },
+          { icon: 'trees',      name: 'Plaza Río de Janeiro',  distance: '3 min walk',  note: 'A tree-lined square with the David fountain, ringed by cafés and old mansions.' },
         ],
       },
       perfectDay: {
