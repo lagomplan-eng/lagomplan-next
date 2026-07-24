@@ -31,7 +31,7 @@
   border-bottom: 1px solid rgba(107, 143, 134, .18);
 }
 .headerRow {
-  max-width: 640px;
+  max-width: 1160px;
   margin: 0 auto;
   width: 100%;
   padding: 0 24px;
@@ -39,6 +39,7 @@
   align-items: center;
   justify-content: space-between;
 }
+@media (max-width: 768px) { .headerRow { padding: 0 20px; } }
 .brand { display: inline-flex; align-items: center; }
 /* mix-blend multiply drops the logo PNG's white background into the light
    header (white → transparent over cream, dark-green marks stay). */

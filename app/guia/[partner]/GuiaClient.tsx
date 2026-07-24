@@ -182,7 +182,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         <section className={styles.section}>
           <div className={styles.container}>
             <div className={styles.letterInner}>
-              <span className={styles.eyebrow}>{t.hostLetter.eyebrow}</span>
+              <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{t.hostLetter.eyebrow}</span>
               <p className={styles.hostQuote}>{'“'}{t.hostLetter.quote}{'”'}</p>
               <p className={styles.lede} style={{ maxWidth: 640 }}>{t.hostLetter.body}</p>
               <div className={styles.hostSig}>

@@ -278,7 +278,7 @@ export const cdmx: City = {
       hostLetter: {
         eyebrow: 'Una carta de tu anfitrión',
         quote: 'La Ciudad de México no se visita, se recorre dos veces, y aún faltan calles.',
-        body: 'Esta guía nació de una pregunta que me hacen mis huéspedes cada semana: ¿a dónde voy hoy? No es una lista exhaustiva, es un recorte curado de lo que de verdad vale la pena. Cada recomendación la caminé, la comí y la comprobé yo mismo.',
+        body: 'Esta guía nació de una pregunta que nos hacen nuestros huéspedes cada semana: ¿a dónde voy hoy? No es una lista exhaustiva, es un recorte curado de lo que de verdad vale la pena. Cada recomendación la caminamos, la comimos y la comprobamos nosotros mismos.',
         roleLabel: 'Tu anfitrión',
       },
     },
@@ -387,7 +387,7 @@ export const cdmx: City = {
       hostLetter: {
         eyebrow: 'A letter from your host',
         quote: 'Mexico City isn\'t visited, it\'s walked twice, and there are still streets left.',
-        body: 'This guide came from a question my guests ask every week: where do I go today? It isn\'t exhaustive, it\'s a curated cut of what\'s truly worth it. I walked, ate, and checked every recommendation myself.',
+        body: 'This guide came from a question our guests ask us every week: where do I go today? It isn\'t exhaustive, it\'s a curated cut of what\'s truly worth it. We walked, ate, and checked every recommendation ourselves.',
         roleLabel: 'Your host',
       },
     },
