@@ -477,6 +477,8 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         <a
           className={styles.stickyCta}
           href={plannerHref}
+          target="_blank"
+          rel="noopener noreferrer"
           onClick={() => onPlannerClick('sticky_cta')}
         >
           {t.stickyCta}
