@@ -135,6 +135,8 @@ export interface CityCopy {
   continueH2: string
   continueLede: string
   continueCta: string
+  /** Label for the fixed/sticky planner button. */
+  stickyCta: string
   discoverEyebrow: string
   discoverH2: string
   footer: string

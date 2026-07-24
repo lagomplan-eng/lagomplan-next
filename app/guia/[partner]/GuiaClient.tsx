@@ -67,6 +67,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [browseNb, setBrowseNb] = useState<string>(partner.homeNeighborhood)
+  const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
   const t = city.copy[lang]
@@ -88,6 +89,14 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
+
+  // Reveal the sticky planner CTA once the guest scrolls past the hero.
+  useEffect(() => {
+    const onScroll = () => setShowSticky(window.scrollY > 480)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   // ── Insiders section in-viewport event (published partners only) ──────────
   const insidersPublished = !!partner.insiders?.publish && !!partner.insiders?.items?.[lang]?.length
@@ -459,6 +468,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
 
       <div className={styles.footer}>
         <span className={styles.footerText}>{t.footer}</span>
+      </div>
+
+      {/* ── Fixed planner CTA (carries the same attributed link) ────────── */}
+      <div className={`${styles.stickyWrap} ${showSticky ? '' : styles.stickyWrapHidden}`}>
+        <a
+          className={styles.stickyCta}
+          href={plannerHref}
+          onClick={() => onPlannerClick('sticky_cta')}
+        >
+          {t.stickyCta}
+        </a>
       </div>
     </div>
   )
