@@ -102,20 +102,16 @@ export const cdmx: City = {
       mapUrl: MAPS('Polanco+Ciudad+de+Mexico'),
       spots: {
         es: [
-          { icon: 'coffee',    name: 'Blend Station',          distance: '5 min caminando',  note: 'Café de especialidad, ideal para trabajar una hora.' },
+          { icon: 'coffee',    name: 'ENO',                    distance: 'Petrarca 258',     note: 'El café de Enrique Olvera: concha con nata y un espresso antes de los museos.' },
           { icon: 'trees',     name: 'Parque Lincoln',         distance: '4 min caminando',  note: 'Pavorreales, kiosco y las mejores bancas para leer.' },
           { icon: 'landmark',  name: 'Museo Soumaya',          distance: '10 min caminando', note: 'Entrada gratuita, arquitectura inconfundible.' },
-          { icon: 'landmark',  name: 'Museo Jumex',            distance: '10 min caminando', note: 'Arte contemporáneo, justo al lado del Soumaya.' },
           { icon: 'basket',    name: 'Antara Fashion Hall',    distance: '12 min caminando', note: 'Para una tarde de tiendas o una copa con vista.' },
-          { icon: 'cross',     name: 'Farmacias del Ahorro',   distance: '5 min caminando',  note: 'Abierto hasta tarde, para lo que se te olvidó empacar.' },
         ],
         en: [
-          { icon: 'coffee',    name: 'Blend Station',          distance: '5 min walk',  note: 'Specialty coffee, good for an hour of work.' },
+          { icon: 'coffee',    name: 'ENO',                    distance: 'Petrarca 258', note: 'Enrique Olvera\'s café: concha with cream and an espresso before the museums.' },
           { icon: 'trees',     name: 'Parque Lincoln',         distance: '4 min walk',  note: 'Peacocks, a bandstand, and the best benches for reading.' },
           { icon: 'landmark',  name: 'Museo Soumaya',          distance: '10 min walk', note: 'Free entry, unmistakable architecture.' },
-          { icon: 'landmark',  name: 'Museo Jumex',            distance: '10 min walk', note: 'Contemporary art, right next to Soumaya.' },
           { icon: 'basket',    name: 'Antara Fashion Hall',    distance: '12 min walk', note: 'For an afternoon of shopping or a drink with a view.' },
-          { icon: 'cross',     name: 'Farmacias del Ahorro',   distance: '5 min walk',  note: 'Open late, for anything you forgot to pack.' },
         ],
       },
       perfectDay: {
