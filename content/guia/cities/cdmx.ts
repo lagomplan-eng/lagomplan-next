@@ -143,7 +143,7 @@ export const cdmx: City = {
       mapUrl: MAPS('Centro+Historico+Ciudad+de+Mexico'),
       spots: {
         es: [
-          { icon: 'coffee',     name: 'Café El Popular',         distance: 'en el Centro', note: 'Abierto casi 24 horas, café de olla y pan dulce.' },
+          { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Cocina mexicana de Ricardo Muñoz Zurita en el patio de un palacio del siglo XVII, entre árboles y lámparas colgantes. Desayuno diario de 9 a 12; comida y cena hasta las 11 — reserva, el patio se llena.' },
           { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'en el Centro', note: 'Desde 1912, cocina mexicana en un salón de azulejos.' },
           { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'en el Centro', note: 'El mercado gourmet de la ciudad, para probar de todo.' },
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'en el Centro', note: 'Ruinas mexicas a un costado de la Catedral.' },
@@ -151,7 +151,7 @@ export const cdmx: City = {
           { icon: 'cross',      name: 'El Moro',                 distance: 'en el Centro', note: 'Churros y chocolate desde 1935, abierto toda la noche.' },
         ],
         en: [
-          { icon: 'coffee',     name: 'Café El Popular',         distance: 'in the Centro', note: 'Open nearly 24 hours, café de olla and sweet bread.' },
+          { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Ricardo Muñoz Zurita\'s Mexican cooking in the courtyard of a 17th-century palace, under trees and hanging lamps. Breakfast daily 9–12; lunch and dinner until 11 — book ahead, the patio fills up.' },
           { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'in the Centro', note: 'Since 1912, Mexican cooking in a tiled dining room.' },
           { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'in the Centro', note: 'The city\'s gourmet market, taste a bit of everything.' },
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'in the Centro', note: 'Aztec ruins right beside the Cathedral.' },
