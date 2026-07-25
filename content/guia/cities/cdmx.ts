@@ -144,7 +144,7 @@ export const cdmx: City = {
       spots: {
         es: [
           { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Cocina mexicana de Ricardo Muñoz Zurita en el patio de un palacio del siglo XVII, entre árboles y lámparas colgantes. Desayuno diario de 9 a 12; comida y cena hasta las 11 — reserva, el patio se llena.' },
-          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'en el Centro', note: 'Desde 1912, cocina mexicana en un salón de azulejos.' },
+          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'Tacuba 28', note: 'Cocina mexicana en un salón de azulejos desde 1912; pide los tamales de la casa.' },
           { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'en el Centro', note: 'El mercado gourmet de la ciudad, para probar de todo.' },
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'en el Centro', note: 'Ruinas mexicas a un costado de la Catedral.' },
           { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'en el Centro', note: 'El teatro más bello del país, murales incluidos.' },
@@ -152,7 +152,7 @@ export const cdmx: City = {
         ],
         en: [
           { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Ricardo Muñoz Zurita\'s Mexican cooking in the courtyard of a 17th-century palace, under trees and hanging lamps. Breakfast daily 9–12; lunch and dinner until 11 — book ahead, the patio fills up.' },
-          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'in the Centro', note: 'Since 1912, Mexican cooking in a tiled dining room.' },
+          { icon: 'utensilsSm', name: 'Café de Tacuba',          distance: 'Tacuba 28', note: 'Mexican cooking in a tiled hall since 1912; order the house tamales.' },
           { icon: 'basket',     name: 'Mercado de San Juan',     distance: 'in the Centro', note: 'The city\'s gourmet market, taste a bit of everything.' },
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'in the Centro', note: 'Aztec ruins right beside the Cathedral.' },
           { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'in the Centro', note: 'The country\'s most beautiful theater, murals included.' },
