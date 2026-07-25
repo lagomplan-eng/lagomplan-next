@@ -27,7 +27,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   Plane, Car, CloudSun, Banknote, Wifi, ShieldCheck, Briefcase, Droplet, Moon,
   SquareParking, Coffee, Croissant, Utensils, ShoppingBasket, Trees, Plus,
-  Landmark, Baby, Martini, Compass, Clock, CloudRain, ArrowDown,
+  Landmark, Baby, Martini, Compass, Clock, CloudRain, ArrowDown, IceCreamCone,
   type LucideIcon,
 } from 'lucide-react'
 import { gaTrack } from '../../../lib/analytics/ga'
@@ -41,7 +41,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   parking: SquareParking, coffee: Coffee, croissant: Croissant, utensilsSm: Utensils,
   basket: ShoppingBasket, trees: Trees, cross: Plus, landmark: Landmark,
   utensils: Utensils, baby: Baby, martini: Martini, compass: Compass, clock: Clock,
-  cloudRain: CloudRain, arrowDown: ArrowDown,
+  cloudRain: CloudRain, arrowDown: ArrowDown, iceCream: IceCreamCone,
 }
 
 function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size?: number; color?: string }) {

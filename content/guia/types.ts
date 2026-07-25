@@ -16,7 +16,7 @@ export type IconKey =
   | 'briefcase' | 'droplet' | 'moon' | 'parking'
   | 'coffee' | 'croissant' | 'utensilsSm' | 'basket' | 'trees' | 'cross'
   | 'landmark' | 'utensils' | 'baby' | 'martini' | 'compass' | 'clock'
-  | 'cloudRain' | 'arrowDown'
+  | 'cloudRain' | 'arrowDown' | 'iceCream'
 
 /** Inline link inside an arrival card body (e.g. the Airalo eSIM link). */
 export interface InlineLink {
