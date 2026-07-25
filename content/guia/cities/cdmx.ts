@@ -104,14 +104,18 @@ export const cdmx: City = {
         es: [
           { icon: 'coffee',    name: 'ENO',                    distance: 'Petrarca 258',     note: 'El café de Enrique Olvera: concha con nata y un espresso antes de los museos.' },
           { icon: 'trees',     name: 'Parque Lincoln',         distance: '4 min caminando',  note: 'Pavorreales, kiosco y las mejores bancas para leer.' },
-          { icon: 'landmark',  name: 'Museo Soumaya',          distance: '10 min caminando', note: 'Entrada gratuita, arquitectura inconfundible.' },
+          { icon: 'landmark',  name: 'Soumaya + Jumex',        distance: 'Plaza Carso',      note: 'Dos museos pared con pared: Soumaya gratis y abierto diario, Jumex de arte contemporáneo — cierra lunes. Un solo viaje, tres horas.' },
+          { icon: 'basket',    name: 'Ikal',                   distance: 'Masaryk 340A',     note: 'Concept store de diseño mexicano; el regalo que no parece de aeropuerto.' },
           { icon: 'basket',    name: 'Antara Fashion Hall',    distance: '12 min caminando', note: 'Para una tarde de tiendas o una copa con vista.' },
+          { icon: 'martini',   name: 'Ticuchi',                distance: 'Petrarca 254',     note: 'La barra de agaves del equipo de Pujol, a la luz de velas; abre de martes a domingo, desde las 5:30.' },
         ],
         en: [
           { icon: 'coffee',    name: 'ENO',                    distance: 'Petrarca 258', note: 'Enrique Olvera\'s café: concha with cream and an espresso before the museums.' },
           { icon: 'trees',     name: 'Parque Lincoln',         distance: '4 min walk',  note: 'Peacocks, a bandstand, and the best benches for reading.' },
-          { icon: 'landmark',  name: 'Museo Soumaya',          distance: '10 min walk', note: 'Free entry, unmistakable architecture.' },
+          { icon: 'landmark',  name: 'Soumaya + Jumex',        distance: 'Plaza Carso', note: 'Two museums wall to wall: Soumaya free and open daily, Jumex for contemporary art — closed Mondays. One trip, three hours.' },
+          { icon: 'basket',    name: 'Ikal',                   distance: 'Masaryk 340A', note: 'Mexican design concept store; the gift that doesn\'t look duty-free.' },
           { icon: 'basket',    name: 'Antara Fashion Hall',    distance: '12 min walk', note: 'For an afternoon of shopping or a drink with a view.' },
+          { icon: 'martini',   name: 'Ticuchi',                distance: 'Petrarca 254', note: 'The Pujol team\'s agave bar, candlelit; Tuesday to Sunday, from 5:30 pm.' },
         ],
       },
       perfectDay: {
