@@ -128,7 +128,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   const homeNb = city.neighborhoods[partner.homeNeighborhood] ?? city.neighborhoods[city.neighborhoodOrder[0]]
   const browseNbData = city.neighborhoods[browseNb] ?? homeNb
   const spots = browseNbData.spots[lang]
-  const perfectDay = homeNb.perfectDay[lang]
+  const itin = city.itinerary[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
   const insiders = partner.insiders
 
@@ -280,24 +280,29 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         </div>
       </section>
 
-      {/* ── 4. A perfect day ───────────────────────────────── */}
-      <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      {/* ── 4. 48-hour itinerary (dark) ────────────────────── */}
+      <section className={`${styles.section} ${styles.sectionPine}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.perfectDayEyebrow} title={t.perfectDayH2} lede={t.perfectDayLede} />
-            <div className={styles.secBody}>
-              <div className={styles.spotList}>
-                {perfectDay.map((m, i) => (
-                  <div className={styles.momentRow} key={i}>
-                    <span className={`${styles.eyebrowMono} ${styles.momentTime}`}>{m.time}</span>
-                    <div>
-                      <h4 className={styles.h4}>{m.title}</h4>
-                      <p className={styles.momentBody}>{m.body}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
+          <div className={styles.itinGrid}>
+            <div className={styles.itinIntro}>
+              <span className={styles.eyebrowMono} style={{ color: 'var(--sage-soft)' }}>{itin.eyebrow}</span>
+              <h2 className={styles.itinTitle}>{itin.title}</h2>
+              <p className={styles.itinLede}>{itin.lede}</p>
             </div>
+            {itin.days.map((day, di) => (
+              <div className={styles.itinDay} key={di}>
+                <h3 className={styles.itinDayTitle}>{day.title}</h3>
+                <div className={styles.itinList}>
+                  {day.items.map((it, ii) => (
+                    <div className={styles.itinRow} key={ii}>
+                      <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{it.time}</span>
+                      <p className={styles.itinText}>{it.text}</p>
+                    </div>
+                  ))}
+                </div>
+                {day.note && <p className={styles.itinNote}>{day.note}</p>}
+              </div>
+            ))}
           </div>
         </div>
       </section>

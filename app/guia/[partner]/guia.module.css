@@ -221,6 +221,36 @@
 .momentTime { flex: none; width: 64px; color: var(--coral); }
 .momentBody { font-size: 14px; color: var(--pine); opacity: .75; line-height: 1.75; max-width: 440px; margin: 0; }
 
+/* ── 48-hour itinerary (dark section) ───────────────────── */
+.itinGrid { display: grid; grid-template-columns: 1fr; gap: 40px; }
+@media (min-width: 900px) {
+  .itinGrid { grid-template-columns: minmax(200px, 260px) 1fr 1fr; gap: 56px; align-items: start; }
+}
+.itinTitle {
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
+  font-weight: 700;
+  font-size: clamp(2rem, 5vw, 2.75rem);
+  line-height: 1.04;
+  letter-spacing: -.02em;
+  color: var(--cream);
+  margin: 14px 0 16px;
+}
+.itinLede { font-size: 15px; line-height: 1.7; color: rgba(255, 249, 243, .72); max-width: 280px; margin: 0; }
+.itinDayTitle {
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
+  font-weight: 600;
+  font-size: clamp(1.2rem, 2.4vw, 1.5rem);
+  color: var(--cream);
+  margin: 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid rgba(255, 249, 243, .16);
+}
+.itinList { display: flex; flex-direction: column; }
+.itinRow { display: flex; gap: 20px; padding: 18px 0; border-bottom: 1px solid rgba(255, 249, 243, .14); }
+.itinTime { flex: none; width: 52px; color: var(--coral); }
+.itinText { font-size: 14px; line-height: 1.6; color: rgba(255, 249, 243, .9); margin: 0; }
+.itinNote { font-style: italic; font-size: 14px; line-height: 1.6; color: rgba(255, 249, 243, .6); margin: 22px 0 0; max-width: 340px; }
+
 /* ── Explore by mood ────────────────────────────────────── */
 .moodGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
 .moodBtn {

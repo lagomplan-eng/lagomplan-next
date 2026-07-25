@@ -173,6 +173,65 @@ export const cdmx: City = {
     { name: 'Mérida',                 photoUrl: '/images/guides/merida.jpg' },
   ],
 
+  itinerary: {
+    es: {
+      eyebrow: 'Itinerario',
+      title: '48 horas',
+      lede: 'Dos días, caminados y comprobados.',
+      days: [
+        {
+          title: 'Día uno, Roma / Condesa',
+          items: [
+            { time: '08:30', text: 'Café y pan local en Gala Panadería o Rosetta.' },
+            { time: '10:00', text: 'Caminata por Río de Janeiro y Parque México.' },
+            { time: '13:30', text: 'Comida en Contramar (llega 1:30 o sufre).' },
+            { time: '15:00', text: 'Galerías de Roma Norte, entrada libre casi siempre.' },
+            { time: '19:30', text: 'Cena ligera o tacos La Once Mil y cocktail en Licorería Limantour.' },
+          ],
+          note: 'Si quieres ver lo que nunca habías visto, aventúrate a la lucha libre.',
+        },
+        {
+          title: 'Día dos, Centro / Chapultepec',
+          items: [
+            { time: '09:00', text: 'Zócalo antes de que llegue el calor.' },
+            { time: '10:30', text: 'Templo Mayor, Bellas Artes y alrededores a pie.' },
+            { time: '13:00', text: 'Churros de El Moro, cerca de Eje Central.' },
+            { time: '16:00', text: 'Bosque de Chapultepec y Museo Soumaya.' },
+            { time: '20:00', text: 'Cena en Máximo Bistrot o Expendio de Maíz si quieres que te sorprendan.' },
+          ],
+        },
+      ],
+    },
+    en: {
+      eyebrow: 'Itinerary',
+      title: '48 hours',
+      lede: 'Two days, walked and checked.',
+      days: [
+        {
+          title: 'Day one, Roma / Condesa',
+          items: [
+            { time: '08:30', text: 'Coffee and local bread at Gala Panadería or Rosetta.' },
+            { time: '10:00', text: 'A walk through Río de Janeiro and Parque México.' },
+            { time: '13:30', text: 'Lunch at Contramar (arrive by 1:30 or suffer).' },
+            { time: '15:00', text: 'Roma Norte galleries, free entry most of the time.' },
+            { time: '19:30', text: 'A light dinner or tacos at La Once Mil, and a cocktail at Licorería Limantour.' },
+          ],
+          note: 'If you want to see something you never have, take a chance on lucha libre.',
+        },
+        {
+          title: 'Day two, Centro / Chapultepec',
+          items: [
+            { time: '09:00', text: 'The Zócalo before the heat arrives.' },
+            { time: '10:30', text: 'Templo Mayor, Bellas Artes, and the surroundings on foot.' },
+            { time: '13:00', text: 'Churros at El Moro, near Eje Central.' },
+            { time: '16:00', text: 'Bosque de Chapultepec and Museo Soumaya.' },
+            { time: '20:00', text: 'Dinner at Máximo Bistrot or Expendio de Maíz if you want to be surprised.' },
+          ],
+        },
+      ],
+    },
+  },
+
   copy: {
     es: {
       navLabel: 'Tu estancia',

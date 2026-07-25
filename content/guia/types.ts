@@ -149,6 +149,26 @@ export interface CityCopy {
   }
 }
 
+export interface ItineraryItem {
+  time: string
+  text: string
+}
+
+export interface ItineraryDay {
+  title: string
+  items: ItineraryItem[]
+  /** Optional closing aside (rendered italic). */
+  note?: string
+}
+
+/** Multi-day itinerary shown as the dark "48 hours" section. */
+export interface Itinerary {
+  eyebrow: string
+  title: string
+  lede: string
+  days: ItineraryDay[]
+}
+
 export interface City {
   id: string
   /** Hero background, public path. */
@@ -157,6 +177,7 @@ export interface City {
   neighborhoodOrder: string[]
   neighborhoods: Record<string, Neighborhood>
   destinations: Destination[]
+  itinerary: Record<Lang, Itinerary>
   copy: Record<Lang, CityCopy>
 }
 
