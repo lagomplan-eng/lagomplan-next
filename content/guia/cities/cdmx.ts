@@ -149,6 +149,7 @@ export const cdmx: City = {
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'en el Centro', note: 'Ruinas mexicas a un costado de la Catedral.' },
           { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'en el Centro', note: 'El teatro más bello del país, murales incluidos.' },
           { icon: 'cross',      name: 'El Moro',                 distance: 'en el Centro', note: 'Churros y chocolate desde 1935, abierto toda la noche.' },
+          { icon: 'martini',    name: 'Bar La Ópera',            distance: '5 de Mayo 10', note: 'Cantina de 1895 con techos dorados y un balazo de Pancho Villa aún incrustado en el techo; abre desde la 1 pm, domingos cierra a las 6.' },
         ],
         en: [
           { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Ricardo Muñoz Zurita\'s Mexican cooking in the courtyard of a 17th-century palace, under trees and hanging lamps. Breakfast daily 9–12; lunch and dinner until 11 — book ahead, the patio fills up.' },
@@ -157,6 +158,7 @@ export const cdmx: City = {
           { icon: 'landmark',   name: 'Templo Mayor',            distance: 'in the Centro', note: 'Aztec ruins right beside the Cathedral.' },
           { icon: 'landmark',   name: 'Palacio de Bellas Artes', distance: 'in the Centro', note: 'The country\'s most beautiful theater, murals included.' },
           { icon: 'cross',      name: 'El Moro',                 distance: 'in the Centro', note: 'Churros and chocolate since 1935, open all night.' },
+          { icon: 'martini',    name: 'Bar La Ópera',            distance: '5 de Mayo 10', note: 'An 1895 cantina with gilded ceilings and Pancho Villa\'s bullet still lodged overhead; opens at 1 pm, Sundays until 6.' },
         ],
       },
       // Source has no perfect-day for Centro; only the home colonia's perfect
