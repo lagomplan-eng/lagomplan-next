@@ -64,6 +64,14 @@ function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; 
 const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
+/** Experience card images, keyed by the experience id. */
+const EXP_PHOTOS: Record<string, string> = {
+  'exp-lucha':      '/images/guia/experiences/exp-lucha.jpg',
+  'exp-xochimilco': '/images/guia/experiences/exp-xochimilco.jpg',
+  'exp-frida':      '/images/guia/experiences/exp-frida.jpg',
+  'exp-ballet':     '/images/guia/experiences/exp-ballet.jpg',
+}
+
 export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
@@ -386,7 +394,12 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
               <div className={styles.expGrid}>
                 {t.experiences.map((exp) => (
                   <div className={styles.expCard} key={exp.id}>
-                    <div className={styles.expThumb}>{exp.title}</div>
+                    {EXP_PHOTOS[exp.id] ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img className={styles.expImg} src={EXP_PHOTOS[exp.id]} alt={exp.title} />
+                    ) : (
+                      <div className={styles.expThumb}>{exp.title}</div>
+                    )}
                     <div className={styles.expBody}>
                       <h5 className={styles.h5}>{exp.title}</h5>
                       <p className={styles.expNote}>{exp.body}</p>
