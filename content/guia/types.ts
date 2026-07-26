@@ -53,6 +53,8 @@ export interface Neighborhood {
   name: string
   /** Google Maps deep-link for "open list in Maps". */
   mapUrl: string
+  /** One-line zone descriptor, shown under the heading (switches per tab). */
+  tagline: Record<Lang, string>
   spots: Record<Lang, Spot[]>
   perfectDay: Record<Lang, Moment[]>
 }
@@ -107,7 +109,7 @@ export interface CityCopy {
   beforeLede: string
   arrivalItems: ArrivalItem[]
   neighborhoodEyebrow: string
-  neighborhoodH2Prefix: string   // e.g. "La vida alrededor de " (+ colonia)
+  neighborhoodH2: string         // fixed heading, e.g. "A short walk from your door"
   neighborhoodLede: string
   openInMapsLabel: string
   perfectDayEyebrow: string

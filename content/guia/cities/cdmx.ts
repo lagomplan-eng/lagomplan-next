@@ -18,6 +18,7 @@ export const cdmx: City = {
     'Roma Norte': {
       name: 'Roma Norte',
       mapUrl: MAPS('Roma+Norte+Ciudad+de+Mexico'),
+      tagline: { es: 'Café de especialidad, galerías pequeñas, vida de banqueta.', en: 'Specialty coffee, small galleries, sidewalk life.' },
       spots: {
         es: [
           { icon: 'croissant',  name: 'Panadería Gala',                    distance: 'Tonalá 143',        note: 'Pan y repostería recién horneados, para empezar bien la mañana.' },
@@ -59,6 +60,7 @@ export const cdmx: City = {
     'Condesa': {
       name: 'Condesa',
       mapUrl: MAPS('Condesa+Ciudad+de+Mexico'),
+      tagline: { es: 'Art déco, parques circulares, mezcalerías de barrio.', en: 'Art deco, circular parks, neighborhood mezcal bars.' },
       spots: {
         es: [
           { icon: 'croissant',  name: 'Lardo',                                                     distance: 'Agustín Melgar 6',                  note: 'Panadería y bistró en una sola parada, perfecto para el desayuno.' },
@@ -100,6 +102,7 @@ export const cdmx: City = {
     'Polanco': {
       name: 'Polanco',
       mapUrl: MAPS('Polanco+Ciudad+de+Mexico'),
+      tagline: { es: 'Museos y el bosque urbano más grande de América Latina.', en: 'Museums, Latin America\'s largest urban forest.' },
       spots: {
         es: [
           { icon: 'coffee',    name: 'ENO',                    distance: 'Petrarca 258',     note: 'El café de Enrique Olvera: concha con nata y un espresso antes de los museos.' },
@@ -141,6 +144,7 @@ export const cdmx: City = {
     'Centro': {
       name: 'Centro',
       mapUrl: MAPS('Centro+Historico+Ciudad+de+Mexico'),
+      tagline: { es: 'Capas de historia, mercados, la ciudad más densa.', en: 'Layers of history, markets, the densest city.' },
       spots: {
         es: [
           { icon: 'utensilsSm', name: 'Azul Histórico',          distance: 'Isabel la Católica 30', note: 'Cocina mexicana de Ricardo Muñoz Zurita en el patio de un palacio del siglo XVII, entre árboles y lámparas colgantes. Desayuno diario de 9 a 12; comida y cena hasta las 11 — reserva, el patio se llena.' },
@@ -243,20 +247,20 @@ export const cdmx: City = {
       beforeH2: 'Un inicio tranquilo para tu viaje',
       beforeLede: 'Lo básico y práctico, para que dejes de pensar en logística en cuanto aterrices.',
       arrivalItems: [
-        { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}. Podemos ofrecerte también transporte privado.' },
+        { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}.' },
         { icon: 'car',       title: 'Transporte',      body: 'Usa Uber o Didi, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. Podemos ofrecerte también transporte privado.' },
-        { icon: 'cloudSun',  title: 'Clima',           body: 'Julio es temporada de lluvias, mañanas soleadas, lluvias breves por la tarde. Lleva capas y una chamarra ligera para la lluvia.' },
+        { icon: 'cloudSun',  title: 'Clima',           body: 'Templado todo el año, 18–25 °C. Las lluvias se concentran de junio a septiembre, casi siempre chubascos breves por la tarde. Lleva capas.' },
         { icon: 'banknote',  title: 'Dinero',          body: 'Las tarjetas se aceptan ampliamente. Lleva algo de efectivo en pesos para mercados, propinas y comida callejera. En restaurantes, la propina recomendada es 10–15%; redondea en taxis y puestos casuales.' },
         { icon: 'wifi',      title: 'Conectividad',    body: 'Un eSIM se activa en minutos. ', link: { text: 'Consigue el tuyo con Airalo aquí', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. El wifi es confiable en la propiedad y en la mayoría de los cafés.' } },
-        { icon: 'shield',    title: 'Seguridad',       body: 'Aplica el sentido común habitual en ciudad, usa apps de transporte por la noche y mantén tus objetos de valor fuera de vista.' },
-        { icon: 'briefcase', title: 'Equipaje',        body: 'Zapatos cómodos para caminar, un outfit elegante para la cena, y una capa ligera para las noches frescas.' },
+        { icon: 'shield',    title: 'Seguridad',       body: 'Aplica el sentido común habitual en ciudad, usa apps de transporte por la noche y mantén tus objetos de valor fuera de vista. En una emergencia, el 911 funciona en todo el país.' },
+        { icon: 'briefcase', title: 'Equipaje',        body: 'Zapatos cómodos para caminar, ropa casual, y una capa ligera para las noches frescas.' },
         { icon: 'droplet',   title: 'Agua de la llave', body: 'Te recomendamos agua embotellada o filtrada para tomar. Es segura para bañarte y lavarte los dientes.' },
         { icon: 'moon',      title: 'Llegar tarde',    body: 'Llega a la hora que sea, no hay problema. Solo te pedimos entrar con calma, es un edificio con vecinos.' },
         { icon: 'parking',   title: 'Estacionamiento', body: 'El estacionamiento en la calle es limitado en la zona. Te recomendamos llegar en Uber o Didi en vez de traer coche.' },
       ],
       neighborhoodEyebrow: 'Tu colonia',
-      neighborhoodH2Prefix: 'La vida alrededor de ',
-      neighborhoodLede: 'Todo está a pocos pasos. Esto es lo que te recomendaría si me preguntaras en el desayuno.',
+      neighborhoodH2: 'A pocos pasos de tu puerta',
+      neighborhoodLede: 'Todo está a pocos pasos. Esto es lo que te recomendaríamos si nos preguntaras en el desayuno.',
       openInMapsLabel: 'Ver lista en Maps',
       perfectDayEyebrow: 'Un día perfecto',
       perfectDayH2: 'Si tuviera un solo día aquí',
@@ -353,20 +357,20 @@ export const cdmx: City = {
       beforeH2: 'A calm start to your trip',
       beforeLede: 'The practical basics, so you can stop thinking about logistics the moment you land.',
       arrivalItems: [
-        { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}. We can also offer you private transportation.' },
+        { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}.' },
         { icon: 'car',       title: 'Transportation', body: 'Use Uber or Didi, cheaper and safer than hailing on the street. The Metro is excellent if you\'re comfortable with crowds. We can also offer you private transportation.' },
-        { icon: 'cloudSun',  title: 'Weather',        body: 'July is rainy season, sunny mornings, brief afternoon showers. Pack layers and a light rain jacket.' },
+        { icon: 'cloudSun',  title: 'Weather',        body: 'Mild year-round, 18–25 °C. Rain concentrates June–September, mostly brief afternoon showers. Pack layers.' },
         { icon: 'banknote',  title: 'Money',          body: 'Cards are widely accepted. Keep some pesos in cash for markets, tips, and street food. In restaurants, 10–15% is the recommended tip; round up for taxis and casual spots.' },
         { icon: 'wifi',      title: 'Connectivity',   body: 'An eSIM activates in minutes. ', link: { text: 'Get yours through Airalo here', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. Wi-Fi is reliable at the property and most cafés.' } },
-        { icon: 'shield',    title: 'Safety',         body: 'Standard city awareness applies, stick to rideshare apps at night and keep valuables out of sight.' },
-        { icon: 'briefcase', title: 'Packing',        body: 'Comfortable walking shoes, one nice outfit for dinner, and a light layer for cooler evenings.' },
+        { icon: 'shield',    title: 'Safety',         body: 'Standard city awareness applies, stick to rideshare apps at night and keep valuables out of sight. In an emergency, 911 works citywide.' },
+        { icon: 'briefcase', title: 'Packing',        body: 'Comfortable walking shoes, casual clothes, and a light layer for cooler evenings.' },
         { icon: 'droplet',   title: 'Tap water',      body: 'We recommend bottled or filtered water for drinking. It\'s safe for showering and brushing your teeth.' },
         { icon: 'moon',      title: 'Coming back late', body: 'Arrive whenever you like, no need to worry. Just come in quietly, it\'s a building with neighbors.' },
         { icon: 'parking',   title: 'Parking',        body: 'Street parking is limited in the area. We recommend arriving by Uber or Didi instead of bringing a car.' },
       ],
       neighborhoodEyebrow: 'Your neighborhood',
-      neighborhoodH2Prefix: 'Life around ',
-      neighborhoodLede: 'Everything\'s within a short walk. Here\'s what I\'d point you to if you asked me at breakfast.',
+      neighborhoodH2: 'A short walk from your door',
+      neighborhoodLede: 'Everything\'s within a short walk. Here\'s what we\'d point you to if you asked us at breakfast.',
       openInMapsLabel: 'Open list in Maps',
       perfectDayEyebrow: 'A perfect day',
       perfectDayH2: 'If I had one day here',
@@ -441,7 +445,7 @@ export const cdmx: City = {
       continueH2: 'Ready to explore beyond your stay?',
       continueLede: 'Build a personalized itinerary, hotels, days, and a budget, in less than a minute.',
       continueCta: 'Plan my next trip →',
-      stickyCta: 'Plan my trip in 60 seconds',
+      stickyCta: 'Personalize my trip in 60 seconds',
       discoverEyebrow: 'Discover more',
       discoverH2: 'Lagomplan goes further than this city',
       footer: 'lagomplan · guest stay experience',

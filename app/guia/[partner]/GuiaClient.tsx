@@ -246,12 +246,12 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       <section className={`${styles.section} ${styles.sectionAlt}`}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
-            <SectionHead
-              eyebrow={t.neighborhoodEyebrow}
-              title={`${t.neighborhoodH2Prefix}${browseNb}`}
-              lede={t.neighborhoodLede}
-              eyebrowColor="var(--pine)"
-            />
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
+              <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
+              <p className={styles.nbTagline}>{browseNbData.tagline[lang]}</p>
+              <p className={styles.lede}>{t.neighborhoodLede}</p>
+            </div>
             <div className={styles.secBody}>
               <div className={styles.nbControls}>
                 <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
