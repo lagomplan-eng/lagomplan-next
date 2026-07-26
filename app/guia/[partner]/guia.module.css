@@ -271,6 +271,13 @@
 
 /* ── Today ──────────────────────────────────────────────── */
 .weatherCard { display: flex; gap: 16px; align-items: center; background: var(--pine); border-radius: var(--radius-xl); padding: 22px; margin: 24px 0 28px; color: var(--cream); }
+/* Loading skeleton — reserves the card's footprint so nothing shifts. */
+.wxIconSkeleton { width: 30px; height: 30px; border-radius: 8px; background: rgba(255, 249, 243, .18); flex: none; }
+.wxBar { height: 14px; border-radius: 6px; background: rgba(255, 249, 243, .22); }
+@media (prefers-reduced-motion: no-preference) {
+  .wxLoading .wxIconSkeleton, .wxLoading .wxBar { animation: wxPulse 1.2s ease-in-out infinite; }
+}
+@keyframes wxPulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 .weatherTemp { font-family: var(--font-mono), monospace; font-size: 20px; }
 .weatherBody { font-size: 13px; opacity: .85; }
 .todayRow { display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid rgba(107, 143, 134, .2); }

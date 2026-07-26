@@ -33,6 +33,7 @@ import {
 import { gaTrack } from '../../../lib/analytics/ga'
 import { getRoute } from '../../../lib/routes'
 import type { City, IconKey, Lang, Partner } from '../../../content/guia/types'
+import WeatherCard from './WeatherCard'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -362,13 +363,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
             <div className={styles.secBody}>
-              <div className={styles.weatherCard}>
-                <Icon name="cloudRain" size={30} color={CREAM} />
-                <div>
-                  <div className={styles.weatherTemp}>{t.weatherTemp}</div>
-                  <div className={styles.weatherBody}>{t.weatherBody}</div>
-                </div>
-              </div>
+              <WeatherCard lang={lang} />
               <div className={styles.spotList}>
                 {t.todayItems.map((ti, i) => (
                   <div className={styles.todayRow} key={i}>
