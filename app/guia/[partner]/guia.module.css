@@ -253,13 +253,14 @@
 .itinNote { font-style: italic; font-size: 14px; line-height: 1.6; color: rgba(255, 249, 243, .6); margin: 22px 0 0; max-width: 340px; }
 .itinMapsBtn {
   display: block; width: 100%; margin-top: 48px;
-  text-align: center; padding: 16px 24px; border-radius: 10px;
-  border: 1px solid rgba(255, 249, 243, .35); color: var(--cream);
-  font-size: 14px; font-weight: 600; letter-spacing: .01em;
-  transition: background .15s, border-color .15s;
+  text-align: center; padding: 17px 24px; border-radius: 10px;
+  background: var(--cream); color: var(--pine); border: none;
+  font-size: 14px; font-weight: 700; letter-spacing: .01em;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+  transition: background .15s, transform .1s;
 }
-.itinMapsBtn:hover { background: rgba(255, 249, 243, .08); border-color: rgba(255, 249, 243, .6); }
-@media (prefers-reduced-motion: reduce) { .itinMapsBtn { transition: none; } }
+.itinMapsBtn:hover { background: #fff; transform: translateY(-1px); }
+@media (prefers-reduced-motion: reduce) { .itinMapsBtn { transition: none; } .itinMapsBtn:hover { transform: none; } }
 
 /* ── Explore by mood ────────────────────────────────────── */
 .moodGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
