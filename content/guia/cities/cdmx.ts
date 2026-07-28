@@ -14,7 +14,7 @@ export const cdmx: City = {
   neighborhoods: {
     'Roma Norte': {
       name: 'Roma Norte',
-      mapUrl: 'https://maps.app.goo.gl/z5pFn386HRtDw1z76',
+      mapUrl: 'https://maps.app.goo.gl/NM3HZoTVpWPuNagb9',
       tagline: { es: 'Café de especialidad, galerías pequeñas, vida de banqueta.', en: 'Specialty coffee, small galleries, sidewalk life.' },
       spots: {
         es: [
