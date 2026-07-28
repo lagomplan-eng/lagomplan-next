@@ -34,6 +34,7 @@ import { gaTrack } from '../../../lib/analytics/ga'
 import { getRoute } from '../../../lib/routes'
 import type { City, IconKey, Lang, Partner } from '../../../content/guia/types'
 import WeatherCard from './WeatherCard'
+import NewsletterSignup from './NewsletterSignup'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -313,6 +314,15 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
               </div>
             ))}
           </div>
+          <a
+            className={styles.itinMapsBtn}
+            href={itin.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => gaTrack('host_guide_map_click', { partner: partner.slug, city: city.id })}
+          >
+            {itin.mapsCta}
+          </a>
         </div>
       </section>
 
@@ -461,6 +471,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
             {t.continueCta}
           </a>
+          <div className={styles.nlRule} />
+          <NewsletterSignup
+            lang={lang}
+            copy={{
+              title: t.newsletterTitle,
+              body: t.newsletterBody,
+              placeholder: t.newsletterPlaceholder,
+              cta: t.newsletterCta,
+              finePrint: t.newsletterFinePrint,
+            }}
+          />
         </div>
       </section>
 

@@ -139,6 +139,12 @@ export interface CityCopy {
   continueCta: string
   /** Label for the fixed/sticky planner button. */
   stickyCta: string
+  /** "El Itinerario" newsletter capture (in the dark band). */
+  newsletterTitle: string
+  newsletterBody: string
+  newsletterPlaceholder: string
+  newsletterCta: string
+  newsletterFinePrint: string
   discoverEyebrow: string
   discoverH2: string
   footer: string
@@ -169,6 +175,9 @@ export interface Itinerary {
   title: string
   lede: string
   days: ItineraryDay[]
+  /** Full-width "open the whole route in Google Maps" button. */
+  mapsCta: string
+  mapsUrl: string
 }
 
 export interface City {

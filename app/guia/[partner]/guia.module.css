@@ -251,6 +251,15 @@
 .itinTime { flex: none; width: 52px; color: var(--coral); }
 .itinText { font-size: 14px; line-height: 1.6; color: rgba(255, 249, 243, .9); margin: 0; }
 .itinNote { font-style: italic; font-size: 14px; line-height: 1.6; color: rgba(255, 249, 243, .6); margin: 22px 0 0; max-width: 340px; }
+.itinMapsBtn {
+  display: block; width: 100%; margin-top: 48px;
+  text-align: center; padding: 16px 24px; border-radius: 10px;
+  border: 1px solid rgba(255, 249, 243, .35); color: var(--cream);
+  font-size: 14px; font-weight: 600; letter-spacing: .01em;
+  transition: background .15s, border-color .15s;
+}
+.itinMapsBtn:hover { background: rgba(255, 249, 243, .08); border-color: rgba(255, 249, 243, .6); }
+@media (prefers-reduced-motion: reduce) { .itinMapsBtn { transition: none; } }
 
 /* ── Explore by mood ────────────────────────────────────── */
 .moodGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
@@ -311,6 +320,36 @@
 .continueH2 { font-family: var(--font-display), 'Fraunces', Georgia, serif; font-style: italic; font-weight: 600; font-size: clamp(1.75rem, 5vw, 2.625rem); color: var(--cream); margin: 16px 0; }
 .continueLede { color: rgba(255, 249, 243, .8); max-width: 420px; margin: 0 auto 32px; font-size: 15px; line-height: 1.6; }
 .ctaPlanner { display: inline-flex; background: var(--cream); color: var(--pine); padding: 14px 28px; border-radius: 8px; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+
+/* ── El Itinerario newsletter (in the Pine band) ────────── */
+.nlRule { width: 100%; max-width: 420px; height: 1px; background: rgba(255, 249, 243, .18); margin: 52px auto 44px; }
+.nlWrap { max-width: 460px; margin: 0 auto; text-align: center; }
+.nlTitle {
+  font-family: var(--font-sans), 'Manrope', system-ui, sans-serif;
+  font-weight: 700; letter-spacing: -.01em;
+  font-size: clamp(1.4rem, 3vw, 1.9rem);
+  color: var(--cream); margin: 0 0 12px;
+}
+.nlBody { font-size: 15px; line-height: 1.7; color: rgba(255, 249, 243, .78); max-width: 420px; margin: 0 auto 24px; text-wrap: pretty; }
+.nlForm { display: flex; flex-wrap: wrap; gap: 10px; max-width: 420px; margin: 0 auto; }
+.nlInput {
+  flex: 1; min-width: 0; padding: 13px 16px; border-radius: 8px;
+  border: 1px solid rgba(255, 249, 243, .28); background: rgba(255, 249, 243, .08);
+  color: var(--cream); font-size: 14px; font-family: var(--font-sans), sans-serif;
+}
+.nlInput::placeholder { color: rgba(255, 249, 243, .5); }
+.nlInput:focus-visible { outline: 2px solid var(--cream); outline-offset: 1px; }
+.nlBtn {
+  flex: none; background: var(--cream); color: var(--pine); border: none;
+  padding: 13px 24px; border-radius: 8px; font-size: 14px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-sans), sans-serif; transition: background .15s;
+}
+.nlBtn:hover { background: #fff; }
+.nlBtn:disabled { opacity: .6; cursor: default; }
+.nlDone { font-size: 15px; color: var(--cream); margin: 4px 0 0; }
+.nlError { font-size: 13px; color: #ffb4ae; margin: 10px 0 0; }
+.nlFine { font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .04em; color: rgba(255, 249, 243, .5); margin: 16px 0 0; }
+@media (prefers-reduced-motion: reduce) { .nlBtn { transition: none; } }
 
 /* ── Discover more ──────────────────────────────────────── */
 .discoverGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 8px; }
