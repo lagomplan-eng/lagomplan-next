@@ -325,7 +325,9 @@
 .expBookIcon { flex-shrink: 0; }
 
 /* ── Food ───────────────────────────────────────────────── */
-.foodGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }
+.foodGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+@media (max-width: 768px) { .foodGrid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 480px) { .foodGrid { grid-template-columns: 1fr; } }
 .foodCard { border: 1px solid rgba(107, 143, 134, .22); border-radius: var(--radius-xl); padding: 18px; background: var(--paper); }
 .foodName { margin: 8px 0 4px; }
 .foodNote { font-size: 12px; color: var(--sage); line-height: 1.6; margin: 0; }
