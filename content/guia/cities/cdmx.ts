@@ -65,7 +65,7 @@ export const cdmx: City = {
 
     'Polanco': {
       name: 'Polanco',
-      mapUrl: MAPS('Polanco+Ciudad+de+Mexico'),
+      mapUrl: 'https://maps.app.goo.gl/qaxoaZk1VEpjLrSt5',
       tagline: { es: 'Museos y el bosque urbano más grande de América Latina.', en: 'Museums, Latin America\'s largest urban forest.' },
       spots: {
         es: [
