@@ -199,7 +199,7 @@ export const cdmx: City = {
           items: [
             { time: '09:00', text: 'Zócalo antes de que llegue el calor.' },
             { time: '10:30', text: 'Templo Mayor, Bellas Artes y alrededores a pie.' },
-            { time: '13:00', text: 'Churros de El Moro, cerca de Eje Central.' },
+            { time: '13:00', text: 'Comida en Azul Histórico, patio colonial en el Centro.' },
             { time: '16:00', text: 'Bosque de Chapultepec y Museo Soumaya.' },
             { time: '20:00', text: 'Cena en Máximo Bistrot o Expendio de Maíz si quieres que te sorprendan.' },
           ],
@@ -229,7 +229,7 @@ export const cdmx: City = {
           items: [
             { time: '09:00', text: 'The Zócalo before the heat arrives.' },
             { time: '10:30', text: 'Templo Mayor, Bellas Artes, and the surroundings on foot.' },
-            { time: '13:00', text: 'Churros at El Moro, near Eje Central.' },
+            { time: '13:00', text: 'Lunch at Azul Histórico, a colonial courtyard in the Centro.' },
             { time: '16:00', text: 'Bosque de Chapultepec and Museo Soumaya.' },
             { time: '20:00', text: 'Dinner at Máximo Bistrot or Expendio de Maíz if you want to be surprised.' },
           ],
