@@ -6,9 +6,6 @@
 
 import type { City } from '../types'
 
-const MAPS = (query: string) =>
-  `https://www.google.com/maps/search/?api=1&query=${query}`
-
 export const cdmx: City = {
   id: 'cdmx',
   heroImage: '/images/guia/cdmx-banner.jpg',
@@ -89,7 +86,7 @@ export const cdmx: City = {
 
     'Centro': {
       name: 'Centro',
-      mapUrl: MAPS('Centro+Historico+Ciudad+de+Mexico'),
+      mapUrl: 'https://maps.app.goo.gl/aEfVCGLidNo97kKu5',
       tagline: { es: 'Capas de historia, mercados, la ciudad más densa.', en: 'Layers of history, markets, the densest city.' },
       spots: {
         es: [
