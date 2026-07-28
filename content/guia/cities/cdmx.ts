@@ -206,7 +206,7 @@ export const cdmx: City = {
         },
       ],
       mapsCta: 'Abre las 48 horas en Google Maps →',
-      mapsUrl: 'https://www.google.com/maps/@19.4104281,-99.1659553,16z',
+      mapsUrl: 'https://maps.app.goo.gl/DKdbomh1dSeDQoND6',
     },
     en: {
       eyebrow: 'Itinerary',
@@ -236,7 +236,7 @@ export const cdmx: City = {
         },
       ],
       mapsCta: 'Open the 48 hours in Google Maps →',
-      mapsUrl: 'https://www.google.com/maps/@19.4104281,-99.1659553,16z',
+      mapsUrl: 'https://maps.app.goo.gl/DKdbomh1dSeDQoND6',
     },
   },
 
