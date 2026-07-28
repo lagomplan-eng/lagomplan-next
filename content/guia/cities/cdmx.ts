@@ -62,7 +62,7 @@ export const cdmx: City = {
 
     'Polanco': {
       name: 'Polanco',
-      mapUrl: 'https://maps.app.goo.gl/qaxoaZk1VEpjLrSt5',
+      mapUrl: 'https://maps.app.goo.gl/5Dd2SJVxMeHhGrgm6',
       tagline: { es: 'Museos y el bosque urbano más grande de América Latina.', en: 'Museums, Latin America\'s largest urban forest.' },
       spots: {
         es: [
@@ -86,7 +86,7 @@ export const cdmx: City = {
 
     'Centro': {
       name: 'Centro',
-      mapUrl: 'https://maps.app.goo.gl/aEfVCGLidNo97kKu5',
+      mapUrl: 'https://maps.app.goo.gl/6GhN852dkHL2xBxP8',
       tagline: { es: 'Capas de historia, mercados, la ciudad más densa.', en: 'Layers of history, markets, the densest city.' },
       spots: {
         es: [
