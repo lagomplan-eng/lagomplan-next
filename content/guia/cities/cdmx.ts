@@ -327,7 +327,7 @@ export const cdmx: City = {
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',        body: 'Hora y media, dentro de uno de los edificios más hermosos de la ciudad.' },
       ],
       foodEyebrow: 'Comida',
-      foodH2: 'Editorial, no interminable',
+      foodH2: 'Los imperdibles',
       foodLede: 'Una recomendación por antojo.',
       foodCollections: [
         { tag: 'Desayuno',      name: 'Panadería Rosetta',    note: 'Llega antes de que se acaben los panes de guayaba.' },
@@ -444,7 +444,7 @@ export const cdmx: City = {
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',      body: 'An hour and a half, inside one of the city\'s most beautiful buildings.' },
       ],
       foodEyebrow: 'Food',
-      foodH2: 'Editorial, not endless',
+      foodH2: 'The must-sees',
       foodLede: 'One pick per craving.',
       foodCollections: [
         { tag: 'Breakfast',   name: 'Panadería Rosetta',    note: 'Get there before the guava rolls sell out.' },
