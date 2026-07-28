@@ -41,7 +41,7 @@ export const cdmx: City = {
 
     'Condesa': {
       name: 'Condesa',
-      mapUrl: MAPS('Condesa+Ciudad+de+Mexico'),
+      mapUrl: 'https://maps.app.goo.gl/B8UA8SMys7ZPKSb17',
       tagline: { es: 'Art déco, parques circulares, mezcalerías de barrio.', en: 'Art deco, circular parks, neighborhood mezcal bars.' },
       spots: {
         es: [
