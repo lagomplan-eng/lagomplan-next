@@ -112,6 +112,9 @@ export interface CityCopy {
   neighborhoodH2: string         // fixed heading, e.g. "A short walk from your door"
   neighborhoodLede: string
   openInMapsLabel: string
+  /** Maps card in the neighborhood header. {n} = place count. */
+  mapCardPrimary: string
+  mapCardSecondary: string
   perfectDayEyebrow: string
   perfectDayH2: string
   perfectDayLede: string

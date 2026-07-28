@@ -267,8 +267,23 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                     >{name}</button>
                   ))}
                 </div>
-                <a className={styles.mapsLink} href={browseNbData.mapUrl} target="_blank" rel="noopener noreferrer">
-                  {t.openInMapsLabel} →
+                <a
+                  className={styles.nbMapCard}
+                  href={browseNbData.mapUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => gaTrack('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                >
+                  <span className={styles.nbMapThumb} aria-hidden>
+                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
+                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
+                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
+                  </span>
+                  <span className={styles.nbMapText}>
+                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
+                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNb}</span>
+                  </span>
+                  <span className={styles.nbMapArrow} aria-hidden>→</span>
                 </a>
               </div>
               <div className={styles.spotList}>
