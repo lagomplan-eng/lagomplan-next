@@ -42,12 +42,6 @@ export interface Spot {
   note: string
 }
 
-export interface Moment {
-  time: string
-  title: string
-  body: string
-}
-
 export interface Neighborhood {
   /** Display name and chip label, e.g. "Roma Norte". */
   name: string
@@ -56,7 +50,6 @@ export interface Neighborhood {
   /** One-line zone descriptor, shown under the heading (switches per tab). */
   tagline: Record<Lang, string>
   spots: Record<Lang, Spot[]>
-  perfectDay: Record<Lang, Moment[]>
 }
 
 export interface MoodItem {
@@ -115,9 +108,6 @@ export interface CityCopy {
   /** Maps card in the neighborhood header. {n} = place count. */
   mapCardPrimary: string
   mapCardSecondary: string
-  perfectDayEyebrow: string
-  perfectDayH2: string
-  perfectDayLede: string
   moodEyebrow: string
   moodH2: string
   moodLede: string

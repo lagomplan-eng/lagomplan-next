@@ -37,24 +37,6 @@ export const cdmx: City = {
           { icon: 'martini',    name: 'Licorería Limantour',               distance: 'Álvaro Obregón 106', note: 'World\'s-best-list cocktails; weekdays before 8 there\'s no line.' },
         ],
       },
-      perfectDay: {
-        es: [
-          { time: '8:00',  title: 'Café en Avellaneda',                 body: 'Pídelo para llevar; la banca bajo el jacarandá de la esquina es la mejor mesa.' },
-          { time: '8:30',  title: 'Una vuelta por Parque México',       body: 'El anfiteatro está vacío antes de las nueve, el mejor momento del día.' },
-          { time: '13:00', title: 'Comida en Contramar',                body: 'El atún tostada y el pescado a la talla, en ese orden. Llega antes de la 1:30pm.' },
-          { time: '16:00', title: 'Museo Tamayo',                       body: 'Colección compacta, se recorre entera en una hora sin cansarse.' },
-          { time: '19:00', title: 'Coctel en Licorería Limantour',      body: 'El Smoking No. 5 es el que piden los que ya conocen la carta.' },
-          { time: '21:00', title: 'Cena en Rosetta',                    body: 'Reserva con dos semanas de anticipación; el pan de elote se acaba temprano.' },
-        ],
-        en: [
-          { time: '8:00',  title: 'Coffee at Café Avellaneda',          body: 'Get it to go; the bench under the corner jacaranda is the best table.' },
-          { time: '8:30',  title: 'A loop through Parque México',       body: 'The amphitheater sits empty before nine, the best hour the park has.' },
-          { time: '13:00', title: 'Lunch at Contramar',                 body: 'Tuna tostada first, pescado a la talla second. Arrive before 1:30pm.' },
-          { time: '16:00', title: 'Museo Tamayo',                       body: 'A compact collection, walkable start to finish in an hour without tiring.' },
-          { time: '19:00', title: 'Cocktail at Licorería Limantour',    body: 'Order the Smoking No. 5, it\'s what the regulars ask for.' },
-          { time: '21:00', title: 'Dinner at Rosetta',                  body: 'Book two weeks out; the corn bread sells out early.' },
-        ],
-      },
     },
 
     'Condesa': {
@@ -77,24 +59,6 @@ export const cdmx: City = {
           { icon: 'trees',      name: 'Parque México',                                              distance: 'Av. México',                        note: 'The green heart of the neighborhood, amphitheater, nursery, art deco benches.' },
           { icon: 'iceCream',   name: 'Helados Myka',                                               distance: 'Ámsterdam 264',                     note: 'Greek frozen yogurt whipped to order, toppings included; the dessert your Ámsterdam walk deserves.' },
           { icon: 'landmark',   name: 'Centro Cultural Bella Época / Librería Rosario Castellanos', distance: 'Tamaulipas 202',                    note: 'An art deco cinema turned the country\'s largest single-room bookstore; open daily until 10 pm.' },
-        ],
-      },
-      perfectDay: {
-        es: [
-          { time: '8:00',  title: 'Café y pan en Lardo',                     body: 'Llega temprano, las mesas de la terraza se llenan rápido.' },
-          { time: '8:30',  title: 'Parque España y Parque México',          body: 'Una caminata tranquila entre los dos parques de la colonia.' },
-          { time: '13:00', title: 'Comida en El Parnita',                   body: 'Los tacos de pescado son el platillo por el que vale la pena ir.' },
-          { time: '16:00', title: 'Museo Nacional de Antropología',         body: 'A un paseo corto en Chapultepec, la colección más importante del país.' },
-          { time: '19:00', title: 'Coctel en Baltra Bar',                   body: 'Mezcal y jazz, en un espacio pequeño e íntimo.' },
-          { time: '21:00', title: 'Cena en El Tizoncito',                   body: 'El lugar que se atribuye la invención del taco al pastor.' },
-        ],
-        en: [
-          { time: '8:00',  title: 'Coffee and bread at Lardo',              body: 'Get there early, the terrace tables fill up fast.' },
-          { time: '8:30',  title: 'Parque España and Parque México',        body: 'An easy walk between the neighborhood\'s two parks.' },
-          { time: '13:00', title: 'Lunch at El Parnita',                    body: 'The fish tacos are the dish worth the trip.' },
-          { time: '16:00', title: 'Museo Nacional de Antropología',         body: 'A short ride into Chapultepec, the country\'s most important collection.' },
-          { time: '19:00', title: 'Cocktail at Baltra Bar',                 body: 'Mezcal and jazz, in a small, intimate space.' },
-          { time: '21:00', title: 'Dinner at El Tizoncito',                 body: 'The spot credited with inventing the taco al pastor.' },
         ],
       },
     },
@@ -121,24 +85,6 @@ export const cdmx: City = {
           { icon: 'martini',   name: 'Ticuchi',                distance: 'Petrarca 254', note: 'The Pujol team\'s agave bar, candlelit; Tuesday to Sunday, from 5:30 pm.' },
         ],
       },
-      perfectDay: {
-        es: [
-          { time: '8:00',  title: 'Café en Blend Station',        body: 'Un espacio tranquilo antes de que empiece el ajetreo del día.' },
-          { time: '8:30',  title: 'Vuelta por Parque Lincoln',    body: 'El respiro verde de Polanco, con pavorreales incluidos.' },
-          { time: '13:00', title: 'Comida en Dulce Patria',       body: 'Cocina mexicana contemporánea de Martha Ortiz, reserva con antelación.' },
-          { time: '16:00', title: 'Museo Soumaya',                body: 'Entrada gratuita, una hora fácil, arquitectura que vale la foto.' },
-          { time: '19:00', title: 'Copa cerca de Antara',         body: 'Termina la tarde con una copa y algo de shopping ligero.' },
-          { time: '21:00', title: 'Cena en Pujol',                body: 'Reserva con semanas de anticipación, vale cada una de ellas.' },
-        ],
-        en: [
-          { time: '8:00',  title: 'Coffee at Blend Station',      body: 'A calm space before the day picks up pace.' },
-          { time: '8:30',  title: 'A loop through Parque Lincoln', body: 'Polanco\'s green breather, peacocks included.' },
-          { time: '13:00', title: 'Lunch at Dulce Patria',        body: 'Martha Ortiz\'s contemporary Mexican cooking, book ahead.' },
-          { time: '16:00', title: 'Museo Soumaya',                body: 'Free entry, an easy hour, architecture worth the photo.' },
-          { time: '19:00', title: 'A drink near Antara',          body: 'Close out the afternoon with a drink and some light shopping.' },
-          { time: '21:00', title: 'Dinner at Pujol',              body: 'Book weeks ahead, it\'s worth every one of them.' },
-        ],
-      },
     },
 
     'Centro': {
@@ -163,9 +109,6 @@ export const cdmx: City = {
           { icon: 'basket',     name: 'La Ciudadela, Mercado de Artesanías', distance: 'Plaza de la Ciudadela, Balderas', note: 'Crafts from every state under one roof; haggle politely and bring cash.' },
         ],
       },
-      // Source has no perfect-day for Centro; only the home colonia's perfect
-      // day is ever rendered, so this stays empty.
-      perfectDay: { es: [], en: [] },
     },
   },
 
@@ -268,9 +211,6 @@ export const cdmx: City = {
       openInMapsLabel: 'Ver lista en Maps',
       mapCardPrimary: 'Ver los {n} lugares en el mapa',
       mapCardSecondary: 'Lista de Google Maps',
-      perfectDayEyebrow: 'Un día perfecto',
-      perfectDayH2: 'Si tuviera un solo día aquí',
-      perfectDayLede: 'Esto es exactamente lo que haría, de principio a fin.',
       moodEyebrow: 'Explora según tu ánimo',
       moodH2: '¿Qué se te antoja hoy?',
       moodLede: 'Elige un ánimo, no una categoría.',
@@ -387,9 +327,6 @@ export const cdmx: City = {
       openInMapsLabel: 'Open list in Maps',
       mapCardPrimary: 'See all {n} places on the map',
       mapCardSecondary: 'Google Maps list',
-      perfectDayEyebrow: 'A perfect day',
-      perfectDayH2: 'If I had one day here',
-      perfectDayLede: 'This is exactly what I\'d do, start to finish.',
       moodEyebrow: 'Explore by mood',
       moodH2: 'What are you in the mood for?',
       moodLede: 'Pick a feeling, not a category.',
