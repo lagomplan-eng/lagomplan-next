@@ -296,9 +296,9 @@ export const cdmx: City = {
           { name: 'Bar Federalista',      note: 'Enfocado en mezcal, relajado y sin pretensiones.' },
         ]},
         { id: 'hidden',    icon: 'compass',  label: 'Lugares escondidos',     title: 'Lugares escondidos', items: [
-          { name: 'Mercado de Medellín',  note: 'Un mercado que pocos turistas encuentran, prueba los puestos caribeños.' },
-          { name: 'Jardín Pushkin',       note: 'Un parque diminuto y tranquilo que la mayoría de las guías se saltan.' },
-          { name: 'Café Nin',             note: 'Escondido, fácil de pasar de largo, vale la pena encontrarlo.' },
+          { name: 'Foro Shakespeare',     note: 'Un pequeño teatro-bar independiente en una casa reconvertida; la mayoría pasa de largo.' },
+          { name: 'Bósforo',              note: 'Una mezcalería detrás de una puerta sin letrero; busca las luces de foquitos.' },
+          { name: 'Casa Franca',          note: 'Una casa reconvertida en librería-café; fácil de pasar de largo.' },
         ]},
         { id: 'short',     icon: 'clock',    label: 'Solo tengo unas horas',  title: 'Solo unas horas', items: [
           { name: 'Vuelta por Parque España',        note: '20 minutos, de principio a fin.' },
@@ -320,10 +320,12 @@ export const cdmx: City = {
       expEyebrow: 'Experiencias',
       expH2: 'Vale la pena el tiempo',
       expLede: 'Una lista corta, a propósito.',
+      expPartnerNote: 'Reservadas a través de Insider, nuestro partner local.',
+      expBookCta: 'Reservar por WhatsApp',
       experiences: [
         { id: 'exp-lucha',      title: 'Lucha libre en la Arena México',                    body: 'Ruidoso, inolvidable, e inconfundiblemente de la Ciudad de México.' },
         { id: 'exp-xochimilco', title: 'Xochimilco & Arca Tierra',                          body: 'Canales antiguos, chinampas vivas y un final gastronómico de la chinampa a la mesa.' },
-        { id: 'exp-frida',      title: 'Museo Frida Kahlo, entrada con horario',            body: 'Reserva con al menos dos semanas de anticipación, los boletos se agotan rápido.' },
+        { id: 'exp-frida',      title: 'Coyoacán',                                          body: 'El barrio de Frida Kahlo y el alma bohemia de la Ciudad de México.' },
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',        body: 'Hora y media, dentro de uno de los edificios más hermosos de la ciudad.' },
       ],
       foodEyebrow: 'Comida',
@@ -413,9 +415,9 @@ export const cdmx: City = {
           { name: 'Bar Federalista',      note: 'Mezcal-forward, low-key and unpretentious.' },
         ]},
         { id: 'hidden',    icon: 'compass',  label: 'Hidden places',       title: 'Hidden places', items: [
-          { name: 'Mercado de Medellín',  note: 'A market few tourists find, try the Caribbean stalls.' },
-          { name: 'Jardín Pushkin',       note: 'A tiny, quiet park most guidebooks skip.' },
-          { name: 'Café Nin',             note: 'Tucked away, easy to miss, worth finding.' },
+          { name: 'Foro Shakespeare',     note: 'A small independent theater-bar in a converted house, most guests walk right past it.' },
+          { name: 'Bósforo',              note: 'A mezcal bar behind an unmarked door, look for the string lights.' },
+          { name: 'Casa Franca',          note: 'A converted house turned bookstore-café, easy to walk past.' },
         ]},
         { id: 'short',     icon: 'clock',    label: 'Only a few hours',    title: 'A few hours only', items: [
           { name: 'Parque España loop',              note: '20 minutes, start to finish.' },
@@ -437,10 +439,12 @@ export const cdmx: City = {
       expEyebrow: 'Experiences',
       expH2: 'Worth the time',
       expLede: 'A short list, on purpose.',
+      expPartnerNote: 'Booked through Insider, our local partner.',
+      expBookCta: 'Book via WhatsApp',
       experiences: [
         { id: 'exp-lucha',      title: 'Lucha libre at Arena México',                     body: 'Loud, unforgettable, and unmistakably Mexico City.' },
         { id: 'exp-xochimilco', title: 'Xochimilco & Arca Tierra',                          body: 'Ancient canals, living chinampas and a farm-to-table culinary finale.' },
-        { id: 'exp-frida',      title: 'Museo Frida Kahlo, timed entry',                  body: 'Book at least two weeks ahead, tickets sell out fast.' },
+        { id: 'exp-frida',      title: 'Coyoacán',                                          body: "Frida Kahlo's neighborhood and the bohemian soul of Mexico City." },
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',      body: 'An hour and a half, inside one of the city\'s most beautiful buildings.' },
       ],
       foodEyebrow: 'Food',

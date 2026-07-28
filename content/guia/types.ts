@@ -131,6 +131,10 @@ export interface CityCopy {
   expEyebrow: string
   expH2: string
   expLede: string
+  /** Small sage line under the lede: booking handled by the local partner. */
+  expPartnerNote: string
+  /** Per-card inline WhatsApp booking link label. */
+  expBookCta: string
   experiences: Experience[]
   foodEyebrow: string
   foodH2: string

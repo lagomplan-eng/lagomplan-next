@@ -319,6 +319,10 @@
 .expThumb { width: 100%; height: 150px; background: var(--sand); display: flex; align-items: center; justify-content: center; color: var(--sage); font-size: 12px; text-align: center; padding: 0 16px; }
 .expBody { padding: 18px; }
 .expNote { font-size: 13px; color: var(--sage); line-height: 1.7; margin: 6px 0 0; }
+.expPartnerNote { font-size: 13px; color: var(--sage); margin: 0; }
+.expBookLink { display: inline-flex; align-items: center; gap: 6px; margin-top: 12px; font-size: 12.5px; font-weight: 600; color: var(--fjord); text-decoration: none; }
+.expBookLink:hover { text-decoration: underline; }
+.expBookIcon { flex-shrink: 0; }
 
 /* ── Food ───────────────────────────────────────────────── */
 .foodGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; }

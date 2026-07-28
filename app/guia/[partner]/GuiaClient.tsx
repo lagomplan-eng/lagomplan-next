@@ -66,6 +66,10 @@ function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; 
 const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
+/** WhatsApp booking link for experiences (routed through the local partner). */
+const WA_BOOK_URL =
+  "https://wa.me/525539149062?text=Hello!%20I'm%20interested%20in%20booking%20an%20Insider%20Mexico%20City%20experience."
+
 /** Experience card images, keyed by the experience id. */
 const EXP_PHOTOS: Record<string, string> = {
   'exp-lucha':      '/images/guia/experiences/exp-lucha.jpg',
@@ -409,7 +413,12 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.expEyebrow} title={t.expH2} lede={t.expLede} />
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow}>{t.expEyebrow}</span>
+              <h2 className={styles.h2}>{t.expH2}</h2>
+              <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
+              <p className={styles.expPartnerNote}>{t.expPartnerNote}</p>
+            </div>
             <div className={styles.secBody}>
               <div className={styles.expGrid}>
                 {t.experiences.map((exp) => (
@@ -423,6 +432,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                     <div className={styles.expBody}>
                       <h5 className={styles.h5}>{exp.title}</h5>
                       <p className={styles.expNote}>{exp.body}</p>
+                      <a
+                        className={styles.expBookLink}
+                        href={WA_BOOK_URL}
+                        target="_blank"
+                        rel="noopener"
+                      >
+                        <svg className={styles.expBookIcon} viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
+                          <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.004c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2Zm0 18.15h-.003a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.11.82.83-3.03-.2-.31a8.19 8.19 0 0 1-1.26-4.39c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.69 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43-.14 0-.31-.01-.48-.01-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.48-.29Z"/>
+                        </svg>
+                        {t.expBookCta}
+                      </a>
                     </div>
                   </div>
                 ))}
