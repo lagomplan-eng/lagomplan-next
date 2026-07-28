@@ -274,9 +274,9 @@ export const cdmx: City = {
       moodLede: 'Elige un ánimo, no una categoría.',
       moods: [
         { id: 'hungry',    icon: 'utensils', label: 'Tengo hambre',          title: 'Para cuando tienes hambre', items: [
-          { name: 'Contramar',           note: 'Mariscos, sin reservación para la comida.' },
-          { name: 'Panadería Rosetta',   note: 'Panes que valen madrugar.' },
           { name: 'Lalo!',               note: 'Desayuno y comida casuales, con producto de mercado.' },
+          { name: 'Masala y Maíz',       note: 'Cruce de México, India y África Oriental; reserva con antelación.' },
+          { name: 'Taquería Orinoco',    note: 'Tacos norteños hasta la madrugada; el trompo y el chicharrón, sin falta.' },
         ]},
         { id: 'culture',   icon: 'landmark', label: 'Quiero cultura',         title: 'Para la cultura', items: [
           { name: 'Museo Tamayo',        note: 'Arte contemporáneo, una hora fácil.' },
@@ -389,9 +389,9 @@ export const cdmx: City = {
       moodLede: 'Pick a feeling, not a category.',
       moods: [
         { id: 'hungry',    icon: 'utensils', label: "I'm hungry",          title: 'For when you\'re hungry', items: [
-          { name: 'Contramar',           note: 'Seafood, no reservation needed for lunch.' },
-          { name: 'Panadería Rosetta',   note: 'Pastries worth setting an alarm for.' },
           { name: 'Lalo!',               note: 'Casual, market-driven breakfast and lunch.' },
+          { name: 'Masala y Maíz',       note: 'Mexico meets India and East Africa; book ahead.' },
+          { name: 'Taquería Orinoco',    note: 'Norteño-style tacos into the early hours; go for the trompo and chicharrón.' },
         ]},
         { id: 'culture',   icon: 'landmark', label: 'I want culture',      title: 'For culture', items: [
           { name: 'Museo Tamayo',        note: 'Contemporary art, an easy hour.' },
