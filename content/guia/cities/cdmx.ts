@@ -322,7 +322,7 @@ export const cdmx: City = {
       expLede: 'Una lista corta, a propósito.',
       experiences: [
         { id: 'exp-lucha',      title: 'Lucha libre en la Arena México',                    body: 'Ruidoso, inolvidable, e inconfundiblemente de la Ciudad de México.' },
-        { id: 'exp-xochimilco', title: 'Tarde en trajinera, Xochimilco',                    body: 'Un paseo lento por los canales, ve entre semana para evitar las multitudes.' },
+        { id: 'exp-xochimilco', title: 'Xochimilco & Arca Tierra',                          body: 'Canales antiguos, chinampas vivas y un final gastronómico de la chinampa a la mesa.' },
         { id: 'exp-frida',      title: 'Museo Frida Kahlo, entrada con horario',            body: 'Reserva con al menos dos semanas de anticipación, los boletos se agotan rápido.' },
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',        body: 'Hora y media, dentro de uno de los edificios más hermosos de la ciudad.' },
       ],
@@ -439,7 +439,7 @@ export const cdmx: City = {
       expLede: 'A short list, on purpose.',
       experiences: [
         { id: 'exp-lucha',      title: 'Lucha libre at Arena México',                     body: 'Loud, unforgettable, and unmistakably Mexico City.' },
-        { id: 'exp-xochimilco', title: 'Afternoon on a trajinera, Xochimilco',            body: 'A slow boat ride through the canals, go on a weekday to skip the crowds.' },
+        { id: 'exp-xochimilco', title: 'Xochimilco & Arca Tierra',                          body: 'Ancient canals, living chinampas and a farm-to-table culinary finale.' },
         { id: 'exp-frida',      title: 'Museo Frida Kahlo, timed entry',                  body: 'Book at least two weeks ahead, tickets sell out fast.' },
         { id: 'exp-ballet',     title: 'Ballet Folklórico, Palacio de Bellas Artes',      body: 'An hour and a half, inside one of the city\'s most beautiful buildings.' },
       ],
