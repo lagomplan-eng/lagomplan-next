@@ -79,6 +79,10 @@ export interface Experience {
   teaser: string
   /** One paragraph, or several for cards that need paragraph breaks. */
   description: string | string[]
+  /** Clickable lead-in phrase (e.g. "Contact us via WhatsApp"), linking to howToBookLinkHref. */
+  howToBookLinkText: string
+  howToBookLinkHref: string
+  /** How-to-book copy that follows the linked phrase. */
   howToBook: string
   /** One line, or two for cards with a primary + alternative booking window. */
   minBookingTime: string | string[]

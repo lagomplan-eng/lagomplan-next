@@ -110,7 +110,7 @@
 .h4 { font-size: 16px; font-weight: 700; color: var(--pine); margin: 0 0 6px; }
 .h5 { font-size: 14px; font-weight: 700; color: var(--pine); margin: 0; }
 
-.link { color: var(--fjord); text-decoration: underline; }
+.link { color: var(--coral); text-decoration: underline; }
 .link:hover { color: var(--pine); }
 
 /* ── Hero ───────────────────────────────────────────────── */
@@ -317,16 +317,14 @@
 .expCard { background: var(--paper); border-radius: var(--radius-xl); overflow: hidden; box-shadow: var(--shadow-card); }
 .expImg { width: 100%; height: 170px; object-fit: cover; display: block; }
 .expThumb { width: 100%; height: 150px; background: var(--sand); display: flex; align-items: center; justify-content: center; color: var(--sage); font-size: 12px; text-align: center; padding: 0 16px; }
-.expIconThumb { width: 100%; height: 150px; background: var(--sand); display: flex; align-items: center; justify-content: center; }
-.expIconChip { width: 56px; height: 56px; border-radius: 16px; background: var(--pine); display: flex; align-items: center; justify-content: center; }
 .expBody { padding: 18px; }
 .expNote { font-size: 13px; color: var(--sage); line-height: 1.7; margin: 6px 0 0; }
 .expPartnerNote { font-size: 13px; color: var(--sage); margin: 0; }
-.expActions { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
-.expBookLink { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--coral); text-decoration: none; }
+.expActions { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-top: 12px; }
+.expBookLink { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 600; color: var(--coral); text-decoration: none; white-space: nowrap; }
 .expBookLink:hover { text-decoration: underline; }
 .expBookIcon { flex-shrink: 0; }
-.expDetailsToggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--sage); background: none; border: none; padding: 0; cursor: pointer; font-family: var(--font-sans), sans-serif; }
+.expDetailsToggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--sage); background: none; border: none; padding: 0; cursor: pointer; font-family: var(--font-sans), sans-serif; white-space: nowrap; }
 .expDetailsChevron { display: inline-block; font-size: 10px; transition: transform .2s ease; }
 .expDetailsPanel { overflow: hidden; transition: max-height .4s ease, opacity .3s; }
 .expDetailsInner { padding-top: 14px; margin-top: 14px; border-top: 1px solid rgba(107, 143, 134, .2); }

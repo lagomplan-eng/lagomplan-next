@@ -74,10 +74,10 @@ const WA_BOOK_URL =
 
 /** Experience card images, keyed by the experience id. */
 const EXP_PHOTOS: Record<string, string> = {
+  'exp-teotihuacan': '/images/guia/experiences/exp-teotihuacan.jpg',
   'exp-lucha': '/images/guia/experiences/exp-lucha.jpg',
   'exp-frida': '/images/guia/experiences/exp-frida.jpg',
-  // TODO: exp-teotihuacan needs a sourced photo — falls back to the text
-  // placeholder (.expThumb) until one is added here.
+  'exp-own-plan': '/images/guia/experiences/exp-own-plan.jpg',
 }
 
 /** Experience card: teaser + WhatsApp link on the face, full copy behind a
@@ -89,11 +89,7 @@ function ExperienceCard({ exp, t }: { exp: Experience; t: CityCopy }) {
 
   return (
     <div className={styles.expCard}>
-      {exp.id === 'exp-own-plan' ? (
-        <div className={styles.expIconThumb}>
-          <div className={styles.expIconChip}><Compass size={22} color={CREAM} strokeWidth={1.8} aria-hidden /></div>
-        </div>
-      ) : EXP_PHOTOS[exp.id] ? (
+      {EXP_PHOTOS[exp.id] ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img className={styles.expImg} src={EXP_PHOTOS[exp.id]} alt={exp.title} />
       ) : (
@@ -131,7 +127,10 @@ function ExperienceCard({ exp, t }: { exp: Experience; t: CityCopy }) {
             <p className={styles.expDetailLabel}>{t.expDescriptionLabel}</p>
             {descriptions.map((d, i) => <p className={styles.expDetailText} key={i}>{d}</p>)}
             <p className={styles.expDetailLabel}>{t.expHowToBookLabel}</p>
-            <p className={styles.expDetailText}>{exp.howToBook}</p>
+            <p className={styles.expDetailText}>
+              <a className={styles.link} href={exp.howToBookLinkHref} target="_blank" rel="noopener noreferrer">{exp.howToBookLinkText}</a>
+              {exp.howToBook}
+            </p>
             <p className={styles.expDetailLabel}>{t.expMinTimeLabel}</p>
             {minTimes.map((mt, i) => <p className={styles.expDetailText} key={i}>{mt}</p>)}
             {exp.needSoonerNote && <p className={styles.expDetailNote}>{exp.needSoonerNote}</p>}

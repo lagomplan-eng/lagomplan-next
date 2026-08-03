@@ -33,8 +33,8 @@ export function categorize(weatherCode: number, precipProbability: number): WxCa
 export const WX_COPY: Record<WxCategory, Record<Lang, string>> = {
   clear:  { es: 'Despejado todo el día.',                                en: 'Clear all day.' },
   partly: { es: 'Parcialmente nublado.',                                en: 'Partly cloudy.' },
-  rain:   { es: 'Lluvia por la tarde, probable — sal con capa ligera.', en: 'Afternoon rain likely — bring a light rain layer.' },
-  storm:  { es: 'Tormenta esperada — planea bajo techo por la tarde.',  en: 'Storms expected — plan indoors for the afternoon.' },
+  rain:   { es: 'Lluvia por la tarde, probable; sal con capa ligera.', en: 'Afternoon rain likely; bring a light rain layer.' },
+  storm:  { es: 'Tormenta esperada, planea bajo techo por la tarde.',  en: 'Storms expected, plan indoors for the afternoon.' },
 }
 
 // Mexico City, fixed coordinates + timezone.
