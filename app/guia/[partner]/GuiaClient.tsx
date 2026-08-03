@@ -318,7 +318,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
               <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
               <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
               <p className={styles.nbTagline}>{browseNbData.tagline[lang]}</p>
-              <p className={styles.lede}>{t.neighborhoodLede}</p>
+              <p className={styles.lede}>{browseNbData.orientation[lang]}</p>
             </div>
             <div className={styles.secBody}>
               <div className={styles.nbControls}>

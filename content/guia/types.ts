@@ -49,6 +49,8 @@ export interface Neighborhood {
   mapUrl: string
   /** One-line zone descriptor, shown under the heading (switches per tab). */
   tagline: Record<Lang, string>
+  /** Honest distance/orientation line for this zone (switches per tab). */
+  orientation: Record<Lang, string>
   spots: Record<Lang, Spot[]>
 }
 
@@ -114,8 +116,7 @@ export interface CityCopy {
   beforeLede: string
   arrivalItems: ArrivalItem[]
   neighborhoodEyebrow: string
-  neighborhoodH2: string         // fixed heading, e.g. "A short walk from your door"
-  neighborhoodLede: string
+  neighborhoodH2: string         // zone-agnostic heading, identical across all zone tabs
   openInMapsLabel: string
   /** Maps card in the neighborhood header. {n} = place count. */
   mapCardPrimary: string
