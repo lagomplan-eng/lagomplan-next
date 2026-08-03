@@ -77,6 +77,9 @@ const EXP_PHOTOS: Record<string, string> = {
   'exp-teotihuacan': '/images/guia/experiences/exp-teotihuacan.jpg',
   'exp-lucha': '/images/guia/experiences/exp-lucha.jpg',
   'exp-frida': '/images/guia/experiences/exp-frida.jpg',
+  // TODO: exp-tacos needs a sourced photo (street taquería scene, matching
+  // the illustrated style of the other cards) — falls back to the text
+  // placeholder (.expThumb) until one is added here.
   'exp-own-plan': '/images/guia/experiences/exp-own-plan.jpg',
 }
 
