@@ -16,7 +16,7 @@ export type IconKey =
   | 'briefcase' | 'droplet' | 'moon' | 'parking'
   | 'coffee' | 'croissant' | 'utensilsSm' | 'basket' | 'trees' | 'cross'
   | 'landmark' | 'utensils' | 'baby' | 'martini' | 'compass' | 'clock'
-  | 'cloudRain' | 'arrowDown' | 'iceCream'
+  | 'cloudRain' | 'arrowDown' | 'iceCream' | 'mountain'
 
 /** Inline link inside an arrival card body (e.g. the Airalo eSIM link). */
 export interface InlineLink {
@@ -75,7 +75,15 @@ export interface TodayItem {
 export interface Experience {
   id: string
   title: string
-  body: string
+  /** Short teaser line shown on the card face. */
+  teaser: string
+  /** One paragraph, or several for cards that need paragraph breaks. */
+  description: string | string[]
+  howToBook: string
+  /** One line, or two for cards with a primary + alternative booking window. */
+  minBookingTime: string | string[]
+  /** Optional "need it sooner?" note — omit for cards where it doesn't apply. */
+  needSoonerNote?: string
 }
 
 export interface FoodCollection {
@@ -125,6 +133,14 @@ export interface CityCopy {
   expPartnerNote: string
   /** Per-card inline WhatsApp booking link label. */
   expBookCta: string
+  /** Toggle label for expanding a card's extra details (e.g. "Details"). */
+  expDetailsCta: string
+  /** Label above the description paragraph(s) in the expanded panel. */
+  expDescriptionLabel: string
+  /** Label above the how-to-book paragraph in the expanded panel. */
+  expHowToBookLabel: string
+  /** Label above the minimum booking time line(s) in the expanded panel. */
+  expMinTimeLabel: string
   experiences: Experience[]
   foodEyebrow: string
   foodH2: string
