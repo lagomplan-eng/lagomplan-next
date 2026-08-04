@@ -45,6 +45,13 @@ export interface Spot {
 export interface Neighborhood {
   /** Display name and chip label, e.g. "Roma Norte". */
   name: string
+  /**
+   * Optional per-language override for the chip/tab label and the "Google
+   * Maps list · …" line, when the internal key (`name`) isn't guest-facing
+   * copy — e.g. an address used as the zone id, shown to guests as
+   * "Your house" / "Tu casa" instead of the raw street address.
+   */
+  tabLabel?: Record<Lang, string>
   /** Google Maps deep-link for "open list in Maps". */
   mapUrl: string
   /** One-line zone descriptor, shown under the heading (switches per tab). */

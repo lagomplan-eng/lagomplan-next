@@ -334,7 +334,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                       aria-selected={name === browseNb}
                       className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
                       onClick={() => setBrowseNb(name)}
-                    >{name}</button>
+                    >{city.neighborhoods[name].tabLabel?.[lang] ?? name}</button>
                   ))}
                 </div>
                 <a
@@ -351,7 +351,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                   </span>
                   <span className={styles.nbMapText}>
                     <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
-                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNb}</span>
+                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
                   </span>
                   <span className={styles.nbMapArrow} aria-hidden>→</span>
                 </a>
