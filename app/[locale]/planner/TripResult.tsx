@@ -3664,6 +3664,10 @@ export default function TripResult({ params }: Props) {
                 <button
                   className="flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] text-[#7A7A76] pr-[15px] hover:text-[#0F3A33] transition-colors"
                   onClick={() => {
+                    if (isReadOnlyPublicView) {
+                      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+                      return
+                    }
                     if (!tripId) {
                       showToast(locale === 'es' ? '🔖 Guarda el viaje primero para compartirlo' : '🔖 Save the trip first to share it')
                       return
