@@ -27,6 +27,7 @@ export interface Database {
           created_at:   string
           share_id:     string | null   // UUID — non-guessable share token
           is_shared:    boolean         // false until owner explicitly shares
+          is_public_example: boolean    // true for curated /ejemplos showcase trips
         }
         Insert: {
           id?:           string
@@ -45,6 +46,7 @@ export interface Database {
           created_at?:   string
           share_id?:     string | null
           is_shared?:    boolean
+          is_public_example?: boolean
         }
         Update: Partial<Database['public']['Tables']['trips']['Insert']>
       }

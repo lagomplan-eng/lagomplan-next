@@ -46,10 +46,11 @@ export async function GET(
       return NextResponse.json({ error: 'Trip not found' }, { status: 404 })
     }
 
-    // Authorization: shared trips are public reads; private trips require
-    // the requester to be the owner. Falling back to 404 (not 403) so we
-    // don't leak the existence of private trips to UUID-guessers.
-    if (!(data as any).is_shared) {
+    // Authorization: shared trips and public example trips are public
+    // reads; private trips require the requester to be the owner. Falling
+    // back to 404 (not 403) so we don't leak the existence of private trips
+    // to UUID-guessers.
+    if (!(data as any).is_shared && !(data as any).is_public_example) {
       const supabase = await getSupabaseServer()
       const { data: { user } } = await supabase.auth.getUser()
       if (!user || (data as any).user_id !== user.id) {
