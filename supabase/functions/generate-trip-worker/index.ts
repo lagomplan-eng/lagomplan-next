@@ -796,7 +796,7 @@ serve(async (req: Request) => {
     duration_days: (job.inputs as any).duration_days ?? null,
     travelers:     travelersValue,
     travel_style:  travelStyleValue,
-    budget_level:  (job.inputs as any).budget ?? null,
+    budget_level:  (job.inputs as any).budget_level ?? (job.inputs as any).budget ?? "medium",
     interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
     // Partner referral stamp folded into job.inputs by /api/trips/jobs.
     ref_source:    (job.inputs as any).ref_source ?? null,

@@ -35,6 +35,14 @@
 
   Si el viaje es de un solo día (overnight === false), deja "accommodations" como arreglo vacío.
 
+  REGLA DE PRESUPUESTO ("budget_breakdown"):
+  Cada rango de "budget_breakdown" (accommodation, food, activities, transport) es para
+  TODO el grupo de viajeros indicado en "Viajeros", no por persona — si el input dice
+  "3 adulto(s) + 1 niño(s)", el rango cubre a las 4 personas juntas, no a una. Usa precios
+  reales y típicos del destino y la temporada, no una plantilla genérica. Da un rango
+  angosto y realista (ej. "$1,800 - $2,200"), no inflado "por seguridad" — el objetivo es
+  que el techo del rango sea un estimado honesto, no un colchón amplio.
+
   CAMPO "neighborhood" EN CADA BLOQUE (importante):
   Para cada bloque del itinerario, incluye el campo opcional "neighborhood"
   con el nombre del barrio o zona local en minúsculas y sin acentos
@@ -68,6 +76,14 @@
   predetermined in the input — use them as-is, don't modify them.
 
   If the trip is a single day (overnight === false), leave "accommodations" as an empty array.
+
+  BUDGET RULE ("budget_breakdown"):
+  Every "budget_breakdown" range (accommodation, food, activities, transport) is for the
+  WHOLE group listed under "Travelers", not per person — if the input says "3 adult(s) +
+  1 child(ren)", the range covers all 4 people together, not one. Use real, typical prices
+  for the destination and season, not a generic template. Give a narrow, realistic range
+  (e.g. "$1,800 - $2,200"), not padded "for safety" — the top of the range should be an
+  honest estimate, not a wide cushion.
 
   "neighborhood" FIELD ON EACH BLOCK (important):
   For each itinerary block, include the optional "neighborhood" field with
@@ -729,19 +745,25 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   `)
       : "";
 
-    // Phase 3 — family composition awareness. If traveler_details ships
-    // children data, surface it explicitly in the prompt + add a soft
-    // guidance block so the AI deliberately adapts venue / pacing / food
-    // choices to the family. Kept short on purpose — the user warned us
-    // not to overcorrect into "family spam".
-    const td = input.traveler_details
-    const isFamily   = input.travelers === "familia" && td && Array.isArray(td.children) && td.children.length > 0
+    // Phase 3 — family composition awareness. `isFamily` (headcount, always
+    // surfaced when the traveler chip is "familia") is deliberately decoupled
+    // from `hasChildren` (kid-specific guidance) — without this, a "familia"
+    // trip with no children captured in the form sent the AI zero numeric
+    // signal at all ("Viajeros: familia persona(s)"), which let group size —
+    // and therefore the whole budget_breakdown — drift unanchored. Kept
+    // short on purpose — the user warned us not to overcorrect into "family
+    // spam".
+    const td           = input.traveler_details
+    const isFamily     = input.travelers === "familia"
+    const familyAdults   = typeof td?.adults === "number" && td.adults > 0 ? td.adults : 2
+    const familyChildren = Array.isArray(td?.children) ? td.children : []
+    const hasChildren     = isFamily && familyChildren.length > 0
     const familyLine = isFamily
       ? (isEN
-          ? `\n  - Family composition: ${td.adults ?? 2} adult(s) + ${td.children.length} child(ren) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`
-          : `\n  - Composición familiar: ${td.adults ?? 2} adulto(s) + ${td.children.length} niño(s) [${td.children.map((c: any) => c?.age ?? "?").join(", ")}]`)
+          ? `\n  - Family composition: ${familyAdults} adult(s)${hasChildren ? ` + ${familyChildren.length} child(ren) [${familyChildren.map((c: any) => c?.age ?? "?").join(", ")}]` : ""}`
+          : `\n  - Composición familiar: ${familyAdults} adulto(s)${hasChildren ? ` + ${familyChildren.length} niño(s) [${familyChildren.map((c: any) => c?.age ?? "?").join(", ")}]` : ""}`)
       : "";
-    const familyGuidance = isFamily
+    const familyGuidance = hasChildren
       ? (isEN ? `
 
   FAMILY TRIP (important):

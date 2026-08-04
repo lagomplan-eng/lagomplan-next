@@ -4743,6 +4743,11 @@ export default function TripResult({ params }: Props) {
                             </div>
                           ))}
                         </div>
+                        <p className="font-mono text-[9px] text-[#B8B5AF] px-4 py-[6px] border-b border-[#E4DFD8]">
+                          {isES
+                            ? 'Estimado alto — cubre el margen superior de precios típicos.'
+                            : 'Upper-range estimate — covers the top of typical local pricing.'}
+                        </p>
 
                         {/* ── Category groups ── */}
                         {Object.entries(budgetByCategory).map(([cat, rows]) => {
