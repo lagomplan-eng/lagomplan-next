@@ -308,7 +308,9 @@
 .weatherTemp { font-family: var(--font-mono), monospace; font-size: 20px; }
 .weatherBody { font-size: 13px; opacity: .85; }
 .todayRow { display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid rgba(107, 143, 134, .2); }
-.tag { flex: none; width: 84px; color: var(--sage); }
+/* Wide enough for the longest tag in either language ("Martes y viernes"
+   runs ~120px at this size) so neither language wraps to 2-3 lines. */
+.tag { flex: none; width: 132px; color: var(--sage); }
 .todayTitle { font-size: 14px; font-weight: 600; color: var(--pine); }
 .todayBody { font-size: 13px; color: var(--sage); margin-top: 2px; }
 
@@ -340,6 +342,25 @@
 .expDetailText { font-size: 13px; color: var(--sage); line-height: 1.7; margin: 0 0 8px; }
 .expDetailText:last-child { margin-bottom: 0; }
 .expDetailNote { font-size: 12.5px; font-style: italic; color: var(--sage); line-height: 1.6; margin: 14px 0 0; }
+
+/* "Your Own Plan" closing banner: full-width, Pine, below the card grid —
+   not a peer card, so it gets its own treatment instead of .expCard's. */
+.expBanner { background: var(--pine); border-radius: var(--radius-xl); padding: 22px 24px; margin-top: 20px; }
+.expBannerRow { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px; }
+.expBannerRow .expActions { margin-top: 0; }
+.expBannerText { flex: 1 1 260px; min-width: 0; }
+.expBannerTitle { font-size: 14px; font-weight: 700; color: var(--cream); margin: 0; }
+.expBannerNote { font-size: 13px; color: rgba(255, 249, 243, .78); line-height: 1.7; margin: 6px 0 0; }
+.expBannerDetailsToggle { display: inline-flex; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: rgba(255, 249, 243, .78); background: none; border: none; padding: 0; cursor: pointer; font-family: var(--font-sans), sans-serif; white-space: nowrap; }
+.expBannerDetailsPanel { overflow: hidden; transition: max-height .4s ease, opacity .3s; }
+.expBannerDetailsInner { padding-top: 14px; margin-top: 14px; border-top: 1px solid rgba(255, 249, 243, .18); }
+.expBannerDetailLabel { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; color: var(--cream); margin: 14px 0 4px; }
+.expBannerDetailLabel:first-child { margin-top: 0; }
+.expBannerDetailText { font-size: 13px; color: rgba(255, 249, 243, .78); line-height: 1.7; margin: 0 0 8px; }
+.expBannerDetailText:last-child { margin-bottom: 0; }
+.expBannerDetailNote { font-size: 12.5px; font-style: italic; color: rgba(255, 249, 243, .6); line-height: 1.6; margin: 14px 0 0; }
+.expBannerLink { color: var(--coral); text-decoration: underline; }
+.expBannerLink:hover { color: var(--cream); }
 
 /* ── Food ───────────────────────────────────────────────── */
 .foodGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
