@@ -77,9 +77,7 @@ const EXP_PHOTOS: Record<string, string> = {
   'exp-teotihuacan': '/images/guia/experiences/exp-teotihuacan.jpg',
   'exp-lucha': '/images/guia/experiences/exp-lucha.jpg',
   'exp-frida': '/images/guia/experiences/exp-frida.jpg',
-  // TODO: exp-tacos needs a sourced photo (street taquería scene, matching
-  // the illustrated style of the other cards) — falls back to the text
-  // placeholder (.expThumb) until one is added here.
+  'exp-tacos': '/images/guia/experiences/exp-tacos.jpg',
   'exp-own-plan': '/images/guia/experiences/exp-own-plan.jpg',
 }
 
@@ -90,17 +88,19 @@ function ExperienceCard({ exp, t }: { exp: Experience; t: CityCopy }) {
   const descriptions = Array.isArray(exp.description) ? exp.description : [exp.description]
   const minTimes = Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]
 
+  const hasPhoto = Boolean(EXP_PHOTOS[exp.id])
+
   return (
-    <div className={styles.expCard}>
-      {EXP_PHOTOS[exp.id] ? (
+    <div className={`${styles.expCard} ${hasPhoto ? '' : styles.expCardNoImg}`}>
+      {hasPhoto && (
         // eslint-disable-next-line @next/next/no-img-element
         <img className={styles.expImg} src={EXP_PHOTOS[exp.id]} alt={exp.title} />
-      ) : (
-        <div className={styles.expThumb}>{exp.title}</div>
       )}
       <div className={styles.expBody}>
-        <h5 className={styles.h5}>{exp.title}</h5>
-        <p className={styles.expNote}>{exp.teaser}</p>
+        <div className={styles.expTextBlock}>
+          <h5 className={styles.h5}>{exp.title}</h5>
+          <p className={styles.expNote}>{exp.teaser}</p>
+        </div>
         <div className={styles.expActions}>
           <a className={styles.expBookLink} href={WA_BOOK_URL} target="_blank" rel="noopener">
             <svg className={styles.expBookIcon} viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
