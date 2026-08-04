@@ -1014,6 +1014,21 @@ export default function TripResult({ params }: Props) {
   const [tripId, setTripId]         = useState<string | null>(null)
   const [rawTripData, setRawTripData] = useState<any>(null)
   const authedUser = useUser()
+  // Public-example read-only mode (Paso 1). Set from the loaded trip row's
+  // own user_id + is_public_example — NOT re-derived from is_shared, which
+  // has different semantics (a private link meant for the sharer's own
+  // travel companions, still fully editable by strangers with the link
+  // today; only is_public_example trips get locked down). Defaults to
+  // "not read-only" until a trip is actually loaded, since most trips
+  // aren't public examples and we don't want a flash of disabled controls
+  // on every normal load.
+  const [tripOwnerId, setTripOwnerId]       = useState<string | null>(null)
+  const [isPublicExample, setIsPublicExample] = useState(false)
+  // While authedUser is still resolving (undefined), treat a public-example
+  // trip as read-only by default — fail toward "can't edit" rather than
+  // flashing editable controls to a stranger for a moment before auth
+  // resolves. Once resolved, only the real owner gets write access.
+  const isReadOnlyPublicView = isPublicExample && authedUser?.id !== tripOwnerId
   const [tripTitle, setTripTitle]     = useState('')
   const [tripSubtitle, setTripSubtitle] = useState('')
   const [days, setDays]         = useState<Day[]>([])
@@ -1247,6 +1262,8 @@ export default function TripResult({ params }: Props) {
           throw new Error(err.error || (locale === 'es' ? 'No se pudo cargar el viaje' : 'Failed to load trip'))
         }
         const data = await res.json()
+        setTripOwnerId(typeof data.user_id === 'string' ? data.user_id : null)
+        setIsPublicExample(data.is_public_example === true)
         const dest      = data.destination || ''
         // 0 is a valid same-day duration; only fall back to 3 when truly absent.
         const tripNights = String(typeof data.duration_days === 'number' ? data.duration_days : 3)
@@ -2222,6 +2239,11 @@ export default function TripResult({ params }: Props) {
 
   // ── Regenerate from pref drawer ──────────────────────────────────────────────
   async function regenerate() {
+    if (isReadOnlyPublicView) {
+      setRegenConfirmOpen(false)
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     // ── Paywall guard (DB-backed) ────────────────────────────────────────
     if (authedUser !== null) {
       const plan = planCredits as PlanState | null
@@ -2584,6 +2606,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function toggleCheck(id: string) {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     setDoneCheckIds(prev => {
       const s = new Set(prev)
       s.has(id) ? s.delete(id) : s.add(id)
@@ -2607,6 +2633,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function deleteItem(itemId: string, dayN: number) {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     // Capture the item's type before we filter it out so the analytics
     // payload can carry which block category was removed (hotel /
     // restaurant / tour / …).
@@ -2899,6 +2929,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function openBookingModal(item: ItineraryItem) {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     // 1. Hand-authored booking options (from guide system) — always trusted
     if (item.bookingOptions && item.bookingOptions.length > 0) {
       setBookingModal({ itemName: item.name, itemType: item.type, options: item.bookingOptions })
@@ -2970,6 +3004,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function removePackingItem(index: number) {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     setPacking(prev => prev.filter((_, i) => i !== index))
     // Re-index packedSet: drop the removed index, shift all higher indices down
     setPackedSet(prev => {
@@ -2992,6 +3030,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function openEditModal(item: ItineraryItem, dayN: number, isNew = false) {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     setEditModalItem(item)
     setEditModalDayN(dayN)
     setEditIsNew(isNew)
@@ -3064,6 +3106,10 @@ export default function TripResult({ params }: Props) {
   }
 
   function addDay() {
+    if (isReadOnlyPublicView) {
+      showToast(locale === 'es' ? 'Este es un plan de ejemplo de solo lectura' : 'This is a read-only example plan')
+      return
+    }
     const newN = days.length > 0 ? Math.max(...days.map(d => d.n)) + 1 : 1
     const newDay: Day = {
       n:        newN,
@@ -3457,6 +3503,23 @@ export default function TripResult({ params }: Props) {
               {locale === 'es' ? 'Guardar mi viaje' : 'Save my trip'}
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ── Public example banner (Paso 1) ──────────────────────────────────
+          Shown only to non-owner visitors of an is_public_example trip.
+          Read-only enforcement itself lives in the guarded mutation
+          functions above (regenerate/toggleCheck/openBookingModal/addDay/
+          openEditModal/deleteItem/removePackingItem) — this banner is the
+          explanatory layer, not the security layer. */}
+      {isReadOnlyPublicView && (
+        <div className="bg-[#0F3A33] text-center py-2 px-4">
+          <span className="font-sans text-[12.5px] text-[#FFF9F3]">
+            {locale === 'es' ? 'Estás viendo un plan de ejemplo · ' : "You're viewing an example plan · "}
+          </span>
+          <Link href="/" className="font-sans text-[12.5px] font-semibold text-[#FFF9F3] underline hover:no-underline">
+            {locale === 'es' ? 'Genera el tuyo gratis →' : 'Generate your own free →'}
+          </Link>
         </div>
       )}
 
@@ -4115,6 +4178,7 @@ export default function TripResult({ params }: Props) {
               // unauthenticated for this purpose (the form is only
               // reachable post-CTA-click, after auth has resolved).
               isLoggedIn={!!authedUser}
+              readOnly={isReadOnlyPublicView}
               // Confirming a booking auto-ticks the matching pre-trip
               // "Reservar hotel" check, which rolls into the Hospedaje
               // milestone + progress bar — single-city → 'pretrip-book-
@@ -4153,12 +4217,14 @@ export default function TripResult({ params }: Props) {
                         : `${nightsNum} ${nightsNum === 1 ? 'día' : 'días'} en ${titleCaseCity(prefDest) || 'tu destino'}`)}
                 </div>
               </div>
-              <button
-                className="font-mono text-[10px] font-medium tracking-[.06em] text-[#0F3A33]"
-                onClick={addDay}
-              >
-                {isES ? '+ Añadir día' : '+ Add day'}
-              </button>
+              {!isReadOnlyPublicView && (
+                <button
+                  className="font-mono text-[10px] font-medium tracking-[.06em] text-[#0F3A33]"
+                  onClick={addDay}
+                >
+                  {isES ? '+ Añadir día' : '+ Add day'}
+                </button>
+              )}
             </div>
 
             {/* Day cards */}

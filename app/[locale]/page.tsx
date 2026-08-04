@@ -11,6 +11,7 @@ import type { Locale } from '../../i18n'
 import HeroForm from '../../components/forms/HeroForm'
 import NewsletterForm from '../../components/forms/NewsletterForm'
 import GuidesPreview from '../../components/GuidesPreview'
+import ExamplesCta from '../../components/examples/ExamplesCta'
 import { BookOpen, ListChecks, Sparkles, Focus } from 'lucide-react'
 
 // ── Metadata ───────────────────────────────────────────────
@@ -133,16 +134,17 @@ export default async function HomePage({
                   ? 'Planificador de viajes'
                   : 'Trip planner'}
               </span>
-              <h1 className="font-sans text-[60px] max-[768px]:text-[40px] font-bold text-[#0F3A33] leading-[1.05] tracking-[-1.5px] mb-5">
+              <h1 className="font-sans text-[60px] max-[768px]:text-[40px] font-bold text-[#0F3A33] leading-[1.05] tracking-[-1.5px] mb-5 [text-wrap:balance]">
                 {isES
                   ? 'Viaja bien. Planea menos.'
                   : 'Travel well. Plan less.'}
               </h1>
-              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full">
+              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full [text-wrap:balance]">
                 {isES
                   ? 'Describe tu viaje — destino, días, quién va — y en 30 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
                   : "Describe your trip — destination, days, who's going — and in 30 seconds you get a complete itinerary with hotels, activities, and budget."}
               </p>
+              <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
             </div>
 
             <HeroForm locale={locale} />
@@ -162,12 +164,12 @@ export default async function HomePage({
           <span className="sec-label">
             {isES ? 'Cómo funciona' : 'How it works'}
           </span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4">
+          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4 [text-wrap:balance]">
             {isES
               ? 'Del destino al itinerario en 30 segundos.'
               : 'From destination to itinerary in 30 seconds.'}
           </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14">
+          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14 [text-wrap:balance]">
             {isES
               ? 'Sin pestañas abiertas, sin hojas de cálculo, sin horas de investigación.'
               : 'No open tabs, no spreadsheets, no hours of research.'}
@@ -205,7 +207,7 @@ export default async function HomePage({
                   <p className="font-sans text-[15px] font-semibold text-[#0F3A33] mt-1 mb-2">
                     {isES ? labels.title_es : labels.title_en}
                   </p>
-                  <p className="font-sans text-[13px] text-[#6B8F86] leading-[1.7] max-w-[240px] min-h-[72px]">
+                  <p className="font-sans text-[13px] text-[#6B8F86] leading-[1.7] max-w-[240px] min-h-[72px] [text-wrap:pretty]">
                     {isES ? labels.body_es : labels.body_en}
                   </p>
                 </div>
@@ -226,15 +228,15 @@ export default async function HomePage({
         <div className="page-inner">
           <div className="grid md:grid-cols-2 gap-20 items-center max-[768px]:grid-cols-1 max-[768px]:gap-9">
             <div>
-              <h2 className="font-sans text-[42px] max-[768px]:text-[32px] font-bold text-[#0F3A33] leading-[1.12] mb-6">
+              <h2 className="font-sans text-[42px] max-[768px]:text-[32px] font-bold text-[#0F3A33] leading-[1.12] mb-6 [text-wrap:balance]">
                 {isES ? 'Ni demasiado, ni muy poco.' : 'Not too much, not too little.'}
               </h2>
-              <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4">
+              <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4 [text-wrap:pretty]">
                 {isES
                   ? 'Planificar un viaje no debería tomar más tiempo que el viaje mismo. Creemos que el mejor plan es el que llega justo — suficiente estructura para no perderse nada, suficiente espacio para dejarse sorprender.'
                   : "Planning a trip shouldn't take longer than the trip itself. We believe the best plan is one that lands just right — enough structure to miss nothing, enough room to be surprised."}
               </p>
-              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.8]">
+              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.8] [text-wrap:pretty]">
                 {isES
                   ? 'El nombre viene del sueco: '
                   : 'The name comes from Swedish: '}
@@ -281,7 +283,7 @@ export default async function HomePage({
         }}
       >
         <div className="page-inner">
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9">
+          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9 [text-wrap:balance]">
             {isES ? 'Quiénes somos' : 'Who we are'}
           </h2>
 
@@ -321,7 +323,7 @@ export default async function HomePage({
                   <p className="font-sans text-[18px] font-semibold text-[#0F3A33] mb-3">
                     {f.name}
                   </p>
-                  <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8]">
+                  <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] [text-wrap:pretty]">
                     {isES ? f.bio_es : f.bio_en}
                   </p>
                 </div>
@@ -341,10 +343,10 @@ export default async function HomePage({
       >
         <div className="page-inner relative z-10">
           <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-3 max-[768px]:mb-3">
+          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-3 max-[768px]:mb-3 [text-wrap:balance]">
             {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
           </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8">
+          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8 [text-wrap:balance]">
             {isES
               ? 'Más de 400 planes creados — esto es lo que nos cuentan.'
               : "Over 400 plans created — here's what people tell us."}
@@ -359,7 +361,7 @@ export default async function HomePage({
                   border: '1px solid rgba(200,191,181,.22)',
                 }}
               >
-                <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-6">
+                <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-6 [text-wrap:pretty]">
                   &ldquo;{isES ? r.quote_es : r.quote_en}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
@@ -393,12 +395,12 @@ export default async function HomePage({
         }}
       >
         <div className="page-inner">
-          <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4">
+          <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4 [text-wrap:balance]">
             {isES
               ? 'Tu próximo viaje puede estar listo en 30 segundos.'
               : 'Your next trip can be ready in 30 seconds.'}
           </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10">
+          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10 [text-wrap:balance]">
             {isES
               ? 'Gratis, sin tarjeta. Describe a dónde vas y la plataforma hace el resto.'
               : "Free, no card needed. Describe where you're going and the platform does the rest."}
@@ -440,7 +442,7 @@ export default async function HomePage({
       <div className="py-14 max-[768px]:py-10" style={{ background: '#0F3A33' }}>
         <div className="page-inner grid grid-cols-[1.1fr_1fr] gap-10 items-center max-[900px]:grid-cols-1 max-[900px]:gap-6">
           <div>
-            <h3 className="font-sans text-[30px] max-[768px]:text-[24px] font-bold text-[#FFF9F3] leading-[1.2] mb-3">
+            <h3 className="font-sans text-[30px] max-[768px]:text-[24px] font-bold text-[#FFF9F3] leading-[1.2] mb-3 [text-wrap:balance]">
               {isES ? (
                 <>
                   Tu escapada,{' '}
@@ -458,7 +460,7 @@ export default async function HomePage({
               )}
             </h3>
 
-            <p className="font-sans text-[15px] text-[rgba(255,249,243,0.78)] leading-[1.7] max-w-[520px]">
+            <p className="font-sans text-[15px] text-[rgba(255,249,243,0.78)] leading-[1.7] max-w-[520px] [text-wrap:balance]">
               {isES
                 ? 'Recibe ideas de viaje curadas, nuevas guías y tips útiles para planear mejor.'
                 : 'Get curated travel ideas, new guides, and useful planning tips.'}

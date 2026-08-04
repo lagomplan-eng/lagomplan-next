@@ -39,6 +39,7 @@ export const ROUTE_MAP = {
   worldcupIndex:      { es: 'mundial',           en: 'worldcup'      },
   worldcupDetail:     { es: 'mundial',           en: 'worldcup'      },
   pricing:            { es: 'precios',           en: 'pricing'       },
+  examples:           { es: 'ejemplos',          en: 'examples'      },
 } as const
 
 export type RouteKey = keyof typeof ROUTE_MAP
@@ -224,6 +225,7 @@ export const INTERNAL_PATHS: Record<RouteKey, string> = {
   worldcupIndex:      '/worldcup',
   worldcupDetail:     '/worldcup/[slug]',
   pricing:            '/pricing',
+  examples:           '/examples',
 }
 
 export function internalPath(key: RouteKey): string {

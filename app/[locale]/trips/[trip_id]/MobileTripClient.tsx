@@ -24,6 +24,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Link } from '../../../../lib/navigation'
 import { useUser } from '../../../../components/auth/SupabaseProvider'
 import { events } from '../../../../lib/analytics'
 import { deriveChecksFromDays, type Day as LibDay, type CheckItem } from '../../../../lib/planner/checks'
@@ -102,6 +103,11 @@ interface Props {
   locale: 'es' | 'en'
   isOwner: boolean
   isAnonTrip: boolean
+  /** Public-example showcase trip (Paso 1). `canEdit` already evaluates to
+   *  false for a non-owner viewer here (real user_id + not the owner), same
+   *  as any other trip that isn't theirs — this flag only drives the
+   *  explanatory banner, it isn't load-bearing for the read-only gate. */
+  isPublicExample: boolean
   title: string
   destination: string | null
   travelers: string | null
@@ -303,15 +309,18 @@ function providerFromUrl(url: string): string {
 }
 
 export default function MobileTripClient(props: Props) {
-  const { tripId, locale, isOwner, isAnonTrip, title, travelers, editPlanUrl, planYoursUrl, loginUrl, currentPath } = props
+  const { tripId, locale, isOwner, isAnonTrip, isPublicExample, title, travelers, editPlanUrl, planYoursUrl, loginUrl, currentPath } = props
   const t = T[locale]
   const router = useRouter()
   const user = useUser()
   const loggedIn = !!user
 
   // Owners and anonymous-trip viewers can edit; a logged-in non-owner on a
-  // shared trip is read-only.
+  // shared or public-example trip is read-only.
   const canEdit = isOwner || isAnonTrip
+  // Drives the explanatory banner only — canEdit above already covers the
+  // actual read-only enforcement for this case (real owner + not them).
+  const showExampleBanner = isPublicExample && !isOwner
 
   // ── Parse trip_data once ───────────────────────────────────────────────────
   // `days` is editable (inline itinerary editor) so it's state, not a memo. It
@@ -847,6 +856,18 @@ export default function MobileTripClient(props: Props) {
 
   return (
     <div className="min-h-screen bg-[#FAF8F5] pb-[120px]"><main className="bg-white pt-[100px] pb-[24px] max-w-[430px] mx-auto">
+      {/* Public example banner (Paso 1 mobile parity) — canEdit already
+          enforces read-only for this case; this is the explanatory layer. */}
+      {showExampleBanner && (
+        <div className="bg-[#0F3A33] text-center py-2 px-4">
+          <span className="font-sans text-[12px] text-[#FFF9F3]">
+            {locale === 'es' ? 'Estás viendo un plan de ejemplo · ' : "You're viewing an example plan · "}
+          </span>
+          <Link href="/" className="font-sans text-[12px] font-semibold text-[#FFF9F3] underline">
+            {locale === 'es' ? 'Genera el tuyo gratis →' : 'Generate your own free →'}
+          </Link>
+        </div>
+      )}
       {/* ── Trip subheader (scrolls away; tabs + day pills stay pinned) ── */}
       <div className="bg-white border-b border-[#E4DFD8] px-[18px] pt-[10px] pb-2">
         <div className="flex items-start justify-between gap-3">

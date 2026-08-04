@@ -13,7 +13,7 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
           <p className="text-[11px] uppercase tracking-[0.18em] text-[#6B8F86] mb-2">
             {locale === 'es' ? 'Destinos' : 'Destinations'}
           </p>
-          <h2 className="text-[28px] md:text-[34px] leading-tight tracking-[-0.03em] text-[#0F3A33]">
+          <h2 className="text-[28px] md:text-[34px] leading-tight tracking-[-0.03em] text-[#0F3A33] [text-wrap:balance]">
             {locale === 'es'
               ? 'Los destinos que vale la pena conocer — y cómo vivirlos bien.'
               : 'The destinations worth knowing — and how to experience them right.'}
@@ -46,10 +46,10 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
             </div>
 
             <div className="p-6">
-              <h3 className="text-[22px] leading-tight tracking-[-0.02em] text-[#0F3A33] transition group-hover:text-[#2D6B57]">
+              <h3 className="text-[22px] leading-tight tracking-[-0.02em] text-[#0F3A33] transition group-hover:text-[#2D6B57] [text-wrap:balance]">
                 {guide.title}
               </h3>
-              <p className="mt-3 text-[15px] leading-7 text-[#35584F]">
+              <p className="mt-3 text-[15px] leading-7 text-[#35584F] [text-wrap:pretty]">
                 {guide.excerpt}
               </p>
             </div>

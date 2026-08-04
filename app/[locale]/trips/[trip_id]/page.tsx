@@ -10,7 +10,14 @@
  *   - Owner (session user === trip.user_id) → full access, edit-link to planner.
  *   - Anonymous trip (user_id null)          → accessible to anyone with the link.
  *   - Shared trip (is_shared)                → accessible to anyone (companion view).
+ *   - Public example (is_public_example)     → accessible to anyone (showcase trip).
  *   - Private, non-owner                     → redirect home (don't leak existence).
+ *
+ * NOTE: this only fixes the READ gate. MobileTripClient still renders full
+ * edit controls (checklist, inline itinerary editor, "Ya reservé") for a
+ * non-owner viewer of an is_public_example trip — writes are safely rejected
+ * server-side (see companion/route.ts's owner check), but the UI doesn't yet
+ * hide/disable them the way the desktop planner does for the same case.
  *
  * The site header (Nav) and footer (Footer) come from app/[locale]/layout.tsx
  * which wraps every page — we don't re-render them here.
@@ -41,13 +48,14 @@ type TripRow = {
   travelers:     string | null
   currency:      string | null
   is_shared:     boolean
+  is_public_example: boolean
 }
 
 async function loadTrip(trip_id: string): Promise<TripRow | null> {
   const admin = getSupabaseAdmin()
   const { data, error } = await admin
     .from('trips')
-    .select('id, title, user_id, trip_data, trip_progress, destination, duration_days, travelers, currency, is_shared')
+    .select('id, title, user_id, trip_data, trip_progress, destination, duration_days, travelers, currency, is_shared, is_public_example')
     .eq('id', trip_id)
     .single()
   if (error || !data) return null
@@ -77,7 +85,7 @@ export default async function MobileTripPage({ params }: Props) {
 
   const isOwner   = !!user && trip!.user_id === user.id
   const isAnon    = trip!.user_id === null
-  const accessible = isOwner || isAnon || trip!.is_shared
+  const accessible = isOwner || isAnon || trip!.is_shared || trip!.is_public_example
   if (!accessible) redirect(getRoute(locale, 'home'))
 
   const plannerBase = getRoute(locale, 'planner')
@@ -88,6 +96,7 @@ export default async function MobileTripPage({ params }: Props) {
       locale={locale}
       isOwner={isOwner}
       isAnonTrip={isAnon}
+      isPublicExample={trip!.is_public_example === true}
       title={trip!.title?.trim() || (trip!.destination ?? '')}
       destination={trip!.destination}
       travelers={trip!.travelers}

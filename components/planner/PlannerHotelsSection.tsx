@@ -70,6 +70,11 @@ interface Props {
    *  Wired upstream to flip the matching pre-trip "Reservar hotel" check
    *  done, which rolls up into the Hospedaje milestone + progress bar. */
   onBookingConfirmed?: (accommodationIndex: number) => void
+  /** Public-example read-only mode (Paso 1) — hides the "Ya reservé"
+   *  confirm-booking nudge/form so an anonymous viewer of a showcase trip
+   *  can't POST /api/trips/[trip_id]/booking-confirm. The primary CTA link
+   *  stays visible (it's a plain outbound booking link, not a mutation). */
+  readOnly?: boolean
 }
 
 const TYPE_LABEL_ES: Record<Accommodation['accommodationType'], string> = {
@@ -128,6 +133,7 @@ export default function PlannerHotelsSection({
   isMultiCity,
   isLoggedIn = false,
   onBookingConfirmed,
+  readOnly = false,
 }: Props) {
   const localeRaw = useLocale()
   const locale: 'es' | 'en' = localeRaw === 'en' ? 'en' : 'es'
@@ -316,6 +322,7 @@ export default function PlannerHotelsSection({
               onDismissPrompt={() => dismissPrompt(acc.id)}
               onLocalBookingSaved={(b) => applyLocalBooking(acc.id, b)}
               onConfirmed={() => onBookingConfirmed?.(idx)}
+              readOnly={readOnly}
             />
           )
         })}
@@ -347,11 +354,13 @@ interface CardProps {
    *  pre-trip "Reservar hotel" check. Only fires on first confirmation,
    *  not on edits. */
   onConfirmed: () => void
+  readOnly?: boolean
 }
 
 function AccommodationCard({
   acc, ctx, tripId, typeLabel, priceLabel, ctaText, ctaBooked, fallbackTagline, locale, booked,
   isLoggedIn, uiState, onUIStateChange, onDismissPrompt, onLocalBookingSaved, onConfirmed,
+  readOnly = false,
 }: CardProps) {
   // Build the Stay22 Allez URL eagerly so the <a href> ships in HTML —
   // lets LetMeAllez see it on page load, and respects the user's "open
@@ -510,17 +519,19 @@ function AccommodationCard({
       {/* "Ya reservé" prompt — small nudge bar inside the card flow,
           visible by default on unconfirmed cards. Persists until the
           user opens the form, dismisses it, or completes confirmation. */}
-      <PromptNudge
-        visible={uiState === 'prompted'}
-        locale={locale}
-        onOpenForm={() => onUIStateChange('form_open')}
-        onDismiss={onDismissPrompt}
-      />
+      {!readOnly && (
+        <PromptNudge
+          visible={uiState === 'prompted'}
+          locale={locale}
+          onOpenForm={() => onUIStateChange('form_open')}
+          onDismiss={onDismissPrompt}
+        />
+      )}
 
       {/* "Ya reservé" inline form — expand-down using the codebase's
           max-height / opacity transition idiom. */}
       <BookingConfirmForm
-        visible={uiState === 'form_open'}
+        visible={!readOnly && uiState === 'form_open'}
         locale={locale}
         accId={acc.id}
         tripId={tripId}
