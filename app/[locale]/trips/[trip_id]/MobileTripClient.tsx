@@ -243,28 +243,54 @@ const RESERVE_VERB: Record<'es' | 'en', Partial<Record<ItemType, string>>> = {
   en: { hotel: 'Book hotel', tour: 'Book tour', restaurant: 'Book table', transfer: 'Book transfer' },
 }
 
-// Translates common English AI-generated budget row labels to Spanish.
-// Only applied when locale === 'es'. Partial match on lowercase key.
-const BUDGET_LABEL_ES: Record<string, string> = {
-  accommodation: 'Alojamiento', hotel: 'Hotel', lodging: 'Alojamiento',
-  food: 'Comida', meals: 'Comidas', restaurant: 'Restaurante', dining: 'Restaurantes',
-  activities: 'Actividades', activity: 'Actividad', tours: 'Tours', tour: 'Tour',
-  transport: 'Traslados', transfer: 'Traslado', transportation: 'Traslados',
-  flight: 'Vuelo', flights: 'Vuelos',
-  entertainment: 'Entretenimiento', shopping: 'Compras', other: 'Otros',
+// Translates raw AI/schema budget row labels ("accommodation", "food", …)
+// to a real word in the viewing locale. Partial match on lowercase key.
+// Was Spanish-only (silently passed English-locale labels through
+// unchanged) — same class of bug as the desktop TripResult.tsx fix:
+// stored trip_data.budgetRows can carry a raw schema key as `label`
+// (see TripResult.tsx's normalizeTripData fix), and this dictionary is
+// mobile's only lever to correct that after the fact, since it reads the
+// already-persisted row rather than re-deriving from the AI's val.label.
+const BUDGET_LABEL_TRANSLATE: Record<'es' | 'en', Record<string, string>> = {
+  es: {
+    accommodation: 'Alojamiento', hotel: 'Hotel', lodging: 'Alojamiento',
+    food: 'Comida', meals: 'Comidas', restaurant: 'Restaurante', dining: 'Restaurantes',
+    activities: 'Actividades', activity: 'Actividad', tours: 'Tours', tour: 'Tour',
+    transport: 'Traslados', transfer: 'Traslado', transportation: 'Traslados',
+    flight: 'Vuelo', flights: 'Vuelos',
+    entertainment: 'Entretenimiento', shopping: 'Compras', other: 'Otros',
+  },
+  en: {
+    alojamiento: 'Accommodation', hotel: 'Hotel', hospedaje: 'Accommodation',
+    comida: 'Food', comidas: 'Meals', restaurante: 'Restaurant', restaurantes: 'Dining', gastronomía: 'Food', gastronomia: 'Food',
+    actividades: 'Activities', actividad: 'Activity', tours: 'Tours', tour: 'Tour',
+    traslados: 'Transport', traslado: 'Transfer',
+    vuelo: 'Flight', vuelos: 'Flights',
+    entretenimiento: 'Entertainment', compras: 'Shopping', otros: 'Other',
+    accommodation: 'Accommodation', food: 'Food', activities: 'Activities', transport: 'Transport', other: 'Other',
+  },
 }
 
 function translateBudgetLabel(label: string, locale: 'es' | 'en'): string {
-  if (locale !== 'es') return label
-  return BUDGET_LABEL_ES[label.toLowerCase().trim()] ?? label
+  return BUDGET_LABEL_TRANSLATE[locale][label.toLowerCase().trim()] ?? label
 }
 
-// Mirrors TripResult.tsx — canonical Spanish display label per category.
-const BUDGET_CATEGORY_LABEL: Record<string, string> = {
-  Alojamiento: 'Hospedaje', Actividades: 'Actividades', Gastronomía: 'Gastronomía',
-  Traslados: 'Traslados', Otros: 'Otros',
-  accommodation: 'Hospedaje', food: 'Gastronomía', activities: 'Actividades',
-  transport: 'Traslados', other: 'Otros',
+// Mirrors TripResult.tsx — locale-aware display label per category. Used
+// to be Spanish-only, so English-locale trips showed Spanish category
+// headers regardless of the viewing locale.
+const BUDGET_CATEGORY_LABEL: Record<'es' | 'en', Record<string, string>> = {
+  es: {
+    Alojamiento: 'Hospedaje', Actividades: 'Actividades', Gastronomía: 'Gastronomía',
+    Traslados: 'Traslados', Otros: 'Otros',
+    accommodation: 'Hospedaje', food: 'Gastronomía', activities: 'Actividades',
+    transport: 'Traslados', other: 'Otros',
+  },
+  en: {
+    Alojamiento: 'Accommodation', Actividades: 'Activities', Gastronomía: 'Food',
+    Traslados: 'Transport', Otros: 'Other',
+    accommodation: 'Accommodation', food: 'Food', activities: 'Activities',
+    transport: 'Transport', other: 'Other',
+  },
 }
 
 function normalizeCategory(raw: string | undefined | null): string {
@@ -1702,7 +1728,7 @@ function BudgetTab(p: {
             return (
               <div key={cat} className="border-b border-[#E4DFD8] last:border-b-0">
                 <div className="flex justify-between items-center px-[14px] py-2 bg-[#EDE7E1]">
-                  <span className="font-mono text-[9px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase">{BUDGET_CATEGORY_LABEL[cat] ?? cat}</span>
+                  <span className="font-mono text-[9px] font-medium text-[#4A4A4A] tracking-[.06em] uppercase">{BUDGET_CATEGORY_LABEL[p.locale][cat] ?? cat}</span>
                   <span className="font-mono text-[10px] text-[#4A4A4A]">{fmt(catTotal)}</span>
                 </div>
                 {rows.map(r => (

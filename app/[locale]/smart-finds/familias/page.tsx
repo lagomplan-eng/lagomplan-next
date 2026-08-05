@@ -212,8 +212,8 @@ export default async function Page({ params }: Props) {
               fontFamily: "'Manrope',sans-serif", fontSize: 13,
               color: `${SAND}75`, lineHeight: 1.6, maxWidth: 440,
             }}>{isES
-              ? 'El mejor kit de viaje no sirve de nada si no sabes adónde vas. Genera tu plan completo en 30 segundos.'
-              : 'The best travel kit is useless without a plan. Generate your full itinerary in 30 seconds.'}</p>
+              ? 'El mejor kit de viaje no sirve de nada si no sabes adónde vas. Genera tu plan completo en 60 segundos.'
+              : 'The best travel kit is useless without a plan. Generate your full itinerary in 60 seconds.'}</p>
           </div>
           <a
             href={isES ? '/es/planificador' : '/en/planner'}

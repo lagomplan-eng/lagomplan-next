@@ -141,8 +141,8 @@ export default async function HomePage({
               </h1>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full [text-wrap:balance]">
                 {isES
-                  ? 'Describe tu viaje — destino, días, quién va — y en 30 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
-                  : "Describe your trip — destination, days, who's going — and in 30 seconds you get a complete itinerary with hotels, activities, and budget."}
+                  ? 'Describe tu viaje — destino, días, quién va — y en 60 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
+                  : "Describe your trip — destination, days, who's going — and in 60 seconds you get a complete itinerary with hotels, activities, and budget."}
               </p>
               <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
             </div>
@@ -166,8 +166,8 @@ export default async function HomePage({
           </span>
           <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4 [text-wrap:balance]">
             {isES
-              ? 'Del destino al itinerario en 30 segundos.'
-              : 'From destination to itinerary in 30 seconds.'}
+              ? 'Del destino al itinerario en 60 segundos.'
+              : 'From destination to itinerary in 60 seconds.'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14 [text-wrap:balance]">
             {isES
@@ -397,8 +397,8 @@ export default async function HomePage({
         <div className="page-inner">
           <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4 [text-wrap:balance]">
             {isES
-              ? 'Tu próximo viaje puede estar listo en 30 segundos.'
-              : 'Your next trip can be ready in 30 seconds.'}
+              ? 'Tu próximo viaje puede estar listo en 60 segundos.'
+              : 'Your next trip can be ready in 60 seconds.'}
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10 [text-wrap:balance]">
             {isES

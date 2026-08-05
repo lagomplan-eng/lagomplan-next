@@ -203,12 +203,12 @@ function TrustStrip({ locale }: { locale: 'es' | 'en' }) {
   const stats = isES
     ? [
         { title: '+10,000 viajes generados',           text: 'Ideas personalizadas para empezar más rápido.' },
-        { title: 'Itinerarios en menos de 30 segundos', text: 'Un primer borrador útil sin fricción innecesaria.' },
+        { title: 'Itinerarios en menos de 60 segundos', text: 'Un primer borrador útil sin fricción innecesaria.' },
         { title: 'Recomendaciones curadas',             text: 'Pensadas para que el viaje se sienta más simple y mejor armado.' },
       ]
     : [
         { title: '+10,000 trips generated',             text: 'Personalised ideas to get you started faster.' },
-        { title: 'Itineraries in under 30 seconds',     text: 'A useful first draft with zero unnecessary friction.' },
+        { title: 'Itineraries in under 60 seconds',     text: 'A useful first draft with zero unnecessary friction.' },
         { title: 'Curated recommendations',             text: 'Designed to make your trip feel simpler and better put together.' },
       ]
 

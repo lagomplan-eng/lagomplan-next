@@ -311,18 +311,65 @@ const BUDGET_ICON: Record<string, string> = {
 // canonical category keys so the DB / row.category contract stays
 // stable while we evolve the user-facing wording. Also defensively
 // maps raw English keys ("accommodation", "food", …) for legacy trip
-// rows whose category never went through normalizeCategory().
-const BUDGET_CATEGORY_LABEL: Record<string, string> = {
-  Alojamiento:   'Hospedaje',
-  Actividades:   'Actividades',
-  Gastronomía:   'Gastronomía',
-  Traslados:     'Traslados',
-  Otros:         'Otros',
-  accommodation: 'Hospedaje',
-  food:          'Gastronomía',
-  activities:    'Actividades',
-  transport:     'Traslados',
-  other:         'Otros',
+// rows whose category never went through normalizeCategory(). Locale-keyed
+// — this used to be a single Spanish-only map, so English-locale trips
+// showed Spanish category headers ("Hospedaje", "Gastronomía", …)
+// regardless of the viewing locale.
+const BUDGET_CATEGORY_LABEL: Record<'es' | 'en', Record<string, string>> = {
+  es: {
+    Alojamiento:   'Hospedaje',
+    Actividades:   'Actividades',
+    Gastronomía:   'Gastronomía',
+    Traslados:     'Traslados',
+    Otros:         'Otros',
+    accommodation: 'Hospedaje',
+    food:          'Gastronomía',
+    activities:    'Actividades',
+    transport:     'Traslados',
+    other:         'Otros',
+  },
+  en: {
+    Alojamiento:   'Accommodation',
+    Actividades:   'Activities',
+    Gastronomía:   'Food',
+    Traslados:     'Transport',
+    Otros:         'Other',
+    accommodation: 'Accommodation',
+    food:          'Food',
+    activities:    'Activities',
+    transport:     'Transport',
+    other:         'Other',
+  },
+}
+
+// Display-time safety net for budget ROW labels (as opposed to the category
+// header above). Trips saved before the normalizeTripData Object.entries fix
+// have the raw schema key ("accommodation", "food", …) baked into their
+// stored trip_data.budgetRows[].label — the parse-time fix only prevents
+// this for newly-generated/regenerated trips, it can't retroactively fix
+// what's already persisted. Mirrors MobileTripClient's BUDGET_LABEL_TRANSLATE
+// so both surfaces treat already-corrupted rows the same way.
+const BUDGET_LABEL_TRANSLATE: Record<'es' | 'en', Record<string, string>> = {
+  es: {
+    accommodation: 'Alojamiento', hotel: 'Hotel', lodging: 'Alojamiento',
+    food: 'Comida', meals: 'Comidas', restaurant: 'Restaurante', dining: 'Restaurantes',
+    activities: 'Actividades', activity: 'Actividad', tours: 'Tours', tour: 'Tour',
+    transport: 'Traslados', transfer: 'Traslado', transportation: 'Traslados',
+    flight: 'Vuelo', flights: 'Vuelos',
+    entertainment: 'Entretenimiento', shopping: 'Compras', other: 'Otros',
+  },
+  en: {
+    alojamiento: 'Accommodation', hotel: 'Hotel', hospedaje: 'Accommodation',
+    comida: 'Food', comidas: 'Meals', restaurante: 'Restaurant', restaurantes: 'Dining', gastronomía: 'Food', gastronomia: 'Food',
+    actividades: 'Activities', actividad: 'Activity', tours: 'Tours', tour: 'Tour',
+    traslados: 'Transport', traslado: 'Transfer',
+    vuelo: 'Flight', vuelos: 'Flights',
+    entretenimiento: 'Entertainment', compras: 'Shopping', otros: 'Other',
+    accommodation: 'Accommodation', food: 'Food', activities: 'Activities', transport: 'Transport', other: 'Other',
+  },
+}
+function translateBudgetLabel(label: string, locale: 'es' | 'en'): string {
+  return BUDGET_LABEL_TRANSLATE[locale][label.toLowerCase().trim()] ?? label
 }
 
 // ── Item type → canonical category ───────────────────────────────────────────
@@ -723,10 +770,20 @@ function normalizeTripData(
   if (Array.isArray(rawBudget)) {
     normalizedBudget = rawBudget.map(normalizeBudgetRow)
   } else if (rawBudget && typeof rawBudget === 'object') {
-    // Handle { "Hotel": 8400, "Restaurantes": 2700 } shape
-    normalizedBudget = Object.entries(rawBudget).map(([key, val], i) =>
-      normalizeBudgetRow({ label: key, amount: val, category: key }, i)
-    )
+    // Handles two shapes:
+    //   { "Hotel": 8400, "Restaurantes": 2700 }              — flat number, no label to read
+    //   { accommodation: { label, range }, food: {...}, … }  — generate-trip's actual
+    //     budget_breakdown schema (the common case). The object KEY here is just the
+    //     JSON property name ("accommodation"), never a real label in any language —
+    //     using it as the display label (as this used to) shows literal schema keys
+    //     to the user regardless of locale. Prefer the AI's own (already-localized)
+    //     val.label when present; the key is only a fallback for the flat-number shape.
+    normalizedBudget = Object.entries(rawBudget).map(([key, val], i) => {
+      const label = (val && typeof val === 'object' && typeof (val as any).label === 'string')
+        ? (val as any).label
+        : key
+      return normalizeBudgetRow({ label, amount: val, category: key }, i)
+    })
   }
 
   // Fallback: derive from item prices when API returns no budget data
@@ -4828,7 +4885,7 @@ export default function TripResult({ params }: Props) {
                               {/* Category header */}
                               <div className="flex items-center justify-between px-4 py-[5px] bg-[#EDE7E1]">
                                 <span className="font-mono text-[8px] font-medium tracking-[.12em] uppercase text-[#7A7A76]">
-                                  {BUDGET_CATEGORY_LABEL[cat] ?? cat}
+                                  {BUDGET_CATEGORY_LABEL[isES ? 'es' : 'en'][cat] ?? cat}
                                 </span>
                                 <span className="font-mono text-[10px] font-medium text-[#3D3D3A]">
                                   {fmtAmt(catTotal)}
@@ -4868,7 +4925,7 @@ export default function TripResult({ params }: Props) {
 
                                       <div className="min-w-0">
                                         <div className="text-[11px] font-normal text-[#1C1C1A] truncate">
-                                          {row.label}
+                                          {translateBudgetLabel(row.label, isES ? 'es' : 'en')}
                                         </div>
                                         <div className="flex items-center gap-[3px] mt-[1px]">
                                           <span className={`w-[5px] h-[5px] rounded-full shrink-0 ${dotCls}`} />

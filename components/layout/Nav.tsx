@@ -134,7 +134,7 @@ export default function Nav() {
   // Feature flag — flip to `true` to re-expose the Mundial hub in the navbar.
   // The route (/es/worldcup, /en/worldcup) and all city pages stay live; this
   // only controls whether the top-level link is rendered. One-line revert.
-  const SHOW_MUNDIAL = true
+  const SHOW_MUNDIAL = false
 
   // Smart Finds — launched 2026-06-02 evening after the broader release
   // (Phase 1B, long-trip fixes, homepage refresh) settled on prod. The
