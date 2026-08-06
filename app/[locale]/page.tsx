@@ -53,7 +53,7 @@ const REVIEWS = [
     quote_es:
       'La plataforma es súper intuitiva; en tres clics pasamos de la idea al itinerario perfecto. Fue esencial para organizar nuestro viaje con total claridad y calma.',
     quote_en:
-      'The platform is incredibly intuitive — three clicks and we went from idea to the perfect itinerary. Essential for organizing our trip with total clarity and calm.',
+      'The platform is incredibly intuitive; three clicks and we went from idea to the perfect itinerary. Essential for organizing our trip with total clarity and calm.',
     name: 'Ana',
     img: '/images/reviews/ana.png',
   },
@@ -74,9 +74,9 @@ const FEATURE_LABELS: Record<
     title_es: 'Guías curadas',
     title_en: 'Curated guides',
     body_es:
-      'Destinos reales, sin relleno. Lo que vale la pena y lo que no — directo.',
+      'Destinos reales, sin relleno. Lo que vale la pena y lo que no, directo.',
     body_en:
-      "Real destinations, no filler. What's worth it and what isn't — straight to the point.",
+      "Real destinations, no filler. What's worth it and what isn't, straight to the point.",
   },
   itineraries: {
     title_es: 'Itinerario día por día',
@@ -90,9 +90,9 @@ const FEATURE_LABELS: Record<
     title_es: 'Hecho para ti',
     title_en: 'Made for you',
     body_es:
-      'Familia, pareja, ritmo relajado o intenso — el plan se adapta a cómo viajas tú.',
+      'Familia, pareja, ritmo relajado o intenso. El plan se adapta a cómo viajas tú.',
     body_en:
-      'Family, couple, relaxed or intense pace — the plan adapts to how you travel.',
+      'Family, couple, relaxed or intense pace. The plan adapts to how you travel.',
   },
   clarity: {
     title_es: 'Sin parálisis',
@@ -141,8 +141,8 @@ export default async function HomePage({
               </h1>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full [text-wrap:balance]">
                 {isES
-                  ? 'Describe tu viaje — destino, días, quién va — y en 60 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
-                  : "Describe your trip — destination, days, who's going — and in 60 seconds you get a complete itinerary with hotels, activities, and budget."}
+                  ? 'Describe tu viaje (destino, días, quién va) y en 60 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
+                  : "Describe your trip (destination, days, who's going) and in 60 seconds you get a complete itinerary with hotels, activities, and budget."}
               </p>
               <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
             </div>
@@ -233,8 +233,8 @@ export default async function HomePage({
               </h2>
               <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4 [text-wrap:pretty]">
                 {isES
-                  ? 'Planificar un viaje no debería tomar más tiempo que el viaje mismo. Creemos que el mejor plan es el que llega justo — suficiente estructura para no perderse nada, suficiente espacio para dejarse sorprender.'
-                  : "Planning a trip shouldn't take longer than the trip itself. We believe the best plan is one that lands just right — enough structure to miss nothing, enough room to be surprised."}
+                  ? 'Planificar un viaje no debería tomar más tiempo que el viaje mismo. Creemos que el mejor plan es el que llega justo: suficiente estructura para no perderse nada, suficiente espacio para dejarse sorprender.'
+                  : "Planning a trip shouldn't take longer than the trip itself. We believe the best plan is one that lands just right: enough structure to miss nothing, enough room to be surprised."}
               </p>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.8] [text-wrap:pretty]">
                 {isES
@@ -242,8 +242,8 @@ export default async function HomePage({
                   : 'The name comes from Swedish: '}
                 <strong className="text-[#0F3A33] font-semibold">lagom</strong>
                 {isES
-                  ? '. Ni mucho, ni poco — lo justo. Eso es lo que hacemos con cada viaje: encontrar el punto exacto entre explorar todo y no agotarse en el intento.'
-                  : ". Not too much, not too little — just right. That's what we do with every trip: find the exact point between seeing everything and burning out trying."}
+                  ? '. Ni mucho, ni poco: lo justo. Eso es lo que hacemos con cada viaje: encontrar el punto exacto entre explorar todo y no agotarse en el intento.'
+                  : ". Not too much, not too little: just right. That's what we do with every trip: find the exact point between seeing everything and burning out trying."}
               </p>
               <div className="flex gap-3.5 mt-8 flex-wrap">
                 <Link href="/guides" className="btn-solid">
@@ -295,7 +295,7 @@ export default async function HomePage({
                 bio_es:
                   'Profesional creativa con años de experiencia gestionando proyectos complejos, Elena es la mente estratégica detrás de LagomPlan. Casada con un sueco y viajera incansable, aplica el concepto de lagom (la medida justa) para transformar ideas en experiencias reales. Ha vivido en 5 países y visitado más de 40. Su superpoder es la comunicación: cree firmemente que el éxito de cualquier viaje radica en los mensajes claros y las conexiones auténticas.',
                 bio_en:
-                  'A creative professional with years of experience managing complex projects, Elena is the strategic mind behind LagomPlan. Married to a Swede and an tireless traveler, she applies the concept of lagom — the right measure — to turn ideas into real experiences. She has lived in 5 countries and visited more than 40. Her superpower is communication: she strongly believes that the success of any trip lies in clear messages and authentic connections.',
+                  'A creative professional with years of experience managing complex projects, Elena is the strategic mind behind LagomPlan. Married to a Swede and an tireless traveler, she applies the concept of lagom (the right measure) to turn ideas into real experiences. She has lived in 5 countries and visited more than 40. Her superpower is communication: she strongly believes that the success of any trip lies in clear messages and authentic connections.',
               },
               {
                 name: 'Pilar',
@@ -348,8 +348,8 @@ export default async function HomePage({
           </h2>
           <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8 [text-wrap:balance]">
             {isES
-              ? 'Más de 400 planes creados — esto es lo que nos cuentan.'
-              : "Over 400 plans created — here's what people tell us."}
+              ? 'Más de 400 planes creados. Esto es lo que nos cuentan.'
+              : "Over 400 plans created. Here's what people tell us."}
           </p>
           <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
             {REVIEWS.map((r) => (

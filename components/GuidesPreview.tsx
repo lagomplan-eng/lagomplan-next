@@ -15,8 +15,8 @@ export default function GuidesPreview({ locale }: { locale: Locale }) {
           </p>
           <h2 className="text-[28px] md:text-[34px] leading-tight tracking-[-0.03em] text-[#0F3A33] [text-wrap:balance]">
             {locale === 'es'
-              ? 'Los destinos que vale la pena conocer — y cómo vivirlos bien.'
-              : 'The destinations worth knowing — and how to experience them right.'}
+              ? 'Los destinos que vale la pena conocer, y cómo vivirlos bien.'
+              : 'The destinations worth knowing, and how to experience them right.'}
           </h2>
         </div>
 
