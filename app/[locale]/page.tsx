@@ -141,8 +141,8 @@ export default async function HomePage({
               </h1>
               <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full [text-wrap:balance]">
                 {isES
-                  ? 'Describe tu viaje (destino, días, quién va) y en 60 segundos tienes un itinerario completo con hoteles, actividades y presupuesto. En español.'
-                  : "Describe your trip (destination, days, who's going) and in 60 seconds you get a complete itinerary with hotels, activities, and budget."}
+                  ? 'Describe tu viaje: destino, días, quién va y en 60 segundos tienes el itinerario día por día, dónde quedarte y todo lo que falta reservar. Con lugares que no están en la lista de siempre.'
+                  : "Describe your trip: destination, days, who's going, and in 60 seconds you get the day-by-day itinerary, where to stay, and everything left to book. With places that aren't on the usual list."}
               </p>
               <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
             </div>
