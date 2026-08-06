@@ -386,7 +386,7 @@ const TYPE_TO_CATEGORY: Record<ItemType, string> = {
 function normalizeCategory(raw: string | undefined | null): string {
   const s = (raw ?? '').toLowerCase().trim()
   if (!s) return 'Otros'
-  if (/hotel|hospedaje|alojamiento|accomod|lodg|habitaci/.test(s)) return 'Alojamiento'
+  if (/hotel|hospedaje|alojamiento|accomm?od|lodg|habitaci/.test(s)) return 'Alojamiento'
   if (/tour|actividad|excursi|experiencia|activ|entrad|ticket/.test(s)) return 'Actividades'
   if (/restaur|gastro|comida|food|cena|almuerz|desayun|drink|bar/.test(s)) return 'Gastronomía'
   if (/transfer|traslado|transport|taxi|uber|vuelo|flight|avion|aeropuerto/.test(s)) return 'Traslados'
@@ -553,7 +553,12 @@ function normalizeBudgetRow(raw: any, index: number): BudgetRow {
     return {
       id:       raw.id       ?? `budget-${index}`,
       label:    raw.label    ?? `Item ${index + 1}`,
-      category: normalizeCategory(raw.category),
+      // Trips saved before the accommodation regex fix have "Otros" baked
+      // into the persisted category — re-derive from the label (which still
+      // has the real text) whenever the stored category comes back generic.
+      category: normalizeCategory(raw.category) !== 'Otros'
+        ? normalizeCategory(raw.category)
+        : normalizeCategory(raw.label),
       icon:     raw.icon,
       note:     raw.note,
       itemId:   raw.itemId,
@@ -778,12 +783,17 @@ function normalizeTripData(
     //     using it as the display label (as this used to) shows literal schema keys
     //     to the user regardless of locale. Prefer the AI's own (already-localized)
     //     val.label when present; the key is only a fallback for the flat-number shape.
-    normalizedBudget = Object.entries(rawBudget).map(([key, val], i) => {
-      const label = (val && typeof val === 'object' && typeof (val as any).label === 'string')
-        ? (val as any).label
-        : key
-      return normalizeBudgetRow({ label, amount: val, category: key }, i)
-    })
+    normalizedBudget = Object.entries(rawBudget)
+      // The AI's budget_breakdown schema includes a "total" key that is
+      // itself the sum of the other 4 — it must never become its own row,
+      // or the on-screen total double-counts it (2x the real amount).
+      .filter(([key]) => key.toLowerCase().trim() !== 'total')
+      .map(([key, val], i) => {
+        const label = (val && typeof val === 'object' && typeof (val as any).label === 'string')
+          ? (val as any).label
+          : key
+        return normalizeBudgetRow({ label, amount: val, category: key }, i)
+      })
   }
 
   // Fallback: derive from item prices when API returns no budget data
@@ -791,11 +801,15 @@ function normalizeTripData(
     normalizedBudget = deriveBudgetFromDays(normalizedDays)
   }
 
-  // Strip aggregate "Total" rows the AI sometimes appends — they're recomputed in UI
+  // Strip aggregate "Total" rows the AI sometimes appends — they're recomputed in UI.
+  // The AI often labels this row descriptively ("Total estimado para 2 personas…")
+  // rather than literally "total", so match on a leading "total" word rather than
+  // exact equality — this also retroactively cleans up trips already persisted
+  // with the bad row baked into trip_data.budgetRows.
   normalizedBudget = normalizedBudget.filter(r => {
     const lbl = r.label.toLowerCase().trim()
     const cat = r.category.toLowerCase().trim()
-    return lbl !== 'total' && cat !== 'total'
+    return !/^total\b/.test(lbl) && cat !== 'total'
   })
 
   // Structured accommodations from the server pipeline (Edge Fn → validation

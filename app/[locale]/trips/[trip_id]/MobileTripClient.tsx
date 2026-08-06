@@ -296,7 +296,7 @@ const BUDGET_CATEGORY_LABEL: Record<'es' | 'en', Record<string, string>> = {
 function normalizeCategory(raw: string | undefined | null): string {
   const s = (raw ?? '').toLowerCase().trim()
   if (!s) return 'Otros'
-  if (/hotel|hospedaje|alojamiento|accomod|lodg|habitaci/.test(s)) return 'Alojamiento'
+  if (/hotel|hospedaje|alojamiento|accomm?od|lodg|habitaci/.test(s)) return 'Alojamiento'
   if (/tour|actividad|excursi|experiencia|activ|entrad|ticket/.test(s)) return 'Actividades'
   if (/restaur|gastro|comida|food|cena|almuerz|desayun|drink|bar/.test(s)) return 'Gastronomía'
   if (/transfer|traslado|transport|taxi|uber|vuelo|flight|avion|aeropuerto/.test(s)) return 'Traslados'
@@ -369,7 +369,18 @@ export default function MobileTripClient(props: Props) {
       start, end, nights, adults: people, locale,
     }) as unknown as Accommodation[]
   }, [rawAccommodations, days.length, segments, props.durationDays, props.destination, people, locale])
-  const baseBudget = useMemo(() => asArray<BudgetRow>(props.tripData?.budgetRows), [props.tripData])
+  const baseBudget = useMemo(() => {
+    // Some persisted trips carry a stray aggregate "Total" row (the AI's own
+    // budget_breakdown.total field leaking into budgetRows) — excluding it
+    // here matches TripResult.tsx's normalizeTripData filter so category
+    // totals and lists don't include a redundant "Total estimado…" line.
+    const rows = asArray<BudgetRow>(props.tripData?.budgetRows)
+    return rows.filter(r => {
+      const lbl = (r.label ?? '').toLowerCase().trim()
+      const cat = (r.category ?? '').toLowerCase().trim()
+      return !/^total\b/.test(lbl) && cat !== 'total'
+    })
+  }, [props.tripData])
   const checks = useMemo(
     () => deriveChecksFromDays(days as unknown as LibDay[], { locale, segments: segments as any }),
     [days, locale, segments],
@@ -868,7 +879,11 @@ export default function MobileTripClient(props: Props) {
   const budgetCategories = useMemo(() => {
     const map = new Map<string, BudgetRow[]>()
     baseBudget.forEach(r => {
-      const key = normalizeCategory(r.category)
+      // Trips saved before the accommodation regex fix have "Otros" baked
+      // into the persisted category — re-derive from the label (which still
+      // has the real text) whenever the stored category comes back generic.
+      const byCategory = normalizeCategory(r.category)
+      const key = byCategory !== 'Otros' ? byCategory : normalizeCategory(r.label)
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(r)
     })
