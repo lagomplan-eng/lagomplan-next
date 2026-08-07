@@ -11,13 +11,20 @@ import type { HeroData } from '../../lib/data/guides/types'
 interface Props {
   data: HeroData
   slug: string
+  locale: string
   plannerHref: string
   onSave?: () => void
   onShare?: () => void
   onPdf?: () => void
 }
 
-export function GuideHero({ data, plannerHref, onSave, onShare, onPdf }: Props) {
+const HERO_LABELS: Record<string, { save: string; share: string; savePdf: string; planTrip: string }> = {
+  es: { save: '✓ Guardar', share: '⟶ Compartir', savePdf: '⬇ Guardar PDF', planTrip: '✦ Planear mi viaje →' },
+  en: { save: '✓ Save',    share: '⟶ Share',    savePdf: '⬇ Save PDF',    planTrip: '✦ Plan my trip →' },
+}
+
+export function GuideHero({ data, locale, plannerHref, onSave, onShare, onPdf }: Props) {
+  const labels = HERO_LABELS[locale] ?? HERO_LABELS.es
   return (
     <section
       data-guide="hero"
@@ -74,7 +81,7 @@ export function GuideHero({ data, plannerHref, onSave, onShare, onPdf }: Props) 
                   onClick={onSave}
                   className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  ✓ Guardar
+                  {labels.save}
                 </button>
               )}
               {onSave && onShare && (
@@ -86,7 +93,7 @@ export function GuideHero({ data, plannerHref, onSave, onShare, onPdf }: Props) 
                   onClick={onShare}
                   className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  ⟶ Compartir
+                  {labels.share}
                 </button>
               )}
               {onShare && (
@@ -98,14 +105,14 @@ export function GuideHero({ data, plannerHref, onSave, onShare, onPdf }: Props) 
                   onClick={onPdf}
                   className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
                 >
-                  ⬇ Guardar PDF
+                  {labels.savePdf}
                 </button>
               )}
               <a
                 href={plannerHref}
                 className="inline-flex items-center gap-2 font-mono text-[11px] font-medium tracking-[.08em] uppercase text-white bg-[#0F3A33] px-5 py-2.5 rounded-lg transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(15,58,51,.25)] ml-auto"
               >
-                ✦ Planear mi viaje →
+                {labels.planTrip}
               </a>
             </div>
           </div>

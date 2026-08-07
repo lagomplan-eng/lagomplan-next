@@ -142,6 +142,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
       <GuideHero
         data={data.hero}
         slug={data.slug}
+        locale={locale}
         plannerHref={plannerHref}
         onSave={handleSave}
         onShare={handleShare}

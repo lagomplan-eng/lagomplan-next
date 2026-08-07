@@ -102,6 +102,13 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
       ? `¿Viajando a ${flat.hero.title}?`
       : `Heading to ${flat.hero.title}?`
 
+  // Derive tips title from hero — must branch per locale like planCtaTitle
+  // above; "para" is Spanish-only and previously leaked onto EN pages.
+  const tipsTitle =
+    loc === 'es'
+      ? `${l.tipsTitle} para ${flat.hero.title}`
+      : `${l.tipsTitle} for ${flat.hero.title}`
+
   return {
     slug:   flat.slug,
     locale: flat.locale,
@@ -163,7 +170,7 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
 
     tips: {
       eyebrow: l.tipsEyebrow,
-      title:   `${l.tipsTitle} para ${flat.hero.title}`,
+      title:   tipsTitle,
       items:   flat.tips,
       funFact: flat.funFact
         ? { eyebrow: l.funFactEyebrow, text: flat.funFact }
