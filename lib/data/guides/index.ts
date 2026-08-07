@@ -73,6 +73,10 @@ import { guide as esloveniaEn } from './eslovenia/en'
 import { guide as islasFeroeEs } from './islas-feroe/es'
 import { guide as islasFeroeEn } from './islas-feroe/en'
 
+// International guides (August 2026 batch)
+import { guide as torresDelPaineEs } from './torres-del-paine/es'
+import { guide as torresDelPaineEn } from './torres-del-paine/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -107,6 +111,8 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'albania':            { es: albaniaEs,            en: albaniaEn },
   'eslovenia':          { es: esloveniaEs,          en: esloveniaEn },
   'islas-feroe':        { es: islasFeroeEs,         en: islasFeroeEn },
+  // International guides (August 2026 batch)
+  'torres-del-paine':   { es: torresDelPaineEs,     en: torresDelPaineEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────

@@ -1096,6 +1096,22 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/islas-feroe.jpg',
     sections: [],
   },
+
+  // ── Torres del Paine ───────────────────────────────────────
+  {
+    slug_es: 'torres-del-paine',
+    slug_en: 'torres-del-paine',
+    title_es: 'Torres del Paine',
+    title_en: 'Torres del Paine',
+    excerpt_es: 'Agosto es un gran momento para ir a las Torres del Paine: el parque casi solo, los mismos lagos de un azul imposible, con 40% menos de precio que en temporada alta y nieve en las montañas para las fotos más dramáticas del año.',
+    excerpt_en: "August is a great time to visit Torres del Paine: the park almost to yourself, the same impossibly blue lakes, 40% lower prices than high season, and snow on the mountains for the year's most dramatic photos.",
+    destination_es: 'Torres del Paine, Chile',
+    destination_en: 'Torres del Paine, Chile',
+    tags_es: ['Pareja', 'Trekking', 'Naturaleza'],
+    tags_en: ['Couple', 'Trekking', 'Nature'],
+    cover_img: '/images/guides/torres-del-paine.jpg',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────
