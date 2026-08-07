@@ -6,7 +6,7 @@ export const guide: FlatGuide = {
 
   hero: {
     title: 'Torres del Paine, Chile',
-    subtitle: 'Agosto es un gran momento para ir a las Torres del Paine. La temporada alta de diciembre tiene colas para el trekking y precios de resort. Agosto tiene el parque casi solo, los mismos guanacos, el mismo Paine Grande y los mismos lagos de un azul imposible, con 40% menos de precio y nieve en las puntas de las montañas que hace las fotos más dramáticas del año. EcoCamp fue el primer alojamiento sustentable del parque en 1997. Sigue siendo el mejor argumento para que dormir en Patagonia no cueste lo que cuesta un coche.',
+    subtitle: 'Agosto es un gran momento para ir a las Torres del Paine. La temporada alta de diciembre tiene colas para el trekking y precios de resort; agosto tiene el parque casi solo, los mismos guanacos y los mismos lagos de un azul imposible, con 40% menos de precio y nieve en las montañas que hace las fotos más dramáticas del año.',
     eyebrow: 'Guía curada · Pareja sin hijos · Torres del Paine · 8 días · Presupuesto bajo',
     tags: ['Pareja', 'Trekking', 'Naturaleza'],
     image: '/images/guides/torres-del-paine.jpg',

@@ -6,7 +6,7 @@ export const guide: FlatGuide = {
 
   hero: {
     title: 'Torres del Paine, Chile',
-    subtitle: 'August is a great time to visit Torres del Paine. High season in December means lines for the trek and resort prices. August has the park almost to yourself, the same guanacos, the same Paine Grande, and the same impossibly blue lakes, with 40% lower prices and snow on the mountain peaks that makes for the most dramatic photos of the year. EcoCamp was the park\'s first sustainable lodging in 1997. It remains the best argument that sleeping in Patagonia shouldn\'t cost what a car costs.',
+    subtitle: 'August is a great time to visit Torres del Paine. High season in December means lines for the trek and resort prices; August has the park almost to yourself, the same guanacos, and the same impossibly blue lakes, with 40% lower prices and snow on the mountains for the most dramatic photos of the year.',
     eyebrow: 'Curated guide · Couple, no kids · Torres del Paine · 8 days · Low budget',
     tags: ['Couple', 'Trekking', 'Nature'],
     image: '/images/guides/torres-del-paine.jpg',
