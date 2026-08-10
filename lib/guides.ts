@@ -1112,6 +1112,70 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/torres-del-paine.jpg',
     sections: [],
   },
+
+  // ── Westfjords, Islandia ───────────────────────────────────
+  {
+    slug_es: 'westfjords-islandia',
+    slug_en: 'westfjords-islandia',
+    title_es: 'Westfjords, Islandia',
+    title_en: 'Westfjords, Iceland',
+    excerpt_es: 'Islandia sin cola. Mientras el anillo dorado procesa autobuses hacia el mismo géiser desde 1970, los Westfjords tienen la cascada más impresionante del país, los acantilados de pájaro más verticales de Europa y una reserva natural accesible solo en barco, hogar de zorros árticos.',
+    excerpt_en: "Iceland without the line. While the Golden Circle buses tourists toward the same geyser it has since 1970, the Westfjords have the country's most impressive waterfall, Europe's most vertical bird cliffs, and a nature reserve reachable only by boat, home to Arctic foxes.",
+    destination_es: 'Westfjords, Islandia',
+    destination_en: 'Westfjords, Iceland',
+    tags_es: ['Familia', 'Adolescentes', 'Naturaleza'],
+    tags_en: ['Family', 'Teens', 'Nature'],
+    cover_img: '/images/guides/westfjords-islandia.jpg',
+    sections: [],
+  },
+
+  // ── Ruanda ───────────────────────────────────────────────────
+  {
+    slug_es: 'ruanda',
+    slug_en: 'ruanda',
+    title_es: 'Parque Nacional de los Volcanes, Ruanda',
+    title_en: 'Volcanoes National Park, Rwanda',
+    excerpt_es: 'El destino más caro por día de África es también el que tiene el impacto de conservación más medible del continente. Un permiso de $1,500 USD protege a los últimos 1,000 gorilas de montaña del planeta y financia a las comunidades del borde del bosque.',
+    excerpt_en: "Africa's most expensive destination per day is also the one with the continent's most measurable conservation impact. A $1,500 USD permit protects the planet's last 1,000 mountain gorillas and funds the communities living at the forest's edge.",
+    destination_es: 'Parque Nacional de los Volcanes, Ruanda',
+    destination_en: 'Volcanoes National Park, Rwanda',
+    tags_es: ['Solo', 'Aventura', 'Naturaleza'],
+    tags_en: ['Solo', 'Adventure', 'Nature'],
+    cover_img: '/images/guides/ruanda.jpg',
+    sections: [],
+  },
+
+  // ── Napa Valley & Sonoma ───────────────────────────────────
+  {
+    slug_es: 'napa-sonoma',
+    slug_en: 'napa-sonoma',
+    title_es: 'Napa Valley & Sonoma, California',
+    title_en: 'Napa Valley & Sonoma, California',
+    excerpt_es: 'El primer valle vitícola del mundo con programa de certificación sustentable. Cinco días diseñados para beber bien, pedalear entre viñedos orgánicos y descubrir que la viticultura regenerativa no es una moda, es el motivo por el que este valle sigue produciendo los mejores vinos de Norteamérica.',
+    excerpt_en: "The world's first wine region with a sustainability certification program. Five days built around drinking well, cycling through organic vineyards, and discovering that regenerative viticulture isn't a trend — it's the reason this valley still produces North America's best wines.",
+    destination_es: 'Napa Valley & Sonoma, California',
+    destination_en: 'Napa Valley & Sonoma, California',
+    tags_es: ['Pareja', 'Vino', 'Sostenibilidad'],
+    tags_en: ['Couple', 'Wine', 'Sustainability'],
+    cover_img: '/images/guides/napa-sonoma.jpg',
+    sections: [],
+  },
+
+  // ── Alto Adigio y Dolomitas ────────────────────────────────
+  {
+    slug_es: 'alto-adigio-dolomitas',
+    slug_en: 'alto-adigio-dolomitas',
+    title_es: 'Alto Adigio / Südtirol, Italia',
+    title_en: 'South Tyrol, Italy',
+    excerpt_es: 'La región italiana que genera más del 60% de su energía de fuentes renovables, muy por encima de la media nacional del 20%. Los Dolomitas son Patrimonio UNESCO desde 2009. Para la familia que quiere las montañas más fotogénicas de Europa.',
+    excerpt_en: 'The Italian region that generates more than 60% of its energy from renewable sources, well above the national average of 20%. The Dolomites have been a UNESCO World Heritage Site since 2009. For the family that wants Europe\'s most photogenic mountains.',
+    destination_es: 'Alto Adigio / Südtirol, Italia',
+    destination_en: 'South Tyrol, Italy',
+    tags_es: ['Familia', 'Niños pequeños', 'Naturaleza'],
+    tags_en: ['Family', 'Young kids', 'Nature'],
+    cover_img: '/images/guides/alto-adigio-dolomitas.jpg',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────

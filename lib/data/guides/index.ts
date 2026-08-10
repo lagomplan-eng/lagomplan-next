@@ -76,6 +76,14 @@ import { guide as islasFeroeEn } from './islas-feroe/en'
 // International guides (August 2026 batch)
 import { guide as torresDelPaineEs } from './torres-del-paine/es'
 import { guide as torresDelPaineEn } from './torres-del-paine/en'
+import { guide as westfjordsIslandiaEs } from './westfjords-islandia/es'
+import { guide as westfjordsIslandiaEn } from './westfjords-islandia/en'
+import { guide as ruandaEs } from './ruanda/es'
+import { guide as ruandaEn } from './ruanda/en'
+import { guide as napaSonomaEs } from './napa-sonoma/es'
+import { guide as napaSonomaEn } from './napa-sonoma/en'
+import { guide as altoAdigioDolomitasEs } from './alto-adigio-dolomitas/es'
+import { guide as altoAdigioDolomitasEn } from './alto-adigio-dolomitas/en'
 
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
@@ -113,6 +121,10 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'islas-feroe':        { es: islasFeroeEs,         en: islasFeroeEn },
   // International guides (August 2026 batch)
   'torres-del-paine':   { es: torresDelPaineEs,     en: torresDelPaineEn },
+  'westfjords-islandia': { es: westfjordsIslandiaEs, en: westfjordsIslandiaEn },
+  'ruanda':              { es: ruandaEs,             en: ruandaEn },
+  'napa-sonoma':         { es: napaSonomaEs,         en: napaSonomaEn },
+  'alto-adigio-dolomitas': { es: altoAdigioDolomitasEs, en: altoAdigioDolomitasEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────
