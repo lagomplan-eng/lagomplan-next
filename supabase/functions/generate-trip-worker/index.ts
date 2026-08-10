@@ -24,6 +24,7 @@
 
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { normalizeJobInputsForTripsInsert } from './logic.ts'
 
 const SUPABASE_URL      = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -186,7 +187,9 @@ function addDaysISO(isoDate: string, days: number): string {
   return d.toISOString().slice(0, 10)
 }
 
-async function generateSegment(jobInputs: Record<string, any>, chunkIndex: number, totalChunks: number, prevSummary: string | null, signal: AbortSignal): Promise<ChunkContent> {
+type SegmentResult = { chunk: ChunkContent; budgetCurrencySuspect: boolean | null }
+
+async function generateSegment(jobInputs: Record<string, any>, chunkIndex: number, totalChunks: number, prevSummary: string | null, signal: AbortSignal): Promise<SegmentResult> {
   const multiCity = getTripSegments(jobInputs)
 
   let segmentPayload: Record<string, any>
@@ -271,7 +274,13 @@ async function generateSegment(jobInputs: Record<string, any>, chunkIndex: numbe
     console.log('[worker] chunk[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
     console.log('[worker] chunk[0] mode:', multiCity ? 'multi-city (sub-chunked)' : 'single-city')
   }
-  return res.trip_data
+  return {
+    chunk: res.trip_data,
+    // Only meaningful for chunk 0 — assembleResult() already treats chunk 0
+    // as the sole source of budget_breakdown, so later chunks' flags (if
+    // any) are never acted on by the caller.
+    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
+  }
 }
 
 // Pull days from a chunk regardless of where the field lives. The sync endpoint
@@ -602,8 +611,11 @@ serve(async (req: Request) => {
     const t = setTimeout(() => ctrl.abort(), Math.min(CHUNK_TIMEOUT_MS, remainingBudget - 2_000))
 
     let chunk: ChunkContent
+    let chunkBudgetCurrencySuspect: boolean | null = null
     try {
-      chunk = await generateSegment(job.inputs, i, job.chunks_total, prevSummary, ctrl.signal)
+      const segResult = await generateSegment(job.inputs, i, job.chunks_total, prevSummary, ctrl.signal)
+      chunk = segResult.chunk
+      chunkBudgetCurrencySuspect = segResult.budgetCurrencySuspect
     } catch (e) {
       clearTimeout(t)
       await admin
@@ -646,9 +658,16 @@ serve(async (req: Request) => {
         .insert({ job_id: job.id, chunk_index: i, content: chunk })
       if (insertErr) throw new Error(`chunks insert failed: ${insertErr.message}`)
 
+      // Persist chunk 0's currency sanity-check flag onto the job row here,
+      // not just carried in-memory — completion (where it eventually feeds
+      // the trips insert) can happen in a LATER, separate Edge Function
+      // invocation via the self-reinvoke chain below, which starts with a
+      // fresh in-memory state and would otherwise lose it.
+      const chunksDoneUpdate: Record<string, unknown> = { chunks_done: i + 1 }
+      if (i === 0) chunksDoneUpdate.budget_currency_suspect = chunkBudgetCurrencySuspect
       const { error: updateErr } = await admin
         .from('generation_jobs')
-        .update({ chunks_done: i + 1 })
+        .update(chunksDoneUpdate)
         .eq('id', job.id)
       if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
 
@@ -700,10 +719,14 @@ serve(async (req: Request) => {
     prevSummary = shortSummary(chunk)
   }
 
-  // Re-read job to see if we finished
+  // Re-read job to see if we finished. budget_currency_suspect is read back
+  // here rather than from the in-memory chunkBudgetCurrencySuspect above —
+  // this invocation may not be the one that generated chunk 0 (self-reinvoke
+  // chain), so the DB row (written when chunk 0 landed, in whichever
+  // invocation that was) is the only reliable source at completion time.
   const { data: final } = await admin
     .from('generation_jobs')
-    .select('chunks_done, chunks_total')
+    .select('chunks_done, chunks_total, budget_currency_suspect')
     .eq('id', job.id)
     .single()
 
@@ -769,22 +792,14 @@ serve(async (req: Request) => {
     .toLowerCase()
     .replace(/[^a-z0-9-]+/g, '-')
 
-  // Normalize enum-typed columns to match what the DB accepts. Mirrors
-  // /api/trips/route.ts so the worker stays in lock-step with the sync path.
-  // Without this, 'Equilibrado' / 'Familia' / etc. get rejected by the
+  // Normalize enum-typed columns (+ currency) to match what the DB accepts
+  // and what the client actually sent. Mirrors /api/trips/route.ts so the
+  // worker stays in lock-step with the sync path. Without the enum
+  // normalization, 'Equilibrado' / 'Familia' / etc. get rejected by the
   // travel_style / traveler_type enum constraints and the insert fails.
-  const VALID_TRAVELERS  = ['solo', 'pareja', 'familia', 'amigos']
-  const VALID_PACES      = ['relajado', 'equilibrado', 'activo']
-  const rawTraveler      = (job.inputs as any).traveler
-  const rawPace          = (job.inputs as any).pace
-  const travelerNorm     = typeof rawTraveler === 'string'
-    ? rawTraveler.toLowerCase()
-    : null
-  const paceNorm         = typeof rawPace === 'string'
-    ? rawPace.toLowerCase()
-    : null
-  const travelersValue   = travelerNorm && VALID_TRAVELERS.includes(travelerNorm) ? travelerNorm : null
-  const travelStyleValue = paceNorm     && VALID_PACES.includes(paceNorm)         ? paceNorm     : null
+  // currency previously wasn't read here at all — see logic.ts.
+  const { travelers: travelersValue, travel_style: travelStyleValue, currency: currencyValue } =
+    normalizeJobInputsForTripsInsert(job.inputs)
 
   const insertPayload = {
     slug:          tripSlug,
@@ -798,6 +813,8 @@ serve(async (req: Request) => {
     travel_style:  travelStyleValue,
     budget_level:  (job.inputs as any).budget_level ?? (job.inputs as any).budget ?? "medium",
     interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
+    currency:      currencyValue,
+    budget_currency_suspect: typeof final.budget_currency_suspect === 'boolean' ? final.budget_currency_suspect : null,
     // Partner referral stamp folded into job.inputs by /api/trips/jobs.
     ref_source:    (job.inputs as any).ref_source ?? null,
   }

@@ -1728,6 +1728,8 @@ export default function TripResult({ params }: Props) {
             const result = await runAsyncGeneration(payload, controller.signal, session)
             tripDataRaw = result.tripDataRaw
             asyncTripId = result.tripId
+            budgetCurrencySuspectValue = result.budgetCurrencySuspect
+            setBudgetCurrencySuspect(budgetCurrencySuspectValue)
             genStatus = 200
           } catch (e: any) {
             if (e?.code === 'redirect_to_login') return
@@ -2166,7 +2168,7 @@ export default function TripResult({ params }: Props) {
     payload: any,
     signal: AbortSignal | undefined,
     session: any,
-  ): Promise<{ tripDataRaw: any; tripId: string | null }> {
+  ): Promise<{ tripDataRaw: any; tripId: string | null; budgetCurrencySuspect: boolean | null }> {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' }
     if (session?.access_token) headers.Authorization = `Bearer ${session.access_token}`
 
@@ -2324,7 +2326,11 @@ export default function TripResult({ params }: Props) {
         // normalize → save → setTripId flow takes over from here. Streaming
         // flag resets so any "more coming" UI cue disappears.
         setIsStreamingPartial(false)
-        return { tripDataRaw: pollData.trip_data, tripId: pollData.tripId ?? null }
+        return {
+          tripDataRaw: pollData.trip_data,
+          tripId: pollData.tripId ?? null,
+          budgetCurrencySuspect: typeof pollData.budget_currency_suspect === 'boolean' ? pollData.budget_currency_suspect : null,
+        }
       }
       if (pollData.status === 'failed') {
         setIsStreamingPartial(false)
@@ -2426,6 +2432,8 @@ export default function TripResult({ params }: Props) {
           const result = await runAsyncGeneration(payload, undefined, session)
           tripDataRaw = result.tripDataRaw
           asyncTripId = result.tripId
+          budgetCurrencySuspectValue = result.budgetCurrencySuspect
+          setBudgetCurrencySuspect(budgetCurrencySuspectValue)
         } catch (e: any) {
           if (e?.code === 'redirect_to_login') return
           if (e?.code === 'paywall') {
@@ -2853,6 +2861,8 @@ export default function TripResult({ params }: Props) {
           const result = await runAsyncGeneration(payload, undefined, session)
           tripDataRaw = result.tripDataRaw
           asyncTripId = result.tripId
+          budgetCurrencySuspectValue = result.budgetCurrencySuspect
+          setBudgetCurrencySuspect(budgetCurrencySuspectValue)
         } catch (e: any) {
           if (e?.code === 'redirect_to_login') return
           if (e?.code === 'paywall') {

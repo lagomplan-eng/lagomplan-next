@@ -35,7 +35,7 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     const admin = getSupabaseAdmin()
     const { data, error } = await (admin as any)
       .from('generation_jobs')
-      .select('id, user_id, status, chunks_total, chunks_done, result, partial_result, error, trip_id, updated_at')
+      .select('id, user_id, status, chunks_total, chunks_done, result, partial_result, error, trip_id, updated_at, budget_currency_suspect')
       .eq('id', id)
       .single()
 
@@ -96,6 +96,12 @@ export async function GET(req: NextRequest, context: { params: Promise<{ id: str
     if (data.status === 'completed') {
       payload.trip_data = data.result
       payload.tripId    = data.trip_id
+      // The worker already wrote this straight into the trips row it
+      // inserted — surfacing it here too so the client's in-memory state
+      // matches without requiring a reload, same as the sync path.
+      if (typeof data.budget_currency_suspect === 'boolean') {
+        payload.budget_currency_suspect = data.budget_currency_suspect
+      }
     }
     if (data.status === 'failed') {
       payload.error = data.error ?? 'generation_failed'
