@@ -1189,6 +1189,13 @@ export default function TripResult({ params }: Props) {
   const [budgetCurrency, setBudgetCurrency] = useState<'MXN' | 'USD'>(
     currencyParam === 'USD' ? 'USD' : 'MXN'
   )
+  // Set once per AI generation (initial gen / regenerate / replaceTrip) from
+  // the Edge Function's budget_currency_suspect flag — a rough sanity check
+  // on whether budget_breakdown's numbers actually landed in the requested
+  // currency. Persisted as-is through later autosaves (like tripTitle) —
+  // never recomputed from a later display-only currency toggle, since it
+  // describes the generation event, not the current display preference.
+  const [budgetCurrencySuspect, setBudgetCurrencySuspect] = useState<boolean | null>(null)
 
   // ── Edit modal state ─────────────────────────────────────────────────────────
   const [editModalItem, setEditModalItem] = useState<ItineraryItem | null>(null)
@@ -1418,6 +1425,9 @@ export default function TripResult({ params }: Props) {
         // C1 — hydrate the budget currency from DB so USD/MXN survives refresh.
         if ((data as any).currency === 'USD' || (data as any).currency === 'MXN') {
           setBudgetCurrency((data as any).currency)
+        }
+        if (typeof (data as any).budget_currency_suspect === 'boolean') {
+          setBudgetCurrencySuspect((data as any).budget_currency_suspect)
         }
         setTripId(savedTripId)
         setRawTripData(data.trip_data ?? null)
@@ -1674,7 +1684,7 @@ export default function TripResult({ params }: Props) {
             : prefTraveler === 'amigos'
             ? { group_count: prefGroupCount }
             : undefined
-        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, segments: segments.length > 0 ? segments : undefined, locale }
+        const payload = { destination, origin, start, end, nights, duration_days, traveler, traveler_details, interests: parsedInterests, pace, budget, currency: budgetCurrency, segments: segments.length > 0 ? segments : undefined, locale }
 
         // Abort any in-flight generation from a prior effect run (auth state
         // transitions can retrigger this effect while the first fetch is still
@@ -1706,6 +1716,11 @@ export default function TripResult({ params }: Props) {
 
         let tripDataRaw: any = null
         let asyncTripId: string | null = null
+        // Local mirror of the state setter below — the immediate save a few
+        // lines down runs before the setBudgetCurrencySuspect state update
+        // has propagated, so it needs a same-tick value, not the (still
+        // stale) React state.
+        let budgetCurrencySuspectValue: boolean | null = null
 
         if (useAsync) {
           // ── Async: helper handles POST + polling loop ────────────────────
@@ -1744,6 +1759,12 @@ export default function TripResult({ params }: Props) {
             throw new Error(base + detail)
           }
           tripDataRaw = genData?.trip_data
+          // Sync path only — the async job/worker path doesn't yet surface
+          // this flag through the polling response, so it stays null there.
+          if (typeof genData?.budget_currency_suspect === 'boolean') {
+            budgetCurrencySuspectValue = genData.budget_currency_suspect
+            setBudgetCurrencySuspect(budgetCurrencySuspectValue)
+          }
         }
         if (!tripDataRaw) throw new Error(`No trip_data in response.`)
 
@@ -1827,6 +1848,7 @@ export default function TripResult({ params }: Props) {
                   traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
                   traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
                   currency:             budgetCurrency,
+                  budget_currency_suspect: budgetCurrencySuspectValue,
                   walking_tolerance:    walkingTolerance,
                 }),
               })
@@ -1986,7 +2008,7 @@ export default function TripResult({ params }: Props) {
       title: tripTitle, subtitle: tripSubtitle, days, packing, budgetRows, doneChecks: doneChecksArr,
       travelers: prefTraveler, traveler_adults: prefAdults,
       traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
-      currency: budgetCurrency,
+      currency: budgetCurrency, budget_currency_suspect: budgetCurrencySuspect,
     })
     if (content === lastSavedContentRef.current) return   // nothing changed
 
@@ -2008,6 +2030,7 @@ export default function TripResult({ params }: Props) {
       traveler_children:    childrenSerial,
       traveler_group_count: groupCountSerial,
       currency:             budgetCurrency,
+      budget_currency_suspect: budgetCurrencySuspect,
     })
 
     // Exponential backoff: ~6.5s window covers most transient blips (cookie
@@ -2081,11 +2104,12 @@ export default function TripResult({ params }: Props) {
     prefChildren:  [] as Child[],
     prefGroupCount: 2,
     budgetCurrency: 'MXN' as 'MXN' | 'USD',
+    budgetCurrencySuspect: null as boolean | null,
   })
   useEffect(() => {
     flushSnapshotRef.current = {
       tripId, tripTitle, tripSubtitle, days, packing, budgetRows, accommodations, doneCheckIds,
-      prefTraveler, prefAdults, prefChildren, prefGroupCount, budgetCurrency,
+      prefTraveler, prefAdults, prefChildren, prefGroupCount, budgetCurrency, budgetCurrencySuspect,
     }
   })
   useEffect(() => {
@@ -2099,7 +2123,7 @@ export default function TripResult({ params }: Props) {
         title: s.tripTitle, subtitle: s.tripSubtitle, days: s.days, packing: s.packing, budgetRows: s.budgetRows, doneChecks: doneChecksArr,
         travelers: s.prefTraveler, traveler_adults: s.prefAdults,
         traveler_children: childrenSerial, traveler_group_count: groupCountSerial,
-        currency: s.budgetCurrency,
+        currency: s.budgetCurrency, budget_currency_suspect: s.budgetCurrencySuspect,
       })
       if (content === lastSavedContentRef.current) return
       try {
@@ -2116,6 +2140,7 @@ export default function TripResult({ params }: Props) {
             traveler_children:    childrenSerial,
             traveler_group_count: groupCountSerial,
             currency:             s.budgetCurrency,
+            budget_currency_suspect: s.budgetCurrencySuspect,
           }),
         })
       } catch {}
@@ -2376,7 +2401,7 @@ export default function TripResult({ params }: Props) {
         // tripId marks this as a regeneration → server skips credit consumption.
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
-        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget, currency: budgetCurrency,
         segments: segments.length > 0 ? segments : undefined,
         locale,
       }
@@ -2390,6 +2415,9 @@ export default function TripResult({ params }: Props) {
 
       let tripDataRaw: any = null
       let asyncTripId: string | null = null
+      // Same-tick local mirror — see the identical comment on the initial-gen
+      // effect above.
+      let budgetCurrencySuspectValue: boolean | null = null
 
       if (useAsync) {
         const supabase = getSupabaseBrowser()
@@ -2424,6 +2452,10 @@ export default function TripResult({ params }: Props) {
           throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
         }
         tripDataRaw = genData?.trip_data
+        if (typeof genData?.budget_currency_suspect === 'boolean') {
+          budgetCurrencySuspectValue = genData.budget_currency_suspect
+          setBudgetCurrencySuspect(budgetCurrencySuspectValue)
+        }
         if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       }
 
@@ -2494,6 +2526,7 @@ export default function TripResult({ params }: Props) {
               traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
               traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
               currency:             budgetCurrency,
+              budget_currency_suspect: budgetCurrencySuspectValue,
               walking_tolerance:    walkingTolerance,
             }
             console.log('[regenerate] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)
@@ -2794,7 +2827,7 @@ export default function TripResult({ params }: Props) {
         // tripId marks this as a regeneration → server skips credit consumption.
         tripId,
         destination: prefDest, origin: prefOrigin, start: prefStart, end: prefEnd,
-        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget,
+        nights: nightsForPayload, duration_days, traveler: prefTraveler, traveler_details, interests: parsedInterests, pace: prefPace, budget: prefBudget, currency: budgetCurrency,
         segments: segments.length > 0 ? segments : undefined,
         locale,
       }
@@ -2809,6 +2842,9 @@ export default function TripResult({ params }: Props) {
 
       let tripDataRaw: any = null
       let asyncTripId: string | null = null
+      // Same-tick local mirror — see the identical comment on the initial-gen
+      // effect above.
+      let budgetCurrencySuspectValue: boolean | null = null
 
       if (useAsync) {
         const supabase = getSupabaseBrowser()
@@ -2841,6 +2877,10 @@ export default function TripResult({ params }: Props) {
           throw new Error(typeof genData?.error === 'string' ? genData.error : 'Generation failed')
         }
         tripDataRaw = genData?.trip_data
+        if (typeof genData?.budget_currency_suspect === 'boolean') {
+          budgetCurrencySuspectValue = genData.budget_currency_suspect
+          setBudgetCurrencySuspect(budgetCurrencySuspectValue)
+        }
         if (!tripDataRaw) throw new Error(`No trip_data. Got: ${JSON.stringify(genData)}`)
       }
 
@@ -2906,6 +2946,7 @@ export default function TripResult({ params }: Props) {
             traveler_children:    prefChildren.map(c => ({ type: c.type, age: c.age })),
             traveler_group_count: prefTraveler === 'amigos' ? prefGroupCount : null,
             currency:             budgetCurrency,
+            budget_currency_suspect: budgetCurrencySuspectValue,
             walking_tolerance:    walkingTolerance,
           }
           console.log('[replaceTrip] autosave body:', { ...autosaveBody, trip_data: '[omitted]' }, 'previousTripId:', previousTripId)

@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       destination, origin, duration_days,
       travelers, travel_style, budget_level, interests, trip_data,
       traveler_adults, traveler_children, traveler_group_count,
-      currency,
+      currency, budget_currency_suspect,
       walking_tolerance,
     } = body
 
@@ -159,6 +159,14 @@ export async function POST(req: NextRequest) {
     // currency: enum-style TEXT ('USD' | 'MXN'). Invalid values fall back to
     // the column default rather than 400ing the request.
     if (currency === 'USD' || currency === 'MXN') insertPayload.currency = currency
+
+    // budget_currency_suspect: nullable boolean sanity-check flag computed
+    // by generate-trip/index.ts at generation time. Only set when the client
+    // actually sent a real boolean — omitted/malformed leaves the column at
+    // its NULL default ("not evaluated") rather than coercing to false.
+    if (typeof budget_currency_suspect === 'boolean') {
+      insertPayload.budget_currency_suspect = budget_currency_suspect
+    }
 
     // Partner referral stamp (see lib/attribution/ref-source.ts). Read once,
     // server-side, from the first-party lagom_ref cookie the guest guide

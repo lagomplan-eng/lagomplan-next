@@ -28,6 +28,7 @@ export interface Database {
           share_id:     string | null   // UUID — non-guessable share token
           is_shared:    boolean         // false until owner explicitly shares
           is_public_example: boolean    // true for curated /ejemplos showcase trips
+          budget_currency_suspect: boolean | null  // null = not evaluated; see generate-trip/index.ts
         }
         Insert: {
           id?:           string
@@ -47,6 +48,7 @@ export interface Database {
           share_id?:     string | null
           is_shared?:    boolean
           is_public_example?: boolean
+          budget_currency_suspect?: boolean | null
         }
         Update: Partial<Database['public']['Tables']['trips']['Insert']>
       }

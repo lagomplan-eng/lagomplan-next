@@ -103,7 +103,7 @@ export async function PATCH(
       title, trip_data,
       travelers, travel_style, budget_level, interests,
       traveler_adults, traveler_children, traveler_group_count,
-      currency,
+      currency, budget_currency_suspect,
     } = body
 
     const supabase = await getSupabaseServer()
@@ -144,6 +144,13 @@ export async function PATCH(
     // currency — only accept the two known values; anything else is ignored
     // rather than 400ing the autosave.
     if (currency === 'USD' || currency === 'MXN') updatePayload.currency = currency
+    // budget_currency_suspect — generation-time sanity-check flag; only
+    // written when the client sends a real boolean, so an autosave that
+    // doesn't touch it (e.g. a checklist toggle) can't accidentally wipe it
+    // back to NULL.
+    if (typeof budget_currency_suspect === 'boolean') {
+      updatePayload.budget_currency_suspect = budget_currency_suspect
+    }
 
     if (Object.keys(updatePayload).length === 0) {
       return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })

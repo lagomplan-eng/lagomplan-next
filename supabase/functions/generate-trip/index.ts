@@ -1,6 +1,9 @@
- // supabase/functions/generate-trip/index.ts                                                                 
+ // supabase/functions/generate-trip/index.ts
   import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-  import { WC_2026_CALENDAR, WC_HOST_CITY_HINTS, type WcMatch } from "./wc-2026-calendar.ts";                                          
+  import { WC_2026_CALENDAR, WC_HOST_CITY_HINTS, type WcMatch } from "./wc-2026-calendar.ts";
+  import {
+    buildInput, isFamilyTraveler, computeHeadcount, isBudgetCurrencySuspect,
+  } from "./logic.ts";
                                                             
   const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");                                                   
                                                                                                                  
@@ -626,6 +629,11 @@ ${dayMap.join("\n")}
     return `\n\n  ${header}\n${rangeLine ? rangeLine + "\n" : ""}${prevLine ? prevLine + "\n" : ""}${intent}`;
   }
 
+  // computeHeadcount / isBudgetCurrencySuspect now live in ./logic.ts (pure,
+  // no Deno deps) so tests/generate-trip-headcount-currency.test.ts can
+  // import and exercise them directly without spinning up Deno or the
+  // network.
+
   function buildPrompt(input: any): string {
     const locale: Locale = input.locale === "en" ? "en" : "es";
     const isEN = locale === "en";
@@ -754,10 +762,14 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     // short on purpose — the user warned us not to overcorrect into "family
     // spam".
     const td           = input.traveler_details
-    const isFamily     = input.travelers === "familia"
+    const isFamily     = isFamilyTraveler(input)
     const familyAdults   = typeof td?.adults === "number" && td.adults > 0 ? td.adults : 2
     const familyChildren = Array.isArray(td?.children) ? td.children : []
     const hasChildren     = isFamily && familyChildren.length > 0
+    // Real headcount for the "X person(s)" data line — `input.travelers` is
+    // the party-type category ("solo"/"pareja"/"familia"/"amigos"), never a
+    // number, so it can't be used directly there.
+    const headcount = computeHeadcount(input)
     const familyLine = isFamily
       ? (isEN
           ? `\n  - Family composition: ${familyAdults} adult(s)${hasChildren ? ` + ${familyChildren.length} child(ren) [${familyChildren.map((c: any) => c?.age ?? "?").join(", ")}]` : ""}`
@@ -862,9 +874,10 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         from:      `- From: ${input.origin ?? "(unspecified)"}`,
         duration:  `- Duration: ${d} days${overnight ? ` (${nights} night(s))` : " (no overnight)"}`,
         dates:     `- Dates: ${start || "(unspecified)"} → ${end || "(unspecified)"}`,
-        travelers: `- Travelers: ${input.travelers} person(s)`,
+        travelers: `- Travelers: ${headcount} person(s)`,
         style:     `- Style: ${input.travel_style}`,
         budget:    `- Budget: ${input.budget_level}`,
+        currency:  `- REQUIRED currency for "budget_breakdown": ${input.currency}. Every amount in every range MUST be in ${input.currency} — do not mix currencies or silently convert to another one.`,
         interests: `- Interests: ${interests}`,
       };
       const closing = multiCity
@@ -878,6 +891,7 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   ${dataLabels.travelers}${familyLine}
   ${dataLabels.style}
   ${dataLabels.budget}
+  ${dataLabels.currency}
   ${dataLabels.interests}
   ${retryNote}${accommodationsBlock}${segmentsContext}${chunkContinuity}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
 
@@ -910,9 +924,10 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
   ${destinationLine}
   - Duración: ${d} días${overnight ? ` (${nights} noche(s))` : " (sin pernocta)"}
   - Fechas: ${start || "(no especificadas)"} → ${end || "(no especificadas)"}${seasonLine}${weekdaysLine}
-  - Viajeros: ${input.travelers} persona(s)${familyLine}
+  - Viajeros: ${headcount} persona(s)${familyLine}
   - Estilo: ${input.travel_style}
   - Presupuesto: ${input.budget_level}
+  - Moneda REQUERIDA para "budget_breakdown": ${input.currency}. Todos los montos en cada rango DEBEN estar en ${input.currency} — no mezcles monedas ni conviertas a otra.
   - Intereses: ${interests}
   ${retryNote}${accommodationsBlock}${segmentsContext}${chunkContinuity}${jetLagContext}${familyGuidance}${temporalGuidance}${wcContext}
 
@@ -968,39 +983,10 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         return errorResponse(400, "missing_destination", "destination is required");                             
       }                           
                                                                                                                  
-      const rawDays = Number(body.duration_days ?? body.nights ?? 5);                                            
-      const duration_days = Math.min(Math.max(rawDays || 5, 1), 35);
-                                                                                                                 
-      // Nights / overnight are deterministic — computed by the calling
-      // layer (Next /api/generate-trip) from the date range. The Edge
-      // Function only re-derives them if the caller didn't provide them
-      // (e.g. direct invocations from tests or legacy clients).
-      const nights = typeof body.nights === "number"
-        ? body.nights
-        : Math.max(0, duration_days - 1);
-      const overnight = typeof body.overnight === "boolean"
-        ? body.overnight
-        : nights >= 1;
-
-      // Locale: 'es' (default) | 'en'. Picks the SYSTEM_PROMPT + every
-      // helper's locale-aware branch so an EN-locale client gets an
-      // English itinerary, ES gets Spanish. Default 'es' preserves the
-      // legacy behavior for any caller that doesn't send the field.
-      const locale: Locale = body.locale === "en" ? "en" : "es";
-
-      const input = {
-        ...body,
-        duration_days,
-        nights,
-        overnight,
-        locale,
-        start:        typeof body.start === "string" ? body.start : "",
-        end:          typeof body.end   === "string" ? body.end   : "",
-        travelers:    body.travelers    ?? 2,
-        travel_style: body.travel_style ?? body.pace   ?? "cultural",
-        budget_level: body.budget_level ?? body.budget ?? "medium",
-        retryHint:    typeof body.retryHint === "string" ? body.retryHint : undefined,
-      };
+      // Body → prompt-input normalization (nights/overnight/locale
+      // derivation, the traveler/travelers field-name fix, currency
+      // default) lives in ./logic.ts — see buildInput() there.
+      const input = buildInput(body);
 
       // Model is read from a Supabase secret so we can flip between Sonnet
       // 4.0 / 4.6 / future models instantly via `supabase secrets set` —
@@ -1044,10 +1030,10 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         body: JSON.stringify({
           model: MODEL,
           max_tokens: 16000,
-          system: systemPromptFor(locale),
+          system: systemPromptFor(input.locale),
           tools: [{
             name: "emit_trip",
-            description: locale === "en"
+            description: input.locale === "en"
               ? "Emit the structured travel itinerary."
               : "Emite el itinerario de viaje estructurado.",
             input_schema: TRIP_SCHEMA,
@@ -1112,12 +1098,20 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         );
       }
 
-                                                                                                                 
-      return new Response(                                                                                       
-        JSON.stringify({ success: true, trip_data: toolUse.input }),
+      const budgetCurrencySuspect = isBudgetCurrencySuspect(
+        toolUse.input.budget_breakdown, input.currency, input.nights, computeHeadcount(input)
+      );
+      if (budgetCurrencySuspect) {
+        console.warn("[generate-trip] budget_currency_suspect", JSON.stringify({
+          currency: input.currency, nights: input.nights, destination: input.destination,
+        }));
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, trip_data: toolUse.input, budget_currency_suspect: budgetCurrencySuspect }),
         { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );                                                                                                       
-                                                                                                                 
+      );
+
     } catch (err) {                                                                                              
       const message = err instanceof Error ? err.message : String(err);                                          
       console.error("[generate-trip] unhandled", message);                                                       
