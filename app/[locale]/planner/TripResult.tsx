@@ -1519,6 +1519,20 @@ export default function TripResult({ params }: Props) {
       trip_id:        tripId ?? undefined,
     })
 
+    // ── Restore original planner URL ───────────────────────────────
+    // PaywallModal saves the URL the user was on before Stripe redirected
+    // them. After Stripe returns to ?checkout=success, the URL has no
+    // destination, so the generate effect would fire with an empty
+    // destination. Navigate back to the original URL so generation can
+    // run normally with all trip params in place.
+    const returnUrl = sessionStorage.getItem('plannerReturnUrl')
+    if (returnUrl) {
+      sessionStorage.removeItem('plannerReturnUrl')
+      // Full-page replace so the success URL doesn't appear in history
+      window.location.replace(returnUrl)
+      return
+    }
+
     // ── Post-purchase gate cleanup ─────────────────────────────────
     // When the user came back from Stripe with credits=0 (pre-purchase),
     // the generate effect's paywall guard fired openPaywall() early,
@@ -4550,6 +4564,7 @@ export default function TripResult({ params }: Props) {
                             <IntelligenceCallout flags={dayIntel.flags} />
                           )}
                         </div>
+
 
                         {/* Next-step banner */}
                         {dayNextCheck && (
