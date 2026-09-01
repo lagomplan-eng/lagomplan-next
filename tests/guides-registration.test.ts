@@ -72,6 +72,12 @@ for (const slug of NEW_SLUGS) {
     expectTrue(`${slug}/${locale}: experiences has at least 1 item`, page.experiences.items.length > 0)
     expectTrue(`${slug}/${locale}: every experience has a bookingUrl pointing at getyourguide/viator`,
       page.experiences.items.every(e => !!e.bookingUrl && /getyourguide\.com|viator\.com/.test(e.bookingUrl)))
+    // Regression: ExperiencesSection.tsx used to hardcode "Reservar" instead
+    // of rendering exp.bookingLabel — verify the adapter's per-locale label
+    // is what actually reaches the data every guide page renders.
+    const expectedBookingLabel = locale === 'en' ? 'See options →' : 'Ver opciones →'
+    expectTrue(`${slug}/${locale}: every experience's bookingLabel is localized (${expectedBookingLabel})`,
+      page.experiences.items.every(e => e.bookingLabel === expectedBookingLabel))
 
     expectTrue(`${slug}/${locale}: checklist has at least 1 item`, page.checklist.items.length > 0)
     expectTrue(`${slug}/${locale}: transport has at least 1 option`, page.transport.options.length > 0)
