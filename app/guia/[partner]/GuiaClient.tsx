@@ -68,6 +68,11 @@ function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; 
 const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
+/** Synthetic key for the partner-specific "Your house" tab — kept out of
+ *  city.neighborhoods/neighborhoodOrder so two partners sharing a city don't
+ *  collide on each other's home-address tab. */
+const HOME_TAB_ID = 'your-house'
+
 /** WhatsApp booking link for experiences (routed through the local partner),
  *  with a language-matched prefilled message. */
 const WA_BOOK_URL: Record<Lang, string> = {
@@ -211,7 +216,7 @@ function ExperienceBanner({ exp, t, lang }: { exp: Experience; t: CityCopy; lang
 export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
-  const [browseNb, setBrowseNb] = useState<string>(partner.homeNeighborhood)
+  const [browseNb, setBrowseNb] = useState<string>(HOME_TAB_ID)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
@@ -263,14 +268,26 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   }, [insidersPublished, partner.slug, city.id])
 
   // ── Planner CTA ───────────────────────────────────────────────────────────
+  // UTM scheme: utm_source=<partner slug>, utm_medium=partner (constant),
+  // utm_campaign=<pilot id>, utm_content=guest_guide (this route IS the
+  // guest-guide distribution channel — other channels, e.g. prearrival/qr,
+  // are separate links documented in docs/analytics/mxcity-pilot-links.md).
   const plannerBase = getRoute(lang, 'planner')
-  const plannerHref =
-    `${plannerBase}?destino=${city.id}&utm_source=host&utm_medium=guia&utm_campaign=${partner.plannerCampaign}`
+  const plannerQuery = new URLSearchParams({
+    utm_source: partner.slug,
+    utm_medium: 'partner',
+    utm_campaign: partner.pilotId,
+    utm_content: 'guest_guide',
+  })
+  const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
     gaTrack('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
 
-  const homeNb = city.neighborhoods[partner.homeNeighborhood] ?? city.neighborhoods[city.neighborhoodOrder[0]]
-  const browseNbData = city.neighborhoods[browseNb] ?? homeNb
+  // Tab order + lookup = partner's own "Your house" pick list, followed by
+  // the zones shared across all partners in this city.
+  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
+  const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
+  const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const spots = browseNbData.spots[lang]
   const itin = city.itinerary[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
@@ -390,7 +407,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
             <div className={styles.secBody}>
               <div className={styles.nbControls}>
                 <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
-                  {city.neighborhoodOrder.map((name) => (
+                  {nbOrder.map((name) => (
                     <button
                       key={name}
                       type="button"
@@ -398,7 +415,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                       aria-selected={name === browseNb}
                       className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
                       onClick={() => setBrowseNb(name)}
-                    >{city.neighborhoods[name].tabLabel?.[lang] ?? name}</button>
+                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
                   ))}
                 </div>
                 <a

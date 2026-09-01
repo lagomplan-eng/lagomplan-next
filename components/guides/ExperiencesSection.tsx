@@ -11,9 +11,10 @@ import { withRef } from '../../lib/affiliate'
 interface Props {
   data: ExperiencesSectionData
   onToast?: (msg: string) => void
+  locale: string
 }
 
-export function ExperiencesSection({ data, onToast }: Props) {
+export function ExperiencesSection({ data, onToast, locale }: Props) {
   return (
     <div data-guide="experiences" className="mb-14">
       {/* Section header */}
@@ -70,10 +71,10 @@ export function ExperiencesSection({ data, onToast }: Props) {
                 href={withRef(exp.bookingUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
-                onClick={() => onToast?.('Abriendo reserva…')}
+                onClick={() => onToast?.(locale === 'en' ? 'Opening booking…' : 'Abriendo reserva…')}
                 className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] font-medium tracking-[.08em] text-white bg-[#0F3A33] px-3 py-[7px] rounded-md transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_3px_10px_rgba(15,58,51,.2)]"
               >
-                Reservar
+                {exp.bookingLabel}
               </a>
             </div>
           </div>

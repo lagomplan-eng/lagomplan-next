@@ -34,6 +34,7 @@ import { GoogleAnalyticsTracker } from '../../components/analytics/GoogleAnalyti
 import ConsentSync from '../../components/analytics/ConsentSync'
 import AuthEventsBridge from '../../components/analytics/AuthEventsBridge'
 import AttributionCapture from '../../components/analytics/AttributionCapture'
+import PartnerAttributionCapture from '../../components/analytics/PartnerAttributionCapture'
 import CookieBanner from '../../components/layout/CookieBanner'
 import DomMutationGuard from '../../components/util/DomMutationGuard'
 import Stay22Guard from '../../components/affiliate/Stay22Guard'
@@ -227,6 +228,7 @@ export default async function RootLayout({
               <CookieBanner />
               <ConsentSync />
               <AttributionCapture />
+              <PartnerAttributionCapture />
               <AuthEventsBridge />
               <GoogleAnalyticsTracker />
               <MetaPixelTracker />

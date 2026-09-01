@@ -232,10 +232,20 @@ export interface Partner {
   city: string
   /** The colonia the property sits in; drives hero copy + "A perfect day". */
   homeNeighborhood: string
+  /**
+   * The "Your house" / "Tu casa" tab — the hyper-local, address-level pick
+   * list. Partner-specific (unlike the other zone tabs, which are shared at
+   * the city level), because it's literally the walk from this partner's
+   * front door.
+   */
+  yourHouse: Neighborhood
   /** Small label, e.g. "Edición Julio 2026". Optional. */
   edition?: Record<Lang, string>
-  /** utm_campaign value for the planner CTA. */
-  plannerCampaign: string
+  /**
+   * Pilot identifier for the planner CTA's utm_campaign (e.g. 'mxcity_pilot').
+   * Generic across future partners/pilots — not specific to this partner.
+   */
+  pilotId: string
   /** Signature name for the host letter. When set, the letter section renders. */
   hostLetterSignature?: string
   /**
