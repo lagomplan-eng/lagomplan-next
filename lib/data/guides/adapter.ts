@@ -32,7 +32,7 @@ const L = {
     planCtaEyebrow:      'AI · Lagomplan',
     planCtaDesc:         'Convierte una guía en tu plan personalizado, fechas, viajeros y presupuesto exactos para tu viaje en 60 segundos.',
     planCtaButton:       'Planear mi viaje →',
-    bookingLabel:        'Ver opciones →',
+    bookingLabel:        'Reservar →',
   },
   en: {
     guideEyebrow:        'Curated guide',
@@ -53,7 +53,7 @@ const L = {
     planCtaEyebrow:      'AI · Lagomplan',
     planCtaDesc:         'Turn this guide into a personalized AI itinerary — exact dates, travelers, and budget for your trip in 60 seconds.',
     planCtaButton:       'Plan my trip →',
-    bookingLabel:        'See options →',
+    bookingLabel:        'Book →',
   },
 } as const
 

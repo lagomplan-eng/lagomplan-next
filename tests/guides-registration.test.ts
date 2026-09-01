@@ -75,7 +75,7 @@ for (const slug of NEW_SLUGS) {
     // Regression: ExperiencesSection.tsx used to hardcode "Reservar" instead
     // of rendering exp.bookingLabel — verify the adapter's per-locale label
     // is what actually reaches the data every guide page renders.
-    const expectedBookingLabel = locale === 'en' ? 'See options →' : 'Ver opciones →'
+    const expectedBookingLabel = locale === 'en' ? 'Book →' : 'Reservar →'
     expectTrue(`${slug}/${locale}: every experience's bookingLabel is localized (${expectedBookingLabel})`,
       page.experiences.items.every(e => e.bookingLabel === expectedBookingLabel))
 
