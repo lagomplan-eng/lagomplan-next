@@ -268,9 +268,18 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   }, [insidersPublished, partner.slug, city.id])
 
   // ── Planner CTA ───────────────────────────────────────────────────────────
+  // UTM scheme: utm_source=<partner slug>, utm_medium=partner (constant),
+  // utm_campaign=<pilot id>, utm_content=guest_guide (this route IS the
+  // guest-guide distribution channel — other channels, e.g. prearrival/qr,
+  // are separate links documented in docs/analytics/mxcity-pilot-links.md).
   const plannerBase = getRoute(lang, 'planner')
-  const plannerHref =
-    `${plannerBase}?destino=${city.id}&utm_source=host&utm_medium=guia&utm_campaign=${partner.plannerCampaign}`
+  const plannerQuery = new URLSearchParams({
+    utm_source: partner.slug,
+    utm_medium: 'partner',
+    utm_campaign: partner.pilotId,
+    utm_content: 'guest_guide',
+  })
+  const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
     gaTrack('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
 

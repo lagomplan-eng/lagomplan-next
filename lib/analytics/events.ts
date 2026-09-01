@@ -29,6 +29,7 @@
 
 import { metaTrack, metaTrackCustom } from './meta'
 import { gaTrack } from './ga'
+import { getPartnerAttributionParams } from './partner-attribution'
 
 // ── Standard / recommended events ──────────────────────────────────────────────
 
@@ -54,7 +55,7 @@ export const events = {
    */
   lead(params?: { content_name?: string; value?: number; currency?: string }) {
     metaTrack('Lead', params)
-    gaTrack('generate_lead', params)
+    gaTrack('generate_lead', { ...params, ...getPartnerAttributionParams() })
   },
 
   /**
@@ -72,7 +73,7 @@ export const events = {
    */
   search(params: { search_string: string; destination?: string }) {
     metaTrack('Search', { search_string: params.search_string })
-    gaTrack('search', { search_term: params.search_string })
+    gaTrack('search', { search_term: params.search_string, ...getPartnerAttributionParams() })
   },
 
   /**
@@ -196,7 +197,7 @@ export const events = {
    */
   tripSaved(params: { trip_id: string; signed_in: boolean }) {
     metaTrackCustom('TripSaved', params)
-    gaTrack('trip_saved', params)
+    gaTrack('trip_saved', { ...params, ...getPartnerAttributionParams() })
   },
 
   /**
@@ -331,7 +332,7 @@ export const events = {
     item_type?:  string
   }) {
     metaTrackCustom('ItineraryEdited', params)
-    gaTrack('itinerary_edited', params)
+    gaTrack('itinerary_edited', { ...params, ...getPartnerAttributionParams() })
   },
 
   /**
@@ -403,6 +404,7 @@ export const events = {
       destination: params.destination,
       trip_id:     params.trip_id,
       ...params.meta,
+      ...getPartnerAttributionParams(),
     })
   },
 
@@ -431,7 +433,7 @@ export const events = {
    */
   waitlistSignup(params: { surface: 'popup' | 'sidebar' | 'end-of-guide' | 'footer' | 'pdf' }) {
     metaTrack('Lead', { content_name: `newsletter-${params.surface}` })
-    gaTrack('waitlist_signup', params)
+    gaTrack('waitlist_signup', { ...params, ...getPartnerAttributionParams() })
   },
 
   /**
@@ -505,6 +507,7 @@ export const events = {
       source:          params.source,
       provider:        params.provider,
       city:            params.city,
+      ...getPartnerAttributionParams(),
     })
     // Also fire the unified affiliateClicked event so the monetization
     // dashboard's "total affiliate clicks" rolls up consistently across
@@ -520,6 +523,7 @@ export const events = {
       trip_id:     params.tripId ?? undefined,
       accommodation_id: params.accommodationId,
       source:      params.source,
+      ...getPartnerAttributionParams(),
     })
   },
 
@@ -528,6 +532,12 @@ export const events = {
    * Distinct from `plannerHotelClicked` (intent to book) — this is the
    * realized conversion. Fired AFTER the booking metadata is saved
    * (optimistic UI; analytics fires alongside the save).
+   *
+   * IMPORTANT: this is guest-typed self-report, NOT a verified webhook/
+   * PMS/payment confirmation — there is no reliable source of truth for
+   * bookings today. `confirmation_type: 'self_reported'` is sent
+   * explicitly so reporting never conflates this with a verified
+   * booking. See docs/analytics/mxcity-pilot-taxonomy.md.
    *
    * Meta custom: `HotelBookingConfirmed`  ·  GA: `hotel_booking_confirmed`.
    */
@@ -546,6 +556,8 @@ export const events = {
       accommodation_id: params.accommodationId,
       city:             params.city,
       provider:         params.provider,
+      confirmation_type: 'self_reported',
+      ...getPartnerAttributionParams(),
     })
   },
 
@@ -603,7 +615,7 @@ export const events = {
   /** Anonymous traveler subscribed via the in-view newsletter card. Also a Lead. */
   mobileViewNewsletterCaptured(params: { tripId: string }) {
     metaTrack('Lead', { content_name: 'mobile-view-newsletter' })
-    gaTrack('mobile_view_newsletter_captured', { trip_id: params.tripId })
+    gaTrack('mobile_view_newsletter_captured', { trip_id: params.tripId, ...getPartnerAttributionParams() })
   },
 
   /** Traveler checked off a per-day task. */

@@ -1,9 +1,9 @@
 // content/guia/partners/livin_roma.ts
 //
 // Partner layer for Livin — second property, Roma Norte. Shares the "Livin"
-// display identity with content/guia/partners/livin.ts; only slug, city
-// zone tabs (shared with livin via content/guia/cities/cdmx.ts), and
-// yourHouse (this property's own address-level picks) differ.
+// display identity with content/guia/partners/livin_condesa.ts; only slug,
+// city zone tabs (shared with Livin Condesa via content/guia/cities/cdmx.ts),
+// and yourHouse (this property's own address-level picks) differ.
 
 import type { Partner } from '../types'
 
@@ -43,10 +43,10 @@ export const livinRoma: Partner = {
     es: 'Edición Julio 2026',
     en: 'July 2026 Edition',
   },
-  plannerCampaign: 'livin',
+  pilotId: 'mxcity_pilot',
   hostLetterSignature: 'Livin',
 
-  // Same as livin.ts: no bespoke insider copy yet, stays unpublished.
+  // Same as livin_condesa.ts: no bespoke insider copy yet, stays unpublished.
   insiders: {
     publish: false,
   },

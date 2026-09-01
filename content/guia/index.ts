@@ -6,7 +6,7 @@
 
 import type { City, Partner } from './types'
 import { cdmx } from './cities/cdmx'
-import { livin } from './partners/livin'
+import { livinCondesa } from './partners/livin_condesa'
 import { livinRoma } from './partners/livin_roma'
 
 const CITIES: Record<string, City> = {
@@ -14,7 +14,7 @@ const CITIES: Record<string, City> = {
 }
 
 const PARTNERS: Record<string, Partner> = {
-  livin,
+  livin_condesa: livinCondesa,
   livin_roma: livinRoma,
 }
 

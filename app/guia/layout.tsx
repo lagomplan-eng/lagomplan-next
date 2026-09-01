@@ -17,6 +17,7 @@ import { Manrope, Fraunces, DM_Mono } from 'next/font/google'
 import { BASE_URL } from '../../lib/seo'
 import ConsentSync from '../../components/analytics/ConsentSync'
 import { GoogleAnalyticsTracker } from '../../components/analytics/GoogleAnalyticsTracker'
+import PartnerAttributionCapture from '../../components/analytics/PartnerAttributionCapture'
 import '../globals.css'
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
@@ -80,6 +81,7 @@ export default function GuiaLayout({ children }: { children: React.ReactNode }) 
         {children}
 
         <ConsentSync />
+        <PartnerAttributionCapture />
         <GoogleAnalyticsTracker />
       </body>
     </html>

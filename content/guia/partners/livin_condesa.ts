@@ -1,12 +1,14 @@
-// content/guia/partners/livin.ts
+// content/guia/partners/livin_condesa.ts
 //
-// Partner layer for Livin — the first (and currently only) filled slot.
-// Small and specific: everything reusable lives in the city layer.
+// Partner layer for Livin Condesa — the original filled slot, renamed
+// from slug 'livin' now that a second Livin property (Livin Roma, see
+// livin_roma.ts) exists in the same pilot. Small and specific: everything
+// reusable lives in the city layer.
 
 import type { Partner } from '../types'
 
-export const livin: Partner = {
-  slug: 'livin',
+export const livinCondesa: Partner = {
+  slug: 'livin_condesa',
   displayName: 'Livin',
   // Curator shown in the hero eyebrow ("Curated by …").
   hostName: 'Livin',
@@ -41,7 +43,7 @@ export const livin: Partner = {
     es: 'Edición Julio 2026',
     en: 'July 2026 Edition',
   },
-  plannerCampaign: 'livin',
+  pilotId: 'mxcity_pilot',
   hostLetterSignature: 'Livin',
 
   // No bespoke insider copy provided yet, so the Insiders section stays
