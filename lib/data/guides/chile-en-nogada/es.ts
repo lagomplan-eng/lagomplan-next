@@ -228,7 +228,7 @@ export const guide: FlatGuide = {
 
   tips: [
     'La temporada: El chile en nogada existe entre el 15 de agosto y el 15 de septiembre aproximadamente, cuando la nuez de Castilla fresca está disponible. Pasada esa fecha, muchos restaurantes siguen ofreciéndolo pero con nuez seca o de temporada anterior. La diferencia en la nogada es notable para quien lo ha probado fresco.',
-    'El precio como indicador: Un chile en nogada hecho con ingredientes de temporada y de calidad cuesta entre $180 y $320 MXN. Cualquier cosa significativamente más barata tiene nuez de la pasada temporada o nogada de caja.',
+    'El precio como indicador: Un chile en nogada hecho con ingredientes de temporada y de calidad cuesta entre $300 y $600 MXN. Cualquier cosa significativamente más barata tiene nuez de la pasada temporada o nogada de caja.',
     'Los niños y el chile: El chile en nogada tiene un relleno dulce-salado (frutas, carne, especias) que los niños de 3 años en adelante suelen aceptar sin drama. La nogada de nuez es más difícil; prueba primero con una cucharita antes de servir el plato completo. La granada y el perejil encima son el elemento más fotogénico y el que más les gusta separar.',
   ],
 

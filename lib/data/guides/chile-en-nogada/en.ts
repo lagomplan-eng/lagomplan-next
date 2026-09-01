@@ -228,7 +228,7 @@ export const guide: FlatGuide = {
 
   tips: [
     "The season: Chile en nogada exists roughly between August 15 and September 15, whenever fresh walnuts are available. After that window, many restaurants keep serving it, but with dried nuts or last season's stock. The difference is obvious to anyone who's had it fresh.",
-    "Price as a signal: A chile en nogada made with quality, in-season ingredients costs between $180 and $320 MXN. Anything significantly cheaper is running on last season's walnuts or a boxed nogada sauce.",
+    "Price as a signal: A chile en nogada made with quality, in-season ingredients costs between $300 and $600 MXN. Anything significantly cheaper is running on last season's walnuts or a boxed nogada sauce.",
     "Kids and the chile: Chile en nogada's sweet-savory filling (fruit, meat, spices) is usually an easy sell for kids 3 and up. The walnut sauce itself is a harder pitch — try a spoonful before serving the full plate. The pomegranate and parsley on top are the most photogenic part, and the part kids most enjoy picking off.",
   ],
 
