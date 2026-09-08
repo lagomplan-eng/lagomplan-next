@@ -186,7 +186,14 @@
 .hostSigName { font-size: 16px; font-weight: 700; color: var(--pine); margin-bottom: 4px; }
 
 /* ── Before you arrive ──────────────────────────────────── */
-.cardGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-top: 8px; }
+/* auto-fill (not auto-fit): auto-fit collapses+redistributes empty tracks,
+   which stretches a lone card (or a trailing orphan) to fill the row.
+   auto-fill keeps the unused tracks, so a single item — or an odd one at
+   the end — sits at one column's width and leaves the rest blank.
+   align-items stays stretch (the default) — cards sharing a row should be
+   equal height; the fix for one long card forcing a tall row is trimming
+   that card's copy, not ragged card heights. */
+.cardGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 8px; }
 .card {
   background: var(--paper);
   border: 1px solid rgba(107, 143, 134, .2);
@@ -414,7 +421,7 @@
 
 /* ── Discover more ──────────────────────────────────────── */
 .discoverGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-top: 8px; }
-.discoverCard { position: relative; display: block; border-radius: var(--radius-xl); overflow: hidden; height: 150px; }
+.discoverCard { position: relative; display: block; border-radius: var(--radius-xl); overflow: hidden; height: 150px; text-decoration: none; }
 .discoverImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .discoverOverlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15, 58, 51, 0) 50%, rgba(15, 58, 51, .7) 100%); }
 .discoverLabel { position: absolute; left: 14px; bottom: 12px; color: var(--cream); font-size: 14px; font-weight: 600; }
@@ -491,3 +498,66 @@
   from { opacity: 0; transform: translateY(10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* ── The practical part (arrival items + FAQ, merged) ───── */
+/* At-a-glance: small pills, not a full-width bar — reuses no other
+   component since nothing like it exists yet on the page. */
+.glanceRow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.glanceBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  background: var(--cream);
+  border: 1px solid var(--sand);
+  border-radius: 4px;
+  font-family: var(--font-mono), monospace;
+  font-size: 11px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--sage);
+  white-space: nowrap;
+}
+
+/* Panel selector: deliberately lighter than .moodBtn/.tab — text only, no
+   icon, thin border — so the filter row doesn't read as a second row of
+   cards. Neither existing chip style matched this without changing those
+   other sections too, so this is its own small variant.
+   Background is var(--paper)/var(--mint), same surfaces .tab and .moodBtn
+   use for their inactive/active states — a transparent/cream fill sitting
+   on the section's own cream background left almost no visible border
+   between chips (or between a chip and the page), so the row read as one
+   run-on shape instead of separate, readable pills. */
+.filterChips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 32px; }
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--paper);
+  border: 1px solid var(--sand);
+  color: var(--sage);
+  font-family: var(--font-sans), sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color .15s, color .15s, background .15s;
+}
+.filterChipActive { background: var(--mint); border-color: var(--pine); color: var(--pine); }
+@media (prefers-reduced-motion: reduce) { .filterChip { transition: none; } }
+
+/* Cards reuse .cardGrid/.card/.iconChip/.h4/.cardBody verbatim (see
+   the neighborhood spot cards) — only the anchor-highlight flash is new. */
+.faqItemHighlight { animation: faqHighlight 1.2s ease; }
+@keyframes faqHighlight {
+  from { background: var(--sand); }
+  to   { background: transparent; }
+}
+@media (prefers-reduced-motion: reduce) { .faqItemHighlight { animation: none; } }
+
+/* No-JS fallback: stacked group labels above each group's card grid. */
+.faqStackedLabel { display: block; margin-bottom: 16px; }
+.faqStackedGroup { margin-bottom: 40px; }
+.faqStackedGroup:last-child { margin-bottom: 0; }

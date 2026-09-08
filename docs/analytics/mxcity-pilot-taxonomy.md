@@ -68,6 +68,39 @@ scheme (see `mxcity-pilot-links.md`).
 | `host_guide_insiders_view` | Insiders section enters viewport (published partners only) |
 | `host_guide_planner_click` | Planner CTA click |
 | `host_guide_map_click` | "See all N places on the map" click |
+| `host_guide_discover_click` | "Discover more" destination card click (added when those cards were wired to real lagomplan.com guide links — previously unlinked, undocumented here until now) |
+| `partner_link_click` | Click on an outbound third-party partner link (Insider, Airalo) — see below |
+
+### `partner_link_click`
+
+Fires from one shared helper (`trackOutboundLink` in `lib/analytics/ga.ts`),
+called from three separate render sites that mean different things — kept
+distinct via `section` rather than collapsed into one guide-wide bucket:
+
+| Param | Values | Notes |
+|---|---|---|
+| `link_name` | `insider` \| `airalo` | Extend the union in `content/guia/types.ts` (`PartnerLinkName`) when a new outbound partner link is added |
+| `partner_slug` | `livin_condesa` \| `livin_roma` \| `livin_polanco` \| `demo` | Explicit param, not inferred from `page_location` — that URL carries the inbound distribution UTMs from Livin and is unreliable to segment on |
+| `zone` | `condesa` \| `roma` \| `polanco` | Absent when the partner has no zone |
+| `lang` | `es` \| `en` | |
+| `section` | `before_you_arrive` \| `experience_book` \| `experience_details` | `before_you_arrive` = the Transportation/Connectivity arrival-item link; `experience_book` = the experience card's "Book" button (highest-intent action on the page); `experience_details` = the how-to-book link inside an expanded experience card |
+| `destination` | e.g. `wa.me`, `airalo.tpm.li` | Hostname only, never the full URL |
+| `experience_name` | e.g. `exp-teotihuacan`'s title | Only present on `experience_book` / `experience_details` — absent on `before_you_arrive` |
+
+**Custom dimensions to register in GA4 (event-scoped, not user-scoped —
+same rule as `partner_id`/`pilot_id`/`distribution_channel` above):**
+`link_name`, `partner_slug`, `zone`, `section`, `destination`, `experience_name`.
+
+**UTMs on outbound hrefs:** Insider links (`wa.me/...`) get
+`utm_source=lagomplan&utm_medium=guide&utm_campaign=<partner.pilotId>`
+appended at render time (`lib/guia/links.ts`, `withPilotUtm`) — reuses
+`pilotId`, the same value already used for the planner CTA's
+`utm_campaign`, rather than `partner_slug`, to avoid two different values
+under the same param name on the same page. **Airalo's href is
+deliberately left untouched** — it's a live affiliate short-link
+(`airalo.tpm.li`) and untested for how it handles extra query params on
+its redirect; it still fires `partner_link_click`, just with its original
+URL.
 
 ## Why events were mapped, not duplicated
 

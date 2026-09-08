@@ -50,4 +50,6 @@ export const livinRoma: Partner = {
   insiders: {
     publish: false,
   },
+
+  zone: 'roma',
 }

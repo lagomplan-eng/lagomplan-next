@@ -1,16 +1,24 @@
-// content/guia/partners/livin_condesa.ts
+// content/guia/partners/demo.ts
 //
-// Partner layer for Livin Condesa — the original filled slot, renamed
-// from slug 'livin' now that a second Livin property (Livin Roma, see
-// livin_roma.ts) exists in the same pilot. Small and specific: everything
-// reusable lives in the city layer.
+// Demo partner — a faithful clone of livin_condesa's non-FAQ fields (byte
+// -for-byte, per the original clone brief: same host/branding/yourHouse,
+// no copy "improvements"), plus the FAQ-module fields under test:
+//   - zone: 'condesa', so Tier B (destination) answers inherit from
+//     content/guia/zones/condesa.ts once that file exists.
+//   - faqAnswers: exactly one Tier A entry (checkinCheckout, Condesa
+//     check-out 11:00) — this is also what clears the module's safety
+//     gate (resolveFaqModule returns null on an empty faqAnswers).
+//   - atAGlance: checkOut only. checkIn and luggage stay unset on purpose;
+//     those facts aren't confirmed yet.
+// noindex: true — Livin branding, near-duplicate of livin_condesa, must
+// never be indexed. utmContent is intentionally left unset (defaults to
+// 'guest_guide').
 
 import type { Partner } from '../types'
 
-export const livinCondesa: Partner = {
-  slug: 'livin_condesa',
+export const demo: Partner = {
+  slug: 'demo',
   displayName: 'Livin',
-  // Curator shown in the hero eyebrow ("Curated by …").
   hostName: 'Livin',
   city: 'cdmx',
   homeNeighborhood: 'Roma Norte',
@@ -45,19 +53,22 @@ export const livinCondesa: Partner = {
   },
   pilotId: 'mxcity_pilot',
   hostLetterSignature: 'Livin',
-
-  // No bespoke insider copy provided yet, so the Insiders section stays
-  // unpublished — it unpublishes cleanly (no empty hole). Do NOT invent
-  // experiences here; fill items[] + set publish: true when real copy arrives.
   insiders: {
     publish: false,
   },
 
-  // FAQ module: zone content only (Everyday errands / Eating in). No
-  // property-tier (faqAnswers) content yet — do not add any without
-  // checking content/guia/faq/resolve.ts's gate first, see conversation.
+  // FAQ module fields under test.
   zone: 'condesa',
+  faqAnswers: {
+    checkinCheckout: {
+      body: {
+        es: 'La salida es a las 11:00.',
+        en: 'Check-out is at 11:00.',
+      },
+    },
+  },
   atAGlance: {
     checkOut: '11:00',
   },
+  noindex: true,
 }

@@ -67,3 +67,42 @@ export function gaPageView(path: string, title?: string): void {
     send_to:       MEASUREMENT_ID,
   })
 }
+
+/**
+ * The three /guia contexts an outbound partner link (Insider, Airalo) can
+ * sit in — deliberately distinct, not collapsed into one "guide" bucket:
+ * a passing mention in "Before you arrive" carries different intent than
+ * the experience card's own "Book" button, which is the highest-intent
+ * action on the page.
+ */
+export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details'
+
+/**
+ * Fires partner_link_click for any of the three tracked render sites
+ * (PracticalCard's InlineLink, the experience "Book" button, the
+ * experience details "how to book" link). One implementation, three
+ * call sites — see lib/guia/links.ts for the UTM side of this (Insider
+ * only, never Airalo).
+ */
+export function trackOutboundLink(params: {
+  linkName: 'insider' | 'airalo'
+  href: string
+  partnerSlug: string
+  zone?: string
+  lang: string
+  section: PartnerLinkSection
+  experienceName?: string
+}): void {
+  let destination = params.href
+  try { destination = new URL(params.href).hostname } catch { /* leave as-is if unparseable */ }
+
+  gaTrack('partner_link_click', {
+    link_name: params.linkName,
+    partner_slug: params.partnerSlug,
+    ...(params.zone ? { zone: params.zone } : {}),
+    lang: params.lang,
+    section: params.section,
+    destination,
+    ...(params.experienceName ? { experience_name: params.experienceName } : {}),
+  })
+}
