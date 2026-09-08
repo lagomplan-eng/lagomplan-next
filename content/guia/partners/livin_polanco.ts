@@ -4,8 +4,6 @@
 // block). Shares the "Livin" display identity with livin_condesa.ts and
 // livin_roma.ts; slug, zone, homeNeighborhood and yourHouse differ.
 //
-// yourHouse.mapUrl is still Condesa's — no real Polanco list link exists
-// yet, and per instruction this is flagged rather than guessed. Same for
 // tagline/orientation below: no copy was given for these, so they're
 // drafted here from the walking-time facts only (10-15 min for most spots,
 // ~20-30 min for two) — flag for review, this is new phrasing, not sourced
@@ -25,7 +23,7 @@ export const livinPolanco: Partner = {
   yourHouse: {
     name: 'Horacio y Thiers',
     tabLabel: { es: 'Tu casa', en: 'Your house' },
-    mapUrl: 'https://maps.app.goo.gl/qQSdT8RVpHCzGpxi8', // FLAG: Condesa's map link — needs a real Polanco list
+    mapUrl: 'https://maps.app.goo.gl/RrvHRV6ny45J8yen6',
     tagline: { es: 'Una caminata corta, casi siempre', en: 'A short walk, mostly' },
     orientation: {
       es: 'La mayoría de estos lugares está a 10–15 minutos caminando desde Horacio y Thiers; dos quedan más lejos y valen la distancia extra, como se indica abajo.',
