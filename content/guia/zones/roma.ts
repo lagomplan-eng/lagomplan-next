@@ -149,21 +149,10 @@ export const roma: Zone = {
       },
     },
 
-    gyms: {
-      body: {
-        es:
-          'La Jungla, en Tonalá 6, está a cuatro minutos y trabaja con ' +
-          'entrenador, en grupos pequeños; abre desde las 6 entre semana y ' +
-          'cierra los domingos. Si prefieres un gimnasio completo con ' +
-          'vestidores, toallas y sauna, Sports World está en Monterrey 133 y ' +
-          'vende pases por día.',
-        en:
-          'La Jungla, at Tonalá 6, is four minutes away and works with a ' +
-          'coach in small groups; it opens at 6 on weekdays and closes ' +
-          'Sundays. If you want a full gym with changing rooms, towels and a ' +
-          'sauna, Sports World is at Monterrey 133 and sells day passes.',
-      },
-    },
+    // gyms: intentionally absent — falls back to the generic Fitpass
+    // default (content/guia/faq/base.ts) rather than naming La Jungla /
+    // Sports World specifically. Per instruction: Roma shows the same
+    // generic gyms text as Condesa, not zone-specific gym picks.
 
     haircuts: {
       body: {

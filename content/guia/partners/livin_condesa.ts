@@ -13,7 +13,7 @@ export const livinCondesa: Partner = {
   // Curator shown in the hero eyebrow ("Curated by …").
   hostName: 'Livin',
   city: 'cdmx',
-  homeNeighborhood: 'Roma Norte',
+  homeNeighborhood: 'Condesa',
   yourHouse: {
     name: 'Veracruz 85',
     tabLabel: { es: 'Tu casa', en: 'Your house' },

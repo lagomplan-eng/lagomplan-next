@@ -78,5 +78,18 @@ export const faqBase: FaqBase = {
         es: 'Fitpass is the easiest way in — one membership gives you rotating access to many gyms and studios in the area, either as a monthly plan or a 10-visit pack. Most studios also let you drop in and pay for a single class if you\'d rather not commit to a pass.',
       },
     },
+    // Moved here from condesa.ts — identical text was about to be
+    // duplicated into roma.ts too. Concierge-arranged, not a specific
+    // local chef, so it isn't property/zone-specific.
+    chefsAtHome: {
+      body: {
+        es:
+          'Para un chef privado en casa, contáctanos y lo organizamos — se arma ' +
+          'según el número de personas, así que avísanos con anticipación.',
+        en:
+          'For a private chef at home, get in touch with us and we\'ll arrange it — ' +
+          'plans are built around headcount, so reach out with advance notice.',
+      },
+    },
   },
 }

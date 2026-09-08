@@ -176,16 +176,9 @@ export const condesa: Zone = {
       // on Google. Do not claim they "take groups of N" without asking them.
     },
 
-    chefsAtHome: {
-      body: {
-        es:
-          'Para un chef privado en casa, contáctanos y lo organizamos — se arma ' +
-          'según el número de personas, así que avísanos con anticipación.',
-        en:
-          'For a private chef at home, get in touch with us and we\'ll arrange it — ' +
-          'plans are built around headcount, so reach out with advance notice.',
-      },
-    },
+    // chefsAtHome: intentionally absent — falls back to the generic
+    // concierge default (content/guia/faq/base.ts), same as every other
+    // zone. Not property/zone-specific.
 
     cateringDelivery: {
       body: {
