@@ -19,9 +19,6 @@
  * ships to a live partner.
  *
  * Keys deliberately absent (no confirmed answer, so they render nothing):
- *   currencyExchange — no reliable casa de cambio verified near Horacio and
- *                      Thiers yet. cashAtms covers the money question until
- *                      one is found.
  *   privateEvents    — Livin policy question
  *   taquizasChefs    — pending the same rework as the Condesa entry
  */
@@ -66,6 +63,28 @@ export const polanco: Zone = {
           'pharmacy inside. For Asian groceries, Toyo at Leibnitz 205 and ' +
           'Yuandong at Mariano Escobedo 424, both under ten minutes away.',
       },
+    },
+
+    currencyExchange: {
+      body: {
+        es:
+          'Arcángeles, en Leibnitz 100, es la casa de cambio más cercana: ' +
+          'detrás de Camino Real, junto a DHL. El tipo de cambio del pizarrón ' +
+          'es el que te dan, y piden pasaporte. Abre de 9 a 5:30 entre semana, ' +
+          'hasta las 2:30 el sábado. Revisa los billetes grandes antes de ' +
+          'salir del mostrador, y evita el aeropuerto por completo. Muchos ' +
+          'huéspedes prefieren Wise, Revolut o DolarApp.',
+        en:
+          "Arcángeles, at Leibnitz 100, is the closest reliable exchange — " +
+          'behind Camino Real, next to DHL. The board rate is what you get, ' +
+          "and they'll scan your passport. Open 9 to 5:30 weekdays, until " +
+          '2:30 Saturday. Check large notes before leaving the counter, and ' +
+          'skip the airport entirely. Many guests use Wise, Revolut or ' +
+          'DolarApp instead of cash.',
+      },
+      // CONFIRM: hours. Several exchanges in Polanco post hours they do not keep.
+      // NOTE: one counterfeit-notes complaint among 42 reviews. The
+      // check-your-notes line is deliberate and is good practice anywhere.
     },
 
     cashAtms: {
