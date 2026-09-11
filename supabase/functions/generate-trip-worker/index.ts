@@ -76,12 +76,14 @@ const CHUNK_TIMEOUT_MS = 145_000
 const SEGMENT_DAYS = 5
 
 type JobRow = {
-  id:           string
-  user_id:      string
-  status:       'queued' | 'running' | 'completed' | 'failed'
-  inputs:       Record<string, any>
-  chunks_total: number
-  chunks_done:  number
+  id:              string
+  user_id:         string
+  status:          'queued' | 'running' | 'completed' | 'failed'
+  inputs:          Record<string, any>
+  chunks_total:    number
+  chunks_done:     number
+  is_regeneration: boolean
+  credit_consumed: boolean
 }
 
 type ChunkContent = Record<string, any>
@@ -487,35 +489,40 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
   }
 }
 
-// Refund one trip credit. Only refunds if the user is on a metered tier
-// (per_trip / pack_5 / pack_10) and trips_remaining hasn't already maxed out.
-// Best-effort — if anything fails, we log and move on. A user keeping the
-// credit they paid for is much worse than a missed refund here.
-async function refundOneTripIfApplicable(admin: any, userId: string): Promise<void> {
-  try {
-    const { data } = await admin
-      .from('user_entitlements')
-      .select('tier, trips_remaining, trips_used')
-      .eq('user_id', userId)
-      .single()
+// Decrement one trip credit — mirrors lib/entitlements.ts's consumeOneTrip
+// exactly (same tier-skip, same clamp), reimplemented here because that's a
+// Node module the Deno worker can't import. Called once, at successful job
+// completion (see the guarded credit_consumed claim below) — never at job
+// creation anymore, so there is nothing to refund on any failure path; the
+// old refundOneTripIfApplicable (and its two call sites) is gone.
+//
+// Never leaves trips_remaining negative — clamped at 0. If the user already
+// had 0 remaining by the time this fires (the accepted soft-concurrency-limit
+// edge case: two jobs started back-to-back before either decremented), the
+// trip is delivered anyway and this just logs a warning rather than
+// blocking or failing the response.
+async function consumeOneTripInWorker(admin: any, userId: string): Promise<void> {
+  const { data } = await admin
+    .from('user_entitlements')
+    .select('tier, trips_remaining, trips_used')
+    .eq('user_id', userId)
+    .single()
 
-    if (!data) return
-    // Subscribers (explorer) and free tier users don't get a metered refund —
-    // explorer is unlimited, free tier doesn't decrement on consume.
-    if (data.tier === 'explorer') return
+  if (!data || data.tier === 'explorer') return
 
-    await admin
-      .from('user_entitlements')
-      .update({
-        trips_remaining: (data.trips_remaining ?? 0) + 1,
-        trips_used:      Math.max(0, (data.trips_used ?? 0) - 1),
-        updated_at:      new Date().toISOString(),
-      })
-      .eq('user_id', userId)
-    console.log('[worker] refunded credit for user:', userId)
-  } catch (e) {
-    console.warn('[worker] refund failed (non-fatal):', e)
+  const remaining = data.trips_remaining ?? 0
+  if (remaining <= 0) {
+    console.warn('[worker] consumeOneTripInWorker: user had 0 credits remaining at completion — delivering trip anyway, soft concurrency limit. user=', userId)
   }
+
+  await admin
+    .from('user_entitlements')
+    .update({
+      trips_remaining: Math.max(0, remaining - 1),
+      trips_used:      (data.trips_used ?? 0) + 1,
+      updated_at:      new Date().toISOString(),
+    })
+    .eq('user_id', userId)
 }
 
 function shortSummary(chunk: ChunkContent): string {
@@ -555,7 +562,7 @@ serve(async (req: Request) => {
   // Load job
   const { data: jobData, error: jobErr } = await admin
     .from('generation_jobs')
-    .select('id, user_id, status, inputs, chunks_total, chunks_done')
+    .select('id, user_id, status, inputs, chunks_total, chunks_done, is_regeneration, credit_consumed')
     .eq('id', job_id)
     .single()
 
@@ -623,14 +630,9 @@ serve(async (req: Request) => {
         .update({ status: 'failed', error: String(e).slice(0, 500) })
         .eq('id', job.id)
 
-      // Refund the credit charged at /api/trips/jobs creation. Users shouldn't
-      // pay for upstream failures (LLM errors, Supabase outages, timeouts).
-      // Skip if any chunk was successfully generated — the user got partial
-      // value, and a no-op refund avoids credit-printing on flaky scenarios.
-      if (job.chunks_done === 0 && i === 0) {
-        await refundOneTripIfApplicable(admin, job.user_id)
-      }
-
+      // No refund needed — the credit is only ever consumed at successful
+      // completion (see consumeOneTripInWorker), so a job that fails here
+      // was never charged in the first place.
       return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
         status: 502,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -707,9 +709,7 @@ serve(async (req: Request) => {
         .from('generation_jobs')
         .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
         .eq('id', job.id)
-      // Don't refund here — chunks generated successfully (we paid for the
-      // LLM calls). The persistence failure is on us; eat it rather than
-      // also clawing back the credit, which compounds the user impact.
+      // No refund needed — nothing was charged (see consumeOneTripInWorker).
       return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
         status: 500,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -837,8 +837,7 @@ serve(async (req: Request) => {
         error:  `trip insert failed: ${tripInsertErr?.message ?? 'unknown'}`,
       })
       .eq('id', job.id)
-    // Refund the credit — user shouldn't pay for a save failure on our side
-    await refundOneTripIfApplicable(admin, job.user_id)
+    // No refund needed — nothing was charged (see consumeOneTripInWorker).
     return new Response(JSON.stringify({ ok: false, status: 'failed', error: tripInsertErr?.message }), {
       status: 500,
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -856,6 +855,31 @@ serve(async (req: Request) => {
     })
     .eq('id', job.id)
     .eq('status', 'running')
+
+  // ── Charge the credit, exactly once, right here at real completion ──────────
+  // Guarded the same way the completion write above is (`WHERE credit_consumed
+  // = false`) — only the invocation that wins this row gets to charge. A
+  // reconciler re-invoking an already-completed job never gets here at all
+  // (the terminal-status noop check near the top of this function returns
+  // before any of this runs), so this guard covers the narrower same-tick
+  // race between overlapping invocations, not reconciliation.
+  const { data: claimedCredit } = await admin
+    .from('generation_jobs')
+    .update({ credit_consumed: true })
+    .eq('id', job.id)
+    .eq('credit_consumed', false)
+    .select('id')
+
+  if (claimedCredit && claimedCredit.length > 0 && !job.is_regeneration) {
+    try {
+      await consumeOneTripInWorker(admin, job.user_id)
+    } catch (e) {
+      // Claim won, charge failed: the job stays a free trip, NOT a double
+      // charge — do not retry, do not revert credit_consumed. Logged with
+      // the job id so this is greppable/reconcilable by hand if it matters.
+      console.error('[worker] credit claim won but charge failed — job stays free, not double-charged. job_id=', job.id, 'user=', job.user_id, e)
+    }
+  }
 
   console.log('[worker] completed job:', job.id, '→ trip:', tripRow.id)
 
