@@ -1,9 +1,27 @@
 'use client'
 
 import { useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
+import { useSearchParams } from 'next/navigation'
 import { Link, useRouter } from '../../lib/navigation'
 import { getSupabaseBrowser } from '../../lib/supabase/client'
+import { ASYNC_THRESHOLD } from '../../lib/plan/limits'
+
+// ── Contextual "why am I here" copy ──────────────────────────────────────────
+// Every generation-flow redirect to /login (see TripResult.tsx's
+// redirectToLoginWithReason) carries a `?reason=` so this bare form isn't a
+// mystery bounce. Copy lives in messages/{es,en}.json under `authGate` (not
+// hardcoded here) — `tripTooLarge` interpolates {threshold}, filled from
+// ASYNC_THRESHOLD, the same constant TripResult's pre-flight guard reads, so
+// raising the anon-visible threshold later is a one-line change in
+// lib/plan/limits.ts, not a copy update here too.
+type AuthGateKey = 'anonLimitReached' | 'notAuthenticated' | 'tripTooLarge'
+
+const REASON_TO_AUTHGATE_KEY: Record<string, AuthGateKey> = {
+  anon_limit_reached: 'anonLimitReached',
+  not_authenticated:  'notAuthenticated',
+  trip_too_large:     'tripTooLarge',
+}
 
 const copy = {
   es: {
@@ -39,9 +57,15 @@ const copy = {
 }
 
 export default function LoginForm() {
-  const locale  = useLocale() as 'es' | 'en'
-  const t       = copy[locale] ?? copy.es
-  const router  = useRouter()
+  const locale    = useLocale() as 'es' | 'en'
+  const t         = copy[locale] ?? copy.es
+  const tAuthGate = useTranslations('authGate')
+  const router    = useRouter()
+
+  const searchParams   = useSearchParams()
+  const reason         = searchParams.get('reason')
+  const authGateKey    = reason ? REASON_TO_AUTHGATE_KEY[reason] : undefined
+  const reasonMessage  = authGateKey ? tAuthGate(authGateKey, { threshold: ASYNC_THRESHOLD }) : null
 
   const [email,    setEmail]    = useState('')
   const [password, setPassword] = useState('')
@@ -153,6 +177,14 @@ export default function LoginForm() {
   // ── Login form ───────────────────────────────────────────────────────────────
   return (
     <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4 max-w-[360px]">
+      {reasonMessage && (
+        <p
+          data-testid="login-reason-banner"
+          className="font-sans text-[14px] text-[#3D3D3A] bg-[#F3EFE8] border border-[#E4DED4] rounded-[8px] px-4 py-3"
+        >
+          {reasonMessage}
+        </p>
+      )}
       <input
         type="email"
         placeholder={t.emailPlaceholder}

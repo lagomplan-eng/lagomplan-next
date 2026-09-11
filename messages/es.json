@@ -318,5 +318,10 @@
       "q6": "¿Aceptan tarjetas mexicanas?",
       "a6": "Sí. Aceptamos tarjetas de crédito y débito mexicanas e internacionales. Los precios en MXN se procesan localmente."
     }
+  },
+  "authGate": {
+    "anonLimitReached": "Ya generaste tu viaje gratuito. Crea una cuenta para seguir generando itinerarios.",
+    "notAuthenticated": "Necesitas una cuenta para generar este viaje.",
+    "tripTooLarge": "Los viajes de más de {threshold} días o con varias ciudades necesitan una cuenta — así podemos generarlos por partes sin que se corten a la mitad."
   }
 }
