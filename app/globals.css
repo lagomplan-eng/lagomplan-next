@@ -589,7 +589,12 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
 
   [data-day="item"] {
     display: grid !important;
-    grid-template-columns: 38pt 1fr !important;
+    /* Was 38pt — too narrow for real data values like "Alternativa" or
+       "Al día siguiente" (up to 17 chars), which overflowed into the title
+       column at print size. 66pt fits everything up to ~11 chars on one
+       line; longer outliers wrap at their natural word spaces instead of
+       overlapping (matches the screen-size fix in DayCard.tsx). */
+    grid-template-columns: 66pt 1fr !important;
     gap: 8pt !important;
     align-items: start !important;
     padding: 5pt 0 !important;
@@ -605,6 +610,7 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
     font-weight: 500 !important;
     padding-top: 1.5pt !important;
     letter-spacing: 0.02em !important;
+    line-height: 1.3 !important;
   }
 
   [data-day="item-title"] {

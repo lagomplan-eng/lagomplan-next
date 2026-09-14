@@ -68,10 +68,15 @@ export function DayCard({ day, dayOrdinalLabel, defaultOpen = false }: Props) {
             <div
               data-day="item"
               key={i}
-              className="grid grid-cols-[48px_1fr] gap-4 items-start py-[18px] border-b border-[#E2DDD5] last:border-0"
+              className="grid grid-cols-[84px_1fr] gap-4 items-start py-[18px] border-b border-[#E2DDD5] last:border-0"
             >
-              {/* Time */}
-              <div data-day="time" className="font-mono text-[11px] font-medium text-[#0F3A33] tracking-[.02em] pt-0.5 whitespace-nowrap">
+              {/* Time — column sized for the longest real values in guide data
+                  (e.g. "07:00–08:00", "Alternativa", both ~11 chars fit on one
+                  line at 84px). Longer outliers like "Al día siguiente" wrap
+                  at their natural word spaces instead of overflowing into the
+                  title column — this was fixed-at-48px + nowrap before, which
+                  let anything past ~7 chars spill over and overlap the title. */}
+              <div data-day="time" className="font-mono text-[11px] font-medium text-[#0F3A33] tracking-[.02em] pt-0.5 leading-[1.3]">
                 {item.time}
               </div>
               {/* Content */}
