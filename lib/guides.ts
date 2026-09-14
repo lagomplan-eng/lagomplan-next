@@ -1176,6 +1176,70 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/alto-adigio-dolomitas.jpg',
     sections: [],
   },
+
+  // ── Capadocia ────────────────────────────────────────────────
+  {
+    slug_es: 'capadocia',
+    slug_en: 'capadocia',
+    title_es: 'Capadocia, Turquía',
+    title_en: 'Cappadocia, Turkey',
+    excerpt_es: 'El paisaje que parece generado por inteligencia artificial lleva 60 millones de años en el mismo lugar: las chimeneas de hadas son el escenario más fotografiado de Turquía. Septiembre trae 26–28°C de día, cielos despejados y la probabilidad de vuelo en globo más alta del año, 85–90%, porque el viento otoñal aún no llega y las lluvias de verano ya pasaron.',
+    excerpt_en: 'The landscape that looks AI-generated has sat in the same place for 60 million years: fairy chimneys are Turkey\'s most photographed backdrop. September brings 26–28°C days, clear skies, and the year\'s best balloon-flight odds, 85–90%, because the autumn wind hasn\'t arrived yet and the summer rains are already gone.',
+    destination_es: 'Capadocia, Turquía',
+    destination_en: 'Cappadocia, Turkey',
+    tags_es: ['Amigos', 'Globo', 'Paisaje'],
+    tags_en: ['Friends', 'Balloon', 'Landscape'],
+    cover_img: '/images/guides/capadocia.png',
+    sections: [],
+  },
+
+  // ── Kioto y Osaka ────────────────────────────────────────────
+  {
+    slug_es: 'kioto-osaka',
+    slug_en: 'kioto-osaka',
+    title_es: 'Kioto y Osaka, Japón',
+    title_en: 'Kyoto and Osaka, Japan',
+    excerpt_es: 'Septiembre es el secreto de Japón: el mismo Kioto de siempre, sin las multitudes del foliaje otoñal. 26–30°C de día, cielos despejados y templos con la mitad de visitantes. El Grand Sumo de Tokio añade el evento deportivo más singular del calendario japonés.',
+    excerpt_en: "September is Japan's open secret: the same Kyoto everyone wants, without the autumn-foliage crowds. 26–30°C by day, clear skies, and temples at half their usual visitor count. Tokyo's September Grand Sumo tournament adds Japan's most singular sporting event.",
+    destination_es: 'Kioto y Osaka, Japón',
+    destination_en: 'Kyoto and Osaka, Japan',
+    tags_es: ['Pareja', 'Templos', 'Gastronomía'],
+    tags_en: ['Couple', 'Temples', 'Food'],
+    cover_img: '/images/guides/kioto-osaka.png',
+    sections: [],
+  },
+
+  // ── Marrakech ────────────────────────────────────────────────
+  {
+    slug_es: 'marrakech',
+    slug_en: 'marrakech',
+    title_es: 'Marrakech, Marruecos',
+    title_en: 'Marrakech, Morocco',
+    excerpt_es: 'Septiembre es el momento exacto: la temperatura baja de los 40°C del verano a los 28–32°C, los europeos vuelven al trabajo y la Medina recupera la escala humana que julio y agosto le quitan.',
+    excerpt_en: "September is the exact window: temperatures drop from summer's 40°C to a more livable 28–32°C, Europeans are back at work, and the Medina regains the human scale that July and August strip away.",
+    destination_es: 'Marrakech, Marruecos',
+    destination_en: 'Marrakech, Morocco',
+    tags_es: ['Solo', 'Cultura', 'Artesanía', 'Bienestar'],
+    tags_en: ['Solo', 'Culture', 'Craft', 'Wellness'],
+    cover_img: '/images/guides/marrakech.png',
+    sections: [],
+  },
+
+  // ── La Ruta del Chile en Nogada ──────────────────────────────
+  {
+    slug_es: 'chile-en-nogada',
+    slug_en: 'chile-en-nogada',
+    title_es: 'La Ruta del Chile en Nogada, Puebla',
+    title_en: 'The Chile en Nogada Route, Puebla',
+    excerpt_es: 'El único plato de México con fecha de caducidad natural: agosto y septiembre, cuando la nuez de Castilla fresca, el durazno criollo y la granada están en temporada simultánea en Puebla. El chile en nogada existe solo cuando sus ingredientes existen.',
+    excerpt_en: 'The only Mexican dish with a built-in expiration date: August and September, when fresh walnuts, native peaches, and pomegranates are all in season at once in Puebla. Chile en nogada exists only when its ingredients do.',
+    destination_es: 'Puebla · Atlixco · Cholula',
+    destination_en: 'Puebla · Atlixco · Cholula',
+    tags_es: ['Familia', 'Gastronomía', 'Roadtrip'],
+    tags_en: ['Family', 'Food', 'Road Trip'],
+    cover_img: '/images/guides/chile-en-nogada.png',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────

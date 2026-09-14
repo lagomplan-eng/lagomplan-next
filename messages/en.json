@@ -318,5 +318,10 @@
       "q6": "Do you accept Mexican cards?",
       "a6": "Yes. We accept Mexican and international credit and debit cards. MXN prices are processed locally."
     }
+  },
+  "authGate": {
+    "anonLimitReached": "You've used your free trip. Create an account to keep generating itineraries.",
+    "notAuthenticated": "You need an account to generate this trip.",
+    "tripTooLarge": "Trips longer than {threshold} days or with multiple cities need an account — that's how we generate them in pieces instead of cutting them off."
   }
 }

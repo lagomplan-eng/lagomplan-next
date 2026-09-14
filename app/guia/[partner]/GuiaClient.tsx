@@ -28,14 +28,20 @@ import {
   Plane, Car, CloudSun, Banknote, Wifi, ShieldCheck, Briefcase, Droplet, Moon,
   SquareParking, Coffee, Croissant, Utensils, ShoppingBasket, Trees, Plus,
   Landmark, Baby, Martini, Compass, Clock, CloudRain, ArrowDown, IceCreamCone,
-  Mountain,
+  Mountain, KeyRound, Luggage, Sparkles, DoorOpen, Shirt, ShoppingCart,
+  Wallet, AlarmClock, Laptop, ChefHat, Truck, PartyPopper, Dumbbell, Scissors,
   type LucideIcon,
 } from 'lucide-react'
-import { gaTrack } from '../../../lib/analytics/ga'
+import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
+import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
+import { getZone } from '../../../content/guia/zones'
+import { resolveFaqModule } from '../../../content/guia/faq/resolve'
+import type { FaqItemKey } from '../../../content/guia/faq/types'
 import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
+import PracticalSection from './PracticalSection'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -46,9 +52,13 @@ const ICONS: Record<IconKey, LucideIcon> = {
   utensils: Utensils, baby: Baby, martini: Martini, compass: Compass, clock: Clock,
   cloudRain: CloudRain, arrowDown: ArrowDown, iceCream: IceCreamCone,
   mountain: Mountain,
+  keyRound: KeyRound, suitcase: Luggage, sparkles: Sparkles, doorOpen: DoorOpen,
+  shirt: Shirt, cart: ShoppingCart, wallet: Wallet, alarmClock: AlarmClock,
+  laptop: Laptop, chefHat: ChefHat, truck: Truck, partyPopper: PartyPopper,
+  dumbbell: Dumbbell, scissors: Scissors,
 }
 
-function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size?: number; color?: string }) {
+export function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size?: number; color?: string }) {
   const Cmp = ICONS[name]
   return <Cmp size={size} color={color} strokeWidth={1.8} aria-hidden />
 }
@@ -68,11 +78,26 @@ function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; 
 const PINE = '#0F3A33'
 const CREAM = '#FFF9F3'
 
+/** Synthetic key for the partner-specific "Your house" tab — kept out of
+ *  city.neighborhoods/neighborhoodOrder so two partners sharing a city don't
+ *  collide on each other's home-address tab. */
+const HOME_TAB_ID = 'your-house'
+
 /** WhatsApp booking link for experiences (routed through the local partner),
  *  with a language-matched prefilled message. */
 const WA_BOOK_URL: Record<Lang, string> = {
   en: "https://wa.me/525539149062?text=Hello!%20I'm%20interested%20in%20booking%20an%20Insider%20Mexico%20City%20experience.",
   es: 'https://wa.me/525539149062?text=%C2%A1Hola!%20Me%20interesa%20reservar%20una%20experiencia%20de%20Insider%20en%20la%20Ciudad%20de%20M%C3%A9xico.',
+}
+
+/**
+ * Maps an ArrivalItem.id to the FAQ item that's meant to replace it once
+ * that FAQ item has real content. Omitting the arrival item is only safe
+ * once its FAQ counterpart actually resolves — otherwise the answer just
+ * disappears rather than moves. See visibleArrivalItems below.
+ */
+const ARRIVAL_FAQ_COUNTERPART: Partial<Record<string, FaqItemKey>> = {
+  'coming-back-late': 'lateReturn',
 }
 
 /** Experience card images, keyed by the experience id. */
@@ -94,12 +119,14 @@ function WhatsAppIcon({ className }: { className?: string }) {
   )
 }
 
-function ExperienceCard({ exp, t, lang }: { exp: Experience; t: CityCopy; lang: Lang }) {
+function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const descriptions = Array.isArray(exp.description) ? exp.description : [exp.description]
   const minTimes = Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]
 
   const hasPhoto = Boolean(EXP_PHOTOS[exp.id])
+  const bookHref = withPilotUtm(WA_BOOK_URL[lang], pilotId, partnerSlug)
+  const detailsHref = withPilotUtm(exp.howToBookLinkHref, pilotId, partnerSlug)
 
   return (
     <div className={`${styles.expCard} ${hasPhoto ? '' : styles.expCardNoImg}`}>
@@ -113,7 +140,16 @@ function ExperienceCard({ exp, t, lang }: { exp: Experience; t: CityCopy; lang: 
           <p className={styles.expNote}>{exp.teaser}</p>
         </div>
         <div className={styles.expActions}>
-          <a className={styles.expBookLink} href={WA_BOOK_URL[lang]} target="_blank" rel="noopener">
+          <a
+            className={styles.expBookLink}
+            href={bookHref}
+            target="_blank"
+            rel="noopener"
+            onClick={() => trackOutboundLink({
+              linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
+              section: 'experience_book', experienceName: exp.title,
+            })}
+          >
             <WhatsAppIcon className={styles.expBookIcon} />
             {t.expBookCta}
           </a>
@@ -140,7 +176,16 @@ function ExperienceCard({ exp, t, lang }: { exp: Experience; t: CityCopy; lang: 
             {descriptions.map((d, i) => <p className={styles.expDetailText} key={i}>{d}</p>)}
             <p className={styles.expDetailLabel}>{t.expHowToBookLabel}</p>
             <p className={styles.expDetailText}>
-              <a className={styles.link} href={exp.howToBookLinkHref} target="_blank" rel="noopener noreferrer">{exp.howToBookLinkText}</a>
+              <a
+                className={styles.link}
+                href={detailsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackOutboundLink({
+                  linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
+                  section: 'experience_details', experienceName: exp.title,
+                })}
+              >{exp.howToBookLinkText}</a>
               {exp.howToBook}
             </p>
             <p className={styles.expDetailLabel}>{t.expMinTimeLabel}</p>
@@ -155,10 +200,12 @@ function ExperienceCard({ exp, t, lang }: { exp: Experience; t: CityCopy; lang: 
 
 /** "Your Own Plan" renders as a full-width closing banner below the experience
  *  grid, not as a peer card, since it's an invitation rather than a place. */
-function ExperienceBanner({ exp, t, lang }: { exp: Experience; t: CityCopy; lang: Lang }) {
+function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string }) {
   const [isOpen, setIsOpen] = useState(false)
   const descriptions = Array.isArray(exp.description) ? exp.description : [exp.description]
   const minTimes = Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]
+  const bookHref = withPilotUtm(WA_BOOK_URL[lang], pilotId, partnerSlug)
+  const detailsHref = withPilotUtm(exp.howToBookLinkHref, pilotId, partnerSlug)
 
   return (
     <div className={styles.expBanner}>
@@ -168,7 +215,16 @@ function ExperienceBanner({ exp, t, lang }: { exp: Experience; t: CityCopy; lang
           <p className={styles.expBannerNote}>{exp.teaser}</p>
         </div>
         <div className={styles.expActions}>
-          <a className={styles.expBookLink} href={WA_BOOK_URL[lang]} target="_blank" rel="noopener">
+          <a
+            className={styles.expBookLink}
+            href={bookHref}
+            target="_blank"
+            rel="noopener"
+            onClick={() => trackOutboundLink({
+              linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
+              section: 'experience_book', experienceName: exp.title,
+            })}
+          >
             <WhatsAppIcon className={styles.expBookIcon} />
             {t.expBookCta}
           </a>
@@ -196,7 +252,16 @@ function ExperienceBanner({ exp, t, lang }: { exp: Experience; t: CityCopy; lang
           {descriptions.map((d, i) => <p className={styles.expBannerDetailText} key={i}>{d}</p>)}
           <p className={styles.expBannerDetailLabel}>{t.expHowToBookLabel}</p>
           <p className={styles.expBannerDetailText}>
-            <a className={styles.expBannerLink} href={exp.howToBookLinkHref} target="_blank" rel="noopener noreferrer">{exp.howToBookLinkText}</a>
+            <a
+              className={styles.expBannerLink}
+              href={detailsHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackOutboundLink({
+                linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
+                section: 'experience_details', experienceName: exp.title,
+              })}
+            >{exp.howToBookLinkText}</a>
             {exp.howToBook}
           </p>
           <p className={styles.expBannerDetailLabel}>{t.expMinTimeLabel}</p>
@@ -211,13 +276,23 @@ function ExperienceBanner({ exp, t, lang }: { exp: Experience; t: CityCopy; lang
 export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
-  const [browseNb, setBrowseNb] = useState<string>(partner.homeNeighborhood)
+  const [browseNb, setBrowseNb] = useState<string>(HOME_TAB_ID)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
   const t = city.copy[lang]
   const interp = (s: string) =>
     s.replace(/\{host\}/g, partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
+
+  // ── ?lang=es|en seeds the toggle ────────────────────────────────────────
+  // Kept as a post-mount effect (not a useState lazy initializer) so the
+  // very first client render still matches the server-rendered 'en'
+  // default — reading window.location here to decide initial state would
+  // hydrate-mismatch a Spanish deep link against the English SSR HTML.
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get('lang')
+    if (requested === 'es' || requested === 'en') setLang(requested)
+  }, [])
 
   // ── Attribution flag + view event (once on load) ──────────────────────────
   useEffect(() => {
@@ -263,18 +338,46 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   }, [insidersPublished, partner.slug, city.id])
 
   // ── Planner CTA ───────────────────────────────────────────────────────────
+  // UTM scheme: utm_source=<partner slug>, utm_medium=partner (constant),
+  // utm_campaign=<pilot id>, utm_content=partner.utmContent, defaulting to
+  // guest_guide (this route IS the guest-guide distribution channel —
+  // other channels, e.g. prearrival/qr, are separate links documented in
+  // docs/analytics/mxcity-pilot-links.md). partner.utmContent existed as a
+  // field with no reader until now — this was the missing wiring.
   const plannerBase = getRoute(lang, 'planner')
-  const plannerHref =
-    `${plannerBase}?destino=${city.id}&utm_source=host&utm_medium=guia&utm_campaign=${partner.plannerCampaign}`
+  const plannerQuery = new URLSearchParams({
+    utm_source: partner.slug,
+    utm_medium: 'partner',
+    utm_campaign: partner.pilotId,
+    utm_content: partner.utmContent ?? 'guest_guide',
+  })
+  const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
     gaTrack('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
 
-  const homeNb = city.neighborhoods[partner.homeNeighborhood] ?? city.neighborhoods[city.neighborhoodOrder[0]]
-  const browseNbData = city.neighborhoods[browseNb] ?? homeNb
+  // Tab order + lookup = partner's own "Your house" pick list, followed by
+  // the zones shared across all partners in this city.
+  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
+  const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
+  const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const spots = browseNbData.spots[lang]
   const itin = city.itinerary[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
   const insiders = partner.insiders
+
+  // ── The practical part (arrival items + FAQ module, merged) ────────────
+  const faqZone = getZone(partner.zone)
+  const faqGroups = resolveFaqModule(partner, faqZone, lang)
+  const resolvedFaqKeys = new Set(faqGroups?.flatMap((g) => g.items.map((it) => it.key)) ?? [])
+  const visibleArrivalItems = t.arrivalItems
+    .filter((item) => {
+      if (!item.id || !partner.arrivalItemsOmit?.includes(item.id)) return true
+      const counterpart = ARRIVAL_FAQ_COUNTERPART[item.id]
+      // Omit only once the FAQ counterpart has actually resolved — otherwise
+      // omitting here would delete the answer rather than relocate it.
+      return !(counterpart && resolvedFaqKeys.has(counterpart))
+    })
+    .map((item) => ({ ...item, body: interp(item.body) }))
 
   return (
     <div className={styles.page}>
@@ -325,7 +428,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           <span className={styles.heroEyebrow}>{interp(t.heroEyebrow)}</span>
           <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroSub}>{interp(t.heroSub)}</p>
-          <a href="#before" className={styles.ctaLight}>
+          <a href="#practico" className={styles.ctaLight}>
             {t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} />
           </a>
         </div>
@@ -349,33 +452,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         </section>
       )}
 
-      {/* ── 2. Before you arrive ───────────────────────────── */}
-      <section id="before" className={styles.section}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.beforeEyebrow} title={t.beforeH2} lede={t.beforeLede} eyebrowColor="var(--pine)" />
-            <div className={styles.secBody}>
-              <div className={styles.cardGrid}>
-                {t.arrivalItems.map((item, i) => (
-                  <div className={styles.card} key={i}>
-                    <div className={styles.iconChip}><Icon name={item.icon} color={CREAM} /></div>
-                    <h4 className={styles.h4}>{item.title}</h4>
-                    <p className={styles.cardBody}>
-                      {interp(item.body)}
-                      {item.link && (
-                        <>
-                          <a className={styles.link} href={item.link.href} target="_blank" rel="noopener noreferrer">{item.link.text}</a>
-                          {item.link.after}
-                        </>
-                      )}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
+      <PracticalSection
+        arrivalItems={visibleArrivalItems}
+        faqGroups={faqGroups}
+        atAGlance={partner.atAGlance}
+        practicalSubhead={partner.practicalSubhead}
+        partnerSlug={partner.slug}
+        zone={partner.zone}
+        pilotId={partner.pilotId}
+        lang={lang}
+      />
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`}>
@@ -390,7 +477,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
             <div className={styles.secBody}>
               <div className={styles.nbControls}>
                 <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
-                  {city.neighborhoodOrder.map((name) => (
+                  {nbOrder.map((name) => (
                     <button
                       key={name}
                       type="button"
@@ -398,7 +485,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                       aria-selected={name === browseNb}
                       className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
                       onClick={() => setBrowseNb(name)}
-                    >{city.neighborhoods[name].tabLabel?.[lang] ?? name}</button>
+                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
                   ))}
                 </div>
                 <a
@@ -552,11 +639,11 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
             <div className={styles.secBody}>
               <div className={styles.expGrid}>
                 {t.experiences.filter((exp) => exp.id !== 'exp-own-plan').map((exp) => (
-                  <ExperienceCard exp={exp} t={t} lang={lang} key={exp.id} />
+                  <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
                 ))}
               </div>
               {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
-                <ExperienceBanner exp={exp} t={t} lang={lang} key={exp.id} />
+                <ExperienceBanner exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
               ))}
             </div>
           </div>
@@ -638,12 +725,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           <h2 className={styles.h2}>{t.discoverH2}</h2>
           <div className={styles.discoverGrid}>
             {city.destinations.map((dest) => (
-              <div className={styles.discoverCard} key={dest.name}>
+              <a
+                className={styles.discoverCard}
+                href={dest.url[lang]}
+                key={dest.name}
+                onClick={() => gaTrack('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className={styles.discoverImg} src={dest.photoUrl} alt={dest.name} />
                 <div className={styles.discoverOverlay} />
                 <span className={styles.discoverLabel}>{dest.name}</span>
-              </div>
+              </a>
             ))}
           </div>
         </div>

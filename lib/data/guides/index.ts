@@ -85,6 +85,16 @@ import { guide as napaSonomaEn } from './napa-sonoma/en'
 import { guide as altoAdigioDolomitasEs } from './alto-adigio-dolomitas/es'
 import { guide as altoAdigioDolomitasEn } from './alto-adigio-dolomitas/en'
 
+// International guides (September 2026 batch)
+import { guide as capadociaEs } from './capadocia/es'
+import { guide as capadociaEn } from './capadocia/en'
+import { guide as kiotoOsakaEs } from './kioto-osaka/es'
+import { guide as kiotoOsakaEn } from './kioto-osaka/en'
+import { guide as marrakechEs } from './marrakech/es'
+import { guide as marrakechEn } from './marrakech/en'
+import { guide as chileEnNogadaEs } from './chile-en-nogada/es'
+import { guide as chileEnNogadaEn } from './chile-en-nogada/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -125,6 +135,11 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'ruanda':              { es: ruandaEs,             en: ruandaEn },
   'napa-sonoma':         { es: napaSonomaEs,         en: napaSonomaEn },
   'alto-adigio-dolomitas': { es: altoAdigioDolomitasEs, en: altoAdigioDolomitasEn },
+  // International guides (September 2026 batch)
+  'capadocia':          { es: capadociaEs,          en: capadociaEn },
+  'kioto-osaka':         { es: kiotoOsakaEs,          en: kiotoOsakaEn },
+  'marrakech':           { es: marrakechEs,           en: marrakechEn },
+  'chile-en-nogada':     { es: chileEnNogadaEs,       en: chileEnNogadaEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────

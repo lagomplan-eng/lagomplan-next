@@ -48,6 +48,27 @@ export const FREE_GUIDE_VIEWS = 1
 export const ASYNC_THRESHOLD = 5
 
 /**
+ * True when a generation request needs to be blocked pre-flight and the
+ * caller sent to /login?reason=trip_too_large, rather than being allowed to
+ * fall through to the sync endpoint.
+ *
+ * The async/chunked pipeline (the only path that safely handles a trip this
+ * size — see ASYNC_THRESHOLD above) requires auth. An anonymous caller can
+ * never reach it, so a large or multi-city request from an anon visitor
+ * would otherwise silently fall through to the single-call sync endpoint,
+ * which was never sized for it. Reads ASYNC_THRESHOLD directly (not a copy
+ * of the number) so the pre-flight guard in TripResult.tsx and the
+ * `reason=trip_too_large` copy in LoginForm.tsx both move together if this
+ * threshold changes.
+ */
+export function shouldRequireAuthForLargeTrip(
+  isAuthenticated: boolean,
+  trip: { duration_days: number; isMultiCity: boolean },
+): boolean {
+  return !isAuthenticated && (trip.duration_days > ASYNC_THRESHOLD || trip.isMultiCity)
+}
+
+/**
  * Given a PlanState-ish object, returns the number of trips the user has
  * used out of FREE_TRIPS_LIMIT. Always floors at 0.
  */

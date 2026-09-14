@@ -17,7 +17,31 @@ const nextConfig = {
   // mapping stays repointable. Add one line per partner.
   async redirects() {
     return [
-      { source: '/livin', destination: '/guia/livin', permanent: false },
+      { source: '/livin', destination: '/guia/livin_condesa', permanent: false },
+
+      // Livin → Livin Condesa slug rename (a second Livin property,
+      // livin_roma, now exists — see content/guia/index.ts). Stale
+      // pre-rename tracking links (utm_source=livin&utm_medium=partner)
+      // must resolve to the new canonical partner_id, not the retired
+      // slug — this more specific rule is matched first (redirects are
+      // evaluated in array order) and rewrites utm_source/utm_medium
+      // before the generic fallback below runs. utm_campaign/utm_content
+      // aren't in this destination's query string, so Next.js passes
+      // them through from the incoming request unchanged. Anchored
+      // regexes (^...$) so this only matches the exact retired values —
+      // never livin_roma or any other slug.
+      {
+        source: '/guia/livin',
+        has: [
+          { type: 'query', key: 'utm_source', value: '^livin$' },
+          { type: 'query', key: 'utm_medium', value: '^partner$' },
+        ],
+        destination: '/guia/livin_condesa?utm_source=livin_condesa&utm_medium=partner',
+        permanent: true,
+      },
+      // Fallback: any other /guia/livin request (no UTMs, or UTMs that
+      // don't match the stale-tracking-link shape above) — plain rename.
+      { source: '/guia/livin', destination: '/guia/livin_condesa', permanent: true },
     ]
   },
 }

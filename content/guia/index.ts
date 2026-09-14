@@ -6,14 +6,20 @@
 
 import type { City, Partner } from './types'
 import { cdmx } from './cities/cdmx'
-import { livin } from './partners/livin'
+import { livinCondesa } from './partners/livin_condesa'
+import { livinRoma } from './partners/livin_roma'
+import { livinPolanco } from './partners/livin_polanco'
+import { demo } from './partners/demo'
 
 const CITIES: Record<string, City> = {
   cdmx,
 }
 
 const PARTNERS: Record<string, Partner> = {
-  livin,
+  livin_condesa: livinCondesa,
+  livin_roma: livinRoma,
+  livin_polanco: livinPolanco,
+  demo,
 }
 
 /** All partner slugs, for generateStaticParams. */

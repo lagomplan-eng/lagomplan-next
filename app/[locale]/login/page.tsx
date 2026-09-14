@@ -3,6 +3,7 @@
  * Route ES: /login  (see i18n.ts pathnames for full localized segment)
  * TODO: implement full page UI
  */
+import { Suspense }                   from 'react'
 import type { Metadata }              from 'next'
 import { buildAlternates, buildOpenGraph, NO_INDEX } from '../../../lib/seo'
 import type { Locale }               from '../../../i18n'
@@ -34,7 +35,9 @@ export default async function Page({
         <h1 className="font-sans text-[40px] font-bold text-[#0F3A33]">
           {locale === 'es' ? 'Iniciar sesión' : 'Log in'}
         </h1>
-<LoginForm />
+        <Suspense fallback={null}>
+          <LoginForm />
+        </Suspense>
       </div>
     </main>
   )

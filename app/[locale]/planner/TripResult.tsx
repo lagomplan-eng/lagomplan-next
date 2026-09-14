@@ -37,7 +37,7 @@ import {
 } from '../../../lib/planner/segments'
 import PlacesInput, { type PlaceResult } from '../../../components/forms/PlacesInput'
 import DateRangePicker, { type DateRange } from '../../../components/forms/DateRangePicker'
-import { ASYNC_THRESHOLD } from '../../../lib/plan/limits'
+import { ASYNC_THRESHOLD, shouldRequireAuthForLargeTrip } from '../../../lib/plan/limits'
 import { GenerationSurface } from '../../../components/generation/GenerationSurface'
 import { useGenerationSurface } from '../../../hooks/useGenerationSurface'
 import { events } from '../../../lib/analytics'
@@ -1022,6 +1022,18 @@ export default function TripResult({ params }: Props) {
   const isES   = locale === 'es'
   const router = useRouter()
 
+  // ── Login redirect with reason ──────────────────────────────────────────────
+  // Every 401 from a generation endpoint carries a structured `code`
+  // ('anon_limit_reached' from /api/generate-trip, 'not_authenticated' from
+  // /api/trips/jobs) which is forwarded here as-is. The pre-flight guard
+  // (see ASYNC_THRESHOLD checks below) uses the client-only 'trip_too_large'
+  // reason — it never reaches the server. LoginForm reads `reason` from the
+  // URL to show contextual copy instead of a bare, unexplained login form.
+  function redirectToLoginWithReason(reason: string) {
+    sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
+    router.push({ pathname: '/login', query: { reason } })
+  }
+
   const {
     destination = '',
     origin = '',
@@ -1711,6 +1723,18 @@ export default function TripResult({ params }: Props) {
         const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || isMultiCityTrip)
         setIsAsyncPath(useAsync)
 
+        // ── Pre-flight guard ──────────────────────────────────────────────
+        // Anon users can never reach the async/chunked path — it requires
+        // auth — so a large or multi-city request from an anon visitor would
+        // otherwise fall through to the single-call sync endpoint, which was
+        // never sized for it (see /api/generate-trip's per-call token/time
+        // budget). Bail before any network call rather than let it fail
+        // downstream with an opaque error.
+        if (shouldRequireAuthForLargeTrip(authedUser !== null, { duration_days, isMultiCity: isMultiCityTrip })) {
+          redirectToLoginWithReason('trip_too_large')
+          return
+        }
+
         console.log('[TripResult] POST payload:', JSON.stringify(payload), 'async:', useAsync)
         genStartedAt = performance.now()
 
@@ -1751,8 +1775,7 @@ export default function TripResult({ params }: Props) {
           setRawResponse(genData)
           if (!genRes.ok) {
             if (genRes.status === 401) {
-              sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
-              router.push({ pathname: '/login' })
+              redirectToLoginWithReason(typeof genData?.code === 'string' ? genData.code : 'anon_limit_reached')
               return
             }
             if (genRes.status === 402) { openPaywall(); return }
@@ -2209,8 +2232,7 @@ export default function TripResult({ params }: Props) {
     setRawResponse(createData)
     if (!createRes.ok) {
       if (createRes.status === 401) {
-        sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search)
-        router.push({ pathname: '/login' })
+        redirectToLoginWithReason(typeof createData?.code === 'string' ? createData.code : 'not_authenticated')
         throw Object.assign(new Error('redirect-to-login'), { code: 'redirect_to_login' })
       }
       if (createRes.status === 402) {
@@ -2417,6 +2439,14 @@ export default function TripResult({ params }: Props) {
       // anything beyond ~14 days. Multi-city ALWAYS uses async (segment-aware
       // chunking).
       const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
+
+      // ── Pre-flight guard — see the identical check on the initial-gen
+      // effect above for the rationale (anon can't reach async).
+      if (shouldRequireAuthForLargeTrip(authedUser !== null, { duration_days, isMultiCity: segments.length > 0 })) {
+        redirectToLoginWithReason('trip_too_large')
+        return
+      }
+
       const previousTripId = tripId   // capture before any setTripId mutation
 
       let tripDataRaw: any = null
@@ -2451,6 +2481,10 @@ export default function TripResult({ params }: Props) {
         const genData = await genRes.json().catch(() => null)
         setRawResponse(genData)
         if (!genRes.ok) {
+          if (genRes.status === 401) {
+            redirectToLoginWithReason(typeof genData?.code === 'string' ? genData.code : 'anon_limit_reached')
+            return
+          }
           if (genRes.status === 402) {
             refreshPlanCredits().catch(() => {})
             setPrefOpen(false)
@@ -2844,6 +2878,14 @@ export default function TripResult({ params }: Props) {
       // the sync /api/generate-trip Edge Function hits WORKER_RESOURCE_LIMIT
       // for anything beyond ~14 days. Multi-city ALWAYS uses async.
       const useAsync = authedUser !== null && (duration_days > ASYNC_THRESHOLD || segments.length > 0)
+
+      // ── Pre-flight guard — see the identical check on the initial-gen
+      // effect above for the rationale (anon can't reach async).
+      if (shouldRequireAuthForLargeTrip(authedUser !== null, { duration_days, isMultiCity: segments.length > 0 })) {
+        redirectToLoginWithReason('trip_too_large')
+        return
+      }
+
       // Capture the predecessor before any setTripId mutation — needed for
       // the "delete the old row after the new one is saved" cleanup step.
       const previousTripId = tripId
@@ -2879,6 +2921,10 @@ export default function TripResult({ params }: Props) {
         const genData = await genRes.json().catch(() => null)
         setRawResponse(genData)
         if (!genRes.ok) {
+          if (genRes.status === 401) {
+            redirectToLoginWithReason(typeof genData?.code === 'string' ? genData.code : 'anon_limit_reached')
+            return
+          }
           if (genRes.status === 402) {
             refreshPlanCredits().catch(() => {})
             openPaywall()

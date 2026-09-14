@@ -9,35 +9,9 @@ import type { City } from '../types'
 export const cdmx: City = {
   id: 'cdmx',
   heroImage: '/images/guia/cdmx-banner.jpg',
-  neighborhoodOrder: ['Veracruz 85', 'Roma Norte', 'Condesa', 'Polanco', 'Centro'],
+  neighborhoodOrder: ['Roma Norte', 'Condesa', 'Polanco', 'Centro'],
 
   neighborhoods: {
-    'Veracruz 85': {
-      name: 'Veracruz 85',
-      tabLabel: { es: 'Tu casa', en: 'Your house' },
-      mapUrl: 'https://maps.app.goo.gl/qQSdT8RVpHCzGpxi8',
-      tagline: { es: 'A pasos de tu puerta', en: 'Steps from your door' },
-      orientation: { es: 'Todo aquí está genuinamente a 10 minutos a pie de tu casa, sin matices, esta es la zona real.', en: 'Everything here is genuinely a 10-minute walk from your house, no hedging, this is the real thing.' },
-      spots: {
-        es: [
-          { icon: 'coffee',     name: 'Quentin',      distance: 'Ámsterdam 67a',                    note: 'Café de especialidad, repostería y una pequeña zona para sentarte, con decoración cuidada, el favorito del barrio.' },
-          { icon: 'utensilsSm', name: 'Maizajo',       distance: 'Fernando Montes de Oca 113',       note: 'Tortillería en funcionamiento abajo, restaurante formal arriba. Pide el suadero y el tamal de boda. La taquería es de pie, sin reservación; el comedor de arriba sí las toma.' },
-          { icon: 'trees',      name: 'Parque España',  distance: 'Parque España',   note: 'A unas cuadras: la contraparte más chica y tranquila del Parque México, una vuelta para correr, tianguis los sábados y bancas que se mantienen en sombra casi todo el día.' },
-          { icon: 'landmark',   name: 'Foro Shakespeare', distance: 'Zamora 7, esq. Veracruz',       note: 'Un teatro independiente activo desde 1982, el foro alternativo de la ciudad, en la esquina misma. Taquilla abre a las 5pm entre semana.' },
-          { icon: 'basket',     name: 'Choza',          distance: 'Tenancingo 38',                    note: 'Tienda y cafetería de vida artesanal: cerámica, textiles y objetos hechos en colaboración con artesanos independientes; buen lugar para un café mientras curioseas.' },
-          { icon: 'martini',    name: 'Antesala',       distance: 'Sinaloa 141, Roma Nte., entre Cozumel y Salamanca', note: 'Coctelería de precisión junto a Lorea, con barra a la vista de los mixólogos y sets en vinil; más tranquilo que la Roma de fin de semana. Abre de martes a sábado desde las 6 pm, unos 10 minutos caminando.' },
-        ],
-        en: [
-          { icon: 'coffee',     name: 'Quentin',      distance: 'Ámsterdam 67a',                    note: 'Specialty coffee, baked goods, a small seating area with trendy decor, the neighborhood\'s go-to.' },
-          { icon: 'utensilsSm', name: 'Maizajo',       distance: 'Fernando Montes de Oca 113',       note: 'A working tortillería downstairs, a proper restaurant upstairs. Order the suadero and the tamal de boda. Standing-room taquería, no reservations; the upstairs dining room does take them.' },
-          { icon: 'trees',      name: 'Parque España',  distance: 'Parque España',   note: 'A few blocks over: a smaller, calmer counterpart to Parque México, a loop for running, a Saturday market, and benches that stay in the shade most of the day.' },
-          { icon: 'landmark',   name: 'Foro Shakespeare', distance: 'Zamora 7, esq. Veracruz',       note: 'An independent theater running since 1982, Mexico City\'s own alternative stage, right on the corner. Box office opens at 5pm on weekdays.' },
-          { icon: 'basket',     name: 'Choza',          distance: 'Tenancingo 38',                    note: 'A lifestyle shop and coffee counter: ceramics, textiles and objects made in collaboration with independent artisans; good for a coffee while you browse.' },
-          { icon: 'martini',    name: 'Antesala',       distance: 'Sinaloa 141, Roma Nte., entre Cozumel y Salamanca', note: 'Precision cocktails next to Lorea, with a bar that puts you right beside the mixologists and vinyl DJ sets; calmer than weekend Roma. Open Tuesday–Saturday from 6 pm, about a 10-minute walk.' },
-        ],
-      },
-    },
-
     'Roma Norte': {
       name: 'Roma Norte',
       mapUrl: 'https://maps.app.goo.gl/NM3HZoTVpWPuNagb9',
@@ -140,11 +114,16 @@ export const cdmx: City = {
   },
 
   destinations: [
-    { name: 'Oaxaca',                 photoUrl: '/images/guides/oaxaca.jpg' },
-    { name: 'Tulum',                  photoUrl: '/images/guides/tulum.jpg' },
-    { name: 'San Miguel de Allende',  photoUrl: '/images/guides/san-miguel-de-allende.jpg' },
-    { name: 'Valle de Bravo',         photoUrl: '/images/guides/valle-de-bravo.jpg' },
-    { name: 'Mérida',                 photoUrl: '/images/guides/merida.jpg' },
+    { name: 'Oaxaca',                 photoUrl: '/images/guides/oaxaca.jpg',
+      url: { en: 'https://www.lagomplan.com/en/guides/oaxaca-essential-guide', es: 'https://www.lagomplan.com/es/guias/oaxaca-guia-esencial' } },
+    { name: 'Tulum',                  photoUrl: '/images/guides/tulum.jpg',
+      url: { en: 'https://www.lagomplan.com/en/guides/tulum-solo-trip-guide', es: 'https://www.lagomplan.com/es/guias/tulum-guia-viaje-solo' } },
+    { name: 'San Miguel de Allende',  photoUrl: '/images/guides/san-miguel-de-allende.jpg',
+      url: { en: 'https://www.lagomplan.com/en/guides/san-miguel-de-allende-couples-trip', es: 'https://www.lagomplan.com/es/guias/san-miguel-de-allende-viaje-de-parejas' } },
+    { name: 'Valle de Bravo',         photoUrl: '/images/guides/valle-de-bravo.jpg',
+      url: { en: 'https://www.lagomplan.com/en/guides/valle-de-bravo-avandaro-family-adventure', es: 'https://www.lagomplan.com/es/guias/valle-de-bravo-avandaro-aventura-en-familia' } },
+    { name: 'Mérida',                 photoUrl: '/images/guides/merida.jpg',
+      url: { en: 'https://www.lagomplan.com/en/guides/merida-adventurous-family', es: 'https://www.lagomplan.com/es/guias/merida' } },
   ],
 
   itinerary: {
@@ -222,14 +201,14 @@ export const cdmx: City = {
       beforeLede: 'Lo básico y práctico, para que dejes de pensar en logística en cuanto aterrices.',
       arrivalItems: [
         { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}.' },
-        { icon: 'car',       title: 'Transporte',      body: 'Usa Uber, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. Para transporte privado, te recomendamos ', link: { text: 'Insider', href: "https://wa.me/525539149062?text=%C2%A1Hola!%20Me%20interesa%20reservar%20una%20experiencia%20de%20Insider%20en%20la%20Ciudad%20de%20M%C3%A9xico.", after: ', una opción segura para quienes buscan comodidad y un transporte confiable.' } },
+        { icon: 'car',       title: 'Transporte',      body: 'Usa Uber, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. Para transporte privado, te recomendamos ', link: { text: 'Insider', href: "https://wa.me/525539149062?text=%C2%A1Hola!%20Me%20interesa%20reservar%20una%20experiencia%20de%20Insider%20en%20la%20Ciudad%20de%20M%C3%A9xico.", after: ', una opción segura para quienes buscan comodidad y un transporte confiable.', linkName: 'insider' } },
         { icon: 'cloudSun',  title: 'Clima',           body: 'Templado todo el año, 18–25 °C. Las lluvias se concentran de junio a septiembre, casi siempre chubascos breves por la tarde. Lleva capas.' },
         { icon: 'banknote',  title: 'Dinero',          body: 'Las tarjetas se aceptan ampliamente. Lleva algo de efectivo en pesos para mercados, propinas y comida callejera. En restaurantes, la propina recomendada es 10–15%; redondea en taxis y puestos casuales.' },
-        { icon: 'wifi',      title: 'Conectividad',    body: 'Un eSIM se activa en minutos. ', link: { text: 'Consigue el tuyo con Airalo aquí', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. El wifi es confiable en la propiedad y en la mayoría de los cafés.' } },
+        { icon: 'wifi',      title: 'Conectividad',    body: 'Un eSIM se activa en minutos. ', link: { text: 'Consigue el tuyo con Airalo aquí', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. El wifi es confiable en la propiedad y en la mayoría de los cafés.', linkName: 'airalo' } },
         { icon: 'shield',    title: 'Seguridad',       body: 'Aplica el sentido común habitual en ciudad, usa apps de transporte por la noche y mantén tus objetos de valor fuera de vista. En una emergencia, el 911 funciona en todo el país.' },
         { icon: 'briefcase', title: 'Equipaje',        body: 'Zapatos cómodos para caminar, ropa casual, y una capa ligera para las noches frescas.' },
         { icon: 'droplet',   title: 'Agua de la llave', body: 'Te recomendamos no tomar agua de la llave, es segura para bañarte, lavarte los dientes y lavar trastes. Si tu departamento cuenta con agua purificada, estará señalada claramente; si tienes duda, mejor usa agua embotellada.' },
-        { icon: 'moon',      title: 'Llegar tarde',    body: 'Llega a la hora que sea, no hay problema.' },
+        { id: 'coming-back-late', icon: 'moon', title: 'Llegar tarde',    body: 'Llega a la hora que sea, no hay problema.' },
         { icon: 'parking',   title: 'Estacionamiento', body: 'El estacionamiento en la calle es limitado en la zona. Te recomendamos llegar en Uber o Didi en vez de traer coche.' },
         { icon: 'mountain',  title: 'Altitud',         body: 'La Ciudad de México está a 2,240 msnm. Toma más agua de lo habitual, ve con calma con el alcohol la primera noche, y evita planear una caminata exigente o una noche larga el primer día; la mayoría se adapta en 24–48 horas.' },
         { icon: 'cross',     title: 'Salud y farmacias', body: 'Las farmacias (del Ahorro, Guadalajara) están por todas partes, muchas abren 24 horas, y venden medicamentos comunes sin receta. Para algo más, pide a tu anfitrión una clínica cercana; el 911 es solo para emergencias.' },
@@ -402,14 +381,14 @@ export const cdmx: City = {
       beforeLede: 'The practical basics, so you can stop thinking about logistics the moment you land.',
       arrivalItems: [
         { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}.' },
-        { icon: 'car',       title: 'Transportation', body: "Use Uber, cheaper and safer than hailing on the street. The Metro is excellent if you're comfortable with crowds. For private transportation, we recommend ", link: { text: 'Insider', href: "https://wa.me/525539149062?text=Hello!%20I'm%20interested%20in%20booking%20an%20Insider%20Mexico%20City%20experience.", after: ', a safe option for you looking for comfort, and reliable transport.' } },
+        { icon: 'car',       title: 'Transportation', body: "Use Uber, cheaper and safer than hailing on the street. The Metro is excellent if you're comfortable with crowds. For private transportation, we recommend ", link: { text: 'Insider', href: "https://wa.me/525539149062?text=Hello!%20I'm%20interested%20in%20booking%20an%20Insider%20Mexico%20City%20experience.", after: ', a safe option for you looking for comfort, and reliable transport.', linkName: 'insider' } },
         { icon: 'cloudSun',  title: 'Weather',        body: 'Mild year-round, 18–25 °C. Rain concentrates June–September, mostly brief afternoon showers. Pack layers.' },
         { icon: 'banknote',  title: 'Money',          body: 'Cards are widely accepted. Keep some pesos in cash for markets, tips, and street food. In restaurants, 10–15% is the recommended tip; round up for taxis and casual spots.' },
-        { icon: 'wifi',      title: 'Connectivity',   body: 'An eSIM activates in minutes. ', link: { text: 'Get yours through Airalo here', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. Wi-Fi is reliable at the property and most cafés.' } },
+        { icon: 'wifi',      title: 'Connectivity',   body: 'An eSIM activates in minutes. ', link: { text: 'Get yours through Airalo here', href: 'https://airalo.tpm.li/xkRXTIKe', after: '. Wi-Fi is reliable at the property and most cafés.', linkName: 'airalo' } },
         { icon: 'shield',    title: 'Safety',         body: 'Standard city awareness applies, stick to rideshare apps at night and keep valuables out of sight. In an emergency, 911 works citywide.' },
         { icon: 'briefcase', title: 'Packing',        body: 'Comfortable walking shoes, casual clothes, and a light layer for cooler evenings.' },
         { icon: 'droplet',   title: 'Tap water',      body: "Please don't drink the tap water, it's fine for showering, brushing your teeth, and washing dishes. If your unit has purified water available, it will be clearly marked; when in doubt, stick to bottled." },
-        { icon: 'moon',      title: 'Coming back late', body: 'Arrive whenever you like, no need to worry.' },
+        { id: 'coming-back-late', icon: 'moon', title: 'Coming back late', body: 'Arrive whenever you like, no need to worry.' },
         { icon: 'parking',   title: 'Parking',        body: 'Street parking is limited in the area. We recommend arriving by Uber or Didi instead of bringing a car.' },
         { icon: 'mountain',  title: 'Altitude',       body: "Mexico City sits at 2,240m (7,350 ft). Drink more water than usual, go easy on alcohol the first night, and don't schedule a hard hike or a big night out on day one; most people adjust within 24–48 hours." },
         { icon: 'cross',     title: 'Health & Pharmacies', body: 'Pharmacies (Farmacias del Ahorro, Guadalajara) are everywhere, many open 24 hours, and sell common medications over the counter. For anything more, ask your host for a nearby clinic; 911 is for emergencies only.' },
