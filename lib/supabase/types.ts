@@ -123,30 +123,34 @@ export interface Database {
       // Async generation jobs (added alongside sync /api/generate-trip).
       generation_jobs: {
         Row: {
-          id:           string
-          user_id:      string
-          trip_id:      string | null
-          status:       'queued' | 'running' | 'completed' | 'failed'
-          inputs:       Json
-          chunks_total: number
-          chunks_done:  number
-          result:       Json | null
-          error:        string | null
-          created_at:   string
-          updated_at:   string
+          id:              string
+          user_id:         string
+          trip_id:         string | null
+          status:          'queued' | 'running' | 'completed' | 'failed'
+          inputs:          Json
+          chunks_total:    number
+          chunks_done:     number
+          result:          Json | null
+          error:           string | null
+          is_regeneration: boolean
+          credit_consumed: boolean
+          created_at:      string
+          updated_at:      string
         }
         Insert: {
-          id?:           string
-          user_id:       string
-          trip_id?:      string | null
-          status:        'queued' | 'running' | 'completed' | 'failed'
-          inputs:        Json
-          chunks_total:  number
-          chunks_done?:  number
-          result?:       Json | null
-          error?:        string | null
-          created_at?:   string
-          updated_at?:   string
+          id?:              string
+          user_id:          string
+          trip_id?:         string | null
+          status:           'queued' | 'running' | 'completed' | 'failed'
+          inputs:           Json
+          chunks_total:     number
+          chunks_done?:     number
+          result?:          Json | null
+          error?:           string | null
+          is_regeneration?: boolean
+          credit_consumed?: boolean
+          created_at?:      string
+          updated_at?:      string
         }
         Update: Partial<Database['public']['Tables']['generation_jobs']['Insert']>
       }

@@ -32,4 +32,8 @@ public/images/smart-finds/_backup/
 /blob-report/
 /playwright/.cache/
 
-# Supabase CLI temp
+# Supabase CLI temp — local CLI state (linked project ref, cached tool
+# versions). Regenerated per-machine by the CLI itself; was tracked
+# before this line existed, causing spurious diffs on every `supabase`
+# command. Untracked via `git rm --cached` alongside this line.
+supabase/.temp/

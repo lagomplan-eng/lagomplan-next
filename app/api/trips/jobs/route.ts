@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import type { User } from '@supabase/supabase-js'
-import { checkGenerationAllowed, consumeOneTrip } from '../../../../lib/entitlements'
+import { checkGenerationAllowed } from '../../../../lib/entitlements'
 import { getSupabaseAdmin, getSupabaseServer } from '../../../../lib/supabase/server'
 import { REF_COOKIE, sanitizeRefSource } from '../../../../lib/attribution/ref-source'
 
@@ -108,27 +108,30 @@ export async function POST(req: NextRequest) {
     const jobInputs = refSource ? { ...body, ref_source: refSource } : body
 
     // Insert the job row BEFORE anything else so a worker invocation has state to read.
+    // is_regeneration is captured here (server-verified ownership check above) so the
+    // worker can skip charging at completion without re-deriving ownership itself.
+    //
+    // NOTE: credit consumption no longer happens here. checkGenerationAllowed() above
+    // still gates whether the user is ALLOWED to start (has credits / is a subscriber),
+    // but the actual decrement now happens in the worker, at successful completion —
+    // see generate-trip-worker/index.ts's guarded credit_consumed claim next to its
+    // guarded `status: 'completed'` write. A job that never completes never charges;
+    // no refund bookkeeping needed on any failure path anymore.
     const { data: jobRow, error: insertErr } = await (admin as any)
       .from('generation_jobs')
       .insert({
-        user_id:      user.id,
-        status:       'queued',
-        inputs:       jobInputs,
-        chunks_total: chunksTotal,
-        chunks_done:  0,
+        user_id:         user.id,
+        status:          'queued',
+        inputs:          jobInputs,
+        chunks_total:    chunksTotal,
+        chunks_done:     0,
+        is_regeneration: isRegeneration,
       })
       .select('id, chunks_total')
       .single()
 
     if (insertErr || !jobRow) {
       return err(500, 'job_create_failed', 'Could not create job', insertErr?.message)
-    }
-
-    // Consume credit only after the job row exists, and only for new trips.
-    if (!isRegeneration) {
-      await consumeOneTrip(user.id).catch(e =>
-        console.error('[trips/jobs] consumeOneTrip error:', e)
-      )
     }
 
     // Fire-and-forget worker invocation. Reconciler handles any dropped invocation.
