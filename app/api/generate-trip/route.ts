@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
+import { waitUntil } from '@vercel/functions'
 import type { User } from '@supabase/supabase-js'
 import { checkGenerationAllowed, consumeOneTrip } from '../../../lib/entitlements'
 import { getSupabaseAdmin, getSupabaseServer } from '../../../lib/supabase/server'
@@ -20,6 +21,56 @@ export const maxDuration = 300
 export const dynamic = 'force-dynamic'
 
 const ANON_COOKIE = 'anon_gen_count'
+
+// ── Time budget ──────────────────────────────────────────────────────────────
+// The real Supabase Free per-invocation cap is 150s (see generate-trip-worker's
+// own budget comments) — 290s per attempt was never actually safe, it just
+// hadn't been tightened to match. ATTEMPT_TIMEOUT_MS gives 10s of margin under
+// that real cap. SOFT_DEADLINE_MS reserves 20s of the 300s maxDuration for
+// entitlement checks / validation / response serialization that happen outside
+// the edge-fn calls themselves, so a new attempt is only started if it can
+// plausibly finish before Vercel kills the function outright. MIN_RETRY_BUDGET_MS
+// is the floor below which a retry has no realistic chance of completing and
+// would just delay the failure response the user already deserves.
+const ATTEMPT_TIMEOUT_MS   = 140_000
+const SOFT_DEADLINE_MS     = 280_000
+const MIN_RETRY_BUDGET_MS  = 60_000
+
+// ── Baseline sync-generation logging ────────────────────────────────────────
+// Internal only (see supabase/migrations/20260911010000_*.sql — lives in the
+// `internal` schema, not `public`, never reachable via anon/authenticated API
+// keys). Captured so the effect of the time-budget/retry/output-thinning work
+// above can be measured against a real "before" number. Fire-and-forget via
+// waitUntil (never blocks the response) and fails silently — a missing or
+// misconfigured logging table must never break trip generation.
+function logSyncGeneration(params: {
+  startedAt:        number
+  duration_days:    number
+  city_count:       number
+  is_authenticated: boolean
+  user_id:          string | null
+  success:          boolean
+  error_code:       string | null
+}) {
+  const admin = getSupabaseAdmin()
+  const promise = (admin as any)
+    .schema('internal')
+    .from('sync_generation_logs')
+    .insert({
+      duration_ms:      Date.now() - params.startedAt,
+      duration_days:    params.duration_days,
+      city_count:       params.city_count,
+      is_authenticated: params.is_authenticated,
+      success:          params.success,
+      error_code:       params.error_code,
+      user_id:          params.user_id,
+    })
+    .then(
+      () => {},
+      (e: unknown) => console.warn('[generate-trip] sync_generation_logs insert failed (non-fatal):', e)
+    )
+  waitUntil(promise)
+}
 
 // Structured error envelope. Every error path returns the same shape so the
 // client can branch on `code` instead of parsing free-form `error` strings.
@@ -79,6 +130,14 @@ async function isRegenerationOfOwnedTrip(
 
 export async function POST(req: NextRequest) {
   const startedAt = Date.now()
+  // Declared outside the try block so the catch handler (a real timeout or
+  // an unexpected throw) can still log with real context instead of zeros —
+  // assigned as soon as body/user are known, a few lines into the try block.
+  let logDurationDays = 0
+  let logCityCount    = 1
+  let logIsAuth       = false
+  let logUserId: string | null = null
+
   try {
     const body = await req.json()
     const tripIdRaw = (body && typeof body === 'object') ? (body as any).tripId : null
@@ -93,6 +152,23 @@ export async function POST(req: NextRequest) {
       isRegeneration,
       bodyKeys: Object.keys(body ?? {}),
     }))
+
+    logDurationDays = typeof body?.duration_days === 'number' ? body.duration_days : 0
+    logCityCount    = Array.isArray(body?.segments) && body.segments.length > 0 ? body.segments.length : 1
+    logIsAuth       = !!user
+    logUserId       = user?.id ?? null
+
+    // Wraps `err()` so every early-return error path logs a baseline row —
+    // see logSyncGeneration above. The success path logs explicitly further
+    // down (there's no single choke point for a 200 the way there is for
+    // errors), and the outer catch block logs its own two cases directly.
+    const errLogged = (status: number, code: string, message: string, detail?: unknown) => {
+      logSyncGeneration({
+        startedAt, duration_days: logDurationDays, city_count: logCityCount,
+        is_authenticated: logIsAuth, user_id: logUserId, success: false, error_code: code,
+      })
+      return err(status, code, message, detail)
+    }
 
     let authorizedUserId: string | null = null
 
@@ -109,9 +185,9 @@ export async function POST(req: NextRequest) {
           const reason = (check as { allowed: false; reason: string }).reason
           // 'error' means infra/config failure — don't show paywall for a broken service
           if (reason === 'error') {
-            return err(503, 'entitlement_check_failed', 'Service temporarily unavailable')
+            return errLogged(503, 'entitlement_check_failed', 'Service temporarily unavailable')
           }
-          return err(402, 'no_credits', 'No credits remaining', { reason })
+          return errLogged(402, 'no_credits', 'No credits remaining', { reason })
         }
 
         authorizedUserId = (check as { allowed: true; userId: string }).userId
@@ -124,7 +200,7 @@ export async function POST(req: NextRequest) {
       const anonCount   = parseInt(cookieStore.get(ANON_COOKIE)?.value ?? '0', 10)
 
       if (anonCount >= ANON_TRIP_LIMIT) {
-        return err(401, 'anon_limit_reached', 'Please sign up to continue generating trips')
+        return errLogged(401, 'anon_limit_reached', 'Please sign up to continue generating trips')
       }
     }
 
@@ -133,7 +209,7 @@ export async function POST(req: NextRequest) {
 
     if (!supabaseUrl || !anonKey) {
       console.error('[generate-trip] missing supabase env vars')
-      return err(500, 'supabase_not_configured', 'Supabase credentials not configured')
+      return errLogged(500, 'supabase_not_configured', 'Supabase credentials not configured')
     }
 
     const functionUrl = `${supabaseUrl}/functions/v1/generate-trip`
@@ -163,15 +239,17 @@ export async function POST(req: NextRequest) {
 
     // ── Edge Function caller (factored so we can retry it) ───────────────────────
     // Returns either the parsed trip_data on success, or an ErrBody-style failure
-    // that the outer handler short-circuits with. The 290s timeout is per attempt;
-    // the retry path is gated on the response shape, not on whether the Edge
-    // Function timed out (a timeout is an outer failure we surface to the user).
-    async function callEdgeOnce(extraBody: Record<string, unknown>): Promise<
+    // that the outer handler short-circuits with. `timeoutMs` is per attempt and
+    // caller-supplied (see ATTEMPT_TIMEOUT_MS / the budget gate around attempt 2
+    // below) rather than a fixed constant — the retry path is gated on the
+    // response shape, not on whether the Edge Function timed out (a timeout is
+    // an outer failure we surface to the user).
+    async function callEdgeOnce(extraBody: Record<string, unknown>, timeoutMs: number): Promise<
       | { ok: true; data: unknown }
       | { ok: false; status: number; code: string; message: string; detail?: unknown }
     > {
       const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 290_000)
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
       let edgeRes: Response
       try {
@@ -213,9 +291,9 @@ export async function POST(req: NextRequest) {
     }
 
     // ── Attempt 1 ────────────────────────────────────────────────────────────────
-    const attempt1 = await callEdgeOnce({})
+    const attempt1 = await callEdgeOnce({}, ATTEMPT_TIMEOUT_MS)
     if (attempt1.ok === false) {
-      return err(attempt1.status, attempt1.code, attempt1.message, attempt1.detail)
+      return errLogged(attempt1.status, attempt1.code, attempt1.message, attempt1.detail)
     }
 
     // ── Validate accommodations contract ─────────────────────────────────────────
@@ -258,37 +336,56 @@ export async function POST(req: NextRequest) {
         ? 'no_days_emitted'
         : 'no_accommodations_emitted'
 
-      console.log('[generate-trip]', JSON.stringify({
-        stage:  'retry_trigger',
-        reason: retryReason,
-      }))
+      // ── Time-budget gate ────────────────────────────────────────────────────
+      // Only fire attempt 2 if it could plausibly finish before we'd blow the
+      // function's own maxDuration. Skipping a doomed retry gets the user to
+      // a failure response faster than starting one that can't finish anyway.
+      const remainingMs = SOFT_DEADLINE_MS - (Date.now() - startedAt)
 
-      const attempt2 = await callEdgeOnce({
-        retryHint: retryReason,
-      })
-
-      if (attempt2.ok) {
-        workingEnvelope = attempt2.data
-        workingTripData = extractTripData(workingEnvelope)
-        validation = validateAccommodations(workingTripData, ctx, 1)
-        daysOk     = hasValidDays(workingTripData)
+      if (remainingMs < MIN_RETRY_BUDGET_MS) {
         console.log('[generate-trip]', JSON.stringify({
-          stage:                 'validation_attempt_2',
-          accommodationsStatus:  validation.status,
-          accommodationsCount:   validation.accommodationsCount,
-          daysOk,
+          stage:  'retry_skipped_insufficient_budget',
+          reason: retryReason,
+          remainingMs,
         }))
+        // No second attempt's data to work with — apply the same
+        // accommodation fallback the "retry itself failed" branch below uses.
+        validation = validateAccommodations(workingTripData, ctx, 1)
       } else {
-        // Retry itself failed — apply accommodations fallback (no day-level
-        // fallback possible). Validation gate at attempt=1 synthesizes the
-        // accommodation stub deterministically.
-        validation = validateAccommodations(workingTripData, ctx, 1)
+        const attempt2TimeoutMs = Math.min(ATTEMPT_TIMEOUT_MS, remainingMs)
         console.log('[generate-trip]', JSON.stringify({
-          stage:                 'retry_failed_falling_back',
-          accommodationsStatus:  validation.status,
-          accommodationsCount:   validation.accommodationsCount,
-          daysOk,
+          stage:  'retry_trigger',
+          reason: retryReason,
+          attempt2TimeoutMs,
         }))
+
+        const attempt2 = await callEdgeOnce({
+          retryHint: retryReason,
+        }, attempt2TimeoutMs)
+
+        if (attempt2.ok) {
+          workingEnvelope = attempt2.data
+          workingTripData = extractTripData(workingEnvelope)
+          validation = validateAccommodations(workingTripData, ctx, 1)
+          daysOk     = hasValidDays(workingTripData)
+          console.log('[generate-trip]', JSON.stringify({
+            stage:                 'validation_attempt_2',
+            accommodationsStatus:  validation.status,
+            accommodationsCount:   validation.accommodationsCount,
+            daysOk,
+          }))
+        } else {
+          // Retry itself failed — apply accommodations fallback (no day-level
+          // fallback possible). Validation gate at attempt=1 synthesizes the
+          // accommodation stub deterministically.
+          validation = validateAccommodations(workingTripData, ctx, 1)
+          console.log('[generate-trip]', JSON.stringify({
+            stage:                 'retry_failed_falling_back',
+            accommodationsStatus:  validation.status,
+            accommodationsCount:   validation.accommodationsCount,
+            daysOk,
+          }))
+        }
       }
     }
 
@@ -312,7 +409,7 @@ export async function POST(req: NextRequest) {
         nights,
         destination: ctx.destination,
       }))
-      return err(
+      return errLogged(
         502,
         'no_days_after_retry',
         'Trip generation produced an empty itinerary. Please try again.',
@@ -333,6 +430,11 @@ export async function POST(req: NextRequest) {
         console.error('[generate-trip] consumeOneTrip error:', e)
       )
     }
+
+    logSyncGeneration({
+      startedAt, duration_days: logDurationDays, city_count: logCityCount,
+      is_authenticated: logIsAuth, user_id: logUserId, success: true, error_code: null,
+    })
 
     const response = NextResponse.json(data)
 
@@ -362,6 +464,11 @@ export async function POST(req: NextRequest) {
       ms,
       message,
     }))
+    const errorCode = isTimeout ? 'timeout' : 'internal'
+    logSyncGeneration({
+      startedAt, duration_days: logDurationDays, city_count: logCityCount,
+      is_authenticated: logIsAuth, user_id: logUserId, success: false, error_code: errorCode,
+    })
     if (isTimeout) {
       return err(504, 'timeout', 'Trip generation timed out — please try again')
     }

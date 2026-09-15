@@ -323,5 +323,8 @@
     "anonLimitReached": "Ya generaste tu viaje gratuito. Crea una cuenta para seguir generando itinerarios.",
     "notAuthenticated": "Necesitas una cuenta para generar este viaje.",
     "tripTooLarge": "Los viajes de más de {threshold} días o con varias ciudades necesitan una cuenta — así podemos generarlos por partes sin que se corten a la mitad."
+  },
+  "generation": {
+    "retrying": "Estamos reintentando — puede tardar un poco más de lo normal."
   }
 }

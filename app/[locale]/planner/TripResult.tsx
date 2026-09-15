@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { Link, useRouter } from '../../../lib/navigation'
 import { useUser } from '../../../components/auth/SupabaseProvider'
 import { getSupabaseBrowser } from '../../../lib/supabase/client'
@@ -130,28 +130,37 @@ interface Props {
 const TRIP_CACHE_SCHEMA = 2
 
 // ─── Generation request — auto-retry once on transient upstream failure ────
-// 500/502/503/504 typically indicate cold-start / network blips on the
-// Supabase Edge Function path — a quick retry usually clears them.
+// 500/502/503 typically indicate cold-start / network blips on the Supabase
+// Edge Function path — a quick retry usually clears them.
 //
-// 529 is deliberately NOT in this list. Anthropic returns 529 when
+// 504 is deliberately NOT in this list (moved out — used to be included).
+// A 504 from our own /api/generate-trip route is always a real timeout
+// (route.ts's own attempt budget ran out), never a blip — retrying just
+// doubles the wait for a failure the user will see anyway. Same reasoning
+// already applied to 529 below.
+//
+// 529 is deliberately NOT in this list either. Anthropic returns 529 when
 // their service is at capacity ("overloaded_error"); their queue does
 // not clear in 1.5s. Retrying just doubles the time the user waits to
 // see the error (~75s + retry → 150s+ on an 8-day trip). Fail fast on
 // 529 and let the user choose whether to retry once they're ready.
 //
 // AbortSignal is honored: if the caller aborts between attempts, we
-// don't retry.
-const TRANSIENT_STATUSES = new Set([500, 502, 503, 504])
+// don't retry. `onRetry` lets the caller surface the retry on screen —
+// previously this was a silent console.warn, invisible to the user.
+const TRANSIENT_STATUSES = new Set([500, 502, 503])
 const RETRY_DELAY_MS     = 1500
 
 async function fetchGenerationWithRetry(
   input: RequestInfo,
   init?: RequestInit,
+  onRetry?: () => void,
 ): Promise<Response> {
   const res = await fetch(input, init)
   if (!TRANSIENT_STATUSES.has(res.status)) return res
   if (init?.signal && (init.signal as AbortSignal).aborted) return res
   console.warn('[TripResult] generation got transient', res.status, '— retrying once')
+  onRetry?.()
   await new Promise(r => setTimeout(r, RETRY_DELAY_MS))
   return fetch(input, init)
 }
@@ -1018,9 +1027,10 @@ function BudgetEditPanel({
 // ─── Main component ────────────────────────────────────────────────────────────
 
 export default function TripResult({ params }: Props) {
-  const locale = useLocale()
-  const isES   = locale === 'es'
-  const router = useRouter()
+  const locale      = useLocale()
+  const isES        = locale === 'es'
+  const tGeneration = useTranslations('generation')
+  const router      = useRouter()
 
   // ── Login redirect with reason ──────────────────────────────────────────────
   // Every 401 from a generation endpoint carries a structured `code`
@@ -1076,6 +1086,10 @@ export default function TripResult({ params }: Props) {
   const [error, setError]     = useState<string | null>(null)
   const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [errorDurationMs, setErrorDurationMs] = useState<number | null>(null)
+  // Set by fetchGenerationWithRetry's onRetry callback when it silently
+  // retries a transient 500/502/503 — previously invisible to the user
+  // (a console.warn only). Reset at the start of every generation attempt.
+  const [retryingVisible, setRetryingVisible] = useState(false)
   // Generation surface signals — drive the calm, phased loading UI.
   // asyncChunksDone/Total are only set when the async /api/trips/jobs path is
   // in use; sync generations leave them null and the surface runs on time floor.
@@ -1762,13 +1776,14 @@ export default function TripResult({ params }: Props) {
           }
         } else {
           // ── Sync: existing /api/generate-trip path ────────────────────────
+          setRetryingVisible(false)
           const genRes = await fetchGenerationWithRetry('/api/generate-trip', {
             method: 'POST',
             headers: genHeaders,
             credentials: 'include',
             body: JSON.stringify(payload),
             signal: controller.signal,
-          })
+          }, () => setRetryingVisible(true))
           genStatus = genRes.status
           const genData = await genRes.json().catch(() => null)
           console.log('[TripResult] POST status:', genRes.status, 'response:', genData)
@@ -1960,6 +1975,7 @@ export default function TripResult({ params }: Props) {
         })
       } finally {
         setLoading(false)
+        setRetryingVisible(false)
       }
     }
     generate()
@@ -2475,9 +2491,10 @@ export default function TripResult({ params }: Props) {
           throw e
         }
       } else {
+        setRetryingVisible(false)
         const genRes  = await fetchGenerationWithRetry('/api/generate-trip', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-        })
+        }, () => setRetryingVisible(true))
         const genData = await genRes.json().catch(() => null)
         setRawResponse(genData)
         if (!genRes.ok) {
@@ -2635,6 +2652,7 @@ export default function TripResult({ params }: Props) {
       })
     } finally {
       setLoading(false)
+      setRetryingVisible(false)
     }
   }
 
@@ -2915,9 +2933,10 @@ export default function TripResult({ params }: Props) {
           throw e
         }
       } else {
+        setRetryingVisible(false)
         const genRes  = await fetchGenerationWithRetry('/api/generate-trip', {
           method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload),
-        })
+        }, () => setRetryingVisible(true))
         const genData = await genRes.json().catch(() => null)
         setRawResponse(genData)
         if (!genRes.ok) {
@@ -3068,6 +3087,7 @@ export default function TripResult({ params }: Props) {
       })
     } finally {
       setLoading(false)
+      setRetryingVisible(false)
     }
   }
 
@@ -3497,17 +3517,24 @@ export default function TripResult({ params }: Props) {
           {!isAccessResolved ? (
             <LoadingState locale={locale} />
           ) : loadingKind === 'generating' ? (
-            <GenerationSurface
-              destination={prefDest || null}
-              durationDays={activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null)}
-              travelers={prefTraveler || null}
-              phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
-              progress={gen.progress}
-              message={gen.message}
-              stage={gen.stage}
-              error={null}
-              locale={locale === 'en' ? 'en' : 'es'}
-            />
+            <>
+              <GenerationSurface
+                destination={prefDest || null}
+                durationDays={activeGenDuration ?? (nights ? durationDaysFromNights(nights) : null)}
+                travelers={prefTraveler || null}
+                phase={gen.phase === 'idle' ? 'initiating' : gen.phase}
+                progress={gen.progress}
+                message={gen.message}
+                stage={gen.stage}
+                error={null}
+                locale={locale === 'en' ? 'en' : 'es'}
+              />
+              {retryingVisible && (
+                <p className="text-center text-[13px] text-[#7A7A76] mt-3">
+                  {tGeneration('retrying')}
+                </p>
+              )}
+            </>
           ) : (
             // Hydration — DB load or cache restore. Reuses existing day-card
             // chrome so layout dimensions match the post-load content exactly
