@@ -25,7 +25,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       locale === 'es'
         ? 'Hoteles seleccionados con criterio editorial — por carácter, ubicación y valor real, no por comisión.'
         : 'Hotels selected with editorial taste — for character, location, and honest value, not commission.',
-    alternates: buildAlternates('hotelsIndex'),
+    alternates: buildAlternates(locale, 'hotelsIndex'),
     openGraph:  buildOpenGraph(locale),
   }
 }

@@ -168,10 +168,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
 
   // 5. Smart Finds kit pages. Only the Familias kit has a real static
   //    segment today (`app/[locale]/smart-finds/familias/page.tsx`).
-  //    Section prefix is `smart-finds` in both locales; only the leaf
-  //    is localized (familias ↔ families). Add more kits here as their
-  //    static segments ship — the other 8 kits currently use the
-  //    `[slug]` stub and aren't crawlable as real content.
+  //    Correction: an earlier pass here changed this to 'familias'/
+  //    'familias', on the wrong assumption that the folder name is the
+  //    literal segment in both locales. It isn't — this route's real
+  //    localized path lives in next-intl's `pathnames` (i18n.ts), not
+  //    lib/routes.ts's ROUTE_MAP, and that config maps EN to
+  //    '/smart-finds/families'. Confirmed empirically: GET
+  //    /en/smart-finds/familias 307-redirects to /en/smart-finds/families,
+  //    which is the one that actually returns 200. Reverted to the
+  //    original familias/families pairing. Add more kits here as their
+  //    static segments ship — the other 8 kits currently use the `[slug]`
+  //    stub and aren't crawlable as real content.
   entries.push(entityEntry('smart-finds', 'smart-finds', 'familias', 'families', 'monthly', 0.6))
 
   return entries

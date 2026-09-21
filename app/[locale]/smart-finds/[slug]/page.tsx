@@ -4,7 +4,7 @@
  * TODO: implement full page UI + resolveEntityBySlug
  */
 import type { Metadata }              from 'next'
-import { buildAlternates, buildOpenGraph } from '../../../../lib/seo'
+import { buildOpenGraph, NO_INDEX } from '../../../../lib/seo'
 import type { Locale }               from '../../../../i18n'
 
 type Props = {
@@ -15,7 +15,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
   return {
     title:       `${locale === 'es' ? 'Producto' : 'Smart find'} — ${slug}`,
-    alternates:  buildAlternates('smartFindDetail'),
+    // No `alternates` and noindex — this catch-all only ever renders for
+    // the 8 kits that don't have a real static segment yet (Next.js
+    // prefers the literal app/[locale]/smart-finds/familias/page.tsx route
+    // over this one whenever the slug is "familias", so that kit is
+    // unaffected). Indexing a stub with no real content would create thin/
+    // duplicate pages. TODO: once a kit ships a real static segment (like
+    // familias did), give it its own page.tsx with
+    // `alternates: buildSmartFindAlternates(locale, entity)` (that helper
+    // already exists in lib/seo.ts) instead of relying on this stub.
+    robots:      NO_INDEX,
     openGraph:   buildOpenGraph(locale),
   }
 }

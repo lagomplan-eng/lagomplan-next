@@ -232,6 +232,20 @@ export function resolveCanonicalSlug(slug: string): string {
 }
 
 /**
+ * Which locales have real content for a given canonical guide key, e.g.
+ * getGuideLocales('capadocia') → ['es', 'en'].
+ *
+ * Used by generateMetadata to build hreflang alternates without inventing
+ * a URL for a locale that doesn't actually have an entry — every guide
+ * today happens to have both, but this stays correct if that ever changes
+ * rather than silently assuming 'en' always exists.
+ */
+export function getGuideLocales(canonicalKey: string): string[] {
+  const entry = FLAT_REGISTRY[canonicalKey]
+  return entry ? Object.keys(entry) : []
+}
+
+/**
  * Returns every FlatGuide for the given locale, each tagged with its canonical
  * registry key (e.g. 'cancun', 'oaxaca'). Falls back to 'es' when the locale
  * is missing for a given guide.

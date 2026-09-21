@@ -13,10 +13,11 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
   const { locale } = await params
+  const alternates = buildAlternates(locale, 'smartFindsIndex')
   return {
     title:       locale === 'es' ? 'Productos de viaje' : 'Smart finds',
-    alternates:  buildAlternates('smartFindsIndex'),
-    openGraph:   buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 

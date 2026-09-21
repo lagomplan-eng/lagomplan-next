@@ -27,6 +27,7 @@ import type { Metadata }      from 'next'
 import { redirect }           from 'next/navigation'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../lib/supabase/server'
 import { getRoute }           from '../../../../lib/routes'
+import { BASE_URL }           from '../../../../lib/seo'
 import type { Locale }        from '../../../../i18n'
 import { normalizeTripProgress } from '../../../../lib/planner/progress'
 import MobileTripClient       from './MobileTripClient'
@@ -63,11 +64,18 @@ async function loadTrip(trip_id: string): Promise<TripRow | null> {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { trip_id } = await params
+  const { locale, trip_id } = await params
   const trip = await loadTrip(trip_id)
   const title = trip?.title?.trim() || (trip?.destination ?? 'Lagomplan')
   return {
     title,
+    // Self-referencing canonical purely for tag hygiene — noindex below is
+    // what actually keeps this out of search, so this has no SEO effect on
+    // its own, it just avoids an absent/inconsistent canonical tag existing
+    // on a real, working URL. Route isn't locale-segment-translated
+    // ("trips" in both locales), so built directly rather than via a
+    // ROUTE_MAP key.
+    alternates: { canonical: `${BASE_URL}/${locale}/trips/${trip_id}` },
     // Companion links are private/shared by URL knowledge — keep them out of
     // search indexes (especially anonymous + shared trips).
     robots: { index: false, follow: false },

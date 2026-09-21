@@ -13,6 +13,8 @@
 
 import type { Metadata } from 'next'
 import type { Locale }   from '../../../../i18n'
+import { BASE_URL, buildOpenGraph } from '../../../../lib/seo'
+import { getRoute } from '../../../../lib/routes'
 import { getKits, getProducts } from '../../../../lib/smart-finds'
 import FilterableKits    from '../../../../components/smart-finds/FilterableKits'
 import PainStrip, { type PainStripItem } from '../../../../components/smart-finds/PainStrip'
@@ -34,6 +36,22 @@ type Props = { params: Promise<{ locale: Locale }> }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const isES = locale === 'es'
+
+  // Correction: an earlier pass here assumed "familias" was the literal
+  // segment in both locales, based only on the physical folder name
+  // (app/[locale]/smart-finds/familias/). That was wrong — this route's
+  // real localized path is next-intl's own routing layer (i18n.ts
+  // `pathnames`), a separate source of truth from lib/routes.ts's
+  // ROUTE_MAP (which doesn't have an entry for this page at all).
+  // i18n.ts maps '/smart-finds/familias' → { es: '/smart-finds/familias',
+  // en: '/smart-finds/families' } — confirmed empirically: GET
+  // /en/smart-finds/familias 307-redirects (next-intl correcting the
+  // mismatched locale/segment pair) to /en/smart-finds/families, which is
+  // the one that actually returns 200 with this page's real content.
+  const esUrl = `${BASE_URL}${getRoute('es', 'smartFindsIndex')}/familias`
+  const enUrl = `${BASE_URL}${getRoute('en', 'smartFindsIndex')}/families`
+  const canonicalUrl = isES ? esUrl : enUrl
+
   return {
     title: isES
       ? 'Smart Finds: Kits Curados para Viajar Bien | Lagomplan'
@@ -41,6 +59,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description: isES
       ? 'Nueve kits curados para viajar bien. Lo que sí llevar, por qué, y dónde conseguirlo — para familias, parejas y fans del fútbol.'
       : 'Nine curated kits for traveling well. What to actually pack, why, and where to find it — for families, couples, and football fans.',
+    alternates: {
+      canonical: canonicalUrl,
+      languages: { es: esUrl, en: enUrl, 'x-default': esUrl },
+    },
+    openGraph: buildOpenGraph(locale, { url: canonicalUrl }),
   }
 }
 

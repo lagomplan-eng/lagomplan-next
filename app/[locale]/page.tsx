@@ -23,11 +23,12 @@ export async function generateMetadata({
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'meta' })
 
+  const alternates = buildAlternates(locale, 'home')
   return {
     title: t('title'),
     description: t('description'),
-    alternates: buildAlternates('home'),
-    openGraph: buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 
