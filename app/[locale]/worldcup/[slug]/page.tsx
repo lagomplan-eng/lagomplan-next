@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { buildOpenGraph } from '../../../../lib/seo'
+import { buildOpenGraph, BASE_URL } from '../../../../lib/seo'
+import { getRoute } from '../../../../lib/routes'
 import type { Locale } from '../../../../i18n'
 
 // Per-city editorial components. Each is a self-contained client component
@@ -78,11 +79,23 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
   const label = CITY_LABEL[slug]
+
+  // Same city slug in both locales (only the segment translates,
+  // mundial↔worldcup) — confirmed by app/sitemap.ts's WORLDCUP_CITY_SLUGS
+  // entries, which already pair es/en on the identical slug.
+  const esUrl = `${BASE_URL}${getRoute('es', 'worldcupDetail')}/${slug}`
+  const enUrl = `${BASE_URL}${getRoute('en', 'worldcupDetail')}/${slug}`
+  const canonicalUrl = locale === 'es' ? esUrl : enUrl
+
   return {
     title: label
       ? `${label} · Mundial 2026 · Lagomplan`
       : 'Mundial 2026 · Lagomplan',
-    openGraph: buildOpenGraph(locale),
+    alternates: {
+      canonical: canonicalUrl,
+      languages: { es: esUrl, en: enUrl, 'x-default': esUrl },
+    },
+    openGraph: buildOpenGraph(locale, { url: canonicalUrl }),
   }
 }
 

@@ -19,7 +19,6 @@ import { getMessages, getTranslations } from 'next-intl/server'
 import { locales, type Locale }       from '../../i18n'
 import {
   BASE_URL,
-  buildAlternates,
   buildOpenGraph,
   ORGANIZATION_SCHEMA,
   WEBSITE_SCHEMA,
@@ -90,7 +89,13 @@ export async function generateMetadata({
     metadataBase: new URL(BASE_URL),
     title:       { default: t('title'), template: `%s — Lagomplan` },
     description: t('description'),
-    alternates:  buildAlternates('home'),
+    // No `alternates` here deliberately — every page's own generateMetadata
+    // sets its own canonical/hreflang. A value here would previously get
+    // inherited verbatim by any page that forgot to set its own (Next.js
+    // metadata merge: a field a child doesn't return is inherited from the
+    // parent), which is exactly how every page ended up canonicalizing to
+    // the home page. The home page itself sets its own alternates in
+    // app/[locale]/page.tsx, so removing it here doesn't change home's tags.
     openGraph:   buildOpenGraph(locale),
     twitter: {
       card:        'summary_large_image',

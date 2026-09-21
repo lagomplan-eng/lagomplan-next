@@ -12,8 +12,9 @@ import type { Metadata } from 'next'
 import { notFound }      from 'next/navigation'
 
 import { getAllGuideParams, getGuideBySlug } from '../../../../lib/guides'
-import { getGuidePageData, getNewGuideParams, resolveCanonicalSlug } from '../../../../lib/data/guides/index'
-import { buildGuideAlternates, buildOpenGraph } from '../../../../lib/seo'
+import { getGuidePageData, getNewGuideParams, resolveCanonicalSlug, getGuideLocales } from '../../../../lib/data/guides/index'
+import { buildGuideAlternates, buildOpenGraph, BASE_URL } from '../../../../lib/seo'
+import { getRoute } from '../../../../lib/routes'
 import type { Locale }              from '../../../../i18n'
 import { GuidePageClient }          from '../../../../components/guides/GuidePageClient'
 import { GuidePageClientV2 }        from '../../../../components/guides/GuidePageClientV2'
@@ -50,13 +51,41 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (newData) {
     const title       = newData.hero.title
     const description = newData.hero.subtitle
+
+    // Slug is identical across locales in this system (only the segment
+    // translates, guias↔guides) — but a requested slug might be a legacy
+    // descriptive alias (e.g. "oaxaca-guia-esencial") that resolves to a
+    // shorter canonical key ("oaxaca"). Alternates always point at the
+    // canonical key so an alias URL's canonical consolidates onto the
+    // short slug instead of self-referencing the alias — same slug the
+    // sitemap already treats as the winner when deduping.
+    const canonicalKey     = resolveCanonicalSlug(slug)
+    const availableLocales = getGuideLocales(canonicalKey)
+    const languages: Record<string, string> = {}
+    for (const loc of availableLocales) {
+      languages[loc] = `${BASE_URL}${getRoute(loc as Locale, 'guideDetail')}/${canonicalKey}`
+    }
+    // Omit a locale's hreflang entirely if that guide has no real content
+    // there — never invent a URL. x-default only when an ES version
+    // actually exists (site convention: ES is the default language).
+    const canonicalUrl = languages[locale]
+      ?? `${BASE_URL}${getRoute(locale, 'guideDetail')}/${canonicalKey}`
+
     return {
       title,
       description,
+      alternates: {
+        canonical: canonicalUrl,
+        languages: {
+          ...languages,
+          ...(languages.es ? { 'x-default': languages.es } : {}),
+        },
+      },
       openGraph: buildOpenGraph(locale, {
         title,
         description,
         type:   'article',
+        url:    canonicalUrl,
         images: newData.hero.coverImage
           ? [{ url: newData.hero.coverImage, width: 1200, height: 630, alt: title }]
           : [],
@@ -70,15 +99,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title       = locale === 'es' ? guide.title_es   : guide.title_en
   const description = locale === 'es' ? guide.excerpt_es : guide.excerpt_en
+  const alternates  = buildGuideAlternates(locale, guide)
 
   return {
     title,
     description,
-    alternates: buildGuideAlternates(guide),
+    alternates,
     openGraph:  buildOpenGraph(locale, {
       title,
       description,
       type:   'article',
+      url:    alternates.canonical as string,
       images: [{ url: guide.cover_img, width: 1200, height: 630, alt: title }],
     }),
   }

@@ -24,11 +24,12 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'pricing.meta' })
+  const alternates = buildAlternates(locale, 'pricing')
   return {
     title:       t('title'),
     description: t('description'),
-    alternates:  buildAlternates('pricing'),
-    openGraph:   buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 
