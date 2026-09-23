@@ -144,26 +144,26 @@ export async function POST(req: NextRequest) {
     // per-sub-chunk days + first-of-each-segment accommodations into the
     // final trip_data. This avoids both (a) the multi-city megaprompt and
     // (b) over-long single-segment calls blowing the Edge Fn's memory/time
-    // budget.
+    // budget. UNCHANGED — keep MC_SEGMENT_DAYS in sync with the worker's
+    // planMultiCityChunks(), which is still the source of truth for
+    // multi-city chunk content.
     //
-    // Single-city: chunks of up to SEGMENT_DAYS each.
-    //
-    // Keep SEGMENT_DAYS + the per-segment sub-chunking math in sync with the
-    // worker's planMultiCityChunks(). The worker is the source of truth for
-    // chunk content; this computation just sizes chunks_total to match.
-    // Reduced 10 → 7 (morning) → 5 (evening) on 2026-05-26: Sonnet 4.6
-    // broke the 150s Supabase Free function cap on 10-day chunks; 7-day
-    // chunks were still marginal in production. See the rationale block
-    // in supabase/functions/generate-trip-worker/index.ts.
-    const SEGMENT_DAYS = 5
+    // Single-city: one chunk PER DAY (worker's SC_DAYS_PER_CHUNK=1 day-level
+    // concurrency redesign, 2026-09-23) — chunksTotal must equal durationDays
+    // exactly, or the worker's completion check (chunks_done < chunks_total)
+    // and the client's progress bar disagree with what the worker actually
+    // plans via planChunks(). This is the one change outside generate-trip*
+    // that redesign required: the worker plans chunk COUNT, this route only
+    // sizes chunks_total to match, same relationship as multi-city always had.
+    const MC_SEGMENT_DAYS = 5
     const bodySegments = Array.isArray((body as any)?.segments) ? (body as any).segments : []
     const isMultiCity  = bodySegments.length >= 2
     const chunksTotal  = isMultiCity
       ? bodySegments.reduce((sum: number, s: any) => {
           const segDays = Math.max(1, (Number(s?.nights) || 0) + 1)
-          return sum + Math.ceil(segDays / SEGMENT_DAYS)
+          return sum + Math.ceil(segDays / MC_SEGMENT_DAYS)
         }, 0)
-      : Math.ceil(durationDays / SEGMENT_DAYS)
+      : durationDays
 
     const admin = getSupabaseAdmin()
 
