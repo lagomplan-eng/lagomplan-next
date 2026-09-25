@@ -5,9 +5,29 @@
     buildInput, isFamilyTraveler, computeHeadcount, isBudgetCurrencySuspect,
   } from "./logic.ts";
                                                             
-  const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");                                                   
-                                                                                                                 
-  const corsHeaders = {                                                                                          
+  const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY");
+
+  // Fire-and-forget metrics logging — same project-wide secrets the worker
+  // uses to reach Postgres directly (no supabase-js import here, this
+  // function otherwise has zero DB dependency; a raw REST insert is enough
+  // for a write-only metrics row and keeps this function's footprint small).
+  const METRICS_SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+  const METRICS_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+  function logGenerationMetric(row: Record<string, unknown>): void {
+    if (!METRICS_SUPABASE_URL || !METRICS_SERVICE_ROLE_KEY) return;
+    fetch(`${METRICS_SUPABASE_URL}/rest/v1/generation_metrics`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey:         METRICS_SERVICE_ROLE_KEY,
+        Authorization:  `Bearer ${METRICS_SERVICE_ROLE_KEY}`,
+        Prefer:         "return=minimal",
+      },
+      body: JSON.stringify(row),
+    }).catch((e) => console.warn("[generate-trip] metrics insert failed:", e));
+  }
+
+  const corsHeaders = {                                                                                        
     "Access-Control-Allow-Origin": "*",                                                                          
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",                        
     "Access-Control-Allow-Methods": "POST, OPTIONS",        
@@ -211,8 +231,24 @@
         items: accommodationItem,
       },
     },
-  };                              
-                                                                                                                 
+  };
+
+  // Lean schema for single-city day chunks beyond the first (worker's
+  // generateDayChunk, chunk_index/segment_index > 0). Every chunk still
+  // costs a call to generate-trip, but chunks 1+ only need `days` — their
+  // title/tagline/budget/accommodations output is discarded by the
+  // worker's assembleResult() (front-matter comes from chunk 0 only), so
+  // asking for it every time was pure wasted generation time. Reuses the
+  // exact same `days` item schema as TRIP_SCHEMA so downstream parsing
+  // (normalizeTripData, chunkDays) doesn't need to know which was used.
+  const TRIP_SCHEMA_DAYS_ONLY = {
+    type: "object",
+    required: ["days"],
+    properties: {
+      days: TRIP_SCHEMA.properties.days,
+    },
+  };
+
   // ── Temporal-context helpers ────────────────────────────────────────────────
   // Pure date math. Derives the season + per-day weekday so the AI can pick
   // climate-appropriate activities (indoor in winter, shaded in summer) and
@@ -586,7 +622,15 @@ ${dayMap.join("\n")}
     const segTotal   = typeof input.total_segments  === "number" ? input.total_segments  : null;
     const dayOffset  = typeof input.trip_day_offset === "number" ? input.trip_day_offset : null;
     const tripTotal  = typeof input.trip_total_days === "number" ? input.trip_total_days : null;
-    const prev       = typeof input.previous_day_summary === "string" ? input.previous_day_summary : "";
+    // Single-city day chunks (worker's DAYS_PER_CHUNK=1 pipeline) no longer
+    // pass previous_day_summary — chunks run concurrently, out of order, so
+    // there's no "previous" chunk to summarize. Anti-repetition/continuity
+    // comes from the upfront skeleton pre-pass instead: daySkeleton is THIS
+    // day's assigned theme/neighborhood/anchor/pace, fullSkeleton is every
+    // other day's, so the model can avoid repeating neighborhoods/anchors
+    // even though it never sees what those other days actually generated.
+    const daySkeleton  = input.day_skeleton && typeof input.day_skeleton === "object" ? input.day_skeleton : null;
+    const fullSkeleton = Array.isArray(input.full_skeleton) ? input.full_skeleton : [];
     if (segIdx === null || segTotal === null || segTotal <= 1) return "";
 
     const isEN    = locale === "en";
@@ -601,10 +645,29 @@ ${dayMap.join("\n")}
           : `  Tu chunk cubre los días ${startsAtDay}–${endsAtDay} del viaje de ${tripTotal} días.`)
       : "";
 
-    const prevLine = prev
+    // Skeleton-derived continuity (replaces the old previous_day_summary
+    // "prevLine"). Two lines: this day's own assigned anchor, and a compact
+    // digest of every OTHER day's assignment so the model can avoid
+    // repeating the same neighborhood/anchor — it can't see what those
+    // other days actually generated (they may not even be generated yet,
+    // running concurrently), only what they were ASSIGNED upfront.
+    const thisDayLine = daySkeleton
       ? (isEN
-          ? `  Previously generated days: ${prev}`
-          : `  Días generados antes: ${prev}`)
+          ? `  Your assigned plan for this day: theme "${daySkeleton.theme}", area "${daySkeleton.neighborhood}", anchor "${daySkeleton.anchor}", pace "${daySkeleton.pace}". Build the day around this.`
+          : `  Tu plan asignado para este día: tema "${daySkeleton.theme}", zona "${daySkeleton.neighborhood}", ancla "${daySkeleton.anchor}", ritmo "${daySkeleton.pace}". Arma el día alrededor de esto.`)
+      : "";
+
+    const otherDaysDigest = fullSkeleton
+      .filter((d: any) => !daySkeleton || d.day !== daySkeleton.day)
+      .map((d: any) => isEN
+        ? `Day ${d.day}: ${d.theme} in ${d.neighborhood} (${d.anchor})`
+        : `Día ${d.day}: ${d.theme} en ${d.neighborhood} (${d.anchor})`)
+      .join(" · ")
+      .slice(0, 500);
+    const otherDaysLine = otherDaysDigest
+      ? (isEN
+          ? `  Other days in this trip (avoid repeating the same neighborhood/anchor): ${otherDaysDigest}`
+          : `  Otros días de este viaje (evita repetir la misma zona/ancla): ${otherDaysDigest}`)
       : "";
 
     let intent = "";
@@ -614,19 +677,19 @@ ${dayMap.join("\n")}
         : `  Este es el PRIMER chunk de un viaje multi-chunk. Tú manejas la LLEGADA en el día 1 (con jet-lag si aplica). NO incluyas despedidas ni narrativa de salida — eso le toca SOLO al último chunk.`;
     } else if (isLast) {
       intent = isEN
-        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from the previous chunk — do NOT re-emit an arrival, hotel check-in, or "first day" framing. Day 1 of YOUR chunk is a continuation day. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
-        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde el chunk anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El día 1 de TU chunk es un día de continuación. El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
+        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from an earlier day — do NOT re-emit an arrival, hotel check-in, or "first day" framing. Day 1 of YOUR chunk is a continuation day. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
+        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde un día anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El día 1 de TU chunk es un día de continuación. El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
     } else {
       intent = isEN
-        ? `  This is a MIDDLE chunk (${segIdx + 1} of ${segTotal}). The traveler is mid-trip — do NOT emit arrival, hotel check-in, "first day" framing, departure, or farewell. Every day is a continuation. Build on the rhythm of the previous chunk; vary neighborhoods and activity types so the trip doesn't feel repetitive.`
-        : `  Este es un chunk INTERMEDIO (${segIdx + 1} de ${segTotal}). El viajero está a media estancia — NO incluyas llegada, check-in, "primer día", despedida ni salida. Cada día es continuación. Construye sobre el ritmo del chunk anterior; varía barrios y tipos de actividad para que el viaje no se sienta repetitivo.`;
+        ? `  This is a MIDDLE chunk (${segIdx + 1} of ${segTotal}). The traveler is mid-trip — do NOT emit arrival, hotel check-in, "first day" framing, departure, or farewell. Every day is a continuation. Follow your assigned plan above; vary neighborhoods and activity types from the other days listed so the trip doesn't feel repetitive.`
+        : `  Este es un chunk INTERMEDIO (${segIdx + 1} de ${segTotal}). El viajero está a media estancia — NO incluyas llegada, check-in, "primer día", despedida ni salida. Cada día es continuación. Sigue tu plan asignado arriba; varía barrios y tipos de actividad respecto a los otros días listados para que el viaje no se sienta repetitivo.`;
     }
 
     const header = isEN
       ? "CHUNK CONTINUITY (critical — this is part of a longer trip):"
       : "CONTINUIDAD DE CHUNK (crítico — esto es parte de un viaje más largo):";
 
-    return `\n\n  ${header}\n${rangeLine ? rangeLine + "\n" : ""}${prevLine ? prevLine + "\n" : ""}${intent}`;
+    return `\n\n  ${header}\n${rangeLine ? rangeLine + "\n" : ""}${thisDayLine ? thisDayLine + "\n" : ""}${otherDaysLine ? otherDaysLine + "\n" : ""}${intent}`;
   }
 
   // computeHeadcount / isBudgetCurrencySuspect now live in ./logic.ts (pure,
@@ -1020,6 +1083,19 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         return !anyDayHasBlocks;
       }
 
+      // Chunk 0 (or a non-chunked sync call, where segment_index is absent)
+      // gets the full schema + front-matter; every later single-city day
+      // chunk gets the lean days-only schema. Multi-city sub-chunks always
+      // use the full schema — see the multi-city accommodations-per-segment
+      // contract above, which needs every sub-chunk's own title/budget/
+      // accommodations output, unlike single-city's chunk-0-only front-matter.
+      const chunkIndexNum = typeof input.segment_index === "number" ? input.segment_index : 0;
+      const isMultiCityInput = isMultiCity(input.segments);
+      const isLeanChunk = !isMultiCityInput && chunkIndexNum > 0;
+      const toolName   = isLeanChunk ? "emit_trip_days" : "emit_trip";
+      const toolSchema = isLeanChunk ? TRIP_SCHEMA_DAYS_ONLY : TRIP_SCHEMA;
+      const maxTokens  = isLeanChunk ? 2500 : 4000;
+
       const claudeRes = await fetch("https://api.anthropic.com/v1/messages", {
         method: "POST",
         headers: {
@@ -1029,16 +1105,20 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         },
         body: JSON.stringify({
           model: MODEL,
-          max_tokens: 16000,
-          system: systemPromptFor(input.locale),
-          tools: [{
-            name: "emit_trip",
-            description: input.locale === "en"
-              ? "Emit the structured travel itinerary."
-              : "Emite el itinerario de viaje estructurado.",
-            input_schema: TRIP_SCHEMA,
+          max_tokens: maxTokens,
+          system: [{
+            type: "text",
+            text: systemPromptFor(input.locale),
+            cache_control: { type: "ephemeral" },
           }],
-          tool_choice: { type: "tool", name: "emit_trip" },
+          tools: [{
+            name: toolName,
+            description: isLeanChunk
+              ? (input.locale === "en" ? "Emit this day's itinerary block." : "Emite el bloque de itinerario de este día.")
+              : (input.locale === "en" ? "Emit the structured travel itinerary." : "Emite el itinerario de viaje estructurado."),
+            input_schema: toolSchema,
+          }],
+          tool_choice: { type: "tool", name: toolName },
           messages: [{ role: "user", content: buildPrompt(input) }],
         }),
       });
@@ -1069,8 +1149,32 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         ms,
       }));
 
+      // Fire-and-forget metrics row — around every Anthropic call in this
+      // function, success or shape-failure alike (the HTTP call itself
+      // already succeeded by this point; later validation failures still
+      // get logged as ok:false below at their own return points, but the
+      // core timing/token/schema signal is captured here regardless).
+      logGenerationMetric({
+        job_id:        typeof input.job_id === "string" ? input.job_id : null,
+        chunk_index:   chunkIndexNum,
+        schema_kind:   isLeanChunk ? "lean" : "full",
+        path:          isMultiCityInput ? "multi" : "single",
+        model:         MODEL,
+        ms,
+        input_tokens:  claudeData.usage?.input_tokens ?? null,
+        output_tokens: claudeData.usage?.output_tokens ?? null,
+        // cache_read_input_tokens is only present on the response when the
+        // request actually sent cache_control — >0 confirms a real hit,
+        // 0 means it was eligible but missed (e.g. no prior write yet),
+        // undefined/null means the field wasn't in the response at all.
+        cache_read:    claudeData.usage?.cache_read_input_tokens ?? null,
+        attempt:       typeof input.attempt === "number" ? input.attempt : 0,
+        stop_reason:   claudeData.stop_reason ?? null,
+        ok:            claudeData.stop_reason !== "max_tokens",
+      });
+
       const toolUse = Array.isArray(claudeData.content)
-        ? claudeData.content.find((c: any) => c?.type === "tool_use" && c?.name === "emit_trip")
+        ? claudeData.content.find((c: any) => c?.type === "tool_use" && c?.name === toolName)
         : null;
 
       if (!toolUse?.input) {

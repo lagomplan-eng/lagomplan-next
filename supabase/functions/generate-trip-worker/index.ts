@@ -5,19 +5,25 @@
 // Contract:
 //   - Invoked with { job_id } (POST body).
 //   - Reads the job row. Idempotent: exits cleanly if already completed/failed.
-//   - Generates one chunk per day, persisting each chunk before advancing.
+//   - SINGLE-CITY: runs a cheap Haiku "skeleton" pre-pass (one theme/
+//     neighborhood/anchor/pace entry per day), then generates all days
+//     CONCURRENTLY (batches of SC_CONCURRENCY), each a standalone 1-day Claude
+//     call anchored to its skeleton entry instead of a sequential
+//     previous-day summary.
+//   - MULTI-CITY: unchanged — sequential per-segment generation with the
+//     original previous_day_summary continuity hint. Nothing in this file's
+//     multi-city path was touched; see the 2026-09-23 PR description for
+//     why (the day-level concurrency redesign was scoped to single-city).
 //   - When all chunks are persisted, assembles them into final trip_data,
 //     writes result on the job row, inserts the trip row, sets status='completed'.
-//   - If runtime budget gets low, exits with status='running'; the reconciler
-//     (or the client-triggered retry) re-invokes and resumes from chunks_done.
+//   - If runtime budget gets low, exits with status='running'; the
+//     self-reinvoke chain (or the reconciler) re-invokes and resumes from
+//     chunks_done.
 //
 // The existing /functions/v1/generate-trip Edge Function produces a full trip
 // in one call. For v1 we delegate per-chunk generation to the SAME Edge Function
 // by calling it with day-scoped inputs, then combine the results here. This
 // avoids re-implementing prompt engineering in two places.
-//
-// If the delegated call fails on a chunk, the worker marks the job failed.
-// Silent retries are the client's responsibility (see useTripGeneration hook).
 
 // deno-lint-ignore-file no-explicit-any
 // @ts-nocheck — Deno runtime; types resolved at deploy time
@@ -36,6 +42,32 @@ const SERVICE_ROLE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
 // LEGACY_ANON_KEY is the original eyJhbGc... JWT-format anon key.
 const LEGACY_ANON_KEY   = Deno.env.get('LEGACY_ANON_KEY') ?? ''
 
+// Same project-wide secret generate-trip/index.ts reads — used here only
+// for the skeleton pre-pass, which calls Anthropic directly (Haiku) rather
+// than going through generate-trip (which is Sonnet-only).
+const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY') ?? ''
+// Env-overridable, same rollback-lever pattern as generate-trip's
+// GENERATE_TRIP_MODEL — flip via `supabase secrets set` with no redeploy.
+const SKELETON_MODEL    = Deno.env.get('SKELETON_MODEL') ?? 'claude-haiku-4-5-20251001'
+
+// Fire-and-forget metrics logging for the skeleton (Haiku) call — the only
+// Anthropic call this file makes directly. Per-chunk generate-trip calls
+// log their own metrics row inside generate-trip/index.ts itself (that
+// function is the one actually talking to Anthropic for those).
+function logGenerationMetric(row: Record<string, unknown>): void {
+  if (!SUPABASE_URL || !SERVICE_ROLE_KEY) return
+  fetch(`${SUPABASE_URL}/rest/v1/generation_metrics`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey:         SERVICE_ROLE_KEY,
+      Authorization:  `Bearer ${SERVICE_ROLE_KEY}`,
+      Prefer:         'return=minimal',
+    },
+    body: JSON.stringify(row),
+  }).catch((e) => console.warn('[worker] metrics insert failed:', e))
+}
+
 // Diagnostics: log key shape on cold start so we can confirm the secret was
 // set as a real JWT (eyJhbGc...) and not, e.g., the new sb_publishable_* key
 // or an empty value.
@@ -43,37 +75,48 @@ console.log('[worker] env check:', {
   url:          SUPABASE_URL?.slice(0, 40) || 'MISSING',
   legacy_anon:  LEGACY_ANON_KEY ? `${LEGACY_ANON_KEY.slice(0, 10)}... (len=${LEGACY_ANON_KEY.length})` : 'EMPTY',
   legacy_starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
+  anthropic_key_present: !!ANTHROPIC_API_KEY,
 })
 
+// ── MC_* — multi-city constants (UNCHANGED values — see file header) ─────
+//
+// Deliberately NOT shared with the single-city SC_* constants below: MC_
+// still runs 3-5 day segments at ~130s each and would abort mid-generation
+// if it ever inherited SC_'s 60s/70s budget, which is sized for 1-day
+// chunks. Two fully separate constant sets, two fully separate functions.
+//
 // Budget: Supabase Free Edge Functions cap at 150s. A 5-day segment on
 // Sonnet 4.6 takes ~100s — ~45s margin under the 145s timeout — sized
 // for real-world variance, not the optimistic average. See history
 // below and scripts/test-sonnet-4-6-shape.ts for the diagnostic data.
-// BUDGET_FLOOR_MS at 135_000 — high enough that we never START a
-// segment we can't reasonably complete.
-const BUDGET_FLOOR_MS = 135_000
-
-// Per-segment LLM call timeout — sized for a 5-day segment on
-// Sonnet 4.6 with healthy margin. We abort at 145s, 5s before
-// Supabase kills the function at 150s, so the worker has time to
-// gracefully record the failure + refund the credit.
-const CHUNK_TIMEOUT_MS = 145_000
-
-// Segment size — number of days per generate-trip call. History:
+const MC_BUDGET_FLOOR_MS = 135_000
+const MC_CHUNK_TIMEOUT_MS = 145_000
+// Segment size for multi-city sub-chunking — number of days per generate-trip
+// call within one real-world segment. History:
 //   • Pre-2026-04: 1 day per call. 30-chunk chains were fragile.
-//   • 2026-04 → 2026-05-25: 10 days on Sonnet 4.0 (chunks ~130s, fit
-//     in Supabase Free's 150s cap with margin).
-//   • 2026-05-26 morning: tried 7 days on Sonnet 4.6 (chunks ~135-140s
-//     in diagnostics, but real-world variance pushed it over 145s on
-//     prod runs — T1b 11-day Oaxaca aborted at chunk 0).
-//   • 2026-05-26 evening: dropped to 5 days on Sonnet 4.6 — chunks
-//     ~100s, ~45s safety margin. Adds ~1 chunk per 30-day trip vs
-//     the 7-day setting (was 5, now 6) but eliminates the timeout
-//     class of failures.
-// If we ever upgrade Supabase to Pro/Team (400s cap), we can return
-// to 10-day segments. Keep this in sync with `app/api/trips/jobs/route.ts`
-// which uses the same constant for chunks_total computation.
-const SEGMENT_DAYS = 5
+//   • 2026-04 → 2026-05-25: 10 days on Sonnet 4.0.
+//   • 2026-05-26 morning: tried 7 days on Sonnet 4.6 — failed in prod.
+//   • 2026-05-26 evening: dropped to 5 days on Sonnet 4.6 — ~100s, ~45s margin.
+// Keep in sync with `app/api/trips/jobs/route.ts`'s multi-city chunksTotal math.
+const MC_SEGMENT_DAYS = 5
+
+// ── SC_* — single-city constants (NEW — day-level concurrency redesign) ──
+//
+// One Claude call per day, up to SC_CONCURRENCY days in flight at once,
+// each bounded by its own 60s timeout. Replaces the old 5-day sequential
+// segment loop for single-city trips only. See PR description for the
+// full rationale. Deliberately NOT shared with MC_* — see note above.
+const SC_DAYS_PER_CHUNK   = 1
+const SC_CONCURRENCY      = 8
+const SC_CHUNK_TIMEOUT_MS = 60_000
+const SC_BUDGET_FLOOR_MS  = 70_000
+// Hard ceiling on retry wall-clock, measured from invocation start. Once
+// elapsed time crosses this, stop retrying rejected chunks in THIS
+// invocation and let the self-reinvoke fallback (below) pick up whatever's
+// still missing in a fresh invocation with a fresh budget.
+const SC_RETRY_ABANDON_MS = 100_000
+const SC_MAX_RETRIES      = 2
+const SC_RETRY_BACKOFF_MS = [1_000, 2_000]
 
 type JobRow = {
   id:           string
@@ -82,9 +125,28 @@ type JobRow = {
   inputs:       Record<string, any>
   chunks_total: number
   chunks_done:  number
+  skeleton?:    SkeletonDay[] | null
 }
 
 type ChunkContent = Record<string, any>
+
+type SkeletonDay = {
+  day:            number
+  theme:          string
+  neighborhood:   string
+  anchor:         string
+  pace:           string
+  // city/travel_day/transfer_hours: schema is ready for the multi-city
+  // unification follow-up (see PR discussion — single-city ships alone in
+  // THIS PR; the outline pass hasn't yet been proven to respect a
+  // pre-specified segment list, only tested inventing its own routing).
+  // Unused by the single-city path today: every day is the same city, so
+  // generateSkeleton() below always sets city to the trip destination and
+  // travel_day to false.
+  city:           string
+  travel_day:     boolean
+  transfer_hours: number
+}
 
 function corsHeaders() {
   return {
@@ -95,11 +157,6 @@ function corsHeaders() {
 }
 
 async function callGenerateTrip(payload: Record<string, any>, signal: AbortSignal) {
-  console.log('[worker] calling generate-trip — token shape:', {
-    starts_eyJ: LEGACY_ANON_KEY.startsWith('eyJ'),
-    len:        LEGACY_ANON_KEY.length,
-    prefix:     LEGACY_ANON_KEY.slice(0, 10),
-  })
   const res = await fetch(`${SUPABASE_URL}/functions/v1/generate-trip`, {
     method: 'POST',
     headers: {
@@ -139,9 +196,9 @@ function getTripSegments(jobInputs: Record<string, any>): TripSegment[] | null {
   return valid.length >= 2 ? (valid as TripSegment[]) : null
 }
 
-// Sub-chunk plan for multi-city jobs. A long segment (e.g. 23 days in
-// Gothenburg) won't fit a single Edge Fn call, so we further split each
-// segment into sub-chunks of at most SEGMENT_DAYS. Each plan entry
+// Sub-chunk plan for multi-city jobs (UNCHANGED). A long segment (e.g. 23
+// days in Gothenburg) won't fit a single Edge Fn call, so we further split
+// each segment into sub-chunks of at most MC_SEGMENT_DAYS. Each plan entry
 // describes one Edge Fn call. Chunk indexing in the job table maps
 // directly to this array's index.
 type ChunkPlanEntry = {
@@ -158,10 +215,10 @@ function planMultiCityChunks(segments: TripSegment[]): ChunkPlanEntry[] {
     // nights+1 = inclusive day count for the segment (check-in day through
     // check-out day). Same-day segments still produce 1 day.
     const segDays = Math.max(1, segments[segIdx].nights + 1)
-    const subCount = Math.ceil(segDays / SEGMENT_DAYS)
+    const subCount = Math.ceil(segDays / MC_SEGMENT_DAYS)
     let offset = 0
     for (let subIdx = 0; subIdx < subCount; subIdx++) {
-      const subDays = Math.min(SEGMENT_DAYS, segDays - offset)
+      const subDays = Math.min(MC_SEGMENT_DAYS, segDays - offset)
       plan.push({
         segmentIndex: segIdx,
         subIndex:     subIdx,
@@ -181,6 +238,16 @@ function countMultiCityChunks(segments: TripSegment[]): number {
   return planMultiCityChunks(segments).length
 }
 
+// ── NEW: single-city day plan ─────────────────────────────────────────────
+// One entry per day (SC_DAYS_PER_CHUNK=1 today; kept as a loop over the
+// constant rather than hardcoded, so a future tuning pass can change the
+// step without touching call sites). Returns 0-indexed day offsets.
+function planChunks(totalDays: number): number[] {
+  const days: number[] = []
+  for (let d = 0; d < totalDays; d += SC_DAYS_PER_CHUNK) days.push(d)
+  return days
+}
+
 function addDaysISO(isoDate: string, days: number): string {
   const d = new Date(`${isoDate}T00:00:00Z`)
   d.setUTCDate(d.getUTCDate() + days)
@@ -189,98 +256,225 @@ function addDaysISO(isoDate: string, days: number): string {
 
 type SegmentResult = { chunk: ChunkContent; budgetCurrencySuspect: boolean | null }
 
-async function generateSegment(jobInputs: Record<string, any>, chunkIndex: number, totalChunks: number, prevSummary: string | null, signal: AbortSignal): Promise<SegmentResult> {
-  const multiCity = getTripSegments(jobInputs)
+// Multi-city segment generation (UNCHANGED behavior) — kept as its own
+// function so the single-city day-chunk path below doesn't have to thread
+// prevSummary through a shared signature.
+async function generateMultiCitySegment(
+  jobInputs: Record<string, any>,
+  chunkIndex: number,
+  prevSummary: string | null,
+  signal: AbortSignal,
+  jobId: string,
+): Promise<SegmentResult> {
+  const multiCity = getTripSegments(jobInputs)!
+  const plan   = planMultiCityChunks(multiCity)
+  if (chunkIndex >= plan.length) {
+    throw new Error(`chunk_index ${chunkIndex} out of range for multi-city plan (length ${plan.length})`)
+  }
+  const entry = plan[chunkIndex]
+  const seg   = multiCity[entry.segmentIndex]
 
-  let segmentPayload: Record<string, any>
+  const subStartDate = addDaysISO(seg.startDate, entry.dayOffset)
+  const subEndDate   = addDaysISO(seg.startDate, entry.dayOffset + entry.subDays - 1)
 
-  if (multiCity) {
-    // ── Multi-city: chunk = (segment, sub-range within segment) ─────────────
-    // Build the plan once per call (cheap, ≤ ~10 entries) and look up the
-    // entry for this chunk index. Long segments are split into multiple
-    // sub-chunks so each Edge Fn call stays under the resource budget.
-    const plan = planMultiCityChunks(multiCity)
-    if (chunkIndex >= plan.length) {
-      throw new Error(`chunk_index ${chunkIndex} out of range for multi-city plan (length ${plan.length})`)
-    }
-    const entry = plan[chunkIndex]
-    const seg   = multiCity[entry.segmentIndex]
+  const segOrigin = seg.origin
+    ?? (entry.segmentIndex === 0 ? jobInputs.origin : multiCity[entry.segmentIndex - 1].destination)
 
-    const subStartDate = addDaysISO(seg.startDate, entry.dayOffset)
-    const subEndDate   = addDaysISO(seg.startDate, entry.dayOffset + entry.subDays - 1)
+  const { segments: _drop, ...singleCityBase } = jobInputs as any
 
-    // Origin: explicit segment origin > previous segment's destination >
-    // jobInputs.origin (trip-level origin).
-    const segOrigin = seg.origin
-      ?? (entry.segmentIndex === 0 ? jobInputs.origin : multiCity[entry.segmentIndex - 1].destination)
-
-    // Strip segments + multi-city-only fields from the forwarded payload so
-    // the generate-trip Edge Function doesn't double-apply the multi-city
-    // prompt branch.
-    const { segments: _drop, ...singleCityBase } = jobInputs as any
-
-    segmentPayload = {
-      ...singleCityBase,
-      destination:  seg.destination,
-      origin:       segOrigin,
-      start:        subStartDate,
-      end:          subEndDate,
-      nights:       Math.max(0, entry.subDays - 1),
-      duration_days: entry.subDays,
-      previous_day_summary: prevSummary ?? undefined,
-      // Diagnostic / informational fields. generate-trip's prompt ignores
-      // these today, but they show up in logs and serve as a hook for
-      // future per-chunk prompt tuning ("Tell the AI this is sub-chunk 2
-      // of 3 for this segment").
-      segment_index:    entry.segmentIndex,
-      total_segments:   multiCity.length,
-      sub_chunk_index:  entry.subIndex,
-      sub_chunk_total:  entry.segSubCount,
-    }
-  } else {
-    // ── Single-city: original day-block chunking ────────────────────────────
-    const totalDays      = Math.max(1, Math.min(35, Number(jobInputs.duration_days) || 1))
-    const segmentStartIdx = chunkIndex * SEGMENT_DAYS
-    const segmentDayCount = Math.min(SEGMENT_DAYS, totalDays - segmentStartIdx)
-
-    const tripStartISO    = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
-    const segmentStartISO = addDaysISO(tripStartISO, segmentStartIdx)
-    const segmentEndISO   = addDaysISO(tripStartISO, segmentStartIdx + segmentDayCount - 1)
-
-    segmentPayload = {
-      ...jobInputs,
-      duration_days:        segmentDayCount,
-      segment_index:        chunkIndex,
-      total_segments:       totalChunks,
-      previous_day_summary: prevSummary ?? undefined,
-      // Trip-level context — lets the prompt know where this chunk sits
-      // in the larger trip (so the AI doesn't restart the arrival
-      // narrative on chunk 1+ and knows the cumulative day offset for
-      // any "Día N" references it weaves into descriptions). Without
-      // these, every chunk reads as a standalone 5-day trip.
-      trip_day_offset: segmentStartIdx,
-      trip_total_days: totalDays,
-      trip_start_date: tripStartISO,
-      trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
-      start: segmentStartISO,
-      end:   segmentEndISO,
-    }
+  const segmentPayload = {
+    ...singleCityBase,
+    destination:  seg.destination,
+    origin:       segOrigin,
+    start:        subStartDate,
+    end:          subEndDate,
+    nights:       Math.max(0, entry.subDays - 1),
+    duration_days: entry.subDays,
+    previous_day_summary: prevSummary ?? undefined,
+    segment_index:    entry.segmentIndex,
+    total_segments:   multiCity.length,
+    sub_chunk_index:  entry.subIndex,
+    sub_chunk_total:  entry.segSubCount,
+    job_id:           jobId,
   }
 
   const res = await callGenerateTrip(segmentPayload, signal)
   if (!res?.trip_data) throw new Error('segment response missing trip_data')
-  if (chunkIndex === 0) {
-    console.log('[worker] chunk[0] keys:', Object.keys(res.trip_data || {}))
-    console.log('[worker] chunk[0] day count:', Array.isArray(res.trip_data?.days) ? res.trip_data.days.length : 'n/a')
-    console.log('[worker] chunk[0] mode:', multiCity ? 'multi-city (sub-chunked)' : 'single-city')
-  }
   return {
     chunk: res.trip_data,
-    // Only meaningful for chunk 0 — assembleResult() already treats chunk 0
-    // as the sole source of budget_breakdown, so later chunks' flags (if
-    // any) are never acted on by the caller.
     budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
   }
+}
+
+// ── NEW: single-city per-day chunk generation ─────────────────────────────
+// One day per call. No previous_day_summary — anti-repetition/continuity
+// comes from the upfront skeleton pre-pass instead (see generateSkeleton
+// below), so days can be generated in any order / concurrently.
+async function generateDayChunk(
+  jobInputs: Record<string, any>,
+  dayIndex: number,
+  totalDays: number,
+  daySkeleton: SkeletonDay | null,
+  fullSkeleton: SkeletonDay[],
+  signal: AbortSignal,
+  jobId: string,
+  attempt: number,
+): Promise<SegmentResult> {
+  const tripStartISO   = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
+  const dayStartISO    = addDaysISO(tripStartISO, dayIndex)
+
+  const segmentPayload = {
+    ...jobInputs,
+    duration_days:   1,
+    // Explicit trip-level nights/overnight, NOT this chunk's own 1-day span.
+    // generate-trip/index.ts falls back to `duration_days - 1` whenever
+    // `nights` isn't a number -- and jobInputs.nights arrives as a URL-query
+    // STRING from the real client (always has), so without this override
+    // that fallback used the just-overridden duration_days=1 above, computed
+    // nights=0, set overnight=false, and told the model "Duración: 1 día
+    // (sin pernocta)" -- directly triggering its own "no overnight -> leave
+    // accommodations empty" instruction. 100% reproducible, not model
+    // flakiness: confirmed live 2026-09-25, every single-city day chunk hit
+    // it. Multi-city never had this bug -- generateMultiCitySegment already
+    // passes `nights` as a real number per sub-chunk.
+    nights:          Math.max(0, totalDays - 1),
+    overnight:       totalDays > 1,
+    segment_index:   dayIndex,
+    total_segments:  totalDays,
+    trip_day_offset: dayIndex,
+    trip_total_days: totalDays,
+    trip_start_date: tripStartISO,
+    trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
+    start: dayStartISO,
+    end:   dayStartISO,
+    day_skeleton:  daySkeleton ?? undefined,
+    full_skeleton: fullSkeleton,
+    job_id:        jobId,
+    attempt,
+  }
+
+  const res = await callGenerateTrip(segmentPayload, signal)
+  if (!res?.trip_data) throw new Error('day chunk response missing trip_data')
+  return {
+    chunk: res.trip_data,
+    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
+  }
+}
+
+// ── NEW: skeleton pre-pass ─────────────────────────────────────────────────
+// One small Haiku call producing a per-day theme/neighborhood/anchor/pace
+// skeleton for the whole trip. Computed once per job (cached on the job
+// row's `skeleton` column so a self-reinvoke doesn't redo it), and used by
+// every day chunk to avoid repeating the same neighborhood/anchor across
+// days despite being generated concurrently and out of order.
+const SKELETON_SCHEMA = {
+  type: 'object',
+  required: ['days'],
+  properties: {
+    days: {
+      type: 'array',
+      items: {
+        type: 'object',
+        required: ['day', 'theme', 'neighborhood', 'anchor', 'pace'],
+        properties: {
+          day:          { type: 'integer' },
+          theme:        { type: 'string' },
+          neighborhood: { type: 'string' },
+          anchor:       { type: 'string' },
+          pace:         { type: 'string' },
+        },
+      },
+    },
+  },
+}
+
+async function generateSkeleton(
+  jobInputs: Record<string, any>,
+  totalDays: number,
+  signal: AbortSignal,
+  jobId: string,
+): Promise<SkeletonDay[]> {
+  if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured for skeleton pass')
+
+  const startedAt = Date.now()
+
+  const isEN = jobInputs.locale === 'en'
+  const interests = Array.isArray(jobInputs.interests) ? jobInputs.interests.join(', ') : ''
+
+  const prompt = isEN
+    ? `Plan a lightweight day-by-day skeleton for a ${totalDays}-day trip to ${jobInputs.destination} (traveler: ${jobInputs.traveler ?? 'n/a'}, pace: ${jobInputs.pace ?? 'n/a'}, budget: ${jobInputs.budget ?? 'n/a'}, interests: ${interests || 'general'}). For EACH day (1 to ${totalDays}), give a short theme, the main neighborhood/area, one anchor activity or place, and the pace. Vary neighborhoods and anchors across days — do not repeat the same neighborhood or anchor on two different days unless the trip is too short to avoid it. Call the emit_skeleton tool with exactly ${totalDays} day entries, one per day from 1 to ${totalDays}.`
+    : `Planea un esqueleto ligero día por día para un viaje de ${totalDays} días a ${jobInputs.destination} (viajero: ${jobInputs.traveler ?? 'n/a'}, ritmo: ${jobInputs.pace ?? 'n/a'}, presupuesto: ${jobInputs.budget ?? 'n/a'}, intereses: ${interests || 'generales'}). Para CADA día (1 a ${totalDays}), da un tema breve, la zona/barrio principal, una actividad o lugar ancla, y el ritmo. Varía zonas y anclas entre días — no repitas la misma zona o ancla en dos días distintos a menos que el viaje sea demasiado corto para evitarlo. Llama a la herramienta emit_skeleton con exactamente ${totalDays} entradas de día, una por cada día de 1 a ${totalDays}.`
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type':      'application/json',
+      'x-api-key':         ANTHROPIC_API_KEY,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: SKELETON_MODEL,
+      max_tokens: 2000,
+      system: isEN
+        ? 'You are a travel planner sketching a lightweight day-by-day skeleton, not the full itinerary. Be concise — one short line of intent per day, not activities.'
+        : 'Eres un planificador de viajes esbozando un esqueleto ligero día por día, no el itinerario completo. Sé conciso — una intención breve por día, no actividades.',
+      tools: [{
+        name: 'emit_skeleton',
+        description: isEN ? 'Emit the day-by-day skeleton.' : 'Emite el esqueleto día por día.',
+        input_schema: SKELETON_SCHEMA,
+      }],
+      tool_choice: { type: 'tool', name: 'emit_skeleton' },
+      messages: [{ role: 'user', content: prompt }],
+    }),
+    signal,
+  })
+
+  const text = await res.text()
+  const ms = Date.now() - startedAt
+  if (!res.ok) throw new Error(`skeleton call returned ${res.status}: ${text.slice(0, 500)}`)
+
+  let data: any
+  try {
+    data = JSON.parse(text)
+  } catch {
+    throw new Error(`skeleton call returned non-JSON: ${text.slice(0, 500)}`)
+  }
+
+  logGenerationMetric({
+    job_id:        jobId,
+    chunk_index:   null,
+    schema_kind:   'skeleton',
+    path:          'single',
+    model:         SKELETON_MODEL,
+    ms,
+    input_tokens:  data.usage?.input_tokens ?? null,
+    output_tokens: data.usage?.output_tokens ?? null,
+    cache_read:    data.usage?.cache_read_input_tokens ?? null,
+    attempt:       0,
+    stop_reason:   data.stop_reason ?? null,
+    ok:            data.stop_reason !== 'max_tokens',
+  })
+
+  const toolUse = Array.isArray(data.content)
+    ? data.content.find((c: any) => c?.type === 'tool_use' && c?.name === 'emit_skeleton')
+    : null
+  const days = toolUse?.input?.days
+  if (!Array.isArray(days) || days.length === 0) {
+    throw new Error('skeleton call returned no days')
+  }
+  // city/travel_day/transfer_hours are on the SkeletonDay type (schema
+  // ready for the multi-city unification follow-up — see the type's own
+  // comment) but not asked of Haiku here: for a single-city trip, city is
+  // always the trip destination and there's no inter-city travel day by
+  // definition, so it's cheaper and more reliable to fill these
+  // deterministically than to spend tokens asking the model to restate
+  // something it can't get wrong-in-a-useful-way for this path.
+  return (days as any[]).map(d => ({
+    ...d,
+    city:           jobInputs.destination,
+    travel_day:     false,
+    transfer_hours: 0,
+  })) as SkeletonDay[]
 }
 
 // Pull days from a chunk regardless of where the field lives. The sync endpoint
@@ -294,12 +488,41 @@ function chunkDays(chunk: any): any[] {
   return []
 }
 
+// ── NEW: pre-assembly integrity check ─────────────────────────────────────
+// Asserts the concatenated day list is contiguous 1..N with no duplicates,
+// and that front-matter (title, budget_breakdown) is present on the chunk
+// that's supposed to carry it (chunk 0). Throws — caller marks the job
+// failed rather than silently assembling a broken/gappy trip.
+function assertChunksIntegrity(chunks: ChunkContent[], expectedDays: number): void {
+  const seen = new Set<number>()
+  let dayCount = 0
+  for (const chunk of chunks) {
+    for (const day of chunkDays(chunk)) {
+      dayCount++
+      const n = (day as any)?.day_number
+      if (typeof n !== 'number') throw new Error(`assertChunksIntegrity: day missing day_number`)
+      if (seen.has(n)) throw new Error(`assertChunksIntegrity: duplicate day_number ${n}`)
+      seen.add(n)
+    }
+  }
+  if (dayCount !== expectedDays) {
+    throw new Error(`assertChunksIntegrity: expected ${expectedDays} days, got ${dayCount}`)
+  }
+  for (let n = 1; n <= expectedDays; n++) {
+    if (!seen.has(n)) throw new Error(`assertChunksIntegrity: missing day_number ${n} (not contiguous 1..${expectedDays})`)
+  }
+  const first = chunks[0] as any
+  if (!first?.title || !first?.budget_breakdown) {
+    throw new Error('assertChunksIntegrity: chunk 0 missing front-matter (title/budget_breakdown)')
+  }
+}
+
 function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>): Record<string, any> {
   // Concatenate per-segment outputs into a single trip_data shape matching
   // what the sync endpoint returns. Each chunk is a segment containing up
-  // to SEGMENT_DAYS days (single-city) OR one segment of the chain (multi-
-  // city). Day numbers are cumulative across segments so users see "Day 17"
-  // not "Segment 2 Day 7". Trip-level metadata (title, subtitle, budget,
+  // to MC_SEGMENT_DAYS days (multi-city) or exactly 1 day (single-city). Day
+  // numbers are cumulative across segments so users see "Day 17" not
+  // "Segment 2 Day 7". Trip-level metadata (title, subtitle, budget,
   // packing) comes from the first segment; the rest are discarded.
   const first     = chunks[0] ?? {}
   const multiCity = getTripSegments(jobInputs)
@@ -348,11 +571,12 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
     // sub-chunks that re-emit the same hotel.
     //
     // Date rewrite: the AI emits checkInDate / checkOutDate / nights for
-    // whatever sub-range the chunk covered (often only 4-5 nights), so on
-    // multi-chunk trips the surviving hotel entry would say "4 noches"
-    // when the actual stay spans the full segment. Patch the dates to
-    // the TRIP-level (single-city) or SEGMENT-level (multi-city) span so
-    // the hotel card shows what the traveler actually books.
+    // whatever sub-range the chunk covered (often only 1 night, now that
+    // single-city chunks are day-sized), so on multi-chunk trips the
+    // surviving hotel entry would say "1 noche" when the actual stay spans
+    // the full trip. Patch the dates to the TRIP-level (single-city) or
+    // SEGMENT-level (multi-city) span so the hotel card shows what the
+    // traveler actually books.
     const chunkAccs = Array.isArray((chunk as any)?.accommodations) ? (chunk as any).accommodations : []
     if (chunkAccs.length === 0) continue
     if (plan) {
@@ -394,11 +618,11 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
   //
   // The first chunk's title is generated by the AI as if it were a complete
   // trip (because each chunk is an isolated single-city generation). For a
-  // multi-chunk trip (>SEGMENT_DAYS), the AI titles chunk 0 with the
-  // chunk's own day count — e.g. an 11-day Oaxaca trip with SEGMENT_DAYS=7
-  // gets "7 Días en Oaxaca: Arte, Sabor y Tradición" because chunk 0 is
-  // 7 days long. The trip itself is 11 days, so the displayed title is
-  // wrong even though the rest of the itinerary is fine.
+  // multi-chunk trip, the AI titles chunk 0 with the chunk's own day
+  // count — e.g. now that single-city chunk 0 is 1 day, an 8-day Osaka trip
+  // gets "1 Día en Osaka" because chunk 0 is 1 day long. The trip itself is
+  // 8 days, so the displayed title is wrong even though the rest of the
+  // itinerary is fine.
   //
   // Fix: take the AI title (which has nice creative additions like
   // ": Arte, Sabor y Tradición") and patch ONLY the leading day count.
@@ -520,15 +744,283 @@ async function refundOneTripIfApplicable(admin: any, userId: string): Promise<vo
 
 function shortSummary(chunk: ChunkContent): string {
   // Compact summary of the segment we just generated, used as a continuity
-  // hint for the next segment's prompt. Picks day titles only (skipping
-  // activities to keep the summary short) so the next segment sees a
-  // sequence like "Day 1: Centro Histórico · Day 2: Coyoacán · ...".
-  // Capped at 400 chars — long enough to convey segment shape without
-  // bloating subsequent prompts.
+  // hint for the next segment's prompt (multi-city only — see file header).
+  // Picks day titles only (skipping activities to keep the summary short)
+  // so the next segment sees a sequence like "Day 1: Centro Histórico ·
+  // Day 2: Coyoacán · ...". Capped at 400 chars.
   const days = chunkDays(chunk)
   if (days.length === 0) return ''
   const titles = days.map((d: any) => d?.title).filter(Boolean)
   return titles.join(' · ').slice(0, 400)
+}
+
+// ── Forked entry points ────────────────────────────────────────────────────
+// Two fully separate functions, two fully separate constant sets (MC_* /
+// SC_*), no variable threaded conditionally between them (no shared
+// prevSummary-or-skeleton state). Each takes the shared mutable
+// chunksByIndex map (read/write, same purpose as before — resume support
+// + progress tracking) but nothing else is shared. Both return `Response`
+// to short-circuit on failure, or `null` to fall through to the shared
+// completion tail in serve() below (re-read job, self-reinvoke or
+// assemble-and-complete — identical for both paths, doesn't touch
+// per-path state).
+
+async function runSequentialMultiCity(
+  admin: any,
+  job: JobRow,
+  multiCity: TripSegment[],
+  chunksByIndex: Map<number, ChunkContent>,
+  startedAt: number,
+): Promise<Response | null> {
+  let prevSummary: string | null =
+    job.chunks_done > 0 && chunksByIndex.has(job.chunks_done - 1)
+      ? shortSummary(chunksByIndex.get(job.chunks_done - 1) as ChunkContent)
+      : null
+
+  for (let i = job.chunks_done; i < job.chunks_total; i++) {
+    const remainingBudget = 140_000 - (Date.now() - startedAt)
+    if (remainingBudget < MC_BUDGET_FLOOR_MS) break
+
+    const ctrl = new AbortController()
+    const t = setTimeout(() => ctrl.abort(), Math.min(MC_CHUNK_TIMEOUT_MS, remainingBudget - 2_000))
+
+    let chunk: ChunkContent
+    let chunkBudgetCurrencySuspect: boolean | null = null
+    try {
+      const segResult = await generateMultiCitySegment(job.inputs, i, prevSummary, ctrl.signal, job.id)
+      chunk = segResult.chunk
+      chunkBudgetCurrencySuspect = segResult.budgetCurrencySuspect
+    } catch (e) {
+      clearTimeout(t)
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: String(e).slice(0, 500) })
+        .eq('id', job.id)
+      if (job.chunks_done === 0 && i === 0) {
+        await refundOneTripIfApplicable(admin, job.user_id)
+      }
+      return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
+        status: 502,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+    clearTimeout(t)
+
+    chunksByIndex.set(i, chunk)
+
+    try {
+      const { error: insertErr } = await admin
+        .from('generation_chunks')
+        .insert({ job_id: job.id, chunk_index: i, content: chunk })
+      if (insertErr) throw new Error(`chunks insert failed: ${insertErr.message}`)
+
+      const chunksDoneUpdate: Record<string, unknown> = { chunks_done: i + 1 }
+      if (i === 0) chunksDoneUpdate.budget_currency_suspect = chunkBudgetCurrencySuspect
+      const { error: updateErr } = await admin
+        .from('generation_jobs')
+        .update(chunksDoneUpdate)
+        .eq('id', job.id)
+      if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
+
+      try {
+        const chunksOrdered: ChunkContent[] = []
+        for (let idx = 0; idx <= i; idx++) {
+          const c = chunksByIndex.get(idx)
+          if (c) chunksOrdered.push(c)
+        }
+        const partial = assembleResult(chunksOrdered, job.inputs)
+        const { error: partialErr } = await admin
+          .from('generation_jobs')
+          .update({ partial_result: partial } as any)
+          .eq('id', job.id)
+        if (partialErr) {
+          console.warn('[worker:mc] partial_result write failed at chunk', i, partialErr.message)
+        }
+      } catch (assemblyErr) {
+        console.warn('[worker:mc] partial_result assembly threw at chunk', i, assemblyErr)
+      }
+    } catch (persistErr) {
+      console.error('[worker:mc] chunk persist failed at index', i, persistErr)
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
+        .eq('id', job.id)
+      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
+        status: 500,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+
+    prevSummary = shortSummary(chunk)
+  }
+
+  return null
+}
+
+async function runConcurrentSingleCity(
+  admin: any,
+  job: JobRow,
+  chunksByIndex: Map<number, ChunkContent>,
+  startedAt: number,
+): Promise<Response | null> {
+  const totalDays = Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+
+  // Skeleton — compute once per job, cache on the row so a self-reinvoke
+  // doesn't redo the Haiku call.
+  let skeleton: SkeletonDay[] | null = Array.isArray(job.skeleton) ? job.skeleton : null
+  if (!skeleton) {
+    const skelCtrl = new AbortController()
+    const skelTimer = setTimeout(() => skelCtrl.abort(), SC_CHUNK_TIMEOUT_MS)
+    try {
+      skeleton = await generateSkeleton(job.inputs, totalDays, skelCtrl.signal, job.id)
+    } catch (e) {
+      clearTimeout(skelTimer)
+      console.error('[worker:sc] skeleton pass failed:', e)
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: `skeleton: ${String(e).slice(0, 500)}` })
+        .eq('id', job.id)
+      await refundOneTripIfApplicable(admin, job.user_id)
+      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'skeleton' }), {
+        status: 502,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+    clearTimeout(skelTimer)
+    await admin.from('generation_jobs').update({ skeleton } as any).eq('id', job.id)
+  }
+
+  const dayPlan = planChunks(totalDays)
+  const missing = dayPlan.filter(d => !chunksByIndex.has(d))
+
+  async function runOneDay(dayIdx: number, signal: AbortSignal, attempt: number) {
+    const daySkeleton = skeleton!.find(s => s.day === dayIdx + 1) ?? null
+    const segResult = await generateDayChunk(job.inputs, dayIdx, totalDays, daySkeleton, skeleton!, signal, job.id, attempt)
+    return { dayIdx, segResult }
+  }
+
+  for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
+    const remainingBudget = 140_000 - (Date.now() - startedAt)
+    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest
+
+    let batch = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
+    const succeeded = new Map<number, SegmentResult>()
+
+    for (let attempt = 0; attempt <= SC_MAX_RETRIES && batch.length > 0; attempt++) {
+      if (attempt > 0) {
+        if (Date.now() - startedAt > SC_RETRY_ABANDON_MS) break // fall through to self-reinvoke
+        await new Promise(r => setTimeout(r, SC_RETRY_BACKOFF_MS[attempt - 1] ?? 2_000))
+      }
+
+      const results = await Promise.allSettled(batch.map(dayIdx => {
+        const ctrl = new AbortController()
+        const t = setTimeout(() => ctrl.abort(), SC_CHUNK_TIMEOUT_MS)
+        return runOneDay(dayIdx, ctrl.signal, attempt).finally(() => clearTimeout(t))
+      }))
+
+      const stillFailing: number[] = []
+      for (let k = 0; k < results.length; k++) {
+        const r = results[k]
+        const dayIdx = batch[k]
+        if (r.status === 'fulfilled') {
+          succeeded.set(r.value.dayIdx, r.value.segResult)
+        } else {
+          console.warn('[worker:sc] day chunk rejected', dayIdx, 'attempt', attempt, String(r.reason).slice(0, 300))
+          stillFailing.push(dayIdx)
+        }
+      }
+      batch = stillFailing
+    }
+
+    if (batch.length > 0) {
+      // Retries exhausted (or abandoned past the wall-clock cutoff) with
+      // chunks still failing — this is a real failure, not a budget
+      // timeout, so we fail the job rather than looping self-reinvoke
+      // forever on a possibly-deterministic error.
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: `day chunks failed after retries: ${batch.join(',')}` })
+        .eq('id', job.id)
+      if (job.chunks_done === 0 && succeeded.size === 0) {
+        await refundOneTripIfApplicable(admin, job.user_id)
+      }
+      return new Response(JSON.stringify({ ok: false, status: 'failed', failed_days: batch }), {
+        status: 502,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Whole batch succeeded — persist in day order.
+    const orderedBatch = [...succeeded.entries()].sort((a, b) => a[0] - b[0])
+    for (const [dayIdx, segResult] of orderedBatch) {
+      chunksByIndex.set(dayIdx, segResult.chunk)
+      try {
+        const { error: insertErr } = await admin
+          .from('generation_chunks')
+          .insert({ job_id: job.id, chunk_index: dayIdx, content: segResult.chunk })
+        // Unique (job_id, chunk_index) — a retried/duplicate insert for an
+        // already-persisted day is a benign no-op, not a hard failure.
+        if (insertErr && insertErr.code !== '23505') {
+          throw new Error(`chunks insert failed: ${insertErr.message}`)
+        }
+        if (dayIdx === 0) {
+          await admin
+            .from('generation_jobs')
+            .update({ budget_currency_suspect: segResult.budgetCurrencySuspect } as any)
+            .eq('id', job.id)
+        }
+      } catch (persistErr) {
+        console.error('[worker:sc] day chunk persist failed at index', dayIdx, persistErr)
+        await admin
+          .from('generation_jobs')
+          .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
+          .eq('id', job.id)
+        return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
+          status: 500,
+          headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    // Contiguous-from-zero count — batches are processed in ascending
+    // order so this is monotonic as long as nothing above returned early.
+    let doneCount = 0
+    while (doneCount < totalDays && chunksByIndex.has(doneCount)) doneCount++
+
+    const { error: updateErr } = await admin
+      .from('generation_jobs')
+      .update({ chunks_done: doneCount })
+      .eq('id', job.id)
+    if (updateErr) {
+      console.error('[worker:sc] chunks_done update failed:', updateErr.message)
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: `chunks_done update failed: ${updateErr.message}` })
+        .eq('id', job.id)
+      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
+        status: 500,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+
+    // Progressive partial assembly — same UX purpose as the multi-city
+    // path: render finished days while the rest are still generating.
+    try {
+      const chunksOrdered: ChunkContent[] = []
+      for (let idx = 0; idx < doneCount; idx++) {
+        const c = chunksByIndex.get(idx)
+        if (c) chunksOrdered.push(c)
+      }
+      if (chunksOrdered.length > 0) {
+        const partial = assembleResult(chunksOrdered, job.inputs)
+        await admin.from('generation_jobs').update({ partial_result: partial } as any).eq('id', job.id)
+      }
+    } catch (assemblyErr) {
+      console.warn('[worker:sc] partial_result assembly threw:', assemblyErr)
+    }
+  }
+
+  return null
 }
 
 serve(async (req: Request) => {
@@ -555,7 +1047,7 @@ serve(async (req: Request) => {
   // Load job
   const { data: jobData, error: jobErr } = await admin
     .from('generation_jobs')
-    .select('id, user_id, status, inputs, chunks_total, chunks_done')
+    .select('id, user_id, status, inputs, chunks_total, chunks_done, skeleton')
     .eq('id', job_id)
     .single()
 
@@ -577,10 +1069,7 @@ serve(async (req: Request) => {
   // Mark running
   await admin.from('generation_jobs').update({ status: 'running' }).eq('id', job.id)
 
-  // Load any segments already persisted (resume support). Each row in
-  // generation_chunks is now one segment (up to SEGMENT_DAYS days),
-  // not one day — but the table name and column names stay for backward
-  // compatibility with existing data and the polling endpoint.
+  // Load any chunks already persisted (resume support).
   const { data: existingChunks } = await admin
     .from('generation_chunks')
     .select('chunk_index, content')
@@ -590,140 +1079,19 @@ serve(async (req: Request) => {
   const chunksByIndex = new Map<number, ChunkContent>()
   for (const c of existingChunks ?? []) chunksByIndex.set((c as any).chunk_index, (c as any).content)
 
-  // Continuity hint for the next segment: summary of the most recently
-  // persisted segment. Uses chunks_done - 1 (the last completed index)
-  // rather than size - 1, which would be wrong if chunks ever come back
-  // sparse (resumed mid-failure).
-  let prevSummary: string | null =
-    job.chunks_done > 0 && chunksByIndex.has(job.chunks_done - 1)
-      ? shortSummary(chunksByIndex.get(job.chunks_done - 1) as ChunkContent)
-      : null
+  const multiCity = getTripSegments(job.inputs)
 
-  // Generate missing segments
-  for (let i = job.chunks_done; i < job.chunks_total; i++) {
-    // Budget check — if we're under the floor, bow out cleanly. With
-    // BUDGET_FLOOR_MS = 135s and segment time ~130s, this means at most
-    // one segment per invocation. Self-reinvoke (or cron) handles the rest.
-    const remainingBudget = 140_000 - (Date.now() - startedAt)
-    if (remainingBudget < BUDGET_FLOOR_MS) break
-
-    const ctrl = new AbortController()
-    const t = setTimeout(() => ctrl.abort(), Math.min(CHUNK_TIMEOUT_MS, remainingBudget - 2_000))
-
-    let chunk: ChunkContent
-    let chunkBudgetCurrencySuspect: boolean | null = null
-    try {
-      const segResult = await generateSegment(job.inputs, i, job.chunks_total, prevSummary, ctrl.signal)
-      chunk = segResult.chunk
-      chunkBudgetCurrencySuspect = segResult.budgetCurrencySuspect
-    } catch (e) {
-      clearTimeout(t)
-      await admin
-        .from('generation_jobs')
-        .update({ status: 'failed', error: String(e).slice(0, 500) })
-        .eq('id', job.id)
-
-      // Refund the credit charged at /api/trips/jobs creation. Users shouldn't
-      // pay for upstream failures (LLM errors, Supabase outages, timeouts).
-      // Skip if any chunk was successfully generated — the user got partial
-      // value, and a no-op refund avoids credit-printing on flaky scenarios.
-      if (job.chunks_done === 0 && i === 0) {
-        await refundOneTripIfApplicable(admin, job.user_id)
-      }
-
-      return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
-        status: 502,
-        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-      })
-    }
-    clearTimeout(t)
-
-    // Persist chunk before updating counter — readers never see progress
-    // without backing data. Wrapped in try/catch because the previous version
-    // had these awaits OUTSIDE any error handling; if either DB call threw
-    // (network blip, unique-constraint collision from a partial prior run,
-    // RLS misconfiguration), the function died with an unhandled exception
-    // and the job sat in status='running' forever, never reaching the cron
-    // reconciler's "rescue stuck jobs" heuristic. Mark failed instead.
-    // Reflect the new chunk in the in-memory map BEFORE the persist try
-    // block so the progressive partial-assembly inside it sees the latest
-    // chunk too. Persistence failures still mark the job failed below;
-    // they don't poison the in-memory state because the function returns
-    // immediately in that branch.
-    chunksByIndex.set(i, chunk)
-
-    try {
-      const { error: insertErr } = await admin
-        .from('generation_chunks')
-        .insert({ job_id: job.id, chunk_index: i, content: chunk })
-      if (insertErr) throw new Error(`chunks insert failed: ${insertErr.message}`)
-
-      // Persist chunk 0's currency sanity-check flag onto the job row here,
-      // not just carried in-memory — completion (where it eventually feeds
-      // the trips insert) can happen in a LATER, separate Edge Function
-      // invocation via the self-reinvoke chain below, which starts with a
-      // fresh in-memory state and would otherwise lose it.
-      const chunksDoneUpdate: Record<string, unknown> = { chunks_done: i + 1 }
-      if (i === 0) chunksDoneUpdate.budget_currency_suspect = chunkBudgetCurrencySuspect
-      const { error: updateErr } = await admin
-        .from('generation_jobs')
-        .update(chunksDoneUpdate)
-        .eq('id', job.id)
-      if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
-
-      // ── Progressive partial assembly (streaming-UI feature) ─────────────
-      // After every chunk completes, recompute assembleResult() over the
-      // chunks-so-far and write it to generation_jobs.partial_result. The
-      // polling endpoint exposes this column; TripResult.tsx renders
-      // whatever days exist while waiting for the rest. The user sees the
-      // first chunk's days at ~100s instead of waiting the full 10 min
-      // for a long trip.
-      //
-      // Inner try/catch is defensive: a failure to compute or write the
-      // partial_result must NOT fail the chunk persistence — partial is
-      // a UX enhancement, not load-bearing. If it fails, the client just
-      // shows the regular spinner until the next chunk lands, or until
-      // the final result is saved at completion.
-      try {
-        const chunksOrdered: ChunkContent[] = []
-        for (let idx = 0; idx <= i; idx++) {
-          const c = chunksByIndex.get(idx)
-          if (c) chunksOrdered.push(c)
-        }
-        const partial = assembleResult(chunksOrdered, job.inputs)
-        const { error: partialErr } = await admin
-          .from('generation_jobs')
-          .update({ partial_result: partial } as any)
-          .eq('id', job.id)
-        if (partialErr) {
-          console.warn('[worker] partial_result write failed at chunk', i, partialErr.message)
-        }
-      } catch (assemblyErr) {
-        console.warn('[worker] partial_result assembly threw at chunk', i, assemblyErr)
-      }
-    } catch (persistErr) {
-      console.error('[worker] chunk persist failed at index', i, persistErr)
-      await admin
-        .from('generation_jobs')
-        .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
-        .eq('id', job.id)
-      // Don't refund here — chunks generated successfully (we paid for the
-      // LLM calls). The persistence failure is on us; eat it rather than
-      // also clawing back the credit, which compounds the user impact.
-      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
-        status: 500,
-        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-      })
-    }
-
-    prevSummary = shortSummary(chunk)
-  }
+  // Explicit fork — see the two functions above for why this is a single
+  // ternary dispatch and not a shared loop with a multiCity branch inside it.
+  const earlyReturn = multiCity
+    ? await runSequentialMultiCity(admin, job, multiCity, chunksByIndex, startedAt)
+    : await runConcurrentSingleCity(admin, job, chunksByIndex, startedAt)
+  if (earlyReturn) return earlyReturn
 
   // Re-read job to see if we finished. budget_currency_suspect is read back
-  // here rather than from the in-memory chunkBudgetCurrencySuspect above —
-  // this invocation may not be the one that generated chunk 0 (self-reinvoke
-  // chain), so the DB row (written when chunk 0 landed, in whichever
-  // invocation that was) is the only reliable source at completion time.
+  // here rather than from in-memory state — this invocation may not be the
+  // one that generated chunk 0 (self-reinvoke chain), so the DB row is the
+  // only reliable source at completion time.
   const { data: final } = await admin
     .from('generation_jobs')
     .select('chunks_done, chunks_total, budget_currency_suspect')
@@ -741,10 +1109,10 @@ serve(async (req: Request) => {
     // Self re-invoke: budget exhausted but more chunks remain. Fire another
     // worker call in the background to resume from chunks_done. Without
     // this, jobs sit at status='running' forever (the cron reconciler is
-    // a future safety net, not the primary completion mechanism).
-    //
-    // EdgeRuntime.waitUntil keeps the function alive until the background
-    // request completes, so the re-invocation actually fires.
+    // a future safety net, not the primary completion mechanism). Also the
+    // fallback for single-city day chunks that kept failing past the
+    // per-invocation retry budget (see SC_RETRY_ABANDON_MS above) — a fresh
+    // invocation gets a fresh retry budget for whatever's still missing.
     console.log('[worker] re-invoking', job.id, 'at chunks_done =', final.chunks_done, '/', final.chunks_total)
     const reinvoke = fetch(`${SUPABASE_URL}/functions/v1/generate-trip-worker`, {
       method: 'POST',
@@ -785,7 +1153,49 @@ serve(async (req: Request) => {
     }
   }
 
+  const expectedDays = multiCity
+    ? multiCity.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
+    : Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+
+  try {
+    assertChunksIntegrity(orderedChunks, expectedDays)
+  } catch (integrityErr) {
+    console.error('[worker] pre-assembly integrity check failed:', integrityErr)
+    await admin
+      .from('generation_jobs')
+      .update({ status: 'failed', error: `integrity: ${String(integrityErr).slice(0, 500)}` })
+      .eq('id', job.id)
+    await refundOneTripIfApplicable(admin, job.user_id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'integrity' }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
+
   const result = assembleResult(orderedChunks, job.inputs)
+
+  // ── CRÍTICA rule enforcement — blocking ──────────────────────────────────
+  // The system prompt's one CRÍTICA rule (generate-trip/index.ts's
+  // "REGLA DE ALOJAMIENTO") requires non-empty accommodations for any
+  // overnight trip. Confirmed via a live test (2026-09-23) that the model
+  // can silently violate this — chunk 0 returned accommodations: [] on a
+  // real 6-night trip despite the LODGING block being correctly present in
+  // its prompt. That must never reach a user as a "completed" trip again:
+  // fail the job here, same as any other generation failure, rather than
+  // shipping a trip with no lodging recommendation.
+  const nights = expectedDays > 0 ? expectedDays - 1 : 0
+  if (nights > 0 && (!Array.isArray(result.accommodations) || result.accommodations.length === 0)) {
+    console.error('[worker] CRITICA violation: nights > 0 but accommodations is empty', { job_id: job.id, nights })
+    await admin
+      .from('generation_jobs')
+      .update({ status: 'failed', error: `CRITICA violation: nights=${nights} but accommodations is empty` })
+      .eq('id', job.id)
+    await refundOneTripIfApplicable(admin, job.user_id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'accommodations_check' }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
 
   // Persist trip row for authed user (matches sync endpoint behavior).
   const tripSlug = `${(job.inputs as any).destination ?? 'trip'}-${job.id.slice(0, 8)}`
@@ -794,10 +1204,7 @@ serve(async (req: Request) => {
 
   // Normalize enum-typed columns (+ currency) to match what the DB accepts
   // and what the client actually sent. Mirrors /api/trips/route.ts so the
-  // worker stays in lock-step with the sync path. Without the enum
-  // normalization, 'Equilibrado' / 'Familia' / etc. get rejected by the
-  // travel_style / traveler_type enum constraints and the insert fails.
-  // currency previously wasn't read here at all — see logic.ts.
+  // worker stays in lock-step with the sync path.
   const { travelers: travelersValue, travel_style: travelStyleValue, currency: currencyValue } =
     normalizeJobInputsForTripsInsert(job.inputs)
 
@@ -815,13 +1222,9 @@ serve(async (req: Request) => {
     interests:     Array.isArray((job.inputs as any).interests) ? (job.inputs as any).interests : [],
     currency:      currencyValue,
     budget_currency_suspect: typeof final.budget_currency_suspect === 'boolean' ? final.budget_currency_suspect : null,
-    // Partner referral stamp folded into job.inputs by /api/trips/jobs.
     ref_source:    (job.inputs as any).ref_source ?? null,
   }
 
-  // Check for insert errors instead of silently swallowing — the previous
-  // version assumed insert always succeeded and quietly set trip_id=null
-  // when it didn't, leaving "completed" jobs with no actual trip row.
   const { data: tripRow, error: tripInsertErr } = await admin
     .from('trips')
     .insert(insertPayload)
@@ -837,7 +1240,6 @@ serve(async (req: Request) => {
         error:  `trip insert failed: ${tripInsertErr?.message ?? 'unknown'}`,
       })
       .eq('id', job.id)
-    // Refund the credit — user shouldn't pay for a save failure on our side
     await refundOneTripIfApplicable(admin, job.user_id)
     return new Response(JSON.stringify({ ok: false, status: 'failed', error: tripInsertErr?.message }), {
       status: 500,
