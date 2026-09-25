@@ -1163,6 +1163,12 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
         ms,
         input_tokens:  claudeData.usage?.input_tokens ?? null,
         output_tokens: claudeData.usage?.output_tokens ?? null,
+        // cache_read_input_tokens is only present on the response when the
+        // request actually sent cache_control — >0 confirms a real hit,
+        // 0 means it was eligible but missed (e.g. no prior write yet),
+        // undefined/null means the field wasn't in the response at all.
+        cache_read:    claudeData.usage?.cache_read_input_tokens ?? null,
+        attempt:       typeof input.attempt === "number" ? input.attempt : 0,
         stop_reason:   claudeData.stop_reason ?? null,
         ok:            claudeData.stop_reason !== "max_tokens",
       });

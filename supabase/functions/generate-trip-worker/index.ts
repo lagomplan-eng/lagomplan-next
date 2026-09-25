@@ -318,6 +318,7 @@ async function generateDayChunk(
   fullSkeleton: SkeletonDay[],
   signal: AbortSignal,
   jobId: string,
+  attempt: number,
 ): Promise<SegmentResult> {
   const tripStartISO   = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
   const dayStartISO    = addDaysISO(tripStartISO, dayIndex)
@@ -325,6 +326,19 @@ async function generateDayChunk(
   const segmentPayload = {
     ...jobInputs,
     duration_days:   1,
+    // Explicit trip-level nights/overnight, NOT this chunk's own 1-day span.
+    // generate-trip/index.ts falls back to `duration_days - 1` whenever
+    // `nights` isn't a number -- and jobInputs.nights arrives as a URL-query
+    // STRING from the real client (always has), so without this override
+    // that fallback used the just-overridden duration_days=1 above, computed
+    // nights=0, set overnight=false, and told the model "Duración: 1 día
+    // (sin pernocta)" -- directly triggering its own "no overnight -> leave
+    // accommodations empty" instruction. 100% reproducible, not model
+    // flakiness: confirmed live 2026-09-25, every single-city day chunk hit
+    // it. Multi-city never had this bug -- generateMultiCitySegment already
+    // passes `nights` as a real number per sub-chunk.
+    nights:          Math.max(0, totalDays - 1),
+    overnight:       totalDays > 1,
     segment_index:   dayIndex,
     total_segments:  totalDays,
     trip_day_offset: dayIndex,
@@ -336,6 +350,7 @@ async function generateDayChunk(
     day_skeleton:  daySkeleton ?? undefined,
     full_skeleton: fullSkeleton,
     job_id:        jobId,
+    attempt,
   }
 
   const res = await callGenerateTrip(segmentPayload, signal)
@@ -434,6 +449,8 @@ async function generateSkeleton(
     ms,
     input_tokens:  data.usage?.input_tokens ?? null,
     output_tokens: data.usage?.output_tokens ?? null,
+    cache_read:    data.usage?.cache_read_input_tokens ?? null,
+    attempt:       0,
     stop_reason:   data.stop_reason ?? null,
     ok:            data.stop_reason !== 'max_tokens',
   })
@@ -876,9 +893,9 @@ async function runConcurrentSingleCity(
   const dayPlan = planChunks(totalDays)
   const missing = dayPlan.filter(d => !chunksByIndex.has(d))
 
-  async function runOneDay(dayIdx: number, signal: AbortSignal) {
+  async function runOneDay(dayIdx: number, signal: AbortSignal, attempt: number) {
     const daySkeleton = skeleton!.find(s => s.day === dayIdx + 1) ?? null
-    const segResult = await generateDayChunk(job.inputs, dayIdx, totalDays, daySkeleton, skeleton!, signal, job.id)
+    const segResult = await generateDayChunk(job.inputs, dayIdx, totalDays, daySkeleton, skeleton!, signal, job.id, attempt)
     return { dayIdx, segResult }
   }
 
@@ -898,7 +915,7 @@ async function runConcurrentSingleCity(
       const results = await Promise.allSettled(batch.map(dayIdx => {
         const ctrl = new AbortController()
         const t = setTimeout(() => ctrl.abort(), SC_CHUNK_TIMEOUT_MS)
-        return runOneDay(dayIdx, ctrl.signal).finally(() => clearTimeout(t))
+        return runOneDay(dayIdx, ctrl.signal, attempt).finally(() => clearTimeout(t))
       }))
 
       const stillFailing: number[] = []
@@ -1156,6 +1173,29 @@ serve(async (req: Request) => {
   }
 
   const result = assembleResult(orderedChunks, job.inputs)
+
+  // ── CRÍTICA rule enforcement — blocking ──────────────────────────────────
+  // The system prompt's one CRÍTICA rule (generate-trip/index.ts's
+  // "REGLA DE ALOJAMIENTO") requires non-empty accommodations for any
+  // overnight trip. Confirmed via a live test (2026-09-23) that the model
+  // can silently violate this — chunk 0 returned accommodations: [] on a
+  // real 6-night trip despite the LODGING block being correctly present in
+  // its prompt. That must never reach a user as a "completed" trip again:
+  // fail the job here, same as any other generation failure, rather than
+  // shipping a trip with no lodging recommendation.
+  const nights = expectedDays > 0 ? expectedDays - 1 : 0
+  if (nights > 0 && (!Array.isArray(result.accommodations) || result.accommodations.length === 0)) {
+    console.error('[worker] CRITICA violation: nights > 0 but accommodations is empty', { job_id: job.id, nights })
+    await admin
+      .from('generation_jobs')
+      .update({ status: 'failed', error: `CRITICA violation: nights=${nights} but accommodations is empty` })
+      .eq('id', job.id)
+    await refundOneTripIfApplicable(admin, job.user_id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'accommodations_check' }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
 
   // Persist trip row for authed user (matches sync endpoint behavior).
   const tripSlug = `${(job.inputs as any).destination ?? 'trip'}-${job.id.slice(0, 8)}`
