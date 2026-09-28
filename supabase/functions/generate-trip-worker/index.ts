@@ -68,6 +68,36 @@ function logGenerationMetric(row: Record<string, unknown>): void {
   }).catch((e) => console.warn('[worker] metrics insert failed:', e))
 }
 
+// Per-model $/MTok rates -- same table and same source as
+// generate-trip/index.ts's copy (2026-09-28, verified against
+// https://platform.claude.com/docs/en/about-claude/pricing, not guessed).
+// Duplicated rather than imported for the same reason logGenerationMetric
+// above is duplicated: no shared module between these two functions yet
+// (see the pending HTTP-extraction refactor). Only SKELETON_MODEL is ever
+// used here -- generate-trip/index.ts computes cost for its own model.
+// Sonnet's rate is the published list price ($3 in / $15 out) -- a $2/$10
+// rate was tried briefly the same day on a claimed account discount that
+// turned out not to exist for this model (see the matching comment in
+// generate-trip/index.ts's copy of this table). Unused by this file today
+// (skeleton is Haiku-only) but kept in sync so the two tables never
+// silently diverge.
+const MODEL_RATES: Record<string, { input: number; cacheWrite: number; cacheRead: number; output: number }> = {
+  'claude-sonnet-4-6':         { input: 3, cacheWrite: 3.75, cacheRead: 0.30, output: 15 },
+  'claude-haiku-4-5-20251001': { input: 1, cacheWrite: 1.25, cacheRead: 0.10, output: 5 },
+}
+function computeCostUsd(model: string, usage: {
+  input_tokens?: number; cache_creation_input_tokens?: number; cache_read_input_tokens?: number; output_tokens?: number;
+} | undefined): number | null {
+  const rates = MODEL_RATES[model]
+  if (!rates || !usage) return null
+  const cost =
+    ((usage.input_tokens ?? 0) * rates.input +
+     (usage.cache_creation_input_tokens ?? 0) * rates.cacheWrite +
+     (usage.cache_read_input_tokens ?? 0) * rates.cacheRead +
+     (usage.output_tokens ?? 0) * rates.output) / 1_000_000
+  return Number(cost.toFixed(6))
+}
+
 // Diagnostics: log key shape on cold start so we can confirm the secret was
 // set as a real JWT (eyJhbGc...) and not, e.g., the new sb_publishable_* key
 // or an empty value.
@@ -107,16 +137,96 @@ const MC_SEGMENT_DAYS = 5
 // segment loop for single-city trips only. See PR description for the
 // full rationale. Deliberately NOT shared with MC_* — see note above.
 const SC_DAYS_PER_CHUNK   = 1
+// Tried 4, 2026-09-28, to test a rate-limit hypothesis -- reverted the same
+// day. With 8 units (7 days + front-matter) SC_CONCURRENCY=4 makes two
+// SEQUENTIAL batches through the outer loop below, not two concurrent
+// waves: batch 2 only starts once batch 1's Promise.allSettled fully
+// resolves, and inherits whatever's left of the job-relative 60s budget at
+// that point. Confirmed live: batch 1 alone (skeleton + 4 concurrent
+// calls) took 47.5s, leaving batch 2 only ~9.5s -- its four calls all
+// genuinely succeeded (confirmed via generation_metrics, ok:true, zero
+// status_code/error) but 27-30s after the 9.5s they were given, well past
+// the point the worker had already aborted and failed the job. This isn't
+// a rate-limit signature (no ok:false rows anywhere) -- it's the two-wave
+// structure itself not fitting a 60s ceiling. Back to 8 (one wave) so a
+// single-city job is structurally one batch, matching what the
+// SC_JOB_DEADLINE_MS budget math above actually assumes.
 const SC_CONCURRENCY      = 8
-const SC_CHUNK_TIMEOUT_MS = 60_000
+//
+// KNOWN, ACCEPTED COST: firing all SC_CONCURRENCY Sonnet calls (day writers
+// + front-matter) within ~100-300ms of each other (confirmed via
+// generation_metrics implied-start-time analysis, 2026-09-28) means the
+// Sonnet system-prompt cache is routinely cold when they all fire. Nothing
+// warms it first -- the skeleton pass runs on Haiku with a completely
+// different prompt, so it can't seed the Sonnet cache. Result: several of
+// the concurrent calls race to write the cache instead of one call writing
+// and the rest reading, each paying the 1.25x write rate instead of the
+// 0.1x read rate for the same ~1200-1900 token system-prompt block.
+// Confirmed on a real trip: 7 of 8 calls each independently paid a cache
+// write (cost_usd backward-derived pre/post rate-correction on 2026-09-28
+// matched the write-token counts exactly). Deliberately NOT fixing this by
+// sequencing -- firing front-matter first to warm the cache before the day
+// writers start would serialize ~25-30s of wall time onto every single-city
+// job to save roughly $0.01-0.02/trip in redundant cache writes. Wrong
+// trade against the 60s ceiling. Leaving this as accepted, understood cost
+// so a future reader doesn't have to re-derive it from a cost_usd anomaly.
 const SC_BUDGET_FLOOR_MS  = 70_000
-// Hard ceiling on retry wall-clock, measured from invocation start. Once
-// elapsed time crosses this, stop retrying rejected chunks in THIS
-// invocation and let the self-reinvoke fallback (below) pick up whatever's
-// still missing in a fresh invocation with a fresh budget.
-const SC_RETRY_ABANDON_MS = 100_000
+// 60s is a hard ceiling on TOTAL job duration (skeleton included), every
+// retry included — confirmed live 2026-09-25 TWICE: a 71s job (35s+ wave,
+// one retry) read as a failure against that target, and a first attempt
+// at fixing this with a FIXED 55s/5s split still overshot to 63.2s because
+// skeleton alone took 6.6s that run — a fixed split doesn't account for
+// skeleton's real variance (observed 4-7s across runs). SC_JOB_DEADLINE_MS
+// is measured against `startedAt` (the actual invocation start, before
+// skeleton runs), not a fixed post-skeleton allowance, so a slow skeleton
+// correctly eats into the generation budget instead of pushing the total
+// past 60s. SC_FINAL_OVERHEAD_RESERVE_MS reserves headroom for the
+// non-generation work after the last attempt (assembly, the accommodations
+// check, duplicate detection, trips insert) — NOT duplicate-venue repair,
+// which is explicitly the "last resort" the product wants even if it
+// pushes past 60s on the rare trip that needs it (see the repair block
+// near the CRÍTICA check below).
+//
+// Every attempt (first AND retry) is bounded by whatever's left of the
+// job's SC_JOB_DEADLINE_MS, computed fresh against real elapsed time since
+// invocation start — NOT a separate fixed per-attempt cap. There used to
+// be one (SC_CHUNK_TIMEOUT_MS, raised 35s -> 45s earlier the same day,
+// 2026-09-25) but it caused the exact failure it was meant to prevent:
+// live, a Buenos Aires day-chunk's attempt-0 was aborted by the 45s cap
+// mid-flight (no metric row logged at all -- killed before it could
+// finish), which left its retry only ~22s of real budget. The retry
+// itself needed ~30s and got aborted too at the 60s job deadline (job
+// failed at 57.3s) -- but the underlying Anthropic call, unaffected by our
+// own AbortController once far enough along, kept running server-side and
+// completed successfully 9s later (confirmed via generation_metrics:
+// ok:true, logged AFTER the job had already been marked failed). A
+// complete, correct result existed and was thrown away because the fixed
+// cap fired before the real call needed to. Removing the cap means
+// attempt 0 gets the full ~50s job-relative remainder (after skeleton) to
+// begin with, so the case that forced a retry in the first place is far
+// less likely to happen at all. If less than SC_MIN_RETRY_WINDOW_MS
+// remains when a retry would fire, skip it and fail the job cleanly
+// instead of starting a retry that can't finish in time anyway.
+//
+// Backstop for the residual case (an attempt that's genuinely still
+// in-flight when the job deadline hits): generate-trip now self-persists
+// its own successful result straight into generation_chunks the moment it
+// has one (see persistChunkContent in generate-trip/index.ts), independent
+// of whether this worker's fetch() ever receives the response. Right
+// before declaring a batch a hard failure below, the worker re-reads
+// generation_chunks for the still-failing units one more time — a result
+// that finished just past this invocation's patience is still picked up
+// instead of discarded, same failure mode as the Buenos Aires case above
+// but now recoverable rather than merely explained.
+const SC_JOB_DEADLINE_MS           = 60_000
+const SC_FINAL_OVERHEAD_RESERVE_MS = 3_000
+const SC_MIN_RETRY_WINDOW_MS       = 10_000
 const SC_MAX_RETRIES      = 2
 const SC_RETRY_BACKOFF_MS = [1_000, 2_000]
+// Skeleton is a single cheap Haiku call (observed 4-8s), not part of the
+// per-day attempt loop above — kept on its own fixed bound rather than a
+// job-relative one since it runs before any of that budget math starts.
+const SC_SKELETON_TIMEOUT_MS = 45_000
 
 type JobRow = {
   id:           string
@@ -136,6 +246,28 @@ type SkeletonDay = {
   neighborhood:   string
   anchor:         string
   pace:           string
+  // Named venues, not just a theme/neighborhood — assigned once, upfront,
+  // across ALL days in the same skeleton call, specifically so the model
+  // doing the assignment can see every other day's pick and avoid
+  // collisions. Added 2026-09-25 after live content validation on the
+  // 10-city test found cross-day venue duplicates (independent concurrent
+  // day-writers converging on the same obvious spot for a neighborhood/
+  // theme with no visibility into each other's choices — theme+neighborhood
+  // alone wasn't a specific enough assignment to prevent that).
+  //
+  // key_breakfast added after a SECOND live test still showed duplicates —
+  // diagnosis (job skeleton vs actual writer output, both inspected
+  // directly) showed the skeleton's own assignments were already unique in
+  // every case; the duplicates were ALWAYS breakfast, a meal slot
+  // key_restaurant never covered. Every day has 2-3 restaurant blocks
+  // (breakfast, lunch/dinner) but the skeleton only named one of them —
+  // for the unassigned slot, independent day-writers reliably converged on
+  // the same well-known local spot. key_restaurant is now implicitly the
+  // day's signature lunch/dinner pick; key_breakfast covers the other
+  // reliably-duplicated slot explicitly.
+  key_restaurant: string
+  key_breakfast:  string
+  key_site:       string
   // city/travel_day/transfer_hours: schema is ready for the multi-city
   // unification follow-up (see PR discussion — single-city ships alone in
   // THIS PR; the outline pass hasn't yet been proven to respect a
@@ -168,7 +300,14 @@ async function callGenerateTrip(payload: Record<string, any>, signal: AbortSigna
     signal,
   })
   const text = await res.text()
-  if (!res.ok) throw new Error(`generate-trip returned ${res.status}: ${text.slice(0, 500)}`)
+  if (!res.ok) {
+    // .status attached (not just embedded in the message string) so the
+    // retry loop can classify 400/401/403 (permanent -- no retry) vs
+    // 429/5xx (transient -- retry with backoff) without string-parsing.
+    const err = new Error(`generate-trip returned ${res.status}: ${text.slice(0, 500)}`)
+    ;(err as any).status = res.status
+    throw err
+  }
   try {
     return JSON.parse(text)
   } catch {
@@ -361,6 +500,46 @@ async function generateDayChunk(
   }
 }
 
+// ── NEW: front-matter generation (title/tagline/hero_tags/before_you_go/
+// budget_breakdown/accommodations, NO days) ────────────────────────────────
+// Previously bundled into chunk 0 (full schema) -- chunk 0 was consistently
+// the slowest call (~40-48s vs ~23-31s for a lean day, confirmed via
+// generation_metrics on the 10-city test) because it carried this extra
+// front-matter on top of a day's worth of content. Split into its own call,
+// fired concurrently with the day writers instead of serialized ahead of
+// them, so max total duration drops from "slowest lean day + front-matter
+// overhead" to just "slowest concurrent call" -- all of them now roughly
+// the same size.
+async function generateFrontmatter(
+  jobInputs: Record<string, any>,
+  totalDays: number,
+  signal: AbortSignal,
+  jobId: string,
+  attempt: number,
+): Promise<SegmentResult> {
+  const tripStartISO = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
+
+  const payload = {
+    ...jobInputs,
+    duration_days:   totalDays,
+    nights:          Math.max(0, totalDays - 1),
+    overnight:       totalDays > 1,
+    trip_total_days: totalDays,
+    trip_start_date: tripStartISO,
+    trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
+    frontmatter_only: true,
+    job_id:          jobId,
+    attempt,
+  }
+
+  const res = await callGenerateTrip(payload, signal)
+  if (!res?.trip_data) throw new Error('frontmatter response missing trip_data')
+  return {
+    chunk: res.trip_data,
+    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
+  }
+}
+
 // ── NEW: skeleton pre-pass ─────────────────────────────────────────────────
 // One small Haiku call producing a per-day theme/neighborhood/anchor/pace
 // skeleton for the whole trip. Computed once per job (cached on the job
@@ -375,13 +554,16 @@ const SKELETON_SCHEMA = {
       type: 'array',
       items: {
         type: 'object',
-        required: ['day', 'theme', 'neighborhood', 'anchor', 'pace'],
+        required: ['day', 'theme', 'neighborhood', 'anchor', 'pace', 'key_restaurant', 'key_breakfast', 'key_site'],
         properties: {
-          day:          { type: 'integer' },
-          theme:        { type: 'string' },
-          neighborhood: { type: 'string' },
-          anchor:       { type: 'string' },
-          pace:         { type: 'string' },
+          day:            { type: 'integer' },
+          theme:          { type: 'string' },
+          neighborhood:   { type: 'string' },
+          anchor:         { type: 'string' },
+          pace:           { type: 'string' },
+          key_restaurant: { type: 'string' },
+          key_breakfast:  { type: 'string' },
+          key_site:       { type: 'string' },
         },
       },
     },
@@ -402,8 +584,8 @@ async function generateSkeleton(
   const interests = Array.isArray(jobInputs.interests) ? jobInputs.interests.join(', ') : ''
 
   const prompt = isEN
-    ? `Plan a lightweight day-by-day skeleton for a ${totalDays}-day trip to ${jobInputs.destination} (traveler: ${jobInputs.traveler ?? 'n/a'}, pace: ${jobInputs.pace ?? 'n/a'}, budget: ${jobInputs.budget ?? 'n/a'}, interests: ${interests || 'general'}). For EACH day (1 to ${totalDays}), give a short theme, the main neighborhood/area, one anchor activity or place, and the pace. Vary neighborhoods and anchors across days — do not repeat the same neighborhood or anchor on two different days unless the trip is too short to avoid it. Call the emit_skeleton tool with exactly ${totalDays} day entries, one per day from 1 to ${totalDays}.`
-    : `Planea un esqueleto ligero día por día para un viaje de ${totalDays} días a ${jobInputs.destination} (viajero: ${jobInputs.traveler ?? 'n/a'}, ritmo: ${jobInputs.pace ?? 'n/a'}, presupuesto: ${jobInputs.budget ?? 'n/a'}, intereses: ${interests || 'generales'}). Para CADA día (1 a ${totalDays}), da un tema breve, la zona/barrio principal, una actividad o lugar ancla, y el ritmo. Varía zonas y anclas entre días — no repitas la misma zona o ancla en dos días distintos a menos que el viaje sea demasiado corto para evitarlo. Llama a la herramienta emit_skeleton con exactamente ${totalDays} entradas de día, una por cada día de 1 a ${totalDays}.`
+    ? `Plan a lightweight day-by-day skeleton for a ${totalDays}-day trip to ${jobInputs.destination} (traveler: ${jobInputs.traveler ?? 'n/a'}, pace: ${jobInputs.pace ?? 'n/a'}, budget: ${jobInputs.budget ?? 'n/a'}, interests: ${interests || 'general'}). For EACH day (1 to ${totalDays}), give: a short theme, the main neighborhood/area, one anchor activity or place, the pace, ONE NAMED restaurant for that day's signature lunch/dinner (key_restaurant), ONE NAMED, DIFFERENT restaurant/café/bakery for that day's breakfast (key_breakfast — every day needs its own breakfast spot too, this is NOT the same slot as key_restaurant), and ONE NAMED site/attraction for that day's key activity (key_site). All three must be real, specific place names, never a category like "a local café". You are assigning these across the WHOLE trip in one pass, so you can see every day at once: EVERY key_restaurant, EVERY key_breakfast, and EVERY key_site across all ${totalDays} days MUST be a DIFFERENT real place from every other day's — no venue of any kind may be assigned to more than one day, and key_restaurant must differ from key_breakfast within the same day too. Also vary neighborhoods and anchors across days. Call the emit_skeleton tool with exactly ${totalDays} day entries, one per day from 1 to ${totalDays}.`
+    : `Planea un esqueleto ligero día por día para un viaje de ${totalDays} días a ${jobInputs.destination} (viajero: ${jobInputs.traveler ?? 'n/a'}, ritmo: ${jobInputs.pace ?? 'n/a'}, presupuesto: ${jobInputs.budget ?? 'n/a'}, intereses: ${interests || 'generales'}). Para CADA día (1 a ${totalDays}), da: un tema breve, la zona/barrio principal, una actividad o lugar ancla, el ritmo, UN restaurante CON NOMBRE para la comida/cena principal del día (key_restaurant), UN restaurante/café/panadería CON NOMBRE, DIFERENTE, para el desayuno de ese día (key_breakfast — cada día necesita también su propio lugar de desayuno, NO es el mismo espacio que key_restaurant), y UN sitio/atracción CON NOMBRE para la actividad clave del día (key_site). Los tres deben ser lugares reales y específicos, nunca una categoría como "un café local". Estás asignando esto para TODO el viaje en una sola pasada, así que ves todos los días a la vez: CADA key_restaurant, CADA key_breakfast y CADA key_site en los ${totalDays} días DEBE ser un lugar real DIFERENTE al de cualquier otro día — ningún lugar de ningún tipo puede asignarse a más de un día, y key_restaurant debe ser distinto de key_breakfast dentro del mismo día también. Varía también zonas y anclas entre días. Llama a la herramienta emit_skeleton con exactamente ${totalDays} entradas de día, una por cada día de 1 a ${totalDays}.`
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -453,6 +635,7 @@ async function generateSkeleton(
     attempt:       0,
     stop_reason:   data.stop_reason ?? null,
     ok:            data.stop_reason !== 'max_tokens',
+    cost_usd:      computeCostUsd(SKELETON_MODEL, data.usage),
   })
 
   const toolUse = Array.isArray(data.content)
@@ -488,12 +671,83 @@ function chunkDays(chunk: any): any[] {
   return []
 }
 
+// ── Duplicate-venue detection + repair helpers ────────────────────────────
+// See the call site (post-assembly, before the trips insert) for the full
+// rationale. transfer/hotel blocks are excluded — legitimately recurring.
+type DupeOccurrence = { dayIdx: number; blockIdx: number; day_number: number; title: string }
+
+function findDuplicateVenueOccurrences(days: any[]): DupeOccurrence[] {
+  const seen = new Map<string, number>() // title -> day_number first seen on
+  const dupes: DupeOccurrence[] = []
+  for (let dayIdx = 0; dayIdx < days.length; dayIdx++) {
+    const day = days[dayIdx]
+    const blocks = day?.blocks ?? []
+    for (let blockIdx = 0; blockIdx < blocks.length; blockIdx++) {
+      const block = blocks[blockIdx]
+      if (block?.type === 'transfer' || block?.type === 'hotel') continue
+      const title = typeof block?.title === 'string' ? block.title.trim() : ''
+      if (!title) continue
+      if (seen.has(title)) {
+        dupes.push({ dayIdx, blockIdx, day_number: day.day_number, title })
+      } else {
+        seen.set(title, day.day_number)
+      }
+    }
+  }
+  return dupes
+}
+
+function allUsedVenueTitles(days: any[]): string[] {
+  const titles: string[] = []
+  for (const day of days ?? []) {
+    for (const block of day?.blocks ?? []) {
+      if (block?.type === 'transfer' || block?.type === 'hotel') continue
+      const t = typeof block?.title === 'string' ? block.title.trim() : ''
+      if (t) titles.push(t)
+    }
+  }
+  return Array.from(new Set(titles))
+}
+
+// Calls generate-trip's single-block-regeneration path (regenerate_block:
+// true — see that file's early-return branch, right after buildInput).
+// Deliberately minimal payload, not the full job.inputs spread — this
+// isn't a day or trip generation, just "give me one different real venue".
+async function regenerateDuplicateBlock(
+  jobInputs: Record<string, any>,
+  dayNumber: number,
+  originalBlock: any,
+  avoidVenues: string[],
+  signal: AbortSignal,
+  jobId: string,
+): Promise<{ title: string; description: string; neighborhood?: string }> {
+  const payload = {
+    locale:            jobInputs.locale,
+    destination:       jobInputs.destination,
+    regenerate_block:  true,
+    block_type:        originalBlock?.type,
+    block_time:        originalBlock?.time,
+    day_number:        dayNumber,
+    avoid_venues:      avoidVenues,
+    job_id:            jobId,
+  }
+  const res = await callGenerateTrip(payload, signal)
+  if (!res?.block?.title) throw new Error('block replacement missing title')
+  return res.block
+}
+
 // ── NEW: pre-assembly integrity check ─────────────────────────────────────
 // Asserts the concatenated day list is contiguous 1..N with no duplicates,
 // and that front-matter (title, budget_breakdown) is present on the chunk
 // that's supposed to carry it (chunk 0). Throws — caller marks the job
 // failed rather than silently assembling a broken/gappy trip.
-function assertChunksIntegrity(chunks: ChunkContent[], expectedDays: number): void {
+// frontmatter: for single-city (front-matter split into its own concurrent
+// unit, see generateFrontmatter/FRONTMATTER_UNIT), pass it separately so
+// the check runs against the actual front-matter carrier, not chunks[0]
+// (which is now just a lean day with no title/budget_breakdown at all).
+// Multi-city still passes null here — chunks[0] genuinely carries its own
+// front-matter, unchanged.
+function assertChunksIntegrity(chunks: ChunkContent[], expectedDays: number, frontmatter: ChunkContent | null): void {
   const seen = new Set<number>()
   let dayCount = 0
   for (const chunk of chunks) {
@@ -511,20 +765,23 @@ function assertChunksIntegrity(chunks: ChunkContent[], expectedDays: number): vo
   for (let n = 1; n <= expectedDays; n++) {
     if (!seen.has(n)) throw new Error(`assertChunksIntegrity: missing day_number ${n} (not contiguous 1..${expectedDays})`)
   }
-  const first = chunks[0] as any
+  const first = (frontmatter ?? chunks[0]) as any
   if (!first?.title || !first?.budget_breakdown) {
-    throw new Error('assertChunksIntegrity: chunk 0 missing front-matter (title/budget_breakdown)')
+    throw new Error('assertChunksIntegrity: missing front-matter (title/budget_breakdown)')
   }
 }
 
-function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>): Record<string, any> {
+function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, frontmatterOverride?: ChunkContent | null): Record<string, any> {
   // Concatenate per-segment outputs into a single trip_data shape matching
   // what the sync endpoint returns. Each chunk is a segment containing up
   // to MC_SEGMENT_DAYS days (multi-city) or exactly 1 day (single-city). Day
   // numbers are cumulative across segments so users see "Day 17" not
   // "Segment 2 Day 7". Trip-level metadata (title, subtitle, budget,
-  // packing) comes from the first segment; the rest are discarded.
-  const first     = chunks[0] ?? {}
+  // packing) comes from the first segment, UNLESS frontmatterOverride is
+  // given (single-city's front-matter is now its own concurrent unit, not
+  // day-chunk 0 — see generateFrontmatter) in which case it's the source
+  // instead. Multi-city always passes undefined here, unchanged behavior.
+  const first     = frontmatterOverride ?? chunks[0] ?? {}
   const multiCity = getTripSegments(jobInputs)
   let dayCounter = 0
   const days: any[] = []
@@ -715,8 +972,45 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>):
 // (per_trip / pack_5 / pack_10) and trips_remaining hasn't already maxed out.
 // Best-effort — if anything fails, we log and move on. A user keeping the
 // credit they paid for is much worse than a missed refund here.
-async function refundOneTripIfApplicable(admin: any, userId: string): Promise<void> {
+// Credit is charged HERE — on successful job completion — not at job
+// creation. app/api/trips/jobs/route.ts still gates job creation on
+// checkGenerationAllowed() (so a user with 0 credits can't start a job at
+// all), but no longer calls consumeOneTrip(). This replaces the old
+// charge-then-refund-on-failure model: a failure anywhere in the pipeline
+// (skeleton, any unit, integrity check, trips insert) now simply never
+// charges, instead of charging immediately and refunding after the fact.
+// Skipped entirely for regenerations (isRegenerationOfOwnedTrip already
+// verified at job creation — see the tripId check at each call site) and
+// for explorer-tier (unlimited) users.
+// Idempotency guard added 2026-09-28 (billing-incident response, see
+// generation_jobs.credit_charged_at migration and the emergency fix to
+// app/api/trips/jobs/route.ts, commit 29fed3e7). Atomic claim BEFORE the
+// actual entitlements decrement: an UPDATE with WHERE credit_charged_at IS
+// NULL either claims the job (1 row) or finds it already claimed (0 rows)
+// -- there's no read-then-write race window a concurrent/duplicate call
+// for the same job_id could land in. This defends against the worker
+// itself double-charging one job (retry, self-reinvoke, duplicate
+// invocation) -- it does NOT relate to the separate route.ts-vs-worker
+// mismatch that caused the original incident, which is fixed by removing
+// the route's creation-time charge entirely, not by guarding here.
+async function consumeOneTripIfApplicable(admin: any, userId: string, jobId: string): Promise<void> {
   try {
+    const { data: claimed, error: claimErr } = await admin
+      .from('generation_jobs')
+      .update({ credit_charged_at: new Date().toISOString() })
+      .eq('id', jobId)
+      .is('credit_charged_at', null)
+      .select('id')
+
+    if (claimErr) {
+      console.warn('[worker] credit claim failed, skipping charge to be safe:', claimErr.message)
+      return
+    }
+    if (!claimed || claimed.length === 0) {
+      console.log('[worker] job', jobId, 'already charged -- skipping duplicate credit consumption')
+      return
+    }
+
     const { data } = await admin
       .from('user_entitlements')
       .select('tier, trips_remaining, trips_used')
@@ -724,21 +1018,19 @@ async function refundOneTripIfApplicable(admin: any, userId: string): Promise<vo
       .single()
 
     if (!data) return
-    // Subscribers (explorer) and free tier users don't get a metered refund —
-    // explorer is unlimited, free tier doesn't decrement on consume.
     if (data.tier === 'explorer') return
 
     await admin
       .from('user_entitlements')
       .update({
-        trips_remaining: (data.trips_remaining ?? 0) + 1,
-        trips_used:      Math.max(0, (data.trips_used ?? 0) - 1),
+        trips_remaining: Math.max(0, (data.trips_remaining ?? 0) - 1),
+        trips_used:      (data.trips_used ?? 0) + 1,
         updated_at:      new Date().toISOString(),
       })
       .eq('user_id', userId)
-    console.log('[worker] refunded credit for user:', userId)
+    console.log('[worker] charged credit for user:', userId, 'job:', jobId)
   } catch (e) {
-    console.warn('[worker] refund failed (non-fatal):', e)
+    console.warn('[worker] charge failed (non-fatal -- job still completes; matches the old refund path\'s non-fatal handling):', e)
   }
 }
 
@@ -796,9 +1088,7 @@ async function runSequentialMultiCity(
         .from('generation_jobs')
         .update({ status: 'failed', error: String(e).slice(0, 500) })
         .eq('id', job.id)
-      if (job.chunks_done === 0 && i === 0) {
-        await refundOneTripIfApplicable(admin, job.user_id)
-      }
+      // No refund -- credit is charged on completion now, not creation.
       return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
         status: 502,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -857,6 +1147,13 @@ async function runSequentialMultiCity(
   return null
 }
 
+// Unit index -1 is a sentinel for "front-matter" (title/tagline/hero_tags/
+// before_you_go/budget_breakdown/accommodations, no days). 0..totalDays-1
+// are day chunks. Both flow through the same concurrency/retry/persistence
+// machinery below via generation_chunks.chunk_index = -1 for front-matter
+// (negative integers are fine in that column; no schema change needed).
+const FRONTMATTER_UNIT = -1
+
 async function runConcurrentSingleCity(
   admin: any,
   job: JobRow,
@@ -870,7 +1167,7 @@ async function runConcurrentSingleCity(
   let skeleton: SkeletonDay[] | null = Array.isArray(job.skeleton) ? job.skeleton : null
   if (!skeleton) {
     const skelCtrl = new AbortController()
-    const skelTimer = setTimeout(() => skelCtrl.abort(), SC_CHUNK_TIMEOUT_MS)
+    const skelTimer = setTimeout(() => skelCtrl.abort(), SC_SKELETON_TIMEOUT_MS)
     try {
       skeleton = await generateSkeleton(job.inputs, totalDays, skelCtrl.signal, job.id)
     } catch (e) {
@@ -880,7 +1177,10 @@ async function runConcurrentSingleCity(
         .from('generation_jobs')
         .update({ status: 'failed', error: `skeleton: ${String(e).slice(0, 500)}` })
         .eq('id', job.id)
-      await refundOneTripIfApplicable(admin, job.user_id)
+      // No refund here -- credit is charged on completion now, not
+      // creation (see the shared completion tail in serve()), so a
+      // pre-completion failure never took the user's credit in the first
+      // place. Same reasoning applies to every failure path below.
       return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'skeleton' }), {
         status: 502,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -891,86 +1191,146 @@ async function runConcurrentSingleCity(
   }
 
   const dayPlan = planChunks(totalDays)
-  const missing = dayPlan.filter(d => !chunksByIndex.has(d))
+  const missingDays = dayPlan.filter(d => !chunksByIndex.has(d))
+  const missing = chunksByIndex.has(FRONTMATTER_UNIT) ? missingDays : [FRONTMATTER_UNIT, ...missingDays]
 
-  async function runOneDay(dayIdx: number, signal: AbortSignal, attempt: number) {
-    const daySkeleton = skeleton!.find(s => s.day === dayIdx + 1) ?? null
-    const segResult = await generateDayChunk(job.inputs, dayIdx, totalDays, daySkeleton, skeleton!, signal, job.id, attempt)
-    return { dayIdx, segResult }
+  async function runOneUnit(unit: number, signal: AbortSignal, attempt: number) {
+    if (unit === FRONTMATTER_UNIT) {
+      const segResult = await generateFrontmatter(job.inputs, totalDays, signal, job.id, attempt)
+      return { unit, segResult }
+    }
+    const daySkeleton = skeleton!.find(s => s.day === unit + 1) ?? null
+    const segResult = await generateDayChunk(job.inputs, unit, totalDays, daySkeleton, skeleton!, signal, job.id, attempt)
+    return { unit, segResult }
   }
 
   for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
     const remainingBudget = 140_000 - (Date.now() - startedAt)
-    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest
+    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest (long, multi-batch trips)
 
     let batch = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
     const succeeded = new Map<number, SegmentResult>()
 
+    attemptLoop:
     for (let attempt = 0; attempt <= SC_MAX_RETRIES && batch.length > 0; attempt++) {
+      // Measured against startedAt (true invocation start, before skeleton
+      // ran) every time, not a fixed post-skeleton allowance — a slow
+      // skeleton correctly eats into this budget instead of the total
+      // silently overshooting 60s. Reserves SC_FINAL_OVERHEAD_RESERVE_MS
+      // for the non-generation work still to come after the last attempt.
       if (attempt > 0) {
-        if (Date.now() - startedAt > SC_RETRY_ABANDON_MS) break // fall through to self-reinvoke
+        const remaining = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
+        if (remaining < SC_MIN_RETRY_WINDOW_MS) break // not enough budget left to retry meaningfully -- fail cleanly instead of starting a doomed attempt
         await new Promise(r => setTimeout(r, SC_RETRY_BACKOFF_MS[attempt - 1] ?? 2_000))
       }
 
-      const results = await Promise.allSettled(batch.map(dayIdx => {
+      // No fixed per-attempt cap (see the SC_JOB_DEADLINE_MS comment above
+      // for why) -- every attempt, first or retry, gets whatever's left of
+      // the job deadline.
+      const remainingForThisAttempt = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
+      if (remainingForThisAttempt <= 0) break // out of budget entirely
+      const thisAttemptTimeout = remainingForThisAttempt
+
+      const results = await Promise.allSettled(batch.map(unit => {
         const ctrl = new AbortController()
-        const t = setTimeout(() => ctrl.abort(), SC_CHUNK_TIMEOUT_MS)
-        return runOneDay(dayIdx, ctrl.signal, attempt).finally(() => clearTimeout(t))
+        const t = setTimeout(() => ctrl.abort(), thisAttemptTimeout)
+        return runOneUnit(unit, ctrl.signal, attempt).finally(() => clearTimeout(t))
       }))
 
+      // Error classification: 400/401/403 are permanent (bad request shape,
+      // bad/expired auth, forbidden) -- retrying won't help and usually
+      // signals something systemic (e.g. the same auth failure would hit
+      // every other unit too), so fail the job immediately rather than
+      // burning the retry budget. 429/5xx and anything without a status
+      // (network errors, our own AbortController timeout) are treated as
+      // transient and retried with backoff.
       const stillFailing: number[] = []
+      let hitPermanentError = false
       for (let k = 0; k < results.length; k++) {
         const r = results[k]
-        const dayIdx = batch[k]
+        const unit = batch[k]
         if (r.status === 'fulfilled') {
-          succeeded.set(r.value.dayIdx, r.value.segResult)
+          succeeded.set(r.value.unit, r.value.segResult)
         } else {
-          console.warn('[worker:sc] day chunk rejected', dayIdx, 'attempt', attempt, String(r.reason).slice(0, 300))
-          stillFailing.push(dayIdx)
+          const status = (r.reason as any)?.status
+          const isPermanent = status === 400 || status === 401 || status === 403
+          console.warn('[worker:sc] unit rejected', unit, 'attempt', attempt, 'status', status ?? 'n/a', String(r.reason).slice(0, 300))
+          stillFailing.push(unit)
+          if (isPermanent) hitPermanentError = true
         }
       }
       batch = stillFailing
+      if (hitPermanentError) break attemptLoop // don't waste retries on a permanent error class
     }
 
     if (batch.length > 0) {
-      // Retries exhausted (or abandoned past the wall-clock cutoff) with
-      // chunks still failing — this is a real failure, not a budget
-      // timeout, so we fail the job rather than looping self-reinvoke
-      // forever on a possibly-deterministic error.
+      // Before giving up: this invocation's own view (succeeded/batch) only
+      // reflects fetches THIS worker actually received a response for. An
+      // attempt can finish successfully server-side after this worker's own
+      // AbortController already gave up on it (the Buenos Aires case —
+      // see the SC_JOB_DEADLINE_MS comment above) — generate-trip
+      // self-persists that result straight into generation_chunks the
+      // moment it has one, independent of whether the response ever made
+      // it back here. One fresh, cheap read for exactly the still-failing
+      // unit indices picks those up instead of failing a job that actually
+      // has a complete result sitting in the table.
+      const { data: lateRows } = await admin
+        .from('generation_chunks')
+        .select('chunk_index, content')
+        .eq('job_id', job.id)
+        .in('chunk_index', batch)
+      for (const row of lateRows ?? []) {
+        const idx = (row as any).chunk_index as number
+        // budgetCurrencySuspect is null for a recovered row (that flag is
+        // computed by generate-trip inline, not stored on the chunk row
+        // itself) -- acceptable: it only feeds an internal QA signal, never
+        // shown to the user, and this recovery path is expected to be rare.
+        succeeded.set(idx, { chunk: (row as any).content, budgetCurrencySuspect: null })
+      }
+      const recoveredIdx = new Set(succeeded.keys())
+      batch = batch.filter(unit => !recoveredIdx.has(unit))
+      if (batch.length > 0) {
+        console.warn('[worker:sc] late-row re-check found', (lateRows ?? []).length, 'of', batch.length + (lateRows ?? []).length, 'still-missing units')
+      }
+    }
+
+    if (batch.length > 0) {
+      // Retries exhausted (or abandoned past the wall-clock cutoff, or a
+      // permanent-class error) with units still failing — a real failure,
+      // not a budget timeout, so fail the job rather than looping
+      // self-reinvoke forever on a possibly-deterministic error.
       await admin
         .from('generation_jobs')
-        .update({ status: 'failed', error: `day chunks failed after retries: ${batch.join(',')}` })
+        .update({ status: 'failed', error: `units failed after retries: ${batch.join(',')}` })
         .eq('id', job.id)
-      if (job.chunks_done === 0 && succeeded.size === 0) {
-        await refundOneTripIfApplicable(admin, job.user_id)
-      }
-      return new Response(JSON.stringify({ ok: false, status: 'failed', failed_days: batch }), {
+      return new Response(JSON.stringify({ ok: false, status: 'failed', failed_units: batch }), {
         status: 502,
         headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
       })
     }
 
-    // Whole batch succeeded — persist in day order.
+    // Whole batch succeeded — persist in unit order (frontmatter's -1 sorts
+    // first naturally).
     const orderedBatch = [...succeeded.entries()].sort((a, b) => a[0] - b[0])
-    for (const [dayIdx, segResult] of orderedBatch) {
-      chunksByIndex.set(dayIdx, segResult.chunk)
+    for (const [unit, segResult] of orderedBatch) {
+      chunksByIndex.set(unit, segResult.chunk)
       try {
         const { error: insertErr } = await admin
           .from('generation_chunks')
-          .insert({ job_id: job.id, chunk_index: dayIdx, content: segResult.chunk })
+          .insert({ job_id: job.id, chunk_index: unit, content: segResult.chunk })
         // Unique (job_id, chunk_index) — a retried/duplicate insert for an
-        // already-persisted day is a benign no-op, not a hard failure.
+        // already-persisted unit is a benign no-op, not a hard failure.
         if (insertErr && insertErr.code !== '23505') {
           throw new Error(`chunks insert failed: ${insertErr.message}`)
         }
-        if (dayIdx === 0) {
+        if (unit === FRONTMATTER_UNIT) {
           await admin
             .from('generation_jobs')
             .update({ budget_currency_suspect: segResult.budgetCurrencySuspect } as any)
             .eq('id', job.id)
         }
       } catch (persistErr) {
-        console.error('[worker:sc] day chunk persist failed at index', dayIdx, persistErr)
+        console.error('[worker:sc] unit persist failed at index', unit, persistErr)
         await admin
           .from('generation_jobs')
           .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
@@ -982,10 +1342,12 @@ async function runConcurrentSingleCity(
       }
     }
 
-    // Contiguous-from-zero count — batches are processed in ascending
-    // order so this is monotonic as long as nothing above returned early.
-    let doneCount = 0
-    while (doneCount < totalDays && chunksByIndex.has(doneCount)) doneCount++
+    // Progress count: frontmatter (0 or 1) + contiguous-from-zero day count.
+    // Batches are processed in ascending order so this is monotonic as long
+    // as nothing above returned early.
+    let dayDoneCount = 0
+    while (dayDoneCount < totalDays && chunksByIndex.has(dayDoneCount)) dayDoneCount++
+    const doneCount = (chunksByIndex.has(FRONTMATTER_UNIT) ? 1 : 0) + dayDoneCount
 
     const { error: updateErr } = await admin
       .from('generation_jobs')
@@ -1005,14 +1367,17 @@ async function runConcurrentSingleCity(
 
     // Progressive partial assembly — same UX purpose as the multi-city
     // path: render finished days while the rest are still generating.
+    // Tolerates missing front-matter (falls back to a generic title/subtitle
+    // inside assembleResult, same as it always has for a missing chunk 0).
     try {
+      const frontmatter = chunksByIndex.get(FRONTMATTER_UNIT) ?? null
       const chunksOrdered: ChunkContent[] = []
-      for (let idx = 0; idx < doneCount; idx++) {
+      for (let idx = 0; idx < dayDoneCount; idx++) {
         const c = chunksByIndex.get(idx)
         if (c) chunksOrdered.push(c)
       }
-      if (chunksOrdered.length > 0) {
-        const partial = assembleResult(chunksOrdered, job.inputs)
+      if (chunksOrdered.length > 0 || frontmatter) {
+        const partial = assembleResult(chunksOrdered, job.inputs, frontmatter)
         await admin.from('generation_jobs').update({ partial_result: partial } as any).eq('id', job.id)
       }
     } catch (assemblyErr) {
@@ -1136,43 +1501,57 @@ serve(async (req: Request) => {
   }
 
   // Assemble and complete
+  async function fetchChunk(idx: number): Promise<ChunkContent | null> {
+    const c = chunksByIndex.get(idx)
+    if (c) return c
+    const { data } = await admin
+      .from('generation_chunks')
+      .select('content')
+      .eq('job_id', job.id)
+      .eq('chunk_index', idx)
+      .single()
+    return data ? (data as any).content : null
+  }
+
   const orderedChunks: ChunkContent[] = []
-  for (let i = 0; i < final.chunks_total; i++) {
-    const c = chunksByIndex.get(i)
-    if (!c) {
-      // Hole in chunks — fetch from DB
-      const { data } = await admin
-        .from('generation_chunks')
-        .select('content')
-        .eq('job_id', job.id)
-        .eq('chunk_index', i)
-        .single()
-      if (data) orderedChunks.push((data as any).content)
-    } else {
-      orderedChunks.push(c)
+  let frontmatter: ChunkContent | null = null
+  let expectedDays: number
+
+  if (multiCity) {
+    // Unchanged — chunks[0] carries its own front-matter, chunks_total
+    // already correctly sized by app/api/trips/jobs/route.ts.
+    expectedDays = multiCity.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
+    for (let i = 0; i < final.chunks_total; i++) {
+      const c = await fetchChunk(i)
+      if (c) orderedChunks.push(c)
+    }
+  } else {
+    // Single-city: chunks_total = totalDays + 1 (front-matter unit +
+    // per-day units). Front-matter lives at chunk_index=-1, separate from
+    // the day chunks — fetch it on its own rather than looping 0..chunks_total.
+    expectedDays = Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+    frontmatter = await fetchChunk(FRONTMATTER_UNIT)
+    for (let i = 0; i < expectedDays; i++) {
+      const c = await fetchChunk(i)
+      if (c) orderedChunks.push(c)
     }
   }
 
-  const expectedDays = multiCity
-    ? multiCity.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
-    : Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
-
   try {
-    assertChunksIntegrity(orderedChunks, expectedDays)
+    assertChunksIntegrity(orderedChunks, expectedDays, frontmatter)
   } catch (integrityErr) {
     console.error('[worker] pre-assembly integrity check failed:', integrityErr)
     await admin
       .from('generation_jobs')
       .update({ status: 'failed', error: `integrity: ${String(integrityErr).slice(0, 500)}` })
       .eq('id', job.id)
-    await refundOneTripIfApplicable(admin, job.user_id)
     return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'integrity' }), {
       status: 500,
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
     })
   }
 
-  const result = assembleResult(orderedChunks, job.inputs)
+  const result = assembleResult(orderedChunks, job.inputs, frontmatter)
 
   // ── CRÍTICA rule enforcement — blocking ──────────────────────────────────
   // The system prompt's one CRÍTICA rule (generate-trip/index.ts's
@@ -1190,8 +1569,58 @@ serve(async (req: Request) => {
       .from('generation_jobs')
       .update({ status: 'failed', error: `CRITICA violation: nights=${nights} but accommodations is empty` })
       .eq('id', job.id)
-    await refundOneTripIfApplicable(admin, job.user_id)
     return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'accommodations_check' }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
+
+  // ── Duplicate-venue detection + repair — last resort, not job failure ──
+  // Confirmed live 2026-09-25, twice: (1) skeleton assigns named venues but
+  // the model can still miss the no-reuse instruction on an unassigned
+  // slot (breakfast wasn't covered until a second fix); (2) failing the
+  // WHOLE job on any duplicate blocked 20% of a 10-city test — too blunt
+  // for a product requirement of near-zero failures. Regenerate just the
+  // offending block(s) instead, with the full used-venue list as context
+  // so the replacement can't collide either; only fail the job if repair
+  // itself can't produce something clean within a small, bounded number of
+  // passes. hotel/transfer blocks are excluded from detection — a hotel
+  // legitimately recurring (check-in day 1, mentioned again on checkout)
+  // isn't a content bug, nor is "traslado al aeropuerto" repeating.
+  const MAX_REPAIR_PASSES = 3
+  for (let pass = 0; pass < MAX_REPAIR_PASSES; pass++) {
+    const dupes = findDuplicateVenueOccurrences(result.days ?? [])
+    if (dupes.length === 0) break
+    console.warn('[worker] duplicate venue(s) found, repairing:', { job_id: job.id, pass, titles: dupes.map(d => d.title) })
+
+    for (const dupe of dupes) {
+      const day = (result.days as any[])[dupe.dayIdx]
+      const block = day.blocks[dupe.blockIdx]
+      const avoid = allUsedVenueTitles(result.days)
+      try {
+        const ctrl = new AbortController()
+        const t = setTimeout(() => ctrl.abort(), 20_000)
+        const replacement = await regenerateDuplicateBlock(job.inputs, dupe.day_number, block, avoid, ctrl.signal, job.id)
+        clearTimeout(t)
+        block.title = replacement.title
+        block.description = replacement.description
+        if (replacement.neighborhood) block.neighborhood = replacement.neighborhood
+      } catch (repairErr) {
+        // Don't fail the pass over one bad repair call -- the next pass
+        // (or the final remainingDupes check below) catches it either way.
+        console.warn('[worker] block repair call failed:', dupe.title, repairErr)
+      }
+    }
+  }
+
+  const remainingDupes = findDuplicateVenueOccurrences(result.days ?? [])
+  if (remainingDupes.length > 0) {
+    console.error('[worker] duplicate venue(s) survived repair:', { job_id: job.id, titles: remainingDupes.map(d => d.title) })
+    await admin
+      .from('generation_jobs')
+      .update({ status: 'failed', error: `duplicate venues survived repair: ${remainingDupes.map(d => d.title).join('; ')}`.slice(0, 500) })
+      .eq('id', job.id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'duplicate_venue_repair_exhausted' }), {
       status: 500,
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
     })
@@ -1240,7 +1669,6 @@ serve(async (req: Request) => {
         error:  `trip insert failed: ${tripInsertErr?.message ?? 'unknown'}`,
       })
       .eq('id', job.id)
-    await refundOneTripIfApplicable(admin, job.user_id)
     return new Response(JSON.stringify({ ok: false, status: 'failed', error: tripInsertErr?.message }), {
       status: 500,
       headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
@@ -1258,6 +1686,16 @@ serve(async (req: Request) => {
     })
     .eq('id', job.id)
     .eq('status', 'running')
+
+  // Charge the credit here, on real success, not at job creation. Mirrors
+  // the same tripId-ownership check app/api/trips/jobs/route.ts already
+  // did at creation time to decide whether to skip the entitlement gate —
+  // job.inputs carries that same tripId through unchanged, so re-checking
+  // it here is consistent, not a second independent judgment call.
+  const isRegeneration = typeof (job.inputs as any)?.tripId === 'string' && (job.inputs as any).tripId.length > 0
+  if (!isRegeneration) {
+    await consumeOneTripIfApplicable(admin, job.user_id, job.id)
+  }
 
   console.log('[worker] completed job:', job.id, '→ trip:', tripRow.id)
 
