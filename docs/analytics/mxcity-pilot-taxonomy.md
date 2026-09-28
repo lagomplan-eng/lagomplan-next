@@ -74,18 +74,18 @@ scheme (see `mxcity-pilot-links.md`).
 ### `partner_link_click`
 
 Fires from one shared helper (`trackOutboundLink` in `lib/analytics/ga.ts`),
-called from three separate render sites that mean different things — kept
+called from four separate render sites that mean different things — kept
 distinct via `section` rather than collapsed into one guide-wide bucket:
 
 | Param | Values | Notes |
 |---|---|---|
-| `link_name` | `insider` \| `airalo` | Extend the union in `content/guia/types.ts` (`PartnerLinkName`) when a new outbound partner link is added |
+| `link_name` | `insider` \| `airalo` \| `chef_whatsapp` \| `chef_take_a_chef` \| `massage_book` \| `massage_whatsapp` \| `massage_map` | Extend the union in `content/guia/types.ts` (`PartnerLinkName`) when a new outbound partner link is added |
 | `partner_slug` | `livin_condesa` \| `livin_roma` \| `livin_polanco` \| `demo` | Explicit param, not inferred from `page_location` — that URL carries the inbound distribution UTMs from Livin and is unreliable to segment on |
 | `zone` | `condesa` \| `roma` \| `polanco` | Absent when the partner has no zone |
 | `lang` | `es` \| `en` | |
-| `section` | `before_you_arrive` \| `experience_book` \| `experience_details` | `before_you_arrive` = the Transportation/Connectivity arrival-item link; `experience_book` = the experience card's "Book" button (highest-intent action on the page); `experience_details` = the how-to-book link inside an expanded experience card |
+| `section` | `before_you_arrive` \| `experience_book` \| `experience_details` \| `services_contact` | `before_you_arrive` = the Transportation/Connectivity arrival-item link; `experience_book` = the experience card's "Book" button (highest-intent action on the page); `experience_details` = the how-to-book link inside an expanded experience card; `services_contact` (added 2026-09-28) = the Take care tab's chef and massage links (WhatsApp, Book online, Mapa, Take a Chef) — `link_name` distinguishes which action within this section |
 | `destination` | e.g. `wa.me`, `airalo.tpm.li` | Hostname only, never the full URL |
-| `experience_name` | e.g. `exp-teotihuacan`'s title | Only present on `experience_book` / `experience_details` — absent on `before_you_arrive` |
+| `experience_name` | e.g. `exp-teotihuacan`'s title | Only present on `experience_book` / `experience_details` — absent on `before_you_arrive` / `services_contact` |
 
 **Custom dimensions to register in GA4 (event-scoped, not user-scoped —
 same rule as `partner_id`/`pilot_id`/`distribution_channel` above):**

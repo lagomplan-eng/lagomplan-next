@@ -6,6 +6,7 @@
 // and yourHouse (this property's own address-level picks) differ.
 
 import type { Partner } from '../types'
+import { CHEF_WHATSAPP_NUMBER } from '../../../lib/guia/links'
 
 export const livinRoma: Partner = {
   slug: 'livin_roma',
@@ -52,4 +53,80 @@ export const livinRoma: Partner = {
   },
 
   zone: 'roma',
+
+  // "Health & Pharmacies" now renders under Take care instead of Before
+  // you arrive — hides the city-level arrivalItems duplicate without
+  // touching its text. 2026-09-28, Livin brief.
+  arrivalItemsOmit: ['health-pharmacies'],
+
+  faqAnswers: {
+    chefsAtHome: {
+      body: {
+        en:
+          'Two chefs we work with come to the apartment and plan the menu around ' +
+          'your group. Chef Adán Canales cooks international cuisine; Chef Mateo ' +
+          'di Monaco cooks Italian. Message us on WhatsApp with your date and ' +
+          'headcount, ideally three days ahead. Looking for something else? ' +
+          'Browse chefs on Take a Chef.',
+        es:
+          'Trabajamos con dos chefs que van al departamento y arman el menú según ' +
+          'tu grupo. Chef Adán Canales cocina internacional; Chef Mateo di ' +
+          'Monaco, italiana. Escríbenos por WhatsApp con la fecha y el número de ' +
+          'personas, idealmente con tres días de anticipación. ¿Buscas otra ' +
+          'cocina? Explora chefs en Take a Chef.',
+      },
+      links: {
+        en: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=Hi!%20I'm%20staying%20at%20Livin%20Roma%20and%20I'd%20like%20a%20private%20chef%20on%20%5Bdate%5D%20for%20%5B%23%5D%20people.`,
+            after: ' · ',
+            linkName: 'chef_whatsapp',
+          },
+          // CONFIRM (Elena): does an English-language version of Take a
+          // Chef's directory exist? Using the ES URL until confirmed.
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', linkName: 'chef_take_a_chef' },
+        ],
+        es: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=%C2%A1Hola!%20Me%20estoy%20quedando%20en%20Livin%20Roma%20y%20quiero%20un%20chef%20privado%20el%20%5Bfecha%5D%20para%20%5B%23%5D%20personas.`,
+            after: ' · ',
+            linkName: 'chef_whatsapp',
+          },
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', linkName: 'chef_take_a_chef' },
+        ],
+      },
+    },
+    massages: {
+      body: {
+        en:
+          'Casa Ancestras, at Tenancingo 26 in Condesa, is a small, unpretentious ' +
+          'space where the therapists are the reason to go. They do massages and ' +
+          'facials rooted in traditional Mexican bodywork, and they work in ' +
+          'English too. By appointment only.',
+        es:
+          'Casa Ancestras, en Tenancingo 26 en la Condesa, es un espacio sencillo ' +
+          'donde lo que vale la pena son las terapeutas. Hacen masajes y faciales ' +
+          'basados en la tradición mexicana del cuidado con las manos, y ' +
+          'atienden también en inglés. Solo con cita.',
+      },
+      links: {
+        en: [
+          { text: 'Book online', href: 'https://app.acuityscheduling.com/schedule/96fb162e', after: ' · ', linkName: 'massage_book' },
+          { text: 'WhatsApp', href: 'https://wa.me/525611224292', after: ' · ', linkName: 'massage_whatsapp' },
+          { text: 'Map', href: 'https://www.google.com/maps/search/?api=1&query=Tenancingo%2026%2C%20Condesa%2C%20CDMX', linkName: 'massage_map' },
+        ],
+        es: [
+          { text: 'Reservar en línea', href: 'https://app.acuityscheduling.com/schedule/96fb162e', after: ' · ', linkName: 'massage_book' },
+          { text: 'WhatsApp', href: 'https://wa.me/525611224292', after: ' · ', linkName: 'massage_whatsapp' },
+          { text: 'Mapa', href: 'https://www.google.com/maps/search/?api=1&query=Tenancingo%2026%2C%20Condesa%2C%20CDMX', linkName: 'massage_map' },
+        ],
+      },
+      // Optional fields intentionally omitted per the brief (empty > invented): price, what's included, languages, group size.
+      // Note: Casa Ancestras is in Condesa, not Roma — the brief lists this
+      // as a partner-layer card for both livin_condesa AND livin_roma (not
+      // zone-scoped), so the address stays Condesa's for both. Not a typo.
+    },
+  },
 }

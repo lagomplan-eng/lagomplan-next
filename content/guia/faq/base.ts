@@ -19,6 +19,8 @@ export const faqBase: FaqBase = {
     { id: 'stay', label: { es: 'Tu estancia', en: 'Your stay' } },
     { id: 'errands', label: { es: 'El día a día', en: 'Everyday errands' } },
     { id: 'eating', label: { es: 'Comer en casa', en: 'Eating in' } },
+    // CONFIRM (Elena): ES label "Cuídate" — per the 2026-09-28 Livin brief.
+    { id: 'care', label: { es: 'Cuídate', en: 'Take care' } },
   ],
 
   items: [
@@ -51,8 +53,6 @@ export const faqBase: FaqBase = {
       label: { es: 'Abierto a horas raras', en: 'Open at odd hours' } },
     { key: 'coworking', group: 'errands', anchor: 'estancia-coworking',
       label: { es: 'Trabajar desde aquí', en: 'Working from here' } },
-    { key: 'gyms', group: 'errands', anchor: 'estancia-gimnasios',
-      label: { es: 'Gyms and studios', en: 'Gyms and studios' } }, // deliberately not localized, per instruction
     { key: 'haircuts', group: 'errands', anchor: 'estancia-cortes-de-pelo',
       label: { es: 'Cortes de pelo', en: 'Haircuts' } },
 
@@ -67,6 +67,18 @@ export const faqBase: FaqBase = {
       label: { es: 'Vino y licores', en: 'Wine and liquor' } },
     { key: 'privateEvents', group: 'eating', anchor: 'estancia-eventos-privados',
       label: { es: 'Eventos privados', en: 'Private events' } },
+
+    // Group 4 — take care (Tier B, destination) — added 2026-09-28 per the
+    // Livin brief. gyms moved here from errands, same key/anchor/label,
+    // only its group changed (the "card moves tab" the brief asked for).
+    { key: 'gyms', group: 'care', anchor: 'estancia-gimnasios',
+      label: { es: 'Gyms and studios', en: 'Gyms and studios' } }, // deliberately not localized, per instruction
+    { key: 'massages', group: 'care', anchor: 'estancia-masajes',
+      label: { es: 'Masajes', en: 'Massages' } },
+    { key: 'healthPharmacies', group: 'care', anchor: 'estancia-salud-farmacias',
+      label: { es: 'Salud y farmacias', en: 'Health & Pharmacies' } },
+    { key: 'familiesPets', group: 'care', anchor: 'estancia-familias-mascotas',
+      label: { es: 'Familias y mascotas', en: 'Families & pets' } },
   ],
 
   defaults: {
@@ -89,6 +101,25 @@ export const faqBase: FaqBase = {
         en:
           'For a private chef at home, get in touch with us and we\'ll arrange it — ' +
           'plans are built around headcount, so reach out with advance notice.',
+      },
+    },
+    // Moved here 2026-09-28 (Livin brief) from the city-level arrivalItems
+    // array (content/guia/cities/cdmx.ts), where this exact text still
+    // lives too — the arrivalItems entry now also carries an id
+    // ('health-pharmacies') so Partner.arrivalItemsOmit can hide it from
+    // "Before you arrive" for partners that render it here instead, in
+    // "Take care", without touching the shared city copy. Text copied
+    // verbatim, not rewritten, per the brief's no-text-changes rule.
+    healthPharmacies: {
+      body: {
+        es:
+          'Las farmacias (del Ahorro, Guadalajara) están por todas partes, muchas ' +
+          'abren 24 horas, y venden medicamentos comunes sin receta. Para algo más, ' +
+          'pide a tu anfitrión una clínica cercana; el 911 es solo para emergencias.',
+        en:
+          'Pharmacies (Farmacias del Ahorro, Guadalajara) are everywhere, many open ' +
+          '24 hours, and sell common medications over the counter. For anything more, ' +
+          'ask your host for a nearby clinic; 911 is for emergencies only.',
       },
     },
   },

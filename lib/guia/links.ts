@@ -6,6 +6,15 @@
  * any other href transform until the redirect has been tested manually.
  */
 
+/**
+ * WhatsApp number for the "Chefs at home" contact flow (livin_condesa,
+ * livin_roma, livin_polanco) — added 2026-09-28. This is Elena's personal
+ * number, TEMPORARY per the brief: kept in this one constant specifically
+ * so swapping to a WhatsApp Business number later is a one-line change,
+ * no content edits needed.
+ */
+export const CHEF_WHATSAPP_NUMBER = '525521362492'
+
 /** Appends utm_source=lagomplan&utm_medium=guide&utm_campaign=<pilotId>
  *  &utm_content=<partnerSlug> to an Insider (wa.me) href — pilotId for the
  *  pilot-level campaign (matches the planner CTA's utm_campaign), slug for
