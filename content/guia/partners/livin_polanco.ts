@@ -82,40 +82,40 @@ export const livinPolanco: Partner = {
   // exists), not 4 — expected, not a gap to fill.
   faqAnswers: {
     chefsAtHome: {
+      // Body ends right before "WhatsApp" / "por" so the two InlineLinks
+      // below splice in as the actual hyperlinked words mid-sentence,
+      // matching the pattern already used for Transportation's Insider
+      // link. Moved 2026-09-28 per direct feedback on the live page.
       body: {
         en:
           'Two chefs we work with come to the apartment and plan the menu around ' +
           'your group. Chef Adán Canales cooks international cuisine; Chef Mateo ' +
-          'di Monaco cooks Italian. Message us on WhatsApp with your date and ' +
-          'headcount, ideally three days ahead. Looking for something else? ' +
-          'Browse chefs on Take a Chef.',
+          'di Monaco cooks Italian. Message us on',
         es:
           'Trabajamos con dos chefs que van al departamento y arman el menú según ' +
           'tu grupo. Chef Adán Canales cocina internacional; Chef Mateo di ' +
-          'Monaco, italiana. Escríbenos por WhatsApp con la fecha y el número de ' +
-          'personas, idealmente con tres días de anticipación. ¿Buscas otra ' +
-          'cocina? Explora chefs en Take a Chef.',
+          'Monaco, italiana. Escríbenos por',
       },
       links: {
         en: [
           {
             text: 'WhatsApp',
             href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=Hi!%20I'm%20staying%20at%20Livin%20Polanco%20and%20I'd%20like%20a%20private%20chef%20on%20%5Bdate%5D%20for%20%5B%23%5D%20people.`,
-            after: ' · ',
+            after: ' with your date and headcount, ideally three days ahead. Looking for something else? Browse chefs on',
             linkName: 'chef_whatsapp',
           },
           // CONFIRM (Elena): does an English-language version of Take a
           // Chef's directory exist? Using the ES URL until confirmed.
-          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', linkName: 'chef_take_a_chef' },
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
         ],
         es: [
           {
             text: 'WhatsApp',
             href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=%C2%A1Hola!%20Me%20estoy%20quedando%20en%20Livin%20Polanco%20y%20quiero%20un%20chef%20privado%20el%20%5Bfecha%5D%20para%20%5B%23%5D%20personas.`,
-            after: ' · ',
+            after: ' con la fecha y el número de personas, idealmente con tres días de anticipación. ¿Buscas otra cocina? Explora chefs en',
             linkName: 'chef_whatsapp',
           },
-          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', linkName: 'chef_take_a_chef' },
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
         ],
       },
     },
