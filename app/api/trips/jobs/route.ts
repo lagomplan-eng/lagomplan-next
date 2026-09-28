@@ -144,17 +144,19 @@ export async function POST(req: NextRequest) {
     // per-sub-chunk days + first-of-each-segment accommodations into the
     // final trip_data. This avoids both (a) the multi-city megaprompt and
     // (b) over-long single-segment calls blowing the Edge Fn's memory/time
-    // budget. UNCHANGED — keep MC_SEGMENT_DAYS in sync with the worker's
-    // planMultiCityChunks(), which is still the source of truth for
-    // multi-city chunk content.
+    // budget.
     //
     // Single-city: one chunk PER DAY (worker's SC_DAYS_PER_CHUNK=1 day-level
-    // concurrency redesign, 2026-09-23) — chunksTotal must equal durationDays
-    // exactly, or the worker's completion check (chunks_done < chunks_total)
-    // and the client's progress bar disagree with what the worker actually
-    // plans via planChunks(). This is the one change outside generate-trip*
-    // that redesign required: the worker plans chunk COUNT, this route only
-    // sizes chunks_total to match, same relationship as multi-city always had.
+    // concurrency redesign, 2026-09-23) PLUS one front-matter unit (title/
+    // tagline/hero_tags/before_you_go/budget_breakdown/accommodations, now
+    // its own concurrent call instead of bundled into chunk 0 -- see
+    // generateFrontmatter in the worker) -- chunksTotal must equal
+    // durationDays + 1 exactly, or the worker's completion check
+    // (chunks_done < chunks_total) and the client's progress bar disagree
+    // with what the worker actually plans. This is the one change outside
+    // generate-trip*/generate-trip-worker that the redesign required: the
+    // worker plans chunk COUNT, this route only sizes chunks_total to
+    // match, same relationship as multi-city always had.
     const MC_SEGMENT_DAYS = 5
     const bodySegments = Array.isArray((body as any)?.segments) ? (body as any).segments : []
     const isMultiCity  = bodySegments.length >= 2
@@ -163,7 +165,7 @@ export async function POST(req: NextRequest) {
           const segDays = Math.max(1, (Number(s?.nights) || 0) + 1)
           return sum + Math.ceil(segDays / MC_SEGMENT_DAYS)
         }, 0)
-      : durationDays
+      : durationDays + 1
 
     const admin = getSupabaseAdmin()
 
