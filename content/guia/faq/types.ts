@@ -18,10 +18,18 @@ export type ZoneFaqKey =
   | 'coworking' | 'gyms' | 'haircuts'
   | 'groupRestaurants' | 'chefsAtHome' | 'cateringDelivery'
   | 'wineLiquor' | 'privateEvents'
+  // Added for the 'care' group (2026-09-28 Livin brief). massages is
+  // partner-layer only by design (see livin_condesa.ts/livin_roma.ts) —
+  // no zone/base answer exists for it. healthPharmacies lives in
+  // base.defaults (moved from the city-level arrivalItems array, see
+  // cdmx.ts). familiesPets has no content yet anywhere — renders nothing
+  // until a zone file sets it (Partner > Zone > base, resolve.ts skips
+  // any key missing at all three layers).
+  | 'massages' | 'healthPharmacies' | 'familiesPets'
 
 export type FaqItemKey = PropertyFaqKey | ZoneFaqKey
 
-export type FaqGroupId = 'stay' | 'errands' | 'eating'
+export type FaqGroupId = 'stay' | 'errands' | 'eating' | 'care'
 
 export interface FaqAnswer {
   body?: Partial<Record<Lang, string>>

@@ -223,5 +223,15 @@ export const polanco: Zone = {
       // repeated service complaints, including a wrong-size bottle on
       // delivery. La Europea is further but reliable.
     },
+
+    // ---------------------------------------------------------------
+    // GROUP 4 — Take care
+    // ---------------------------------------------------------------
+
+    // TODO (Pili): familiesPets — pediatra/niñera, veterinario, parques
+    // pet-friendly en Polanco. Intentionally absent until verified.
+    // No massages entry for Polanco — deliberately excluded per the
+    // brief; Take care renders with 3 cards here (gyms, healthPharmacies,
+    // and familiesPets once filled), not 4. Expected, do not add one.
   },
 }

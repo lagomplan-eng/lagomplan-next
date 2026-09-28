@@ -37,7 +37,7 @@ import { useEffect, useState } from 'react'
 import { Icon } from './GuiaClient'
 import type { ArrivalItem, IconKey, InlineLink, Lang, Partner } from '../../../content/guia/types'
 import type { FaqGroupId, FaqItemKey, ResolvedFaqGroup } from '../../../content/guia/faq/types'
-import { trackOutboundLink } from '../../../lib/analytics/ga'
+import { trackOutboundLink, type PartnerLinkSection } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import styles from './guia.module.css'
 
@@ -89,6 +89,11 @@ const FAQ_ITEM_ICONS: Record<FaqItemKey, IconKey> = {
   cateringDelivery: 'truck',
   wineLiquor: 'martini',
   privateEvents: 'partyPopper',
+  // Take care group, added 2026-09-28 (gyms already mapped above, just
+  // moved groups — same icon, no change needed here).
+  massages: 'flower',
+  healthPharmacies: 'cross',
+  familiesPets: 'baby',
 }
 
 type PanelId = 'before' | FaqGroupId
@@ -100,6 +105,12 @@ interface PracticalCardItem {
   title: string
   body: string
   links?: InlineLink[]
+  // Which partner_link_click `section` this item's links fire with.
+  // Computed per-panel at build time (see allPanels below) — added
+  // 2026-09-28 so Take care's chef/massage links can report
+  // 'services_contact' distinctly from arrival items' 'before_you_arrive',
+  // instead of the value being hardcoded the same for every panel.
+  section: PartnerLinkSection
 }
 
 interface Panel {
@@ -150,7 +161,7 @@ function PracticalCard({
                   partnerSlug,
                   zone,
                   lang,
-                  section: 'before_you_arrive',
+                  section: item.section,
                 }) : undefined}
               >{link.text}</a>
               {link.after}
@@ -191,6 +202,7 @@ export default function PracticalSection({
     title: item.title,
     body: item.body,
     links: item.link ? [item.link] : undefined,
+    section: 'before_you_arrive',
   }))
 
   const allPanels: Panel[] = []
@@ -199,6 +211,11 @@ export default function PracticalSection({
   }
   if (faqGroups) {
     for (const g of faqGroups) {
+      // 'care' (Take care) items report 'services_contact' — chef/massage
+      // WhatsApp, Book online, Mapa, Take a Chef — distinctly from every
+      // other panel's 'before_you_arrive'. Added 2026-09-28; every other
+      // panel's behavior is unchanged from before this section existed.
+      const section: PartnerLinkSection = g.id === 'care' ? 'services_contact' : 'before_you_arrive'
       allPanels.push({
         id: g.id,
         chipLabel: g.label,
@@ -209,6 +226,7 @@ export default function PracticalSection({
           title: it.label,
           body: it.body,
           links: it.links,
+          section,
         })),
       })
     }

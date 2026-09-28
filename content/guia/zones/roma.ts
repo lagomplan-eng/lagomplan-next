@@ -227,5 +227,12 @@ export const roma: Zone = {
           'bottles that travel in a suitcase.',
       },
     },
+
+    // ---------------------------------------------------------------
+    // GROUP 4 — Take care
+    // ---------------------------------------------------------------
+
+    // TODO (Pili): familiesPets — pediatra/niñera, veterinario, parques
+    // pet-friendly en Roma. Intentionally absent until verified.
   },
 }
