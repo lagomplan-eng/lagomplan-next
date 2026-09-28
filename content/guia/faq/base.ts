@@ -55,6 +55,13 @@ export const faqBase: FaqBase = {
       label: { es: 'Trabajar desde aquí', en: 'Working from here' } },
     { key: 'haircuts', group: 'errands', anchor: 'estancia-cortes-de-pelo',
       label: { es: 'Cortes de pelo', en: 'Haircuts' } },
+    // Moved here from Take care (2026-09-28) — balances the two tabs;
+    // Take care otherwise reads thin/unbalanced against Everyday errands
+    // on pages without a strong Take care lineup. anchor/label/body
+    // unchanged, only `group` (and its position in this array, which
+    // resolve.ts uses as render order within a group) changed.
+    { key: 'healthPharmacies', group: 'errands', anchor: 'estancia-salud-farmacias',
+      label: { es: 'Salud y farmacias', en: 'Health & Pharmacies' } },
 
     // Group 3 — eating in and hosting (Tier B, destination)
     { key: 'groupRestaurants', group: 'eating', anchor: 'estancia-restaurantes-grupos',
@@ -75,8 +82,6 @@ export const faqBase: FaqBase = {
       label: { es: 'Gyms and studios', en: 'Gyms and studios' } }, // deliberately not localized, per instruction
     { key: 'massages', group: 'care', anchor: 'estancia-masajes',
       label: { es: 'Masajes', en: 'Massages' } },
-    { key: 'healthPharmacies', group: 'care', anchor: 'estancia-salud-farmacias',
-      label: { es: 'Salud y farmacias', en: 'Health & Pharmacies' } },
     { key: 'familiesPets', group: 'care', anchor: 'estancia-familias-mascotas',
       label: { es: 'Familias y mascotas', en: 'Families & pets' } },
   ],
@@ -107,8 +112,11 @@ export const faqBase: FaqBase = {
     // array (content/guia/cities/cdmx.ts), where this exact text still
     // lives too — the arrivalItems entry now also carries an id
     // ('health-pharmacies') so Partner.arrivalItemsOmit can hide it from
-    // "Before you arrive" for partners that render it here instead, in
-    // "Take care", without touching the shared city copy. Text copied
+    // "Before you arrive" for partners that render it here instead. This
+    // item briefly lived in the new "Take care" group (2026-09-28) and
+    // was moved again the same day into "Everyday errands" (see its item
+    // def above) to balance the two tabs — this default's content and key
+    // are unaffected by which group it's rendered under. Text copied
     // verbatim, not rewritten, per the brief's no-text-changes rule.
     healthPharmacies: {
       body: {
