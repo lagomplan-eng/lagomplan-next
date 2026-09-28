@@ -6,7 +6,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import type { User } from '@supabase/supabase-js'
-import { checkGenerationAllowed, consumeOneTrip } from '../../../../lib/entitlements'
+import { checkGenerationAllowed } from '../../../../lib/entitlements'
 import { getSupabaseAdmin, getSupabaseServer } from '../../../../lib/supabase/server'
 import { REF_COOKIE, sanitizeRefSource } from '../../../../lib/attribution/ref-source'
 
@@ -190,12 +190,19 @@ export async function POST(req: NextRequest) {
       return err(500, 'job_create_failed', 'Could not create job', insertErr?.message)
     }
 
-    // Consume credit only after the job row exists, and only for new trips.
-    if (!isRegeneration) {
-      await consumeOneTrip(user.id).catch(e =>
-        console.error('[trips/jobs] consumeOneTrip error:', e)
-      )
-    }
+    // EMERGENCY FIX 2026-09-28: credit is now charged by the worker on
+    // successful completion (consumeOneTripIfApplicable in
+    // generate-trip-worker/index.ts), not here at creation. That worker
+    // change shipped to production earlier via a direct
+    // `supabase functions deploy` (Edge Functions deploy independently of
+    // this Next.js app / Vercel), while this file's matching removal sat
+    // uncommitted -- so for a window, every completed async trip was
+    // charged TWICE (here at creation, again by the worker at completion),
+    // and every FAILED trip was charged once here with no refund (the old
+    // refund-on-failure path was removed from the worker as part of the
+    // same change). checkGenerationAllowed() above still gates job
+    // creation itself (0 credits -> can't start), the deduction just no
+    // longer happens twice.
 
     // Fire-and-forget worker invocation. Reconciler handles any dropped invocation.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
