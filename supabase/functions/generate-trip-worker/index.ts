@@ -1204,15 +1204,21 @@ async function runConcurrentSingleCity(
     return { unit, segResult }
   }
 
-  for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
-    const remainingBudget = 140_000 - (Date.now() - startedAt)
-    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest (long, multi-batch trips)
-
-    let batch = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
-    const succeeded = new Map<number, SegmentResult>()
-
-    attemptLoop:
-    for (let attempt = 0; attempt <= SC_MAX_RETRIES && batch.length > 0; attempt++) {
+  // Per-unit retry, not batch-level. Previously a failed unit's retry only
+  // started once Promise.allSettled resolved for the WHOLE batch -- so a
+  // unit that failed at ~10s waited behind its slowest sibling (a
+  // legitimate 25-35s call) before its own retry even began, landing
+  // retries at ~55-57s against the 60s deadline. Confirmed live across
+  // five separate failures (Lisboa/Tokyo/Barcelona/Medellín/Roma,
+  // 2026-09-25 through 2026-09-28): every retry started right when the
+  // batch's LAST successful sibling finished, never when the failing unit
+  // itself actually failed. Each unit now retries independently,
+  // immediately on its own failure (after backoff), computing its own
+  // remaining-budget window at that moment -- moves typical retry landing
+  // from ~56s to ~33s and makes the 60s deadline non-marginal regardless
+  // of whatever's actually causing the underlying failure.
+  async function runUnitWithRetries(unit: number): Promise<{ unit: number; segResult?: SegmentResult; permanentError?: boolean }> {
+    for (let attempt = 0; attempt <= SC_MAX_RETRIES; attempt++) {
       // Measured against startedAt (true invocation start, before skeleton
       // ran) every time, not a fixed post-skeleton allowance — a slow
       // skeleton correctly eats into this budget instead of the total
@@ -1220,7 +1226,7 @@ async function runConcurrentSingleCity(
       // for the non-generation work still to come after the last attempt.
       if (attempt > 0) {
         const remaining = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
-        if (remaining < SC_MIN_RETRY_WINDOW_MS) break // not enough budget left to retry meaningfully -- fail cleanly instead of starting a doomed attempt
+        if (remaining < SC_MIN_RETRY_WINDOW_MS) return { unit } // not enough budget left to retry meaningfully -- fail cleanly instead of starting a doomed attempt
         await new Promise(r => setTimeout(r, SC_RETRY_BACKOFF_MS[attempt - 1] ?? 2_000))
       }
 
@@ -1228,39 +1234,49 @@ async function runConcurrentSingleCity(
       // for why) -- every attempt, first or retry, gets whatever's left of
       // the job deadline.
       const remainingForThisAttempt = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
-      if (remainingForThisAttempt <= 0) break // out of budget entirely
-      const thisAttemptTimeout = remainingForThisAttempt
+      if (remainingForThisAttempt <= 0) return { unit } // out of budget entirely
 
-      const results = await Promise.allSettled(batch.map(unit => {
-        const ctrl = new AbortController()
-        const t = setTimeout(() => ctrl.abort(), thisAttemptTimeout)
-        return runOneUnit(unit, ctrl.signal, attempt).finally(() => clearTimeout(t))
-      }))
-
-      // Error classification: 400/401/403 are permanent (bad request shape,
-      // bad/expired auth, forbidden) -- retrying won't help and usually
-      // signals something systemic (e.g. the same auth failure would hit
-      // every other unit too), so fail the job immediately rather than
-      // burning the retry budget. 429/5xx and anything without a status
-      // (network errors, our own AbortController timeout) are treated as
-      // transient and retried with backoff.
-      const stillFailing: number[] = []
-      let hitPermanentError = false
-      for (let k = 0; k < results.length; k++) {
-        const r = results[k]
-        const unit = batch[k]
-        if (r.status === 'fulfilled') {
-          succeeded.set(r.value.unit, r.value.segResult)
-        } else {
-          const status = (r.reason as any)?.status
-          const isPermanent = status === 400 || status === 401 || status === 403
-          console.warn('[worker:sc] unit rejected', unit, 'attempt', attempt, 'status', status ?? 'n/a', String(r.reason).slice(0, 300))
-          stillFailing.push(unit)
-          if (isPermanent) hitPermanentError = true
-        }
+      const ctrl = new AbortController()
+      const t = setTimeout(() => ctrl.abort(), remainingForThisAttempt)
+      try {
+        const { segResult } = await runOneUnit(unit, ctrl.signal, attempt).finally(() => clearTimeout(t))
+        return { unit, segResult }
+      } catch (err) {
+        // Error classification: 400/401/403 are permanent (bad request
+        // shape, bad/expired auth, forbidden) -- retrying THIS unit won't
+        // help, so stop here rather than burning its retry budget. A
+        // systemic permanent error (e.g. the same auth failure) hits every
+        // other unit's own first attempt independently and each stops
+        // itself the same way -- no cross-unit signal needed. 429/5xx and
+        // anything without a status (network errors, our own
+        // AbortController timeout) are transient and retried with backoff.
+        const status = (err as any)?.status
+        const isPermanent = status === 400 || status === 401 || status === 403
+        console.warn('[worker:sc] unit rejected', unit, 'attempt', attempt, 'status', status ?? 'n/a', String(err).slice(0, 300))
+        if (isPermanent) return { unit, permanentError: true }
+        // loop continues -> retries THIS unit immediately (after backoff),
+        // not gated on any sibling unit's state.
       }
-      batch = stillFailing
-      if (hitPermanentError) break attemptLoop // don't waste retries on a permanent error class
+    }
+    return { unit } // retries exhausted
+  }
+
+  for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
+    const remainingBudget = 140_000 - (Date.now() - startedAt)
+    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest (long, multi-batch trips)
+
+    const batchUnits = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
+    const succeeded = new Map<number, SegmentResult>()
+
+    const unitResults = await Promise.allSettled(batchUnits.map(unit => runUnitWithRetries(unit)))
+    let batch: number[] = []
+    for (const r of unitResults) {
+      if (r.status !== 'fulfilled') continue // runUnitWithRetries never throws -- defensive only
+      if (r.value.segResult) {
+        succeeded.set(r.value.unit, r.value.segResult)
+      } else {
+        batch.push(r.value.unit)
+      }
     }
 
     if (batch.length > 0) {
