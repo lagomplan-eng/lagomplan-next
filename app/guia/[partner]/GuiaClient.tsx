@@ -99,6 +99,15 @@ const WA_BOOK_URL: Record<Lang, string> = {
  */
 const ARRIVAL_FAQ_COUNTERPART: Partial<Record<string, FaqItemKey>> = {
   'coming-back-late': 'lateReturn',
+  // Added 2026-09-28 alongside the Livin "Take care"/errands work — this
+  // mapping is what actually gates arrivalItemsOmit (see
+  // visibleArrivalItems below), and was missed when 'health-pharmacies'
+  // was added to arrivalItemsOmit on the Livin partners: without an
+  // entry here, `counterpart` was always undefined, so the safety check
+  // never omitted the card and it rendered under BOTH "Before you
+  // arrive" and (correctly) "Everyday errands" at once. Confirmed live
+  // on production before this fix (curl + grep the SSR HTML).
+  'health-pharmacies': 'healthPharmacies',
 }
 
 /** Experience card images, keyed by the experience id. */
