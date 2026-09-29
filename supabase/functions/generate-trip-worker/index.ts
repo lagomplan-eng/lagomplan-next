@@ -282,17 +282,41 @@ const SC_DAYS_PER_CHUNK   = 1
 // batch 1 alone had already eaten ~40s of the 60s job deadline, leaving
 // batch 2 too little to run OR retry. Same root cause as the CONCURRENCY=4
 // finding above, just triggered by trip length instead of a lower
-// constant. 16 covers the longest real trip length observed (14 days = 15
-// units) in one wave, matching the same "structurally one batch" reasoning
-// that motivated reverting to 8 in the first place. Verified via a live
-// load test before committing to this value (not just isolate-boot logs at
-// 8, which never got checked at 16) -- see PR description for the
-// per-call latency comparison against the 7-8-concurrent baseline. If
-// concurrency itself degrades at higher fan-out (not yet observed, but
-// untested above 16), the fallback is a per-batch deadline instead of one
-// job-wide clock, not a lower ceiling -- a lower ceiling just moves this
-// same failure to a shorter trip length, it doesn't fix the mechanism.
-const SC_CONCURRENCY      = 16
+// constant.
+//
+// Raised 16 -> 32, 2026-09-30 (same day): 16 was verified clean at exactly
+// 16 concurrent calls, but a 30-day trip (31 units) still needed TWO
+// batches at that ceiling -- batch 2 started at whatever real elapsed time
+// batch 1 happened to take, and that run's batch 1 happened to finish fast
+// (7-12s/call that day, not the 15-22s/call seen in earlier tests), giving
+// batch 2 a comfortable margin. That was a property of that day's latency,
+// not of the design.
+//
+// Proven, not just reasoned about: a temporary delay-injection test hook
+// (added and removed the same day) forced ONE unit inside batch 1 to take
+// an extra 45s on a 36-unit (35-day) trip. Result was more severe than
+// "batch 2 starves on a smaller budget" -- that one slow unit is itself a
+// member of batch 1's own Promise.allSettled, so batch 1 never resolved in
+// time at all. Its own per-attempt abort fired past the 60s job deadline,
+// its own retry check saw negative remaining budget and skipped the retry,
+// and the whole job failed right there -- the outer loop never reached a
+// second iteration, so batch 2's 4 units (which would have succeeded, per
+// the clean 30-day/31-unit test at this same concurrency) were never even
+// attempted. One pathologically slow call ANYWHERE in a batch can fail an
+// entire multi-batch job, not just under-budget whatever comes after it.
+//
+// 32 covers a 30-day trip (31 units) in exactly one wave, removing the
+// batch-1-speed dependency entirely for every trip length this product has
+// actually seen in production (longest observed: 30 days). Verified via
+// live load test at this value -- see PR description for the per-call
+// latency distribution, 429 check, and traceless-failure check. A trip
+// that still exceeds 32 units (>31 days) keeps the exact same two-wave
+// risk this comment describes, just moved further out -- raising the
+// ceiling doesn't eliminate the mechanism, it removes the dependency for
+// every length actually seen so far. If a longer trip becomes real, the
+// documented fallback is a per-batch deadline instead of one job-wide
+// clock, not another ceiling bump.
+const SC_CONCURRENCY      = 32
 //
 // KNOWN, ACCEPTED COST: firing all SC_CONCURRENCY Sonnet calls (day writers
 // + front-matter) within ~100-300ms of each other (confirmed via
