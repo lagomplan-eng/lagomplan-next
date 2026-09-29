@@ -493,7 +493,19 @@ ${lines}
       const where = s.origin
         ? (isEN ? `from ${s.origin} to ${s.destination}` : `de ${s.origin} a ${s.destination}`)
         : s.destination;
-      const dayCount = Math.max(1, s.nights || 0);
+      // nights+1 = inclusive day count (check-in day through check-out day),
+      // matching planMultiCityDays/countMultiCityDays in the worker and
+      // every other day-count computation in this codebase. This used to
+      // read `s.nights || 0` alone (no +1) -- harmless while this block was
+      // decorative/hint-only in the old sequential multi-city architecture
+      // (each sub-chunk's own destination field was authoritative
+      // regardless of what this text said), but the 2026-09-29 day-level
+      // migration makes this text load-bearing: the model's own DAY → CITY
+      // MAPPING now needs to agree with generateDayChunk's deterministic
+      // per-day city override, or a later segment gets two contradictory
+      // signals about which city it's writing for. Confirmed this was
+      // previously undercounting by exactly `segments.length` days.
+      const dayCount = Math.max(1, s.nights + 1);
       const dayStart = dayCursor;
       const dayEnd   = dayCursor + dayCount - 1;
       dayMap.push(dayCount === 1
@@ -669,11 +681,29 @@ ${dayMap.join("\n")}
     // repeating the same neighborhood/anchor — it can't see what those
     // other days actually generated (they may not even be generated yet,
     // running concurrently), only what they were ASSIGNED upfront.
-    const thisDayLine = daySkeleton
+    // Multi-city travel days (daySkeleton.travel_day, added for the
+    // 2026-09-29 multi-city migration) get a DIFFERENT instruction, not the
+    // normal three-named-venues framing below. A day that's mostly consumed
+    // by transfer must not get a full itinerary written for it — that was
+    // the single biggest risk in moving multi-city onto day-level generation
+    // (each day is written by an isolated call with no innate sense of how
+    // much of the day the transfer itself eats). transfer_hours comes from
+    // the skeleton pass's own estimate (Haiku, asked specifically for
+    // travel days); city/travel_day are always deterministic overrides from
+    // the segment plan, never model-assigned — see generateSkeleton in the
+    // worker.
+    const isTravelDay = daySkeleton && (daySkeleton as any).travel_day === true;
+    const transferHours = isTravelDay && typeof (daySkeleton as any).transfer_hours === "number"
+      ? (daySkeleton as any).transfer_hours : null;
+    const thisDayLine = isTravelDay
       ? (isEN
-          ? `  Your assigned plan for this day: theme "${daySkeleton.theme}", area "${daySkeleton.neighborhood}", anchor "${daySkeleton.anchor}", pace "${daySkeleton.pace}". Your BREAKFAST block MUST be at "${daySkeleton.key_breakfast}", your signature lunch/dinner MUST be at "${daySkeleton.key_restaurant}", and your key activity MUST be at "${daySkeleton.key_site}" — all three were assigned specifically to this day, across the whole trip at once, precisely so no other day uses them. Build the day around this; do not substitute a different place for any of these three, including breakfast.`
-          : `  Tu plan asignado para este día: tema "${daySkeleton.theme}", zona "${daySkeleton.neighborhood}", ancla "${daySkeleton.anchor}", ritmo "${daySkeleton.pace}". Tu bloque de DESAYUNO DEBE ser en "${daySkeleton.key_breakfast}", tu comida/cena principal DEBE ser en "${daySkeleton.key_restaurant}", y tu actividad clave DEBE ser en "${daySkeleton.key_site}" — los tres se asignaron específicamente a este día, viendo todo el viaje a la vez, justo para que ningún otro día los use. Arma el día alrededor de esto; no sustituyas ninguno de los tres, incluyendo el desayuno.`)
-      : "";
+          ? `  TRAVEL DAY: this day is consumed by the transfer to the next city${transferHours ? ` (~${transferHours}h)` : ""}. You MUST include the transfer itself as its own "transfer" block. Do NOT write a full day's itinerary — at most 1-2 additional blocks total (a light meal or a short arrival/departure activity near the transfer point), and only if the remaining time genuinely allows it. Do NOT force a museum, a long tour, or a multi-neighborhood outing onto this day. The theme/area for context: "${daySkeleton!.theme}" in "${daySkeleton!.neighborhood}" — treat this as a loose backdrop, not a checklist to fill.`
+          : `  DÍA DE TRASLADO: este día está consumido por el traslado a la siguiente ciudad${transferHours ? ` (~${transferHours}h)` : ""}. DEBES incluir el traslado en sí como su propio bloque "transfer". NO escribas un itinerario completo — como máximo 1-2 bloques adicionales en total (una comida ligera o una actividad breve de llegada/salida cerca del punto de traslado), y solo si el tiempo restante realmente lo permite. NO fuerces un museo, un tour largo, ni un recorrido por varios barrios en este día. El tema/zona de contexto: "${daySkeleton!.theme}" en "${daySkeleton!.neighborhood}" — trátalo como telón de fondo suelto, no como lista que llenar.`)
+      : daySkeleton
+        ? (isEN
+            ? `  Your assigned plan for this day: theme "${daySkeleton.theme}", area "${daySkeleton.neighborhood}", anchor "${daySkeleton.anchor}", pace "${daySkeleton.pace}". Your BREAKFAST block MUST be at "${daySkeleton.key_breakfast}", your signature lunch/dinner MUST be at "${daySkeleton.key_restaurant}", and your key activity MUST be at "${daySkeleton.key_site}" — all three were assigned specifically to this day, across the whole trip at once, precisely so no other day uses them. Build the day around this; do not substitute a different place for any of these three, including breakfast.`
+            : `  Tu plan asignado para este día: tema "${daySkeleton.theme}", zona "${daySkeleton.neighborhood}", ancla "${daySkeleton.anchor}", ritmo "${daySkeleton.pace}". Tu bloque de DESAYUNO DEBE ser en "${daySkeleton.key_breakfast}", tu comida/cena principal DEBE ser en "${daySkeleton.key_restaurant}", y tu actividad clave DEBE ser en "${daySkeleton.key_site}" — los tres se asignaron específicamente a este día, viendo todo el viaje a la vez, justo para que ningún otro día los use. Arma el día alrededor de esto; no sustituyas ninguno de los tres, incluyendo el desayuno.`)
+        : "";
 
     const otherDaysList = fullSkeleton.filter((d: any) => !daySkeleton || d.day !== daySkeleton.day);
     const otherDaysDigest = otherDaysList
@@ -713,9 +743,28 @@ ${dayMap.join("\n")}
         ? `  This is the FIRST chunk of a multi-chunk trip. You own the ARRIVAL on day 1 (jet-lag aware if relevant). Do NOT emit any farewell / departure narrative — that belongs to the LAST chunk only.`
         : `  Este es el PRIMER chunk de un viaje multi-chunk. Tú manejas la LLEGADA en el día 1 (con jet-lag si aplica). NO incluyas despedidas ni narrativa de salida — eso le toca SOLO al último chunk.`;
     } else if (isLast) {
+      // Deliberately does NOT say "day 1 of your chunk" (it used to, and
+      // was removed 2026-09-30) -- that phrasing dates from when a "chunk"
+      // could span several days (multi-day multi-city sub-chunks) and "day
+      // 1 of your chunk" meant something distinct from the trip's actual
+      // day 1. Every chunk is exactly 1 day now (single-city always was;
+      // multi-city too as of the day-level migration), so that sentence
+      // was, at best, a no-op restating "the only day in your chunk" and at
+      // worst actively misleading: confirmed live on 21- and 30-day trips,
+      // where the LAST day chunk's own `day_number` field came back as `1`
+      // instead of the correct 21/30 -- assertChunksIntegrity caught it as
+      // a duplicate day_number against the real day 1's chunk, failing the
+      // job. The literal string "Day 1" sitting in the LAST piece of
+      // continuity instruction text the model reads (this block is
+      // concatenated after openingLine, which DOES state the correct
+      // absolute day number) is the most likely direct cause. Removed
+      // rather than reworded -- the surrounding sentences already convey
+      // "this is a continuation day" without needing a day-numbered clause
+      // that can't be phrased safely now that chunk-day and trip-day are
+      // always the same thing.
       intent = isEN
-        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from an earlier day — do NOT re-emit an arrival, hotel check-in, or "first day" framing. Day 1 of YOUR chunk is a continuation day. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
-        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde un día anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El día 1 de TU chunk es un día de continuación. El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
+        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from an earlier day — do NOT re-emit an arrival, hotel check-in, or "first day" framing. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
+        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde un día anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
     } else {
       intent = isEN
         ? `  This is a MIDDLE chunk (${segIdx + 1} of ${segTotal}). The traveler is mid-trip — do NOT emit arrival, hotel check-in, "first day" framing, departure, or farewell. Every day is a continuation. Follow your assigned plan above; vary neighborhoods and activity types from the other days listed so the trip doesn't feel repetitive.`
@@ -774,27 +823,53 @@ ${dayMap.join("\n")}
     // back to the original "at least 1 entry covering all nights" contract.
     const multiCity = isMultiCity(input.segments) ? input.segments as TripSegment[] : null;
 
-    // Suppress the accommodations block on non-first single-city chunks. The
-    // worker's assembleResult() only keeps the first non-empty accommodation
-    // block anyway (single-city dedupe), so asking later chunks to emit a
-    // hotel for their sub-range just burns tokens and tempts the AI to weave
-    // a check-in narrative into a continuation day.
+    // Suppress the accommodations block on any day-only chunked call (both
+    // single-city and multi-city, now that multi-city also runs through the
+    // day-level concurrent pipeline — see generate-trip-worker/index.ts's
+    // 2026-09-29 multi-city migration). A day chunk is bound to
+    // TRIP_SCHEMA_DAYS_ONLY, which has no `accommodations` field at all, so
+    // asking it to emit lodging is unfulfillable noise regardless of city
+    // count — worse for multi-city specifically, where the old text ("ONE
+    // entry PER segment") would otherwise render into EVERY day's prompt,
+    // not just once. Only the front-matter call (isFrontmatterOnly, its
+    // schema DOES have accommodations) or a genuinely non-chunked sync call
+    // (segTotalNum null) should ever see this block.
     const segIdxNum    = typeof input.segment_index  === "number" ? input.segment_index  : null;
     const segTotalNum  = typeof input.total_segments === "number" ? input.total_segments : null;
-    const isLaterChunk = segIdxNum !== null && segTotalNum !== null && segTotalNum > 1 && segIdxNum > 0;
-    const skipAccommodationsForChunk = isLaterChunk && !multiCity;
+    const isChunkedCall = segTotalNum !== null && segTotalNum > 1;
+    const skipAccommodationsForChunk = isChunkedCall && !isFrontmatterOnly;
+    // Jet-lag guidance is still gated the OLD way — arrival-day-only,
+    // regardless of front-matter/day split — so this stays its own flag
+    // rather than being folded into skipAccommodationsForChunk above.
+    const isNotFirstDay = segIdxNum !== null && segIdxNum > 0;
+
+    // A same-day segment (nights: 0 -- e.g. a quick stop before departure)
+    // needs no lodging. Only segments with at least 1 night go in the
+    // REQUIRED list below; a 0-night segment is called out separately so
+    // the model doesn't read its absence as an oversight and invent one
+    // anyway. The worker's assembleResult only matches/requires entries for
+    // these same overnightSegments -- keeping this list and that matching
+    // logic in exact agreement is what makes a genuinely-absent entry (0
+    // nights) distinguishable from a genuinely-missing one (a real failure).
+    const overnightSegments = multiCity ? multiCity.filter(s => s.nights > 0) : [];
+    const sameDaySegments   = multiCity ? multiCity.filter(s => s.nights <= 0) : [];
+    const sameDayNote = sameDaySegments.length > 0
+      ? (isEN
+          ? `\n  (${sameDaySegments.map(s => s.destination).join(", ")}: same-day segment, 0 nights -- do NOT include an accommodations entry for ${sameDaySegments.length === 1 ? "it" : "these"}.)`
+          : `\n  (${sameDaySegments.map(s => s.destination).join(", ")}: tramo de un solo día, 0 noches -- NO incluyas entrada de accommodations para ${sameDaySegments.length === 1 ? "él" : "estos"}.)`)
+      : "";
 
     const accommodationsBlock = (overnight && !skipAccommodationsForChunk)
       ? multiCity
-        ? (isEN ? `
+        ? (overnightSegments.length === 0 ? "" : (isEN ? `
   LODGING BY SEGMENT (REQUIRED):
-  This trip has ${multiCity.length} segments. You MUST return "accommodations" with ONE entry
-  PER segment (${multiCity.length} total), in the same order as the segments:
-${multiCity.map((s, i) => `    Segment ${i + 1}:
+  This trip has ${overnightSegments.length} segment(s) that need lodging. You MUST return "accommodations" with ONE entry
+  PER segment listed below (${overnightSegments.length} total), in the same order:
+${overnightSegments.map((s, i) => `    Segment ${i + 1}:
       - city:         "${s.destination}"        ← use this exact value
       - checkInDate:  "${s.startDate}"          ← use this exact value
       - checkOutDate: "${s.endDate}"            ← use this exact value
-      - nights:       ${s.nights}`).join("\n")}
+      - nights:       ${s.nights}`).join("\n")}${sameDayNote}
   Each entry must also include:
     - neighborhood: specific area within that city
     - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
@@ -802,19 +877,19 @@ ${multiCity.map((s, i) => `    Segment ${i + 1}:
     - priceTier: "budget" | "mid" | "upscale" | "luxury"
     - familyFriendly: true | false` : `
   ALOJAMIENTO POR TRAMO (OBLIGATORIO):
-  Este viaje tiene ${multiCity.length} tramos. DEBES devolver "accommodations" con UNA entrada
-  POR CADA tramo (${multiCity.length} en total), en el mismo orden que los tramos:
-${multiCity.map((s, i) => `    Tramo ${i + 1}:
+  Este viaje tiene ${overnightSegments.length} tramo(s) que necesitan alojamiento. DEBES devolver "accommodations" con UNA entrada
+  POR CADA tramo listado abajo (${overnightSegments.length} en total), en el mismo orden:
+${overnightSegments.map((s, i) => `    Tramo ${i + 1}:
       - city:         "${s.destination}"        ← usa esto exacto
       - checkInDate:  "${s.startDate}"          ← usa esto exacto
       - checkOutDate: "${s.endDate}"            ← usa esto exacto
-      - nights:       ${s.nights}`).join("\n")}
+      - nights:       ${s.nights}`).join("\n")}${sameDayNote}
   Cada entrada debe incluir además:
     - neighborhood: zona concreta dentro de esa ciudad
     - accommodationType: "hotel" | "boutique" | "hostel" | "apartment" | "resort" | "cabin" | "glamping"
     - rationale: 1 oración explicando por qué encaja con el tramo y el estilo
     - priceTier: "budget" | "mid" | "upscale" | "luxury"
-    - familyFriendly: true | false`)
+    - familyFriendly: true | false`))
         : (isEN ? `
   LODGING (REQUIRED):
   This trip includes ${nights} night(s). You MUST return "accommodations" with at least 1 entry
@@ -940,7 +1015,7 @@ ${multiCity.map((s, i) => `    Tramo ${i + 1}:
     // so the AI knows where the relaxed Day 1 is coming from. Gated to
     // chunk 0 of a chunked trip: chunks 1+ are continuation days with no
     // arrival to soften, so the prompt block would only confuse the model.
-    const jetLagContext   = isLaterChunk
+    const jetLagContext   = isNotFirstDay
       ? ""
       : buildJetLagContext(input.destination, input.origin, locale);
 
