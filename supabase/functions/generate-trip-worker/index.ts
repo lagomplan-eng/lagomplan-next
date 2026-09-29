@@ -31,6 +31,21 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { normalizeJobInputsForTripsInsert } from './logic.ts'
+// HTTP-extraction refactor (2026-09-28): day chunks and front-matter used
+// to go through generate-trip over HTTP (callGenerateTrip below, still
+// used by multi-city -- untouched). That extra hop is where the
+// "traceless death" / phantom-retry failures lived: generate-trip's own
+// execution would complete and log a metric successfully while this
+// worker's fetch to it dropped at the connection level, discarding a
+// finished result and forcing a retry on work that was already done.
+// generateDayChunk/generateFrontmatter now call Anthropic directly, the
+// same way generateSkeleton already did (proven live in production) --
+// same process, no second hop to drop. buildInput/isBudgetCurrencySuspect/
+// computeHeadcount and the prompt-building logic are the SAME functions
+// generate-trip/index.ts still uses for its own untouched paths (multi-
+// city, sync) -- imported from there, not reimplemented.
+import { buildInput, isBudgetCurrencySuspect, computeHeadcount } from '../generate-trip/logic.ts'
+import { systemPromptFor, TRIP_SCHEMA_DAYS_ONLY, TRIP_SCHEMA_FRONTMATTER_ONLY, buildPrompt } from '../generate-trip/prompt.ts'
 
 const SUPABASE_URL      = Deno.env.get('SUPABASE_URL')!
 const SERVICE_ROLE_KEY  = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
@@ -72,18 +87,47 @@ function logGenerationMetric(row: Record<string, unknown>): void {
 // generate-trip/index.ts's copy (2026-09-28, verified against
 // https://platform.claude.com/docs/en/about-claude/pricing, not guessed).
 // Duplicated rather than imported for the same reason logGenerationMetric
-// above is duplicated: no shared module between these two functions yet
-// (see the pending HTTP-extraction refactor). Only SKELETON_MODEL is ever
-// used here -- generate-trip/index.ts computes cost for its own model.
-// Sonnet's rate is the published list price ($3 in / $15 out) -- a $2/$10
-// rate was tried briefly the same day on a claimed account discount that
-// turned out not to exist for this model (see the matching comment in
-// generate-trip/index.ts's copy of this table). Unused by this file today
-// (skeleton is Haiku-only) but kept in sync so the two tables never
-// silently diverge.
+// above is duplicated: no shared module for this (prompt.ts is prompt-only,
+// deliberately not a dumping ground for unrelated concerns). Sonnet's rate
+// is the published list price ($3 in / $15 out) -- a $2/$10 rate was tried
+// briefly the same day on a claimed account discount that turned out not
+// to exist for this model. claude-sonnet-5 added 2026-09-28 for the
+// Sonnet 5 migration evaluation (backlog #101) -- confirmed against
+// platform.claude.com/docs/en/models/sonnet-5/overview. As of the
+// HTTP-extraction refactor this table is actively used for day/front-
+// matter calls too, not just the skeleton.
 const MODEL_RATES: Record<string, { input: number; cacheWrite: number; cacheRead: number; output: number }> = {
   'claude-sonnet-4-6':         { input: 3, cacheWrite: 3.75, cacheRead: 0.30, output: 15 },
   'claude-haiku-4-5-20251001': { input: 1, cacheWrite: 1.25, cacheRead: 0.10, output: 5 },
+  'claude-sonnet-5':           { input: 2, cacheWrite: 2.50, cacheRead: 0.20, output: 10 },
+}
+// Same rollback lever as generate-trip/index.ts's MODEL constant (flip via
+// `supabase secrets set`, no redeploy) -- now resolved here too since day/
+// front-matter calls no longer pass through generate-trip's own copy of
+// this. test_model is the same TEMPORARY Sonnet 5 evaluation hook (backlog
+// #101) -- REMOVE both the env fallback comment relevance and this branch
+// together once that evaluation concludes.
+function resolveDayModel(jobInputs: Record<string, any>): string {
+  if (typeof jobInputs.test_model === 'string') return jobInputs.test_model
+  return Deno.env.get('GENERATE_TRIP_MODEL') ?? 'claude-sonnet-4-6'
+}
+
+// Same validation generate-trip/index.ts's serve() handler applies to its
+// own tool_use response -- copied, not imported, since it's a small
+// function tied to this file's own error-throwing convention (the HTTP
+// handler returns a Response; this throws, for runUnitWithRetries to
+// catch and classify). Returns true when the payload is genuinely missing
+// the itinerary (empty days, or every day has zero blocks) -- frontmatter
+// responses correctly have no `days` field at all, so isFrontmatterOnly
+// short-circuits before that check.
+function isInvalidShape(toolUseInput: any, isFrontmatterOnly: boolean): boolean {
+  if (!toolUseInput) return true
+  if (isFrontmatterOnly) return false
+  if (!Array.isArray(toolUseInput.days) || toolUseInput.days.length === 0) return true
+  const anyDayHasBlocks = toolUseInput.days.some(
+    (d: any) => Array.isArray(d?.blocks) && d.blocks.length > 0
+  )
+  return !anyDayHasBlocks
 }
 function computeCostUsd(model: string, usage: {
   input_tokens?: number; cache_creation_input_tokens?: number; cache_read_input_tokens?: number; output_tokens?: number;
@@ -492,12 +536,136 @@ async function generateDayChunk(
     attempt,
   }
 
-  const res = await callGenerateTrip(segmentPayload, signal)
-  if (!res?.trip_data) throw new Error('day chunk response missing trip_data')
-  return {
-    chunk: res.trip_data,
-    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
+  return callAnthropicForChunk(segmentPayload, false, dayIndex, signal, jobId, attempt)
+}
+
+// ── Direct Anthropic call for single-city day/front-matter units ─────────
+// Shared by generateDayChunk and generateFrontmatter below -- same call
+// shape, differing only in tool/schema/token-budget and which chunk_index
+// this attempt logs and self-persists under (a day index, or -1 for
+// front-matter -- the literal, not FRONTMATTER_UNIT below, for the same
+// reason generate-trip/index.ts used to keep its own copy as a literal:
+// cheap to keep in sync by inspection, no import-ordering question).
+//
+// Mirrors generateSkeleton's direct-call shape (already proven live) and
+// generate-trip/index.ts's own serve() handler logic for these two unit
+// kinds (isInvalidShape, the wrapped-fetch error/metrics logging, cost
+// computation) -- this is that same logic, inlined here instead of
+// reached over HTTP, so a completed result can never be discarded by a
+// dropped connection between two separate function invocations.
+async function callAnthropicForChunk(
+  segmentPayload: Record<string, any>,
+  isFrontmatterOnly: boolean,
+  chunkIndexForMetrics: number,
+  signal: AbortSignal,
+  jobId: string,
+  attempt: number,
+): Promise<SegmentResult> {
+  if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured for day/front-matter call')
+
+  const input = buildInput(segmentPayload)
+  const model = resolveDayModel(segmentPayload)
+  const toolName = isFrontmatterOnly ? 'emit_trip_frontmatter' : 'emit_trip_days'
+  const toolSchema = isFrontmatterOnly ? TRIP_SCHEMA_FRONTMATTER_ONLY : TRIP_SCHEMA_DAYS_ONLY
+  const maxTokens = isFrontmatterOnly ? 2000 : 2500
+
+  const metricBase = {
+    job_id: jobId,
+    chunk_index: chunkIndexForMetrics,
+    schema_kind: isFrontmatterOnly ? 'frontmatter' : 'lean',
+    path: 'single',
+    model,
+    attempt,
+    ok: false,
   }
+
+  const startedAt = Date.now()
+  let res: Response
+  try {
+    res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type':      'application/json',
+        'x-api-key':         ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: maxTokens,
+        system: [{
+          type: 'text',
+          text: systemPromptFor(input.locale),
+          cache_control: { type: 'ephemeral' },
+        }],
+        tools: [{
+          name: toolName,
+          description: isFrontmatterOnly
+            ? (input.locale === 'en' ? "Emit the trip's front matter (title, tagline, budget, lodging) — no days." : 'Emite los datos generales del viaje (título, tagline, presupuesto, alojamiento) — sin días.')
+            : (input.locale === 'en' ? "Emit this day's itinerary block." : 'Emite el bloque de itinerario de este día.'),
+          input_schema: toolSchema,
+        }],
+        tool_choice: { type: 'tool', name: toolName },
+        messages: [{ role: 'user', content: buildPrompt(input) }],
+      }),
+      signal,
+    })
+  } catch (fetchErr) {
+    // Same fetch-throws case generate-trip/index.ts used to classify --
+    // no .status attached, so runUnitWithRetries treats it as transient.
+    const message = fetchErr instanceof Error ? fetchErr.message : String(fetchErr)
+    logGenerationMetric({ ...metricBase, ms: Date.now() - startedAt, status_code: null, error: message.slice(0, 500) })
+    throw new Error(`direct Anthropic call fetch failed: ${message}`)
+  }
+
+  const ms = Date.now() - startedAt
+
+  if (!res.ok) {
+    const errText = await res.text().catch(() => '')
+    logGenerationMetric({ ...metricBase, ms, status_code: res.status, error: errText.slice(0, 500) })
+    const err = new Error(`direct Anthropic call returned ${res.status}: ${errText.slice(0, 500)}`)
+    ;(err as any).status = res.status // 400/401/403 -> permanent, per runUnitWithRetries' classification
+    throw err
+  }
+
+  const data = await res.json()
+
+  if (data.stop_reason === 'max_tokens') {
+    logGenerationMetric({
+      ...metricBase, ms, status_code: null, error: 'max_tokens truncation',
+      input_tokens: data.usage?.input_tokens ?? null,
+      output_tokens: data.usage?.output_tokens ?? null,
+      stop_reason: 'max_tokens',
+      cost_usd: computeCostUsd(model, data.usage),
+    })
+    throw new Error('max_tokens truncation')
+  }
+
+  logGenerationMetric({
+    ...metricBase,
+    ok: true,
+    ms,
+    input_tokens:  data.usage?.input_tokens ?? null,
+    output_tokens: data.usage?.output_tokens ?? null,
+    cache_read:    data.usage?.cache_read_input_tokens ?? null,
+    stop_reason:   data.stop_reason ?? null,
+    cost_usd:      computeCostUsd(model, data.usage),
+  })
+
+  const toolUse = Array.isArray(data.content)
+    ? data.content.find((c: any) => c?.type === 'tool_use' && c?.name === toolName)
+    : null
+  if (!toolUse?.input) {
+    throw new Error('no tool_use in direct Anthropic response')
+  }
+  if (isInvalidShape(toolUse.input, isFrontmatterOnly)) {
+    throw new Error('invalid shape: model produced no itinerary days')
+  }
+
+  const budgetCurrencySuspect = isFrontmatterOnly
+    ? isBudgetCurrencySuspect(toolUse.input.budget_breakdown, input.currency, input.nights, computeHeadcount(input))
+    : null
+
+  return { chunk: toolUse.input, budgetCurrencySuspect }
 }
 
 // ── NEW: front-matter generation (title/tagline/hero_tags/before_you_go/
@@ -532,12 +700,7 @@ async function generateFrontmatter(
     attempt,
   }
 
-  const res = await callGenerateTrip(payload, signal)
-  if (!res?.trip_data) throw new Error('frontmatter response missing trip_data')
-  return {
-    chunk: res.trip_data,
-    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
-  }
+  return callAnthropicForChunk(payload, true, -1, signal, jobId, attempt)
 }
 
 // ── NEW: skeleton pre-pass ─────────────────────────────────────────────────
