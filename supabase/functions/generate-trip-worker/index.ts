@@ -5,25 +5,33 @@
 // Contract:
 //   - Invoked with { job_id } (POST body).
 //   - Reads the job row. Idempotent: exits cleanly if already completed/failed.
-//   - SINGLE-CITY: runs a cheap Haiku "skeleton" pre-pass (one theme/
-//     neighborhood/anchor/pace entry per day), then generates all days
-//     CONCURRENTLY (batches of SC_CONCURRENCY), each a standalone 1-day Claude
-//     call anchored to its skeleton entry instead of a sequential
-//     previous-day summary.
-//   - MULTI-CITY: unchanged — sequential per-segment generation with the
-//     original previous_day_summary continuity hint. Nothing in this file's
-//     multi-city path was touched; see the 2026-09-23 PR description for
-//     why (the day-level concurrency redesign was scoped to single-city).
+//   - ONE PIPELINE for both single-city and multi-city (2026-09-29 multi-
+//     city migration — previously multi-city ran a fully separate sequential
+//     per-segment loop with a previous_day_summary continuity hint; deleted,
+//     see git history for runSequentialMultiCity/planMultiCityChunks if you
+//     need it). Runs a cheap Haiku "skeleton" pre-pass (one theme/
+//     neighborhood/anchor/pace/city/travel_day/transfer_hours entry per
+//     day, across the WHOLE trip regardless of how many cities), then
+//     generates all days CONCURRENTLY (batches of SC_CONCURRENCY), each a
+//     standalone 1-day Claude call anchored to its skeleton entry instead of
+//     a sequential previous-day summary. For multi-city, planMultiCityDays()
+//     assigns each day a city/origin/travel-day flag deterministically from
+//     the segment list (never left to the model), and generateDayChunk
+//     overrides that day's destination/origin accordingly. Multi-city stays
+//     on Sonnet 4.6 via the GENERATE_TRIP_MODEL secret (resolveDayModel
+//     below) — its tool-calling shape was never migrated to Sonnet 5.5's
+//     strict mode, a deliberate, separate later decision.
 //   - When all chunks are persisted, assembles them into final trip_data,
 //     writes result on the job row, inserts the trip row, sets status='completed'.
 //   - If runtime budget gets low, exits with status='running'; the
 //     self-reinvoke chain (or the reconciler) re-invokes and resumes from
 //     chunks_done.
 //
-// The existing /functions/v1/generate-trip Edge Function produces a full trip
-// in one call. For v1 we delegate per-chunk generation to the SAME Edge Function
-// by calling it with day-scoped inputs, then combine the results here. This
-// avoids re-implementing prompt engineering in two places.
+// Day/front-matter generation calls Anthropic directly (see
+// callAnthropicOnce below) rather than delegating to the /functions/v1/
+// generate-trip Edge Function over HTTP — see the 2026-09-28 HTTP-
+// extraction PR note further down for why. generate-trip is still used for
+// single-block duplicate-venue repair (regenerateDuplicateBlock).
 
 // deno-lint-ignore-file no-explicit-any
 // @ts-nocheck — Deno runtime; types resolved at deploy time
@@ -111,16 +119,27 @@ const MODEL_RATES: Record<string, { input: number; cacheWrite: number; cacheRead
 // regression on the clean HTTP-extracted pipeline showed ~22s wall vs 4.6's
 // ~37s, $0.129/trip vs $0.175, 0/70 retries, clean accommodations/dupes.
 // Deliberately its OWN env var, NOT the GENERATE_TRIP_MODEL secret
-// generate-trip/index.ts's own MODEL resolution reads -- that path (multi-
-// city, sync, regenerate-duplicate-block) still uses forced tool_choice
+// generate-trip/index.ts's own MODEL resolution reads -- that path (sync,
+// regenerate-duplicate-block) still uses forced tool_choice
 // (tool_choice:"tool"), which 400s on Sonnet 5.5, and was never migrated to
 // the strict-mode shape (out of scope, see PR description). Sharing one
 // lever would mean flipping either path's rollback silently breaks the
 // other's request shape. test_model is the same TEMPORARY model-evaluation
 // hook (backlog #101) -- REMOVE it once evaluation of whatever's next
 // concludes; the model default itself is no longer temporary.
+//
+// Multi-city (2026-09-29 migration onto this same pipeline) deliberately
+// stays on GENERATE_TRIP_MODEL/4.6, NOT GENERATE_TRIP_DAY_MODEL -- its
+// prompt (buildSegmentsContext's DAY -> CITY mapping, LODGING BY SEGMENT,
+// transition-day rules) was never exercised against Sonnet 5.5's strict
+// tool use, and getting that right (schema, effort, the travel-day framing
+// above) is a separate, later decision. Since resolveDayModel never returns
+// a Sonnet 5.5 model ID for a multi-city job, isSonnet55() downstream is
+// always false for it -- the request naturally takes the original forced-
+// tool_choice shape with zero extra branching needed at the call site.
 function resolveDayModel(jobInputs: Record<string, any>): string {
   if (typeof jobInputs.test_model === 'string') return jobInputs.test_model
+  if (getTripSegments(jobInputs)) return Deno.env.get('GENERATE_TRIP_MODEL') ?? 'claude-sonnet-4-6'
   return Deno.env.get('GENERATE_TRIP_DAY_MODEL') ?? 'claude-sonnet-5-5'
 }
 
@@ -221,29 +240,17 @@ console.log('[worker] env check:', {
   anthropic_key_present: !!ANTHROPIC_API_KEY,
 })
 
-// ── MC_* — multi-city constants (UNCHANGED values — see file header) ─────
+// ── SC_* — day-level concurrency constants (single-city AND multi-city) ──
 //
-// Deliberately NOT shared with the single-city SC_* constants below: MC_
-// still runs 3-5 day segments at ~130s each and would abort mid-generation
-// if it ever inherited SC_'s 60s/70s budget, which is sized for 1-day
-// chunks. Two fully separate constant sets, two fully separate functions.
-//
-// Budget: Supabase Free Edge Functions cap at 150s. A 5-day segment on
-// Sonnet 4.6 takes ~100s — ~45s margin under the 145s timeout — sized
-// for real-world variance, not the optimistic average. See history
-// below and scripts/test-sonnet-4-6-shape.ts for the diagnostic data.
-const MC_BUDGET_FLOOR_MS = 135_000
-const MC_CHUNK_TIMEOUT_MS = 145_000
-// Segment size for multi-city sub-chunking — number of days per generate-trip
-// call within one real-world segment. History:
-//   • Pre-2026-04: 1 day per call. 30-chunk chains were fragile.
-//   • 2026-04 → 2026-05-25: 10 days on Sonnet 4.0.
-//   • 2026-05-26 morning: tried 7 days on Sonnet 4.6 — failed in prod.
-//   • 2026-05-26 evening: dropped to 5 days on Sonnet 4.6 — ~100s, ~45s margin.
-// Keep in sync with `app/api/trips/jobs/route.ts`'s multi-city chunksTotal math.
-const MC_SEGMENT_DAYS = 5
-
-// ── SC_* — single-city constants (NEW — day-level concurrency redesign) ──
+// Originally single-city-only (hence the name, kept for minimal diff —
+// not worth a file-wide rename); as of the 2026-09-29 multi-city migration
+// this same set governs multi-city jobs too, since a multi-city trip is now
+// just a day plan whose city varies (see planMultiCityDays below) rather
+// than a separate sequential per-segment loop. The old MC_* constant set
+// (135s/145s budgets sized for 3-5-day HTTP sub-chunks) is gone along with
+// the sequential loop that used it — a multi-city day chunk is exactly the
+// same shape and cost as a single-city one, so it fits the SAME 60s/70s
+// budget math below without adjustment.
 //
 // One Claude call per day, up to SC_CONCURRENCY days in flight at once,
 // each bounded by its own 60s timeout. Replaces the old 5-day sequential
@@ -381,13 +388,16 @@ type SkeletonDay = {
   key_restaurant: string
   key_breakfast:  string
   key_site:       string
-  // city/travel_day/transfer_hours: schema is ready for the multi-city
-  // unification follow-up (see PR discussion — single-city ships alone in
-  // THIS PR; the outline pass hasn't yet been proven to respect a
-  // pre-specified segment list, only tested inventing its own routing).
-  // Unused by the single-city path today: every day is the same city, so
-  // generateSkeleton() below always sets city to the trip destination and
-  // travel_day to false.
+  // city/travel_day/transfer_hours: used by the 2026-09-29 multi-city
+  // migration (planMultiCityDays below). city and travel_day are ALWAYS
+  // deterministic overrides applied after the Haiku call returns, for both
+  // single- and multi-city — never left to the model, since the segment
+  // list already answers both with certainty. transfer_hours is the one
+  // field genuinely left to the model: a real-world estimate of how long
+  // the transfer between two specific cities takes, which the code has no
+  // way to know on its own. Single-city: city is always the trip
+  // destination, travel_day is always false, transfer_hours is always 0 (no
+  // transfer exists) — unchanged from before this migration.
   city:           string
   travel_day:     boolean
   transfer_hours: number
@@ -448,56 +458,76 @@ function getTripSegments(jobInputs: Record<string, any>): TripSegment[] | null {
   return valid.length >= 2 ? (valid as TripSegment[]) : null
 }
 
-// Sub-chunk plan for multi-city jobs (UNCHANGED). A long segment (e.g. 23
-// days in Gothenburg) won't fit a single Edge Fn call, so we further split
-// each segment into sub-chunks of at most MC_SEGMENT_DAYS. Each plan entry
-// describes one Edge Fn call. Chunk indexing in the job table maps
-// directly to this array's index.
-type ChunkPlanEntry = {
-  segmentIndex: number   // which segment of the chain this chunk belongs to
-  subIndex:     number   // 0-indexed position within that segment
-  segSubCount:  number   // total sub-chunks for this segment (for the AI hint)
-  dayOffset:    number   // day offset within the segment (0-indexed)
-  subDays:      number   // number of days this chunk covers
-}
-
-function planMultiCityChunks(segments: TripSegment[]): ChunkPlanEntry[] {
-  const plan: ChunkPlanEntry[] = []
-  for (let segIdx = 0; segIdx < segments.length; segIdx++) {
-    // nights+1 = inclusive day count for the segment (check-in day through
-    // check-out day). Same-day segments still produce 1 day.
-    const segDays = Math.max(1, segments[segIdx].nights + 1)
-    const subCount = Math.ceil(segDays / MC_SEGMENT_DAYS)
-    let offset = 0
-    for (let subIdx = 0; subIdx < subCount; subIdx++) {
-      const subDays = Math.min(MC_SEGMENT_DAYS, segDays - offset)
-      plan.push({
-        segmentIndex: segIdx,
-        subIndex:     subIdx,
-        segSubCount:  subCount,
-        dayOffset:    offset,
-        subDays,
-      })
-      offset += subDays
-    }
-  }
-  return plan
-}
-
-// Pure helper exposed for the API route to compute chunks_total without
-// duplicating the planning logic. Returns the count (≥1).
-function countMultiCityChunks(segments: TripSegment[]): number {
-  return planMultiCityChunks(segments).length
-}
-
-// ── NEW: single-city day plan ─────────────────────────────────────────────
+// ── Day plan (single-city AND multi-city) ─────────────────────────────────
 // One entry per day (SC_DAYS_PER_CHUNK=1 today; kept as a loop over the
 // constant rather than hardcoded, so a future tuning pass can change the
-// step without touching call sites). Returns 0-indexed day offsets.
+// step without touching call sites). Returns 0-indexed day offsets. Used
+// as-is for both city modes — a day chunk is a day chunk regardless of
+// which city it belongs to; planMultiCityDays below is what supplies the
+// PER-DAY city/origin/travel information layered on top of this same list.
 function planChunks(totalDays: number): number[] {
   const days: number[] = []
   for (let d = 0; d < totalDays; d += SC_DAYS_PER_CHUNK) days.push(d)
   return days
+}
+
+// Per-day city assignment for a multi-city trip, replacing the old
+// planMultiCityChunks (which grouped up to MC_SEGMENT_DAYS days into one
+// HTTP call to generate-trip — gone along with the sequential loop that
+// used it). Index i of the returned array corresponds to dayIndex i in
+// planChunks(totalDays)'s output (0-indexed, trip-wide across every
+// segment concatenated) — every day chunk is exactly 1 day, so "chunk
+// boundaries" and "city boundaries" are the same thing by construction;
+// there's no sub-chunking left to snap to a city change, a day IS the unit.
+//
+// city/origin/segmentIndex are fully deterministic from the segment list —
+// never left to the model. travelDay marks the LAST day of every segment
+// except the final one (matches buildSegmentsContext's own documented
+// transition-day rule in prompt.ts, so the day-writer's per-day framing and
+// the shared multi-city prompt context agree on which days are travel days).
+type MultiCityDayInfo = {
+  city:         string
+  origin:       string
+  segmentIndex: number
+  travelDay:    boolean
+  // This day's actual calendar date, derived from ITS OWN segment's
+  // startDate + offset -- not from the trip-wide start date + a global day
+  // index. Segments are trusted to be contiguous (day-count math elsewhere
+  // in this file already assumes this), but deriving dates per-segment
+  // rather than via a single running offset means a gap or overlap in the
+  // segment list can't silently shift every later city's dates.
+  dateISO:      string
+}
+
+function planMultiCityDays(segments: TripSegment[], jobOrigin: string | undefined): MultiCityDayInfo[] {
+  const out: MultiCityDayInfo[] = []
+  for (let segIdx = 0; segIdx < segments.length; segIdx++) {
+    const seg = segments[segIdx]
+    // nights+1 = inclusive day count for the segment (check-in day through
+    // check-out day). Same-day segments still produce 1 day.
+    const segDays = Math.max(1, seg.nights + 1)
+    const segOrigin = seg.origin
+      ?? (segIdx === 0 ? (jobOrigin ?? '') : segments[segIdx - 1].destination)
+    const isFinalSegment = segIdx === segments.length - 1
+    for (let d = 0; d < segDays; d++) {
+      out.push({
+        city:         seg.destination,
+        origin:       segOrigin,
+        segmentIndex: segIdx,
+        travelDay:    d === segDays - 1 && !isFinalSegment,
+        dateISO:      addDaysISO(seg.startDate, d),
+      })
+    }
+  }
+  return out
+}
+
+// Trip-wide day count for a multi-city trip — same formula used everywhere
+// else in this file that needs it (assembleResult's totalTripDays, serve()'s
+// expectedDays). Kept as its own named function rather than inlined at each
+// call site so the formula can't drift between them.
+function countMultiCityDays(segments: TripSegment[]): number {
+  return segments.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
 }
 
 function addDaysISO(isoDate: string, days: number): string {
@@ -508,60 +538,18 @@ function addDaysISO(isoDate: string, days: number): string {
 
 type SegmentResult = { chunk: ChunkContent; budgetCurrencySuspect: boolean | null }
 
-// Multi-city segment generation (UNCHANGED behavior) — kept as its own
-// function so the single-city day-chunk path below doesn't have to thread
-// prevSummary through a shared signature.
-async function generateMultiCitySegment(
-  jobInputs: Record<string, any>,
-  chunkIndex: number,
-  prevSummary: string | null,
-  signal: AbortSignal,
-  jobId: string,
-): Promise<SegmentResult> {
-  const multiCity = getTripSegments(jobInputs)!
-  const plan   = planMultiCityChunks(multiCity)
-  if (chunkIndex >= plan.length) {
-    throw new Error(`chunk_index ${chunkIndex} out of range for multi-city plan (length ${plan.length})`)
-  }
-  const entry = plan[chunkIndex]
-  const seg   = multiCity[entry.segmentIndex]
-
-  const subStartDate = addDaysISO(seg.startDate, entry.dayOffset)
-  const subEndDate   = addDaysISO(seg.startDate, entry.dayOffset + entry.subDays - 1)
-
-  const segOrigin = seg.origin
-    ?? (entry.segmentIndex === 0 ? jobInputs.origin : multiCity[entry.segmentIndex - 1].destination)
-
-  const { segments: _drop, ...singleCityBase } = jobInputs as any
-
-  const segmentPayload = {
-    ...singleCityBase,
-    destination:  seg.destination,
-    origin:       segOrigin,
-    start:        subStartDate,
-    end:          subEndDate,
-    nights:       Math.max(0, entry.subDays - 1),
-    duration_days: entry.subDays,
-    previous_day_summary: prevSummary ?? undefined,
-    segment_index:    entry.segmentIndex,
-    total_segments:   multiCity.length,
-    sub_chunk_index:  entry.subIndex,
-    sub_chunk_total:  entry.segSubCount,
-    job_id:           jobId,
-  }
-
-  const res = await callGenerateTrip(segmentPayload, signal)
-  if (!res?.trip_data) throw new Error('segment response missing trip_data')
-  return {
-    chunk: res.trip_data,
-    budgetCurrencySuspect: typeof res.budget_currency_suspect === 'boolean' ? res.budget_currency_suspect : null,
-  }
-}
-
-// ── NEW: single-city per-day chunk generation ─────────────────────────────
+// ── Per-day chunk generation (single-city AND multi-city) ────────────────
 // One day per call. No previous_day_summary — anti-repetition/continuity
 // comes from the upfront skeleton pre-pass instead (see generateSkeleton
-// below), so days can be generated in any order / concurrently.
+// below), so days can be generated in any order / concurrently. For multi-
+// city, dayInfo (from planMultiCityDays) overrides destination/origin to
+// this specific day's city — jobInputs.destination/origin, whatever the
+// client sent, is the FIRST segment's at best and irrelevant for any later
+// one. segments itself is NOT stripped from the payload (the old
+// generateMultiCitySegment used to drop it) — buildPrompt's own
+// isMultiCity(input.segments) check needs it present to render the DAY →
+// CITY MAPPING / LODGING BY SEGMENT / transition-day context every day
+// chunk (and the front-matter call) relies on.
 async function generateDayChunk(
   jobInputs: Record<string, any>,
   dayIndex: number,
@@ -571,9 +559,14 @@ async function generateDayChunk(
   signal: AbortSignal,
   jobId: string,
   attempt: number,
+  dayInfo: MultiCityDayInfo | null = null,
 ): Promise<SegmentResult> {
   const tripStartISO   = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
-  const dayStartISO    = addDaysISO(tripStartISO, dayIndex)
+  // dayInfo.dateISO (derived from THIS day's own segment) for multi-city --
+  // more robust than tripStartISO + dayIndex, which assumes every segment
+  // is back-to-back with no gap. Single-city (dayInfo null) keeps the
+  // original trip-start + offset computation, unchanged.
+  const dayStartISO    = dayInfo ? dayInfo.dateISO : addDaysISO(tripStartISO, dayIndex)
 
   const segmentPayload = {
     ...jobInputs,
@@ -587,8 +580,7 @@ async function generateDayChunk(
     // (sin pernocta)" -- directly triggering its own "no overnight -> leave
     // accommodations empty" instruction. 100% reproducible, not model
     // flakiness: confirmed live 2026-09-25, every single-city day chunk hit
-    // it. Multi-city never had this bug -- generateMultiCitySegment already
-    // passes `nights` as a real number per sub-chunk.
+    // it.
     nights:          Math.max(0, totalDays - 1),
     overnight:       totalDays > 1,
     segment_index:   dayIndex,
@@ -599,6 +591,13 @@ async function generateDayChunk(
     trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
     start: dayStartISO,
     end:   dayStartISO,
+    // Multi-city per-day overrides -- jobInputs.destination/origin (the
+    // client's top-level values) are, at best, only correct for the FIRST
+    // segment. destination/origin here are what buildPrompt actually reads
+    // for season/WC-context lines and the jet-lag block; segments (already
+    // present via the ...jobInputs spread above, not stripped) is what
+    // drives the DAY → CITY MAPPING / LODGING BY SEGMENT text itself.
+    ...(dayInfo ? { destination: dayInfo.city, origin: dayInfo.origin } : {}),
     day_skeleton:  daySkeleton ?? undefined,
     full_skeleton: fullSkeleton,
     job_id:        jobId,
@@ -844,6 +843,13 @@ async function generateFrontmatter(
 ): Promise<SegmentResult> {
   const tripStartISO = typeof jobInputs.start === 'string' ? jobInputs.start : new Date(jobInputs.start).toISOString().slice(0, 10)
 
+  // Multi-city: jobInputs.destination (whatever the client sent) isn't
+  // reliable for a chain -- destinationLine in buildPrompt already branches
+  // off segments itself for the actual prompt text, but input.destination
+  // still feeds season-line/WC-context helpers, so point it at the first
+  // city rather than leave it stale/generic.
+  const multiCity = getTripSegments(jobInputs)
+
   const payload = {
     ...jobInputs,
     duration_days:   totalDays,
@@ -853,6 +859,7 @@ async function generateFrontmatter(
     trip_start_date: tripStartISO,
     trip_end_date:   addDaysISO(tripStartISO, totalDays - 1),
     frontmatter_only: true,
+    ...(multiCity ? { destination: multiCity[0].destination } : {}),
     job_id:          jobId,
     attempt,
   }
@@ -884,6 +891,13 @@ const SKELETON_SCHEMA = {
           key_restaurant: { type: 'string' },
           key_breakfast:  { type: 'string' },
           key_site:       { type: 'string' },
+          // Optional -- only meaningfully asked of the model for multi-city
+          // travel days (see the prompt branch below). Not in `required`:
+          // single-city never mentions this field at all, so Haiku simply
+          // omits it there, and the post-call override below hardcodes 0
+          // for every non-travel day regardless of what (if anything) came
+          // back.
+          transfer_hours: { type: 'number' },
         },
       },
     },
@@ -895,6 +909,7 @@ async function generateSkeleton(
   totalDays: number,
   signal: AbortSignal,
   jobId: string,
+  multiCityDayPlan: MultiCityDayInfo[] | null,
 ): Promise<SkeletonDay[]> {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured for skeleton pass')
 
@@ -903,9 +918,39 @@ async function generateSkeleton(
   const isEN = jobInputs.locale === 'en'
   const interests = Array.isArray(jobInputs.interests) ? jobInputs.interests.join(', ') : ''
 
+  // Multi-city: tell Haiku which city each day belongs to and which days
+  // are travel days, so its theme/neighborhood/venue assignments land in
+  // the RIGHT city per day instead of drifting toward whichever city
+  // jobInputs.destination happens to name. city/travel_day themselves are
+  // NEVER trusted from the model (see the deterministic override below) --
+  // this context exists so the THINGS the model DOES decide (theme,
+  // neighborhood, venues, transfer_hours) are coherent with a plan it
+  // already knows is fixed, not so it re-derives the plan itself.
+  const dayPlanLines = multiCityDayPlan
+    ? multiCityDayPlan.map((d, i) => {
+        const dayNum = i + 1
+        if (!d.travelDay) {
+          return isEN ? `  Day ${dayNum}: ${d.city}` : `  Día ${dayNum}: ${d.city}`
+        }
+        // Next city is whichever segment's day-1 comes right after this one.
+        const nextCity = multiCityDayPlan[i + 1]?.city ?? d.city
+        return isEN
+          ? `  Day ${dayNum}: ${d.city} → ${nextCity} (TRAVEL DAY -- estimate transfer_hours realistically for this route; keep key_restaurant/key_breakfast modest and near the transfer, key_site can be light or omitted in spirit)`
+          : `  Día ${dayNum}: ${d.city} → ${nextCity} (DÍA DE TRASLADO -- estima transfer_hours de forma realista para esta ruta; mantén key_restaurant/key_breakfast modestos y cerca del traslado, key_site puede ser ligero)`
+      }).join('\n')
+    : ''
+
+  const multiCityBlock = multiCityDayPlan
+    ? (isEN
+        ? `\n\nThis is a MULTI-CITY trip. Each day belongs to a specific city -- use EXACTLY this day → city assignment, do not invent your own routing:\n${dayPlanLines}\nFor travel days, also fill transfer_hours (a realistic estimate in hours for that specific route -- your general knowledge of typical flight/bus/ferry times between these places). Leave transfer_hours at 0 (or omit it) for every non-travel day.`
+        : `\n\nEste es un viaje MULTI-CIUDAD. Cada día pertenece a una ciudad específica -- usa EXACTAMENTE esta asignación día → ciudad, no inventes tu propia ruta:\n${dayPlanLines}\nPara los días de traslado, llena también transfer_hours (una estimación realista en horas para esa ruta específica -- tu conocimiento general de tiempos típicos de vuelo/autobús/ferry entre estos lugares). Deja transfer_hours en 0 (u omítelo) en cada día que no sea de traslado.`)
+    : ''
+
+  const destinationForPrompt = multiCityDayPlan ? (isEN ? 'multiple cities (see below)' : 'varias ciudades (ver abajo)') : jobInputs.destination
+
   const prompt = isEN
-    ? `Plan a lightweight day-by-day skeleton for a ${totalDays}-day trip to ${jobInputs.destination} (traveler: ${jobInputs.traveler ?? 'n/a'}, pace: ${jobInputs.pace ?? 'n/a'}, budget: ${jobInputs.budget ?? 'n/a'}, interests: ${interests || 'general'}). For EACH day (1 to ${totalDays}), give: a short theme, the main neighborhood/area, one anchor activity or place, the pace, ONE NAMED restaurant for that day's signature lunch/dinner (key_restaurant), ONE NAMED, DIFFERENT restaurant/café/bakery for that day's breakfast (key_breakfast — every day needs its own breakfast spot too, this is NOT the same slot as key_restaurant), and ONE NAMED site/attraction for that day's key activity (key_site). All three must be real, specific place names, never a category like "a local café". You are assigning these across the WHOLE trip in one pass, so you can see every day at once: EVERY key_restaurant, EVERY key_breakfast, and EVERY key_site across all ${totalDays} days MUST be a DIFFERENT real place from every other day's — no venue of any kind may be assigned to more than one day, and key_restaurant must differ from key_breakfast within the same day too. Also vary neighborhoods and anchors across days. Call the emit_skeleton tool with exactly ${totalDays} day entries, one per day from 1 to ${totalDays}.`
-    : `Planea un esqueleto ligero día por día para un viaje de ${totalDays} días a ${jobInputs.destination} (viajero: ${jobInputs.traveler ?? 'n/a'}, ritmo: ${jobInputs.pace ?? 'n/a'}, presupuesto: ${jobInputs.budget ?? 'n/a'}, intereses: ${interests || 'generales'}). Para CADA día (1 a ${totalDays}), da: un tema breve, la zona/barrio principal, una actividad o lugar ancla, el ritmo, UN restaurante CON NOMBRE para la comida/cena principal del día (key_restaurant), UN restaurante/café/panadería CON NOMBRE, DIFERENTE, para el desayuno de ese día (key_breakfast — cada día necesita también su propio lugar de desayuno, NO es el mismo espacio que key_restaurant), y UN sitio/atracción CON NOMBRE para la actividad clave del día (key_site). Los tres deben ser lugares reales y específicos, nunca una categoría como "un café local". Estás asignando esto para TODO el viaje en una sola pasada, así que ves todos los días a la vez: CADA key_restaurant, CADA key_breakfast y CADA key_site en los ${totalDays} días DEBE ser un lugar real DIFERENTE al de cualquier otro día — ningún lugar de ningún tipo puede asignarse a más de un día, y key_restaurant debe ser distinto de key_breakfast dentro del mismo día también. Varía también zonas y anclas entre días. Llama a la herramienta emit_skeleton con exactamente ${totalDays} entradas de día, una por cada día de 1 a ${totalDays}.`
+    ? `Plan a lightweight day-by-day skeleton for a ${totalDays}-day trip to ${destinationForPrompt} (traveler: ${jobInputs.traveler ?? 'n/a'}, pace: ${jobInputs.pace ?? 'n/a'}, budget: ${jobInputs.budget ?? 'n/a'}, interests: ${interests || 'general'}). For EACH day (1 to ${totalDays}), give: a short theme, the main neighborhood/area, one anchor activity or place, the pace, ONE NAMED restaurant for that day's signature lunch/dinner (key_restaurant), ONE NAMED, DIFFERENT restaurant/café/bakery for that day's breakfast (key_breakfast — every day needs its own breakfast spot too, this is NOT the same slot as key_restaurant), and ONE NAMED site/attraction for that day's key activity (key_site). All three must be real, specific place names, never a category like "a local café". You are assigning these across the WHOLE trip in one pass, so you can see every day at once: EVERY key_restaurant, EVERY key_breakfast, and EVERY key_site across all ${totalDays} days MUST be a DIFFERENT real place from every other day's — no venue of any kind may be assigned to more than one day, and key_restaurant must differ from key_breakfast within the same day too. Also vary neighborhoods and anchors across days.${multiCityBlock} Call the emit_skeleton tool with exactly ${totalDays} day entries, one per day from 1 to ${totalDays}.`
+    : `Planea un esqueleto ligero día por día para un viaje de ${totalDays} días a ${destinationForPrompt} (viajero: ${jobInputs.traveler ?? 'n/a'}, ritmo: ${jobInputs.pace ?? 'n/a'}, presupuesto: ${jobInputs.budget ?? 'n/a'}, intereses: ${interests || 'generales'}). Para CADA día (1 a ${totalDays}), da: un tema breve, la zona/barrio principal, una actividad o lugar ancla, el ritmo, UN restaurante CON NOMBRE para la comida/cena principal del día (key_restaurant), UN restaurante/café/panadería CON NOMBRE, DIFERENTE, para el desayuno de ese día (key_breakfast — cada día necesita también su propio lugar de desayuno, NO es el mismo espacio que key_restaurant), y UN sitio/atracción CON NOMBRE para la actividad clave del día (key_site). Los tres deben ser lugares reales y específicos, nunca una categoría como "un café local". Estás asignando esto para TODO el viaje en una sola pasada, así que ves todos los días a la vez: CADA key_restaurant, CADA key_breakfast y CADA key_site en los ${totalDays} días DEBE ser un lugar real DIFERENTE al de cualquier otro día — ningún lugar de ningún tipo puede asignarse a más de un día, y key_restaurant debe ser distinto de key_breakfast dentro del mismo día también. Varía también zonas y anclas entre días.${multiCityBlock} Llama a la herramienta emit_skeleton con exactamente ${totalDays} entradas de día, una por cada día de 1 a ${totalDays}.`
 
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -965,19 +1010,36 @@ async function generateSkeleton(
   if (!Array.isArray(days) || days.length === 0) {
     throw new Error('skeleton call returned no days')
   }
-  // city/travel_day/transfer_hours are on the SkeletonDay type (schema
-  // ready for the multi-city unification follow-up — see the type's own
-  // comment) but not asked of Haiku here: for a single-city trip, city is
-  // always the trip destination and there's no inter-city travel day by
-  // definition, so it's cheaper and more reliable to fill these
-  // deterministically than to spend tokens asking the model to restate
-  // something it can't get wrong-in-a-useful-way for this path.
-  return (days as any[]).map(d => ({
-    ...d,
-    city:           jobInputs.destination,
-    travel_day:     false,
-    transfer_hours: 0,
-  })) as SkeletonDay[]
+  // city/travel_day are ALWAYS deterministic overrides, single-city and
+  // multi-city alike -- never trusted from the model, since the segment
+  // list (or, for single-city, the simple fact there's only one city)
+  // already answers both with certainty. transfer_hours is the one field
+  // taken from the model, and only for days multiCityDayPlan itself marks
+  // as a travel day -- a non-travel day gets 0 regardless of what (if
+  // anything) Haiku returned for it, since only travel days ever explained
+  // that field to the model in the first place (see multiCityBlock above).
+  //
+  // Looked up by the model's OWN `day` field (1-indexed), NOT array
+  // position -- the downstream consumer (runOneUnit's
+  // `skeleton!.find(s => s.day === unit + 1)`) never assumed the array
+  // comes back in order either, and there's no validation anywhere forcing
+  // Haiku to return exactly N entries in 1..N order. Using array index here
+  // would silently pair the wrong city/travel_day with a day if the model
+  // ever reorders or skips one.
+  return (days as any[]).map((d) => {
+    const dayNum = typeof d.day === 'number' ? d.day : null
+    const planEntry = dayNum !== null ? (multiCityDayPlan?.[dayNum - 1] ?? null) : null
+    const rawTransferHours = typeof d.transfer_hours === 'number' && Number.isFinite(d.transfer_hours) ? d.transfer_hours : null
+    return {
+      ...d,
+      city:           planEntry?.city ?? jobInputs.destination,
+      travel_day:     planEntry?.travelDay ?? false,
+      // Fallback of 4h if the model marks a travel day but omits/garbles
+      // the estimate -- better than 0 (which would tell the day-writer
+      // "no transfer to account for" on a day we KNOW is one).
+      transfer_hours: planEntry?.travelDay ? (rawTransferHours ?? 4) : 0,
+    }
+  }) as SkeletonDay[]
 }
 
 // Pull days from a chunk regardless of where the field lives. The sync endpoint
@@ -1091,29 +1153,39 @@ function assertChunksIntegrity(chunks: ChunkContent[], expectedDays: number, fro
   }
 }
 
+// Strips accents, lowercases, trims, collapses whitespace -- enough to
+// match "San José" against "San Jose", or "  Roma " against "roma". NOT a
+// translation layer: "Panama City" vs "Ciudad de Panamá" still won't match
+// on normalization alone, which is why the LODGING BY SEGMENT prompt block
+// (prompt.ts) explicitly tells the model `city: "${s.destination}" <- use
+// this exact value` -- the same instruction that's already proven reliable
+// for single-city's own city field across this whole session's testing.
+function normalizeCityForMatch(s: unknown): string {
+  if (typeof s !== 'string') return ''
+  return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ')
+}
+
 function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, frontmatterOverride?: ChunkContent | null): Record<string, any> {
-  // Concatenate per-segment outputs into a single trip_data shape matching
-  // what the sync endpoint returns. Each chunk is a segment containing up
-  // to MC_SEGMENT_DAYS days (multi-city) or exactly 1 day (single-city). Day
-  // numbers are cumulative across segments so users see "Day 17" not
-  // "Segment 2 Day 7". Trip-level metadata (title, subtitle, budget,
-  // packing) comes from the first segment, UNLESS frontmatterOverride is
-  // given (single-city's front-matter is now its own concurrent unit, not
-  // day-chunk 0 — see generateFrontmatter) in which case it's the source
-  // instead. Multi-city always passes undefined here, unchanged behavior.
+  // Concatenate per-day outputs into a single trip_data shape matching what
+  // the sync endpoint returns. Every chunk is exactly 1 day, single-city or
+  // multi-city alike (multi-city's old up-to-5-day HTTP sub-chunks are gone
+  // — 2026-09-29 migration). Day numbers are cumulative across the whole
+  // trip so users see "Day 17" not "Segment 2 Day 7". Trip-level metadata
+  // (title, subtitle, budget, accommodations) always comes from
+  // frontmatterOverride now — front-matter is its own concurrent unit for
+  // both city modes (see generateFrontmatter), never day-chunk 0.
   const first     = frontmatterOverride ?? chunks[0] ?? {}
   const multiCity = getTripSegments(jobInputs)
   let dayCounter = 0
   const days: any[] = []
-  const accommodations: any[] = []
 
-  // Each segment is generated as an independent single-city call, so the
-  // AI numbers days from 1 *within* that segment. After we bump day_number
-  // to be cumulative across the trip, the AI-emitted strings ("Día 7 ·
-  // Gothenburg — ...") become inconsistent with the card header ("DÍA 17").
-  // Rewrite the leading "Día N" / "Day N" prefix in day_label + title so
-  // the displayed numbers line up. Match Spanish + English; case-insensitive
-  // on the day word; tolerate spaces around the dot separator.
+  // Each day is generated as an independent isolated call, so the AI numbers
+  // it from 1 as if it were the only day. After we bump day_number to be
+  // cumulative across the trip, the AI-emitted strings ("Día 1 · Bocas del
+  // Toro — ...") become inconsistent with the card header ("DÍA 6"). Rewrite
+  // the leading "Día N" / "Day N" prefix in day_label + title so the
+  // displayed numbers line up. Match Spanish + English; case-insensitive on
+  // the day word; tolerate spaces around the dot separator.
   const dayLeadRE = /^(D[ií]a|Day)\s+\d+/i
   function renumberLeadingDay(s: unknown, n: number): string | undefined {
     if (typeof s !== 'string' || !s) return s as undefined
@@ -1122,17 +1194,8 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, 
       : s
   }
 
-  // For multi-city: build chunk→segment mapping so we only count the FIRST
-  // sub-chunk of each segment for accommodations (a long segment splits
-  // into multiple sub-chunks, each of which would emit its own
-  // accommodation entry — we want one per segment, not one per sub-chunk).
-  const plan = multiCity ? planMultiCityChunks(multiCity) : null
-  const accommodationsSeenForSegment = new Set<number>()
-
-  for (let chunkIdx = 0; chunkIdx < chunks.length; chunkIdx++) {
-    const chunk = chunks[chunkIdx]
-    const segmentDays = chunkDays(chunk)
-    for (const day of segmentDays) {
+  for (const chunk of chunks) {
+    for (const day of chunkDays(chunk)) {
       dayCounter += 1
       days.push({
         ...day,
@@ -1141,54 +1204,80 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, 
         title:      renumberLeadingDay((day as any).title,     dayCounter),
       })
     }
-    // Accommodations: in single-city, every chunk's accommodation block
-    // describes the same lodging (or the AI's best guess each time); pick
-    // the first non-empty. In multi-city, take exactly one per segment —
-    // from the first sub-chunk of each segment — and skip duplicates from
-    // sub-chunks that re-emit the same hotel.
-    //
-    // Date rewrite: the AI emits checkInDate / checkOutDate / nights for
-    // whatever sub-range the chunk covered (often only 1 night, now that
-    // single-city chunks are day-sized), so on multi-chunk trips the
-    // surviving hotel entry would say "1 noche" when the actual stay spans
-    // the full trip. Patch the dates to the TRIP-level (single-city) or
-    // SEGMENT-level (multi-city) span so the hotel card shows what the
-    // traveler actually books.
-    const chunkAccs = Array.isArray((chunk as any)?.accommodations) ? (chunk as any).accommodations : []
-    if (chunkAccs.length === 0) continue
-    if (plan) {
-      const segIdx = plan[chunkIdx]?.segmentIndex
-      if (segIdx !== undefined && !accommodationsSeenForSegment.has(segIdx)) {
-        const seg = multiCity![segIdx]
-        const patched = chunkAccs.map((a: any) => ({
-          ...a,
-          checkInDate:  seg.startDate,
-          checkOutDate: seg.endDate,
-          nights:       Math.max(0, seg.nights),
-        }))
-        accommodations.push(...patched)
-        accommodationsSeenForSegment.add(segIdx)
+  }
+
+  // Accommodations — sourced ENTIRELY from front-matter now (day chunks use
+  // TRIP_SCHEMA_DAYS_ONLY, which has no accommodations field at all, so
+  // there's nothing to collect from `chunks` any more regardless of city
+  // mode). Date rewrite: the AI is given exact checkInDate/checkOutDate/
+  // nights per entry in the LODGING (single-city) / LODGING BY SEGMENT
+  // (multi-city) prompt block and told to use them as-is, but they're
+  // patched here deterministically anyway rather than trusted blindly.
+  const rawAccommodations: any[] = Array.isArray((first as any).accommodations) ? (first as any).accommodations : []
+  let accommodations: any[]
+  if (multiCity) {
+    // One entry per OVERNIGHT segment (nights > 0), matched by the
+    // accommodationItem.city field the prompt explicitly asks the model to
+    // echo back — NOT by array position, so a model miscount doesn't
+    // silently attach the wrong dates to the wrong city. A same-day segment
+    // (nights: 0 -- prompt.ts's sameDayNote explicitly tells the model NOT
+    // to emit one) is skipped here too, so its legitimate absence can't be
+    // confused with a real miss. An OVERNIGHT segment with no match FAILS
+    // the job (thrown, caught by the call site) rather than shipping a
+    // multi-city trip silently missing lodging for one of its cities — same
+    // stance as the CRITICA accommodations-empty check below, just
+    // city-aware.
+    const used = new Set<number>()
+    const matched: any[] = []
+    const missingSegments: string[] = []
+    for (const seg of multiCity.filter(s => s.nights > 0)) {
+      const target = normalizeCityForMatch(seg.destination)
+      let foundIdx = -1
+      for (let i = 0; i < rawAccommodations.length; i++) {
+        if (used.has(i)) continue
+        const candidate = normalizeCityForMatch(rawAccommodations[i]?.city)
+        if (candidate && (candidate === target || candidate.includes(target) || target.includes(candidate))) {
+          foundIdx = i
+          break
+        }
       }
-    } else if (accommodations.length === 0) {
-      // Single-city: take the first non-empty accommodation block and
-      // rewrite its dates/nights to the full trip span. jobInputs holds
-      // the trip-level start / end / duration_days (the client passes
-      // these through unchanged on /api/trips/jobs creation).
-      const tripStart = typeof jobInputs.start === 'string' ? jobInputs.start : undefined
-      const tripEnd   = typeof jobInputs.end   === 'string' ? jobInputs.end   : undefined
-      const tripNights = (() => {
-        const fromInputs = Number(jobInputs.duration_days)
-        if (Number.isFinite(fromInputs) && fromInputs > 0) return Math.max(0, fromInputs - 1)
-        return 0
-      })()
-      const patched = chunkAccs.map((a: any) => ({
-        ...a,
-        ...(tripStart ? { checkInDate:  tripStart } : {}),
-        ...(tripEnd   ? { checkOutDate: tripEnd   } : {}),
-        ...(tripNights > 0 ? { nights: tripNights } : {}),
-      }))
-      accommodations.push(...patched)
+      if (foundIdx === -1) {
+        missingSegments.push(seg.destination)
+        continue
+      }
+      used.add(foundIdx)
+      matched.push({
+        ...rawAccommodations[foundIdx],
+        checkInDate:  seg.startDate,
+        checkOutDate: seg.endDate,
+        nights:       Math.max(0, seg.nights),
+      })
     }
+    if (missingSegments.length > 0) {
+      const returnedCities = rawAccommodations.map((a: any) => (typeof a?.city === 'string' && a.city.trim()) || '(no city)').join(', ') || '(none)'
+      throw new Error(`assembleResult: no accommodation matched for segment(s) [${missingSegments.join(', ')}] -- model returned cities: [${returnedCities}]`)
+    }
+    accommodations = matched
+  } else if (rawAccommodations.length > 0) {
+    // Single-city: take the front-matter's accommodation block(s) and
+    // rewrite dates/nights to the full trip span. jobInputs holds the
+    // trip-level start / end / duration_days (the client passes these
+    // through unchanged on /api/trips/jobs creation).
+    const tripStart = typeof jobInputs.start === 'string' ? jobInputs.start : undefined
+    const tripEnd   = typeof jobInputs.end   === 'string' ? jobInputs.end   : undefined
+    const tripNights = (() => {
+      const fromInputs = Number(jobInputs.duration_days)
+      if (Number.isFinite(fromInputs) && fromInputs > 0) return Math.max(0, fromInputs - 1)
+      return 0
+    })()
+    accommodations = rawAccommodations.map((a: any) => ({
+      ...a,
+      ...(tripStart ? { checkInDate:  tripStart } : {}),
+      ...(tripEnd   ? { checkOutDate: tripEnd   } : {}),
+      ...(tripNights > 0 ? { nights: tripNights } : {}),
+    }))
+  } else {
+    accommodations = []
   }
 
   // Title patching:
@@ -1208,7 +1297,7 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, 
   // alone — already correct.
   const tripLocale: 'es' | 'en' = jobInputs.locale === 'en' ? 'en' : 'es'
   const totalTripDays = (() => {
-    if (multiCity) return multiCity.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
+    if (multiCity) return countMultiCityDays(multiCity)
     const fromInputs = Number(jobInputs.duration_days)
     return Number.isFinite(fromInputs) && fromInputs > 0 ? fromInputs : days.length
   })()
@@ -1279,7 +1368,7 @@ function assembleResult(chunks: ChunkContent[], jobInputs: Record<string, any>, 
     subtitle:         (first as any).subtitle ?? fallbackSubtitle,
     destination:      jobInputs.destination,
     days,
-    accommodations:   accommodations.length > 0 ? accommodations : ((first as any).accommodations ?? null),
+    accommodations:   accommodations.length > 0 ? accommodations : null,
     budget_breakdown: firstBudget,
     packing:          (first as any).packing  ?? null,
     // Preserve segments on the saved trip_data so the result page hydrates
@@ -1354,118 +1443,17 @@ async function consumeOneTripIfApplicable(admin: any, userId: string, jobId: str
   }
 }
 
-function shortSummary(chunk: ChunkContent): string {
-  // Compact summary of the segment we just generated, used as a continuity
-  // hint for the next segment's prompt (multi-city only — see file header).
-  // Picks day titles only (skipping activities to keep the summary short)
-  // so the next segment sees a sequence like "Day 1: Centro Histórico ·
-  // Day 2: Coyoacán · ...". Capped at 400 chars.
-  const days = chunkDays(chunk)
-  if (days.length === 0) return ''
-  const titles = days.map((d: any) => d?.title).filter(Boolean)
-  return titles.join(' · ').slice(0, 400)
-}
-
-// ── Forked entry points ────────────────────────────────────────────────────
-// Two fully separate functions, two fully separate constant sets (MC_* /
-// SC_*), no variable threaded conditionally between them (no shared
-// prevSummary-or-skeleton state). Each takes the shared mutable
-// chunksByIndex map (read/write, same purpose as before — resume support
-// + progress tracking) but nothing else is shared. Both return `Response`
-// to short-circuit on failure, or `null` to fall through to the shared
-// completion tail in serve() below (re-read job, self-reinvoke or
-// assemble-and-complete — identical for both paths, doesn't touch
-// per-path state).
-
-async function runSequentialMultiCity(
-  admin: any,
-  job: JobRow,
-  multiCity: TripSegment[],
-  chunksByIndex: Map<number, ChunkContent>,
-  startedAt: number,
-): Promise<Response | null> {
-  let prevSummary: string | null =
-    job.chunks_done > 0 && chunksByIndex.has(job.chunks_done - 1)
-      ? shortSummary(chunksByIndex.get(job.chunks_done - 1) as ChunkContent)
-      : null
-
-  for (let i = job.chunks_done; i < job.chunks_total; i++) {
-    const remainingBudget = 140_000 - (Date.now() - startedAt)
-    if (remainingBudget < MC_BUDGET_FLOOR_MS) break
-
-    const ctrl = new AbortController()
-    const t = setTimeout(() => ctrl.abort(), Math.min(MC_CHUNK_TIMEOUT_MS, remainingBudget - 2_000))
-
-    let chunk: ChunkContent
-    let chunkBudgetCurrencySuspect: boolean | null = null
-    try {
-      const segResult = await generateMultiCitySegment(job.inputs, i, prevSummary, ctrl.signal, job.id)
-      chunk = segResult.chunk
-      chunkBudgetCurrencySuspect = segResult.budgetCurrencySuspect
-    } catch (e) {
-      clearTimeout(t)
-      await admin
-        .from('generation_jobs')
-        .update({ status: 'failed', error: String(e).slice(0, 500) })
-        .eq('id', job.id)
-      // No refund -- credit is charged on completion now, not creation.
-      return new Response(JSON.stringify({ ok: false, status: 'failed' }), {
-        status: 502,
-        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-      })
-    }
-    clearTimeout(t)
-
-    chunksByIndex.set(i, chunk)
-
-    try {
-      const { error: insertErr } = await admin
-        .from('generation_chunks')
-        .insert({ job_id: job.id, chunk_index: i, content: chunk })
-      if (insertErr) throw new Error(`chunks insert failed: ${insertErr.message}`)
-
-      const chunksDoneUpdate: Record<string, unknown> = { chunks_done: i + 1 }
-      if (i === 0) chunksDoneUpdate.budget_currency_suspect = chunkBudgetCurrencySuspect
-      const { error: updateErr } = await admin
-        .from('generation_jobs')
-        .update(chunksDoneUpdate)
-        .eq('id', job.id)
-      if (updateErr) throw new Error(`chunks_done update failed: ${updateErr.message}`)
-
-      try {
-        const chunksOrdered: ChunkContent[] = []
-        for (let idx = 0; idx <= i; idx++) {
-          const c = chunksByIndex.get(idx)
-          if (c) chunksOrdered.push(c)
-        }
-        const partial = assembleResult(chunksOrdered, job.inputs)
-        const { error: partialErr } = await admin
-          .from('generation_jobs')
-          .update({ partial_result: partial } as any)
-          .eq('id', job.id)
-        if (partialErr) {
-          console.warn('[worker:mc] partial_result write failed at chunk', i, partialErr.message)
-        }
-      } catch (assemblyErr) {
-        console.warn('[worker:mc] partial_result assembly threw at chunk', i, assemblyErr)
-      }
-    } catch (persistErr) {
-      console.error('[worker:mc] chunk persist failed at index', i, persistErr)
-      await admin
-        .from('generation_jobs')
-        .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
-        .eq('id', job.id)
-      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
-        status: 500,
-        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-      })
-    }
-
-    prevSummary = shortSummary(chunk)
-  }
-
-  return null
-}
+// ── Single entry point (single-city AND multi-city) ───────────────────────
+// Was two fully separate functions (runSequentialMultiCity, sequential,
+// previous_day_summary continuity; runConcurrentSingleCity, concurrent,
+// skeleton continuity) until the 2026-09-29 multi-city migration deleted
+// the sequential one entirely. Multi-city is now just a day plan whose city
+// varies per entry (planMultiCityDays) -- same retry loop, same
+// concurrency batching, same persistence/progress/late-row-recovery code as
+// single-city, zero duplication. Takes the shared mutable chunksByIndex map
+// (read/write — resume support + progress tracking). Returns `Response` to
+// short-circuit on failure, or `null` to fall through to the shared
+// completion tail in serve() below.
 
 // Unit index -1 is a sentinel for "front-matter" (title/tagline/hero_tags/
 // before_you_go/budget_breakdown/accommodations, no days). 0..totalDays-1
@@ -1474,13 +1462,22 @@ async function runSequentialMultiCity(
 // (negative integers are fine in that column; no schema change needed).
 const FRONTMATTER_UNIT = -1
 
-async function runConcurrentSingleCity(
+async function runConcurrentTrip(
   admin: any,
   job: JobRow,
   chunksByIndex: Map<number, ChunkContent>,
   startedAt: number,
 ): Promise<Response | null> {
-  const totalDays = Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+  const multiCity = getTripSegments(job.inputs)
+  const totalDays = multiCity
+    ? countMultiCityDays(multiCity)
+    : Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+  // Per-day city/origin/travel-day assignment, deterministic from the
+  // segment list -- null for single-city. Threaded into both the skeleton
+  // pass (so Haiku's theme/venue assignments land in the right city) and
+  // every generateDayChunk call (so destination/origin are overridden per
+  // day, not left at whatever the client's top-level jobInputs said).
+  const multiCityDayInfo = multiCity ? planMultiCityDays(multiCity, job.inputs.origin) : null
 
   // Skeleton — compute once per job, cache on the row so a self-reinvoke
   // doesn't redo the Haiku call.
@@ -1489,7 +1486,7 @@ async function runConcurrentSingleCity(
     const skelCtrl = new AbortController()
     const skelTimer = setTimeout(() => skelCtrl.abort(), SC_SKELETON_TIMEOUT_MS)
     try {
-      skeleton = await generateSkeleton(job.inputs, totalDays, skelCtrl.signal, job.id)
+      skeleton = await generateSkeleton(job.inputs, totalDays, skelCtrl.signal, job.id, multiCityDayInfo)
     } catch (e) {
       clearTimeout(skelTimer)
       console.error('[worker:sc] skeleton pass failed:', e)
@@ -1520,7 +1517,8 @@ async function runConcurrentSingleCity(
       return { unit, segResult }
     }
     const daySkeleton = skeleton!.find(s => s.day === unit + 1) ?? null
-    const segResult = await generateDayChunk(job.inputs, unit, totalDays, daySkeleton, skeleton!, signal, job.id, attempt)
+    const dayInfo = multiCityDayInfo?.[unit] ?? null
+    const segResult = await generateDayChunk(job.inputs, unit, totalDays, daySkeleton, skeleton!, signal, job.id, attempt, dayInfo)
     return { unit, segResult }
   }
 
@@ -1701,10 +1699,15 @@ async function runConcurrentSingleCity(
       })
     }
 
-    // Progressive partial assembly — same UX purpose as the multi-city
-    // path: render finished days while the rest are still generating.
-    // Tolerates missing front-matter (falls back to a generic title/subtitle
-    // inside assembleResult, same as it always has for a missing chunk 0).
+    // Progressive partial assembly — render finished days while the rest
+    // are still generating. Tolerates missing front-matter (falls back to a
+    // generic title/subtitle inside assembleResult). For multi-city, if
+    // front-matter hasn't landed yet, assembleResult's new accommodation-
+    // by-city matching (see its own comment) throws for every segment —
+    // caught right here, same as any other assembly hiccup, so it just
+    // skips writing a partial preview for this round rather than failing
+    // the job. Front-matter is always in the FIRST batch (see `missing`
+    // above), so this window is brief in practice.
     try {
       const frontmatter = chunksByIndex.get(FRONTMATTER_UNIT) ?? null
       const chunksOrdered: ChunkContent[] = []
@@ -1782,11 +1785,7 @@ serve(async (req: Request) => {
 
   const multiCity = getTripSegments(job.inputs)
 
-  // Explicit fork — see the two functions above for why this is a single
-  // ternary dispatch and not a shared loop with a multiCity branch inside it.
-  const earlyReturn = multiCity
-    ? await runSequentialMultiCity(admin, job, multiCity, chunksByIndex, startedAt)
-    : await runConcurrentSingleCity(admin, job, chunksByIndex, startedAt)
+  const earlyReturn = await runConcurrentTrip(admin, job, chunksByIndex, startedAt)
   if (earlyReturn) return earlyReturn
 
   // Re-read job to see if we finished. budget_currency_suspect is read back
@@ -1850,27 +1849,16 @@ serve(async (req: Request) => {
   }
 
   const orderedChunks: ChunkContent[] = []
-  let frontmatter: ChunkContent | null = null
-  let expectedDays: number
-
-  if (multiCity) {
-    // Unchanged — chunks[0] carries its own front-matter, chunks_total
-    // already correctly sized by app/api/trips/jobs/route.ts.
-    expectedDays = multiCity.reduce((sum, s) => sum + Math.max(1, s.nights + 1), 0)
-    for (let i = 0; i < final.chunks_total; i++) {
-      const c = await fetchChunk(i)
-      if (c) orderedChunks.push(c)
-    }
-  } else {
-    // Single-city: chunks_total = totalDays + 1 (front-matter unit +
-    // per-day units). Front-matter lives at chunk_index=-1, separate from
-    // the day chunks — fetch it on its own rather than looping 0..chunks_total.
-    expectedDays = Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
-    frontmatter = await fetchChunk(FRONTMATTER_UNIT)
-    for (let i = 0; i < expectedDays; i++) {
-      const c = await fetchChunk(i)
-      if (c) orderedChunks.push(c)
-    }
+  // chunks_total = expectedDays + 1 (front-matter unit + per-day units) for
+  // BOTH city modes now — front-matter lives at chunk_index=-1, separate
+  // from the day chunks, fetched on its own rather than looped with them.
+  const expectedDays = multiCity
+    ? countMultiCityDays(multiCity)
+    : Math.max(1, Math.min(35, Number(job.inputs.duration_days) || 1))
+  const frontmatter: ChunkContent | null = await fetchChunk(FRONTMATTER_UNIT)
+  for (let i = 0; i < expectedDays; i++) {
+    const c = await fetchChunk(i)
+    if (c) orderedChunks.push(c)
   }
 
   try {
@@ -1887,7 +1875,26 @@ serve(async (req: Request) => {
     })
   }
 
-  const result = assembleResult(orderedChunks, job.inputs, frontmatter)
+  let result: Record<string, any>
+  try {
+    result = assembleResult(orderedChunks, job.inputs, frontmatter)
+  } catch (assembleErr) {
+    // Multi-city's accommodation-by-city matching (see assembleResult's own
+    // comment) throws rather than silently shipping a trip missing lodging
+    // for one of its cities — same failure-not-silent-corruption stance as
+    // assertChunksIntegrity right above. Single-city's assembleResult path
+    // never throws, so this is a new, multi-city-only failure mode in
+    // practice.
+    console.error('[worker] assembleResult failed:', assembleErr)
+    await admin
+      .from('generation_jobs')
+      .update({ status: 'failed', error: `assembly: ${String(assembleErr).slice(0, 500)}` })
+      .eq('id', job.id)
+    return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'assembly' }), {
+      status: 500,
+      headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+    })
+  }
 
   // ── CRÍTICA rule enforcement — blocking ──────────────────────────────────
   // The system prompt's one CRÍTICA rule (generate-trip/index.ts's

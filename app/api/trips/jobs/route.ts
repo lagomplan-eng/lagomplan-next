@@ -138,34 +138,26 @@ export async function POST(req: NextRequest) {
     }
 
     const durationDays = Math.min(Math.max(Number((body as any)?.duration_days) || 1, 1), 35)
-    // Multi-city: one chunk per SUB-CHUNK of a segment (long segments split
-    // into multiple Edge Fn calls). Each chunk calls generate-trip as a
-    // clean single-city request for that sub-range, and the worker assembles
-    // per-sub-chunk days + first-of-each-segment accommodations into the
-    // final trip_data. This avoids both (a) the multi-city megaprompt and
-    // (b) over-long single-segment calls blowing the Edge Fn's memory/time
-    // budget.
+    // One chunk PER DAY across the whole trip (worker's SC_DAYS_PER_CHUNK=1
+    // day-level concurrency pipeline) PLUS one front-matter unit (title/
+    // tagline/hero_tags/before_you_go/budget_breakdown/accommodations, its
+    // own concurrent call — see generateFrontmatter in the worker) —
+    // chunksTotal must equal totalDays + 1 exactly, or the worker's
+    // completion check (chunks_done < chunks_total) and the client's
+    // progress bar disagree with what the worker actually plans.
     //
-    // Single-city: one chunk PER DAY (worker's SC_DAYS_PER_CHUNK=1 day-level
-    // concurrency redesign, 2026-09-23) PLUS one front-matter unit (title/
-    // tagline/hero_tags/before_you_go/budget_breakdown/accommodations, now
-    // its own concurrent call instead of bundled into chunk 0 -- see
-    // generateFrontmatter in the worker) -- chunksTotal must equal
-    // durationDays + 1 exactly, or the worker's completion check
-    // (chunks_done < chunks_total) and the client's progress bar disagree
-    // with what the worker actually plans. This is the one change outside
-    // generate-trip*/generate-trip-worker that the redesign required: the
-    // worker plans chunk COUNT, this route only sizes chunks_total to
-    // match, same relationship as multi-city always had.
-    const MC_SEGMENT_DAYS = 5
+    // Multi-city (2026-09-29 migration) is no longer a separate sub-chunk
+    // scheme — it runs through this SAME day-level pipeline, one chunk per
+    // day across every segment concatenated (a day is a day regardless of
+    // which city it's in), so totalDays here is just the segment nights
+    // summed the same way the worker's countMultiCityDays() computes it.
+    // Keep this formula in sync with that function if either changes.
     const bodySegments = Array.isArray((body as any)?.segments) ? (body as any).segments : []
     const isMultiCity  = bodySegments.length >= 2
-    const chunksTotal  = isMultiCity
-      ? bodySegments.reduce((sum: number, s: any) => {
-          const segDays = Math.max(1, (Number(s?.nights) || 0) + 1)
-          return sum + Math.ceil(segDays / MC_SEGMENT_DAYS)
-        }, 0)
-      : durationDays + 1
+    const totalDays    = isMultiCity
+      ? bodySegments.reduce((sum: number, s: any) => sum + Math.max(1, (Number(s?.nights) || 0) + 1), 0)
+      : durationDays
+    const chunksTotal  = totalDays + 1
 
     const admin = getSupabaseAdmin()
 
@@ -192,19 +184,13 @@ export async function POST(req: NextRequest) {
       return err(500, 'job_create_failed', 'Could not create job', insertErr?.message)
     }
 
-    // EMERGENCY FIX 2026-09-28: credit is now charged by the worker on
-    // successful completion (consumeOneTripIfApplicable in
-    // generate-trip-worker/index.ts), not here at creation. That worker
-    // change shipped to production earlier via a direct
-    // `supabase functions deploy` (Edge Functions deploy independently of
-    // this Next.js app / Vercel), while this file's matching removal sat
-    // uncommitted -- so for a window, every completed async trip was
-    // charged TWICE (here at creation, again by the worker at completion),
-    // and every FAILED trip was charged once here with no refund (the old
-    // refund-on-failure path was removed from the worker as part of the
-    // same change). checkGenerationAllowed() above still gates job
-    // creation itself (0 credits -> can't start), the deduction just no
-    // longer happens twice.
+    // Credit is charged by the worker on successful completion, not here at
+    // creation — see consumeOneTripIfApplicable in generate-trip-worker.
+    // checkGenerationAllowed() above still gates job creation itself (a
+    // user with 0 credits can't start a job at all), but the actual
+    // deduction now only happens once a trip is genuinely delivered, so a
+    // failed generation never costs the user a credit in the first place
+    // (replacing the old charge-then-refund-on-failure model).
 
     // Fire-and-forget worker invocation. Reconciler handles any dropped invocation.
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
