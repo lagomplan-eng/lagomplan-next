@@ -268,10 +268,31 @@ const SC_DAYS_PER_CHUNK   = 1
 // status_code/error) but 27-30s after the 9.5s they were given, well past
 // the point the worker had already aborted and failed the job. This isn't
 // a rate-limit signature (no ok:false rows anywhere) -- it's the two-wave
-// structure itself not fitting a 60s ceiling. Back to 8 (one wave) so a
-// single-city job is structurally one batch, matching what the
-// SC_JOB_DEADLINE_MS budget math above actually assumes.
-const SC_CONCURRENCY      = 8
+// structure itself not fitting a 60s ceiling.
+//
+// Raised 8 -> 16, 2026-09-30: every single-city test this session ran
+// exactly 7 days (8 units), so the >SC_CONCURRENCY batching path was never
+// actually exercised until the multi-city migration's own test batch hit
+// it for the first time -- 3 of 5 multi-city trips over 8 units (9, 10, 14
+// units) all failed on exactly their 9th-and-later unit, via this EXACT
+// same second-batch starvation mechanism, just newly visible because
+// multi-city trips commonly run longer than 7 days where single-city
+// testing never had. Confirmed live: a 9-unit trip's unit 7 (the sole
+// member of batch 2) got aborted at 11.6s with ZERO retry attempted --
+// batch 1 alone had already eaten ~40s of the 60s job deadline, leaving
+// batch 2 too little to run OR retry. Same root cause as the CONCURRENCY=4
+// finding above, just triggered by trip length instead of a lower
+// constant. 16 covers the longest real trip length observed (14 days = 15
+// units) in one wave, matching the same "structurally one batch" reasoning
+// that motivated reverting to 8 in the first place. Verified via a live
+// load test before committing to this value (not just isolate-boot logs at
+// 8, which never got checked at 16) -- see PR description for the
+// per-call latency comparison against the 7-8-concurrent baseline. If
+// concurrency itself degrades at higher fan-out (not yet observed, but
+// untested above 16), the fallback is a per-batch deadline instead of one
+// job-wide clock, not a lower ceiling -- a lower ceiling just moves this
+// same failure to a shorter trip length, it doesn't fix the mechanism.
+const SC_CONCURRENCY      = 16
 //
 // KNOWN, ACCEPTED COST: firing all SC_CONCURRENCY Sonnet calls (day writers
 // + front-matter) within ~100-300ms of each other (confirmed via
