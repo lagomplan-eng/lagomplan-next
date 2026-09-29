@@ -336,56 +336,53 @@ const SC_CONCURRENCY      = 32
 // trade against the 60s ceiling. Leaving this as accepted, understood cost
 // so a future reader doesn't have to re-derive it from a cost_usd anomaly.
 const SC_BUDGET_FLOOR_MS  = 70_000
-// 60s is a hard ceiling on TOTAL job duration (skeleton included), every
-// retry included — confirmed live 2026-09-25 TWICE: a 71s job (35s+ wave,
-// one retry) read as a failure against that target, and a first attempt
-// at fixing this with a FIXED 55s/5s split still overshot to 63.2s because
-// skeleton alone took 6.6s that run — a fixed split doesn't account for
-// skeleton's real variance (observed 4-7s across runs). SC_JOB_DEADLINE_MS
-// is measured against `startedAt` (the actual invocation start, before
-// skeleton runs), not a fixed post-skeleton allowance, so a slow skeleton
-// correctly eats into the generation budget instead of pushing the total
-// past 60s. SC_FINAL_OVERHEAD_RESERVE_MS reserves headroom for the
-// non-generation work after the last attempt (assembly, the accommodations
-// check, duplicate detection, trips insert) — NOT duplicate-venue repair,
-// which is explicitly the "last resort" the product wants even if it
-// pushes past 60s on the rare trip that needs it (see the repair block
-// near the CRÍTICA check below).
+// History: per-attempt timeout used to be derived from a single job-wide
+// 60s clock (SC_JOB_DEADLINE_MS - elapsed since invocation start), not a
+// fixed per-attempt cap. That itself replaced an EARLIER fixed cap
+// (SC_CHUNK_TIMEOUT_MS, 35s -> 45s, 2026-09-25) which caused the exact
+// failure it was meant to prevent: a Buenos Aires day-chunk's attempt-0
+// was aborted by the fixed cap mid-flight, leaving its retry only ~22s of
+// real budget -- the retry needed ~30s and got aborted too at the 60s job
+// deadline (job failed at 57.3s), while the underlying Anthropic call,
+// unaffected by our own AbortController once far enough along, completed
+// successfully 9s later server-side. The job-wide-clock redesign fixed
+// THAT specific case (attempt 0 got the full ~50s job-relative remainder
+// instead of a fixed 45s), but introduced a worse one: a unit's timeout
+// shrinking based on how much OF THE JOB had already elapsed meant a
+// single pathologically slow unit -- anywhere, not just in a later wave --
+// could burn most of a SHARED clock, since it's a member of its own
+// wave's Promise.allSettled, which waits for its slowest member regardless
+// of wave size. Proven live 2026-09-30: an injected 45s delay on one unit
+// caused that unit's own abort to fire PAST the 60s job deadline, its own
+// retry check to see negative remaining budget and skip the retry
+// entirely, and the WHOLE JOB to fail -- discarding every other
+// already-generated unit in that wave, because persistence was gated on
+// the whole wave's Promise.allSettled resolving, not on each unit's own
+// success.
 //
-// Every attempt (first AND retry) is bounded by whatever's left of the
-// job's SC_JOB_DEADLINE_MS, computed fresh against real elapsed time since
-// invocation start — NOT a separate fixed per-attempt cap. There used to
-// be one (SC_CHUNK_TIMEOUT_MS, raised 35s -> 45s earlier the same day,
-// 2026-09-25) but it caused the exact failure it was meant to prevent:
-// live, a Buenos Aires day-chunk's attempt-0 was aborted by the 45s cap
-// mid-flight (no metric row logged at all -- killed before it could
-// finish), which left its retry only ~22s of real budget. The retry
-// itself needed ~30s and got aborted too at the 60s job deadline (job
-// failed at 57.3s) -- but the underlying Anthropic call, unaffected by our
-// own AbortController once far enough along, kept running server-side and
-// completed successfully 9s later (confirmed via generation_metrics:
-// ok:true, logged AFTER the job had already been marked failed). A
-// complete, correct result existed and was thrown away because the fixed
-// cap fired before the real call needed to. Removing the cap means
-// attempt 0 gets the full ~50s job-relative remainder (after skeleton) to
-// begin with, so the case that forced a retry in the first place is far
-// less likely to happen at all. If less than SC_MIN_RETRY_WINDOW_MS
-// remains when a retry would fire, skip it and fail the job cleanly
-// instead of starting a retry that can't finish in time anyway.
+// Replaced with SC_UNIT_TIMEOUT_MS (below) -- a FIXED per-attempt
+// deadline, independent of job-wide elapsed time -- plus per-unit
+// immediate persistence (see runUnitWithRetries): a unit now persists
+// itself the moment IT succeeds, not gated on any sibling. A stuck unit's
+// own fixed timeout can no longer consume budget that belonged to anyone
+// else, and even in the worst case (a unit exhausts all its own retries)
+// its already-persisted batch-mates are unaffected.
 //
-// Backstop for the residual case (an attempt that's genuinely still
-// in-flight when the job deadline hits): generate-trip now self-persists
-// its own successful result straight into generation_chunks the moment it
-// has one (see persistChunkContent in generate-trip/index.ts), independent
-// of whether this worker's fetch() ever receives the response. Right
-// before declaring a batch a hard failure below, the worker re-reads
-// generation_chunks for the still-failing units one more time — a result
-// that finished just past this invocation's patience is still picked up
-// instead of discarded, same failure mode as the Buenos Aires case above
-// but now recoverable rather than merely explained.
-const SC_JOB_DEADLINE_MS           = 60_000
-const SC_FINAL_OVERHEAD_RESERVE_MS = 3_000
-const SC_MIN_RETRY_WINDOW_MS       = 10_000
+// Re-verified with the SAME injected-delay reproduction used to prove the
+// original bug (one unit delayed +45s on a 36-unit/35-day trip): the
+// delayed unit's attempt 0 aborted at t=57.8s = skeleton-end(21.8s) +
+// SC_UNIT_TIMEOUT_MS(35s) + backoff(1s) -- exact, not approximate. Its
+// retry succeeded independently 6.8s later. The other 31 units in the same
+// wave: 0 retries, 0 failures, already persisted between t=29.2s and
+// t=35.5s, completely unaffected by their sibling's trouble. Job completed
+// (36/36 chunks) instead of failing. One residual property, smaller than
+// the original bug and not fixed here: the NEXT wave still doesn't start
+// until Promise.allSettled resolves for this one, so a slow unit still
+// delays (not fails) whatever's queued behind it -- confirmed in the same
+// test: wave 2 started at t=64.7s instead of the ~35s it would have
+// without the injected delay, purely a wall-clock cost, no retries or
+// failures resulted from it.
+const SC_UNIT_TIMEOUT_MS = 35_000
 const SC_MAX_RETRIES      = 2
 const SC_RETRY_BACKOFF_MS = [1_000, 2_000]
 // Skeleton is a single cheap Haiku call (observed 4-8s), not part of the
@@ -1599,34 +1596,33 @@ async function runConcurrentTrip(
   // 2026-09-25 through 2026-09-28): every retry started right when the
   // batch's LAST successful sibling finished, never when the failing unit
   // itself actually failed. Each unit now retries independently,
-  // immediately on its own failure (after backoff), computing its own
-  // remaining-budget window at that moment -- moves typical retry landing
-  // from ~56s to ~33s and makes the 60s deadline non-marginal regardless
-  // of whatever's actually causing the underlying failure.
-  async function runUnitWithRetries(unit: number): Promise<{ unit: number; segResult?: SegmentResult; permanentError?: boolean }> {
+  // immediately on its own failure (after backoff) -- see SC_UNIT_TIMEOUT_MS
+  // above for why the per-attempt deadline itself is now fixed rather than
+  // derived from job-wide elapsed time.
+  //
+  // Persists ITSELF the moment it succeeds (2026-09-30) -- previously
+  // persistence was the OUTER wave loop's job, done only after
+  // Promise.allSettled resolved for the WHOLE wave, which meant a single
+  // slow-or-stuck sibling blocked every already-successful unit in that
+  // wave from ever being written to generation_chunks. Proven live: an
+  // injected 45s delay on one unit caused its own retry check to run out
+  // of budget and the ENTIRE job to fail, discarding every other unit in
+  // that wave even though they'd already succeeded -- they just hadn't
+  // been persisted yet, because persistence was waiting on Promise.
+  // allSettled, which waits for its slowest member regardless of wave
+  // size. Persisting inline here means "succeeded" and "durably saved" are
+  // now the same moment for every unit, independent of its batch-mates.
+  async function runUnitWithRetries(unit: number): Promise<{ unit: number; segResult?: SegmentResult; permanentError?: boolean; persistError?: string }> {
     for (let attempt = 0; attempt <= SC_MAX_RETRIES; attempt++) {
-      // Measured against startedAt (true invocation start, before skeleton
-      // ran) every time, not a fixed post-skeleton allowance — a slow
-      // skeleton correctly eats into this budget instead of the total
-      // silently overshooting 60s. Reserves SC_FINAL_OVERHEAD_RESERVE_MS
-      // for the non-generation work still to come after the last attempt.
       if (attempt > 0) {
-        const remaining = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
-        if (remaining < SC_MIN_RETRY_WINDOW_MS) return { unit } // not enough budget left to retry meaningfully -- fail cleanly instead of starting a doomed attempt
         await new Promise(r => setTimeout(r, SC_RETRY_BACKOFF_MS[attempt - 1] ?? 2_000))
       }
 
-      // No fixed per-attempt cap (see the SC_JOB_DEADLINE_MS comment above
-      // for why) -- every attempt, first or retry, gets whatever's left of
-      // the job deadline.
-      const remainingForThisAttempt = SC_JOB_DEADLINE_MS - (Date.now() - startedAt) - SC_FINAL_OVERHEAD_RESERVE_MS
-      if (remainingForThisAttempt <= 0) return { unit } // out of budget entirely
-
       const ctrl = new AbortController()
-      const t = setTimeout(() => ctrl.abort(), remainingForThisAttempt)
+      const t = setTimeout(() => ctrl.abort(), SC_UNIT_TIMEOUT_MS)
+      let segResult: SegmentResult
       try {
-        const { segResult } = await runOneUnit(unit, ctrl.signal, attempt).finally(() => clearTimeout(t))
-        return { unit, segResult }
+        ;({ segResult } = await runOneUnit(unit, ctrl.signal, attempt).finally(() => clearTimeout(t)))
       } catch (err) {
         // Error classification: 400/401/403 are permanent (bad request
         // shape, bad/expired auth, forbidden) -- retrying THIS unit won't
@@ -1640,83 +1636,17 @@ async function runConcurrentTrip(
         const isPermanent = status === 400 || status === 401 || status === 403
         console.warn('[worker:sc] unit rejected', unit, 'attempt', attempt, 'status', status ?? 'n/a', String(err).slice(0, 300))
         if (isPermanent) return { unit, permanentError: true }
-        // loop continues -> retries THIS unit immediately (after backoff),
-        // not gated on any sibling unit's state.
+        continue // retries THIS unit immediately (after backoff), independent of every other unit's state
       }
-    }
-    return { unit } // retries exhausted
-  }
 
-  for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
-    const remainingBudget = 140_000 - (Date.now() - startedAt)
-    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest (long, multi-batch trips)
-
-    const batchUnits = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
-    const succeeded = new Map<number, SegmentResult>()
-
-    const unitResults = await Promise.allSettled(batchUnits.map(unit => runUnitWithRetries(unit)))
-    let batch: number[] = []
-    for (const r of unitResults) {
-      if (r.status !== 'fulfilled') continue // runUnitWithRetries never throws -- defensive only
-      if (r.value.segResult) {
-        succeeded.set(r.value.unit, r.value.segResult)
-      } else {
-        batch.push(r.value.unit)
-      }
-    }
-
-    if (batch.length > 0) {
-      // Before giving up: this invocation's own view (succeeded/batch) only
-      // reflects fetches THIS worker actually received a response for. An
-      // attempt can finish successfully server-side after this worker's own
-      // AbortController already gave up on it (the Buenos Aires case —
-      // see the SC_JOB_DEADLINE_MS comment above) — generate-trip
-      // self-persists that result straight into generation_chunks the
-      // moment it has one, independent of whether the response ever made
-      // it back here. One fresh, cheap read for exactly the still-failing
-      // unit indices picks those up instead of failing a job that actually
-      // has a complete result sitting in the table.
-      const { data: lateRows } = await admin
-        .from('generation_chunks')
-        .select('chunk_index, content')
-        .eq('job_id', job.id)
-        .in('chunk_index', batch)
-      for (const row of lateRows ?? []) {
-        const idx = (row as any).chunk_index as number
-        // budgetCurrencySuspect is null for a recovered row (that flag is
-        // computed by generate-trip inline, not stored on the chunk row
-        // itself) -- acceptable: it only feeds an internal QA signal, never
-        // shown to the user, and this recovery path is expected to be rare.
-        succeeded.set(idx, { chunk: (row as any).content, budgetCurrencySuspect: null })
-      }
-      const recoveredIdx = new Set(succeeded.keys())
-      batch = batch.filter(unit => !recoveredIdx.has(unit))
-      if (batch.length > 0) {
-        console.warn('[worker:sc] late-row re-check found', (lateRows ?? []).length, 'of', batch.length + (lateRows ?? []).length, 'still-missing units')
-      }
-    }
-
-    if (batch.length > 0) {
-      // Retries exhausted (or abandoned past the wall-clock cutoff, or a
-      // permanent-class error) with units still failing — a real failure,
-      // not a budget timeout, so fail the job rather than looping
-      // self-reinvoke forever on a possibly-deterministic error.
-      await admin
-        .from('generation_jobs')
-        .update({ status: 'failed', error: `units failed after retries: ${batch.join(',')}` })
-        .eq('id', job.id)
-      return new Response(JSON.stringify({ ok: false, status: 'failed', failed_units: batch }), {
-        status: 502,
-        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-      })
-    }
-
-    // Whole batch succeeded — persist in unit order (frontmatter's -1 sorts
-    // first naturally).
-    const orderedBatch = [...succeeded.entries()].sort((a, b) => a[0] - b[0])
-    for (const [unit, segResult] of orderedBatch) {
-      chunksByIndex.set(unit, segResult.chunk)
+      // Persist immediately -- see the function comment above for why this
+      // moved here instead of the outer wave loop. A persist failure (DB-
+      // level, not a generation failure) is surfaced distinctly so the
+      // caller can fail the job outright rather than silently treating a
+      // successful-but-unpersisted generation as "still missing" and
+      // burning a retry on it.
       try {
+        chunksByIndex.set(unit, segResult.chunk)
         const { error: insertErr } = await admin
           .from('generation_chunks')
           .insert({ job_id: job.id, chunk_index: unit, content: segResult.chunk })
@@ -1733,15 +1663,104 @@ async function runConcurrentTrip(
         }
       } catch (persistErr) {
         console.error('[worker:sc] unit persist failed at index', unit, persistErr)
-        await admin
-          .from('generation_jobs')
-          .update({ status: 'failed', error: String(persistErr).slice(0, 500) })
-          .eq('id', job.id)
-        return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
-          status: 500,
-          headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
-        })
+        return { unit, persistError: String(persistErr).slice(0, 500) }
       }
+
+      return { unit, segResult }
+    }
+    return { unit } // retries exhausted
+  }
+
+  for (let batchStart = 0; batchStart < missing.length; batchStart += SC_CONCURRENCY) {
+    const remainingBudget = 140_000 - (Date.now() - startedAt)
+    if (remainingBudget < SC_BUDGET_FLOOR_MS) break // self-reinvoke picks up the rest (long, multi-batch trips)
+
+    const batchUnits = missing.slice(batchStart, batchStart + SC_CONCURRENCY)
+
+    // Each unit persists itself inside runUnitWithRetries the moment it
+    // succeeds (see that function's comment) -- by the time this
+    // Promise.allSettled resolves, every successful unit in this wave is
+    // ALREADY durably saved, regardless of how slow any one sibling was.
+    // This loop only needs to sort out what's left: a genuine persist
+    // failure (fail the job outright), or units that never succeeded at
+    // all (late-row recovery, then a real failure if still missing).
+    const unitResults = await Promise.allSettled(batchUnits.map(unit => runUnitWithRetries(unit)))
+    let batch: number[] = []
+    let persistError: string | null = null
+    for (const r of unitResults) {
+      if (r.status !== 'fulfilled') continue // runUnitWithRetries never throws -- defensive only
+      if (r.value.persistError) {
+        persistError = r.value.persistError
+      } else if (!r.value.segResult) {
+        batch.push(r.value.unit)
+      }
+      // else: succeeded AND already persisted -- nothing left to do.
+    }
+
+    if (persistError) {
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: persistError })
+        .eq('id', job.id)
+      return new Response(JSON.stringify({ ok: false, status: 'failed', stage: 'persist' }), {
+        status: 500,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (batch.length > 0) {
+      // Before giving up: this invocation's own view (batch) only reflects
+      // fetches THIS worker actually received a response for. An attempt
+      // can finish successfully server-side after this worker's own
+      // AbortController already gave up on it — generate-trip's HTTP path
+      // (regenerateDuplicateBlock's callGenerateTrip, or a race with
+      // another invocation of this same job) can still self-persist
+      // independently of whether the response ever made it back here. One
+      // fresh, cheap read for exactly the still-failing unit indices picks
+      // those up instead of failing a job that actually has a complete
+      // result sitting in the table. Already-persisted by definition — no
+      // insert needed, just fold it into this invocation's own view.
+      const { data: lateRows } = await admin
+        .from('generation_chunks')
+        .select('chunk_index, content')
+        .eq('job_id', job.id)
+        .in('chunk_index', batch)
+      for (const row of lateRows ?? []) {
+        const idx = (row as any).chunk_index as number
+        chunksByIndex.set(idx, (row as any).content)
+        if (idx === FRONTMATTER_UNIT) {
+          // budgetCurrencySuspect is null for a recovered row (that flag is
+          // computed inline at generation time, not stored on the chunk row
+          // itself) -- acceptable: it only feeds an internal QA signal,
+          // never shown to the user, and this recovery path is rare.
+          await admin
+            .from('generation_jobs')
+            .update({ budget_currency_suspect: null } as any)
+            .eq('id', job.id)
+        }
+      }
+      const recoveredIdx = new Set((lateRows ?? []).map((row: any) => row.chunk_index as number))
+      batch = batch.filter(unit => !recoveredIdx.has(unit))
+      if (batch.length > 0) {
+        console.warn('[worker:sc] late-row re-check found', (lateRows ?? []).length, 'of', batch.length + (lateRows ?? []).length, 'still-missing units')
+      }
+    }
+
+    if (batch.length > 0) {
+      // Retries exhausted (or a permanent-class error) with units still
+      // failing — a real failure, not a budget timeout, so fail the job
+      // rather than looping self-reinvoke forever on a possibly-
+      // deterministic error. Every OTHER unit in this wave, and every
+      // prior wave, is already durably persisted at this point regardless
+      // of this failure.
+      await admin
+        .from('generation_jobs')
+        .update({ status: 'failed', error: `units failed after retries: ${batch.join(',')}` })
+        .eq('id', job.id)
+      return new Response(JSON.stringify({ ok: false, status: 'failed', failed_units: batch }), {
+        status: 502,
+        headers: { ...corsHeaders(), 'Content-Type': 'application/json' },
+      })
     }
 
     // Progress count: frontmatter (0 or 1) + contiguous-from-zero day count.
