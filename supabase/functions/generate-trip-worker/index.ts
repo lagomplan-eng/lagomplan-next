@@ -982,7 +982,15 @@ async function generateSkeleton(
     },
     body: JSON.stringify({
       model: SKELETON_MODEL,
-      max_tokens: 2000,
+      // 2000 -> 4000, 2026-09-30: a 15-day skeleton measured at 1749/2000
+      // tokens (87% of budget) before this trip length was ever actually
+      // tested -- a 21-day trip truncated outright (output_tokens:2000,
+      // stop_reason:'max_tokens'). Measured cost is ~93 tokens/day + ~280
+      // fixed overhead; 4000 covers ~40 days with real headroom instead of
+      // running close to the edge on any trip in the product's realistic
+      // range. Haiku, and only spends what a given day count actually
+      // needs -- this raises the ceiling, not the typical cost.
+      max_tokens: 4000,
       system: isEN
         ? 'You are a travel planner sketching a lightweight day-by-day skeleton, not the full itinerary. Be concise — one short line of intent per day, not activities.'
         : 'Eres un planificador de viajes esbozando un esqueleto ligero día por día, no el itinerario completo. Sé conciso — una intención breve por día, no actividades.',
@@ -1023,6 +1031,21 @@ async function generateSkeleton(
     ok:            data.stop_reason !== 'max_tokens',
     cost_usd:      computeCostUsd(SKELETON_MODEL, data.usage),
   })
+
+  // Explicit, distinct failure -- a truncated skeleton is NOT the same
+  // failure as "the model genuinely returned zero days" (the generic check
+  // below). A truncated tool_use JSON can still partially parse (some days
+  // present, some fields missing, or the array cut off mid-entry) and slip
+  // past the `!Array.isArray(days) || days.length === 0` check with a
+  // SHORT-but-non-empty days array -- every day past the truncation point
+  // then reaches generateDayChunk with no skeleton entry at all (daySkeleton
+  // = null), silently losing the anti-duplicate venue assignment for those
+  // days instead of failing the job outright. That reads as a duplicate-
+  // venue problem days later, not an obvious "the skeleton failed" -- fail
+  // here instead, before that ambiguity has a chance to happen.
+  if (data.stop_reason === 'max_tokens') {
+    throw new Error(`skeleton truncated at max_tokens (${data.usage?.output_tokens ?? '?'} output tokens) -- trip is likely too long for the current skeleton budget`)
+  }
 
   const toolUse = Array.isArray(data.content)
     ? data.content.find((c: any) => c?.type === 'tool_use' && c?.name === 'emit_skeleton')

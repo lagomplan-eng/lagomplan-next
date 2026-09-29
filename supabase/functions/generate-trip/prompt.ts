@@ -743,9 +743,28 @@ ${dayMap.join("\n")}
         ? `  This is the FIRST chunk of a multi-chunk trip. You own the ARRIVAL on day 1 (jet-lag aware if relevant). Do NOT emit any farewell / departure narrative — that belongs to the LAST chunk only.`
         : `  Este es el PRIMER chunk de un viaje multi-chunk. Tú manejas la LLEGADA en el día 1 (con jet-lag si aplica). NO incluyas despedidas ni narrativa de salida — eso le toca SOLO al último chunk.`;
     } else if (isLast) {
+      // Deliberately does NOT say "day 1 of your chunk" (it used to, and
+      // was removed 2026-09-30) -- that phrasing dates from when a "chunk"
+      // could span several days (multi-day multi-city sub-chunks) and "day
+      // 1 of your chunk" meant something distinct from the trip's actual
+      // day 1. Every chunk is exactly 1 day now (single-city always was;
+      // multi-city too as of the day-level migration), so that sentence
+      // was, at best, a no-op restating "the only day in your chunk" and at
+      // worst actively misleading: confirmed live on 21- and 30-day trips,
+      // where the LAST day chunk's own `day_number` field came back as `1`
+      // instead of the correct 21/30 -- assertChunksIntegrity caught it as
+      // a duplicate day_number against the real day 1's chunk, failing the
+      // job. The literal string "Day 1" sitting in the LAST piece of
+      // continuity instruction text the model reads (this block is
+      // concatenated after openingLine, which DOES state the correct
+      // absolute day number) is the most likely direct cause. Removed
+      // rather than reworded -- the surrounding sentences already convey
+      // "this is a continuation day" without needing a day-numbered clause
+      // that can't be phrased safely now that chunk-day and trip-day are
+      // always the same thing.
       intent = isEN
-        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from an earlier day — do NOT re-emit an arrival, hotel check-in, or "first day" framing. Day 1 of YOUR chunk is a continuation day. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
-        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde un día anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El día 1 de TU chunk es un día de continuación. El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
+        ? `  This is the LAST chunk of a multi-chunk trip. The traveler is already in the destination and continues from an earlier day — do NOT re-emit an arrival, hotel check-in, or "first day" framing. The FINAL day MAY include a departure / farewell narrative if a flight or transfer fits.`
+        : `  Este es el ÚLTIMO chunk del viaje. El viajero ya está en el destino y continúa desde un día anterior — NO repitas llegada, check-in al hotel ni narrativa de "primer día". El ÚLTIMO día PUEDE incluir despedida / traslado de salida si el vuelo o el transfer encaja.`;
     } else {
       intent = isEN
         ? `  This is a MIDDLE chunk (${segIdx + 1} of ${segTotal}). The traveler is mid-trip — do NOT emit arrival, hotel check-in, "first day" framing, departure, or farewell. Every day is a continuation. Follow your assigned plan above; vary neighborhoods and activity types from the other days listed so the trip doesn't feel repetitive.`
