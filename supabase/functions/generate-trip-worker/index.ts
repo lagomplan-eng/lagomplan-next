@@ -100,16 +100,85 @@ const MODEL_RATES: Record<string, { input: number; cacheWrite: number; cacheRead
   'claude-sonnet-4-6':         { input: 3, cacheWrite: 3.75, cacheRead: 0.30, output: 15 },
   'claude-haiku-4-5-20251001': { input: 1, cacheWrite: 1.25, cacheRead: 0.10, output: 5 },
   'claude-sonnet-5':           { input: 2, cacheWrite: 2.50, cacheRead: 0.20, output: 10 },
+  // Same price as claude-sonnet-5 (confirmed via platform.claude.com/docs/
+  // en/models/sonnet-5-5/overview, released 2026-09-28) -- superseded that
+  // evaluation (backlog #101) since it's the same price and strictly
+  // faster/fewer-tokens. See isSonnet55()/toStrictSchema() below for the
+  // request-shape changes this model requires.
+  'claude-sonnet-5-5':         { input: 2, cacheWrite: 2.50, cacheRead: 0.20, output: 10 },
 }
-// Same rollback lever as generate-trip/index.ts's MODEL constant (flip via
-// `supabase secrets set`, no redeploy) -- now resolved here too since day/
-// front-matter calls no longer pass through generate-trip's own copy of
-// this. test_model is the same TEMPORARY Sonnet 5 evaluation hook (backlog
-// #101) -- REMOVE both the env fallback comment relevance and this branch
-// together once that evaluation concludes.
+// Default flipped to claude-sonnet-5-5 2026-09-29 (backlog #101): 10-city
+// regression on the clean HTTP-extracted pipeline showed ~22s wall vs 4.6's
+// ~37s, $0.129/trip vs $0.175, 0/70 retries, clean accommodations/dupes.
+// Deliberately its OWN env var, NOT the GENERATE_TRIP_MODEL secret
+// generate-trip/index.ts's own MODEL resolution reads -- that path (multi-
+// city, sync, regenerate-duplicate-block) still uses forced tool_choice
+// (tool_choice:"tool"), which 400s on Sonnet 5.5, and was never migrated to
+// the strict-mode shape (out of scope, see PR description). Sharing one
+// lever would mean flipping either path's rollback silently breaks the
+// other's request shape. test_model is the same TEMPORARY model-evaluation
+// hook (backlog #101) -- REMOVE it once evaluation of whatever's next
+// concludes; the model default itself is no longer temporary.
 function resolveDayModel(jobInputs: Record<string, any>): string {
   if (typeof jobInputs.test_model === 'string') return jobInputs.test_model
-  return Deno.env.get('GENERATE_TRIP_MODEL') ?? 'claude-sonnet-4-6'
+  return Deno.env.get('GENERATE_TRIP_DAY_MODEL') ?? 'claude-sonnet-5-5'
+}
+
+// Sonnet 5.5 rejects forced tool_choice (tool_choice:"tool"/"any" -> 400)
+// and needs a different request shape (tool_choice:"auto" + strict:true,
+// thinking:"between_tools" + output_config.effort). Every other model this
+// worker calls (4.6, Haiku, Sonnet 5) keeps the existing forced-tool_choice
+// shape untouched. Matches on the bare model ID or any dated variant of it,
+// the same convention Anthropic uses for its own dated model IDs.
+function isSonnet55(model: string): boolean {
+  return model === 'claude-sonnet-5-5' || model.startsWith('claude-sonnet-5-5-')
+}
+
+// TEMPORARY evaluation hook (backlog #101), same pattern as test_model.
+// Day-writer/frontmatter calls need no reasoning -- the skeleton pre-pass
+// already made every structural decision (theme/neighborhood/anchor/pace/
+// venues) and Places-equivalent context is already in the prompt; the day
+// writer is filling in prose around decisions already made, not making new
+// ones. 'low' is the default; pass test_effort to A/B against 'medium' if
+// the 10-city numbers don't make the case on their own. Only consulted
+// when isSonnet55() -- 4.6/5/Haiku don't take an effort parameter at all.
+function resolveEffort(jobInputs: Record<string, any>): string {
+  if (typeof jobInputs.test_effort === 'string') return jobInputs.test_effort
+  return 'low'
+}
+
+// Sonnet 5.5's strict tool use (required to replace forced tool_choice --
+// see isSonnet55() above) rejects maxLength/maxItems and requires
+// additionalProperties:false on every object node. Derives the strict
+// variant from the canonical schema (TRIP_SCHEMA_DAYS_ONLY/
+// TRIP_SCHEMA_FRONTMATTER_ONLY in prompt.ts, shared with generate-trip/
+// index.ts's own untouched paths) instead of hand-maintaining a duplicate,
+// so the two can't drift. Trade-off: this DROPS the blocks-per-day (6) and
+// description-length (320 char) caps that were added 2026-09-28 specifically
+// to bound wall-clock (output length drives per-call latency almost
+// linearly). Those caps aren't expressible in a strict schema (maxItems is
+// unsupported; only minItems 0/1 is). Compensated with an explicit prompt
+// reminder (see STRICT_MODE_LENGTH_REMINDER below) but that's best-effort,
+// not enforced -- watch cost_usd and per-call ms on the 5.5 batch for
+// runaway output before trusting this trade-off long-term.
+function toStrictSchema(schema: any): any {
+  if (Array.isArray(schema)) return schema.map(toStrictSchema)
+  if (schema === null || typeof schema !== 'object') return schema
+  const out: Record<string, any> = {}
+  for (const [k, v] of Object.entries(schema)) {
+    if (k === 'maxLength' || k === 'minLength' || k === 'maxItems') continue // unsupported under strict tool use
+    out[k] = toStrictSchema(v)
+  }
+  if (out.type === 'object') out.additionalProperties = false
+  return out
+}
+
+// Compensates for the dropped maxItems:6 / maxLength:320 caps (see
+// toStrictSchema above) -- appended to the day-chunk user prompt only
+// (frontmatter has no blocks/description fields) when calling Sonnet 5.5.
+const STRICT_MODE_LENGTH_REMINDER: Record<'es' | 'en', string> = {
+  es: '\n\nLímites de formato: máximo 6 bloques por día, cada "description" de máximo 320 caracteres.',
+  en: '\n\nFormatting limits: at most 6 blocks per day, each "description" at most 320 characters.',
 }
 
 // Same validation generate-trip/index.ts's serve() handler applies to its
@@ -553,21 +622,35 @@ async function generateDayChunk(
 // computation) -- this is that same logic, inlined here instead of
 // reached over HTTP, so a completed result can never be discarded by a
 // dropped connection between two separate function invocations.
-async function callAnthropicForChunk(
+//
+// Takes an explicit `model` (rather than resolving it internally) and an
+// `isFallback` flag so callAnthropicForChunk below can call this twice
+// within the same attempt -- once for the primary model, once for the
+// Sonnet-5.5-failed fallback to 4.6 -- with both calls sharing this one
+// implementation instead of two near-duplicate copies.
+async function callAnthropicOnce(
   segmentPayload: Record<string, any>,
   isFrontmatterOnly: boolean,
   chunkIndexForMetrics: number,
   signal: AbortSignal,
   jobId: string,
   attempt: number,
+  model: string,
+  isFallback: boolean,
 ): Promise<SegmentResult> {
   if (!ANTHROPIC_API_KEY) throw new Error('ANTHROPIC_API_KEY not configured for day/front-matter call')
 
   const input = buildInput(segmentPayload)
-  const model = resolveDayModel(segmentPayload)
   const toolName = isFrontmatterOnly ? 'emit_trip_frontmatter' : 'emit_trip_days'
   const toolSchema = isFrontmatterOnly ? TRIP_SCHEMA_FRONTMATTER_ONLY : TRIP_SCHEMA_DAYS_ONLY
-  const maxTokens = isFrontmatterOnly ? 2000 : 2500
+  const strictMode = isSonnet55(model)
+  // +30% buffer on 5.5: same tokenizer as Sonnet 5, which produces ~30% more
+  // tokens than 4.6/Haiku for the same text (confirmed in the migration
+  // guide, not yet confirmed against our own prompts) -- watch stop_reason
+  // for 'max_tokens' truncation on the 5.5 batch and raise further if seen.
+  const maxTokens = isFrontmatterOnly
+    ? (strictMode ? 2700 : 2000)
+    : (strictMode ? 3300 : 2500)
 
   const metricBase = {
     job_id: jobId,
@@ -577,6 +660,7 @@ async function callAnthropicForChunk(
     model,
     attempt,
     ok: false,
+    model_fallback: isFallback,
   }
 
   const startedAt = Date.now()
@@ -602,10 +686,31 @@ async function callAnthropicForChunk(
           description: isFrontmatterOnly
             ? (input.locale === 'en' ? "Emit the trip's front matter (title, tagline, budget, lodging) — no days." : 'Emite los datos generales del viaje (título, tagline, presupuesto, alojamiento) — sin días.')
             : (input.locale === 'en' ? "Emit this day's itinerary block." : 'Emite el bloque de itinerario de este día.'),
-          input_schema: toolSchema,
+          input_schema: strictMode ? toStrictSchema(toolSchema) : toolSchema,
+          ...(strictMode ? { strict: true } : {}),
         }],
-        tool_choice: { type: 'tool', name: toolName },
-        messages: [{ role: 'user', content: buildPrompt(input) }],
+        // tool_choice:"tool" (forced) 400s on Sonnet 5.5 -- "auto" + strict
+        // schema + an explicit must-call-the-tool prompt line is the
+        // documented replacement. Every other model keeps forced tool_choice.
+        tool_choice: strictMode ? { type: 'auto' } : { type: 'tool', name: toolName },
+        // between_tools = the lowest thinking setting on 5.5 (forced-
+        // choice models below never send a thinking field at all, so this
+        // whole block is 5.5-only). effort:'low' by default -- see
+        // resolveEffort() above.
+        ...(strictMode ? {
+          thinking: { type: 'between_tools' },
+          output_config: { effort: resolveEffort(segmentPayload) },
+        } : {}),
+        messages: [{
+          role: 'user',
+          content: buildPrompt(input)
+            + (strictMode
+                ? (input.locale === 'en'
+                    ? `\n\nRespond ONLY by calling the ${toolName} tool with the complete data — do not respond with plain text.`
+                    : `\n\nResponde ÚNICAMENTE llamando a la herramienta ${toolName} con los datos completos — no respondas con texto.`)
+                : '')
+            + (strictMode && !isFrontmatterOnly ? STRICT_MODE_LENGTH_REMINDER[input.locale] : ''),
+        }],
       }),
       signal,
     })
@@ -640,6 +745,19 @@ async function callAnthropicForChunk(
     throw new Error('max_tokens truncation')
   }
 
+  // Only reachable with tool_choice:"auto" (strictMode/5.5) -- forced
+  // tool_choice can't refuse. Logged distinctly so a refusal doesn't read
+  // as an unexplained "no tool_use in response" in the metrics.
+  if (data.stop_reason === 'refusal') {
+    const category = data.stop_details?.reason ?? data.stop_details?.type ?? 'unknown'
+    logGenerationMetric({
+      ...metricBase, ms, status_code: null, error: `refusal: ${category}`,
+      stop_reason: 'refusal',
+      cost_usd: computeCostUsd(model, data.usage),
+    })
+    throw new Error(`model refused: ${category}`)
+  }
+
   logGenerationMetric({
     ...metricBase,
     ok: true,
@@ -666,6 +784,45 @@ async function callAnthropicForChunk(
     : null
 
   return { chunk: toolUse.input, budgetCurrencySuspect }
+}
+
+// Entry point generateDayChunk/generateFrontmatter actually call. Resolves
+// the model once, tries it, and — only when that model is Sonnet 5.5 and
+// the call fails for ANY reason (fetch failure, non-2xx, max_tokens,
+// refusal, no tool_use, invalid shape) — retries THIS SAME attempt once on
+// Sonnet 4.6 with the non-strict/forced-tool_choice shape, rather than
+// letting runUnitWithRetries' outer loop retry 5.5 again. Added 2026-09-29
+// after a real multi-minute outage in Sonnet 5.5's strict-tool-use grammar
+// compiler failed every one of 8 concurrent calls in a batch identically —
+// with SC_CONCURRENCY concurrent calls per batch, an outage without this
+// fails the whole job, not just slows it. Deliberately broad (any error,
+// not just 503) since every failure mode we can hit here is either
+// something 4.6's mature non-strict path doesn't share (grammar-compiler
+// instability) or something equally possible on either model (network
+// blip) — narrowing this to "503 only" would leave the other Sonnet-5.5-
+// specific failure shapes with no safety net. Doesn't consume any of
+// SC_MAX_RETRIES' budget; it's a same-attempt, same-deadline detour. If the
+// 4.6 fallback ALSO fails, that error is what the outer retry loop sees
+// and classifies normally (a 400 there is genuinely permanent, unrelated
+// to 5.5). A sustained outage costs one wasted 5.5 probe per attempt, not
+// a failed job — see PR description / generation_metrics.model_fallback
+// for how often this actually fires.
+async function callAnthropicForChunk(
+  segmentPayload: Record<string, any>,
+  isFrontmatterOnly: boolean,
+  chunkIndexForMetrics: number,
+  signal: AbortSignal,
+  jobId: string,
+  attempt: number,
+): Promise<SegmentResult> {
+  const model = resolveDayModel(segmentPayload)
+  try {
+    return await callAnthropicOnce(segmentPayload, isFrontmatterOnly, chunkIndexForMetrics, signal, jobId, attempt, model, false)
+  } catch (err) {
+    if (!isSonnet55(model) || signal.aborted) throw err
+    console.warn('[worker] Sonnet 5.5 call failed, falling back to 4.6 for this attempt:', String(err).slice(0, 200))
+    return await callAnthropicOnce(segmentPayload, isFrontmatterOnly, chunkIndexForMetrics, signal, jobId, attempt, 'claude-sonnet-4-6', true)
+  }
 }
 
 // ── NEW: front-matter generation (title/tagline/hero_tags/before_you_go/
