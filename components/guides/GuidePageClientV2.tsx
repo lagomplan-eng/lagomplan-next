@@ -156,8 +156,8 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
           {/* ── Left column ── */}
           <div>
             <Itinerary data={data.itinerary} locale={locale} />
-            <HotelsSection data={data.hotels} locale={locale} onToast={toast.show} />
-            <ExperiencesSection data={data.experiences} onToast={toast.show} locale={locale} />
+            <HotelsSection data={data.hotels} locale={locale} onToast={toast.show} destination={data.hero.title} />
+            <ExperiencesSection data={data.experiences} onToast={toast.show} locale={locale} destination={data.hero.title} />
           </div>
 
           {/* ── Right column (sticky) ── */}

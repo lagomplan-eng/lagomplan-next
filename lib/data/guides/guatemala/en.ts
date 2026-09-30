@@ -185,19 +185,19 @@ export const guide: FlatGuide = {
       name: 'Private coffee tasting',
       description: 'Guatemala produces some of the best beans in the world. A sensory tasting at a historic estate like La Azotea lets you understand the connection between volcanic soil and the perfect cup.',
       tags: ['Coffee', 'Tasting', 'Estate'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/grDEZhey3a',
     },
     {
       name: 'Private sailing on Atitlán',
       description: 'Avoid the public boats. Rent a private launch to visit San Juan La Laguna (the village of art and textiles) and Santa Catarina. Seeing the three volcanoes (Atitlán, Tolimán and San Pedro) from the middle of the lake in silence is a spiritual experience.',
       tags: ['Lake', 'Volcanoes', 'Private'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Vj80TjtAwX',
     },
     {
       name: 'Helicopter transfer',
       description: 'For the highest level of luxury and to skip the traffic, the helicopter transfer from Antigua to Atitlán offers an aerial perspective of the volcanoes that is simply unforgettable.',
       tags: ['Helicopter', 'Aerial', 'Luxury'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://flyinguate.com/experiencias',
     },
   ],
 
