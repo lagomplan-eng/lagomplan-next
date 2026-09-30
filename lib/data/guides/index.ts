@@ -95,6 +95,16 @@ import { guide as marrakechEn } from './marrakech/en'
 import { guide as chileEnNogadaEs } from './chile-en-nogada/es'
 import { guide as chileEnNogadaEn } from './chile-en-nogada/en'
 
+// International guides (October 2026 batch)
+import { guide as romaEs } from './roma/es'
+import { guide as romaEn } from './roma/en'
+import { guide as udaipurEs } from './udaipur/es'
+import { guide as udaipurEn } from './udaipur/en'
+import { guide as mauricioEs } from './mauricio/es'
+import { guide as mauricioEn } from './mauricio/en'
+import { guide as hongKongEs } from './hong-kong/es'
+import { guide as hongKongEn } from './hong-kong/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -140,6 +150,11 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'kioto-osaka':         { es: kiotoOsakaEs,          en: kiotoOsakaEn },
   'marrakech':           { es: marrakechEs,           en: marrakechEn },
   'chile-en-nogada':     { es: chileEnNogadaEs,       en: chileEnNogadaEn },
+  // International guides (October 2026 batch)
+  'roma':                { es: romaEs,                en: romaEn },
+  'udaipur':             { es: udaipurEs,             en: udaipurEn },
+  'mauricio':            { es: mauricioEs,            en: mauricioEn },
+  'hong-kong':           { es: hongKongEs,            en: hongKongEn },
 }
 
 // ── Slug aliases ───────────────────────────────────────────────────────────────
@@ -189,6 +204,15 @@ const SLUG_ALIASES: Record<string, string> = {
   // Tulum
   'tulum-guia-viaje-solo':  'tulum',
   'tulum-solo-trip-guide':  'tulum',
+  // Roma / Rome — genuine locale-name mismatch (unlike kioto-osaka and the
+  // other 7 international guides left on a single shared slug as known,
+  // deliberately deferred debt — see feedback_guide-slug-locale-naming
+  // memory). 'roma' is also the bare FLAT_REGISTRY key, so the ES URL
+  // (/es/guias/roma) needs no alias; only the EN spelling does.
+  'rome': 'roma',
+  // Mauricio / Mauritius — same treatment. 'mauricio' is the bare
+  // FLAT_REGISTRY key (ES URL needs no alias); 'mauritius' is the EN spelling.
+  'mauritius': 'mauricio',
 }
 
 // ── Public helpers ─────────────────────────────────────────────────────────────

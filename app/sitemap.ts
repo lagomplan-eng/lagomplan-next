@@ -40,7 +40,7 @@ import type { MetadataRoute } from 'next'
 import { BASE_URL } from '../lib/seo'
 import { ROUTE_MAP, type RouteKey } from '../lib/routes'
 import { getNewGuideParams } from '../lib/data/guides/index'
-import { getAllGuideParams } from '../lib/guides'
+import { getAllGuideParams, getGuideBySlug } from '../lib/guides'
 import type { Locale } from '../i18n'
 
 const LOCALES: Locale[] = ['es', 'en']
@@ -133,18 +133,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     entries.push(staticEntry(key))
   }
 
-  // 2. Guides — V2 system pairs ES/EN slugs by canonical slug.
-  //    The ES version is what `getNewGuideParams` lists for `locale: 'es'`;
-  //    the EN version uses the same slug today (per resolveCanonicalSlug
-  //    in lib/data/guides/index.ts). When EN-localized slugs land,
-  //    refactor here to pair via the canonical slug map.
+  // 2. Guides — V2 system pairs ES/EN slugs via the lib/guides.ts shadow
+  //    entry's real slug_es/slug_en, not the bare canonical slug. Most
+  //    guides share one slug across locales, but some (Roma/Rome,
+  //    Mauricio/Mauritius) genuinely don't — falling back to the bare
+  //    canonical slug only for guides with no shadow entry yet.
   const v2Slugs = new Set(
     getNewGuideParams()
       .filter(p => p.locale === 'es')
       .map(p => p.slug),
   )
   for (const slug of v2Slugs) {
-    entries.push(entityEntry('guias', 'guides', slug, slug))
+    const shadow = getGuideBySlug('es', slug)
+    const enSlug = shadow ? shadow.slug_en : slug
+    entries.push(entityEntry('guias', 'guides', slug, enSlug))
   }
 
   // 3. Legacy guides — same slug across locales.

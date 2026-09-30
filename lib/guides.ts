@@ -1240,6 +1240,76 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/chile-en-nogada.png',
     sections: [],
   },
+
+  // ── International guides (October 2026 batch) ─────────────────
+
+  // Roma / Rome — genuine locale-name mismatch, given real per-locale
+  // slugs (unlike the deferred international batch above) — see
+  // SLUG_ALIASES in lib/data/guides/index.ts and
+  // feedback_guide-slug-locale-naming memory.
+  {
+    slug_es: 'roma',
+    slug_en: 'rome',
+    title_es: 'Roma, Italia',
+    title_en: 'Rome, Italy',
+    excerpt_es: 'Octubre es el mes que Roma guarda para sí misma. El calor y las filas del verano ya se fueron y la ciudad recupera su escala humana. Para la pareja que quiere comer bien, caminar despacio y terminar cada noche en una trattoria de Trastevere sin reserva previa.',
+    excerpt_en: "October is the month Rome keeps for itself. Summer's heat and four-hour lines are gone, and the city gets its human scale back. For the couple who wants to eat well, walk slowly, and end every night at a Trastevere trattoria with no reservation needed.",
+    destination_es: 'Roma, Italia',
+    destination_en: 'Rome, Italy',
+    tags_es: ['Pareja', 'Gastronomía', 'Relax', 'Historia'],
+    tags_en: ['Couple', 'Food', 'Relaxation', 'History'],
+    cover_img: '/images/guides/roma.png',
+    sections: [],
+  },
+
+  // ── Udaipur ────────────────────────────────────────────────
+  {
+    slug_es: 'udaipur',
+    slug_en: 'udaipur',
+    title_es: 'Udaipur, Rajastán, India',
+    title_en: 'Udaipur, Rajasthan, India',
+    excerpt_es: 'La ciudad construida alrededor de los lagos artificiales más grandes de Asia es exactamente tan hermosa como dicen las fotos. Para la familia con adolescentes que quiere que el viaje sea el argumento definitivo de que el mundo real supera cualquier pantalla.',
+    excerpt_en: "The city built around Asia's largest artificial lakes is exactly as beautiful as the photos claim. For the family with teenagers who wants the trip to be the definitive argument that the real world beats any screen.",
+    destination_es: 'Udaipur, India',
+    destination_en: 'Udaipur, India',
+    tags_es: ['Familia', 'Cultura', 'Palacios', 'Lagos'],
+    tags_en: ['Family', 'Culture', 'Palaces', 'Lakes'],
+    cover_img: '/images/guides/udaipur.png',
+    sections: [],
+  },
+
+  // Mauricio / Mauritius — genuine locale-name mismatch, given real
+  // per-locale slugs — see SLUG_ALIASES in lib/data/guides/index.ts.
+  {
+    slug_es: 'mauricio',
+    slug_en: 'mauritius',
+    title_es: 'Mauricio, Océano Índico',
+    title_en: 'Mauritius, Indian Ocean',
+    excerpt_es: 'Una isla de 65 kilómetros de largo en medio del Océano Índico con playas de arena blanca, delfines a menos de un kilómetro de la orilla y una cascada que cae sobre tierra de siete colores. Para la familia con niños pequeños que quiere aventura sin la logística imposible.',
+    excerpt_en: 'A 65-kilometer-long island in the middle of the Indian Ocean, with white-sand beaches, dolphins less than a kilometer from shore, and a waterfall pouring over seven-colored earth. For the family with young kids who wants adventure without impossible logistics.',
+    destination_es: 'Mauricio',
+    destination_en: 'Mauritius',
+    tags_es: ['Familia', 'Playa', 'Aventura', 'Naturaleza'],
+    tags_en: ['Family', 'Beach', 'Adventure', 'Nature'],
+    cover_img: '/images/guides/mauricio.png',
+    sections: [],
+  },
+
+  // ── Hong Kong ──────────────────────────────────────────────
+  {
+    slug_es: 'hong-kong',
+    slug_en: 'hong-kong',
+    title_es: 'Hong Kong, China',
+    title_en: 'Hong Kong, China',
+    excerpt_es: 'La ciudad donde los dim sum del desayuno tienen tres estrellas Michelin y la noche dura más de lo que nadie había planeado. Para el viaje que mezcla agenda de trabajo con el grupo de amigos que lleva meses sin verse.',
+    excerpt_en: "The city where breakfast dim sum carries three Michelin stars and the night runs longer than anyone planned. For the trip that mixes a work agenda with the friend group you haven't all seen in months.",
+    destination_es: 'Hong Kong',
+    destination_en: 'Hong Kong',
+    tags_es: ['Amigos', 'Negocios', 'Gastronomía', 'Ciudad'],
+    tags_en: ['Friends', 'Business', 'Food', 'City'],
+    cover_img: '/images/guides/hong-kong.png',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────

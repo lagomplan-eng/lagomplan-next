@@ -92,10 +92,19 @@ export default async function GuideDetailPage({ params }: Props) {
   // 1. Try new guide data system
   const newData = getGuidePageData(slug, locale)
   if (newData) {
-    const canonical   = resolveCanonicalSlug(slug)
     const otherLocale = locale === 'es' ? 'en' : 'es'
     const guidePrefix = otherLocale === 'es' ? 'guias' : 'guides'
-    const alternateLocaleUrl = `/${otherLocale}/${guidePrefix}/${canonical}`
+    // Prefer the real per-locale slug from the lib/guides.ts shadow entry
+    // (every FlatGuide-backed guide has one) — most guides share the same
+    // slug in both locales, but some (Roma/Rome, Mauricio/Mauritius) don't,
+    // and re-emitting the bare canonical key for both would 404-safe-but-
+    // wrong-language the alternate link for those. Falls back to the bare
+    // canonical key only if a guide somehow has no shadow entry yet.
+    const shadow  = getGuideBySlug(locale, slug)
+    const otherSlug = shadow
+      ? (otherLocale === 'es' ? shadow.slug_es : shadow.slug_en)
+      : resolveCanonicalSlug(slug)
+    const alternateLocaleUrl = `/${otherLocale}/${guidePrefix}/${otherSlug}`
     return <GuidePageClientV2 data={newData} locale={locale} alternateLocaleUrl={alternateLocaleUrl} />
   }
 
