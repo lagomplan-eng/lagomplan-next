@@ -232,7 +232,7 @@ export const guide: FlatGuide = {
       name: 'Ferry to Colonia from Buenos Aires',
       description: 'If the trip starts in Argentina, the 1-hour Buquebus is the best first memory of Uruguay for kids. The muddy Río de la Plata, the open-air deck and arrival at the Colonia pier work as a threshold into the country.',
       tags: ['Ferry', 'Family', 'Crossing'],
-      affiliateUrl: '',
+      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
     },
     {
       name: 'Day at a Uruguayan estancia',

@@ -6,6 +6,7 @@
 // reusable lives in the city layer.
 
 import type { Partner } from '../types'
+import { CHEF_WHATSAPP_NUMBER } from '../../../lib/guia/links'
 
 export const livinCondesa: Partner = {
   slug: 'livin_condesa',
@@ -53,11 +54,89 @@ export const livinCondesa: Partner = {
     publish: false,
   },
 
-  // FAQ module: zone content only (Everyday errands / Eating in). No
-  // property-tier (faqAnswers) content yet — do not add any without
-  // checking content/guia/faq/resolve.ts's gate first, see conversation.
   zone: 'condesa',
   atAGlance: {
     checkOut: '11:00',
+  },
+
+  // "Health & Pharmacies" now renders under Take care (faqAnswers falls
+  // through to base.defaults.healthPharmacies) instead of Before you
+  // arrive — this hides the city-level arrivalItems duplicate for this
+  // partner without touching its text. 2026-09-28, Livin brief.
+  arrivalItemsOmit: ['health-pharmacies'],
+
+  // Partner-tier (Tier A doesn't apply here — chefsAtHome/massages are
+  // Tier B/ZoneFaqKey, just set at the partner layer per the brief rather
+  // than the zone layer, so Partner > Zone > base resolution picks these
+  // over condesa.ts's absence and faqBase.defaults' generic concierge
+  // text). Added 2026-09-28.
+  faqAnswers: {
+    chefsAtHome: {
+      // Body ends right before "WhatsApp" / "por" so the two InlineLinks
+      // below splice in as the actual hyperlinked words mid-sentence
+      // (WhatsApp, then Take a Chef), matching the pattern already used
+      // for Transportation's Insider link — not a separate action list
+      // appended after the paragraph. Moved 2026-09-28 per direct
+      // feedback on the live page.
+      body: {
+        en:
+          'Two chefs we work with come to the apartment and plan the menu around ' +
+          'your group. Chef Adán Canales cooks international cuisine; Chef Mateo ' +
+          'di Monaco cooks Italian. Message us on',
+        es:
+          'Trabajamos con dos chefs que van al departamento y arman el menú según ' +
+          'tu grupo. Chef Adán Canales cocina internacional; Chef Mateo di ' +
+          'Monaco, italiana. Escríbenos por',
+      },
+      links: {
+        en: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=Hi!%20I'm%20staying%20at%20Livin%20Condesa%20and%20I'd%20like%20a%20private%20chef%20on%20%5Bdate%5D%20for%20%5B%23%5D%20people.`,
+            after: ' with your date and headcount, ideally three days ahead. Looking for something else? Browse chefs on',
+            linkName: 'chef_whatsapp',
+          },
+          // CONFIRM (Elena): does an English-language version of Take a
+          // Chef's directory exist? Using the ES URL until confirmed.
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
+        ],
+        es: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=%C2%A1Hola!%20Me%20estoy%20quedando%20en%20Livin%20Condesa%20y%20quiero%20un%20chef%20privado%20el%20%5Bfecha%5D%20para%20%5B%23%5D%20personas.`,
+            after: ' con la fecha y el número de personas, idealmente con tres días de anticipación. ¿Buscas otra cocina? Explora chefs en',
+            linkName: 'chef_whatsapp',
+          },
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
+        ],
+      },
+    },
+    massages: {
+      body: {
+        en:
+          'Casa Ancestras, at Tenancingo 26 in Condesa, is a small, unpretentious ' +
+          'space where the therapists are the reason to go. They do massages and ' +
+          'facials rooted in traditional Mexican bodywork, and they work in ' +
+          'English too. By appointment only.',
+        es:
+          'Casa Ancestras, en Tenancingo 26 en la Condesa, es un espacio sencillo ' +
+          'donde lo que vale la pena son las terapeutas. Hacen masajes y faciales ' +
+          'basados en la tradición mexicana del cuidado con las manos, y ' +
+          'atienden también en inglés. Solo con cita.',
+      },
+      links: {
+        en: [
+          { text: 'Book online', href: 'https://app.acuityscheduling.com/schedule/96fb162e', after: ' · ', linkName: 'massage_book' },
+          { text: 'WhatsApp', href: 'https://wa.me/525611224292', after: ' · ', linkName: 'massage_whatsapp' },
+          { text: 'Map', href: 'https://www.google.com/maps/search/?api=1&query=Tenancingo%2026%2C%20Condesa%2C%20CDMX', linkName: 'massage_map' },
+        ],
+        es: [
+          { text: 'Reservar en línea', href: 'https://app.acuityscheduling.com/schedule/96fb162e', after: ' · ', linkName: 'massage_book' },
+          { text: 'WhatsApp', href: 'https://wa.me/525611224292', after: ' · ', linkName: 'massage_whatsapp' },
+          { text: 'Mapa', href: 'https://www.google.com/maps/search/?api=1&query=Tenancingo%2026%2C%20Condesa%2C%20CDMX', linkName: 'massage_map' },
+        ],
+      },
+      // Optional fields intentionally omitted per the brief (empty > invented): price, what's included, languages, group size.
+    },
   },
 }

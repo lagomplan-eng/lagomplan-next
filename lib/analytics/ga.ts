@@ -75,17 +75,19 @@ export function gaPageView(path: string, title?: string): void {
  * the experience card's own "Book" button, which is the highest-intent
  * action on the page.
  */
-export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details'
+// services_contact added 2026-09-28 (Livin brief, Take care tab) — chef
+// and massage outbound links (WhatsApp, Book online, Mapa, Take a Chef).
+export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact'
 
 /**
- * Fires partner_link_click for any of the three tracked render sites
+ * Fires partner_link_click for any of the four tracked render sites
  * (PracticalCard's InlineLink, the experience "Book" button, the
- * experience details "how to book" link). One implementation, three
- * call sites — see lib/guia/links.ts for the UTM side of this (Insider
- * only, never Airalo).
+ * experience details "how to book" link, and Take care's services_contact
+ * links). One implementation, four call sites — see lib/guia/links.ts for
+ * the UTM side of this (Insider only, never Airalo).
  */
 export function trackOutboundLink(params: {
-  linkName: 'insider' | 'airalo'
+  linkName: 'insider' | 'airalo' | 'chef_whatsapp' | 'chef_take_a_chef' | 'massage_book' | 'massage_whatsapp' | 'massage_map'
   href: string
   partnerSlug: string
   zone?: string

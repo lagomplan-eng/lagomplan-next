@@ -6,15 +6,24 @@
  */
 
 import type { ExperiencesSection as ExperiencesSectionData } from '../../lib/data/guides/types'
-import { withRef } from '../../lib/affiliate'
+import { withRef, buildAffiliateLink } from '../../lib/affiliate'
 
 interface Props {
   data: ExperiencesSectionData
   onToast?: (msg: string) => void
   locale: string
+  /** City/destination name, used as the fallback search-link target when an experience has no pre-resolved bookingUrl. */
+  destination: string
 }
 
-export function ExperiencesSection({ data, onToast, locale }: Props) {
+export function ExperiencesSection({ data, onToast, locale, destination }: Props) {
+  const ctxLocale = locale === 'en' ? 'en' : 'es'
+
+  function expHref(bookingUrl: string | undefined): string {
+    if (bookingUrl) return withRef(bookingUrl)
+    return buildAffiliateLink('getyourguide', { city: destination, locale: ctxLocale, surface: 'guide' })
+  }
+
   return (
     <div data-guide="experiences" className="mb-14">
       {/* Section header */}
@@ -68,7 +77,7 @@ export function ExperiencesSection({ data, onToast, locale }: Props) {
             {/* Action */}
             <div className="flex-shrink-0 pt-0.5 max-[640px]:hidden">
               <a
-                href={withRef(exp.bookingUrl)}
+                href={expHref(exp.bookingUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => onToast?.(locale === 'en' ? 'Opening booking…' : 'Abriendo reserva…')}

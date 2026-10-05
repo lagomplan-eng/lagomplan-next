@@ -30,6 +30,7 @@ import {
   Landmark, Baby, Martini, Compass, Clock, CloudRain, ArrowDown, IceCreamCone,
   Mountain, KeyRound, Luggage, Sparkles, DoorOpen, Shirt, ShoppingCart,
   Wallet, AlarmClock, Laptop, ChefHat, Truck, PartyPopper, Dumbbell, Scissors,
+  Flower2,
   type LucideIcon,
 } from 'lucide-react'
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
@@ -55,7 +56,7 @@ const ICONS: Record<IconKey, LucideIcon> = {
   keyRound: KeyRound, suitcase: Luggage, sparkles: Sparkles, doorOpen: DoorOpen,
   shirt: Shirt, cart: ShoppingCart, wallet: Wallet, alarmClock: AlarmClock,
   laptop: Laptop, chefHat: ChefHat, truck: Truck, partyPopper: PartyPopper,
-  dumbbell: Dumbbell, scissors: Scissors,
+  dumbbell: Dumbbell, scissors: Scissors, flower: Flower2,
 }
 
 export function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size?: number; color?: string }) {
@@ -98,6 +99,15 @@ const WA_BOOK_URL: Record<Lang, string> = {
  */
 const ARRIVAL_FAQ_COUNTERPART: Partial<Record<string, FaqItemKey>> = {
   'coming-back-late': 'lateReturn',
+  // Added 2026-09-28 alongside the Livin "Take care"/errands work — this
+  // mapping is what actually gates arrivalItemsOmit (see
+  // visibleArrivalItems below), and was missed when 'health-pharmacies'
+  // was added to arrivalItemsOmit on the Livin partners: without an
+  // entry here, `counterpart` was always undefined, so the safety check
+  // never omitted the card and it rendered under BOTH "Before you
+  // arrive" and (correctly) "Everyday errands" at once. Confirmed live
+  // on production before this fix (curl + grep the SSR HTML).
+  'health-pharmacies': 'healthPharmacies',
 }
 
 /** Experience card images, keyed by the experience id. */

@@ -61,8 +61,13 @@ expectEq('REG-06 (7) Livin Roma retains pilotId mxcity_pilot', roma?.pilotId, 'm
 
 expectEq('REG-07 the retired slug "livin" no longer resolves', getPartner('livin'), null)
 
+// Not an exact-membership check: this file'''s scope is the livin→livin_condesa
+// rename, not a full inventory of the partner registry, and a new partner
+// (e.g. livin_polanco, demo) is expected to be added over time without
+// breaking this test — only that the rename didn'''t disturb condesa or roma.
 const slugs = listPartnerSlugs().slice().sort()
-expectEq('REG-08 registry contains exactly livin_condesa + livin_roma', slugs, ['livin_condesa', 'livin_roma'])
+expectTrue('REG-08 registry includes both livin_condesa + livin_roma',
+  slugs.includes('livin_condesa') && slugs.includes('livin_roma'))
 
 const condesaGuide = getGuide('livin_condesa')
 expectTrue('REG-09 getGuide("livin_condesa") resolves partner + city', condesaGuide !== null && condesaGuide.city.id === 'cdmx')

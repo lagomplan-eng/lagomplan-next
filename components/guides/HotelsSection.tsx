@@ -6,12 +6,14 @@
  */
 
 import type { HotelsSection as HotelsSectionData } from '../../lib/data/guides/types'
-import { withRef } from '../../lib/affiliate'
+import { withRef, buildAffiliateLink } from '../../lib/affiliate'
 
 interface Props {
   data: HotelsSectionData
   onToast?: (msg: string) => void
   locale: string
+  /** City/destination name, used as the fallback search-link target when a hotel has no pre-resolved bookingUrl. */
+  destination: string
 }
 
 const BOOK_LABEL: Record<string, string> = {
@@ -19,8 +21,14 @@ const BOOK_LABEL: Record<string, string> = {
   en: 'Book →',
 }
 
-export function HotelsSection({ data, onToast, locale }: Props) {
+export function HotelsSection({ data, onToast, locale, destination }: Props) {
   const bookLabel = BOOK_LABEL[locale] ?? BOOK_LABEL.es
+  const ctxLocale = locale === 'en' ? 'en' : 'es'
+
+  function hotelHref(bookingUrl: string | undefined): string {
+    if (bookingUrl) return withRef(bookingUrl)
+    return buildAffiliateLink('booking', { city: destination, locale: ctxLocale, surface: 'guide' })
+  }
 
   return (
     <div data-guide="hotels" className="mb-14">
@@ -79,7 +87,7 @@ export function HotelsSection({ data, onToast, locale }: Props) {
             <div className="flex flex-col gap-2 flex-shrink-0 pt-[22px] max-[640px]:flex-row max-[640px]:pt-0">
               <a
                 data-hotel="book-link"
-                href={withRef(hotel.bookingUrl)}
+                href={hotelHref(hotel.bookingUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => onToast?.('Abriendo reserva…')}

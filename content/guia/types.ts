@@ -25,11 +25,20 @@ export type IconKey =
   | 'keyRound' | 'suitcase' | 'sparkles' | 'doorOpen' | 'shirt' | 'cart'
   | 'wallet' | 'alarmClock' | 'laptop' | 'chefHat' | 'truck' | 'partyPopper'
   | 'dumbbell' | 'scissors'
+  // Added for the 'care' group's massages card (2026-09-28) — no existing
+  // icon fit "massage/spa" without forcing a mismatched metaphor.
+  | 'flower'
 
 /** Inline link inside an arrival card body (e.g. the Airalo eSIM link). */
 /** Which outbound partner a link goes to, for partner_link_click tracking.
- *  Extend this union when a new outbound partner link is added. */
-export type PartnerLinkName = 'insider' | 'airalo'
+ *  Extend this union when a new outbound partner link is added.
+ *  chef_whatsapp/chef_take_a_chef and massage_* added 2026-09-28 (Livin
+ *  brief, Take care tab) — distinct values so link_name differentiates
+ *  each action within the same 'services_contact' section. */
+export type PartnerLinkName =
+  | 'insider' | 'airalo'
+  | 'chef_whatsapp' | 'chef_take_a_chef'
+  | 'massage_book' | 'massage_whatsapp' | 'massage_map'
 
 export interface InlineLink {
   text: string

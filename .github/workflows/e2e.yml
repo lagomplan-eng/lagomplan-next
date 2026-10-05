@@ -39,6 +39,14 @@ jobs:
         with:
           version: latest
 
+      # `supabase start` pulls several images from ghcr.io/supabase/*.
+      # Anonymous pulls share a low, easily-exhausted rate limit and
+      # intermittently fail with "toomanyrequests" — unrelated to any code
+      # change, but it fails the job. Authenticating with the workflow'''s own
+      # GITHUB_TOKEN (no extra secret needed) gets a much higher per-repo quota.
+      - name: Log in to GHCR (avoids anonymous pull rate limits)
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Start local Supabase (applies migrations → builds the schema)
         run: supabase start
 

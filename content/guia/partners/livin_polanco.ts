@@ -9,10 +9,12 @@
 // ~20-30 min for two) — flag for review, this is new phrasing, not sourced
 // copy like the rest of the file.
 //
-// No faqAnswers/atAGlance/arrivalItemsOmit — no property-tier content yet,
-// so "Your stay" stays absent (panels.length >= 2 rule).
+// No atAGlance — no confirmed check-in/out/luggage facts yet, so "Your
+// stay" stays absent (panels.length >= 2 rule; faqAnswers.chefsAtHome
+// below is Tier B/ZoneFaqKey, not Tier A, so it doesn't clear that gate).
 
 import type { Partner } from '../types'
+import { CHEF_WHATSAPP_NUMBER } from '../../../lib/guia/links'
 
 export const livinPolanco: Partner = {
   slug: 'livin_polanco',
@@ -67,5 +69,55 @@ export const livinPolanco: Partner = {
   practicalSubhead: {
     es: 'Lo práctico está a unas cuadras. El resto de Polanco vale la caminata.',
     en: 'Everything practical is within a few blocks. The rest of Polanco is worth the walk.',
+  },
+
+  // "Health & Pharmacies" now renders under Take care instead of Before
+  // you arrive — hides the city-level arrivalItems duplicate without
+  // touching its text. 2026-09-28, Livin brief.
+  arrivalItemsOmit: ['health-pharmacies'],
+
+  // No massages entry here — deliberately excluded per the brief (Casa
+  // Ancestras is Condesa/Roma only). Take care renders 3 cards for
+  // Polanco (gyms, healthPharmacies, and familiesPets once a zone entry
+  // exists), not 4 — expected, not a gap to fill.
+  faqAnswers: {
+    chefsAtHome: {
+      // Body ends right before "WhatsApp" / "por" so the two InlineLinks
+      // below splice in as the actual hyperlinked words mid-sentence,
+      // matching the pattern already used for Transportation's Insider
+      // link. Moved 2026-09-28 per direct feedback on the live page.
+      body: {
+        en:
+          'Two chefs we work with come to the apartment and plan the menu around ' +
+          'your group. Chef Adán Canales cooks international cuisine; Chef Mateo ' +
+          'di Monaco cooks Italian. Message us on',
+        es:
+          'Trabajamos con dos chefs que van al departamento y arman el menú según ' +
+          'tu grupo. Chef Adán Canales cocina internacional; Chef Mateo di ' +
+          'Monaco, italiana. Escríbenos por',
+      },
+      links: {
+        en: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=Hi!%20I'm%20staying%20at%20Livin%20Polanco%20and%20I'd%20like%20a%20private%20chef%20on%20%5Bdate%5D%20for%20%5B%23%5D%20people.`,
+            after: ' with your date and headcount, ideally three days ahead. Looking for something else? Browse chefs on',
+            linkName: 'chef_whatsapp',
+          },
+          // CONFIRM (Elena): does an English-language version of Take a
+          // Chef's directory exist? Using the ES URL until confirmed.
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
+        ],
+        es: [
+          {
+            text: 'WhatsApp',
+            href: `https://wa.me/${CHEF_WHATSAPP_NUMBER}?text=%C2%A1Hola!%20Me%20estoy%20quedando%20en%20Livin%20Polanco%20y%20quiero%20un%20chef%20privado%20el%20%5Bfecha%5D%20para%20%5B%23%5D%20personas.`,
+            after: ' con la fecha y el número de personas, idealmente con tres días de anticipación. ¿Buscas otra cocina? Explora chefs en',
+            linkName: 'chef_whatsapp',
+          },
+          { text: 'Take a Chef', href: 'https://www.takeachef.com/es-mx/our-chefs', after: '.', linkName: 'chef_take_a_chef' },
+        ],
+      },
+    },
   },
 }

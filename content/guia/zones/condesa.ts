@@ -211,5 +211,13 @@ export const condesa: Zone = {
 
     // privateEvents: intentionally absent — no confirmed answer.
     // Renders nothing until Livin tells us how they handle it.
+
+    // ---------------------------------------------------------------
+    // GROUP 4 — Take care
+    // ---------------------------------------------------------------
+
+    // TODO (Pili): familiesPets — pediatra/niñera, veterinario, parques
+    // pet-friendly en Condesa. Intentionally absent until verified;
+    // renders nothing at any layer until then.
   },
 }
