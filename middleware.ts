@@ -12,6 +12,7 @@
 import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { locales, defaultLocale, pathnames } from './i18n'
+import { getGuideRedirectSlug } from './lib/guide-slugs'
 
 const intlMiddleware = createMiddleware({
   locales,
@@ -43,6 +44,22 @@ export default function middleware(req: NextRequest) {
   // is unaffected.
   if (pathname === '/guia' || pathname.startsWith('/guia/')) {
     return NextResponse.next()
+  }
+
+  // Guide alias URLs → 301 to the short, canonical, per-locale slug
+  // (/es/guias/oaxaca-guia-esencial → /es/guias/oaxaca, /en/guides/roma →
+  // /en/guides/rome). True 301 here rather than next.config's `permanent`
+  // (which emits 308). Query string (utm_*) is preserved.
+  const guideMatch = pathname.match(/^\/(es|en)\/(guias|guides)\/([^/]+)\/?$/)
+  if (guideMatch) {
+    const [, locale, segment, slug] = guideMatch
+    const expectedSegment = locale === 'es' ? 'guias' : 'guides'
+    const target = segment === expectedSegment ? getGuideRedirectSlug(locale, slug) : null
+    if (target) {
+      const url = req.nextUrl.clone()
+      url.pathname = `/${locale}/${segment}/${target}`
+      return NextResponse.redirect(url, { status: 301 })
+    }
   }
 
   // 301 legacy redirects — check exact match first, then prefix match for slugs

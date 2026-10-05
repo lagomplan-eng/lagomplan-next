@@ -9,6 +9,7 @@
 
 import type { FlatGuide, GuidePageData } from './types'
 import { adaptFlatGuide } from './adapter'
+import { resolveGuideKey, getPublicGuideSlug, getGuideRedirectSlug } from '../../guide-slugs'
 
 // ── Guide imports ──────────────────────────────────────────────────────────────
 
@@ -157,73 +158,15 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'hong-kong':           { es: hongKongEs,            en: hongKongEn },
 }
 
-// ── Slug aliases ───────────────────────────────────────────────────────────────
-// Maps locale-specific URL slugs (from lib/guides.ts) → canonical registry key.
-// Add new entries here whenever a guide gets a new descriptive URL slug.
-
-const SLUG_ALIASES: Record<string, string> = {
-  // Valle de Bravo
-  'valle-de-bravo-avandaro-aventura-en-familia': 'valle-de-bravo',
-  'valle-de-bravo-avandaro-family-adventure':    'valle-de-bravo',
-  // Riviera Maya
-  'riviera-maya-roadtrip-de-semana-santa': 'riviera-maya',
-  'riviera-maya-easter-road-trip':         'riviera-maya',
-  // Oaxaca
-  'oaxaca-guia-esencial':  'oaxaca',
-  'oaxaca-essential-guide': 'oaxaca',
-  // Cuernavaca
-  'cuernavaca-refugio-de-primavera-estilo': 'cuernavaca',
-  'cuernavaca-spring-getaway-and-style':    'cuernavaca',
-  // Cancún
-  'cancun-guia-familiar': 'cancun',
-  'cancun-family-guide':  'cancun',
-  // Ciudad de México
-  'ciudad-de-mexico-guia-de-parejas': 'ciudad-de-mexico',
-  'mexico-city-couples-guide':        'ciudad-de-mexico',
-  // Guadalajara
-  'guadalajara-guia-de-amigos': 'guadalajara',
-  'guadalajara-friends-guide':  'guadalajara',
-  // Los Cabos
-  'los-cabos-relax-entre-amigas': 'los-cabos',
-  'los-cabos-girls-getaway':      'los-cabos',
-  // Mérida
-  'merida-familia-aventurera': 'merida',
-  'merida-adventurous-family': 'merida',
-  // Querétaro
-  'queretaro-guia-de-amigos': 'queretaro',
-  'queretaro-friends-guide':  'queretaro',
-  // Puerto Vallarta
-  'puerto-vallarta-guia-romantica': 'puerto-vallarta',
-  'puerto-vallarta-romantic-guide': 'puerto-vallarta',
-  // San Miguel de Allende
-  'san-miguel-de-allende-viaje-de-parejas': 'san-miguel-de-allende',
-  'san-miguel-de-allende-couples-trip':     'san-miguel-de-allende',
-  // Tepoztlán
-  'tepoztlan-escapada-en-pareja': 'tepoztlan',
-  'tepoztlan-couple-escape':      'tepoztlan',
-  // Tulum
-  'tulum-guia-viaje-solo':  'tulum',
-  'tulum-solo-trip-guide':  'tulum',
-  // Roma / Rome — genuine locale-name mismatch (unlike kioto-osaka and the
-  // other 7 international guides left on a single shared slug as known,
-  // deliberately deferred debt — see feedback_guide-slug-locale-naming
-  // memory). 'roma' is also the bare FLAT_REGISTRY key, so the ES URL
-  // (/es/guias/roma) needs no alias; only the EN spelling does.
-  'rome': 'roma',
-  // Mauricio / Mauritius — same treatment. 'mauricio' is the bare
-  // FLAT_REGISTRY key (ES URL needs no alias); 'mauritius' is the EN spelling.
-  'mauritius': 'mauricio',
-}
-
 // ── Public helpers ─────────────────────────────────────────────────────────────
 
 /**
  * Returns guide data for a given slug + locale, or null if not found.
  * Accepts both canonical short slugs and locale-specific descriptive slugs
- * (via SLUG_ALIASES). Falls back to 'es' if the requested locale is missing.
+ * (via resolveGuideKey in lib/guide-slugs.ts). Falls back to 'es' if the requested locale is missing.
  */
 export function getGuidePageData(slug: string, locale: string): GuidePageData | null {
-  const key = SLUG_ALIASES[slug] ?? slug
+  const key = resolveGuideKey(slug)
   const entry = FLAT_REGISTRY[key]
   if (!entry) return null
   const flat = entry[locale] ?? entry['es'] ?? null
@@ -232,13 +175,15 @@ export function getGuidePageData(slug: string, locale: string): GuidePageData | 
 }
 
 /**
- * Returns all { locale, slug } pairs for generateStaticParams().
+ * Returns all { locale, slug } pairs for generateStaticParams() and the
+ * sitemap. `slug` is the PUBLIC per-locale slug (roma/rome, mauricio/mauritius,
+ * otherwise the registry key) — never an alias, since aliases 301 away.
  */
 export function getNewGuideParams(): Array<{ locale: string; slug: string }> {
   const params: Array<{ locale: string; slug: string }> = []
-  for (const slug of Object.keys(FLAT_REGISTRY)) {
-    for (const locale of Object.keys(FLAT_REGISTRY[slug])) {
-      params.push({ locale, slug })
+  for (const key of Object.keys(FLAT_REGISTRY)) {
+    for (const locale of Object.keys(FLAT_REGISTRY[key])) {
+      params.push({ locale, slug: getPublicGuideSlug(key, locale) })
     }
   }
   return params
@@ -252,7 +197,7 @@ export function getNewGuideParams(): Array<{ locale: string; slug: string }> {
  * resolveCanonicalSlug('oaxaca')               → 'oaxaca'
  */
 export function resolveCanonicalSlug(slug: string): string {
-  return SLUG_ALIASES[slug] ?? slug
+  return resolveGuideKey(slug)
 }
 
 /**
@@ -286,4 +231,5 @@ export function getAllFlatGuides(locale: string): Array<{ canonical: string; fla
   return out
 }
 
+export { getPublicGuideSlug, getGuideRedirectSlug }
 export type { GuidePageData }

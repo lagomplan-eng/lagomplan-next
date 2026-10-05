@@ -12,15 +12,22 @@
  *   4. If user is NOT authenticated → render TripShareWall (auth gate UI).
  */
 
+import type { Metadata }     from 'next'
 import { redirect }          from 'next/navigation'
 import { getSupabaseServer, getSupabaseAdmin } from '../../../../../lib/supabase/server'
 import { getRoute }          from '../../../../../lib/routes'
+import { NO_INDEX }          from '../../../../../lib/seo'
 import type { Locale }       from '../../../../../i18n'
 import TripShareWall         from '../../../../../components/trips/TripShareWall'
 
 type Props = {
   params: Promise<{ locale: Locale; shareId: string }>
 }
+
+// Private share URL: noindex, and deliberately NO `alternates` — the
+// layout sets none either, so no canonical is emitted at all (in particular
+// none pointing at the home page).
+export const metadata: Metadata = { robots: NO_INDEX }
 
 export default async function TripSharePage({ params }: Props) {
   const { locale, shareId } = await params
