@@ -253,6 +253,16 @@ export interface InsiderPick {
   note: string
 }
 
+/** A tour the operator sells directly (demo prospects). */
+export interface OwnTour {
+  id: string
+  title: string
+  teaser: string
+  description?: string
+  bookHref: string
+  bookLabel?: string
+}
+
 export interface Partner {
   slug: string
   displayName: string
@@ -320,6 +330,26 @@ export interface Partner {
 
   /** noindex,nofollow for this partner's page. Default false. */
   noindex?: boolean
+
+  /**
+   * City zones (keys of City.neighborhoods) to browse INSTEAD of the
+   * "Your house" tab + the city's full zone list. Used by /demo prospects,
+   * which have no street-level pick list. First entry is the default tab.
+   */
+  neighborhoods?: string[]
+
+  /** Overrides the city-level host-letter copy (requires hostLetterSignature). */
+  hostLetter?: Partial<Record<Lang, { quote?: string; body: string; roleLabel?: string }>>
+
+  /**
+   * The operator's own tours. When present for the active language they
+   * replace the Insider experiences section (those route to a Lagomplan
+   * WhatsApp; these route to the operator).
+   */
+  ownTours?: Partial<Record<Lang, OwnTour[]>>
+
+  /** Co-branding: logo (public path or https URL) and an optional accent hex. */
+  brand?: { logo?: string; accent?: string }
 
   /** Overrides the utm_content value on outbound Lagomplan CTAs. Default
    *  'guest_guide'. */
