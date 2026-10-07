@@ -36,6 +36,7 @@ import {
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
+import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
 import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
 import { resolveFaqModule } from '../../../content/guia/faq/resolve'
@@ -286,6 +287,7 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: E
 export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
+  const [stay, setStay] = useState<Stay>({})
   const [browseNb, setBrowseNb] = useState<string>(HOME_TAB_ID)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
@@ -300,8 +302,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   // default — reading window.location here to decide initial state would
   // hydrate-mismatch a Spanish deep link against the English SSR HTML.
   useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get('lang')
+    const params = new URLSearchParams(window.location.search)
+    const requested = params.get('lang')
     if (requested === 'es' || requested === 'en') setLang(requested)
+
+    // ?llegada&noches&adultos&ninos personalize the guide. Same post-mount
+    // timing as ?lang for the same hydration reason. With no (or invalid)
+    // params `stay` stays {} and nothing below changes.
+    const parsed = parseStay(params)
+    setStay(parsed)
+    // Traveling with kids → open that mood by default.
+    if (parsed.children && parsed.children > 0) setMood('kids')
   }, [])
 
   // ── Attribution flag + view event (once on load) ──────────────────────────
@@ -436,6 +447,9 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <span className={styles.heroEyebrow}>{interp(t.heroEyebrow)}</span>
+          {stay.nights && (
+            <p className={styles.heroStay}>{stayHeading(lang, stay.nights, partner.homeNeighborhood)}</p>
+          )}
           <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroSub}>{interp(t.heroSub)}</p>
           <a href="#practico" className={styles.ctaLight}>

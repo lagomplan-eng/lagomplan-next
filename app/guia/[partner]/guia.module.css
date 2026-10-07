@@ -141,6 +141,7 @@
 .heroContent { position: relative; max-width: 1160px; margin: 0 auto; width: 100%; padding: 0 24px 56px; color: var(--cream); }
 @media (max-width: 768px) { .heroContent { padding: 0 20px 48px; } }
 .heroEyebrow { display: block; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); opacity: .8; margin-bottom: 14px; }
+.heroStay { font-family: var(--font-display), serif; font-size: 22px; font-style: italic; color: var(--cream); margin: 0 0 10px; }
 .heroTitle {
   font-family: var(--font-display), 'Fraunces', Georgia, serif;
   font-style: italic;
