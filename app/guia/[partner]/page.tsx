@@ -31,9 +31,9 @@ export async function generateMetadata(
   return {
     title,
     description,
-    // Partner guest guides are noindex for every partner (follow stays on so
-    // outbound/affiliate links are still crawled). Overrides Partner.noindex.
-    robots: { index: false, follow: true },
+    robots: partner.noindex
+      ? { index: false, follow: false }
+      : { index: true, follow: true },
     openGraph: {
       title,
       description,
