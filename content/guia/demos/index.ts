@@ -28,6 +28,8 @@ export interface DemoProspect {
   neighborhoods?: string[]
   /** Check-out time shown in the practical section, e.g. "11:00". */
   checkOut?: string
+  /** "During your stay" cards (check-out, house rules, contact). */
+  duringStay?: Partner['duringStay']
   /** Operator's own tours; replace the Insider experiences section. */
   ownTours?: Partial<Record<Lang, OwnTour[]>>
 }
@@ -81,6 +83,11 @@ const PROSPECTS: Record<string, DemoProspect> = {
     },
     // Still the literal placeholder "[check-out]" — rendered highlighted.
     checkOut: hostMeTenderJson.checkout,
+    duringStay: {
+      checkOut: hostMeTenderJson.checkout,
+      rules: hostMeTenderJson.rules,
+      contact: hostMeTenderJson.contact,
+    },
     ownTours: {
       es: hostMeTenderJson.tours.map((t, i) => toTour(t, 'es', i)),
       en: hostMeTenderJson.tours.map((t, i) => toTour(t, 'en', i)),
@@ -144,6 +151,7 @@ export function buildDemoPartner(p: DemoProspect): Partner {
         }
       : {}),
     ...(p.ownTours ? { ownTours: p.ownTours } : {}),
+    ...(p.duringStay ? { duringStay: p.duringStay } : {}),
     brand: {
       logo: p.logo,
       accent: p.accent && HEX.test(p.accent) ? p.accent : undefined,

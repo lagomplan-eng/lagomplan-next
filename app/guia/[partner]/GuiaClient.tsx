@@ -508,6 +508,43 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
         </section>
       )}
 
+      {/* ── During your stay (demo prospects: check-out / rules / contact) ── */}
+      {partner.duringStay && (
+        <section id="estancia" className={styles.section}>
+          <div className={styles.container}>
+            <div className={styles.secGrid}>
+              <SectionHead
+                eyebrow={partner.displayName}
+                title={lang === 'es' ? 'Durante tu estancia' : 'During your stay'}
+              />
+              <div className={styles.secBody}>
+                <div className={styles.cardGrid}>
+                  {([
+                    ['clock',    lang === 'es' ? 'Salida' : 'Check-out',              partner.duringStay.checkOut],
+                    ['shield',   lang === 'es' ? 'Reglas de la casa' : 'House rules', partner.duringStay.rules],
+                    ['doorOpen', lang === 'es' ? 'Contacto' : 'Contact',              partner.duringStay.contact],
+                  ] as const).filter(([, , value]) => value).map(([icon, title, value]) => (
+                    <div className={styles.card} key={title}>
+                      <div className={styles.iconChip}><Icon name={icon} color="var(--cream)" /></div>
+                      <h4 className={styles.h4}>{title}</h4>
+                      <div className={styles.cardBody}>
+                        {value!.split(' · ').map((part, i) => (
+                          <div key={i}>
+                            {/^[^\s@\[]+@[^\s@]+\.[^\s@]+$/.test(part)
+                              ? <a className={styles.link} href={`mailto:${part}`}>{part}</a>
+                              : withPlaceholders(part)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
       <PracticalSection
         arrivalItems={visibleArrivalItems}
