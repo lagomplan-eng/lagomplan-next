@@ -412,8 +412,8 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
 
   return (
     <div
-      className={styles.page}
-      style={partner.brand?.accent ? ({ '--coral': partner.brand.accent } as React.CSSProperties) : undefined}
+      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}`}
+      style={partner.brand?.accent ? ({ '--accent': partner.brand.accent } as React.CSSProperties) : undefined}
     >
       {demo && (
         <div className={styles.demoBanner} role="note">

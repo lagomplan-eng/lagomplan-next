@@ -569,3 +569,8 @@
 .coBrandLogo { height: 36px; width: auto; display: block; }
 .coBrandName { font-family: var(--font-display), serif; font-size: 18px; color: var(--pine); }
 @media (max-width: 768px) { .coBrandLogo { height: 28px; } .coBrandName { font-size: 15px; } }
+
+/* Prospect accent (--accent) replaces the coral on light surfaces. Pine
+   surfaces keep the default coral: a dark brand green would vanish there. */
+.accented { --coral: var(--accent); }
+.accented .sectionPine, .accented .expBanner, .accented .weatherCard { --coral: #E1615B; }

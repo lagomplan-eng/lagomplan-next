@@ -37,6 +37,13 @@ const PROSPECTS: Record<string, DemoProspect> = {
   'host-me-tender': {
     slug: 'host-me-tender',
     name: 'Host Me Tender',
+    // PROVISIONAL accent, not a brand-guide value: sampled from their logo
+    // (hostmetender.com …/secundario2-verdeselva.png) — the most frequent
+    // fully-opaque pixel colour (≈ the flat fill; antialiased edges are
+    // lighter, core median was #1e4737). Replace with the real "verde selva"
+    // hex from their brand guide once we have it.
+    accent: '#194332',
+    logo: 'https://www.hostmetender.com/uploads/1/1/0/2/11025726/published/secundario2-verdeselva.png?1770248624',
   },
   'dave-nat': {
     slug: 'dave-nat',
