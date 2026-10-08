@@ -508,7 +508,7 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
         </section>
       )}
 
-      {/* ── During your stay (demo prospects: check-out / rules / contact) ── */}
+      {/* ── During your stay (demo prospects: house rules / contact; check-out lives in the practical strip) ── */}
       {partner.duringStay && (
         <section id="estancia" className={styles.section}>
           <div className={styles.container}>
@@ -520,7 +520,6 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
               <div className={styles.secBody}>
                 <div className={styles.cardGrid}>
                   {([
-                    ['clock',    lang === 'es' ? 'Salida' : 'Check-out',              partner.duringStay.checkOut],
                     ['shield',   lang === 'es' ? 'Reglas de la casa' : 'House rules', partner.duringStay.rules],
                     ['doorOpen', lang === 'es' ? 'Contacto' : 'Contact',              partner.duringStay.contact],
                   ] as const).filter(([, , value]) => value).map(([icon, title, value]) => (

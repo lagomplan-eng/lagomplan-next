@@ -353,11 +353,12 @@ export interface Partner {
   ownTours?: Partial<Record<Lang, OwnTour[]>>
 
   /**
-   * "During your stay" card trio (check-out / house rules / contact), shown
-   * right after the host letter. Plain strings, same in both languages;
-   * "[bracketed]" placeholders render highlighted. Renders only when set.
+   * "During your stay" cards (house rules / contact), shown right after the
+   * host letter. Check-out is NOT here: it's already in the practical strip
+   * (atAGlance.checkOut). Plain strings, same in both languages; "[bracketed]"
+   * placeholders render highlighted. Renders only when set.
    */
-  duringStay?: { checkOut?: string; rules?: string; contact?: string }
+  duringStay?: { rules?: string; contact?: string }
 
   /** Co-branding: logo (public path or https URL) and an optional accent hex. */
   brand?: { logo?: string; accent?: string }

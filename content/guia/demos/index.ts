@@ -28,7 +28,7 @@ export interface DemoProspect {
   neighborhoods?: string[]
   /** Check-out time shown in the practical section, e.g. "11:00". */
   checkOut?: string
-  /** "During your stay" cards (check-out, house rules, contact). */
+  /** "During your stay" cards (house rules, contact). */
   duringStay?: Partner['duringStay']
   /** Operator's own tours; replace the Insider experiences section. */
   ownTours?: Partial<Record<Lang, OwnTour[]>>
@@ -84,7 +84,6 @@ const PROSPECTS: Record<string, DemoProspect> = {
     // Still the literal placeholder "[check-out]" — rendered highlighted.
     checkOut: hostMeTenderJson.checkout,
     duringStay: {
-      checkOut: hostMeTenderJson.checkout,
       rules: hostMeTenderJson.rules,
       contact: hostMeTenderJson.contact,
     },
