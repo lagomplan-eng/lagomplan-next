@@ -37,6 +37,8 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
+import { buildVisit } from '../../../lib/guia/visit'
+import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
 import { resolveFaqModule } from '../../../content/guia/faq/resolve'
@@ -289,7 +291,11 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: E
  *  the "Demo prepared for" banner. Absent on the regular /guia route. */
 export interface DemoMeta { slug: string; prospectName: string }
 
-export default function GuiaClient({ partner, city, demo }: { partner: Partner; city: City; demo?: DemoMeta }) {
+/** recordVisits: true only on production deployments (VERCEL_ENV, read on the
+ *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
+export default function GuiaClient({ partner, city, demo, recordVisits = false }: {
+  partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
+}) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [stay, setStay] = useState<Stay>({})
@@ -334,6 +340,19 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
     } catch { /* cookies disabled */ }
     track('host_guide_view', { partner: partner.slug, city: city.id })
   }, [partner.slug, city.id])
+
+  // ── Visit log (production only) ───────────────────────────────────────────
+  // Fire-and-forget INSERT without .select(): anon has no SELECT privilege, so
+  // asking for the row back would fail. Errors are swallowed; logging a visit
+  // must never break the guide.
+  useEffect(() => {
+    if (!recordVisits) return
+    const row = buildVisit(demo ? demo.slug : partner.slug, window.location.search, navigator.userAgent)
+    getSupabaseBrowser()
+      .from(demo ? 'demo_visits' : 'guide_visits')
+      .insert(row as any)
+      .then(() => {}, () => {})
+  }, [recordVisits, demo?.slug, partner.slug])
 
   // Keep the document language in sync with the toggle (a11y / SEO).
   useEffect(() => {

@@ -37,5 +37,9 @@ export default async function DemoPage(
   const city = getCity(partner.city)
   if (!city) notFound()
 
-  return <GuiaClient partner={partner} city={city} demo={{ slug: prospect.slug, prospectName: prospect.name }} />
+  return (
+    <GuiaClient partner={partner} city={city} demo={{ slug: prospect.slug, prospectName: prospect.name }}
+      recordVisits={process.env.VERCEL_ENV === 'production'}
+    />
+  )
 }
