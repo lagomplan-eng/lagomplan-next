@@ -40,6 +40,7 @@ import type { FaqGroupId, FaqItemKey, ResolvedFaqGroup } from '../../../content/
 import { trackOutboundLink, type PartnerLinkSection } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import styles from './guia.module.css'
+import { withPlaceholders } from './placeholders'
 
 const MODULE_COPY: Record<Lang, { eyebrow: string; heading: string; subhead: string; beforeChip: string }> = {
   en: {
@@ -142,7 +143,7 @@ function PracticalCard({
       <div className={styles.iconChip}><Icon name={item.icon} color="var(--cream)" /></div>
       <h4 className={styles.h4}>{item.title}</h4>
       <p className={styles.cardBody}>
-        {item.body}
+        {withPlaceholders(item.body)}
         {item.links?.map((link, i) => {
           // Insider gets UTMs; Airalo is a live affiliate short-link and
           // stays untouched. Both still fire partner_link_click.
@@ -302,7 +303,7 @@ export default function PracticalSection({
             {glanceBadges.length > 0 && (
               <div className={styles.glanceRow}>
                 {glanceBadges.map((b) => (
-                  <span className={styles.glanceBadge} key={b.key}>{b.label} · {b.value}</span>
+                  <span className={styles.glanceBadge} key={b.key}>{b.label} · {withPlaceholders(b.value)}</span>
                 ))}
               </div>
             )}

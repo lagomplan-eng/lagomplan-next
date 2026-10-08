@@ -11,6 +11,7 @@ import type { Lang, OwnTour, Partner } from '../types'
 import type { ZoneId } from '../zones/types'
 import { getZone } from '../zones'
 import { cdmx } from '../cities/cdmx'
+import hostMeTenderJson from '../../../B2B demos/host-me-tender.json'
 
 export interface DemoProspect {
   /** URL segment: /demo/<slug>. Lowercase letters, digits, hyphens. */
@@ -31,19 +32,59 @@ export interface DemoProspect {
   ownTours?: Partial<Record<Lang, OwnTour[]>>
 }
 
+// PROVISIONAL attribution under every tour — wording to be reviewed by Pili.
+const TOUR_BYLINE: Record<Lang, string> = {
+  es: 'con Sabores México',
+  en: 'with Sabores México',
+}
+
+interface TourJson {
+  name: string
+  description: { es: string; en: string }
+  price: string
+  url: string
+}
+
+/** JSON tour → OwnTour. Prices stay as-is ("[precio]" renders highlighted). */
+function toTour(t: TourJson, lang: Lang, i: number): OwnTour {
+  return {
+    id: `tour-${i + 1}`,
+    title: t.name,
+    teaser: t.description[lang],
+    price: t.price,
+    byline: TOUR_BYLINE[lang],
+    bookHref: t.url,
+  }
+}
+
 // NOTE: names below are placeholders from the sales brief — confirm the exact
 // brand spelling, logo and accent before sending each demo link.
 const PROSPECTS: Record<string, DemoProspect> = {
   'host-me-tender': {
     slug: 'host-me-tender',
-    name: 'Host Me Tender',
+    name: hostMeTenderJson.name,
     // PROVISIONAL accent, not a brand-guide value: sampled from their logo
     // (hostmetender.com …/secundario2-verdeselva.png) — the most frequent
     // fully-opaque pixel colour (≈ the flat fill; antialiased edges are
     // lighter, core median was #1e4737). Replace with the real "verde selva"
-    // hex from their brand guide once we have it.
+    // hex from their brand guide once we have it. The JSON's own brandColor
+    // is still the placeholder "[hex verde selva]".
     accent: '#194332',
-    logo: 'https://www.hostmetender.com/uploads/1/1/0/2/11025726/published/secundario2-verdeselva.png?1770248624',
+    // Local copy of hostMeTenderJson.logoUrl (don't hotlink their site).
+    logo: '/images/demos/host-me-tender-logo.png',
+    neighborhoods: [hostMeTenderJson.neighborhood],
+    // Their own letter replaces the city-level one; quote '' hides the
+    // generic Lagomplan quote so it isn't attributed to them.
+    hostLetter: {
+      es: { quote: '', body: hostMeTenderJson.hostLetter.es },
+      en: { quote: '', body: hostMeTenderJson.hostLetter.en },
+    },
+    // Still the literal placeholder "[check-out]" — rendered highlighted.
+    checkOut: hostMeTenderJson.checkout,
+    ownTours: {
+      es: hostMeTenderJson.tours.map((t, i) => toTour(t, 'es', i)),
+      en: hostMeTenderJson.tours.map((t, i) => toTour(t, 'en', i)),
+    },
   },
   'dave-nat': {
     slug: 'dave-nat',

@@ -259,6 +259,10 @@ export interface OwnTour {
   title: string
   teaser: string
   description?: string
+  /** Free text; "[precio]" style placeholders render highlighted. */
+  price?: string
+  /** Discreet attribution line under the title, e.g. "con Sabores México". */
+  byline?: string
   bookHref: string
   bookLabel?: string
 }

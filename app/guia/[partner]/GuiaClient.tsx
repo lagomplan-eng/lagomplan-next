@@ -44,6 +44,7 @@ import type { FaqItemKey } from '../../../content/guia/faq/types'
 import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
 import PracticalSection from './PracticalSection'
+import { withPlaceholders } from './placeholders'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -493,9 +494,11 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
           <div className={styles.container}>
             <div className={styles.letterCard}>
               <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{letter.eyebrow}</span>
-              <p className={styles.hostQuote}>{letter.quote}</p>
+              {letter.quote && <p className={styles.hostQuote}>{letter.quote}</p>}
               <div className={styles.letterDivider} />
-              <p className={styles.letterBody}>{letter.body}</p>
+              {letter.body.split('\n').map((line, i) => (
+                <p className={styles.letterBody} key={i}>{withPlaceholders(line)}</p>
+              ))}
               <div className={styles.hostSig}>
                 <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
                 <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{letter.roleLabel}</span>
@@ -695,8 +698,10 @@ export default function GuiaClient({ partner, city, demo }: { partner: Partner; 
                     <div className={styles.expBody}>
                       <div className={styles.expTextBlock}>
                         <h5 className={styles.h5}>{tour.title}</h5>
+                        {tour.byline && <p className={styles.tourByline}>{tour.byline}</p>}
                         <p className={styles.expNote}>{tour.teaser}</p>
                         {tour.description && <p className={styles.expNote}>{tour.description}</p>}
+                        {tour.price && <p className={styles.tourPrice}>{withPlaceholders(tour.price)}</p>}
                       </div>
                       <div className={styles.expActions}>
                         <a
