@@ -17,14 +17,15 @@ type Props = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
+  const alternates = buildAlternates(locale, 'guidesIndex')
   return {
     title: locale === 'es' ? 'Guías de viaje' : 'Travel guides',
     description:
       locale === 'es'
         ? 'Guías editoriales para viajeros con criterio. Destinos, itinerarios y tips sin ruido.'
         : 'Editorial guides for travelers with taste. Destinations, itineraries, and noise-free tips.',
-    alternates: buildAlternates('guidesIndex'),
-    openGraph:  buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 

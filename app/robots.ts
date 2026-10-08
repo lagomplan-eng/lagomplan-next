@@ -7,9 +7,12 @@
  *   - Allow all user-agents on the public surface.
  *   - Block crawl on functional + private routes:
  *       /api/                — backend endpoints, not content
- *       /trips/, /es/trips/, /en/trips/ — share URLs reveal user trip data
+ *       /trips/                         — unprefixed legacy path
  *       /es/mis-viajes, /en/my-trips    — authenticated dashboards
  *       /es/cuenta,    /en/account      — authenticated account
+ *   - Deliberately NOT blocked: /es/trips/, /en/trips/. Those pages are
+ *     noindex via meta tags (trips/share, trips/[trip_id]); a Disallow would
+ *     stop Google from ever reading that noindex.
  *
  * `signup` and `login` are intentionally crawlable (no Disallow): they
  * receive direct external links from email clients and we want Google
@@ -32,8 +35,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: [
           '/api/',
           '/trips/',
-          '/es/trips/',
-          '/en/trips/',
           '/es/mis-viajes',
           '/en/my-trips',
           '/es/cuenta',

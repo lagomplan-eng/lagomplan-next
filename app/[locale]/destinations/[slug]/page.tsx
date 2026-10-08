@@ -4,7 +4,7 @@
  * TODO: implement full page UI + resolveEntityBySlug
  */
 import type { Metadata }              from 'next'
-import { buildAlternates, buildOpenGraph } from '../../../../lib/seo'
+import { buildOpenGraph, NO_INDEX } from '../../../../lib/seo'
 import type { Locale }               from '../../../../i18n'
 
 type Props = {
@@ -15,7 +15,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params
   return {
     title:       `${locale === 'es' ? 'Destino' : 'Destination'} — ${slug}`,
-    alternates:  buildAlternates('destinationDetail'),
+    // No `alternates` and noindex while this page has no real entity data
+    // source wired in (still a stub — see file header). Indexing a page
+    // that can't yet resolve a real slug would just create thin/duplicate
+    // content. TODO: once a real destinations data source + slug lookup
+    // ships, remove `robots` below and set
+    // `alternates: buildDestinationAlternates(locale, entity)` instead
+    // (that helper already exists in lib/seo.ts, unused until then).
+    robots:      NO_INDEX,
     openGraph:   buildOpenGraph(locale),
   }
 }

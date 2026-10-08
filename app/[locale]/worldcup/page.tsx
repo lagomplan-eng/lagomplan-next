@@ -8,14 +8,15 @@ type Props = { params: Promise<{ locale: Locale }> }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
+  const alternates = buildAlternates(locale, 'worldcupIndex')
   return {
     title: locale === 'es' ? 'Guías de campo · Mundial 2026' : 'Field guides · World Cup 2026',
     description:
       locale === 'es'
         ? '16 guías de campo para las sedes del Mundial 2026. Ciudad de México, Los Ángeles, Nueva York, Miami, Toronto y más.'
         : '16 field guides for the 2026 World Cup host cities. Mexico City, Los Angeles, New York, Miami, Toronto and more.',
-    alternates: buildAlternates('worldcupIndex'),
-    openGraph: buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 

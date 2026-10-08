@@ -16,9 +16,11 @@
  *   3. World Cup city detail pages — hardcoded list mirrors `CITY_MAP`
  *      in app/[locale]/worldcup/[slug]/page.tsx (16 confirmed host cities).
  *
- * Each entry emits BOTH locales' URLs (es + en) and an `alternates.languages`
- * map so Google reads the hreflang alternates directly from the sitemap
- * (in addition to the <link rel="alternate"> tags in the HTML).
+ * Every URL (es and en) is its OWN <url> entry, and each entry carries the
+ * full alternates set (es, en, x-default) including itself, as Google's
+ * hreflang spec requires (reciprocal, self-referencing). x-default = ES.
+ * Guide URLs use the per-locale public slug (roma/rome, mauricio/mauritius);
+ * legacy alias slugs are 301'd by middleware and never listed here.
  *
  * Excluded by design (per the SEO audit):
  *   - my-trips / cuenta / account — authenticated dashboards
@@ -39,11 +41,9 @@
 import type { MetadataRoute } from 'next'
 import { BASE_URL } from '../lib/seo'
 import { ROUTE_MAP, type RouteKey } from '../lib/routes'
-import { getNewGuideParams } from '../lib/data/guides/index'
-import { getAllGuideParams, getGuideBySlug } from '../lib/guides'
+import { getNewGuideParams, getGuideLocales, resolveCanonicalSlug, getPublicGuideSlug } from '../lib/data/guides/index'
+import { getAllGuides } from '../lib/guides'
 import type { Locale } from '../i18n'
-
-const LOCALES: Locale[] = ['es', 'en']
 
 // Static routes that should appear in the sitemap, in source order.
 // Excluded RouteKeys: account, signup, login, myTrips (private/functional).
@@ -70,111 +70,75 @@ const WORLDCUP_CITY_SLUGS = [
   'tor', 'van',                             // Canada
 ] as const
 
-/**
- * Build the segment of a route on the current locale.
- * Mirrors `getRoute` in lib/routes.ts but without the BASE_URL prefix
- * so we can compose alternates uniformly.
- */
+/** `/es/<segment>` or `/es` for the empty (home) segment. */
 function localizedPath(locale: Locale, key: RouteKey): string {
   const segment = ROUTE_MAP[key][locale]
   return segment ? `/${locale}/${segment}` : `/${locale}`
 }
 
 /**
- * Build a sitemap entry for a static route, with both locales as
- * hreflang alternates. Spanish is x-default to match the canonical
- * convention used elsewhere in the codebase.
+ * Emit one sitemap entry per locale URL, each with the complete alternates
+ * set. Order: es, en.
  */
-function staticEntry(key: RouteKey, lastModified = new Date()): MetadataRoute.Sitemap[number] {
-  const esUrl = `${BASE_URL}${localizedPath('es', key)}`
-  const enUrl = `${BASE_URL}${localizedPath('en', key)}`
-  return {
-    url:          esUrl,
+function pairEntries(
+  esPath: string,
+  enPath: string,
+  changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'],
+  priority: number,
+  lastModified = new Date(),
+): MetadataRoute.Sitemap {
+  const esUrl = `${BASE_URL}${esPath}`
+  const enUrl = `${BASE_URL}${enPath}`
+  const alternates = { languages: { es: esUrl, en: enUrl, 'x-default': esUrl } }
+  return [esUrl, enUrl].map(url => ({
+    url,
     lastModified,
-    changeFrequency: 'weekly',
-    priority:        key === 'home' ? 1.0 : 0.7,
-    alternates: {
-      languages: { es: esUrl, en: enUrl, 'x-default': esUrl },
-    },
-  }
-}
-
-/**
- * Build paired sitemap entries for an entity that has different
- * slugs per locale (currently only guides do — worldcup uses the
- * same slug for both locales).
- */
-function entityEntry(
-  segmentEs: string,
-  segmentEn: string,
-  slugEs:    string,
-  slugEn:    string,
-  changeFrequency: MetadataRoute.Sitemap[number]['changeFrequency'] = 'monthly',
-  priority:        number = 0.6,
-): MetadataRoute.Sitemap[number] {
-  const esUrl = `${BASE_URL}/es/${segmentEs}/${slugEs}`
-  const enUrl = `${BASE_URL}/en/${segmentEn}/${slugEn}`
-  return {
-    url:          esUrl,
-    lastModified: new Date(),
     changeFrequency,
     priority,
-    alternates: {
-      languages: { es: esUrl, en: enUrl, 'x-default': esUrl },
-    },
-  }
+    alternates: { languages: { ...alternates.languages } },
+  }))
 }
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = []
 
-  // 1. Static routes (one entry per route, with hreflang)
+  // 1. Static routes
   for (const key of SITEMAP_ROUTES) {
-    entries.push(staticEntry(key))
+    entries.push(...pairEntries(
+      localizedPath('es', key), localizedPath('en', key),
+      'weekly', key === 'home' ? 1.0 : 0.7,
+    ))
   }
 
-  // 2. Guides — V2 system pairs ES/EN slugs via the lib/guides.ts shadow
-  //    entry's real slug_es/slug_en, not the bare canonical slug. Most
-  //    guides share one slug across locales, but some (Roma/Rome,
-  //    Mauricio/Mauritius) genuinely don't — falling back to the bare
-  //    canonical slug only for guides with no shadow entry yet.
-  const v2Slugs = new Set(
-    getNewGuideParams()
-      .filter(p => p.locale === 'es')
-      .map(p => p.slug),
+  // 2. Guides — registry keys, each with its per-locale public slug.
+  const registryKeys = new Set(
+    getNewGuideParams().filter(p => p.locale === 'es').map(p => resolveCanonicalSlug(p.slug)),
   )
-  for (const slug of v2Slugs) {
-    const shadow = getGuideBySlug('es', slug)
-    const enSlug = shadow ? shadow.slug_en : slug
-    entries.push(entityEntry('guias', 'guides', slug, enSlug))
+  for (const key of registryKeys) {
+    // Guard: a guide missing a locale gets no entry for it and no hreflang
+    // to it — never invent a URL.
+    if (!getGuideLocales(key).includes('es') || !getGuideLocales(key).includes('en')) continue
+    entries.push(...pairEntries(
+      `/es/guias/${getPublicGuideSlug(key, 'es')}`,
+      `/en/guides/${getPublicGuideSlug(key, 'en')}`,
+      'monthly', 0.6,
+    ))
   }
 
-  // 3. Legacy guides — same slug across locales.
-  //    Filter out anything already emitted by the V2 path so we don't
-  //    duplicate URLs (and dilute Google's understanding of canonical).
-  const legacyEsSlugs = new Set(
-    getAllGuideParams()
-      .filter(p => p.locale === 'es')
-      .map(p => p.slug),
-  )
-  for (const slug of legacyEsSlugs) {
-    if (v2Slugs.has(slug)) continue
-    entries.push(entityEntry('guias', 'guides', slug, slug))
+  // 3. Legacy-only guides (no V2 registry entry): their own slug_es/slug_en.
+  for (const g of getAllGuides('es')) {
+    if (getGuideLocales(resolveCanonicalSlug(g.slug_es)).length > 0) continue
+    entries.push(...pairEntries(`/es/guias/${g.slug_es}`, `/en/guides/${g.slug_en}`, 'monthly', 0.6))
   }
 
   // 4. World Cup city detail pages — same slug across locales.
-  //    These are core long-tail traffic for Mundial 2026.
   for (const slug of WORLDCUP_CITY_SLUGS) {
-    entries.push(entityEntry('mundial', 'worldcup', slug, slug, 'weekly', 0.7))
+    entries.push(...pairEntries(`/es/mundial/${slug}`, `/en/worldcup/${slug}`, 'weekly', 0.7))
   }
 
-  // 5. Smart Finds kit pages. Only the Familias kit has a real static
-  //    segment today (`app/[locale]/smart-finds/familias/page.tsx`).
-  //    Section prefix is `smart-finds` in both locales; only the leaf
-  //    is localized (familias ↔ families). Add more kits here as their
-  //    static segments ship — the other 8 kits currently use the
-  //    `[slug]` stub and aren't crawlable as real content.
-  entries.push(entityEntry('smart-finds', 'smart-finds', 'familias', 'families', 'monthly', 0.6))
+  // 5. Smart Finds — only the Familias kit has a real static segment.
+  //    EN segment is 'families' (i18n.ts pathnames), not 'familias'.
+  entries.push(...pairEntries('/es/smart-finds/familias', '/en/smart-finds/families', 'monthly', 0.6))
 
   return entries
 }

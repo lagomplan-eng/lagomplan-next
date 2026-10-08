@@ -95,10 +95,11 @@ export async function generateMetadata({
   params: Promise<{ locale: Locale }>
 }): Promise<Metadata> {
   const { locale } = await params
+  const alternates = buildAlternates(locale, 'examples')
   return {
     title:      locale === 'es' ? 'Esto es lo que recibes' : 'This is what you get',
-    alternates: buildAlternates('examples'),
-    openGraph:  buildOpenGraph(locale),
+    alternates,
+    openGraph:  buildOpenGraph(locale, { url: alternates.canonical as string }),
   }
 }
 

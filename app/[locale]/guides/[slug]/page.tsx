@@ -12,8 +12,9 @@ import type { Metadata } from 'next'
 import { notFound }      from 'next/navigation'
 
 import { getAllGuideParams, getGuideBySlug } from '../../../../lib/guides'
-import { getGuidePageData, getNewGuideParams, resolveCanonicalSlug } from '../../../../lib/data/guides/index'
-import { buildGuideAlternates, buildOpenGraph } from '../../../../lib/seo'
+import { getGuidePageData, getNewGuideParams, resolveCanonicalSlug, getGuideLocales, getPublicGuideSlug } from '../../../../lib/data/guides/index'
+import { buildGuideAlternates, buildOpenGraph, BASE_URL } from '../../../../lib/seo'
+import { getRoute } from '../../../../lib/routes'
 import type { Locale }              from '../../../../i18n'
 import { GuidePageClient }          from '../../../../components/guides/GuidePageClient'
 import { GuidePageClientV2 }        from '../../../../components/guides/GuidePageClientV2'
@@ -30,7 +31,11 @@ export function generateStaticParams() {
   const seen = new Set<string>()
   const all: Array<{ locale: string; slug: string }> = []
 
-  for (const p of [...newData, ...legacy]) {
+  // Legacy entries whose slug resolves into the V2 registry are aliases
+  // (301'd by middleware) — don't prerender them.
+  const legacyOnly = legacy.filter(p => getGuideLocales(resolveCanonicalSlug(p.slug)).length === 0)
+
+  for (const p of [...newData, ...legacyOnly]) {
     const key = `${p.locale}:${p.slug}`
     if (!seen.has(key)) {
       seen.add(key)
@@ -50,13 +55,38 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (newData) {
     const title       = newData.hero.title
     const description = newData.hero.subtitle
+
+    // Each locale's URL uses its own public slug (roma/rome,
+    // mauricio/mauritius, otherwise the short registry key). Alias URLs
+    // never get here — middleware 301s them — but if one did, canonical
+    // still resolves to the short public URL, never the alias.
+    const canonicalKey     = resolveCanonicalSlug(slug)
+    const availableLocales = getGuideLocales(canonicalKey)
+    const languages: Record<string, string> = {}
+    for (const loc of availableLocales) {
+      languages[loc] = `${BASE_URL}${getRoute(loc as Locale, 'guideDetail')}/${getPublicGuideSlug(canonicalKey, loc)}`
+    }
+    // Omit a locale's hreflang entirely if that guide has no real content
+    // there — never invent a URL. x-default only when an ES version
+    // actually exists (site convention: ES is the default language).
+    const canonicalUrl = languages[locale]
+      ?? `${BASE_URL}${getRoute(locale, 'guideDetail')}/${getPublicGuideSlug(canonicalKey, locale)}`
+
     return {
       title,
       description,
+      alternates: {
+        canonical: canonicalUrl,
+        languages: {
+          ...languages,
+          ...(languages.es ? { 'x-default': languages.es } : {}),
+        },
+      },
       openGraph: buildOpenGraph(locale, {
         title,
         description,
         type:   'article',
+        url:    canonicalUrl,
         images: newData.hero.coverImage
           ? [{ url: newData.hero.coverImage, width: 1200, height: 630, alt: title }]
           : [],
@@ -70,15 +100,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title       = locale === 'es' ? guide.title_es   : guide.title_en
   const description = locale === 'es' ? guide.excerpt_es : guide.excerpt_en
+  const alternates  = buildGuideAlternates(locale, guide)
 
   return {
     title,
     description,
-    alternates: buildGuideAlternates(guide),
+    alternates,
     openGraph:  buildOpenGraph(locale, {
       title,
       description,
       type:   'article',
+      url:    alternates.canonical as string,
       images: [{ url: guide.cover_img, width: 1200, height: 630, alt: title }],
     }),
   }
@@ -94,16 +126,8 @@ export default async function GuideDetailPage({ params }: Props) {
   if (newData) {
     const otherLocale = locale === 'es' ? 'en' : 'es'
     const guidePrefix = otherLocale === 'es' ? 'guias' : 'guides'
-    // Prefer the real per-locale slug from the lib/guides.ts shadow entry
-    // (every FlatGuide-backed guide has one) — most guides share the same
-    // slug in both locales, but some (Roma/Rome, Mauricio/Mauritius) don't,
-    // and re-emitting the bare canonical key for both would 404-safe-but-
-    // wrong-language the alternate link for those. Falls back to the bare
-    // canonical key only if a guide somehow has no shadow entry yet.
-    const shadow  = getGuideBySlug(locale, slug)
-    const otherSlug = shadow
-      ? (otherLocale === 'es' ? shadow.slug_es : shadow.slug_en)
-      : resolveCanonicalSlug(slug)
+    // Per-locale public slug (roma/rome, mauricio/mauritius, else the key).
+    const otherSlug = getPublicGuideSlug(resolveCanonicalSlug(slug), otherLocale)
     const alternateLocaleUrl = `/${otherLocale}/${guidePrefix}/${otherSlug}`
     return <GuidePageClientV2 data={newData} locale={locale} alternateLocaleUrl={alternateLocaleUrl} />
   }

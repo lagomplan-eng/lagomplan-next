@@ -40,23 +40,34 @@ export function buildCanonical(locale: Locale, routeKey: RouteKey): string {
 // ── Alternates for static pages (no entity slug) ──────────
 
 /**
- * Generates hreflang alternates for any non-entity page.
+ * Generates canonical + hreflang alternates for any non-entity page.
  *
- * buildAlternates('planner') → {
+ * `locale` is REQUIRED (not defaulted) so canonical self-references the
+ * locale actually being rendered — previously this always hardcoded the
+ * Spanish URL as canonical regardless of which locale's page was being
+ * built, which meant every /en/* page's canonical pointed at its /es/*
+ * counterpart instead of itself. Making the param required means a
+ * forgotten call site fails the TypeScript build instead of silently
+ * reintroducing that bug.
+ *
+ * buildAlternates('en', 'planner') → {
+ *   canonical: 'https://www.lagomplan.com/en/planner',
  *   languages: {
- *     'es': 'https://lagomplan.com/es/planificador',
- *     'en': 'https://lagomplan.com/en/planner',
- *     'x-default': 'https://lagomplan.com/es/planificador',
+ *     'es': 'https://www.lagomplan.com/es/planificador',
+ *     'en': 'https://www.lagomplan.com/en/planner',
+ *     'x-default': 'https://www.lagomplan.com/es/planificador',
  *   }
  * }
  */
-export function buildAlternates(routeKey: RouteKey): NonNullable<Metadata['alternates']> {
+export function buildAlternates(locale: Locale, routeKey: RouteKey): NonNullable<Metadata['alternates']> {
+  const esUrl = `${BASE_URL}${getRoute('es', routeKey)}`
+  const enUrl = `${BASE_URL}${getRoute('en', routeKey)}`
   return {
-    canonical: `${BASE_URL}${getRoute('es', routeKey)}`,
+    canonical: locale === 'es' ? esUrl : enUrl,
     languages: {
-      'es':        `${BASE_URL}${getRoute('es', routeKey)}`,
-      'en':        `${BASE_URL}${getRoute('en', routeKey)}`,
-      'x-default': `${BASE_URL}${getRoute('es', routeKey)}`,
+      'es':        esUrl,
+      'en':        enUrl,
+      'x-default': esUrl,
     },
   }
 }
@@ -64,49 +75,51 @@ export function buildAlternates(routeKey: RouteKey): NonNullable<Metadata['alter
 // ── Alternates for entity detail pages ─────────────────────
 
 /**
- * Generates hreflang alternates for a guide detail page.
- * Handles different slugs per locale.
+ * Generates canonical + hreflang alternates for a guide detail page.
+ * Handles different slugs per locale. `locale` is required — see
+ * buildAlternates above for why.
  *
- * buildGuideAlternates(guide) → {
+ * buildGuideAlternates('en', guide) → {
+ *   canonical: 'https://www.lagomplan.com/en/guides/valley-of-bravo',
  *   languages: {
- *     'es': 'https://lagomplan.com/es/guias/valle-de-bravo',
- *     'en': 'https://lagomplan.com/en/guides/valley-of-bravo',
- *     'x-default': 'https://lagomplan.com/es/guias/valle-de-bravo',
+ *     'es': 'https://www.lagomplan.com/es/guias/valle-de-bravo',
+ *     'en': 'https://www.lagomplan.com/en/guides/valley-of-bravo',
+ *     'x-default': 'https://www.lagomplan.com/es/guias/valle-de-bravo',
  *   }
  * }
  */
-export function buildGuideAlternates(entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
+export function buildGuideAlternates(locale: Locale, entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
   const esUrl = `${BASE_URL}${getGuideUrl('es', entity)}`
   const enUrl = `${BASE_URL}${getGuideUrl('en', entity)}`
   return {
-    canonical: esUrl,
+    canonical: locale === 'es' ? esUrl : enUrl,
     languages: { 'es': esUrl, 'en': enUrl, 'x-default': esUrl },
   }
 }
 
-export function buildDestinationAlternates(entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
+export function buildDestinationAlternates(locale: Locale, entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
   const esUrl = `${BASE_URL}${getDestinationUrl('es', entity)}`
   const enUrl = `${BASE_URL}${getDestinationUrl('en', entity)}`
   return {
-    canonical: esUrl,
+    canonical: locale === 'es' ? esUrl : enUrl,
     languages: { 'es': esUrl, 'en': enUrl, 'x-default': esUrl },
   }
 }
 
-export function buildHotelAlternates(entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
+export function buildHotelAlternates(locale: Locale, entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
   const esUrl = `${BASE_URL}${getHotelUrl('es', entity)}`
   const enUrl = `${BASE_URL}${getHotelUrl('en', entity)}`
   return {
-    canonical: esUrl,
+    canonical: locale === 'es' ? esUrl : enUrl,
     languages: { 'es': esUrl, 'en': enUrl, 'x-default': esUrl },
   }
 }
 
-export function buildSmartFindAlternates(entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
+export function buildSmartFindAlternates(locale: Locale, entity: LocalizedEntity): NonNullable<Metadata['alternates']> {
   const esUrl = `${BASE_URL}${getSmartFindUrl('es', entity)}`
   const enUrl = `${BASE_URL}${getSmartFindUrl('en', entity)}`
   return {
-    canonical: esUrl,
+    canonical: locale === 'es' ? esUrl : enUrl,
     languages: { 'es': esUrl, 'en': enUrl, 'x-default': esUrl },
   }
 }
