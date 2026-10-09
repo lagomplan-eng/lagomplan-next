@@ -38,7 +38,6 @@ import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
 import { buildVisit } from '../../../lib/guia/visit'
-import { getSupabaseBrowser } from '../../../lib/supabase/client'
 import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
 import { resolveFaqModule } from '../../../content/guia/faq/resolve'
@@ -348,10 +347,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
   useEffect(() => {
     if (!recordVisits) return
     const row = buildVisit(demo ? demo.slug : partner.slug, window.location.search, navigator.userAgent)
-    getSupabaseBrowser()
-      .from(demo ? 'demo_visits' : 'guide_visits')
-      .insert(row as any)
-      .then(() => {}, () => {})
+    // Dynamic import: the Supabase browser client is ~60 kB and only
+    // production visits need it, so it stays out of the initial bundle
+    // (static import took the guides' first load from 115 kB to 176 kB).
+    import('../../../lib/supabase/client')
+      .then(({ getSupabaseBrowser }) =>
+        // The generated Database type doesn't know these two tables.
+        (getSupabaseBrowser() as any).from(demo ? 'demo_visits' : 'guide_visits').insert(row))
+      .catch(() => { /* telemetry only */ })
   }, [recordVisits, demo?.slug, partner.slug])
 
   // Keep the document language in sync with the toggle (a11y / SEO).
