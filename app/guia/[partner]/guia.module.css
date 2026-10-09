@@ -141,6 +141,7 @@
 .heroContent { position: relative; max-width: 1160px; margin: 0 auto; width: 100%; padding: 0 24px 56px; color: var(--cream); }
 @media (max-width: 768px) { .heroContent { padding: 0 20px 48px; } }
 .heroEyebrow { display: block; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--cream); opacity: .8; margin-bottom: 14px; }
+.heroStay { font-family: var(--font-display), serif; font-size: 22px; font-style: italic; color: var(--cream); margin: 0 0 10px; }
 .heroTitle {
   font-family: var(--font-display), 'Fraunces', Georgia, serif;
   font-style: italic;
@@ -182,6 +183,7 @@
 }
 .letterDivider { width: 48px; height: 2px; background: var(--coral); border-radius: 2px; margin: 28px auto; }
 .letterBody { font-size: 15px; line-height: 1.85; color: var(--sage); max-width: 680px; margin: 0 auto; }
+.letterBody + .letterBody { margin-top: 14px; }
 .hostSig { margin-top: 32px; }
 .hostSigName { font-size: 16px; font-weight: 700; color: var(--pine); margin-bottom: 4px; }
 
@@ -561,3 +563,20 @@
 .faqStackedLabel { display: block; margin-bottom: 16px; }
 .faqStackedGroup { margin-bottom: 40px; }
 .faqStackedGroup:last-child { margin-bottom: 0; }
+
+/* ── /demo/[prospect] ─────────────────────────────────────── */
+.demoBanner { background: var(--pine); color: var(--cream); font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; text-align: center; padding: 6px 12px; opacity: .92; }
+.coBrand { display: inline-flex; align-items: center; gap: 10px; margin-left: 12px; color: var(--sage); }
+.coBrandLogo { height: 36px; width: auto; display: block; }
+.coBrandName { font-family: var(--font-display), serif; font-size: 18px; color: var(--pine); }
+@media (max-width: 768px) { .coBrandLogo { height: 28px; } .coBrandName { font-size: 15px; } }
+
+/* Prospect accent (--accent) replaces the coral on light surfaces. Pine
+   surfaces keep the default coral: a dark brand green would vanish there. */
+.accented { --coral: var(--accent); }
+.accented .sectionPine, .accented .expBanner, .accented .weatherCard { --coral: #E1615B; }
+
+/* Demo placeholders ("[precio]") — loud on purpose so nobody ships them. */
+.placeholder { background: #ffe14d; color: #3d3200; padding: 0 4px; border-radius: 3px; outline: 1.5px dashed #b38f00; font-style: normal; font-weight: 600; }
+.tourByline { font-size: 12px; font-style: italic; color: var(--sage); margin: 2px 0 8px; }
+.tourPrice { font-size: 13px; font-weight: 600; color: var(--pine); margin: 8px 0 0; }

@@ -36,6 +36,8 @@ import {
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
+import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
+import { buildVisit } from '../../../lib/guia/visit'
 import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
 import { resolveFaqModule } from '../../../content/guia/faq/resolve'
@@ -43,6 +45,7 @@ import type { FaqItemKey } from '../../../content/guia/faq/types'
 import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
 import PracticalSection from './PracticalSection'
+import { withPlaceholders } from './placeholders'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -283,14 +286,27 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: E
   )
 }
 
-export default function GuiaClient({ partner, city }: { partner: Partner; city: City }) {
+/** Set by /demo/[prospect]: switches attribution, analytics naming and shows
+ *  the "Demo prepared for" banner. Absent on the regular /guia route. */
+export interface DemoMeta { slug: string; prospectName: string }
+
+/** recordVisits: true only on production deployments (VERCEL_ENV, read on the
+ *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
+export default function GuiaClient({ partner, city, demo, recordVisits = false }: {
+  partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
+}) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
-  const [browseNb, setBrowseNb] = useState<string>(HOME_TAB_ID)
+  const [stay, setStay] = useState<Stay>({})
+  const [browseNb, setBrowseNb] = useState<string>(partner.neighborhoods?.[0] ?? HOME_TAB_ID)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
   const t = city.copy[lang]
+  // Demo traffic must not pollute the real-partner pilot metrics, so every
+  // host_guide_* event is renamed demo_guide_* on /demo.
+  const track = (name: string, params: Record<string, string | number | boolean | undefined>) =>
+    gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
   const interp = (s: string) =>
     s.replace(/\{host\}/g, partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
 
@@ -300,20 +316,46 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   // default — reading window.location here to decide initial state would
   // hydrate-mismatch a Spanish deep link against the English SSR HTML.
   useEffect(() => {
-    const requested = new URLSearchParams(window.location.search).get('lang')
+    const params = new URLSearchParams(window.location.search)
+    const requested = params.get('lang')
     if (requested === 'es' || requested === 'en') setLang(requested)
+
+    // ?llegada&noches&adultos&ninos personalize the guide. Same post-mount
+    // timing as ?lang for the same hydration reason. With no (or invalid)
+    // params `stay` stays {} and nothing below changes.
+    const parsed = parseStay(params)
+    setStay(parsed)
+    // Traveling with kids → open that mood by default.
+    if (parsed.children && parsed.children > 0) setMood('kids')
   }, [])
 
   // ── Attribution flag + view event (once on load) ──────────────────────────
   useEffect(() => {
-    const ref = `host:${partner.slug}`
+    const ref = demo ? `demo:${demo.slug}` : `host:${partner.slug}`
     try { window.localStorage.setItem('lagom_ref', ref) } catch { /* private mode */ }
     try {
       const secure = window.location.protocol === 'https:' ? '; Secure' : ''
       document.cookie = `lagom_ref=${encodeURIComponent(ref)}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`
     } catch { /* cookies disabled */ }
-    gaTrack('host_guide_view', { partner: partner.slug, city: city.id })
+    track('host_guide_view', { partner: partner.slug, city: city.id })
   }, [partner.slug, city.id])
+
+  // ── Visit log (production only) ───────────────────────────────────────────
+  // Fire-and-forget INSERT without .select(): anon has no SELECT privilege, so
+  // asking for the row back would fail. Errors are swallowed; logging a visit
+  // must never break the guide.
+  useEffect(() => {
+    if (!recordVisits) return
+    const row = buildVisit(demo ? demo.slug : partner.slug, window.location.search, navigator.userAgent)
+    // Dynamic import: the Supabase browser client is ~60 kB and only
+    // production visits need it, so it stays out of the initial bundle
+    // (static import took the guides' first load from 115 kB to 176 kB).
+    import('../../../lib/supabase/client')
+      .then(({ getSupabaseBrowser }) =>
+        // The generated Database type doesn't know these two tables.
+        (getSupabaseBrowser() as any).from(demo ? 'demo_visits' : 'guide_visits').insert(row))
+      .catch(() => { /* telemetry only */ })
+  }, [recordVisits, demo?.slug, partner.slug])
 
   // Keep the document language in sync with the toggle (a11y / SEO).
   useEffect(() => {
@@ -338,7 +380,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       for (const e of entries) {
         if (e.isIntersecting && !fired) {
           fired = true
-          gaTrack('host_guide_insiders_view', { partner: partner.slug, city: city.id })
+          track('host_guide_insiders_view', { partner: partner.slug, city: city.id })
           obs.disconnect()
         }
       }
@@ -363,13 +405,15 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
   })
   const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
-    gaTrack('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
+    track('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
 
   // Tab order + lookup = partner's own "Your house" pick list, followed by
   // the zones shared across all partners in this city.
-  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
+  const nbOrder = partner.neighborhoods ?? [HOME_TAB_ID, ...city.neighborhoodOrder]
   const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
+  const ownTours = partner.ownTours?.[lang] ?? []
+  const letter = { ...t.hostLetter, ...partner.hostLetter?.[lang] }
   const spots = browseNbData.spots[lang]
   const itin = city.itinerary[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
@@ -390,7 +434,15 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
     .map((item) => ({ ...item, body: interp(item.body) }))
 
   return (
-    <div className={styles.page}>
+    <div
+      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}`}
+      style={partner.brand?.accent ? ({ '--accent': partner.brand.accent } as React.CSSProperties) : undefined}
+    >
+      {demo && (
+        <div className={styles.demoBanner} role="note">
+          {lang === 'es' ? `Demo preparada para ${demo.prospectName}` : `Demo prepared for ${demo.prospectName}`}
+        </div>
+      )}
       {/* ── Header ─────────────────────────────────────────── */}
       <header className={styles.header}>
         <div className={styles.headerRow}>
@@ -409,6 +461,17 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
             />
             <span className={styles.brandFallback}>lagomplan</span>
           </span>
+          {demo && (
+            <span className={styles.coBrand}>
+              <span aria-hidden>×</span>
+              {partner.brand?.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={partner.brand.logo} alt={partner.displayName} className={styles.coBrandLogo} />
+              ) : (
+                <span className={styles.coBrandName}>{partner.displayName}</span>
+              )}
+            </span>
+          )}
           <div className={styles.navRight}>
             <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.navLabel}</span>
             <div className={styles.langGroup} role="group" aria-label={lang === 'es' ? 'Idioma' : 'Language'}>
@@ -436,6 +499,9 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <span className={styles.heroEyebrow}>{interp(t.heroEyebrow)}</span>
+          {stay.nights && (
+            <p className={styles.heroStay}>{stayHeading(lang, stay.nights, partner.homeNeighborhood)}</p>
+          )}
           <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
           <p className={styles.heroSub}>{interp(t.heroSub)}</p>
           <a href="#practico" className={styles.ctaLight}>
@@ -449,13 +515,51 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
         <section className={styles.section}>
           <div className={styles.container}>
             <div className={styles.letterCard}>
-              <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{t.hostLetter.eyebrow}</span>
-              <p className={styles.hostQuote}>{t.hostLetter.quote}</p>
+              <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{letter.eyebrow}</span>
+              {letter.quote && <p className={styles.hostQuote}>{letter.quote}</p>}
               <div className={styles.letterDivider} />
-              <p className={styles.letterBody}>{t.hostLetter.body}</p>
+              {letter.body.split('\n').map((line, i) => (
+                <p className={styles.letterBody} key={i}>{withPlaceholders(line)}</p>
+              ))}
               <div className={styles.hostSig}>
                 <div className={styles.hostSigName}>{partner.hostLetterSignature}</div>
-                <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.hostLetter.roleLabel}</span>
+                <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{letter.roleLabel}</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── During your stay (demo prospects: house rules / contact; check-out lives in the practical strip) ── */}
+      {partner.duringStay && (
+        <section id="estancia" className={styles.section}>
+          <div className={styles.container}>
+            <div className={styles.secGrid}>
+              <SectionHead
+                eyebrow={partner.displayName}
+                title={lang === 'es' ? 'Durante tu estancia' : 'During your stay'}
+              />
+              <div className={styles.secBody}>
+                <div className={styles.cardGrid}>
+                  {([
+                    ['shield',   lang === 'es' ? 'Reglas de la casa' : 'House rules', partner.duringStay.rules],
+                    ['doorOpen', lang === 'es' ? 'Contacto' : 'Contact',              partner.duringStay.contact],
+                  ] as const).filter(([, , value]) => value).map(([icon, title, value]) => (
+                    <div className={styles.card} key={title}>
+                      <div className={styles.iconChip}><Icon name={icon} color="var(--cream)" /></div>
+                      <h4 className={styles.h4}>{title}</h4>
+                      <div className={styles.cardBody}>
+                        {value!.split(' · ').map((part, i) => (
+                          <div key={i}>
+                            {/^[^\s@\[]+@[^\s@]+\.[^\s@]+$/.test(part)
+                              ? <a className={styles.link} href={`mailto:${part}`}>{part}</a>
+                              : withPlaceholders(part)}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
@@ -503,7 +607,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                   href={browseNbData.mapUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  onClick={() => gaTrack('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                  onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
                 >
                   <span className={styles.nbMapThumb} aria-hidden>
                     <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
@@ -565,7 +669,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
             href={itin.mapsUrl}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => gaTrack('host_guide_map_click', { partner: partner.slug, city: city.id })}
+            onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id })}
           >
             {itin.mapsCta}
           </a>
@@ -637,6 +741,44 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
       </section>
 
       {/* ── 7. Experiences ─────────────────────────────────── */}
+      {ownTours.length > 0 ? (
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <SectionHead
+              eyebrow={partner.displayName}
+              title={lang === 'es' ? `Experiencias de ${partner.displayName}` : `${partner.displayName} experiences`}
+            />
+            <div className={styles.secBody}>
+              <div className={styles.expGrid}>
+                {ownTours.map((tour) => (
+                  <div className={`${styles.expCard} ${styles.expCardNoImg}`} key={tour.id}>
+                    <div className={styles.expBody}>
+                      <div className={styles.expTextBlock}>
+                        <h5 className={styles.h5}>{tour.title}</h5>
+                        {tour.byline && <p className={styles.tourByline}>{tour.byline}</p>}
+                        <p className={styles.expNote}>{tour.teaser}</p>
+                        {tour.description && <p className={styles.expNote}>{tour.description}</p>}
+                        {tour.price && <p className={styles.tourPrice}>{withPlaceholders(tour.price)}</p>}
+                      </div>
+                      <div className={styles.expActions}>
+                        <a
+                          className={styles.expBookLink}
+                          href={tour.bookHref}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => track('host_guide_tour_click', { partner: partner.slug, city: city.id, tour: tour.id })}
+                        >{tour.bookLabel ?? (lang === 'es' ? 'Reservar' : 'Book')}</a>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      ) : (
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
@@ -659,6 +801,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
           </div>
         </div>
       </section>
+      )}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
@@ -739,7 +882,7 @@ export default function GuiaClient({ partner, city }: { partner: Partner; city: 
                 className={styles.discoverCard}
                 href={dest.url[lang]}
                 key={dest.name}
-                onClick={() => gaTrack('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
+                onClick={() => track('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img className={styles.discoverImg} src={dest.photoUrl} alt={dest.name} />

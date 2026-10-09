@@ -42,7 +42,11 @@ export default function middleware(req: NextRequest) {
   // /guia/lupito is served as-is instead of redirected to /es/guia/lupito.
   // Note: this is the singular /guia; the plural /guias legacy redirect below
   // is unaffected.
-  if (pathname === '/guia' || pathname.startsWith('/guia/')) {
+  // Sales demos (/demo/[prospect]) are the same locale-agnostic guide.
+  if (
+    pathname === '/guia' || pathname.startsWith('/guia/') ||
+    pathname === '/demo' || pathname.startsWith('/demo/')
+  ) {
     return NextResponse.next()
   }
 

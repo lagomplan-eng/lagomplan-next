@@ -50,5 +50,5 @@ export default async function GuiaPartnerPage(
   const guide = getGuide(slug)
   if (!guide) notFound()
 
-  return <GuiaClient partner={guide.partner} city={guide.city} />
+  return <GuiaClient partner={guide.partner} city={guide.city} recordVisits={process.env.VERCEL_ENV === 'production'} />
 }
