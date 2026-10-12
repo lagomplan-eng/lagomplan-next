@@ -1,7 +1,8 @@
 'use client'
 
 /**
- * ChecklistLeadForm — lead-magnet signup for /checklist-viajar-con-bebe.
+ * LeadMagnetForm — reusable lead-magnet signup. `magnet` is the client-safe
+ * subset from lib/lead-magnets.ts (toPublic).
  *
  * Rendered twice on the page (hero + footer); each instance owns its state.
  * Posts to /api/lead-magnet. The success panel and the form share one grid
@@ -11,18 +12,17 @@
 import { useId, useRef, useState } from 'react'
 import { gaTrack } from '../../lib/analytics/ga'
 import { isValidNewsletterEmail } from '../../lib/newsletter'
+import type { LeadMagnetPublic } from '../../lib/lead-magnets'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
 export type FormPosition = 'hero' | 'footer'
 
-const LEAD_MAGNET = 'checklist_baby'
-const PDF_HREF = '/downloads/checklist-hotel-bebe.pdf'
 
 const fieldCls =
   'w-full rounded-full border border-pine/30 bg-white px-5 py-3.5 font-sans text-base text-pine ' +
   'placeholder:text-pine/60 focus:border-pine focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-cream'
 
-export default function ChecklistLeadForm({ position }: { position: FormPosition }) {
+export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagnetPublic; position: FormPosition }) {
   const uid = useId()
   const [name, setName]       = useState('')
   const [email, setEmail]     = useState('')
@@ -34,7 +34,7 @@ export default function ChecklistLeadForm({ position }: { position: FormPosition
   function onFirstInteraction() {
     if (started.current) return
     started.current = true
-    gaTrack('form_start', { lead_magnet: LEAD_MAGNET, form_position: position })
+    gaTrack('form_start', { lead_magnet: magnet.analyticsId, form_position: position })
   }
 
   async function onSubmit(e: React.FormEvent) {
@@ -52,6 +52,7 @@ export default function ChecklistLeadForm({ position }: { position: FormPosition
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
+          magnet:       magnet.slug,
           name:         name.trim(),
           email:        cleanEmail,
           website,
@@ -62,7 +63,7 @@ export default function ChecklistLeadForm({ position }: { position: FormPosition
       if (!res.ok) throw new Error(String(res.status))
       setSentTo(cleanEmail)
       setStatus('success')
-      gaTrack('generate_lead', { lead_magnet: LEAD_MAGNET, form_position: position })
+      gaTrack('generate_lead', { lead_magnet: magnet.analyticsId, form_position: position })
     } catch {
       setStatus('error')
     }
@@ -138,8 +139,8 @@ export default function ChecklistLeadForm({ position }: { position: FormPosition
           Te mandamos el checklist a <strong className="break-all font-bold text-pine">{sentTo}</strong>. Si no llega en 5 minutos, revisa promociones o spam.
         </p>
         <a
-          href={PDF_HREF} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-          onClick={() => gaTrack('lead_magnet_download', { lead_magnet: LEAD_MAGNET, form_position: position })}
+          href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
+          onClick={() => gaTrack('lead_magnet_download', { lead_magnet: magnet.analyticsId, form_position: position })}
           className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
         >
           Descargar ahora →

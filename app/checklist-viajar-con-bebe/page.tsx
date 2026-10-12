@@ -9,9 +9,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { BASE_URL } from '../../lib/seo'
-import ChecklistLeadForm from '../../components/forms/ChecklistLeadForm'
+import LeadMagnetForm from '../../components/forms/LeadMagnetForm'
+import { getLeadMagnet, toPublic } from '../../lib/lead-magnets'
 import styles from './editorial.module.css'
 
+const MAGNET = toPublic(getLeadMagnet('checklist-baby')!)
 const PATH = '/checklist-viajar-con-bebe'
 const TITLE = 'Qué preguntarle al hotel antes de viajar con bebé | Lagomplan'
 const DESCRIPTION =
@@ -87,7 +89,7 @@ export default function ChecklistLanding() {
             </p>
           </div>
           <div id="checklist-form">
-            <ChecklistLeadForm position="hero" />
+            <LeadMagnetForm magnet={MAGNET} position="hero" />
           </div>
         </section>
 
@@ -158,7 +160,7 @@ export default function ChecklistLanding() {
             <h2 className="font-display text-3xl font-medium leading-tight sm:text-4xl">
               Las otras 21 <em className="italic">están en el checklist.</em>
             </h2>
-            <ChecklistLeadForm position="footer" />
+            <LeadMagnetForm magnet={MAGNET} position="footer" />
           </div>
         </section>
       </main>

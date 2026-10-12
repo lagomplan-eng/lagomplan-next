@@ -2,6 +2,7 @@
  * lib/email/checklist-baby.ts
  *
  * Server-side template for the lead-magnet delivery email (checklist N.º 02,
+ * registered in lib/lead-magnets.ts; preheader + PDF URL come from there,
  * "Qué preguntarle al hotel antes de ir con bebé"). Converted from the
  * Mailchimp-merge-tag HTML; every inline style is preserved.
  *
@@ -11,11 +12,6 @@
  *   *|UNSUB|*           → env MAILCHIMP_UNSUB_URL
  */
 
-export const CHECKLIST_PDF_URL = 'https://lagomplan.com/downloads/checklist-hotel-bebe.pdf'
-export const CHECKLIST_SUBJECT = 'Tu checklist: 24 preguntas antes de reservar'
-const PREHEADER = 'Empieza por la cuna. Es la que más sorpresas da.'
-const PDF_URL = CHECKLIST_PDF_URL
-
 function esc(s: string): string {
   return s
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -23,6 +19,10 @@ function esc(s: string): string {
 }
 
 export interface ChecklistEmailOptions {
+  /** Hidden inbox preheader (from the magnet config). */
+  preheader: string
+  /** Absolute PDF URL for the button (from the magnet config). */
+  pdfUrl: string
   name?: string | null
   /** Defaults to env LAGOMPLAN_POSTAL_ADDRESS (line omitted when unset). */
   postalAddress?: string
@@ -30,7 +30,9 @@ export interface ChecklistEmailOptions {
   unsubUrl?: string
 }
 
-export function renderChecklistEmail(opts: ChecklistEmailOptions = {}): { html: string; text: string } {
+export function renderChecklistEmail(opts: ChecklistEmailOptions): { html: string; text: string } {
+  const PREHEADER = esc(opts.preheader)
+  const PDF_URL = opts.pdfUrl
   const name = (opts.name ?? '').trim()
   const address = (opts.postalAddress ?? process.env.LAGOMPLAN_POSTAL_ADDRESS ?? '').trim()
   const unsubUrl = (opts.unsubUrl ?? process.env.MAILCHIMP_UNSUB_URL ?? '').trim()
