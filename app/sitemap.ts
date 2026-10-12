@@ -140,5 +140,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   //    EN segment is 'families' (i18n.ts pathnames), not 'familias'.
   entries.push(...pairEntries('/es/smart-finds/familias', '/en/smart-finds/families', 'monthly', 0.6))
 
+  // 6. Lead-magnet landing — Spanish-only, no hreflang alternates.
+  entries.push({
+    url: `${BASE_URL}/checklist-viajar-con-bebe`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  })
+
   return entries
 }
