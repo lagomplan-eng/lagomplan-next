@@ -208,6 +208,15 @@ export default async function RootLayout({
           `}
         </Script>
 
+        {/* ── Mailchimp connected-site script ──
+            Lets Mailchimp verify the site connection (Check Connection)
+            and enables its popups/tracking. Async, loaded after hydrate. */}
+        <Script
+          id="mcjs"
+          src="https://chimpstatic.com/mcjs-connected/js/users/6926f5f508747ce3ab9253cc3/e33d58f69307d0ece38ed7116.js"
+          strategy="afterInteractive"
+        />
+
         {/* ── Meta Pixel — gated behind cookie consent ──
             The Pixel base loader + init + first PageView are emitted by
             <ConsentSync> only after the user accepts non-essential
