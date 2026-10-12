@@ -78,7 +78,7 @@ export default function ChecklistLanding() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="mx-auto grid max-w-5xl gap-8 px-5 pb-12 pt-2 sm:px-8 md:grid-cols-2 md:items-start md:gap-14 md:pt-10">
+        <section className="mx-auto grid max-w-5xl gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-2 md:items-start md:gap-14 md:pt-10">
           <div>
             <p className={LABEL}>Checklist para familias · N.º 02</p>
             <h1 className="mt-3 font-display text-[2.15rem] font-medium leading-[1.08] sm:text-5xl">
@@ -93,17 +93,9 @@ export default function ChecklistLanding() {
           </div>
         </section>
 
-        {/* ── Illustration placeholder ── */}
+        {/* Hairline between hero and body (replaces the former illustration slot) */}
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          {/* TODO(illustration): replace with an on-brand illustration (no photography). */}
-          <div
-            data-placeholder="illustration"
-            role="img"
-            aria-label="Espacio reservado para una ilustración"
-            className="flex h-36 items-center justify-center rounded-2xl border border-dashed border-pine/30 bg-sand/60 sm:h-48"
-          >
-            <span className={LABEL}>Ilustración · pendiente</span>
-          </div>
+          <div className="border-t border-pine/15" />
         </div>
 
         {/* ── Por qué existe ── */}
