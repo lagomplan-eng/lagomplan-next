@@ -253,16 +253,23 @@ export interface InsiderPick {
   note: string
 }
 
-/** A tour the operator sells directly (demo prospects). */
+/**
+ * A tour the operator sells directly (demo prospects). Rendered by the same
+ * card as the Insider experiences (image, Details, Book button); "[bracketed]"
+ * text in any string field renders highlighted.
+ */
 export interface OwnTour {
   id: string
   title: string
   teaser: string
-  description?: string
-  /** Free text; "[precio]" style placeholders render highlighted. */
+  description?: string | string[]
   price?: string
-  /** Discreet attribution line under the title, e.g. "con Sabores México". */
-  byline?: string
+  /** Public path to one of our own illustrations. Omitted → highlighted "[imagen]" placeholder. */
+  image?: string
+  /** Details panel: how to book / minimum booking time. */
+  howToBook?: string
+  minBookingTime?: string | string[]
+  /** The Book button goes straight here (no Lagomplan UTMs added). */
   bookHref: string
   bookLabel?: string
 }
@@ -335,30 +342,27 @@ export interface Partner {
   /** noindex,nofollow for this partner's page. Default false. */
   noindex?: boolean
 
-  /**
-   * City zones (keys of City.neighborhoods) to browse INSTEAD of the
-   * "Your house" tab + the city's full zone list. Used by /demo prospects,
-   * which have no street-level pick list. First entry is the default tab.
-   */
-  neighborhoods?: string[]
+  /** Zone tab selected on load (a key of City.neighborhoods). Default: the "Your house" tab. */
+  defaultNeighborhood?: string
 
   /** Overrides the city-level host-letter copy (requires hostLetterSignature). */
   hostLetter?: Partial<Record<Lang, { quote?: string; body: string; roleLabel?: string }>>
 
   /**
    * The operator's own tours. When present for the active language they
-   * replace the Insider experiences section (those route to a Lagomplan
-   * WhatsApp; these route to the operator).
+   * replace the Insider experience cards (those route to a Lagomplan
+   * WhatsApp; these route to the operator), inside the same section layout.
    */
   ownTours?: Partial<Record<Lang, OwnTour[]>>
 
+  /** Replaces the "Booked through Insider…" line when ownTours are shown. */
+  experiencesPartnerNote?: Partial<Record<Lang, string>>
+
   /**
-   * "During your stay" cards (house rules / contact), shown right after the
-   * host letter. Check-out is NOT here: it's already in the practical strip
-   * (atAGlance.checkOut). Plain strings, same in both languages; "[bracketed]"
-   * placeholders render highlighted. Renders only when set.
+   * Operator WhatsApp for the closing "Your own plan" banner. Without `href`
+   * the banner shows `label` as a highlighted, disabled placeholder.
    */
-  duringStay?: { rules?: string; contact?: string }
+  operatorWhatsApp?: { label: Record<Lang, string>; href?: string }
 
   /** Co-branding: logo (public path or https URL) and an optional accent hex. */
   brand?: { logo?: string; accent?: string }

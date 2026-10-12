@@ -21,9 +21,25 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { prospect: slug } = await params
   const prospect = getDemoProspect(slug)
+  const robots = { index: false, follow: false, googleBot: { index: false, follow: false } }
+  if (!prospect) return { title: 'Demo', robots }
+
+  // Same title/description/preview pattern as /guia/[partner]. The page stays
+  // noindex,nofollow; the og:image is only for link previews when it's shared.
+  const city = getCity(buildDemoPartner(prospect).city)
+  const title = `${prospect.name} · Your stay guide`
+  const description =
+    `Your guest guide to Mexico City, curated by ${prospect.name} and powered by Lagomplan.`
   return {
-    title: prospect ? `${prospect.name} · Demo` : 'Demo',
-    robots: { index: false, follow: false, googleBot: { index: false, follow: false } },
+    title,
+    description,
+    robots,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      ...(city ? { images: [{ url: city.heroImage }] } : {}),
+    },
   }
 }
 

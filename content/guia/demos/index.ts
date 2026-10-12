@@ -4,13 +4,17 @@
 // (so the demo reuses GuiaClient unchanged) via buildDemoPartner(). Demos are
 // noindex, never in the sitemap, and nothing links to them.
 //
+// A demo is the /guia/livin_condesa template 1:1 — same components, sections,
+// tabs, zones and city layers. Only the PROPERTY layer changes (brand, host
+// letter, tours, stay facts). Every property fact we don't have yet is a
+// "[bracketed]" placeholder, which renders highlighted: nothing is invented.
+//
 // Adding a prospect = add an entry to PROSPECTS. Only `slug` and `name` are
-// required; everything else is optional and omitted sections simply don't render.
+// required.
 
-import type { Lang, OwnTour, Partner } from '../types'
+import type { Lang, Neighborhood, OwnTour, Partner } from '../types'
 import type { ZoneId } from '../zones/types'
 import { getZone } from '../zones'
-import { cdmx } from '../cities/cdmx'
 import hostMeTenderJson from '../../../B2B demos/host-me-tender.json'
 
 export interface DemoProspect {
@@ -24,20 +28,12 @@ export interface DemoProspect {
   accent?: string
   /** Host letter. Renders only when provided. */
   hostLetter?: Partial<Record<Lang, { quote?: string; body: string; roleLabel?: string }>>
-  /** City zones to browse, first is default. Defaults to ['Condesa']. */
-  neighborhoods?: string[]
-  /** Check-out time shown in the practical section, e.g. "11:00". */
+  /** Check-out time for the practical strip. Default: the "[check-out]" placeholder. */
   checkOut?: string
-  /** "During your stay" cards (house rules, contact). */
-  duringStay?: Partner['duringStay']
-  /** Operator's own tours; replace the Insider experiences section. */
+  /** Operator's own tours; replace the Insider experience cards. */
   ownTours?: Partial<Record<Lang, OwnTour[]>>
-}
-
-// PROVISIONAL attribution under every tour — wording to be reviewed by Pili.
-const TOUR_BYLINE: Record<Lang, string> = {
-  es: 'con Sabores México',
-  en: 'with Sabores México',
+  /** Section-level attribution under the experiences heading. */
+  experiencesPartnerNote?: Partial<Record<Lang, string>>
 }
 
 interface TourJson {
@@ -47,16 +43,35 @@ interface TourJson {
   url: string
 }
 
+// Our own illustrations that genuinely fit a tour (no third-party images).
+// Tours without one get a highlighted "[imagen]" placeholder.
+const TOUR_IMAGES: Record<string, string> = {
+  'tour-3': '/images/guia/experiences/exp-frida.jpg', // Coyoacán food tour
+  'tour-4': '/images/guia/experiences/exp-tacos.jpg', // taco tour
+}
+
 /** JSON tour → OwnTour. Prices stay as-is ("[precio]" renders highlighted). */
 function toTour(t: TourJson, lang: Lang, i: number): OwnTour {
+  const id = `tour-${i + 1}`
   return {
-    id: `tour-${i + 1}`,
-    title: t.name,
+    id,
+    title: t.name, // tour names stay in English in both languages
     teaser: t.description[lang],
     price: t.price,
-    byline: TOUR_BYLINE[lang],
+    image: TOUR_IMAGES[id],
+    howToBook: lang === 'es'
+      ? 'Reserva en línea con el botón «Reservar».'
+      : 'Book online with the "Book" button.',
+    minBookingTime: '[tiempo mínimo de reserva]',
     bookHref: t.url,
+    bookLabel: lang === 'es' ? 'Reservar' : 'Book',
   }
+}
+
+// PROVISIONAL wording — to be reviewed by Pili.
+const SABORES_NOTE: Record<Lang, string> = {
+  es: 'Reservas con Sabores México, nuestro aliado local.',
+  en: 'Booked through Sabores México, our local partner.',
 }
 
 // NOTE: names below are placeholders from the sales brief — confirm the exact
@@ -74,7 +89,6 @@ const PROSPECTS: Record<string, DemoProspect> = {
     accent: '#194332',
     // Local copy of hostMeTenderJson.logoUrl (don't hotlink their site).
     logo: '/images/demos/host-me-tender-logo.png',
-    neighborhoods: [hostMeTenderJson.neighborhood],
     // Their own letter replaces the city-level one; quote '' hides the
     // generic Lagomplan quote so it isn't attributed to them.
     hostLetter: {
@@ -83,14 +97,11 @@ const PROSPECTS: Record<string, DemoProspect> = {
     },
     // Still the literal placeholder "[check-out]" — rendered highlighted.
     checkOut: hostMeTenderJson.checkout,
-    duringStay: {
-      rules: hostMeTenderJson.rules,
-      contact: hostMeTenderJson.contact,
-    },
     ownTours: {
       es: hostMeTenderJson.tours.map((t, i) => toTour(t, 'es', i)),
       en: hostMeTenderJson.tours.map((t, i) => toTour(t, 'en', i)),
     },
+    experiencesPartnerNote: SABORES_NOTE,
   },
   'dave-nat': {
     slug: 'dave-nat',
@@ -98,8 +109,8 @@ const PROSPECTS: Record<string, DemoProspect> = {
   },
 }
 
-const DEFAULT_NEIGHBORHOODS = ['Condesa']
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
+const PROPERTY = '[nombre de la propiedad]'
 
 export function listDemoSlugs(): string[] {
   return Object.keys(PROSPECTS)
@@ -115,11 +126,32 @@ function zoneFor(neighborhood: string): ZoneId | undefined {
   return getZone(id) ? id : undefined
 }
 
+/**
+ * The "Your house" tab: the same slot Livin fills with its street-level list.
+ * We don't have the property's, so the name and exactly three spots are
+ * highlighted placeholders.
+ */
+function placeholderHouse(): Neighborhood {
+  const spot = (icon: 'coffee' | 'utensilsSm' | 'trees') => ({
+    icon,
+    name: '[lugar cercano]',
+    distance: '[dirección]',
+    note: '[descripción del lugar]',
+  })
+  const spots = [spot('coffee'), spot('utensilsSm'), spot('trees')]
+  return {
+    name: PROPERTY,
+    tabLabel: { es: 'Tu casa', en: 'Your house' },
+    mapUrl: '', // no Maps list yet → the card renders as plain text
+    tagline: { es: `A pasos de ${PROPERTY}`, en: `Steps from ${PROPERTY}` },
+    orientation: { es: '[distancia a pie desde la propiedad]', en: '[walking distance from the property]' },
+    spots: { es: spots, en: spots },
+  }
+}
+
 export function buildDemoPartner(p: DemoProspect): Partner {
-  const neighborhoods = (p.neighborhoods?.length ? p.neighborhoods : DEFAULT_NEIGHBORHOODS)
-    .filter((n) => n in cdmx.neighborhoods)
-  const zones = neighborhoods.length ? neighborhoods : DEFAULT_NEIGHBORHOODS
-  const home = zones[0]
+  const home = 'Condesa' // default zone for every demo
+  const checkOut = p.checkOut ?? '[check-out]'
 
   return {
     // Prefixed so demo traffic is distinguishable from real partners in
@@ -129,28 +161,37 @@ export function buildDemoPartner(p: DemoProspect): Partner {
     hostName: p.name,
     city: 'cdmx',
     homeNeighborhood: home,
-    // Required by the type; unused because `neighborhoods` replaces the tab.
-    yourHouse: cdmx.neighborhoods[home],
-    neighborhoods: zones,
+    yourHouse: placeholderHouse(),
+    defaultNeighborhood: home,
     pilotId: 'mxcity_demo',
     zone: zoneFor(home),
     noindex: true,
     ...(p.hostLetter ? { hostLetterSignature: p.name, hostLetter: p.hostLetter } : {}),
-    ...(p.checkOut
-      ? {
-          atAGlance: { checkOut: p.checkOut },
-          faqAnswers: {
-            checkinCheckout: {
-              body: {
-                es: `La salida es a las ${p.checkOut}.`,
-                en: `Check-out is at ${p.checkOut}.`,
-              },
-            },
-          },
-        }
-      : {}),
+    atAGlance: { checkOut },
+    // Same omission Livin applies: "Health & Pharmacies" lives under
+    // Everyday errands, not duplicated under Before you arrive.
+    arrivalItemsOmit: ['health-pharmacies'],
+    faqAnswers: {
+      checkinCheckout: {
+        body: {
+          es: `La salida es a las ${checkOut}.`,
+          en: `Check-out is at ${checkOut}.`,
+        },
+      },
+      // We must not promise a service on the operator's behalf: these two
+      // cards stay placeholders until the operator confirms what they offer.
+      chefsAtHome: {
+        body: { es: '[servicio de chef del operador]', en: '[servicio de chef del operador]' },
+      },
+      massages: {
+        body: { es: '[masaje recomendado]', en: '[masaje recomendado]' },
+      },
+    },
+    operatorWhatsApp: {
+      label: { es: '[WhatsApp del operador]', en: '[operator WhatsApp]' },
+    },
     ...(p.ownTours ? { ownTours: p.ownTours } : {}),
-    ...(p.duringStay ? { duringStay: p.duringStay } : {}),
+    ...(p.experiencesPartnerNote ? { experiencesPartnerNote: p.experiencesPartnerNote } : {}),
     brand: {
       logo: p.logo,
       accent: p.accent && HEX.test(p.accent) ? p.accent : undefined,

@@ -578,5 +578,8 @@
 
 /* Demo placeholders ("[precio]") — loud on purpose so nobody ships them. */
 .placeholder { background: #ffe14d; color: #3d3200; padding: 0 4px; border-radius: 3px; outline: 1.5px dashed #b38f00; font-style: normal; font-weight: 600; }
-.tourByline { font-size: 12px; font-style: italic; color: var(--sage); margin: 2px 0 8px; }
 .tourPrice { font-size: 13px; font-weight: 600; color: var(--pine); margin: 8px 0 0; }
+
+/* Operator-tour card extras: "[imagen]" placeholder box, disabled operator CTA. */
+.expImgPlaceholder { display: flex; align-items: center; justify-content: center; background: rgba(15, 58, 51, .06); }
+.expBookDisabled { cursor: not-allowed; opacity: .9; }

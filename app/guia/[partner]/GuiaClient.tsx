@@ -38,7 +38,7 @@ import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
 import { buildVisit } from '../../../lib/guia/visit'
-import type { City, CityCopy, Experience, IconKey, Lang, Partner } from '../../../content/guia/types'
+import type { City, CityCopy, Experience, IconKey, Lang, OwnTour, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
 import { resolveFaqModule } from '../../../content/guia/faq/resolve'
 import type { FaqItemKey } from '../../../content/guia/faq/types'
@@ -132,18 +132,45 @@ function WhatsAppIcon({ className }: { className?: string }) {
   )
 }
 
-function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string }) {
-  const [isOpen, setIsOpen] = useState(false)
-  const descriptions = Array.isArray(exp.description) ? exp.description : [exp.description]
-  const minTimes = Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]
+/** Maps an operator tour onto the Experience shape the card renders. */
+function ownAsExperience(o: OwnTour): Experience {
+  return {
+    id: o.id,
+    title: o.title,
+    teaser: o.teaser,
+    description: o.description ?? [],
+    howToBookLinkText: '',
+    howToBookLinkHref: '',
+    howToBook: o.howToBook ?? '',
+    minBookingTime: o.minBookingTime ?? [],
+  }
+}
 
-  const hasPhoto = Boolean(EXP_PHOTOS[exp.id])
+/** The same card renders both Insider experiences and an operator's own
+ *  tours (`own`): own tours get their own Book link (no Lagomplan UTMs, no
+ *  WhatsApp icon), an optional price line, and a highlighted "[imagen]"
+ *  placeholder when we have no illustration that fits. */
+function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId, own, onOwnBook }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string; own?: OwnTour; onOwnBook?: () => void }) {
+  const [isOpen, setIsOpen] = useState(false)
+  const descriptions = (Array.isArray(exp.description) ? exp.description : [exp.description]).filter(Boolean)
+  const minTimes = (Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]).filter(Boolean)
+
+  const hasPhoto = own ? true : Boolean(EXP_PHOTOS[exp.id])
   const bookHref = withPilotUtm(WA_BOOK_URL[lang], pilotId, partnerSlug)
   const detailsHref = withPilotUtm(exp.howToBookLinkHref, pilotId, partnerSlug)
 
   return (
     <div className={`${styles.expCard} ${hasPhoto ? '' : styles.expCardNoImg}`}>
-      {hasPhoto && (
+      {own ? (
+        own.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img className={styles.expImg} src={own.image} alt={exp.title} />
+        ) : (
+          <div className={`${styles.expImg} ${styles.expImgPlaceholder}`}>
+            <mark className={styles.placeholder}>[imagen]</mark>
+          </div>
+        )
+      ) : hasPhoto && (
         // eslint-disable-next-line @next/next/no-img-element
         <img className={styles.expImg} src={EXP_PHOTOS[exp.id]} alt={exp.title} />
       )}
@@ -151,21 +178,32 @@ function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Exp
         <div className={styles.expTextBlock}>
           <h5 className={styles.h5}>{exp.title}</h5>
           <p className={styles.expNote}>{exp.teaser}</p>
+          {own?.price && <p className={styles.tourPrice}>{withPlaceholders(own.price)}</p>}
         </div>
         <div className={styles.expActions}>
-          <a
-            className={styles.expBookLink}
-            href={bookHref}
-            target="_blank"
-            rel="noopener"
-            onClick={() => trackOutboundLink({
-              linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
-              section: 'experience_book', experienceName: exp.title,
-            })}
-          >
-            <WhatsAppIcon className={styles.expBookIcon} />
-            {t.expBookCta}
-          </a>
+          {own ? (
+            <a
+              className={styles.expBookLink}
+              href={own.bookHref}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={onOwnBook}
+            >{own.bookLabel ?? (lang === 'es' ? 'Reservar' : 'Book')}</a>
+          ) : (
+            <a
+              className={styles.expBookLink}
+              href={bookHref}
+              target="_blank"
+              rel="noopener"
+              onClick={() => trackOutboundLink({
+                linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
+                section: 'experience_book', experienceName: exp.title,
+              })}
+            >
+              <WhatsAppIcon className={styles.expBookIcon} />
+              {t.expBookCta}
+            </a>
+          )}
           <button
             type="button"
             className={styles.expDetailsToggle}
@@ -185,24 +223,34 @@ function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Exp
           style={{ maxHeight: isOpen ? '2000px' : '0', opacity: isOpen ? 1 : 0 }}
         >
           <div className={styles.expDetailsInner}>
-            <p className={styles.expDetailLabel}>{t.expDescriptionLabel}</p>
-            {descriptions.map((d, i) => <p className={styles.expDetailText} key={i}>{d}</p>)}
+            {descriptions.length > 0 && (
+              <>
+                <p className={styles.expDetailLabel}>{t.expDescriptionLabel}</p>
+                {descriptions.map((d, i) => <p className={styles.expDetailText} key={i}>{withPlaceholders(d)}</p>)}
+              </>
+            )}
             <p className={styles.expDetailLabel}>{t.expHowToBookLabel}</p>
             <p className={styles.expDetailText}>
-              <a
-                className={styles.link}
-                href={detailsHref}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackOutboundLink({
-                  linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
-                  section: 'experience_details', experienceName: exp.title,
-                })}
-              >{exp.howToBookLinkText}</a>
-              {exp.howToBook}
+              {!own && (
+                <a
+                  className={styles.link}
+                  href={detailsHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => trackOutboundLink({
+                    linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
+                    section: 'experience_details', experienceName: exp.title,
+                  })}
+                >{exp.howToBookLinkText}</a>
+              )}
+              {withPlaceholders(exp.howToBook)}
             </p>
-            <p className={styles.expDetailLabel}>{t.expMinTimeLabel}</p>
-            {minTimes.map((mt, i) => <p className={styles.expDetailText} key={i}>{mt}</p>)}
+            {minTimes.length > 0 && (
+              <>
+                <p className={styles.expDetailLabel}>{t.expMinTimeLabel}</p>
+                {minTimes.map((mt, i) => <p className={styles.expDetailText} key={i}>{withPlaceholders(mt)}</p>)}
+              </>
+            )}
             {exp.needSoonerNote && <p className={styles.expDetailNote}>{exp.needSoonerNote}</p>}
           </div>
         </div>
@@ -213,7 +261,7 @@ function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Exp
 
 /** "Your Own Plan" renders as a full-width closing banner below the experience
  *  grid, not as a peer card, since it's an invitation rather than a place. */
-function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string }) {
+function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId, operator }: { exp: Experience; t: CityCopy; lang: Lang; partnerSlug: string; zone?: string; pilotId: string; operator?: { label: string; href?: string } }) {
   const [isOpen, setIsOpen] = useState(false)
   const descriptions = Array.isArray(exp.description) ? exp.description : [exp.description]
   const minTimes = Array.isArray(exp.minBookingTime) ? exp.minBookingTime : [exp.minBookingTime]
@@ -228,19 +276,34 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: E
           <p className={styles.expBannerNote}>{exp.teaser}</p>
         </div>
         <div className={styles.expActions}>
-          <a
-            className={styles.expBookLink}
-            href={bookHref}
-            target="_blank"
-            rel="noopener"
-            onClick={() => trackOutboundLink({
-              linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
-              section: 'experience_book', experienceName: exp.title,
-            })}
-          >
-            <WhatsAppIcon className={styles.expBookIcon} />
-            {t.expBookCta}
-          </a>
+          {operator ? (
+            // Operator demo: the CTA goes to the OPERATOR's WhatsApp — never Insider's.
+            operator.href ? (
+              <a className={styles.expBookLink} href={operator.href} target="_blank" rel="noopener noreferrer">
+                <WhatsAppIcon className={styles.expBookIcon} />
+                {operator.label}
+              </a>
+            ) : (
+              <span className={`${styles.expBookLink} ${styles.expBookDisabled}`} aria-disabled="true">
+                <WhatsAppIcon className={styles.expBookIcon} />
+                {withPlaceholders(operator.label)}
+              </span>
+            )
+          ) : (
+            <a
+              className={styles.expBookLink}
+              href={bookHref}
+              target="_blank"
+              rel="noopener"
+              onClick={() => trackOutboundLink({
+                linkName: 'insider', href: bookHref, partnerSlug, zone, lang,
+                section: 'experience_book', experienceName: exp.title,
+              })}
+            >
+              <WhatsAppIcon className={styles.expBookIcon} />
+              {t.expBookCta}
+            </a>
+          )}
           <button
             type="button"
             className={styles.expBannerDetailsToggle}
@@ -265,16 +328,22 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId }: { exp: E
           {descriptions.map((d, i) => <p className={styles.expBannerDetailText} key={i}>{d}</p>)}
           <p className={styles.expBannerDetailLabel}>{t.expHowToBookLabel}</p>
           <p className={styles.expBannerDetailText}>
-            <a
-              className={styles.expBannerLink}
-              href={detailsHref}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => trackOutboundLink({
-                linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
-                section: 'experience_details', experienceName: exp.title,
-              })}
-            >{exp.howToBookLinkText}</a>
+            {operator ? (
+              operator.href
+                ? <a className={styles.expBannerLink} href={operator.href} target="_blank" rel="noopener noreferrer">{exp.howToBookLinkText}</a>
+                : withPlaceholders(operator.label)
+            ) : (
+              <a
+                className={styles.expBannerLink}
+                href={detailsHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackOutboundLink({
+                  linkName: 'insider', href: detailsHref, partnerSlug, zone, lang,
+                  section: 'experience_details', experienceName: exp.title,
+                })}
+              >{exp.howToBookLinkText}</a>
+            )}
             {exp.howToBook}
           </p>
           <p className={styles.expBannerDetailLabel}>{t.expMinTimeLabel}</p>
@@ -298,7 +367,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [stay, setStay] = useState<Stay>({})
-  const [browseNb, setBrowseNb] = useState<string>(partner.neighborhoods?.[0] ?? HOME_TAB_ID)
+  const [browseNb, setBrowseNb] = useState<string>(partner.defaultNeighborhood ?? HOME_TAB_ID)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
@@ -409,7 +478,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
 
   // Tab order + lookup = partner's own "Your house" pick list, followed by
   // the zones shared across all partners in this city.
-  const nbOrder = partner.neighborhoods ?? [HOME_TAB_ID, ...city.neighborhoodOrder]
+  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
   const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const ownTours = partner.ownTours?.[lang] ?? []
@@ -530,42 +599,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
         </section>
       )}
 
-      {/* ── During your stay (demo prospects: house rules / contact; check-out lives in the practical strip) ── */}
-      {partner.duringStay && (
-        <section id="estancia" className={styles.section}>
-          <div className={styles.container}>
-            <div className={styles.secGrid}>
-              <SectionHead
-                eyebrow={partner.displayName}
-                title={lang === 'es' ? 'Durante tu estancia' : 'During your stay'}
-              />
-              <div className={styles.secBody}>
-                <div className={styles.cardGrid}>
-                  {([
-                    ['shield',   lang === 'es' ? 'Reglas de la casa' : 'House rules', partner.duringStay.rules],
-                    ['doorOpen', lang === 'es' ? 'Contacto' : 'Contact',              partner.duringStay.contact],
-                  ] as const).filter(([, , value]) => value).map(([icon, title, value]) => (
-                    <div className={styles.card} key={title}>
-                      <div className={styles.iconChip}><Icon name={icon} color="var(--cream)" /></div>
-                      <h4 className={styles.h4}>{title}</h4>
-                      <div className={styles.cardBody}>
-                        {value!.split(' · ').map((part, i) => (
-                          <div key={i}>
-                            {/^[^\s@\[]+@[^\s@]+\.[^\s@]+$/.test(part)
-                              ? <a className={styles.link} href={`mailto:${part}`}>{part}</a>
-                              : withPlaceholders(part)}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
       <PracticalSection
         arrivalItems={visibleArrivalItems}
@@ -585,8 +618,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
             <div className={styles.secHead}>
               <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
               <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
-              <p className={styles.nbTagline}>{browseNbData.tagline[lang]}</p>
-              <p className={styles.lede}>{browseNbData.orientation[lang]}</p>
+              <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
+              <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
             </div>
             <div className={styles.secBody}>
               <div className={styles.nbControls}>
@@ -604,7 +637,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
                 </div>
                 <a
                   className={styles.nbMapCard}
-                  href={browseNbData.mapUrl}
+                  href={browseNbData.mapUrl || undefined}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
@@ -627,10 +660,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
                     <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
                     <div>
                       <div className={styles.spotHead}>
-                        <h5 className={styles.h5}>{spot.name}</h5>
-                        <span className={styles.spotDist}>{spot.distance}</span>
+                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}</h5>
+                        <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
                       </div>
-                      <p className={styles.spotNote}>{spot.note}</p>
+                      <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
                     </div>
                   </div>
                 ))}
@@ -741,44 +774,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
       </section>
 
       {/* ── 7. Experiences ─────────────────────────────────── */}
-      {ownTours.length > 0 ? (
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead
-              eyebrow={partner.displayName}
-              title={lang === 'es' ? `Experiencias de ${partner.displayName}` : `${partner.displayName} experiences`}
-            />
-            <div className={styles.secBody}>
-              <div className={styles.expGrid}>
-                {ownTours.map((tour) => (
-                  <div className={`${styles.expCard} ${styles.expCardNoImg}`} key={tour.id}>
-                    <div className={styles.expBody}>
-                      <div className={styles.expTextBlock}>
-                        <h5 className={styles.h5}>{tour.title}</h5>
-                        {tour.byline && <p className={styles.tourByline}>{tour.byline}</p>}
-                        <p className={styles.expNote}>{tour.teaser}</p>
-                        {tour.description && <p className={styles.expNote}>{tour.description}</p>}
-                        {tour.price && <p className={styles.tourPrice}>{withPlaceholders(tour.price)}</p>}
-                      </div>
-                      <div className={styles.expActions}>
-                        <a
-                          className={styles.expBookLink}
-                          href={tour.bookHref}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          onClick={() => track('host_guide_tour_click', { partner: partner.slug, city: city.id, tour: tour.id })}
-                        >{tour.bookLabel ?? (lang === 'es' ? 'Reservar' : 'Book')}</a>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      ) : (
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
@@ -786,22 +781,36 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
               <span className={styles.eyebrow}>{t.expEyebrow}</span>
               <h2 className={styles.h2}>{t.expH2}</h2>
               <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
-              <p className={styles.expPartnerNote}>{t.expPartnerNote}</p>
+              <p className={styles.expPartnerNote}>
+                {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
+              </p>
             </div>
             <div className={styles.secBody}>
               <div className={styles.expGrid}>
-                {t.experiences.filter((exp) => exp.id !== 'exp-own-plan').map((exp) => (
-                  <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
-                ))}
+                {ownTours.length > 0
+                  ? ownTours.map((tour) => (
+                      <ExperienceCard
+                        exp={ownAsExperience(tour)} own={tour} t={t} lang={lang}
+                        partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={tour.id}
+                        onOwnBook={() => track('host_guide_tour_click', { partner: partner.slug, city: city.id, tour: tour.id })}
+                      />
+                    ))
+                  : t.experiences.filter((exp) => exp.id !== 'exp-own-plan').map((exp) => (
+                      <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
+                    ))}
               </div>
               {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
-                <ExperienceBanner exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
+                <ExperienceBanner
+                  exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id}
+                  operator={ownTours.length > 0 && partner.operatorWhatsApp
+                    ? { label: partner.operatorWhatsApp.label[lang], href: partner.operatorWhatsApp.href }
+                    : undefined}
+                />
               ))}
             </div>
           </div>
         </div>
       </section>
-      )}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
