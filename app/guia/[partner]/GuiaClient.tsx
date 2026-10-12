@@ -46,6 +46,8 @@ import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
 import PracticalSection from './PracticalSection'
 import { withPlaceholders } from './placeholders'
+import { WhatsAppIcon } from './WhatsAppIcon'
+import StayGlance from './StayGlance'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -124,13 +126,6 @@ const EXP_PHOTOS: Record<string, string> = {
 
 /** Experience card: teaser + WhatsApp link on the face, full copy behind a
  *  "Details" toggle so longer cards (e.g. Frida/Coyoacán) don't stretch the row. */
-function WhatsAppIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="currentColor">
-      <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38a9.9 9.9 0 0 0 4.79 1.22h.004c5.46 0 9.91-4.45 9.91-9.91C21.95 6.45 17.5 2 12.04 2Zm0 18.15h-.003a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.11.82.83-3.03-.2-.31a8.19 8.19 0 0 1-1.26-4.39c0-4.54 3.7-8.23 8.24-8.23 2.2 0 4.27.86 5.82 2.42a8.18 8.18 0 0 1 2.41 5.82c0 4.54-3.69 8.23-8.24 8.23Zm4.52-6.16c-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.13-.16.25-.64.81-.78.97-.14.17-.29.19-.54.06-.25-.12-1.05-.39-1.99-1.23-.74-.66-1.23-1.47-1.38-1.72-.14-.25-.02-.38.11-.51.11-.11.25-.29.37-.43.12-.14.16-.25.25-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.56-.43-.14 0-.31-.01-.48-.01-.17 0-.43.06-.66.31-.23.25-.87.85-.87 2.07 0 1.22.89 2.4 1.01 2.56.12.17 1.75 2.67 4.24 3.74.59.26 1.05.41 1.41.52.59.19 1.13.16 1.56.1.48-.07 1.47-.6 1.68-1.18.21-.58.21-1.07.14-1.18-.06-.11-.23-.17-.48-.29Z"/>
-    </svg>
-  )
-}
 
 /** Maps an operator tour onto the Experience shape the card renders. */
 function ownAsExperience(o: OwnTour): Experience {
@@ -160,7 +155,7 @@ function ExperienceCard({ exp, t, lang, partnerSlug, zone, pilotId, own, onOwnBo
   const detailsHref = withPilotUtm(exp.howToBookLinkHref, pilotId, partnerSlug)
 
   return (
-    <div className={`${styles.expCard} ${hasPhoto ? '' : styles.expCardNoImg}`}>
+    <div id={own?.id} className={`${styles.expCard} ${hasPhoto ? '' : styles.expCardNoImg}`}>
       {own ? (
         own.image ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -483,6 +478,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const ownTours = partner.ownTours?.[lang] ?? []
   const letter = { ...t.hostLetter, ...partner.hostLetter?.[lang] }
+  // Demo template option — only on /demo/*, only when the data exists. Every
+  // /guia/<partner> page has no `demo` prop, so none of this can apply there.
+  const cobrand = !!demo && !!partner.cobrand && !!partner.brand?.logo
+  const splitLetter = !!demo && !!partner.cobrand && !!partner.stayGlance && !!partner.hostLetter?.[lang]?.paragraphs?.length
   const spots = browseNbData.spots[lang]
   const itin = city.itinerary[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
@@ -509,12 +508,21 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
     >
       {demo && (
         <div className={styles.demoBanner} role="note">
-          {lang === 'es' ? `Demo preparada para ${demo.prospectName}` : `Demo prepared for ${demo.prospectName}`}
+          <span>{lang === 'es' ? `Demo preparada para ${demo.prospectName}` : `Demo prepared for ${demo.prospectName}`}</span>
+          {cobrand && <span className={styles.poweredBy}>Powered by Lagomplan</span>}
         </div>
       )}
       {/* ── Header ─────────────────────────────────────────── */}
       <header className={styles.header}>
         <div className={styles.headerRow}>
+          {cobrand ? (
+            // Demo co-brand option: the prospect's logo alone, on the left.
+            <span className={styles.brand}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={partner.brand!.logo} alt={partner.displayName} className={styles.hmtLogo} />
+            </span>
+          ) : (
+          <>
           <span className={styles.brand}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -540,6 +548,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
                 <span className={styles.coBrandName}>{partner.displayName}</span>
               )}
             </span>
+          )}
+          </>
           )}
           <div className={styles.navRight}>
             <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.navLabel}</span>
@@ -580,7 +590,40 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
       </section>
 
       {/* ── Host letter (renders when the partner provides a signature) ── */}
-      {partner.hostLetterSignature && (
+      {splitLetter && partner.hostLetter?.[lang]?.paragraphs && (
+        <section className={styles.section}>
+          <div className={styles.container}>
+            <div className={styles.letterSplit}>
+              <article className={styles.letterMain}>
+                <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{letter.eyebrow}</span>
+                {partner.hostLetter[lang]!.paragraphs!.map((para, i) => {
+                  const link = partner.hostLetter![lang]!.link
+                  const at = link ? para.indexOf(link.text) : -1
+                  return (
+                    <p className={styles.letterP} key={i}>
+                      {link && at >= 0
+                        ? <>{para.slice(0, at)}<a href={link.href}>{link.text}</a>{para.slice(at + link.text.length)}</>
+                        : para}
+                    </p>
+                  )
+                })}
+                <div className={styles.letterSig}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={partner.brand!.logo} alt={partner.displayName} className={styles.letterSigLogo} />
+                  <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{letter.roleLabel}</span>
+                </div>
+              </article>
+              <StayGlance
+                lang={lang}
+                glance={partner.stayGlance!}
+                whatsapp={partner.operatorWhatsApp ? { label: partner.operatorWhatsApp.label[lang], href: partner.operatorWhatsApp.href } : undefined}
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {partner.hostLetterSignature && !splitLetter && (
         <section className={styles.section}>
           <div className={styles.container}>
             <div className={styles.letterCard}>

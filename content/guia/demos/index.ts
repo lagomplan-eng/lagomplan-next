@@ -27,13 +27,15 @@ export interface DemoProspect {
   /** Accent color as #rgb or #rrggbb. Invalid values are ignored. */
   accent?: string
   /** Host letter. Renders only when provided. */
-  hostLetter?: Partial<Record<Lang, { quote?: string; body: string; roleLabel?: string }>>
+  hostLetter?: Partner['hostLetter']
   /** Check-out time for the practical strip. Default: the "[check-out]" placeholder. */
   checkOut?: string
   /** Operator's own tours; replace the Insider experience cards. */
   ownTours?: Partial<Record<Lang, OwnTour[]>>
   /** Section-level attribution under the experiences heading. */
   experiencesPartnerNote?: Partial<Record<Lang, string>>
+  /** "Your stay at a glance" card data (rules, email, Instagram). */
+  stayGlance?: Partner['stayGlance']
 }
 
 interface TourJson {
@@ -46,9 +48,11 @@ interface TourJson {
 // Our own illustrations that genuinely fit a tour (no third-party images).
 // Tours without one get a highlighted "[imagen]" placeholder.
 const TOUR_IMAGES: Record<string, string> = {
-  'tour-3': '/images/guia/experiences/exp-frida.jpg', // Coyoacán food tour
   'tour-4': '/images/guia/experiences/exp-tacos.jpg', // taco tour
 }
+
+// Tours in the JSON that this demo deliberately leaves out (Livin shows 4).
+const EXCLUDED_TOURS = ['Secrets & Spice']
 
 /** JSON tour → OwnTour. Prices stay as-is ("[precio]" renders highlighted). */
 function toTour(t: TourJson, lang: Lang, i: number): OwnTour {
@@ -65,6 +69,44 @@ function toTour(t: TourJson, lang: Lang, i: number): OwnTour {
     minBookingTime: '[tiempo mínimo de reserva]',
     bookHref: t.url,
     bookLabel: lang === 'es' ? 'Reservar' : 'Book',
+  }
+}
+
+const TOUR_LINK_TEXT: Record<Lang, string> = {
+  es: 'el recorrido a pie por la Roma Norte',
+  en: 'the Roma Norte walking tour',
+}
+
+/**
+ * The JSON letter is six lines: welcome (2 sentences) / neighborhood /
+ * tour recommendation / contact sentence / goodbye / signature. The split
+ * layout shows 3 paragraphs — welcome (lines 1-2), recommendation (line 3,
+ * with the tour name linked to tour 1) and goodbye (line 5) — and drops the
+ * contact sentence (contact lives in the stay card) and the team signature
+ * line (the signature is the logo). Fails loudly if the JSON changes shape.
+ */
+function splitLetter(lang: Lang) {
+  const lines = hostMeTenderJson.hostLetter[lang].split('\n')
+  if (lines.length !== 6 || !lines[2].includes(TOUR_LINK_TEXT[lang]) || !/[\[@]/.test(lines[3])) {
+    throw new Error(`host-me-tender.json hostLetter.${lang} changed shape — update splitLetter()`)
+  }
+  return {
+    quote: '',
+    body: lines.join('\n'), // fallback for the classic layout
+    paragraphs: [`${lines[0]} ${lines[1]}`, lines[2], lines[4]],
+    link: { text: TOUR_LINK_TEXT[lang], href: '#tour-1' },
+  }
+}
+
+/** Rules / email / Instagram from the JSON; the WhatsApp placeholder is operatorWhatsApp. */
+function stayGlanceFromJson(): NonNullable<Partner['stayGlance']> {
+  const parts = hostMeTenderJson.contact.split(' · ')
+  const email = parts.find((x) => /^[^\s@\[]+@[^\s@]+\.[^\s@]+$/.test(x))
+  const ig = parts.find((x) => x.startsWith('Instagram '))?.replace('Instagram ', '')
+  return {
+    rules: hostMeTenderJson.rules,
+    ...(email ? { email } : {}),
+    ...(ig ? { instagram: { handle: ig, href: `https://www.instagram.com/${ig.replace('@', '')}/` } } : {}),
   }
 }
 
@@ -91,15 +133,13 @@ const PROSPECTS: Record<string, DemoProspect> = {
     logo: '/images/demos/host-me-tender-logo.png',
     // Their own letter replaces the city-level one; quote '' hides the
     // generic Lagomplan quote so it isn't attributed to them.
-    hostLetter: {
-      es: { quote: '', body: hostMeTenderJson.hostLetter.es },
-      en: { quote: '', body: hostMeTenderJson.hostLetter.en },
-    },
+    hostLetter: { es: splitLetter('es'), en: splitLetter('en') },
+    stayGlance: stayGlanceFromJson(),
     // Still the literal placeholder "[check-out]" — rendered highlighted.
     checkOut: hostMeTenderJson.checkout,
     ownTours: {
-      es: hostMeTenderJson.tours.map((t, i) => toTour(t, 'es', i)),
-      en: hostMeTenderJson.tours.map((t, i) => toTour(t, 'en', i)),
+      es: hostMeTenderJson.tours.filter((t) => !EXCLUDED_TOURS.includes(t.name)).map((t, i) => toTour(t, 'es', i)),
+      en: hostMeTenderJson.tours.filter((t) => !EXCLUDED_TOURS.includes(t.name)).map((t, i) => toTour(t, 'en', i)),
     },
     experiencesPartnerNote: SABORES_NOTE,
   },
@@ -164,6 +204,7 @@ export function buildDemoPartner(p: DemoProspect): Partner {
     yourHouse: placeholderHouse(),
     defaultNeighborhood: home,
     pilotId: 'mxcity_demo',
+    cobrand: true,
     zone: zoneFor(home),
     noindex: true,
     ...(p.hostLetter ? { hostLetterSignature: p.name, hostLetter: p.hostLetter } : {}),
@@ -190,6 +231,7 @@ export function buildDemoPartner(p: DemoProspect): Partner {
     operatorWhatsApp: {
       label: { es: '[WhatsApp del operador]', en: '[operator WhatsApp]' },
     },
+    ...(p.stayGlance ? { stayGlance: p.stayGlance } : {}),
     ...(p.ownTours ? { ownTours: p.ownTours } : {}),
     ...(p.experiencesPartnerNote ? { experiencesPartnerNote: p.experiencesPartnerNote } : {}),
     brand: {

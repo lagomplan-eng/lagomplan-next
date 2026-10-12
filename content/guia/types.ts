@@ -346,7 +346,15 @@ export interface Partner {
   defaultNeighborhood?: string
 
   /** Overrides the city-level host-letter copy (requires hostLetterSignature). */
-  hostLetter?: Partial<Record<Lang, { quote?: string; body: string; roleLabel?: string }>>
+  hostLetter?: Partial<Record<Lang, {
+    quote?: string
+    body: string
+    roleLabel?: string
+    /** Split-letter layout: the letter as paragraphs (replaces `body`). */
+    paragraphs?: string[]
+    /** Split-letter layout: `text` (a substring of one paragraph) becomes a link. */
+    link?: { text: string; href: string }
+  }>>
 
   /**
    * The operator's own tours. When present for the active language they
@@ -363,6 +371,18 @@ export interface Partner {
    * the banner shows `label` as a highlighted, disabled placeholder.
    */
   operatorWhatsApp?: { label: Record<Lang, string>; href?: string }
+
+  /**
+   * Demo template option (only honoured on /demo/*): a single co-brand
+   * header (prospect logo only, "Powered by Lagomplan" in the demo bar) and,
+   * when hostLetter.paragraphs + stayGlance exist, the letter in 8 columns
+   * with the "Your stay at a glance" card in 4. Off by default, so every
+   * /guia/<partner> page renders exactly as before.
+   */
+  cobrand?: boolean
+
+  /** "Your stay at a glance" card (rules + contact). The WhatsApp button uses `operatorWhatsApp`. */
+  stayGlance?: { rules?: string; email?: string; instagram?: { handle: string; href: string } }
 
   /** Co-branding: logo (public path or https URL) and an optional accent hex. */
   brand?: { logo?: string; accent?: string }
