@@ -9,7 +9,7 @@
  * cell, so swapping them never changes the container height (no layout shift).
  */
 
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { gaTrack } from '../../lib/analytics/ga'
 import { isValidNewsletterEmail } from '../../lib/newsletter'
 import type { LeadMagnetPublic } from '../../lib/lead-magnets'
@@ -32,6 +32,7 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   // false when the API signed them up but the delivery email failed
   const [emailSent, setEmailSent] = useState(true)
   const started = useRef(false)
+  const typingAtSubmit = useRef(false)
 
   function onFirstInteraction() {
     if (started.current) return
@@ -42,6 +43,11 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (status === 'loading') return
+    // iOS keeps the input focused (keyboard up) when a button is tapped. Blur
+    // now so the keyboard starts closing while the request is in flight.
+    const active = document.activeElement as HTMLElement | null
+    typingAtSubmit.current = !!active && /^(INPUT|TEXTAREA)$/.test(active.tagName)
+    if (typingAtSubmit.current) active!.blur()
     const cleanEmail = email.trim().toLowerCase()
     if (!name.trim() || !isValidNewsletterEmail(cleanEmail)) {
       setStatus('error')
@@ -74,11 +80,49 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   }
 
   const done = status === 'success'
-  const trackDownload = () =>
-    gaTrack('lead_magnet_download', { lead_magnet: magnet.analyticsId, form_position: position })
+
+  // After a successful submit:
+  //  1. blur the input and (on touch devices) wait for the on-screen keyboard
+  //     to close, so scroll positions are measured against the final viewport;
+  //  2. move focus to the success heading (tabIndex -1) — this is the single
+  //     screen-reader announcement (the panel deliberately has no aria-live);
+  //  3. bring the whole panel into view (smoothly, or instantly under
+  //     prefers-reduced-motion). `block: 'nearest'` scrolls only if part of the
+  //     panel is off-screen, so a fully visible panel doesn't move the page.
+  const rootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!done) return
+    let cancelled = false
+
+    ;(async () => {
+      const active = document.activeElement as HTMLElement | null
+      if (active && /^(INPUT|TEXTAREA)$/.test(active.tagName)) { typingAtSubmit.current = true; active.blur() }
+      if (typingAtSubmit.current && window.matchMedia('(pointer: coarse)').matches) {
+        const vv = window.visualViewport
+        // iOS shrinks only the visual viewport when the keyboard is up. If it is
+        // still shrunk, wait for it to close; otherwise it already has.
+        if (vv && window.innerHeight - vv.height > 80) await waitForKeyboardClose()
+        else await new Promise<void>(r => requestAnimationFrame(() => r()))
+      }
+      typingAtSubmit.current = false
+      if (cancelled) return
+
+      const panel = rootRef.current?.querySelector<HTMLElement>('[data-success-visible="true"]')
+      if (!panel) return
+      panel.querySelector<HTMLElement>('[data-success-heading]')?.focus({ preventScroll: true })
+
+      const r = panel.getBoundingClientRect()
+      const vh = window.visualViewport?.height ?? window.innerHeight
+      if (r.top >= 0 && r.bottom <= vh) return
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' })
+    })()
+
+    return () => { cancelled = true }
+  }, [done])
 
   return (
-    <div className="grid">
+    <div ref={rootRef} className="grid">
       {/* ── Form ── */}
       <form
         onSubmit={onSubmit}
@@ -129,45 +173,137 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
           {status === 'error' ? 'Algo salió mal. Inténtalo de nuevo.' : ''}
         </p>
         <p className="font-sans text-xs leading-relaxed text-pine/70">
-          Un PDF de 2 páginas. Sin spam — puedes darte de baja cuando quieras.
+          Un PDF de 12 páginas, para imprimir o guardar en tu celular. Sin spam — puedes darte de baja cuando quieras.
         </p>
       </form>
 
-      {/* ── Success ── */}
-      <div
-        role="status"
-        aria-live="polite"
-        className={`[grid-area:1/1] flex flex-col justify-center gap-3 rounded-2xl bg-sand p-6 ${done ? '' : 'invisible'}`}
-        aria-hidden={!done}
-      >
-        {emailSent ? (
-          <>
-            <p className="font-display text-3xl leading-tight text-pine">Listo. Revisa tu correo.</p>
-            <p className="font-sans text-base leading-relaxed text-pine/80">
-              Te mandamos el checklist a <strong className="break-all font-bold text-pine">{sentTo}</strong>. Si no llega en 5 minutos, revisa promociones o spam.
-            </p>
-            <a
-              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-              onClick={trackDownload}
-              className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
-            >
-              Descargar ahora →
-            </a>
-          </>
-        ) : (
-          <>
-            <p className="font-display text-3xl leading-tight text-pine">Listo. Aquí está tu checklist.</p>
-            <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
-            <a
-              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-              onClick={trackDownload}
-              className="rounded-full bg-pine px-6 py-4 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
-            >
-              Descargar el checklist →
-            </a>
-          </>
-        )}
-      </div>
+      {/* ── Success ──
+          Both variants always render in the same grid cell as the form
+          (only the active one is visible), so the cell is as tall as the
+          tallest state and nothing shifts when the form swaps. */}
+      {/* Permanent, never-visible copy sized for a ~2-line address: keeps the
+          cell height constant no matter how short the real address is. */}
+      <SuccessPanel visible={false} variant="sent" magnet={magnet} position={position} email={SIZER_EMAIL} />
+      <SuccessPanel
+        visible={done && emailSent}
+        variant="sent"
+        magnet={magnet}
+        position={position}
+        email={sentTo}
+      />
+      <SuccessPanel
+        visible={done && !emailSent}
+        variant="failed"
+        magnet={magnet}
+        position={position}
+        email={sentTo}
+      />
     </div>
   )
+}
+
+// Stand-in address for the hidden sizing panel (~2 lines at 375px).
+const SIZER_EMAIL = 'nombre.apellido.largo@dominio-ejemplo.com.mx'
+
+const DEFAULT_NEXT_STEP_EVENT = 'planner_cta_click'
+
+const primaryBtn =
+  'block rounded-full bg-pine px-6 py-3.5 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-sand'
+
+function SuccessPanel({
+  visible, variant, magnet, position, email,
+}: {
+  visible:  boolean
+  variant:  'sent' | 'failed'
+  magnet:   LeadMagnetPublic
+  position: FormPosition
+  email:    string
+}) {
+  const track = (event: string) => gaTrack(event, { lead_magnet: magnet.analyticsId, form_position: position })
+  const tab = visible ? 0 : -1
+
+  return (
+    <div
+      aria-hidden={!visible}
+      data-success-visible={visible ? 'true' : undefined}
+      className={`[grid-area:1/1] flex scroll-my-4 flex-col justify-center gap-3 rounded-2xl bg-sand p-5 ${visible ? '' : 'invisible'}`}
+    >
+      {variant === 'sent' ? (
+        <>
+          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Revisa tu correo.</h2>
+          <p className="font-sans text-base leading-relaxed text-pine/80">
+            Te mandamos el checklist a{' '}
+            <strong className="font-bold text-pine [overflow-wrap:anywhere]"><EmailText email={email} /></strong>.
+            {' '}Si no llega en 5 minutos, revisa promociones o spam.
+          </p>
+          <a
+            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+            onClick={() => track('lead_magnet_download')}
+            className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
+          >
+            Descargar ahora →
+          </a>
+        </>
+      ) : (
+        <>
+          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Aquí está tu checklist.</h2>
+          <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
+          <a
+            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+            onClick={() => track('lead_magnet_download')}
+            className={primaryBtn}
+          >
+            Descargar el checklist →
+          </a>
+        </>
+      )}
+
+      {/* Next step — rendered only if the magnet's config provides one */}
+      {magnet.nextStep && (
+        <div className="mt-1 border-t border-pine/20 pt-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-pine/80">
+            {variant === 'sent' ? magnet.nextStep.eyebrowSent : magnet.nextStep.eyebrowFailed}
+          </p>
+          <p className="mt-1.5 font-sans text-sm leading-relaxed text-pine/85">
+            {magnet.nextStep.text}
+          </p>
+          <a
+            href={magnet.nextStep.buttonUrl} tabIndex={tab}
+            onClick={() => track(magnet.nextStep!.analyticsEvent ?? DEFAULT_NEXT_STEP_EVENT)}
+            className={`${primaryBtn} mt-3`}
+          >
+            {magnet.nextStep.buttonLabel}
+          </a>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** Prefer wrapping at the "@" over mid-word; overflow-wrap:anywhere is the fallback. */
+function EmailText({ email }: { email: string }) {
+  const at = email.indexOf('@')
+  if (at < 1) return <>{email}</>
+  return <>{email.slice(0, at)}<wbr />{email.slice(at)}</>
+}
+
+/**
+ * Resolves when the on-screen keyboard has (probably) closed: the next
+ * visualViewport resize, or a short timeout if none arrives (no keyboard,
+ * browser that doesn't resize, already closed).
+ */
+function waitForKeyboardClose(maxMs = 450): Promise<void> {
+  return new Promise(resolve => {
+    const vv = window.visualViewport
+    if (!vv) { setTimeout(resolve, 0); return }
+    const finish = () => {
+      vv.removeEventListener('resize', finish)
+      clearTimeout(timer)
+      // let layout settle one frame after the resize
+      requestAnimationFrame(() => resolve())
+    }
+    const timer = setTimeout(finish, maxMs)
+    vv.addEventListener('resize', finish, { once: true })
+  })
 }

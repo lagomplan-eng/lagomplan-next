@@ -7,6 +7,7 @@
  */
 
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { BASE_URL } from '../../lib/seo'
 import LeadMagnetForm from '../../components/forms/LeadMagnetForm'
@@ -78,7 +79,7 @@ export default function ChecklistLanding() {
 
       <main>
         {/* ── Hero ── */}
-        <section className="mx-auto grid max-w-5xl gap-8 px-5 pb-14 pt-2 sm:px-8 md:grid-cols-2 md:items-start md:gap-14 md:pt-10">
+        <section className="mx-auto grid max-w-5xl gap-8 overflow-x-clip px-5 pb-14 pt-2 sm:px-8 md:grid-cols-2 md:items-start md:gap-14 md:pt-10">
           <div>
             <p className={LABEL}>Checklist para familias · N.º 02</p>
             <h1 className="mt-3 font-display text-[2.15rem] font-medium leading-[1.08] sm:text-5xl">
@@ -87,9 +88,30 @@ export default function ChecklistLanding() {
             <p className="mt-4 text-base leading-relaxed text-pine/80 sm:text-lg">
               24 preguntas que separan un viaje tranquilo de tres noches sin dormir. Te mandamos el checklist a tu correo.
             </p>
+            <div id="checklist-form" className="mt-6 md:mt-8 md:max-w-md">
+              <LeadMagnetForm magnet={MAGNET} position="hero" />
+            </div>
           </div>
-          <div id="checklist-form">
-            <LeadMagnetForm magnet={MAGNET} position="hero" />
+
+          {/* PDF preview: cover in front, section 01 page behind. Small and
+              below the form on mobile so the button stays above the fold. */}
+          <div className="relative mx-auto h-[290px] w-[240px] md:h-[400px] md:w-[300px] md:justify-self-center lg:h-[470px] lg:w-[360px]">
+            <Image
+              src="/images/checklist/preview-inner.webp"
+              alt=""
+              width={480}
+              height={680}
+              sizes="(min-width: 1024px) 240px, (min-width: 768px) 190px, 150px"
+              className="absolute right-0 top-0 w-[150px] rotate-[5deg] rounded-xl shadow-[0_14px_40px_-12px_rgba(15,58,51,0.35)] md:w-[190px] md:rounded-2xl lg:w-[240px]"
+            />
+            <Image
+              src="/images/checklist/preview-cover.webp"
+              alt="Vista previa del checklist Qué preguntarle al hotel antes de ir con bebé"
+              width={640}
+              height={906}
+              sizes="(min-width: 1024px) 270px, (min-width: 768px) 220px, 170px"
+              className="absolute left-0 top-5 w-[170px] -rotate-[2deg] rounded-xl shadow-[0_18px_50px_-12px_rgba(15,58,51,0.45)] md:top-10 md:w-[220px] md:rounded-2xl lg:w-[270px]"
+            />
           </div>
         </section>
 

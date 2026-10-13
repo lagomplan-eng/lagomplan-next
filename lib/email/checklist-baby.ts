@@ -90,7 +90,7 @@ export function renderChecklistEmail(opts: ChecklistEmailOptions): { html: strin
         <tr>
           <td class="px" style="padding:12px 48px 0 48px;">
             <h1 class="h1" style="margin:0; font-family:Georgia, 'Times New Roman', serif; font-weight:normal; font-size:36px; line-height:42px; color:#0F3A33;">
-              Qué preguntarle al hotel<br><em>antes de ir con bebé.</em>
+              ¿Qué preguntarle al hotel<br><em>antes de ir con bebé?</em>
             </h1>
           </td>
         </tr>
