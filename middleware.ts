@@ -46,6 +46,11 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // Lead-magnet landing — Spanish-only, locale-agnostic (own root layout).
+  if (pathname === '/checklist-viajar-con-bebe') {
+    return NextResponse.next()
+  }
+
   // Guide alias URLs → 301 to the short, canonical, per-locale slug
   // (/es/guias/oaxaca-guia-esencial → /es/guias/oaxaca, /en/guides/roma →
   // /en/guides/rome). True 301 here rather than next.config's `permanent`
@@ -84,6 +89,6 @@ export default function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2)).*)',
+    '/((?!api|_next/static|_next/image|favicon\\.ico|robots\\.txt|sitemap\\.xml|.*\\.(?:png|jpg|jpeg|gif|webp|svg|ico|woff|woff2|pdf)).*)',
   ],
 }
