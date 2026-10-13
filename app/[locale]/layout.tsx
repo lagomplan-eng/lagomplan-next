@@ -124,6 +124,18 @@ export default async function RootLayout({
       className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Mailchimp connected-site script. Must be in the server-rendered
+            HTML (not next/script, which injects client-side) or Mailchimp's
+            "Check Connection" can't find the mcjs tag. */}
+        <script
+          id="mcjs"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/6926f5f508747ce3ab9253cc3/e33d58f69307d0ece38ed7116.js");`,
+          }}
+        />
+      </head>
       <body>
         {/* ── JSON-LD: Organization + WebSite (site-wide schemas) ───────
             Establishes the brand entity in Google's Knowledge Graph and

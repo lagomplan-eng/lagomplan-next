@@ -1,0 +1,18 @@
+/*
+ * Scoped to /checklist-viajar-con-bebe only.
+ * app/globals.css forces ALL headings to upright Manrope with !important
+ * ("design-system enforcement"). This landing's brief calls for Fraunces
+ * roman + italic headlines, so we out-specify that rule here (class +
+ * element beats element alone, both !important) instead of editing it.
+ */
+.editorial h1,
+.editorial h2,
+.editorial h3 {
+  font-family: var(--font-display), 'Fraunces', serif !important;
+}
+.editorial h1 em,
+.editorial h2 em,
+.editorial h3 em {
+  font-family: var(--font-display), 'Fraunces', serif !important;
+  font-style: italic !important;
+}

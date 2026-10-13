@@ -42,7 +42,15 @@ eq('unknown slug untouched', getGuideRedirectSlug('es', 'no-existe'), null)
 const sm = sitemap()
 const urls = sm.map(e => e.url)
 eq('no duplicate URLs', new Set(urls).size, urls.length)
+// Spanish-only pages with no /en counterpart: deliberately no hreflang
+// alternates. Everything else must carry the full es/en/x-default set.
+const ES_ONLY_NO_ALTERNATES = ['https://www.lagomplan.com/checklist-viajar-con-bebe']
+for (const u of ES_ONLY_NO_ALTERNATES) {
+  const e = sm.find(x => x.url === u)
+  eq(`${u} is in the sitemap without alternates`, !!e && !e.alternates, true)
+}
 for (const e of sm) {
+  if (ES_ONLY_NO_ALTERNATES.includes(e.url)) continue
   const l = e.alternates?.languages as Record<string, string> | undefined
   const ok = !!l && Object.keys(l).sort().join() === 'en,es,x-default' && l['x-default'] === l.es && (e.url === l.es || e.url === l.en)
   if (!ok) { fail++; console.error(`FAIL alternates for ${e.url}`) } else pass++
