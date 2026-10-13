@@ -13,6 +13,23 @@ import { renderChecklistEmail } from './email/checklist-baby'
 
 export interface RenderedEmail { html: string; text: string }
 
+/**
+ * Optional "next step" block shown under the success message. The shared form
+ * renders only what this gives it; a magnet without `nextStep` shows no block.
+ */
+export interface LeadMagnetNextStep {
+  /** Mono eyebrow when the delivery email was sent. */
+  eyebrowSent: string
+  /** Mono eyebrow when the email failed and the PDF is offered directly. */
+  eyebrowFailed: string
+  text: string
+  buttonLabel: string
+  /** Full URL including UTM params. */
+  buttonUrl: string
+  /** GA4 event fired on click (receives lead_magnet + form_position). */
+  analyticsEvent: string
+}
+
 export interface LeadMagnet {
   /** Request/config key, e.g. "checklist-baby". */
   slug: string
@@ -26,6 +43,7 @@ export interface LeadMagnet {
   pdfUrl: string
   emailSubject: string
   emailPreheader: string
+  nextStep?: LeadMagnetNextStep
   render: (args: { name: string; preheader: string; pdfUrl: string }) => RenderedEmail
 }
 
@@ -34,6 +52,7 @@ export interface LeadMagnetPublic {
   slug: string
   analyticsId: string
   pdfPath: string
+  nextStep?: LeadMagnetNextStep
 }
 
 export const LEAD_MAGNETS: Record<string, LeadMagnet> = {
@@ -45,6 +64,14 @@ export const LEAD_MAGNETS: Record<string, LeadMagnet> = {
     pdfUrl: 'https://lagomplan.com/downloads/checklist-hotel-bebe.pdf',
     emailSubject: 'Tu checklist: 24 preguntas antes de reservar',
     emailPreheader: 'Empieza por la cuna. Es la que más sorpresas da.',
+    nextStep: {
+      eyebrowSent:   'Mientras llega tu checklist',
+      eyebrowFailed: 'Siguiente paso',
+      text:          'Arma tu próximo viaje en familia en 60 segundos — con horarios de siesta incluidos.',
+      buttonLabel:   'Planea tu viaje gratis →',
+      buttonUrl:     '/es/planificador?utm_source=landing&utm_medium=success&utm_campaign=w3_bebe',
+      analyticsEvent: 'planner_cta_click',
+    },
     render: ({ name, preheader, pdfUrl }) => renderChecklistEmail({ name, preheader, pdfUrl }),
   },
 }
@@ -56,5 +83,5 @@ export function getLeadMagnet(slug: unknown): LeadMagnet | undefined {
 }
 
 export function toPublic(m: LeadMagnet): LeadMagnetPublic {
-  return { slug: m.slug, analyticsId: m.analyticsId, pdfPath: m.pdfPath }
+  return { slug: m.slug, analyticsId: m.analyticsId, pdfPath: m.pdfPath, nextStep: m.nextStep }
 }

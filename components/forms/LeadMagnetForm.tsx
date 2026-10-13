@@ -9,7 +9,7 @@
  * cell, so swapping them never changes the container height (no layout shift).
  */
 
-import { useId, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { gaTrack } from '../../lib/analytics/ga'
 import { isValidNewsletterEmail } from '../../lib/newsletter'
 import type { LeadMagnetPublic } from '../../lib/lead-magnets'
@@ -75,8 +75,23 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
 
   const done = status === 'success'
 
+  // After a successful submit, bring the whole success panel into view
+  // (smoothly, or instantly under prefers-reduced-motion). `block: 'nearest'`
+  // scrolls only if part of the panel is off-screen, so a panel that is already
+  // fully visible (typically desktop) doesn't move the page.
+  const rootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!done) return
+    const panel = rootRef.current?.querySelector<HTMLElement>('[data-success-visible="true"]')
+    if (!panel) return
+    const r = panel.getBoundingClientRect()
+    if (r.top >= 0 && r.bottom <= window.innerHeight) return
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' })
+  }, [done])
+
   return (
-    <div className="grid">
+    <div ref={rootRef} className="grid">
       {/* ── Form ── */}
       <form
         onSubmit={onSubmit}
@@ -159,9 +174,6 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
 // Stand-in address for the hidden sizing panel (~2 lines at 375px).
 const SIZER_EMAIL = 'nombre.apellido.largo@dominio-ejemplo.com.mx'
 
-const PLANNER_HREF =
-  '/es/planificador?utm_source=landing&utm_medium=success&utm_campaign=w3_bebe'
-
 const primaryBtn =
   'block rounded-full bg-pine px-6 py-3.5 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-sand'
@@ -183,14 +195,15 @@ function SuccessPanel({
       role="status"
       aria-live="polite"
       aria-hidden={!visible}
-      className={`[grid-area:1/1] flex flex-col justify-center gap-3 rounded-2xl bg-sand p-5 ${visible ? '' : 'invisible'}`}
+      data-success-visible={visible ? 'true' : undefined}
+      className={`[grid-area:1/1] flex scroll-my-4 flex-col justify-center gap-3 rounded-2xl bg-sand p-5 ${visible ? '' : 'invisible'}`}
     >
       {variant === 'sent' ? (
         <>
           <p className="font-display text-2xl leading-tight text-pine">Listo. Revisa tu correo.</p>
           <p className="font-sans text-base leading-relaxed text-pine/80">
             Te mandamos el checklist a{' '}
-            <strong className="font-bold text-pine [overflow-wrap:anywhere]">{email}</strong>.
+            <strong className="font-bold text-pine [overflow-wrap:anywhere]"><EmailText email={email} /></strong>.
             {' '}Si no llega en 5 minutos, revisa promociones o spam.
           </p>
           <a
@@ -215,22 +228,31 @@ function SuccessPanel({
         </>
       )}
 
-      {/* Next step */}
-      <div className="mt-1 border-t border-pine/20 pt-3">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-pine/80">
-          {variant === 'sent' ? 'Mientras llega tu checklist' : 'Siguiente paso'}
-        </p>
-        <p className="mt-1.5 font-sans text-sm leading-relaxed text-pine/85">
-          Arma tu próximo viaje en familia en 60 segundos — con horarios de siesta incluidos.
-        </p>
-        <a
-          href={PLANNER_HREF} tabIndex={tab}
-          onClick={() => track('planner_cta_click')}
-          className={`${primaryBtn} mt-3`}
-        >
-          Planea tu viaje gratis →
-        </a>
-      </div>
+      {/* Next step — rendered only if the magnet's config provides one */}
+      {magnet.nextStep && (
+        <div className="mt-1 border-t border-pine/20 pt-3">
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-pine/80">
+            {variant === 'sent' ? magnet.nextStep.eyebrowSent : magnet.nextStep.eyebrowFailed}
+          </p>
+          <p className="mt-1.5 font-sans text-sm leading-relaxed text-pine/85">
+            {magnet.nextStep.text}
+          </p>
+          <a
+            href={magnet.nextStep.buttonUrl} tabIndex={tab}
+            onClick={() => track(magnet.nextStep!.analyticsEvent)}
+            className={`${primaryBtn} mt-3`}
+          >
+            {magnet.nextStep.buttonLabel}
+          </a>
+        </div>
+      )}
     </div>
   )
+}
+
+/** Prefer wrapping at the "@" over mid-word; overflow-wrap:anywhere is the fallback. */
+function EmailText({ email }: { email: string }) {
+  const at = email.indexOf('@')
+  if (at < 1) return <>{email}</>
+  return <>{email.slice(0, at)}<wbr />{email.slice(at)}</>
 }
