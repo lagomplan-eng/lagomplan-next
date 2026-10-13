@@ -1,0 +1,60 @@
+{
+  "name": "Host Me Tender",
+  "logoUrl": "https://www.hostmetender.com/uploads/1/1/0/2/11025726/published/secundario2-verdeselva.png?1770248624",
+  "brandColor": "[hex verde selva]",
+  "neighborhood": "Condesa",
+  "hostLetter": {
+    "es": "Te damos la bienvenida a Condesa. Desde 2014 recibimos huéspedes en la Ciudad de México, y nos da gusto que esta vez seas tú.\nEste barrio se vive a pie: cafés, parques y restaurantes a unas cuadras de tu puerta.\nSi quieres empezar por la comida, te recomendamos el recorrido a pie por la Roma Norte que hacemos con Sabores México: cuatro horas y seis paradas.\nPara lo que necesites durante tu estancia, escríbenos a [WhatsApp del operador] o a contacto@hostmetender.com.\nQue disfrutes la ciudad a tu ritmo.\nEl equipo de Host Me Tender",
+    "en": "Welcome to Condesa. We've been hosting guests in Mexico City since 2014, and we're glad this time it's you.\nThis is a neighborhood best lived on foot, with cafés, parks and restaurants a few blocks from your door.\nIf you'd like to start with food, we recommend the Roma Norte walking tour we run with Sabores México: four hours, six stops.\nFor anything you need during your stay, message us at [operator WhatsApp] or contacto@hostmetender.com.\nEnjoy the city at your own pace.\nThe Host Me Tender team"
+  },
+  "checkout": "[check-out]",
+  "rules": "[reglas de la casa]",
+  "contact": "contacto@hostmetender.com · [WhatsApp del operador] · Instagram @host.me.tender",
+  "tours": [
+    {
+      "name": "Tales & Tastings: Charming Roma Norte Food Tour",
+      "description": {
+        "es": "Recorrido gastronómico a pie por la Roma Norte: 4 h, 6 paradas, más de 13 platillos, máximo 10 personas.",
+        "en": "Walking food tour through Roma Norte: 4 hrs, 6 stops, 13+ dishes, up to 10 people."
+      },
+      "price": "[precio]",
+      "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/DxWVP?channelId=e4cxgeyofm98bv84knyde3n0p"
+    },
+    {
+      "name": "Flavors of our Heritage: Historic Mexico City Center Food Tour",
+      "description": {
+        "es": "Recorrido gastronómico a pie por el Centro Histórico: 5 h, 8 paradas, más de 13 platillos, máximo 10 personas.",
+        "en": "Walking food tour through the Historic Center: 5 hrs, 8 stops, 13+ dishes, up to 10 people."
+      },
+      "price": "[precio]",
+      "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/XD0Ye?channelId=e4cxgeyofm98bv84knyde3n0p"
+    },
+    {
+      "name": "Boho Feast: Delights of Coyoacán Food Tour",
+      "description": {
+        "es": "Recorrido gastronómico a pie por Coyoacán: 3.5 h, 8 paradas, más de 13 platillos, máximo 10 personas.",
+        "en": "Walking food tour through Coyoacán: 3.5 hrs, 8 stops, 13+ dishes, up to 10 people."
+      },
+      "price": "[precio]",
+      "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/2lVpM?channelId=e4cxgeyofm98bv84knyde3n0p"
+    },
+    {
+      "name": "Our Unmissable Mexico City Taco Tour: Taco Beats and Mezcal Sips",
+      "description": {
+        "es": "Ruta de tacos con un experto local, con cerveza local y mezcal: 3.5 h en transporte, 6 paradas, máximo 10 personas.",
+        "en": "Taco route with a local expert, plus local beer and mezcal: 3.5 hrs by transport, 6 stops, up to 10 people."
+      },
+      "price": "[precio]",
+      "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/zqaEN?channelId=e4cxgeyofm98bv84knyde3n0p"
+    },
+    {
+      "name": "Secrets & Spice",
+      "description": {
+        "es": "Recorrido guiado por el Mercado de Jamaica: 3.5 h, 6 paradas, más de 13 platillos, máximo 10 personas.",
+        "en": "Guided tour of Mercado de Jamaica: 3.5 hrs, 6 stops, 13+ dishes, up to 10 people."
+      },
+      "price": "[precio]",
+      "url": "https://saboresmexicofoodtours.com/food-tours/"
+    }
+  ]
+}

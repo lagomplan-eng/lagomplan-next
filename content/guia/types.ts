@@ -253,6 +253,27 @@ export interface InsiderPick {
   note: string
 }
 
+/**
+ * A tour the operator sells directly (demo prospects). Rendered by the same
+ * card as the Insider experiences (image, Details, Book button); "[bracketed]"
+ * text in any string field renders highlighted.
+ */
+export interface OwnTour {
+  id: string
+  title: string
+  teaser: string
+  description?: string | string[]
+  price?: string
+  /** Public path to one of our own illustrations. Omitted → highlighted "[imagen]" placeholder. */
+  image?: string
+  /** Details panel: how to book / minimum booking time. */
+  howToBook?: string
+  minBookingTime?: string | string[]
+  /** The Book button goes straight here (no Lagomplan UTMs added). */
+  bookHref: string
+  bookLabel?: string
+}
+
 export interface Partner {
   slug: string
   displayName: string
@@ -320,6 +341,51 @@ export interface Partner {
 
   /** noindex,nofollow for this partner's page. Default false. */
   noindex?: boolean
+
+  /** Zone tab selected on load (a key of City.neighborhoods). Default: the "Your house" tab. */
+  defaultNeighborhood?: string
+
+  /** Overrides the city-level host-letter copy (requires hostLetterSignature). */
+  hostLetter?: Partial<Record<Lang, {
+    quote?: string
+    body: string
+    roleLabel?: string
+    /** Split-letter layout: the letter as paragraphs (replaces `body`). */
+    paragraphs?: string[]
+    /** Split-letter layout: `text` (a substring of one paragraph) becomes a link. */
+    link?: { text: string; href: string }
+  }>>
+
+  /**
+   * The operator's own tours. When present for the active language they
+   * replace the Insider experience cards (those route to a Lagomplan
+   * WhatsApp; these route to the operator), inside the same section layout.
+   */
+  ownTours?: Partial<Record<Lang, OwnTour[]>>
+
+  /** Replaces the "Booked through Insider…" line when ownTours are shown. */
+  experiencesPartnerNote?: Partial<Record<Lang, string>>
+
+  /**
+   * Operator WhatsApp for the closing "Your own plan" banner. Without `href`
+   * the banner shows `label` as a highlighted, disabled placeholder.
+   */
+  operatorWhatsApp?: { label: Record<Lang, string>; href?: string }
+
+  /**
+   * Demo template option (only honoured on /demo/*): a single co-brand
+   * header (prospect logo only, "Powered by Lagomplan" in the demo bar) and,
+   * when hostLetter.paragraphs + stayGlance exist, the letter in 8 columns
+   * with the "Your stay at a glance" card in 4. Off by default, so every
+   * /guia/<partner> page renders exactly as before.
+   */
+  cobrand?: boolean
+
+  /** "Your stay at a glance" card (rules + contact). The WhatsApp button uses `operatorWhatsApp`. */
+  stayGlance?: { rules?: string; email?: string; instagram?: { handle: string; href: string } }
+
+  /** Co-branding: logo (public path or https URL) and an optional accent hex. */
+  brand?: { logo?: string; accent?: string }
 
   /** Overrides the utm_content value on outbound Lagomplan CTAs. Default
    *  'guest_guide'. */
