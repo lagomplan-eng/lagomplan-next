@@ -74,8 +74,6 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   }
 
   const done = status === 'success'
-  const trackDownload = () =>
-    gaTrack('lead_magnet_download', { lead_magnet: magnet.analyticsId, form_position: position })
 
   return (
     <div className="grid">
@@ -129,44 +127,109 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
           {status === 'error' ? 'Algo salió mal. Inténtalo de nuevo.' : ''}
         </p>
         <p className="font-sans text-xs leading-relaxed text-pine/70">
-          Un PDF de 2 páginas. Sin spam — puedes darte de baja cuando quieras.
+          Un PDF de 12 páginas, para imprimir o guardar en tu celular. Sin spam — puedes darte de baja cuando quieras.
         </p>
       </form>
 
-      {/* ── Success ── */}
-      <div
-        role="status"
-        aria-live="polite"
-        className={`[grid-area:1/1] flex flex-col justify-center gap-3 rounded-2xl bg-sand p-6 ${done ? '' : 'invisible'}`}
-        aria-hidden={!done}
-      >
-        {emailSent ? (
-          <>
-            <p className="font-display text-3xl leading-tight text-pine">Listo. Revisa tu correo.</p>
-            <p className="font-sans text-base leading-relaxed text-pine/80">
-              Te mandamos el checklist a <strong className="break-all font-bold text-pine">{sentTo}</strong>. Si no llega en 5 minutos, revisa promociones o spam.
-            </p>
-            <a
-              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-              onClick={trackDownload}
-              className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
-            >
-              Descargar ahora →
-            </a>
-          </>
-        ) : (
-          <>
-            <p className="font-display text-3xl leading-tight text-pine">Listo. Aquí está tu checklist.</p>
-            <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
-            <a
-              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-              onClick={trackDownload}
-              className="rounded-full bg-pine px-6 py-4 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
-            >
-              Descargar el checklist →
-            </a>
-          </>
-        )}
+      {/* ── Success ──
+          Both variants always render in the same grid cell as the form
+          (only the active one is visible), so the cell is as tall as the
+          tallest state and nothing shifts when the form swaps. */}
+      {/* Permanent, never-visible copy sized for a ~2-line address: keeps the
+          cell height constant no matter how short the real address is. */}
+      <SuccessPanel visible={false} variant="sent" magnet={magnet} position={position} email={SIZER_EMAIL} />
+      <SuccessPanel
+        visible={done && emailSent}
+        variant="sent"
+        magnet={magnet}
+        position={position}
+        email={sentTo}
+      />
+      <SuccessPanel
+        visible={done && !emailSent}
+        variant="failed"
+        magnet={magnet}
+        position={position}
+        email={sentTo}
+      />
+    </div>
+  )
+}
+
+// Stand-in address for the hidden sizing panel (~2 lines at 375px).
+const SIZER_EMAIL = 'nombre.apellido.largo@dominio-ejemplo.com.mx'
+
+const PLANNER_HREF =
+  '/es/planificador?utm_source=landing&utm_medium=success&utm_campaign=w3_bebe'
+
+const primaryBtn =
+  'block rounded-full bg-pine px-6 py-3.5 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 ' +
+  'focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-sand'
+
+function SuccessPanel({
+  visible, variant, magnet, position, email,
+}: {
+  visible:  boolean
+  variant:  'sent' | 'failed'
+  magnet:   LeadMagnetPublic
+  position: FormPosition
+  email:    string
+}) {
+  const track = (event: string) => gaTrack(event, { lead_magnet: magnet.analyticsId, form_position: position })
+  const tab = visible ? 0 : -1
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-hidden={!visible}
+      className={`[grid-area:1/1] flex flex-col justify-center gap-3 rounded-2xl bg-sand p-5 ${visible ? '' : 'invisible'}`}
+    >
+      {variant === 'sent' ? (
+        <>
+          <p className="font-display text-2xl leading-tight text-pine">Listo. Revisa tu correo.</p>
+          <p className="font-sans text-base leading-relaxed text-pine/80">
+            Te mandamos el checklist a{' '}
+            <strong className="font-bold text-pine [overflow-wrap:anywhere]">{email}</strong>.
+            {' '}Si no llega en 5 minutos, revisa promociones o spam.
+          </p>
+          <a
+            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+            onClick={() => track('lead_magnet_download')}
+            className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
+          >
+            Descargar ahora →
+          </a>
+        </>
+      ) : (
+        <>
+          <p className="font-display text-2xl leading-tight text-pine">Listo. Aquí está tu checklist.</p>
+          <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
+          <a
+            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+            onClick={() => track('lead_magnet_download')}
+            className={primaryBtn}
+          >
+            Descargar el checklist →
+          </a>
+        </>
+      )}
+
+      {/* Next step */}
+      <div className="mt-1 border-t border-pine/20 pt-3">
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-pine/80">
+          {variant === 'sent' ? 'Mientras llega tu checklist' : 'Siguiente paso'}
+        </p>
+        <p className="mt-1.5 font-sans text-sm leading-relaxed text-pine/85">
+          Arma tu próximo viaje en familia en 60 segundos — con horarios de siesta incluidos.
+        </p>
+        <a
+          href={PLANNER_HREF} tabIndex={tab}
+          onClick={() => track('planner_cta_click')}
+          className={`${primaryBtn} mt-3`}
+        >
+          Planea tu viaje gratis →
+        </a>
       </div>
     </div>
   )
