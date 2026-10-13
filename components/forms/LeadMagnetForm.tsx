@@ -32,6 +32,7 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   // false when the API signed them up but the delivery email failed
   const [emailSent, setEmailSent] = useState(true)
   const started = useRef(false)
+  const typingAtSubmit = useRef(false)
 
   function onFirstInteraction() {
     if (started.current) return
@@ -42,6 +43,11 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (status === 'loading') return
+    // iOS keeps the input focused (keyboard up) when a button is tapped. Blur
+    // now so the keyboard starts closing while the request is in flight.
+    const active = document.activeElement as HTMLElement | null
+    typingAtSubmit.current = !!active && /^(INPUT|TEXTAREA)$/.test(active.tagName)
+    if (typingAtSubmit.current) active!.blur()
     const cleanEmail = email.trim().toLowerCase()
     if (!name.trim() || !isValidNewsletterEmail(cleanEmail)) {
       setStatus('error')
@@ -75,19 +81,44 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
 
   const done = status === 'success'
 
-  // After a successful submit, bring the whole success panel into view
-  // (smoothly, or instantly under prefers-reduced-motion). `block: 'nearest'`
-  // scrolls only if part of the panel is off-screen, so a panel that is already
-  // fully visible (typically desktop) doesn't move the page.
+  // After a successful submit:
+  //  1. blur the input and (on touch devices) wait for the on-screen keyboard
+  //     to close, so scroll positions are measured against the final viewport;
+  //  2. move focus to the success heading (tabIndex -1) — this is the single
+  //     screen-reader announcement (the panel deliberately has no aria-live);
+  //  3. bring the whole panel into view (smoothly, or instantly under
+  //     prefers-reduced-motion). `block: 'nearest'` scrolls only if part of the
+  //     panel is off-screen, so a fully visible panel doesn't move the page.
   const rootRef = useRef<HTMLDivElement>(null)
   useEffect(() => {
     if (!done) return
-    const panel = rootRef.current?.querySelector<HTMLElement>('[data-success-visible="true"]')
-    if (!panel) return
-    const r = panel.getBoundingClientRect()
-    if (r.top >= 0 && r.bottom <= window.innerHeight) return
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' })
+    let cancelled = false
+
+    ;(async () => {
+      const active = document.activeElement as HTMLElement | null
+      if (active && /^(INPUT|TEXTAREA)$/.test(active.tagName)) { typingAtSubmit.current = true; active.blur() }
+      if (typingAtSubmit.current && window.matchMedia('(pointer: coarse)').matches) {
+        const vv = window.visualViewport
+        // iOS shrinks only the visual viewport when the keyboard is up. If it is
+        // still shrunk, wait for it to close; otherwise it already has.
+        if (vv && window.innerHeight - vv.height > 80) await waitForKeyboardClose()
+        else await new Promise<void>(r => requestAnimationFrame(() => r()))
+      }
+      typingAtSubmit.current = false
+      if (cancelled) return
+
+      const panel = rootRef.current?.querySelector<HTMLElement>('[data-success-visible="true"]')
+      if (!panel) return
+      panel.querySelector<HTMLElement>('[data-success-heading]')?.focus({ preventScroll: true })
+
+      const r = panel.getBoundingClientRect()
+      const vh = window.visualViewport?.height ?? window.innerHeight
+      if (r.top >= 0 && r.bottom <= vh) return
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      panel.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'nearest' })
+    })()
+
+    return () => { cancelled = true }
   }, [done])
 
   return (
@@ -174,6 +205,8 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
 // Stand-in address for the hidden sizing panel (~2 lines at 375px).
 const SIZER_EMAIL = 'nombre.apellido.largo@dominio-ejemplo.com.mx'
 
+const DEFAULT_NEXT_STEP_EVENT = 'planner_cta_click'
+
 const primaryBtn =
   'block rounded-full bg-pine px-6 py-3.5 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 ' +
   'focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-sand'
@@ -192,15 +225,13 @@ function SuccessPanel({
 
   return (
     <div
-      role="status"
-      aria-live="polite"
       aria-hidden={!visible}
       data-success-visible={visible ? 'true' : undefined}
       className={`[grid-area:1/1] flex scroll-my-4 flex-col justify-center gap-3 rounded-2xl bg-sand p-5 ${visible ? '' : 'invisible'}`}
     >
       {variant === 'sent' ? (
         <>
-          <p className="font-display text-2xl leading-tight text-pine">Listo. Revisa tu correo.</p>
+          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Revisa tu correo.</h2>
           <p className="font-sans text-base leading-relaxed text-pine/80">
             Te mandamos el checklist a{' '}
             <strong className="font-bold text-pine [overflow-wrap:anywhere]"><EmailText email={email} /></strong>.
@@ -216,7 +247,7 @@ function SuccessPanel({
         </>
       ) : (
         <>
-          <p className="font-display text-2xl leading-tight text-pine">Listo. Aquí está tu checklist.</p>
+          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Aquí está tu checklist.</h2>
           <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
           <a
             href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
@@ -239,7 +270,7 @@ function SuccessPanel({
           </p>
           <a
             href={magnet.nextStep.buttonUrl} tabIndex={tab}
-            onClick={() => track(magnet.nextStep!.analyticsEvent)}
+            onClick={() => track(magnet.nextStep!.analyticsEvent ?? DEFAULT_NEXT_STEP_EVENT)}
             className={`${primaryBtn} mt-3`}
           >
             {magnet.nextStep.buttonLabel}
@@ -255,4 +286,24 @@ function EmailText({ email }: { email: string }) {
   const at = email.indexOf('@')
   if (at < 1) return <>{email}</>
   return <>{email.slice(0, at)}<wbr />{email.slice(at)}</>
+}
+
+/**
+ * Resolves when the on-screen keyboard has (probably) closed: the next
+ * visualViewport resize, or a short timeout if none arrives (no keyboard,
+ * browser that doesn't resize, already closed).
+ */
+function waitForKeyboardClose(maxMs = 450): Promise<void> {
+  return new Promise(resolve => {
+    const vv = window.visualViewport
+    if (!vv) { setTimeout(resolve, 0); return }
+    const finish = () => {
+      vv.removeEventListener('resize', finish)
+      clearTimeout(timer)
+      // let layout settle one frame after the resize
+      requestAnimationFrame(() => resolve())
+    }
+    const timer = setTimeout(finish, maxMs)
+    vv.addEventListener('resize', finish, { once: true })
+  })
 }

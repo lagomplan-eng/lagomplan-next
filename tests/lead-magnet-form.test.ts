@@ -28,14 +28,18 @@ async function main() {
   const render = (m: typeof pub) => renderToStaticMarkup(React.createElement(LeadMagnetForm, { magnet: m, position: 'hero' }))
 
   eq('checklist-baby has nextStep', !!pub.nextStep, true)
-  eq('nextStep url keeps UTMs', pub.nextStep?.buttonUrl, '/es/planificador?utm_source=landing&utm_medium=success&utm_campaign=w3_bebe')
+  eq('nextStep url is internal with no UTMs', pub.nextStep?.buttonUrl, '/es/planificador')
+  eq('no magnet nextStep url carries utm_ params unless external', Object.values({ ...{ x: pub.nextStep } }).every(n => !n || /^https?:\/\//.test(n.buttonUrl) || !/utm_/.test(n.buttonUrl)), true)
   eq('nextStep event', pub.nextStep?.analyticsEvent, 'planner_cta_click')
 
   const withNext = render(pub)
   eq('block rendered: button label', withNext.includes('Planea tu viaje gratis'), true)
   eq('block rendered: sent eyebrow', withNext.includes('Mientras llega tu checklist'), true)
   eq('block rendered: failed eyebrow', withNext.includes('Siguiente paso'), true)
-  eq('block rendered: url', withNext.includes('utm_campaign=w3_bebe'), true)
+  eq('block rendered: url', withNext.includes('href="/es/planificador"'), true)
+  eq('block rendered: no utm in html', withNext.includes('utm_'), false)
+  const noEvent = render({ ...pub, nextStep: { ...pub.nextStep!, analyticsEvent: undefined } })
+  eq('analyticsEvent optional: block still renders', noEvent.includes('Planea tu viaje gratis'), true)
 
   const without = render({ ...pub, nextStep: undefined })
   eq('no config: button hidden', without.includes('Planea tu viaje gratis'), false)

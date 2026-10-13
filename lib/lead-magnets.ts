@@ -24,10 +24,18 @@ export interface LeadMagnetNextStep {
   eyebrowFailed: string
   text: string
   buttonLabel: string
-  /** Full URL including UTM params. */
+  /**
+   * Button URL. MUST NOT carry UTM params when it points inside the site:
+   * UTMs on internal links make GA4 start a new session and overwrite the
+   * visitor's original source (e.g. Instagram). The click is tracked by
+   * `analyticsEvent` instead. UTMs are only appropriate for external links.
+   */
   buttonUrl: string
-  /** GA4 event fired on click (receives lead_magnet + form_position). */
-  analyticsEvent: string
+  /**
+   * GA4 event fired on click (receives lead_magnet + form_position).
+   * Optional: the form falls back to "planner_cta_click".
+   */
+  analyticsEvent?: string
 }
 
 export interface LeadMagnet {
@@ -69,7 +77,7 @@ export const LEAD_MAGNETS: Record<string, LeadMagnet> = {
       eyebrowFailed: 'Siguiente paso',
       text:          'Arma tu próximo viaje en familia en 60 segundos — con horarios de siesta incluidos.',
       buttonLabel:   'Planea tu viaje gratis →',
-      buttonUrl:     '/es/planificador?utm_source=landing&utm_medium=success&utm_campaign=w3_bebe',
+      buttonUrl:     '/es/planificador',
       analyticsEvent: 'planner_cta_click',
     },
     render: ({ name, preheader, pdfUrl }) => renderChecklistEmail({ name, preheader, pdfUrl }),
