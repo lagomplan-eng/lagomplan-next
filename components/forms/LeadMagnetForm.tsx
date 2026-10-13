@@ -29,6 +29,8 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   const [website, setWebsite] = useState('') // honeypot
   const [status, setStatus]   = useState<Status>('idle')
   const [sentTo, setSentTo]   = useState('')
+  // false when the API signed them up but the delivery email failed
+  const [emailSent, setEmailSent] = useState(true)
   const started = useRef(false)
 
   function onFirstInteraction() {
@@ -61,6 +63,8 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
         }),
       })
       if (!res.ok) throw new Error(String(res.status))
+      const data = await res.json().catch(() => ({}))
+      setEmailSent(data?.emailSent !== false)
       setSentTo(cleanEmail)
       setStatus('success')
       gaTrack('generate_lead', { lead_magnet: magnet.analyticsId, form_position: position })
@@ -70,6 +74,8 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
   }
 
   const done = status === 'success'
+  const trackDownload = () =>
+    gaTrack('lead_magnet_download', { lead_magnet: magnet.analyticsId, form_position: position })
 
   return (
     <div className="grid">
@@ -134,17 +140,33 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
         className={`[grid-area:1/1] flex flex-col justify-center gap-3 rounded-2xl bg-sand p-6 ${done ? '' : 'invisible'}`}
         aria-hidden={!done}
       >
-        <p className="font-display text-3xl leading-tight text-pine">Listo. Revisa tu correo.</p>
-        <p className="font-sans text-base leading-relaxed text-pine/80">
-          Te mandamos el checklist a <strong className="break-all font-bold text-pine">{sentTo}</strong>. Si no llega en 5 minutos, revisa promociones o spam.
-        </p>
-        <a
-          href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
-          onClick={() => gaTrack('lead_magnet_download', { lead_magnet: magnet.analyticsId, form_position: position })}
-          className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
-        >
-          Descargar ahora →
-        </a>
+        {emailSent ? (
+          <>
+            <p className="font-display text-3xl leading-tight text-pine">Listo. Revisa tu correo.</p>
+            <p className="font-sans text-base leading-relaxed text-pine/80">
+              Te mandamos el checklist a <strong className="break-all font-bold text-pine">{sentTo}</strong>. Si no llega en 5 minutos, revisa promociones o spam.
+            </p>
+            <a
+              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
+              onClick={trackDownload}
+              className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
+            >
+              Descargar ahora →
+            </a>
+          </>
+        ) : (
+          <>
+            <p className="font-display text-3xl leading-tight text-pine">Listo. Aquí está tu checklist.</p>
+            <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
+            <a
+              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={done ? 0 : -1}
+              onClick={trackDownload}
+              className="rounded-full bg-pine px-6 py-4 text-center font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-cream"
+            >
+              Descargar el checklist →
+            </a>
+          </>
+        )}
       </div>
     </div>
   )

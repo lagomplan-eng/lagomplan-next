@@ -9,7 +9,8 @@
  *   1. Mailchimp — upsert the member (PUT, idempotent) + tags.
  *      Reuses MAILCHIMP_API_KEY / MAILCHIMP_LIST_ID via lib/newsletter.ts.
  *   2. Resend — deliver the checklist email (HTML + text, List-Unsubscribe).
- * The client sees an error only if BOTH fail. Repeat signups re-send the
+ * The client sees an error only if BOTH fail. The success body carries
+ * `emailSent` so the UI never claims "check your email" when Resend failed. Repeat signups re-send the
  * email and count as success.
  *
  * Abuse protection: honeypot, per-IP (5/10min) and per-email (3/24h) limits
@@ -105,7 +106,7 @@ export async function POST(req: NextRequest) {
 
   // Honeypot — bots fill it. Pretend success, do nothing.
   if (typeof body.website === 'string' && body.website.trim() !== '') {
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true, emailSent: true })
   }
 
   const magnet = getLeadMagnet(body.magnet)
@@ -125,7 +126,7 @@ export async function POST(req: NextRequest) {
   // Over the per-email cap: they already got the email — report success
   // without sending again (don't leak, don't let the form be used to spam).
   if (!(await takeAttempt('email', email, EMAIL_LIMIT))) {
-    return NextResponse.json({ ok: true })
+    return NextResponse.json({ ok: true, emailSent: true })
   }
 
   const utm = { source: slug(body.utm_source), campaign: slug(body.utm_campaign) }
@@ -139,5 +140,5 @@ export async function POST(req: NextRequest) {
   if (mc.status === 'rejected' && mail.status === 'rejected') {
     return NextResponse.json({ error: 'Something went wrong' }, { status: 502 })
   }
-  return NextResponse.json({ ok: true })
+  return NextResponse.json({ ok: true, emailSent: mail.status === 'fulfilled' })
 }
