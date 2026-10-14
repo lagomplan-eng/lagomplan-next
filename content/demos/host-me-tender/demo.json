@@ -7,6 +7,7 @@
   "partner": {
     "name": "Host Me Tender",
     "logo": "logo.png",
+    "logo_note": "[logo en SVG o alta resolución]",
     "logo_source_url": "https://www.hostmetender.com/uploads/1/1/0/2/11025726/published/secundario2-verdeselva.png?1770248624",
     "brand_color": "#194332",
     "brand_color_provisional": true,

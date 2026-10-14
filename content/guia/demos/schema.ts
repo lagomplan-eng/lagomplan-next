@@ -82,6 +82,8 @@ export function makeDemoSchema(reviewers: readonly string[]) {
       name: text('partner.name'),
       /** File in the demo folder (png/jpg/webp/svg). */
       logo: z.string().regex(/^[\w.-]+\.(?:png|jpe?g|webp|svg)$/i, 'must be a file name inside the demo folder, e.g. "logo.png"').optional(),
+      /** Pending-work note shown by demo:check. A "[bracketed]" value counts as a pending placeholder; remove it once the real logo is in. */
+      logo_note: text('logo_note').optional(),
       logo_source_url: https('logo_source_url').optional(),
       brand_color: z.string().regex(HEX, 'must be #rgb or #rrggbb, e.g. #194332').optional(),
       brand_color_provisional: z.boolean().optional(),
