@@ -12,57 +12,30 @@
 //
 // Server-only (reads the filesystem at build time).
 
-import fs from 'node:fs'
-import path from 'node:path'
 import type { Lang, Neighborhood, OwnTour, Partner } from '../types'
 import type { ZoneId } from '../zones/types'
 import { getZone } from '../zones'
-import { ZONE_TAB, DEMO_ZONES, type DemoConfig, type DemoTour } from './types'
+import { ZONE_TAB, type DemoConfig, type DemoTour } from './types'
+import { formatReport, listDemoFolders, validateDemoFolder } from './validate'
 
 export type { DemoConfig } from './types'
 
-const DEMOS_DIR = path.join(process.cwd(), 'content', 'demos')
-const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 const PROPERTY = '[nombre de la propiedad]'
 
 let cache: Record<string, DemoConfig> | null = null
 
-/** Minimal structural checks with readable errors (the full Zod schema comes next). */
-function check(cfg: DemoConfig, folder: string): DemoConfig {
-  const where = `content/demos/${folder}/demo.json`
-  const fail = (field: string, msg: string): never => { throw new Error(`${where} › ${field}: ${msg}`) }
-  if (cfg.slug !== folder) fail('slug', `must equal the folder name "${folder}" (got "${cfg.slug}")`)
-  if (!SLUG.test(cfg.slug)) fail('slug', 'lowercase letters, digits and hyphens only')
-  if (cfg.kind !== 'demo') fail('kind', 'must be "demo"')
-  for (const e of cfg.environments ?? []) if (e !== 'preview' && e !== 'production') fail('environments', `"${e}" is not preview|production`)
-  if (cfg.city !== 'cdmx') fail('city', 'must be "cdmx"')
-  if (!cfg.partner?.name) fail('partner.name', 'required')
-  if (!Array.isArray(cfg.property?.zones) || cfg.property.zones.length === 0) fail('property.zones', 'at least one zone is required')
-  for (const z of cfg.property.zones) if (!(DEMO_ZONES as readonly string[]).includes(z)) fail('property.zones', `"${z}" is not one of ${DEMO_ZONES.join(', ')}`)
-  return cfg
-}
-
 function load(): Record<string, DemoConfig> {
   if (cache) return cache
   const out: Record<string, DemoConfig> = {}
-  const folders = fs.existsSync(DEMOS_DIR)
-    ? fs.readdirSync(DEMOS_DIR, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).sort()
-    : []
-  for (const folder of folders) {
-    const file = path.join(DEMOS_DIR, folder, 'demo.json')
-    if (!fs.existsSync(file)) continue
-    let raw: DemoConfig
-    try { raw = JSON.parse(fs.readFileSync(file, 'utf8')) } catch (e) {
-      throw new Error(`content/demos/${folder}/demo.json › invalid JSON: ${(e as Error).message}`)
-    }
-    const cfg = check(raw, folder)
-    const logo = cfg.partner.logo
-    if (logo && !fs.existsSync(path.join(DEMOS_DIR, folder, logo))) {
-      console.warn(`[demos] ${folder}: partner.logo "${logo}" not found in content/demos/${folder}/ — the header will fall back to the name`)
-    }
-    out[cfg.slug] = cfg
+  const failures: string[] = []
+  for (const folder of listDemoFolders()) {
+    const report = validateDemoFolder(folder) // placeholders are fine; errors fail the build
+    if (report.errors.length || !report.config) { failures.push(formatReport(report)); continue }
+    out[report.config.slug] = report.config
   }
+  // A broken demo fails the build with every problem listed, before anything is published.
+  if (failures.length) throw new Error(`Invalid demo config:\n${failures.join('\n')}`)
   return (cache = out)
 }
 
@@ -100,6 +73,20 @@ function toTour(t: DemoTour, lang: Lang, i: number): OwnTour {
     minBookingTime: t.min_booking_time ?? '[tiempo mínimo de reserva]',
     bookHref: t.url,
     bookLabel: lang === 'es' ? 'Reservar' : 'Book',
+  }
+}
+
+/** The "Your house" tab from demo.json, or highlighted placeholders when absent. */
+function houseFor(p: DemoConfig): Neighborhood {
+  const h = p.property.house
+  if (!h) return placeholderHouse()
+  return {
+    name: h.name,
+    tabLabel: { es: 'Tu casa', en: 'Your house' },
+    mapUrl: h.map_url ?? '',
+    tagline: h.tagline ?? { es: `A pasos de ${h.name}`, en: `Steps from ${h.name}` },
+    orientation: h.orientation ?? { es: '[distancia a pie desde la propiedad]', en: '[walking distance from the property]' },
+    spots: h.spots,
   }
 }
 
@@ -161,7 +148,7 @@ export function buildDemoPartner(p: DemoConfig): Partner {
     hostName: p.partner.name,
     city: p.city,
     homeNeighborhood: home,
-    yourHouse: placeholderHouse(),
+    yourHouse: houseFor(p),
     defaultNeighborhood: home,
     pilotId: 'mxcity_demo',
     cobrand: !!p.guide?.cobrand,
@@ -182,10 +169,10 @@ export function buildDemoPartner(p: DemoConfig): Partner {
       // We must not promise a service on the operator's behalf: these two
       // cards stay placeholders until the operator confirms what they offer.
       chefsAtHome: {
-        body: { es: '[servicio de chef del operador]', en: '[servicio de chef del operador]' },
+        body: p.guide?.faq?.chefs_at_home ?? { es: '[servicio de chef del operador]', en: '[servicio de chef del operador]' },
       },
       massages: {
-        body: { es: '[masaje recomendado]', en: '[masaje recomendado]' },
+        body: p.guide?.faq?.massages ?? { es: '[masaje recomendado]', en: '[masaje recomendado]' },
       },
     },
     operatorWhatsApp: {

@@ -46,5 +46,16 @@ eq('dave-nat cobrand off', dn.cobrand, false)
 eq('dave-nat logo src', demoLogoSrc(getDemoProspect('dave-nat')!), undefined)
 eq('dave-nat check-out stays a placeholder', dn.atAGlance?.checkOut, '[check-out]')
 
+// Optional blocks of the documented example flow through to the Partner.
+import fs from 'node:fs'
+import { buildDemoPartner as build } from '../content/guia/demos'
+const ex = JSON.parse(fs.readFileSync('docs/demos/example.demo.json', 'utf8'))
+const exp = build(ex)
+eq('example: first zone → tab + faq zone', [exp.defaultNeighborhood, exp.zone], ['Polanco', 'polanco'])
+eq('example: house from JSON', [exp.yourHouse.name, exp.yourHouse.spots.es.length, exp.yourHouse.mapUrl], ['Kasava Masaryk', 3, 'https://maps.app.goo.gl/EXAMPLE'])
+eq('example: whatsapp href', exp.operatorWhatsApp?.href, 'https://wa.me/5215512345678')
+eq('example: faq overrides', [exp.faqAnswers?.chefsAtHome?.body.en.startsWith('We work with a chef'), exp.faqAnswers?.massages?.body.es.startsWith('Un estudio')], [true, true])
+eq('example: tour overrides', [exp.ownTours?.es?.[0].minBookingTime, exp.ownTours?.es?.[0].image], ['24 h', '/images/guia/experiences/exp-tacos.jpg'])
+
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('demos-loader: all passed')
