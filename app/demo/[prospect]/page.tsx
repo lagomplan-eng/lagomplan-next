@@ -1,8 +1,8 @@
 // app/demo/[prospect]/page.tsx
 //
 // Sales demo of the co-branded guide for one prospect. Same GuiaClient as
-// /guia/[partner]; the prospect config in content/guia/demos supplies the
-// branding. Never indexed, not in the sitemap, and nothing links here.
+// /guia/[partner]; the prospect config in content/demos/<slug>/demo.json supplies
+// the branding. Never indexed, not in the sitemap, and nothing links here.
 
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -27,9 +27,9 @@ export async function generateMetadata(
   // Same title/description/preview pattern as /guia/[partner]. The page stays
   // noindex,nofollow; the og:image is only for link previews when it's shared.
   const city = getCity(buildDemoPartner(prospect).city)
-  const title = `${prospect.name} · Your stay guide`
+  const title = `${prospect.partner.name} · Your stay guide`
   const description =
-    `Your guest guide to Mexico City, curated by ${prospect.name} and powered by Lagomplan.`
+    `Your guest guide to Mexico City, curated by ${prospect.partner.name} and powered by Lagomplan.`
   return {
     title,
     description,
@@ -54,7 +54,7 @@ export default async function DemoPage(
   if (!city) notFound()
 
   return (
-    <GuiaClient partner={partner} city={city} demo={{ slug: prospect.slug, prospectName: prospect.name }}
+    <GuiaClient partner={partner} city={city} demo={{ slug: prospect.slug, prospectName: prospect.partner.name }}
       recordVisits={process.env.VERCEL_ENV === 'production'}
     />
   )

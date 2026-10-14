@@ -331,3 +331,7 @@ Total fases 0–3: **aprox. 3–4 días** de trabajo para dejar “JSON + logo +
 | 6 | Esquema pensado para que demos y guías de partners compartan tabla, con `kind: "demo" \| "partner"`. Hoy siguen como archivos. | La forma del JSON imita esas columnas; `schema_version` incluido. |
 
 Plan aprobado: Fase A (base) → B (datos fuera del código) → C (validación) → D (comando y paridad). Se reporta al final de cada fase.
+
+### Limitaciones conocidas (aprobadas 2026-10-13)
+- **Varias zonas por demo:** `property.zones` acepta varias (ej. Polanco + Condesa), pero solo la **primera** fija la pestaña inicial y la capa de FAQ. Las demás son informativas hasta que el resolver de FAQ admita más de una zona. Todas las pestañas del barrio (Roma Norte, Condesa, Polanco, Centro) ya se muestran en cualquier demo.
+- **`review`:** `by` solo acepta nombres de una lista de revisores en config (hoy: "Pili"); `date` en ISO `YYYY-MM-DD`. Sin `review` válido el comando no publica a Production (a preview sí). Lo rellena Elena tras el OK de Pili.

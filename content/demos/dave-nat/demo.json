@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "kind": "demo",
+  "slug": "dave-nat",
+  "city": "cdmx",
+  "review": null,
+  "partner": {
+    "name": "Dave & Nat"
+  },
+  "property": {
+    "zones": [
+      "condesa"
+    ]
+  }
+}

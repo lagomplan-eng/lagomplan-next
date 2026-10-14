@@ -138,7 +138,9 @@ await checkRobots('/guia/livin_condesa', /index, follow/, 'index, follow (per-pa
 await checkRobots('/guia/livin_roma', /index, follow/, 'index, follow (per-partner default)')
 await checkRobots('/guia/demo', /noindex, nofollow/, 'noindex, nofollow (Partner.noindex)')
 
-for (const d of ['/demo/host-me-tender', '/demo/dave-nat']) {
+// Demos are data: every content/demos/<slug>/ folder is checked, no list to maintain.
+const DEMO_SLUGS = (await import('node:fs')).readdirSync(new URL('../content/demos/', import.meta.url), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort()
+for (const d of DEMO_SLUGS.map((s) => `/demo/${s}`)) {
   const r = await get(d)
   if (r.status !== 200) rows.push({ name: d, ok: null, detail: `n/a — route not present on this branch (HTTP ${r.status})`, kind: 'noindex' })
   else await checkNoindex(d, { follow: false })
