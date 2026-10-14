@@ -33,3 +33,6 @@ public/images/smart-finds/_backup/
 /playwright/.cache/
 
 # Supabase CLI temp
+
+# Generated from content/demos/*/ by scripts/sync-demo-assets.mjs
+/public/demos/

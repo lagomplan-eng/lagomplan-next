@@ -350,6 +350,29 @@ function ExperienceBanner({ exp, t, lang, partnerSlug, zone, pilotId, operator }
   )
 }
 
+/** Partner logo with a graceful fallback: if the file is missing or broken it
+ *  warns in the console and shows the partner name instead of a broken image. */
+function BrandLogo({ src, alt, className }: { src: string; alt: string; className?: string }) {
+  const [failed, setFailed] = useState(false)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+  const fail = () => {
+    console.warn(`[guia] logo failed to load: ${src} — showing "${alt}" instead`)
+    setFailed(true)
+  }
+  // The server-rendered <img> can fail before React hydrates (so onError never
+  // fires): re-check once on mount.
+  useEffect(() => {
+    const el = imgRef.current
+    if (el && el.complete && el.naturalWidth === 0) fail()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [src])
+  if (failed) return <span className={className} style={{ width: 'auto', fontWeight: 600 }}>{alt}</span>
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img ref={imgRef} src={src} alt={alt} className={className} onError={fail} />
+  )
+}
+
 /** Set by /demo/[prospect]: switches attribution, analytics naming and shows
  *  the "Demo prepared for" banner. Absent on the regular /guia route. */
 export interface DemoMeta { slug: string; prospectName: string }
@@ -518,8 +541,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
           {cobrand ? (
             // Demo co-brand option: the prospect's logo alone, on the left.
             <span className={styles.brand}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={partner.brand!.logo} alt={partner.displayName} className={styles.hmtLogo} />
+              <BrandLogo src={partner.brand!.logo!} alt={partner.displayName} className={styles.hmtLogo} />
             </span>
           ) : (
           <>
@@ -542,8 +564,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
             <span className={styles.coBrand}>
               <span aria-hidden>×</span>
               {partner.brand?.logo ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={partner.brand.logo} alt={partner.displayName} className={styles.coBrandLogo} />
+                <BrandLogo src={partner.brand.logo} alt={partner.displayName} className={styles.coBrandLogo} />
               ) : (
                 <span className={styles.coBrandName}>{partner.displayName}</span>
               )}
@@ -608,8 +629,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
                   )
                 })}
                 <div className={styles.letterSig}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={partner.brand!.logo} alt={partner.displayName} className={styles.letterSigLogo} />
+                  <BrandLogo src={partner.brand!.logo!} alt={partner.displayName} className={styles.letterSigLogo} />
                   <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{letter.roleLabel}</span>
                 </div>
               </article>

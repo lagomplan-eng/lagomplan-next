@@ -21,6 +21,8 @@
  *
  * Exit 0 when nothing failed; routes absent on the current branch report n/a.
  */
+import { readdirSync, readFileSync } from 'node:fs'
+
 const args = process.argv.slice(2)
 const BASE = args.find((a) => !a.startsWith('--')) || 'http://localhost:3200'
 const SHARE = (args.find((a) => a.startsWith('--share=')) || '').slice(8)
@@ -138,8 +140,14 @@ await checkRobots('/guia/livin_condesa', /index, follow/, 'index, follow (per-pa
 await checkRobots('/guia/livin_roma', /index, follow/, 'index, follow (per-partner default)')
 await checkRobots('/guia/demo', /noindex, nofollow/, 'noindex, nofollow (Partner.noindex)')
 
-for (const d of ['/demo/host-me-tender', '/demo/dave-nat']) {
+// Demos are data: every content/demos/<slug>/ folder is checked, no list to maintain.
+const DEMO_SLUGS = readdirSync(new URL('../content/demos/', import.meta.url), { withFileTypes: true }).filter((e) => e.isDirectory()).map((e) => e.name).sort()
+const hiddenInProd = (slug) => {
+  try { return !(JSON.parse(readFileSync(new URL(`../content/demos/${slug}/demo.json`, import.meta.url), 'utf8')).environments ?? ['preview', 'production']).includes('production') } catch { return false }
+}
+for (const d of DEMO_SLUGS.map((s) => `/demo/${s}`)) {
   const r = await get(d)
+  if (r.status === 404 && hiddenInProd(d.slice(6))) { rows.push({ name: d, ok: true, detail: '404 on purpose: environments excludes production', kind: 'noindex' }); continue }
   if (r.status !== 200) rows.push({ name: d, ok: null, detail: `n/a — route not present on this branch (HTTP ${r.status})`, kind: 'noindex' })
   else await checkNoindex(d, { follow: false })
 }
@@ -158,9 +166,26 @@ for (const l of locs) {
 }
 const smXml = sm.body
 const entries = [...smXml.matchAll(/<url>([\s\S]*?)<\/url>/g)].map((m) => m[1])
+// Spanish-only pages with no /en counterpart: deliberately NO hreflang
+// alternates (same list as tests/seo-slugs-sitemap.test.ts). They must still
+// be 200, lang="es" and carry exactly one self-canonical + matching og:url.
+const ES_ONLY = ['/checklist-viajar-con-bebe', '/puente-noviembre']
+for (const path of ES_ONLY) {
+  const r = await get(path)
+  const p = parse(r.body)
+  const ownCanon = p.canon.length === 1 && p.canon[0] === PROD + path
+  const ownOg = p.og.length === 1 && p.og[0] === PROD + path
+  rows.push({
+    name: `es-only ${path}`,
+    ok: r.status === 200 && ownCanon && ownOg && /<html[^>]*lang="es"/.test(r.body),
+    detail: r.status !== 200 ? `HTTP ${r.status}` : `canonical=${p.canon} og:url=${p.og}, no hreflang by design`,
+    kind: 'es-only',
+  })
+}
 let altBad = 0
 for (const e of entries) {
   const loc = (e.match(/<loc>([^<]+)<\/loc>/) || [])[1]
+  if (ES_ONLY.includes(loc.replace(PROD, ''))) continue
   const alts = [...e.matchAll(/hreflang="([^"]+)"[^>]*href="([^"]+)"|href="([^"]+)"[^>]*hreflang="([^"]+)"/g)].map((m) => ({ l: m[1] || m[4], h: m[2] || m[3] }))
   const has = (l) => alts.find((a) => a.l === l)
   if (!has('es') || !has('en') || !has('x-default') || !alts.some((a) => a.h === loc)) { altBad++; if (altBad <= 5) smErrs.push(`alternates incomplete: ${loc}`) }
