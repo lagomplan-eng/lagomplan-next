@@ -44,7 +44,10 @@ const urls = sm.map(e => e.url)
 eq('no duplicate URLs', new Set(urls).size, urls.length)
 // Spanish-only pages with no /en counterpart: deliberately no hreflang
 // alternates. Everything else must carry the full es/en/x-default set.
-const ES_ONLY_NO_ALTERNATES = ['https://www.lagomplan.com/checklist-viajar-con-bebe']
+const ES_ONLY_NO_ALTERNATES = [
+  'https://www.lagomplan.com/checklist-viajar-con-bebe',
+  'https://www.lagomplan.com/puente-noviembre',
+]
 for (const u of ES_ONLY_NO_ALTERNATES) {
   const e = sm.find(x => x.url === u)
   eq(`${u} is in the sitemap without alternates`, !!e && !e.alternates, true)

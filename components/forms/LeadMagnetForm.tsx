@@ -4,7 +4,9 @@
  * LeadMagnetForm — reusable lead-magnet signup. `magnet` is the client-safe
  * subset from lib/lead-magnets.ts (toPublic).
  *
- * Rendered twice on the page (hero + footer); each instance owns its state.
+ * Can render more than once per page (e.g. hero + footer); each instance owns
+ * its state. Button, small print and success copy come from `magnet.form`; the
+ * download link appears only when the magnet has a PDF (`pdfPath`).
  * Posts to /api/lead-magnet. The success panel and the form share one grid
  * cell, so swapping them never changes the container height (no layout shift).
  */
@@ -15,7 +17,7 @@ import { isValidNewsletterEmail } from '../../lib/newsletter'
 import type { LeadMagnetPublic } from '../../lib/lead-magnets'
 
 type Status = 'idle' | 'loading' | 'success' | 'error'
-export type FormPosition = 'hero' | 'footer'
+export type FormPosition = 'hero' | 'body' | 'footer'
 
 
 const fieldCls =
@@ -166,14 +168,14 @@ export default function LeadMagnetForm({ magnet, position }: { magnet: LeadMagne
           type="submit" disabled={status === 'loading' || done} tabIndex={done ? -1 : 0}
           className="mt-1 rounded-full bg-pine px-6 py-4 font-sans text-base font-bold text-cream transition-opacity hover:opacity-90 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine focus-visible:ring-offset-2 focus-visible:ring-offset-cream disabled:opacity-70"
         >
-          {status === 'loading' ? 'Enviando…' : 'Recibir el checklist gratis →'}
+          {status === 'loading' ? 'Enviando…' : magnet.form.submitLabel}
         </button>
 
         <p role="alert" className={`min-h-[1.25rem] font-sans text-sm text-coral ${status === 'error' ? '' : 'invisible'}`}>
           {status === 'error' ? 'Algo salió mal. Inténtalo de nuevo.' : ''}
         </p>
         <p className="font-sans text-xs leading-relaxed text-pine/70">
-          Un PDF de 12 páginas, para imprimir o guardar en tu celular. Sin spam — puedes darte de baja cuando quieras.
+          {magnet.form.microcopy}
         </p>
       </form>
 
@@ -220,7 +222,8 @@ function SuccessPanel({
   position: FormPosition
   email:    string
 }) {
-  const track = (event: string) => gaTrack(event, { lead_magnet: magnet.analyticsId, form_position: position })
+  const track = (event: string, extra?: Record<string, string>) =>
+    gaTrack(event, { lead_magnet: magnet.analyticsId, form_position: position, ...extra })
   const tab = visible ? 0 : -1
 
   return (
@@ -233,29 +236,33 @@ function SuccessPanel({
         <>
           <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Revisa tu correo.</h2>
           <p className="font-sans text-base leading-relaxed text-pine/80">
-            Te mandamos el checklist a{' '}
+            {magnet.form.successLead}{' '}
             <strong className="font-bold text-pine [overflow-wrap:anywhere]"><EmailText email={email} /></strong>.
-            {' '}Si no llega en 5 minutos, revisa promociones o spam.
+            {' '}{magnet.form.successTail}
           </p>
-          <a
-            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
-            onClick={() => track('lead_magnet_download')}
-            className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
-          >
-            Descargar ahora →
-          </a>
+          {magnet.pdfPath && (
+            <a
+              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+              onClick={() => track('lead_magnet_download')}
+              className="w-fit font-sans text-base font-bold text-pine underline underline-offset-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-pine"
+            >
+              Descargar ahora →
+            </a>
+          )}
         </>
       ) : (
         <>
-          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">Listo. Aquí está tu checklist.</h2>
+          <h2 tabIndex={-1} data-success-heading className="font-display text-2xl leading-tight text-pine focus:outline-none">{magnet.form.failedHeadline}</h2>
           <p className="font-sans text-base leading-relaxed text-pine/80">Te sumamos a la lista de Lagomplan.</p>
-          <a
-            href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
-            onClick={() => track('lead_magnet_download')}
-            className={primaryBtn}
-          >
-            Descargar el checklist →
-          </a>
+          {magnet.pdfPath && (
+            <a
+              href={magnet.pdfPath} target="_blank" rel="noopener noreferrer" tabIndex={tab}
+              onClick={() => track('lead_magnet_download')}
+              className={primaryBtn}
+            >
+              Descargar el checklist →
+            </a>
+          )}
         </>
       )}
 
@@ -270,7 +277,7 @@ function SuccessPanel({
           </p>
           <a
             href={magnet.nextStep.buttonUrl} tabIndex={tab}
-            onClick={() => track(magnet.nextStep!.analyticsEvent ?? DEFAULT_NEXT_STEP_EVENT)}
+            onClick={() => track(magnet.nextStep!.analyticsEvent ?? DEFAULT_NEXT_STEP_EVENT, magnet.nextStep!.analyticsParams)}
             className={`${primaryBtn} mt-3`}
           >
             {magnet.nextStep.buttonLabel}
