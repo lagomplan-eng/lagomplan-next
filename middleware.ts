@@ -50,8 +50,8 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Lead-magnet landing — Spanish-only, locale-agnostic (own root layout).
-  if (pathname === '/checklist-viajar-con-bebe') {
+  // Lead-magnet landings — Spanish-only, locale-agnostic (own root layout).
+  if (pathname === '/checklist-viajar-con-bebe' || pathname === '/puente-noviembre') {
     return NextResponse.next()
   }
 
