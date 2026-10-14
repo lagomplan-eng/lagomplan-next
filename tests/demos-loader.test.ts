@@ -13,6 +13,15 @@ const eq = (name: string, got: unknown, want: unknown) => {
 }
 
 eq('slugs come from the folders', listDemoSlugs(), ['dave-nat', 'host-me-tender'])
+// dave-nat is preview-only: hidden (404) when VERCEL_ENV=production.
+eq('dave-nat is served outside production', getDemoProspect('dave-nat')?.slug, 'dave-nat')
+process.env.VERCEL_ENV = 'production'
+eq('production lists only host-me-tender', listDemoSlugs(), ['host-me-tender'])
+eq('dave-nat → null in production', getDemoProspect('dave-nat'), null)
+eq('host-me-tender still served in production', getDemoProspect('host-me-tender')?.slug, 'host-me-tender')
+process.env.VERCEL_ENV = 'preview'
+eq('preview lists both', listDemoSlugs(), ['dave-nat', 'host-me-tender'])
+delete process.env.VERCEL_ENV
 eq('unknown slug → null', getDemoProspect('nope'), null)
 eq('prototype keys are not slugs', getDemoProspect('constructor'), null)
 

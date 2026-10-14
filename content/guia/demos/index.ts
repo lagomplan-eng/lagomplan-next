@@ -35,6 +35,7 @@ function check(cfg: DemoConfig, folder: string): DemoConfig {
   if (cfg.slug !== folder) fail('slug', `must equal the folder name "${folder}" (got "${cfg.slug}")`)
   if (!SLUG.test(cfg.slug)) fail('slug', 'lowercase letters, digits and hyphens only')
   if (cfg.kind !== 'demo') fail('kind', 'must be "demo"')
+  for (const e of cfg.environments ?? []) if (e !== 'preview' && e !== 'production') fail('environments', `"${e}" is not preview|production`)
   if (cfg.city !== 'cdmx') fail('city', 'must be "cdmx"')
   if (!cfg.partner?.name) fail('partner.name', 'required')
   if (!Array.isArray(cfg.property?.zones) || cfg.property.zones.length === 0) fail('property.zones', 'at least one zone is required')
@@ -65,13 +66,20 @@ function load(): Record<string, DemoConfig> {
   return (cache = out)
 }
 
+/** Demos that opt out of Production (environments: ["preview"]) 404 there. */
+function visibleHere(cfg: DemoConfig): boolean {
+  if (process.env.VERCEL_ENV !== 'production') return true
+  return (cfg.environments ?? ['preview', 'production']).includes('production')
+}
+
 export function listDemoSlugs(): string[] {
-  return Object.keys(load())
+  const all = load()
+  return Object.keys(all).filter((s) => visibleHere(all[s]))
 }
 
 export function getDemoProspect(slug: string): DemoConfig | null {
   const all = load()
-  return Object.prototype.hasOwnProperty.call(all, slug) ? all[slug] : null
+  return Object.prototype.hasOwnProperty.call(all, slug) && visibleHere(all[slug]) ? all[slug] : null
 }
 
 /** Public URL of the demo's logo (copied to public/demos/<slug>/ by scripts/sync-demo-assets.mjs). */

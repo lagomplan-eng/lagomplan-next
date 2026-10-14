@@ -37,6 +37,8 @@ export interface DemoConfig {
   kind: 'demo'
   /** Must equal the folder name. */
   slug: string
+  /** Where this demo is served. Default: both. `["preview"]` ⇒ 404 on Production (VERCEL_ENV=production). */
+  environments?: ('preview' | 'production')[]
   city: 'cdmx'
   /** Editorial review; filled after the reviewer's OK. */
   review: { by: string; date: string } | null
