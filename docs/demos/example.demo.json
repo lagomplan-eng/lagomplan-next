@@ -1,0 +1,98 @@
+{
+  "schema_version": 1,
+  "kind": "demo",
+  "slug": "kasava-homes",
+  "environments": ["preview", "production"],
+  "city": "cdmx",
+  "review": { "by": "Pili", "date": "2026-10-14" },
+  "partner": {
+    "name": "Kasava Homes",
+    "logo": "logo.png",
+    "logo_source_url": "https://www.example.com/brand/logo.png",
+    "brand_color": "#2F5D50",
+    "brand_color_provisional": false,
+    "contact": {
+      "email": "hola@kasava.example",
+      "whatsapp": {
+        "label": { "es": "WhatsApp de Kasava", "en": "Kasava WhatsApp" },
+        "href": "https://wa.me/5215512345678"
+      },
+      "instagram": "@kasava.homes"
+    }
+  },
+  "property": {
+    "zones": ["polanco", "condesa"],
+    "check_out": "12:00",
+    "rules": "No fiestas ni eventos. Silencio de 22:00 a 08:00. Prohibido fumar dentro del departamento.",
+    "house": {
+      "name": "Kasava Masaryk",
+      "map_url": "https://maps.app.goo.gl/EXAMPLE",
+      "tagline": { "es": "A pasos de tu puerta", "en": "Steps from your door" },
+      "orientation": {
+        "es": "Todo lo de esta lista está a 10 minutos a pie o menos.",
+        "en": "Everything on this list is a 10-minute walk or less."
+      },
+      "spots": {
+        "es": [
+          { "icon": "coffee", "name": "Café Ejemplo", "distance": "Calle Ejemplo 12", "note": "Café de especialidad y pan de la casa." },
+          { "icon": "utensilsSm", "name": "Fonda Ejemplo", "distance": "Calle Ejemplo 40", "note": "Comida corrida y tortillas hechas a mano." },
+          { "icon": "trees", "name": "Parque Ejemplo", "distance": "Av. Ejemplo s/n", "note": "Un parque tranquilo para caminar por la mañana." }
+        ],
+        "en": [
+          { "icon": "coffee", "name": "Café Ejemplo", "distance": "Calle Ejemplo 12", "note": "Specialty coffee and house-baked bread." },
+          { "icon": "utensilsSm", "name": "Fonda Ejemplo", "distance": "Calle Ejemplo 40", "note": "Set lunches and handmade tortillas." },
+          { "icon": "trees", "name": "Parque Ejemplo", "distance": "Av. Ejemplo s/n", "note": "A quiet park for a morning walk." }
+        ]
+      }
+    }
+  },
+  "guide": {
+    "cobrand": true,
+    "host_letter": {
+      "es": {
+        "paragraphs": [
+          "Te damos la bienvenida a Polanco. Llevamos años recibiendo huéspedes y nos da gusto que esta vez seas tú.",
+          "Si quieres empezar por la comida, te recomendamos el recorrido gastronómico que hacemos con nuestro aliado local.",
+          "Que disfrutes la ciudad a tu ritmo."
+        ],
+        "link": { "text": "el recorrido gastronómico", "href": "#tour-1" }
+      },
+      "en": {
+        "paragraphs": [
+          "Welcome to Polanco. We've been hosting guests for years, and we're glad this time it's you.",
+          "If you'd like to start with food, we recommend the food tour we run with our local partner.",
+          "Enjoy the city at your own pace."
+        ],
+        "link": { "text": "the food tour", "href": "#tour-1" }
+      }
+    },
+    "tours": [
+      {
+        "name": "Polanco Food Walk",
+        "description": {
+          "es": "Recorrido gastronómico a pie por Polanco: 3 h, 5 paradas, máximo 8 personas.",
+          "en": "Walking food tour through Polanco: 3 hrs, 5 stops, up to 8 people."
+        },
+        "price": "$1,200 MXN",
+        "url": "https://book.example.com/polanco-food-walk",
+        "image": "/images/guia/experiences/exp-tacos.jpg",
+        "how_to_book": { "es": "Reserva en línea con el botón «Reservar».", "en": "Book online with the \"Book\" button." },
+        "min_booking_time": "24 h"
+      }
+    ],
+    "tours_partner_note": {
+      "es": "Reservas con nuestro aliado local.",
+      "en": "Booked through our local partner."
+    },
+    "faq": {
+      "chefs_at_home": {
+        "es": "Trabajamos con una chef que va al departamento y arma el menú según tu grupo. Escríbenos con tres días de anticipación.",
+        "en": "We work with a chef who comes to the apartment and plans the menu around your group. Message us three days ahead."
+      },
+      "massages": {
+        "es": "Un estudio a dos cuadras ofrece masajes con cita previa.",
+        "en": "A studio two blocks away offers massages by appointment."
+      }
+    }
+  }
+}
