@@ -8,7 +8,7 @@
  * Two INDEPENDENT jobs (one failing never blocks the other):
  *   1. Mailchimp — upsert the member (PUT, idempotent) + tags.
  *      Reuses MAILCHIMP_API_KEY / MAILCHIMP_LIST_ID via lib/newsletter.ts.
- *   2. Resend — deliver the checklist email (HTML + text, List-Unsubscribe).
+ *   2. Resend — deliver the magnet's email (HTML + text, List-Unsubscribe).
  * The client sees an error only if BOTH fail. The success body carries
  * `emailSent` so the UI never claims "check your email" when Resend failed. Repeat signups re-send the
  * email and count as success.
