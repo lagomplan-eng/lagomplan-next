@@ -27,3 +27,11 @@ Dos pasos, nunca automático:
 Paridad con Livin: `e2e/guia-parity.spec.ts` compara pestañas, zonas del barrio, tarjetas de experiencias y secciones
 de cada demo contra `/guia/livin_condesa` (ES y EN). Solo se permite diferir en la capa de propiedad, y cada excepción
 está listada en el propio test.
+
+## Visitas y review
+- **Ver visitas:** `npm run demo:visits -- [--days 30] [--slug <slug>] [--table demo|guide|both]`. Solo SELECT sobre
+  `demo_visits` y `guide_visits` (columnas `slug, ref, lang, ua_summary, created_at`), sin `ref=qa-elena|pili` ni `bot:*`,
+  salida agregada por slug, ref y día (UTC), nunca filas. La service role key se lee de `.env.local` y no se imprime.
+- **Registrar el review editorial:** `npm run demo:review -- <slug> --by Pili --date YYYY-MM-DD` (solo cambia `review`;
+  no hace commit). Luego `demo:preview` y `demo:promote`.
+- `partner.logo_note` (opcional) marca trabajo pendiente del logo con un `[placeholder]`; bórralo cuando llegue el definitivo.
