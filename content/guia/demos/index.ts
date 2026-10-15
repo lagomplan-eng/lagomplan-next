@@ -170,6 +170,7 @@ export function buildDemoPartner(p: DemoConfig): Partner {
       // cards stay placeholders until the operator confirms what they offer.
       chefsAtHome: {
         body: p.guide?.faq?.chefs_at_home ?? { es: '[servicio de chef del operador]', en: '[servicio de chef del operador]' },
+        ...(p.guide?.faq?.chefs_at_home_links ? { links: p.guide.faq.chefs_at_home_links } : {}),
       },
       massages: {
         body: p.guide?.faq?.massages ?? { es: '[masaje recomendado]', en: '[masaje recomendado]' },
