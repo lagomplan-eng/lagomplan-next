@@ -27,6 +27,13 @@ const https = (_what: string) =>
 const bilingual = (what: string) =>
   z.object({ es: text(`${what}.es`), en: text(`${what}.en`) }, { error: `${what} needs both "es" and "en"` }).strict()
 
+const faqLink = z.object({
+  text: text('faq link text'),
+  href: z.string().regex(/^https:\/\/[^\s]+$/, 'must be an https:// link'),
+  after: z.string().max(400).optional(),
+  linkName: z.enum(['chef_whatsapp', 'chef_take_a_chef']).optional(),
+}).strict()
+
 const SLUG = /^[a-z0-9][a-z0-9-]{0,63}$/
 const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 
@@ -126,6 +133,8 @@ export function makeDemoSchema(reviewers: readonly string[]) {
       /** Replaces the two FAQ cards we must not promise on the operator's behalf. */
       faq: z.object({
         chefs_at_home: bilingual('faq.chefs_at_home').optional(),
+        /** Links spliced after the chefs text, like Livin's WhatsApp / Take a Chef. */
+        chefs_at_home_links: z.object({ es: z.array(faqLink).min(1).max(4), en: z.array(faqLink).min(1).max(4) }, { error: 'faq.chefs_at_home_links needs both "es" and "en"' }).strict().optional(),
         massages: bilingual('faq.massages').optional(),
       }).strict().optional(),
     }).strict().optional(),

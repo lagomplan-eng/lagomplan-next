@@ -39,7 +39,8 @@ for (const slug of ['host-me-tender', 'dave-nat']) {
 }
 const hmt = validateDemoFolder('host-me-tender')
 ok('hmt lists price + check-out + rules placeholders', ['guide.tours[0].price', 'property.check_out', 'property.rules'].every((p) => hmt.placeholders.some((x) => x.path === p)), hmt.placeholders.map((p) => p.path))
-ok('hmt lists implicit [imagen] for tours 1-3 only', [0, 1, 2].every((i) => hmt.placeholders.some((x) => x.path === `guide.tours[${i}].image`)) && !hmt.placeholders.some((x) => x.path === 'guide.tours[3].image'))
+ok('hmt has an image on every tour (no [imagen])', !hmt.placeholders.some((x) => /tours\[\d\]\.image/.test(x.path)))
+ok('hmt chefs card has no placeholder (Livin text + links)', !hmt.placeholders.some((x) => x.path === 'guide.faq.chefs_at_home'))
 ok('hmt lists the pending logo (SVG / high-res)', hmt.placeholders.some((x) => x.path === 'partner.logo_note' && x.message.includes('SVG')), hmt.placeholders.map((p) => p.path))
 ok('hmt flags the provisional color', hmt.warnings.some((w) => w.path === 'partner.brand_color'))
 ok('hmt warns the 42px logo', hmt.warnings.some((w) => w.path === 'partner.logo' && w.message.includes('42px')))
