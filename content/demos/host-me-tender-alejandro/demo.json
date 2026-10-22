@@ -67,7 +67,7 @@
           "en": "Walking food tour through Roma Norte: 4 hrs, 6 stops, 13+ dishes, up to 10 people."
         },
         "price": "[precio]",
-        "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/DxWVP?channelId=e4cxgeyofm98bv84knyde3n0p",
+        "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-hmt-tour-3.jpg"
       },
       {
@@ -77,7 +77,7 @@
           "en": "Walking food tour through the Historic Center: 5 hrs, 8 stops, 13+ dishes, up to 10 people."
         },
         "price": "[precio]",
-        "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/XD0Ye?channelId=e4cxgeyofm98bv84knyde3n0p",
+        "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-hmt-tour-2.jpg"
       },
       {
@@ -87,7 +87,7 @@
           "en": "Walking food tour through Coyoacán: 3.5 hrs, 8 stops, 13+ dishes, up to 10 people."
         },
         "price": "[precio]",
-        "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/2lVpM?channelId=e4cxgeyofm98bv84knyde3n0p",
+        "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-hmt-tour-1.jpg"
       },
       {
@@ -97,13 +97,13 @@
           "en": "Taco route with a local expert, plus local beer and mezcal: 3.5 hrs by transport, 6 stops, up to 10 people."
         },
         "price": "[precio]",
-        "url": "https://book.peek.com/s/1f5bf9a4-a91e-47fd-ba59-54a9fcc738ff/zqaEN?channelId=e4cxgeyofm98bv84knyde3n0p",
+        "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-tacos.jpg"
       }
     ],
     "tours_partner_note": {
-      "es": "Reservas con Sabores México, nuestro aliado local.",
-      "en": "Booked through Sabores México, our local partner."
+      "es": "Reserva en la página de experiencias de Host Me Tender",
+      "en": "Book through Host Me Tender's experiences page"
     },
     "faq": {
       "chefs_at_home": {
