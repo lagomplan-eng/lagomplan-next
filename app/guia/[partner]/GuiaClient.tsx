@@ -37,6 +37,7 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
+import { applyArrivalOverride } from '../../../lib/guia/arrival'
 import { buildVisit } from '../../../lib/guia/visit'
 import type { City, CityCopy, Experience, IconKey, Lang, OwnTour, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
@@ -522,12 +523,18 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
       // omitting here would delete the answer rather than relocate it.
       return !(counterpart && resolvedFaqKeys.has(counterpart))
     })
+    .map((item) => applyArrivalOverride(item, partner.arrivalItemOverrides, lang))
     .map((item) => ({ ...item, body: interp(item.body) }))
 
   return (
     <div
-      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}`}
-      style={partner.brand?.accent ? ({ '--accent': partner.brand.accent } as React.CSSProperties) : undefined}
+      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}`}
+      style={partner.brand?.accent || partner.placeholderPill
+        ? ({
+            ...(partner.brand?.accent ? { '--accent': partner.brand.accent } : {}),
+            ...(partner.placeholderPill ? { '--ph-label': JSON.stringify(partner.placeholderPill[lang]) } : {}),
+          } as React.CSSProperties)
+        : undefined}
     >
       {demo && (
         <div className={styles.demoBanner} role="note">
@@ -929,17 +936,21 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
             {t.continueCta}
           </a>
-          <div className={styles.nlRule} />
-          <NewsletterSignup
-            lang={lang}
-            copy={{
-              title: t.newsletterTitle,
-              body: t.newsletterBody,
-              placeholder: t.newsletterPlaceholder,
-              cta: t.newsletterCta,
-              finePrint: t.newsletterFinePrint,
-            }}
-          />
+          {!partner.hideNewsletter && (
+            <>
+              <div className={styles.nlRule} />
+              <NewsletterSignup
+                lang={lang}
+                copy={{
+                  title: t.newsletterTitle,
+                  body: t.newsletterBody,
+                  placeholder: t.newsletterPlaceholder,
+                  cta: t.newsletterCta,
+                  finePrint: t.newsletterFinePrint,
+                }}
+              />
+            </>
+          )}
         </div>
       </section>
 

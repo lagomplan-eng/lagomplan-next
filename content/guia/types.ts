@@ -381,6 +381,26 @@ export interface Partner {
    */
   cobrand?: boolean
 
+  /**
+   * Demo-only presentation option (set from demo.json guide.display): every
+   * "[placeholder]" renders as a soft neutral pill reading this label, instead of
+   * the yellow dashed marker. Does not fill any value. Absent = standard look.
+   */
+  placeholderPill?: Record<Lang, string>
+
+  /** Text overrides for city-level arrival cards, keyed by the card's icon.
+   *  `body` replaces the text; `link` replaces the card's link (`null` drops it);
+   *  `linkAfter` replaces the copy that trails the (kept) link. Only the partner
+   *  that sets this is affected. */
+  arrivalItemOverrides?: Partial<Record<IconKey, Partial<Record<Lang, {
+    body?: string
+    link?: InlineLink | null
+    linkAfter?: string
+  }>>>>
+
+  /** Demo-only presentation option (guide.display.hide_newsletter): hides the newsletter form. */
+  hideNewsletter?: boolean
+
   /** "Your stay at a glance" card (rules + contact). The WhatsApp button uses `operatorWhatsApp`. */
   stayGlance?: { rules?: string; email?: string; instagram?: { handle: string; href: string } }
 

@@ -40,7 +40,8 @@ const HEX = /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/
 const tour = z.object({
   name: text('name'),
   description: bilingual('description'),
-  price: text('price (use "[precio]" if unknown)'),
+  /** One text for both languages, or { es, en } when the wording differs (e.g. "Desde $115 en Localbird"). */
+  price: z.union([text('price (use "[precio]" if unknown)'), bilingual('price')]),
   url: https('url'),
   image: z.string().regex(/^\/images\/guia\/experiences\/[\w.-]+\.(?:jpg|jpeg|png|webp)$/,
     'must be one of our own illustrations: /images/guia/experiences/<file> (no third-party images). Omit it to show "[imagen]"').optional(),
@@ -130,6 +131,19 @@ export function makeDemoSchema(reviewers: readonly string[]) {
       host_letter: z.object({ es: letterLang.optional(), en: letterLang.optional() }).strict().optional(),
       tours: z.array(tour).min(1).max(6, 'at most 6 tours').optional(),
       tours_partner_note: bilingual('tours_partner_note').optional(),
+      /** Opt-in presentation options for this demo only. Absent = the standard template, unchanged. */
+      display: z.object({
+        /** Placeholders render as a soft neutral pill with this label instead of the yellow "[…]" marker. Nothing is filled in. */
+        placeholder_pill: bilingual('display.placeholder_pill').optional(),
+        /** Hides the "El Itinerario" newsletter form. */
+        hide_newsletter: z.boolean().optional(),
+        /** Replaces the "Transportation" card's Insider recommendation: `body` is the card text, `link` the sentence that links to `href` (the operator's booking page). */
+        transport_card: z.object({
+          body: bilingual('display.transport_card.body'),
+          link_text: bilingual('display.transport_card.link_text'),
+          href: https('display.transport_card.href'),
+        }).strict().optional(),
+      }).strict().optional(),
       /** Replaces the two FAQ cards we must not promise on the operator's behalf. */
       faq: z.object({
         chefs_at_home: bilingual('faq.chefs_at_home').optional(),
