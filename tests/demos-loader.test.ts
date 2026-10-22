@@ -70,7 +70,7 @@ eq('alejandro: "From $X on Localbird" (EN)', tours('en').map((t) => t.price), ['
 eq('alejandro: "Desde $X en Localbird" (ES)', tours('es').map((t) => t.price), ['Desde $115 en Localbird', 'Desde $115 en Localbird', 'Desde $110 en Localbird', 'Desde $135 en Localbird'])
 eq('alejandro: durations (EN)', tours('en').map((t) => t.teaser.match(/(\d(?:\.5)?) hours/)?.[1]), ['4', '5', '4', '3.5'])
 eq('alejandro: stop counts only for Roma (6) and Coyoacán (8)', tours('en').map((t) => t.teaser.match(/(\d+) stops/)?.[1] ?? null), ['6', null, '8', null])
-eq('alejandro: Centro has no image (shows the pill, not the Coyoacán scene); the others keep theirs', tours('en').map((t) => t.image ?? null), ['/images/guia/experiences/exp-hmt-tour-3.jpg', null, '/images/guia/experiences/exp-hmt-tour-1.jpg', '/images/guia/experiences/exp-tacos.jpg'])
+eq('alejandro: every tour keeps its original image (Centro: exp-hmt-tour-2, restored on request)', tours('en').map((t) => t.image ?? null), ['/images/guia/experiences/exp-hmt-tour-3.jpg', '/images/guia/experiences/exp-hmt-tour-2.jpg', '/images/guia/experiences/exp-hmt-tour-1.jpg', '/images/guia/experiences/exp-tacos.jpg'])
 eq('alejandro: placeholder pill label + hidden newsletter', [alej.placeholderPill, alej.hideNewsletter], [{ es: 'Por confirmar con Host Me Tender', en: 'To confirm with Host Me Tender' }, true])
 // Transportation card: no Insider, no WhatsApp; links to Localbird instead.
 const car = alej.arrivalItemOverrides?.car

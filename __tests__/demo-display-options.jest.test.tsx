@@ -76,10 +76,11 @@ describe('host-me-tender-alejandro', () => {
     expect(en.container.textContent).not.toContain('Desde $')
   })
 
-  test('Centro has no image: the pill stands in for it (the old image was a Coyoacán scene)', async () => {
+  test('all 4 tours show their image (Centro keeps exp-hmt-tour-2); no image placeholder', async () => {
     const { container } = await renderDemo('host-me-tender-alejandro', 'en')
-    expect(container.querySelectorAll('img[src*="/images/guia/experiences/"]')).toHaveLength(3)
-    expect(container.querySelectorAll('[class*="expImgPlaceholder"] mark')).toHaveLength(1)
+    const srcs = [...container.querySelectorAll('img[src*="/images/guia/experiences/"]')].map((i) => i.getAttribute('src'))
+    expect(srcs).toEqual(['/images/guia/experiences/exp-hmt-tour-3.jpg', '/images/guia/experiences/exp-hmt-tour-2.jpg', '/images/guia/experiences/exp-hmt-tour-1.jpg', '/images/guia/experiences/exp-tacos.jpg'])
+    expect(container.querySelectorAll('[class*="expImgPlaceholder"]')).toHaveLength(0)
   })
 
   test.each([['es', 'Reserva tu traslado al aeropuerto en la página de experiencias de Host Me Tender'], ['en', "Book your airport transfer on Host Me Tender's experiences page"]] as const)(
