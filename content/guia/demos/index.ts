@@ -65,7 +65,7 @@ function toTour(t: DemoTour, lang: Lang, i: number): OwnTour {
     id: `tour-${i + 1}`,
     title: t.name,
     teaser: t.description[lang],
-    price: t.price,
+    price: typeof t.price === 'string' ? t.price : t.price[lang],
     image: t.image,
     howToBook: t.how_to_book?.[lang] ?? (lang === 'es'
       ? 'Reserva en línea con el botón «Reservar».'
@@ -183,6 +183,8 @@ export function buildDemoPartner(p: DemoConfig): Partner {
     ...(stayGlance ? { stayGlance } : {}),
     ...(tours?.length ? { ownTours: { es: tours.map((t, i) => toTour(t, 'es', i)), en: tours.map((t, i) => toTour(t, 'en', i)) } } : {}),
     ...(note ? { experiencesPartnerNote: note } : {}),
+    ...(p.guide?.display?.placeholder_pill ? { placeholderPill: p.guide.display.placeholder_pill } : {}),
+    ...(p.guide?.display?.hide_newsletter ? { hideNewsletter: true } : {}),
     brand: {
       logo,
       accent: accent && HEX.test(accent) ? accent : undefined,

@@ -381,6 +381,16 @@ export interface Partner {
    */
   cobrand?: boolean
 
+  /**
+   * Demo-only presentation option (set from demo.json guide.display): every
+   * "[placeholder]" renders as a soft neutral pill reading this label, instead of
+   * the yellow dashed marker. Does not fill any value. Absent = standard look.
+   */
+  placeholderPill?: Record<Lang, string>
+
+  /** Demo-only presentation option (guide.display.hide_newsletter): hides the newsletter form. */
+  hideNewsletter?: boolean
+
   /** "Your stay at a glance" card (rules + contact). The WhatsApp button uses `operatorWhatsApp`. */
   stayGlance?: { rules?: string; email?: string; instagram?: { handle: string; href: string } }
 

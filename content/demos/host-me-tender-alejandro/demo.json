@@ -66,7 +66,10 @@
           "es": "Recorrido gastronómico a pie por la Roma Norte: 4 h, 6 paradas, más de 13 platillos, máximo 10 personas.",
           "en": "Walking food tour through Roma Norte: 4 hrs, 6 stops, 13+ dishes, up to 10 people."
         },
-        "price": "[precio]",
+        "price": {
+          "es": "Desde $115 en Localbird",
+          "en": "From $115 on Localbird"
+        },
         "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-hmt-tour-3.jpg"
       },
@@ -96,7 +99,10 @@
           "es": "Ruta de tacos con un experto local, con cerveza local y mezcal: 3.5 h en transporte, 6 paradas, máximo 10 personas.",
           "en": "Taco route with a local expert, plus local beer and mezcal: 3.5 hrs by transport, 6 stops, up to 10 people."
         },
-        "price": "[precio]",
+        "price": {
+          "es": "Desde $135 en Localbird",
+          "en": "From $135 on Localbird"
+        },
         "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-tacos.jpg"
       }
@@ -128,6 +134,13 @@
           }
         ]
       }
+    },
+    "display": {
+      "placeholder_pill": {
+        "es": "Por confirmar con Host Me Tender",
+        "en": "To confirm with Host Me Tender"
+      },
+      "hide_newsletter": true
     }
   }
 }

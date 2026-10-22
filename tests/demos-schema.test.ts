@@ -32,7 +32,7 @@ const msgs = (r: ReturnType<typeof validateDemoFolder>) => r.errors.map((e) => `
 const has = (r: ReturnType<typeof validateDemoFolder>, frag: string) => msgs(r).some((m) => m.includes(frag))
 
 // 1. The real demos are valid and list their pending placeholders.
-for (const slug of ['host-me-tender', 'dave-nat']) {
+for (const slug of ['host-me-tender', 'dave-nat', 'host-me-tender-alejandro']) {
   fs.cpSync(path.join(REAL, slug), path.join(TMP, slug), { recursive: true })
   const r = validateDemoFolder(slug)
   ok(`${slug} is valid`, r.errors.length === 0, msgs(r))
@@ -96,6 +96,26 @@ ok('city other than cdmx', (() => { const c = base(); c.slug = 'ct'; c.city = 'g
 // 5. kind "partner": placeholders are always errors.
 const partner = base(); partner.slug = 'real'; partner.kind = 'partner'; put('real', partner)
 ok('kind partner blocks placeholders', has(validateDemoFolder('real'), 'real partner guides can\'t have any'))
+
+// X. Opt-in presentation options (guide.display) and per-language prices.
+{
+  const withPrice = (price: unknown) => { const c = base(); c.slug = 'px'; c.guide.tours[0].price = price; return c }
+  put('px-str', { ...withPrice('From $115'), slug: 'px-str' })
+  ok('price: plain text still valid', validateDemoFolder('px-str').errors.length === 0, msgs(validateDemoFolder('px-str')))
+  put('px-bi', { ...withPrice({ es: 'Desde $115 en Localbird', en: 'From $115 on Localbird' }), slug: 'px-bi' })
+  ok('price: { es, en } valid', validateDemoFolder('px-bi').errors.length === 0, msgs(validateDemoFolder('px-bi')))
+  put('px-half', { ...withPrice({ es: 'Desde $115' }), slug: 'px-half' })
+  ok('price: { es } alone is rejected', validateDemoFolder('px-half').errors.length > 0)
+  put('px-empty', { ...withPrice('  '), slug: 'px-empty' })
+  ok('price: empty text still rejected', validateDemoFolder('px-empty').errors.length > 0)
+
+  const withDisplay = (display: unknown, slug: string) => { const c = base(); c.slug = slug; c.guide.display = display; put(slug, c); return validateDemoFolder(slug) }
+  ok('display: pill + hide_newsletter valid', withDisplay({ placeholder_pill: { es: 'Por confirmar', en: 'To confirm' }, hide_newsletter: true }, 'pd-ok').errors.length === 0)
+  ok('display: pill needs both languages', withDisplay({ placeholder_pill: { es: 'Por confirmar' } }, 'pd-half').errors.length > 0)
+  ok('display: hide_newsletter must be a boolean', withDisplay({ hide_newsletter: 'yes' }, 'pd-bool').errors.length > 0)
+  ok('display: unknown keys are errors (typos fail)', withDisplay({ hide_newsletters: true }, 'pd-typo').errors.length > 0)
+  ok('display: a placeholder inside a bilingual price is still listed as pending', (() => { const c = base(); c.slug = 'pd-ph'; c.guide.tours[0].price = { es: '[precio]', en: '[price]' }; put('pd-ph', c); return validateDemoFolder('pd-ph').placeholders.some((p) => p.path === 'guide.tours[0].price.es') })())
+}
 
 fs.rmSync(TMP, { recursive: true, force: true })
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }

@@ -526,8 +526,13 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
 
   return (
     <div
-      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}`}
-      style={partner.brand?.accent ? ({ '--accent': partner.brand.accent } as React.CSSProperties) : undefined}
+      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}`}
+      style={partner.brand?.accent || partner.placeholderPill
+        ? ({
+            ...(partner.brand?.accent ? { '--accent': partner.brand.accent } : {}),
+            ...(partner.placeholderPill ? { '--ph-label': JSON.stringify(partner.placeholderPill[lang]) } : {}),
+          } as React.CSSProperties)
+        : undefined}
     >
       {demo && (
         <div className={styles.demoBanner} role="note">
@@ -929,17 +934,21 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
             {t.continueCta}
           </a>
-          <div className={styles.nlRule} />
-          <NewsletterSignup
-            lang={lang}
-            copy={{
-              title: t.newsletterTitle,
-              body: t.newsletterBody,
-              placeholder: t.newsletterPlaceholder,
-              cta: t.newsletterCta,
-              finePrint: t.newsletterFinePrint,
-            }}
-          />
+          {!partner.hideNewsletter && (
+            <>
+              <div className={styles.nlRule} />
+              <NewsletterSignup
+                lang={lang}
+                copy={{
+                  title: t.newsletterTitle,
+                  body: t.newsletterBody,
+                  placeholder: t.newsletterPlaceholder,
+                  cta: t.newsletterCta,
+                  finePrint: t.newsletterFinePrint,
+                }}
+              />
+            </>
+          )}
         </div>
       </section>
 
