@@ -11,7 +11,7 @@ import path from 'node:path'
 
 const TMP = fs.mkdtempSync(path.join(os.tmpdir(), 'demos-'))
 process.env.DEMOS_DIR = TMP // before importing the validator
-fs.writeFileSync(path.join(TMP, 'config.json'), JSON.stringify({ reviewers: ['Pili'] }))
+fs.writeFileSync(path.join(TMP, 'config.json'), JSON.stringify({ reviewers: ['Pili', 'Elena'] }))
 const REAL = path.join(process.cwd(), 'content', 'demos')
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -54,7 +54,8 @@ ok('production needs review', has(validateDemoFolder('host-me-tender', { product
 ok('preview-only demo needs no review', validateDemoFolder('dave-nat', { production: true }).errors.length === 0)
 const withReview = (review: unknown) => { const c = base(); c.slug = 'rv'; c.review = review; put('rv', c); return validateDemoFolder('rv', { production: true }) }
 ok('valid review passes', withReview({ by: 'Pili', date: '2026-10-14' }).errors.length === 0, msgs(withReview({ by: 'Pili', date: '2026-10-14' })))
-ok('unknown reviewer rejected', has(withReview({ by: 'Elena', date: '2026-10-14' }), 'review.by: must be one of: Pili'))
+ok('unknown reviewer rejected', has(withReview({ by: 'Ghost', date: '2026-10-14' }), 'review.by: must be one of: Pili, Elena'))
+ok('Elena is a valid reviewer', withReview({ by: 'Elena', date: '2026-10-22' }).errors.length === 0)
 ok('non-ISO date rejected', has(withReview({ by: 'Pili', date: '14/10/2026' }), 'review.date: must be YYYY-MM-DD'))
 ok('impossible date rejected', has(withReview({ by: 'Pili', date: '2026-02-31' }), 'is not a real date'))
 ok('future date rejected', has(withReview({ by: 'Pili', date: '2099-01-01' }), 'is in the future'))
@@ -114,6 +115,11 @@ ok('kind partner blocks placeholders', has(validateDemoFolder('real'), 'real par
   ok('display: pill needs both languages', withDisplay({ placeholder_pill: { es: 'Por confirmar' } }, 'pd-half').errors.length > 0)
   ok('display: hide_newsletter must be a boolean', withDisplay({ hide_newsletter: 'yes' }, 'pd-bool').errors.length > 0)
   ok('display: unknown keys are errors (typos fail)', withDisplay({ hide_newsletters: true }, 'pd-typo').errors.length > 0)
+  const tc = { body: { es: 'Texto', en: 'Text' }, link_text: { es: 'Reserva', en: 'Book' }, href: 'https://p.localbird.io/x/for-you' }
+  ok('display: transport_card valid', withDisplay({ transport_card: tc }, 'pd-tc').errors.length === 0)
+  ok('display: transport_card needs both languages in body', withDisplay({ transport_card: { ...tc, body: { es: 'Texto' } } }, 'pd-tc1').errors.length > 0)
+  ok('display: transport_card needs an https href', withDisplay({ transport_card: { ...tc, href: 'http://x.com' } }, 'pd-tc2').errors.length > 0)
+  ok('display: transport_card rejects unknown keys', withDisplay({ transport_card: { ...tc, whatsapp: 'x' } }, 'pd-tc3').errors.length > 0)
   ok('display: a placeholder inside a bilingual price is still listed as pending', (() => { const c = base(); c.slug = 'pd-ph'; c.guide.tours[0].price = { es: '[precio]', en: '[price]' }; put('pd-ph', c); return validateDemoFolder('pd-ph').placeholders.some((p) => p.path === 'guide.tours[0].price.es') })())
 }
 

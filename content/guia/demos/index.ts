@@ -185,6 +185,16 @@ export function buildDemoPartner(p: DemoConfig): Partner {
     ...(note ? { experiencesPartnerNote: note } : {}),
     ...(p.guide?.display?.placeholder_pill ? { placeholderPill: p.guide.display.placeholder_pill } : {}),
     ...(p.guide?.display?.hide_newsletter ? { hideNewsletter: true } : {}),
+    ...(p.guide?.display?.transport_card
+      ? {
+          arrivalItemOverrides: {
+            car: Object.fromEntries((['es', 'en'] as const).map((l) => [l, {
+              body: p.guide!.display!.transport_card!.body[l],
+              link: { text: p.guide!.display!.transport_card!.link_text[l], href: p.guide!.display!.transport_card!.href },
+            }])),
+          },
+        }
+      : {}),
     brand: {
       logo,
       accent: accent && HEX.test(accent) ? accent : undefined,

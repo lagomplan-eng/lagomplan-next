@@ -37,6 +37,7 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
+import { applyArrivalOverride } from '../../../lib/guia/arrival'
 import { buildVisit } from '../../../lib/guia/visit'
 import type { City, CityCopy, Experience, IconKey, Lang, OwnTour, Partner } from '../../../content/guia/types'
 import { getZone } from '../../../content/guia/zones'
@@ -522,6 +523,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
       // omitting here would delete the answer rather than relocate it.
       return !(counterpart && resolvedFaqKeys.has(counterpart))
     })
+    .map((item) => applyArrivalOverride(item, partner.arrivalItemOverrides, lang))
     .map((item) => ({ ...item, body: interp(item.body) }))
 
   return (

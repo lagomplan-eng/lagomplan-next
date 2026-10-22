@@ -388,6 +388,16 @@ export interface Partner {
    */
   placeholderPill?: Record<Lang, string>
 
+  /** Text overrides for city-level arrival cards, keyed by the card's icon.
+   *  `body` replaces the text; `link` replaces the card's link (`null` drops it);
+   *  `linkAfter` replaces the copy that trails the (kept) link. Only the partner
+   *  that sets this is affected. */
+  arrivalItemOverrides?: Partial<Record<IconKey, Partial<Record<Lang, {
+    body?: string
+    link?: InlineLink | null
+    linkAfter?: string
+  }>>>>
+
   /** Demo-only presentation option (guide.display.hide_newsletter): hides the newsletter form. */
   hideNewsletter?: boolean
 

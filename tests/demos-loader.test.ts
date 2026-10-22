@@ -16,7 +16,7 @@ eq('slugs come from the folders', listDemoSlugs(), ['dave-nat', 'host-me-tender'
 // dave-nat is preview-only: hidden (404) when VERCEL_ENV=production.
 eq('dave-nat is served outside production', getDemoProspect('dave-nat')?.slug, 'dave-nat')
 process.env.VERCEL_ENV = 'production'
-eq('production lists only host-me-tender (the others are preview-only)', listDemoSlugs(), ['host-me-tender'])
+eq('production lists host-me-tender + its copy (dave-nat is preview-only)', listDemoSlugs(), ['host-me-tender', 'host-me-tender-alejandro'])
 eq('dave-nat → null in production', getDemoProspect('dave-nat'), null)
 eq('host-me-tender still served in production', getDemoProspect('host-me-tender')?.slug, 'host-me-tender')
 process.env.VERCEL_ENV = 'preview'
@@ -58,22 +58,36 @@ eq('example: whatsapp href', exp.operatorWhatsApp?.href, 'https://wa.me/52155123
 eq('example: faq overrides', [exp.faqAnswers?.chefsAtHome?.body.en.startsWith('We work with a chef'), exp.faqAnswers?.massages?.body.es.startsWith('Un estudio')], [true, true])
 eq('example: tour overrides', [exp.ownTours?.es?.[0].minBookingTime, exp.ownTours?.es?.[0].image], ['24 h', '/images/guia/experiences/exp-tacos.jpg'])
 
-// ── host-me-tender-alejandro: an editable copy of host-me-tender (preview-only) ──
+// ── host-me-tender-alejandro: an editable copy of host-me-tender, served in Production ──
 const alej = buildDemoPartner(getDemoProspect('host-me-tender-alejandro')!)
 const tours = (l: 'es' | 'en') => alej.ownTours?.[l] ?? []
-eq('alejandro: every Book button → Localbird experiences page', tours('es').concat(tours('en')).map((t) => t.bookHref), Array(8).fill('https://p.localbird.io/hostmetender/for-you'))
+const LB = 'https://p.localbird.io/hostmetender/for-you'
+eq('alejandro: every Book button → Localbird experiences page', tours('es').concat(tours('en')).map((t) => t.bookHref), Array(8).fill(LB))
 eq('alejandro: attribution (ES/EN)', alej.experiencesPartnerNote, { es: 'Reserva en la página de experiencias de Host Me Tender', en: "Book through Host Me Tender's experiences page" })
-eq('alejandro: confirmed prices are bilingual (Roma, Taco)', [tours('es')[0].price, tours('en')[0].price, tours('es')[3].price, tours('en')[3].price], ['Desde $115 en Localbird', 'From $115 on Localbird', 'Desde $135 en Localbird', 'From $135 on Localbird'])
-eq('alejandro: unconfirmed prices stay placeholders (Coyoacán, Centro: tour data differs from Localbird)', [tours('es')[1].price, tours('es')[2].price, tours('en')[1].price, tours('en')[2].price], ['[precio]', '[precio]', '[precio]', '[precio]'])
+// Titles, durations and prices are the live Localbird listings; stop counts only where the listing states one (Roma six, Coyoacán 8).
+eq('alejandro: 4 tours = Localbird titles', tours('en').map((t) => t.title), ['Colonia Roma Food Tour in Mexico City', 'Mexico City Historic Center Food Tour', 'Coyoacán Food Tour in Mexico City', 'Mexico City Taco Mezcal Tour'])
+eq('alejandro: "From $X on Localbird" (EN)', tours('en').map((t) => t.price), ['From $115 on Localbird', 'From $115 on Localbird', 'From $110 on Localbird', 'From $135 on Localbird'])
+eq('alejandro: "Desde $X en Localbird" (ES)', tours('es').map((t) => t.price), ['Desde $115 en Localbird', 'Desde $115 en Localbird', 'Desde $110 en Localbird', 'Desde $135 en Localbird'])
+eq('alejandro: durations (EN)', tours('en').map((t) => t.teaser.match(/(\d(?:\.5)?) hours/)?.[1]), ['4', '5', '4', '3.5'])
+eq('alejandro: stop counts only for Roma (6) and Coyoacán (8)', tours('en').map((t) => t.teaser.match(/(\d+) stops/)?.[1] ?? null), ['6', null, '8', null])
+eq('alejandro: Centro has no image (shows the pill, not the Coyoacán scene); the others keep theirs', tours('en').map((t) => t.image ?? null), ['/images/guia/experiences/exp-hmt-tour-3.jpg', null, '/images/guia/experiences/exp-hmt-tour-1.jpg', '/images/guia/experiences/exp-tacos.jpg'])
 eq('alejandro: placeholder pill label + hidden newsletter', [alej.placeholderPill, alej.hideNewsletter], [{ es: 'Por confirmar con Host Me Tender', en: 'To confirm with Host Me Tender' }, true])
-eq('alejandro: preview-only', getDemoProspect('host-me-tender-alejandro')?.environments, ['preview'])
+// Transportation card: no Insider, no WhatsApp; links to Localbird instead.
+const car = alej.arrivalItemOverrides?.car
+eq('alejandro: Transportation card → Localbird (both languages)', [car?.es?.link, car?.en?.link], [
+  { text: 'Reserva tu traslado al aeropuerto en la página de experiencias de Host Me Tender', href: LB },
+  { text: "Book your airport transfer on Host Me Tender's experiences page", href: LB },
+])
+eq('alejandro: Transportation text has no Insider/WhatsApp', /insider|wa\.me|whatsapp/i.test(JSON.stringify(car)), false)
+eq('alejandro: served in Production, with a valid review', [getDemoProspect('host-me-tender-alejandro')?.environments, getDemoProspect('host-me-tender-alejandro')?.review], [undefined, { by: 'Elena', date: '2026-10-22' }])
 // The original and every other demo get none of the new options.
 const hmtOrig = getDemoProspect('host-me-tender')!
-eq('host-me-tender: no pill, newsletter kept, string price unchanged', [hmt.placeholderPill, hmt.hideNewsletter, hmt.ownTours?.es?.[0].price, hmtOrig.guide?.display], [undefined, undefined, '[precio]', undefined])
-eq('dave-nat: no display options', [buildDemoPartner(getDemoProspect('dave-nat')!).placeholderPill, buildDemoPartner(getDemoProspect('dave-nat')!).hideNewsletter], [undefined, undefined])
+eq('host-me-tender: no pill, no overrides, newsletter kept, string price unchanged', [hmt.placeholderPill, hmt.hideNewsletter, hmt.arrivalItemOverrides, hmt.ownTours?.es?.[0].price, hmtOrig.guide?.display], [undefined, undefined, undefined, '[precio]', undefined])
+const daveNat = buildDemoPartner(getDemoProspect('dave-nat')!)
+eq('dave-nat: no display options', [daveNat.placeholderPill, daveNat.hideNewsletter, daveNat.arrivalItemOverrides], [undefined, undefined, undefined])
 // Copy fidelity: apart from the edits above, the copy IS host-me-tender (guards silent drift).
-const strip = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.environments; delete d.guide.display; delete d.guide.tours_partner_note; d.guide.tours.forEach((t: any) => { delete t.url; delete t.price }); return d }
-eq('alejandro == host-me-tender except slug / environments / tour urls+prices / attribution / display', strip(getDemoProspect('host-me-tender-alejandro')), strip(hmtOrig))
+const strip = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.review; delete d.environments; delete d.guide.display; delete d.guide.tours_partner_note; delete d.guide.tours; return d }
+eq('alejandro == host-me-tender except slug / review / display / tours / attribution', strip(getDemoProspect('host-me-tender-alejandro')), strip(hmtOrig))
 
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('demos-loader: all passed')

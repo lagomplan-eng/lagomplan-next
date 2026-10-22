@@ -137,6 +137,12 @@ export function makeDemoSchema(reviewers: readonly string[]) {
         placeholder_pill: bilingual('display.placeholder_pill').optional(),
         /** Hides the "El Itinerario" newsletter form. */
         hide_newsletter: z.boolean().optional(),
+        /** Replaces the "Transportation" card's Insider recommendation: `body` is the card text, `link` the sentence that links to `href` (the operator's booking page). */
+        transport_card: z.object({
+          body: bilingual('display.transport_card.body'),
+          link_text: bilingual('display.transport_card.link_text'),
+          href: https('display.transport_card.href'),
+        }).strict().optional(),
       }).strict().optional(),
       /** Replaces the two FAQ cards we must not promise on the operator's behalf. */
       faq: z.object({

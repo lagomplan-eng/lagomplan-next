@@ -3,10 +3,10 @@
   "kind": "demo",
   "slug": "host-me-tender-alejandro",
   "city": "cdmx",
-  "review": null,
-  "environments": [
-    "preview"
-  ],
+  "review": {
+    "by": "Elena",
+    "date": "2026-10-22"
+  },
   "partner": {
     "name": "Host Me Tender",
     "logo": "logo.png",
@@ -61,10 +61,10 @@
     },
     "tours": [
       {
-        "name": "Tales & Tastings: Charming Roma Norte Food Tour",
+        "name": "Colonia Roma Food Tour in Mexico City",
         "description": {
-          "es": "Recorrido gastronómico a pie por la Roma Norte: 4 h, 6 paradas, más de 13 platillos, máximo 10 personas.",
-          "en": "Walking food tour through Roma Norte: 4 hrs, 6 stops, 13+ dishes, up to 10 people."
+          "es": "Recorrido gastronómico a pie por la colonia Roma: 4 horas, 6 paradas.",
+          "en": "Walking food tour through Colonia Roma: 4 hours, 6 stops."
         },
         "price": {
           "es": "Desde $115 en Localbird",
@@ -74,30 +74,35 @@
         "image": "/images/guia/experiences/exp-hmt-tour-3.jpg"
       },
       {
-        "name": "Flavors of our Heritage: Historic Mexico City Center Food Tour",
+        "name": "Mexico City Historic Center Food Tour",
         "description": {
-          "es": "Recorrido gastronómico a pie por el Centro Histórico: 5 h, 8 paradas, más de 13 platillos, máximo 10 personas.",
-          "en": "Walking food tour through the Historic Center: 5 hrs, 8 stops, 13+ dishes, up to 10 people."
+          "es": "Recorrido gastronómico a pie por el Centro Histórico: 5 horas.",
+          "en": "Walking food tour through the Historic Center: 5 hours."
         },
-        "price": "[precio]",
-        "url": "https://p.localbird.io/hostmetender/for-you",
-        "image": "/images/guia/experiences/exp-hmt-tour-2.jpg"
+        "price": {
+          "es": "Desde $115 en Localbird",
+          "en": "From $115 on Localbird"
+        },
+        "url": "https://p.localbird.io/hostmetender/for-you"
       },
       {
-        "name": "Boho Feast: Delights of Coyoacán Food Tour",
+        "name": "Coyoacán Food Tour in Mexico City",
         "description": {
-          "es": "Recorrido gastronómico a pie por Coyoacán: 3.5 h, 8 paradas, más de 13 platillos, máximo 10 personas.",
-          "en": "Walking food tour through Coyoacán: 3.5 hrs, 8 stops, 13+ dishes, up to 10 people."
+          "es": "Recorrido gastronómico a pie por Coyoacán: 4 horas, 8 paradas.",
+          "en": "Walking food tour through Coyoacán: 4 hours, 8 stops."
         },
-        "price": "[precio]",
+        "price": {
+          "es": "Desde $110 en Localbird",
+          "en": "From $110 on Localbird"
+        },
         "url": "https://p.localbird.io/hostmetender/for-you",
         "image": "/images/guia/experiences/exp-hmt-tour-1.jpg"
       },
       {
-        "name": "Our Unmissable Mexico City Taco Tour: Taco Beats and Mezcal Sips",
+        "name": "Mexico City Taco Mezcal Tour",
         "description": {
-          "es": "Ruta de tacos con un experto local, con cerveza local y mezcal: 3.5 h en transporte, 6 paradas, máximo 10 personas.",
-          "en": "Taco route with a local expert, plus local beer and mezcal: 3.5 hrs by transport, 6 stops, up to 10 people."
+          "es": "Recorrido de tacos y mezcal en transporte privado: 3.5 horas.",
+          "en": "Taco and mezcal tour by private transportation: 3.5 hours."
         },
         "price": {
           "es": "Desde $135 en Localbird",
@@ -140,7 +145,18 @@
         "es": "Por confirmar con Host Me Tender",
         "en": "To confirm with Host Me Tender"
       },
-      "hide_newsletter": true
+      "hide_newsletter": true,
+      "transport_card": {
+        "body": {
+          "es": "Usa Uber, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes.",
+          "en": "Use Uber, cheaper and safer than hailing on the street. The Metro is excellent if you're comfortable with crowds."
+        },
+        "link_text": {
+          "es": "Reserva tu traslado al aeropuerto en la página de experiencias de Host Me Tender",
+          "en": "Book your airport transfer on Host Me Tender's experiences page"
+        },
+        "href": "https://p.localbird.io/hostmetender/for-you"
+      }
     }
   }
 }
