@@ -185,6 +185,7 @@ export function buildDemoPartner(p: DemoConfig): Partner {
     ...(note ? { experiencesPartnerNote: note } : {}),
     ...(p.guide?.display?.placeholder_pill ? { placeholderPill: p.guide.display.placeholder_pill } : {}),
     ...(p.guide?.display?.hide_newsletter ? { hideNewsletter: true } : {}),
+    ...(p.guide?.display?.agenda ? { agenda: { ...(p.guide.host_pick ? { hostPick: p.guide.host_pick } : {}) } } : {}),
     ...(p.guide?.display?.transport_card
       ? {
           arrivalItemOverrides: {
