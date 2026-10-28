@@ -1,0 +1,409 @@
+{
+  "schema_version": 1,
+  "events": [
+    {
+      "id": "desfile-dia-de-muertos",
+      "title": {
+        "es": "Gran Desfile de Día de Muertos",
+        "en": "Great Day of the Dead Parade"
+      },
+      "category": "culture",
+      "start": "2026-10-31",
+      "end": "2026-10-31",
+      "dateLabel": {
+        "es": "Sáb 31 oct · 14:00",
+        "en": "Sat 31 Oct · 2:00 pm"
+      },
+      "place": {
+        "es": "Paseo de la Reforma → Zócalo",
+        "en": "Paseo de la Reforma → Zócalo"
+      },
+      "why": {
+        "es": "Desfile de Día de Muertos que va de Reforma al Zócalo.",
+        "en": "Day of the Dead parade running from Reforma to the Zócalo."
+      },
+      "hours": {
+        "es": "14:00",
+        "en": "14:00"
+      },
+      "cost": {
+        "es": "Gratis",
+        "en": "Free"
+      },
+      "url": "https://visitmexico.com/es/actividad/28/desfile-de-dia-de-muertos-2025-en-cdmx",
+      "featured": true,
+      "status": "to_verify",
+      "checkNote": "The source is the 2025 page: confirm the 2026 date, time and route."
+    },
+    {
+      "id": "cacao-para-todos",
+      "title": {
+        "es": "Festival Cacao para Todos",
+        "en": "Festival Cacao para Todos"
+      },
+      "category": "food",
+      "start": "2026-10-29",
+      "end": "2026-11-02",
+      "dateLabel": {
+        "es": "29 oct–2 nov",
+        "en": "29 Oct–2 Nov"
+      },
+      "place": {
+        "es": "Museo Anahuacalli, Coyoacán",
+        "en": "Museo Anahuacalli, Coyoacán"
+      },
+      "why": {
+        "es": "Festival del cacao en el Museo Anahuacalli, en Coyoacán.",
+        "en": "Cacao festival at the Anahuacalli Museum in Coyoacán."
+      },
+      "hours": {
+        "es": "10:00–19:00",
+        "en": "10:00–19:00"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://www.gastrolabweb.com/donde-comer/2026/10/18/festival-cacao-para-todos-2026-fechas-sede-y-bebidas-en-cdmx-70420.html",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Confirm the price."
+    },
+    {
+      "id": "gp-mexico-f1",
+      "title": {
+        "es": "Gran Premio de México de F1",
+        "en": "Mexico City F1 Grand Prix"
+      },
+      "category": "sport",
+      "start": "2026-10-30",
+      "end": "2026-11-01",
+      "dateLabel": {
+        "es": "30 oct–1 nov",
+        "en": "30 Oct–1 Nov"
+      },
+      "place": {
+        "es": "Autódromo Hermanos Rodríguez",
+        "en": "Autódromo Hermanos Rodríguez"
+      },
+      "why": {
+        "es": "Fin de semana del Gran Premio de México en el Autódromo Hermanos Rodríguez.",
+        "en": "Mexico City Grand Prix weekend at the Autódromo Hermanos Rodríguez."
+      },
+      "hours": {
+        "es": "Carrera el domingo 1 de noviembre · [hora de la carrera]",
+        "en": "Race on Sunday 1 November · [race time]"
+      },
+      "url": "https://www.formula1.com/en/racing/2026/mexico",
+      "featured": false,
+      "status": "verified",
+      "verifiedAt": "2026-10-22",
+      "verifiedBy": "Elena",
+      "checkNote": "Dates confirmed on formula1.com (2026-10-22). The page shows the race at 20:00 without a time zone, so the time is left as a placeholder. The price was removed: it is not on that page."
+    },
+    {
+      "id": "ofrenda-monumental-zocalo",
+      "title": {
+        "es": "Ofrenda monumental del Zócalo",
+        "en": "Monumental ofrenda at the Zócalo"
+      },
+      "category": "culture",
+      "start": "2026-10-29",
+      "end": "2026-11-02",
+      "dateLabel": {
+        "es": "29 oct–2 nov",
+        "en": "29 Oct–2 Nov"
+      },
+      "place": {
+        "es": "Centro Histórico",
+        "en": "Historic Center"
+      },
+      "why": {
+        "es": "Ofrenda monumental de Día de Muertos en el Centro Histórico.",
+        "en": "Monumental Day of the Dead ofrenda in the Historic Center."
+      },
+      "hours": {
+        "es": "[horario]",
+        "en": "[hours]"
+      },
+      "cost": {
+        "es": "Gratis",
+        "en": "Free"
+      },
+      "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Confirm the hours."
+    },
+    {
+      "id": "feria-no-estaban-muertos",
+      "title": {
+        "es": "Feria «No estaban muertos, andaban de parranda»",
+        "en": "Fair “No estaban muertos, andaban de parranda”"
+      },
+      "category": "culture",
+      "start": "2026-10-29",
+      "end": "2026-11-02",
+      "dateLabel": {
+        "es": "29 oct–2 nov",
+        "en": "29 Oct–2 Nov"
+      },
+      "place": {
+        "es": "Museo Nacional de Culturas Populares, Coyoacán",
+        "en": "National Museum of Popular Cultures, Coyoacán"
+      },
+      "why": {
+        "es": "Feria en el Museo Nacional de Culturas Populares, en Coyoacán.",
+        "en": "Fair at the National Museum of Popular Cultures in Coyoacán."
+      },
+      "hours": {
+        "es": "11:00–19:00",
+        "en": "11:00–19:00"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://mncp.cultura.gob.mx/event/feria-no-estaban-muertos-andaban-de-parranda/",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Confirm the price."
+    },
+    {
+      "id": "el-camino-reforma",
+      "title": {
+        "es": "El Camino · iluminación de Día de Muertos",
+        "en": "El Camino · Day of the Dead illumination"
+      },
+      "category": "culture",
+      "start": "2026-10-23",
+      "end": "2026-11-08",
+      "dateLabel": {
+        "es": "23 oct–8 nov",
+        "en": "23 Oct–8 Nov"
+      },
+      "place": {
+        "es": "Paseo de la Reforma",
+        "en": "Paseo de la Reforma"
+      },
+      "why": {
+        "es": "Iluminación de Día de Muertos en el Paseo de la Reforma.",
+        "en": "Day of the Dead illumination on Paseo de la Reforma."
+      },
+      "hours": {
+        "es": "[horario]",
+        "en": "[hours]"
+      },
+      "cost": {
+        "es": "Gratis",
+        "en": "Free"
+      },
+      "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Confirm the hours."
+    },
+    {
+      "id": "food-wine-mirando-al-sur",
+      "title": {
+        "es": "Food & Wine Festival: Mirando al Sur",
+        "en": "Food & Wine Festival: Mirando al Sur"
+      },
+      "category": "food",
+      "start": "2026-11-07",
+      "end": "2026-11-08",
+      "dateLabel": {
+        "es": "7–8 nov",
+        "en": "7–8 Nov"
+      },
+      "place": {
+        "es": "Jardines de Campo Marte",
+        "en": "Campo Marte Gardens"
+      },
+      "why": {
+        "es": "Food & Wine Festival «Mirando al Sur» en los Jardines de Campo Marte.",
+        "en": "Food & Wine Festival “Mirando al Sur” at the Campo Marte Gardens."
+      },
+      "hours": {
+        "es": "Sáb 13:00–22:00 · Dom 13:00–19:00",
+        "en": "Sat 1:00–10:00 pm · Sun 1:00–7:00 pm"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://robbreportenespanol.com/travel/experiencias/food-wine-festival-2026-el-encuentro-gastronomico-que-reunira-a-mas-de-80-chefs-en-cdmx/",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Confirm the price."
+    },
+    {
+      "id": "nba-mexico-city-game",
+      "title": {
+        "es": "NBA Mexico City Game",
+        "en": "NBA Mexico City Game"
+      },
+      "category": "sport",
+      "start": "2026-11-07",
+      "end": "2026-11-07",
+      "dateLabel": {
+        "es": "Sáb 7 nov",
+        "en": "Sat 7 Nov"
+      },
+      "place": {
+        "es": "Arena CDMX",
+        "en": "Arena CDMX"
+      },
+      "why": {
+        "es": "Partido de la NBA en la Arena CDMX; equipos por confirmar.",
+        "en": "NBA game at Arena CDMX; teams to be confirmed."
+      },
+      "hours": {
+        "es": "[horario]",
+        "en": "[hours]"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://www.mexicocity.cdmx.gob.mx/turismo-deportivo-en-la-ciudad-de-mexico/cartelera-de-encuentros-deportivos/?lang=en",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Teams, time and price to confirm."
+    },
+    {
+      "id": "letape-cdmx",
+      "title": {
+        "es": "L'Étape CDMX by Tour de France",
+        "en": "L'Étape CDMX by Tour de France"
+      },
+      "category": "outdoors",
+      "start": "2026-11-15",
+      "end": "2026-11-15",
+      "dateLabel": {
+        "es": "Dom 15 nov",
+        "en": "Sun 15 Nov"
+      },
+      "place": {
+        "es": "[lugar]",
+        "en": "[place]"
+      },
+      "why": {
+        "es": "Rodada ciclista de 40, 60 o 115 km.",
+        "en": "Cycling ride of 40, 60 or 115 km."
+      },
+      "hours": {
+        "es": "[horario]",
+        "en": "[hours]"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://www.tritour.org/eventos/letape-cdmx",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Venue, time and price to confirm."
+    },
+    {
+      "id": "carrera-del-ring",
+      "title": {
+        "es": "Carrera del Ring",
+        "en": "Carrera del Ring"
+      },
+      "category": "outdoors",
+      "start": "2026-11-29",
+      "end": "2026-11-29",
+      "dateLabel": {
+        "es": "Dom 29 nov",
+        "en": "Sun 29 Nov"
+      },
+      "place": {
+        "es": "[lugar]",
+        "en": "[place]"
+      },
+      "why": {
+        "es": "Carrera de 5 y 10 km, con función de lucha libre en la meta.",
+        "en": "5 and 10 km race, with a lucha libre show at the finish."
+      },
+      "hours": {
+        "es": "[horario]",
+        "en": "[hours]"
+      },
+      "cost": {
+        "es": "[costo]",
+        "en": "[cost]"
+      },
+      "url": "https://www.asdeporte.com/evento/carrera-del-ring-2026-k5c/datos-del-evento",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Venue, time and price to confirm."
+    }
+  ],
+  "dayTrips": [
+    {
+      "id": "xochimilco",
+      "title": {
+        "es": "Xochimilco",
+        "en": "Xochimilco"
+      },
+      "length": {
+        "es": "Medio día",
+        "en": "Half day"
+      },
+      "why": {
+        "es": "Los canales y las trajineras de Xochimilco, al sur de la ciudad.",
+        "en": "The canals and trajineras of Xochimilco, in the south of the city."
+      },
+      "url": null
+    },
+    {
+      "id": "teotihuacan",
+      "title": {
+        "es": "Teotihuacán",
+        "en": "Teotihuacán"
+      },
+      "length": {
+        "es": "Día completo",
+        "en": "Full day"
+      },
+      "why": {
+        "es": "Zona arqueológica con las pirámides del Sol y de la Luna, a las afueras de la ciudad.",
+        "en": "Archaeological site with the Pyramids of the Sun and the Moon, outside the city."
+      },
+      "url": null
+    },
+    {
+      "id": "los-dinamos",
+      "title": {
+        "es": "Los Dinamos",
+        "en": "Los Dinamos"
+      },
+      "length": {
+        "es": "Medio día",
+        "en": "Half day"
+      },
+      "why": {
+        "es": "Parque con bosque y senderos dentro de la Ciudad de México.",
+        "en": "A park with forest and trails inside Mexico City."
+      },
+      "url": null
+    },
+    {
+      "id": "tepoztlan",
+      "title": {
+        "es": "Tepoztlán",
+        "en": "Tepoztlán"
+      },
+      "length": {
+        "es": "Día completo",
+        "en": "Full day"
+      },
+      "why": {
+        "es": "Pueblo de montaña en el estado de Morelos.",
+        "en": "Mountain town in the state of Morelos."
+      },
+      "url": null
+    }
+  ]
+}
