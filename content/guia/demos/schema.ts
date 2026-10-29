@@ -131,12 +131,16 @@ export function makeDemoSchema(reviewers: readonly string[]) {
       host_letter: z.object({ es: letterLang.optional(), en: letterLang.optional() }).strict().optional(),
       tours: z.array(tour).min(1).max(6, 'at most 6 tours').optional(),
       tours_partner_note: bilingual('tours_partner_note').optional(),
+      /** The operator's recommendation inside "Mientras estás aquí". Missing → highlighted placeholder. */
+      host_pick: bilingual('host_pick').optional(),
       /** Opt-in presentation options for this demo only. Absent = the standard template, unchanged. */
       display: z.object({
         /** Placeholders render as a soft neutral pill with this label instead of the yellow "[…]" marker. Nothing is filled in. */
         placeholder_pill: bilingual('display.placeholder_pill').optional(),
         /** Hides the "El Itinerario" newsletter form. */
         hide_newsletter: z.boolean().optional(),
+        /** Replaces the weekly section with "Mientras estás aquí" (the dated agenda in content/guia/cdmx/agenda.json). */
+        agenda: z.boolean().optional(),
         /** Replaces the "Transportation" card's Insider recommendation: `body` is the card text, `link` the sentence that links to `href` (the operator's booking page). */
         transport_card: z.object({
           body: bilingual('display.transport_card.body'),

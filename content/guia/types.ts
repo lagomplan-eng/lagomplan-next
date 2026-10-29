@@ -398,6 +398,14 @@ export interface Partner {
     linkAfter?: string
   }>>>>
 
+  /**
+   * Opt-in "Mientras estás aquí" agenda (demo.json guide.display.agenda): replaces
+   * the weekly section ("Every week in Mexico City"); the weekly items move to its
+   * "Siempre en la ciudad" pill. Absent = the weekly section, unchanged.
+   * `hostPick` is the operator's recommendation (guide.host_pick); missing → placeholder.
+   */
+  agenda?: { hostPick?: Partial<Record<Lang, string>> }
+
   /** Demo-only presentation option (guide.display.hide_newsletter): hides the newsletter form. */
   hideNewsletter?: boolean
 

@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "kind": "demo",
+  "slug": "host-me-tender-agenda",
+  "city": "cdmx",
+  "review": {
+    "by": "Elena",
+    "date": "2026-10-22"
+  },
+  "partner": {
+    "name": "Host Me Tender",
+    "logo": "logo.png",
+    "logo_note": "[logo en SVG o alta resolución]",
+    "logo_source_url": "https://www.hostmetender.com/uploads/1/1/0/2/11025726/published/secundario2-verdeselva.png?1770248624",
+    "brand_color": "#194332",
+    "brand_color_provisional": true,
+    "brand_color_note": "Sampled from the logo, not a brand-guide value. Replace with the real \"verde selva\" hex.",
+    "contact": {
+      "email": "contacto@hostmetender.com",
+      "whatsapp": {
+        "label": {
+          "es": "[WhatsApp del operador]",
+          "en": "[operator WhatsApp]"
+        }
+      },
+      "instagram": "@host.me.tender"
+    }
+  },
+  "property": {
+    "zones": [
+      "condesa"
+    ],
+    "check_out": "[check-out]",
+    "rules": "[reglas de la casa]"
+  },
+  "guide": {
+    "cobrand": true,
+    "host_letter": {
+      "es": {
+        "paragraphs": [
+          "Te damos la bienvenida a Condesa. Desde 2014 recibimos huéspedes en la Ciudad de México, y nos da gusto que esta vez seas tú. Este barrio se vive a pie: cafés, parques y restaurantes a unas cuadras de tu puerta.",
+          "Si quieres empezar por la comida, te recomendamos el recorrido a pie por la Roma Norte que hacemos con Sabores México: cuatro horas y seis paradas.",
+          "Que disfrutes la ciudad a tu ritmo."
+        ],
+        "link": {
+          "text": "el recorrido a pie por la Roma Norte",
+          "href": "#tour-1"
+        }
+      },
+      "en": {
+        "paragraphs": [
+          "Welcome to Condesa. We've been hosting guests in Mexico City since 2014, and we're glad this time it's you. This is a neighborhood best lived on foot, with cafés, parks and restaurants a few blocks from your door.",
+          "If you'd like to start with food, we recommend the Roma Norte walking tour we run with Sabores México: four hours, six stops.",
+          "Enjoy the city at your own pace."
+        ],
+        "link": {
+          "text": "the Roma Norte walking tour",
+          "href": "#tour-1"
+        }
+      }
+    },
+    "tours": [
+      {
+        "name": "Colonia Roma Food Tour in Mexico City",
+        "description": {
+          "es": "Recorrido gastronómico a pie por la colonia Roma: 4 horas, 6 paradas.",
+          "en": "Walking food tour through Colonia Roma: 4 hours, 6 stops."
+        },
+        "price": {
+          "es": "Desde $115 en Localbird",
+          "en": "From $115 on Localbird"
+        },
+        "url": "https://p.localbird.io/hostmetender/for-you",
+        "image": "/images/guia/experiences/exp-hmt-tour-3.jpg"
+      },
+      {
+        "name": "Mexico City Historic Center Food Tour",
+        "description": {
+          "es": "Recorrido gastronómico a pie por el Centro Histórico: 5 horas.",
+          "en": "Walking food tour through the Historic Center: 5 hours."
+        },
+        "price": {
+          "es": "Desde $115 en Localbird",
+          "en": "From $115 on Localbird"
+        },
+        "url": "https://p.localbird.io/hostmetender/for-you",
+        "image": "/images/guia/experiences/exp-hmt-tour-2.jpg"
+      },
+      {
+        "name": "Coyoacán Food Tour in Mexico City",
+        "description": {
+          "es": "Recorrido gastronómico a pie por Coyoacán: 4 horas, 8 paradas.",
+          "en": "Walking food tour through Coyoacán: 4 hours, 8 stops."
+        },
+        "price": {
+          "es": "Desde $110 en Localbird",
+          "en": "From $110 on Localbird"
+        },
+        "url": "https://p.localbird.io/hostmetender/for-you",
+        "image": "/images/guia/experiences/exp-hmt-tour-1.jpg"
+      },
+      {
+        "name": "Mexico City Taco Mezcal Tour",
+        "description": {
+          "es": "Recorrido de tacos y mezcal en transporte privado: 3.5 horas.",
+          "en": "Taco and mezcal tour by private transportation: 3.5 hours."
+        },
+        "price": {
+          "es": "Desde $135 en Localbird",
+          "en": "From $135 on Localbird"
+        },
+        "url": "https://p.localbird.io/hostmetender/for-you",
+        "image": "/images/guia/experiences/exp-tacos.jpg"
+      }
+    ],
+    "tours_partner_note": {
+      "es": "Reserva en la página de experiencias de Host Me Tender",
+      "en": "Book through Host Me Tender's experiences page"
+    },
+    "faq": {
+      "chefs_at_home": {
+        "en": "Browse chefs on",
+        "es": "Explora chefs en"
+      },
+      "chefs_at_home_links": {
+        "es": [
+          {
+            "text": "Take a Chef",
+            "href": "https://www.takeachef.com/es-mx/our-chefs",
+            "after": ".",
+            "linkName": "chef_take_a_chef"
+          }
+        ],
+        "en": [
+          {
+            "text": "Take a Chef",
+            "href": "https://www.takeachef.com/es-mx/our-chefs",
+            "after": ".",
+            "linkName": "chef_take_a_chef"
+          }
+        ]
+      }
+    },
+    "display": {
+      "placeholder_pill": {
+        "es": "Por confirmar con Host Me Tender",
+        "en": "To confirm with Host Me Tender"
+      },
+      "hide_newsletter": true,
+      "transport_card": {
+        "body": {
+          "es": "Usa Uber, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes.",
+          "en": "Use Uber, cheaper and safer than hailing on the street. The Metro is excellent if you're comfortable with crowds."
+        },
+        "link_text": {
+          "es": "Reserva tu traslado al aeropuerto en la página de experiencias de Host Me Tender",
+          "en": "Book your airport transfer on Host Me Tender's experiences page"
+        },
+        "href": "https://p.localbird.io/hostmetender/for-you"
+      },
+      "agenda": true
+    }
+  }
+}

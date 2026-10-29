@@ -49,6 +49,9 @@ import PracticalSection from './PracticalSection'
 import { withPlaceholders } from './placeholders'
 import { WhatsAppIcon } from './WhatsAppIcon'
 import StayGlance from './StayGlance'
+import SectionHead from './SectionHead'
+import AgendaSection from './AgendaSection'
+import type { Agenda } from '../../../content/guia/agenda/schema'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -68,18 +71,6 @@ const ICONS: Record<IconKey, LucideIcon> = {
 export function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKey; size?: number; color?: string }) {
   const Cmp = ICONS[name]
   return <Cmp size={size} color={color} strokeWidth={1.8} aria-hidden />
-}
-
-/** Section header: eyebrow + heading + optional lede. `eyebrowColor` overrides
- *  the default coral eyebrow (applies to both languages — it's just styling). */
-function SectionHead({ eyebrow, title, lede, eyebrowColor }: { eyebrow: string; title?: string; lede?: string; eyebrowColor?: string }) {
-  return (
-    <div className={styles.secHead}>
-      <span className={styles.eyebrow} style={eyebrowColor ? { color: eyebrowColor } : undefined}>{eyebrow}</span>
-      {title && <h2 className={styles.h2}>{title}</h2>}
-      {lede && <p className={styles.lede}>{lede}</p>}
-    </div>
-  )
 }
 
 const PINE = '#0F3A33'
@@ -380,8 +371,12 @@ export interface DemoMeta { slug: string; prospectName: string }
 
 /** recordVisits: true only on production deployments (VERCEL_ENV, read on the
  *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
-export default function GuiaClient({ partner, city, demo, recordVisits = false }: {
+export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = true }: {
   partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
+  /** Validated agenda data (server-loaded). Used only when partner.agenda is set. */
+  agenda?: Agenda
+  /** Render events still "to_verify" (Preview / local). The page passes false on Production. */
+  showUnverified?: boolean
 }) {
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
@@ -821,6 +816,18 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
       </section>
 
       {/* ── 6. Today ───────────────────────────────────────── */}
+      {partner.agenda && agenda ? (
+        <AgendaSection
+          lang={lang}
+          agenda={agenda}
+          showUnverified={showUnverified}
+          alwaysItems={t.todayItems.map((ti) => ({ ...ti, body: interp(ti.body) }))}
+          hostName={partner.displayName}
+          hostLogo={partner.brand?.logo ? <BrandLogo src={partner.brand.logo} alt={partner.displayName} className={styles.agHostLogo} /> : undefined}
+          hostPick={partner.agenda.hostPick}
+          onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
+        />
+      ) : (
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
@@ -842,6 +849,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false }
           </div>
         </div>
       </section>
+      )}
 
       {/* ── 7. Experiences ─────────────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>

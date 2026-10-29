@@ -12,15 +12,15 @@ const eq = (name: string, got: unknown, want: unknown) => {
   if (!ok) { failed++; console.error(`FAIL ${name}\n  got:  ${JSON.stringify(got)}\n  want: ${JSON.stringify(want)}`) }
 }
 
-eq('slugs come from the folders', listDemoSlugs(), ['dave-nat', 'host-me-tender', 'host-me-tender-alejandro'])
+eq('slugs come from the folders', listDemoSlugs(), ['dave-nat', 'host-me-tender', 'host-me-tender-agenda', 'host-me-tender-alejandro'])
 // dave-nat is preview-only: hidden (404) when VERCEL_ENV=production.
 eq('dave-nat is served outside production', getDemoProspect('dave-nat')?.slug, 'dave-nat')
 process.env.VERCEL_ENV = 'production'
-eq('production lists host-me-tender + its copy (dave-nat is preview-only)', listDemoSlugs(), ['host-me-tender', 'host-me-tender-alejandro'])
+eq('production lists host-me-tender, the agenda demo and the Alejandro copy (dave-nat is preview-only)', listDemoSlugs(), ['host-me-tender', 'host-me-tender-agenda', 'host-me-tender-alejandro'])
 eq('dave-nat → null in production', getDemoProspect('dave-nat'), null)
 eq('host-me-tender still served in production', getDemoProspect('host-me-tender')?.slug, 'host-me-tender')
 process.env.VERCEL_ENV = 'preview'
-eq('preview lists every demo', listDemoSlugs(), ['dave-nat', 'host-me-tender', 'host-me-tender-alejandro'])
+eq('preview lists every demo', listDemoSlugs(), ['dave-nat', 'host-me-tender', 'host-me-tender-agenda', 'host-me-tender-alejandro'])
 delete process.env.VERCEL_ENV
 eq('unknown slug → null', getDemoProspect('nope'), null)
 eq('prototype keys are not slugs', getDemoProspect('constructor'), null)
@@ -88,6 +88,18 @@ eq('dave-nat: no display options', [daveNat.placeholderPill, daveNat.hideNewslet
 // Copy fidelity: apart from the edits above, the copy IS host-me-tender (guards silent drift).
 const strip = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.review; delete d.environments; delete d.guide.display; delete d.guide.tours_partner_note; delete d.guide.tours; return d }
 eq('alejandro == host-me-tender except slug / review / display / tours / attribution', strip(getDemoProspect('host-me-tender-alejandro')), strip(hmtOrig))
+
+// ── host-me-tender-agenda: the copy that hosts "Mientras estás aquí" (preview-only) ──
+const ag = getDemoProspect('host-me-tender-agenda')!
+const agPartner = buildDemoPartner(ag)
+eq('agenda demo: opts in to the agenda; no host_pick yet → placeholder', [agPartner.agenda, ag.guide?.host_pick], [{}, undefined])
+eq('agenda demo: served in Production, with a valid review', [ag.environments, ag.review], [undefined, { by: 'Elena', date: '2026-10-22' }])
+eq('only the agenda demo opts in: every other demo has no agenda', ['host-me-tender', 'host-me-tender-alejandro', 'dave-nat'].map((s) => buildDemoPartner(getDemoProspect(s)!).agenda), [undefined, undefined, undefined])
+const stripAg = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.environments; delete d.guide.display.agenda; return d }
+eq('agenda demo == host-me-tender-alejandro except slug / environments / display.agenda', stripAg(ag), stripAg(getDemoProspect('host-me-tender-alejandro')))
+process.env.VERCEL_ENV = 'production'
+eq('agenda demo is served in Production', getDemoProspect('host-me-tender-agenda')?.slug, 'host-me-tender-agenda')
+delete process.env.VERCEL_ENV
 
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('demos-loader: all passed')
