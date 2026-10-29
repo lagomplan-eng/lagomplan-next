@@ -157,7 +157,8 @@
           "en": "Book your airport transfer on Host Me Tender's experiences page"
         },
         "href": "https://p.localbird.io/hostmetender/for-you"
-      }
+      },
+      "agenda": true
     }
   }
 }

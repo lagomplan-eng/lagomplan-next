@@ -8,7 +8,7 @@
 import { z } from 'zod'
 
 export const SCHEMA_VERSION = 1
-export const CATEGORIES = ['food', 'culture', 'sport', 'outdoors'] as const
+export const CATEGORIES = ['food', 'culture', 'sport', 'outdoors', 'music', 'city'] as const
 export type Category = (typeof CATEGORIES)[number]
 export const STATUSES = ['verified', 'to_verify'] as const
 
@@ -35,15 +35,18 @@ export const eventSchema = z.object({
   category: z.enum(CATEGORIES, { error: `must be one of: ${CATEGORIES.join(', ')}` }),
   start: isoDate,
   end: isoDate,
-  /** Free-form date text shown to guests, e.g. "29 oct–2 nov". */
+  /** Free-form date text, e.g. "29 oct–2 nov". Not shown in the stay-window layout (dates come from start/end); kept for reference. */
   dateLabel: bilingual('dateLabel'),
-  place: bilingual('place'),
-  /** One factual line. Only confirmed facts: anything unknown is a "[placeholder]". */
-  why: bilingual('why'),
-  hours: bilingual('hours'),
-  /** Omit when we have no sourced price (the row is then not shown at all). */
+  /** Venue. Omit when there is none (city-wide) or it is unknown: the row then shows only the category. */
+  place: bilingual('place').optional(),
+  /** Short clock label shown under the date in the list, e.g. "14:00" / "10–19 h". Omit when unknown: never invented. */
+  time: bilingual('time').optional(),
+  /** Reference facts. Not shown in the stay-window layout; omit what we do not know instead of writing a placeholder. */
+  why: bilingual('why').optional(),
+  hours: bilingual('hours').optional(),
   cost: bilingual('cost').optional(),
-  url: https,
+  /** Official / source page. When present the whole row links to it. */
+  url: https.optional(),
   featured: z.boolean({ error: 'must be true or false' }),
   status: z.enum(STATUSES, { error: `must be one of: ${STATUSES.join(', ')}` }),
   verifiedAt: isoDate.optional(),
@@ -59,6 +62,20 @@ export const eventSchema = z.object({
   }
 })
 
+/** Things that happen every week (not dated). 0 = Sunday … 6 = Saturday. */
+export const recurringSchema = z.object({
+  id,
+  title: bilingual('title'),
+  /** Weekdays on which an occurrence row appears in the calendar. Empty = it is only listed in "Cada semana en la ciudad" (e.g. a daily thing). */
+  weekdays: z.array(z.number().int().min(0).max(6)).max(7).refine((d) => new Set(d).size === d.length, 'weekdays must be unique'),
+  /** Short clock label under the date in the list (e.g. "8–14 h", "Noche"). Omit when unknown. */
+  time: bilingual('time').optional(),
+  /** Label of the "Cada semana" card, e.g. "Domingos · 8–14 h". */
+  when_label: bilingual('when_label'),
+  /** One line under the title on the "Cada semana" card. */
+  line: bilingual('line'),
+}).strict()
+
 export const dayTripSchema = z.object({
   id,
   title: bilingual('title'),
@@ -71,10 +88,11 @@ export const dayTripSchema = z.object({
 export const agendaSchema = z.object({
   schema_version: z.literal(SCHEMA_VERSION, { error: `must be ${SCHEMA_VERSION}` }),
   events: z.array(eventSchema).min(1, 'at least one event'),
+  recurring: z.array(recurringSchema).min(1, 'at least one recurring item'),
   dayTrips: z.array(dayTripSchema).min(1, 'at least one day trip'),
 }).strict().superRefine((a, ctx) => {
   const seen = new Set<string>()
-  for (const [list, key] of [[a.events, 'events'], [a.dayTrips, 'dayTrips']] as const) {
+  for (const [list, key] of [[a.events, 'events'], [a.recurring, 'recurring'], [a.dayTrips, 'dayTrips']] as const) {
     list.forEach((x, i) => {
       if (seen.has(x.id)) ctx.addIssue({ code: 'custom', path: [key, i, 'id'], message: `duplicate id "${x.id}"` })
       seen.add(x.id)
@@ -84,4 +102,5 @@ export const agendaSchema = z.object({
 
 export type AgendaEvent = z.infer<typeof eventSchema>
 export type DayTrip = z.infer<typeof dayTripSchema>
+export type RecurringItem = z.infer<typeof recurringSchema>
 export type Agenda = z.infer<typeof agendaSchema>
