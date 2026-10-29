@@ -155,6 +155,14 @@ function sortRows(rows: AgendaRow[]): AgendaRow[] {
     .map((x) => x.r)
 }
 
+/** "7 – 8 NOV", "29 OCT – 4 NOV": the full range of a multi-day event (one label wherever it is listed). */
+function spanLabel(c: AgendaCopy, e: Pick<AgendaEvent, 'start' | 'end'>): string {
+  const mon = (iso: string) => c.monthsShort[Number(iso.slice(5, 7)) - 1].toUpperCase()
+  return e.start.slice(0, 7) === e.end.slice(0, 7)
+    ? `${day(e.start)} – ${day(e.end)} ${mon(e.start)}`
+    : `${day(e.start)} ${mon(e.start)} – ${day(e.end)} ${mon(e.end)}`
+}
+
 /** One list for a range: dated events that overlap it + one row per occurrence of each recurring item. */
 export function rowsForRange(agenda: Pick<Agenda, 'events' | 'recurring'>, range: Range, ctx: RowContext): AgendaRow[] {
   const c = AGENDA_COPY[ctx.lang]
@@ -164,14 +172,13 @@ export function rowsForRange(agenda: Pick<Agenda, 'events' | 'recurring'>, range
   for (const e of visibleEvents(agenda.events, ctx.today, ctx.showUnverified)) {
     if (!overlaps(e, range)) continue
     const from = maxIso(e.start, range.start)
-    const to = minIso(e.end, range.end)
     const highlight = e.id === hl
     const meta = [categoryLabel(c, e.category), e.place?.[ctx.lang]].filter(Boolean).join(' · ')
     rows.push({
       id: e.id,
       kind: 'event',
       date: from,
-      dateLabel: from === to ? `${dow(c, from)} ${day(from)}` : `${day(from)} – ${day(to)}`,
+      dateLabel: e.start === e.end ? `${dow(c, from)} ${day(from)}` : spanLabel(c, e), // the event's own dates, not clipped to the chip
       time: e.time?.[ctx.lang] ?? null,
       title: e.title[ctx.lang],
       meta: highlight ? `${meta} · ${c.highlight}` : meta,
@@ -223,24 +230,21 @@ export function aheadLabel(stay: Range, today: string, lang: AgendaLang): string
 }
 
 /**
- * "Coming up": visible events that overlap aheadWindow() and appear in NO stay chip (the
- * chips cover the whole stay, so: events that do not overlap the stay). Each row carries its
- * full date range (with the month); `afterStay` marks the ones that start after check-out.
+ * "Coming up in {month}": every visible event from the start of the check-out month (or today) to the window end — the stay included —
+ * each listed ONCE with its full date range (with the month). `afterStay` marks the
+ * ones that start after check-out.
  * Events that end before max(today, check-in) are left out: they are over before the guest arrives.
  */
 export function aheadRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit<RowContext, 'window'>): AgendaRow[] {
   const c = AGENDA_COPY[ctx.lang]
-  const win = aheadWindow(stay, ctx.today)
+  const full = aheadWindow(stay, ctx.today)
+  const win = { start: maxIso(ctx.today, `${stay.end.slice(0, 7)}-01`), end: full.end } // the check-out month (from today on) up to the window end
   const rows: AgendaRow[] = []
   for (const e of visibleEvents(agenda.events, ctx.today, ctx.showUnverified)) {
-    if (!overlaps(e, win) || overlaps(e, stay)) continue
+    if (!overlaps(e, win)) continue
     if (e.end < maxIso(ctx.today, stay.start)) continue // already over by the time the guest is here (or today)
     const mon = (iso: string) => c.monthsShort[Number(iso.slice(5, 7)) - 1].toUpperCase()
-    const dateLabel = e.start === e.end
-      ? `${dow(c, e.start)} ${day(e.start)} ${mon(e.start)}`
-      : e.start.slice(0, 7) === e.end.slice(0, 7)
-        ? `${day(e.start)} – ${day(e.end)} ${mon(e.start)}`
-        : `${day(e.start)} ${mon(e.start)} – ${day(e.end)} ${mon(e.end)}`
+    const dateLabel = e.start === e.end ? `${dow(c, e.start)} ${day(e.start)} ${mon(e.start)}` : spanLabel(c, e)
     rows.push({
       id: e.id,
       kind: 'event',
@@ -257,7 +261,3 @@ export function aheadRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit
   }
   return sortRows(rows)
 }
-
-/** Every recurring item, for the "Cada semana en la ciudad" row (daily items included). */
-export const weeklyCards = (agenda: Pick<Agenda, 'recurring'>, lang: AgendaLang) =>
-  agenda.recurring.map((r: RecurringItem) => ({ id: r.id, when: r.when_label[lang], title: r.title[lang], line: r.line[lang] }))

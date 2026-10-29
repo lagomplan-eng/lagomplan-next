@@ -7,7 +7,7 @@
 //   - verified events whose verification is older than --stale-days (default 14)
 //   - events without an official link (their row is not a link)
 //   - any "[placeholder]" left in a string (none should be: unknown values are omitted)
-//   - the recurring items and which of them only live in the "Cada semana" row
+//   - the recurring items and which of them never appear in the calendar (no weekdays)
 //   - week by week (Mon–Sun) for the next --weeks weeks: how many dated events a guest
 //     would see on Preview vs Production, so verification can start with the quiet weeks
 // Exit 0 unless the file is invalid: these are warnings for the editor.
@@ -58,7 +58,7 @@ for (const s of ph.slice(0, 8)) console.log(`   ${s.slice(0, 100)}`)
 
 console.log(`\nrecurring (shown in Production as published copy; not individually verified):`)
 for (const r of agenda.recurring) {
-  console.log(`   ${r.id.padEnd(32)} ${r.weekdays.length ? `weekdays ${r.weekdays.join(',')}` : 'no weekdays: only in "Cada semana en la ciudad"'}${r.time ? `  time "${r.time.es}"` : ''}`)
+  console.log(`   ${r.id.padEnd(32)} ${r.weekdays.length ? `weekdays ${r.weekdays.join(',')}` : 'no weekdays: never shown in the calendar'}${r.time ? `  time "${r.time.es}"` : ''}`)
 }
 console.log(`   day trips without an official link: ${agenda.dayTrips.filter((t) => !t.url).length}/${agenda.dayTrips.length} (they are never links)`)
 

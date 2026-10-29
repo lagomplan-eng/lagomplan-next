@@ -11,8 +11,7 @@
  * The stay window comes from ?llegada & ?noches (check-out day included); without a
  * valid pair it is today … today + 13 days. The window is cut into calendar weeks
  * (Mon–Sun) shown as date-only chips; each chip lists, in one list, the dated events that
- * overlap it plus every occurrence of the weekly things. Below: "Cada semana en la
- * ciudad", and two buttons that open "Más adelante" (+30 days) and the day trips.
+ * overlap it plus every occurrence of the weekly things. Below: two buttons that open "Próximamente en {mes}" (the whole month) and the day trips.
  *
  * Dates are computed IN THE BROWSER after mount (America/Mexico_City): pages are static,
  * so computing them at build time would freeze the window. Before mount only the header
@@ -24,7 +23,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import type { Lang } from '../../../content/guia/types'
 import type { Agenda } from '../../../content/guia/agenda/schema'
 import { AGENDA_COPY } from '../../../content/guia/agenda/copy'
-import { aheadLabel, aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, weeklyCards, type AgendaRow } from '../../../content/guia/agenda/logic'
+import { aheadLabel, aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, type AgendaRow } from '../../../content/guia/agenda/logic'
 import SectionHead from './SectionHead'
 import WeatherCard from './WeatherCard'
 import styles from './guia.module.css'
@@ -59,7 +58,6 @@ export default function AgendaSection({ lang, agenda, showUnverified, stay, onTr
   const range = ranges[Math.min(sel, ranges.length - 1)]
   const rows = ctx && range ? rowsForRange(agenda, range, ctx) : []
   const ahead = ctx && win ? aheadRows(agenda, win, { lang, today: ctx.today, showUnverified }) : []
-  const weekly = weeklyCards(agenda, lang)
 
   const renderRow = (r: AgendaRow) => {
     const body = (
@@ -127,19 +125,6 @@ export default function AgendaSection({ lang, agenda, showUnverified, stay, onTr
                     <p className={styles.agQuietBody}>{c.quietBody}</p>
                   </div>
                 )}
-
-                <div className={styles.agWeeklyWrap}>
-                  <h3 className={styles.agWeeklyTitle}>{c.weeklyTitle}</h3>
-                  <ul className={styles.agWeekly}>
-                    {weekly.map((w) => (
-                      <li className={styles.agWeeklyCard} key={w.id}>
-                        <span className={styles.agItemTime}>{w.when}</span>
-                        <span className={styles.agItemTitle}>{w.title}</span>
-                        <span className={styles.agItemMeta}>{w.line}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
 
                 <div className={styles.agButtons}>
                   {ahead.length > 0 && (

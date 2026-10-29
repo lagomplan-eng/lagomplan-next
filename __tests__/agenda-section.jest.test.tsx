@@ -112,20 +112,18 @@ describe('AgendaSection — chips and rows', () => {
   })
 })
 
-describe('AgendaSection — empty range, weekly row, buttons', () => {
-  test('quiet range (Wed–Thu in December): friendly card and still the weekly row', async () => {
+describe('AgendaSection — empty range, buttons', () => {
+  test('quiet range (Wed–Thu in December): friendly card, no list', async () => {
     const { rows, container } = await mount({ stay: { arrival: '2026-12-09', nights: 1 } })
     expect(rows()).toHaveLength(0)
     expect(screen.getByText('Días tranquilos en la ciudad')).toBeInTheDocument()
     expect(screen.getByText(/No hay eventos especiales en estas fechas/)).toBeInTheDocument()
-    expect(container.querySelectorAll('[class*="agWeeklyCard"]')).toHaveLength(4)
   })
 
-  test('"Cada semana en la ciudad": all four recurring items, the viewpoint included', async () => {
+  test('the "Cada semana en la ciudad" row is gone (no weekly cards, no title)', async () => {
     const { container } = await mount()
-    expect(screen.getByText('Cada semana en la ciudad')).toBeInTheDocument()
-    expect(container.querySelectorAll('[class*="agWeeklyCard"]')).toHaveLength(4)
-    expect(screen.getAllByText(/Torre Latinoamericana/).length).toBeGreaterThan(0)
+    expect(container.querySelectorAll('[class*="agWeekly"]')).toHaveLength(0)
+    expect(container.textContent).not.toMatch(/Cada semana en la ciudad/)
   })
 
   test('"Más adelante →" opens an inline panel (aria-expanded/controls) and closes again', async () => {
@@ -137,8 +135,11 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
     const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
     expect(panel).toHaveTextContent('Corona Capital')
     expect(panel).toHaveTextContent('20 – 22 NOV')
-    expect(panel!.textContent!.match(/después de tu estancia/g)).toHaveLength(7) // every row starts after check-out
-    expect(panel).not.toHaveTextContent('Gran Premio de México') // overlaps the stay → already in a chip
+    expect(panel!.textContent!.match(/después de tu estancia/g)).toHaveLength(14) // the events that start after check-out (Nov 3)
+    expect(panel).toHaveTextContent('Flow Fest') // the researched November events are there
+    expect(panel).toHaveTextContent('Gran Premio de México') // the whole month: the stay's own events too, each once
+    expect(panel!.querySelectorAll('li')).toHaveLength(21)
+    expect(panel).toHaveTextContent('23 OCT – 8 NOV') // a multi-day event keeps its full dates
     await click(btn)
     expect(document.getElementById(btn.getAttribute('aria-controls')!)).toBeNull()
   })
@@ -161,8 +162,8 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
     expect(trips).toHaveAttribute('aria-expanded', 'true')
   })
 
-  test('a button whose panel would be empty is hidden (Production, stay = all of November: nothing else verified)', async () => {
-    await mount({ showUnverified: false, stay: { arrival: '2026-11-01', nights: 29 } })
+  test('a button whose panel would be empty is hidden (stay in December: no event listed for that month yet)', async () => {
+    await mount({ showUnverified: false, stay: { arrival: '2026-12-09', nights: 1 } })
     expect(screen.queryByRole('button', { name: 'Próximamente en noviembre →' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Escapadas de un día →' })).toBeInTheDocument()
   })
@@ -175,7 +176,7 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
   test('29 nights from Nov 1 → the four ranges of the brief', async () => {
     const { chips } = await mount({ stay: { arrival: '2026-11-01', nights: 29 } })
     expect(chips().map((c) => c.textContent)).toEqual(['1 – 8 nov', '9 – 15 nov', '16 – 22 nov', '23 – 30 nov'])
-    expect(screen.queryByRole('button', { name: 'Próximamente en noviembre →' })).toBeNull() // the parade ended before check-in: nothing is left to list
+    expect(screen.getByRole('button', { name: 'Próximamente en noviembre →' })).toBeInTheDocument() // the whole month, stay included
   })
 
   test('a stay change resets the selection to the first chip', async () => {
@@ -189,14 +190,13 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
 describe('AgendaSection — ES / EN', () => {
   test('same structure in both languages; every visible string switches', async () => {
     const es = await mount({ lang: 'es' })
-    const shape = (u: typeof es) => ({ chips: u.chips().length, rows: u.rows().length, links: u.container.querySelectorAll('a').length, weekly: u.container.querySelectorAll('[class*="agWeeklyCard"]').length })
+    const shape = (u: typeof es) => ({ chips: u.chips().length, rows: u.rows().length, links: u.container.querySelectorAll('a').length })
     const esShape = shape(es); es.unmount()
     const en = await mount({ lang: 'en' })
     expect(shape(en)).toEqual(esShape)
     expect(screen.getByRole('heading', { name: "While you're here" })).toBeInTheDocument()
     expect(en.chips().map((c) => c.textContent)).toEqual(['Oct 30 – Nov 1', 'Nov 2 – 3'])
     expect(screen.getByText("What's happening in the city during your stay.")).toBeInTheDocument()
-    expect(screen.getByText('Every week in the city')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Coming up in November →' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Day trips →' })).toBeInTheDocument()
     expect(screen.getByText('Great Day of the Dead Parade')).toBeInTheDocument()
@@ -207,7 +207,7 @@ describe('AgendaSection — ES / EN', () => {
 
   test('English: "To confirm" pill and the "after your stay" tag', async () => {
     const { container, click } = await mount({ lang: 'en', stay: { arrival: '2026-11-06', nights: 3 } })
-    expect(screen.getByText('To confirm')).toBeInTheDocument()
+    expect(screen.getAllByText('To confirm').length).toBeGreaterThan(0)
     await click(screen.getByRole('button', { name: 'Coming up in November →' }))
     expect(container.textContent).toContain('after your stay')
   })
@@ -264,5 +264,56 @@ describe('GuiaClient — opt-in, kill switch, weekly section intact elsewhere', 
       expect(container.textContent).not.toContain("While you're here")
       unmount()
     }
+  })
+
+  const before = (a: Element, b: Element) => !!(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+
+  test('agenda layout: Experiences sit right under the 48-hour itinerary, before the agenda', async () => {
+    const slug = 'host-me-tender-alejandro'
+    await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
+    const itin = screen.getByText('Two days, walked and checked.')
+    const exp = screen.getByRole('heading', { name: 'Worth the time' })
+    const agendaH = screen.getByRole('heading', { name: "While you're here" })
+    expect(before(itin, exp)).toBe(true)
+    expect(before(exp, agendaH)).toBe(true)
+  })
+
+  test('other guides: Experiences stay AFTER the weekly section, unchanged (Livin and host-me-tender)', async () => {
+    for (const partner of [getPartner('livin_condesa')!, buildDemoPartner(getDemoProspect('host-me-tender')!)]) {
+      const { unmount } = await renderGuide(partner, { agenda, showUnverified: true })
+      const weekly = screen.getByRole('heading', { name: 'Every week in Mexico City' })
+      expect(before(weekly, screen.getByRole('heading', { name: 'Worth the time' }))).toBe(true)
+      unmount()
+    }
+  })
+
+  test('kill switch: Experiences go back after the weekly section too', async () => {
+    mockEnabled = false
+    const slug = 'host-me-tender-alejandro'
+    await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
+    expect(before(screen.getByRole('heading', { name: 'Every week in Mexico City' }), screen.getByRole('heading', { name: 'Worth the time' }))).toBe(true)
+    expect(screen.queryByRole('button', { name: /practical details/i })).toBeNull()
+  })
+
+  test('agenda layout: "A calm start to your trip" is collapsible (collapsed by default, content stays in the DOM)', async () => {
+    const slug = 'host-me-tender-alejandro'
+    const { container } = await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
+    expect(screen.getByRole('heading', { name: 'A calm start to your trip' })).toBeInTheDocument()
+    const toggle = screen.getByRole('button', { name: /Show the practical details/ })
+    const body = container.querySelector('#practico-body') as HTMLElement
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(toggle).toHaveAttribute('aria-controls', 'practico-body')
+    expect(body).not.toBeVisible()
+    expect(body.querySelectorAll('[class*="cardGrid"] > *').length).toBeGreaterThan(5)
+    await act(async () => { fireEvent.click(toggle) })
+    expect(screen.getByRole('button', { name: /Hide the practical details/ })).toHaveAttribute('aria-expanded', 'true')
+    expect(body).toBeVisible()
+  })
+
+  test('other guides: the practical section is not collapsible (no toggle, nothing hidden)', async () => {
+    const { container } = await renderGuide(getPartner('livin_condesa')!, { agenda, showUnverified: true })
+    expect(screen.queryByRole('button', { name: /practical details/i })).toBeNull()
+    expect(container.querySelector('#practico-body')).toBeNull() // markup identical to before: no id, no hidden attribute
+    expect(container.querySelector('#practico [hidden]')).toBeNull()
   })
 })

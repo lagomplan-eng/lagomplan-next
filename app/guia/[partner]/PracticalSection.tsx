@@ -42,18 +42,22 @@ import { withPilotUtm } from '../../../lib/guia/links'
 import styles from './guia.module.css'
 import { withPlaceholders } from './placeholders'
 
-const MODULE_COPY: Record<Lang, { eyebrow: string; heading: string; subhead: string; beforeChip: string }> = {
+const MODULE_COPY: Record<Lang, { eyebrow: string; heading: string; subhead: string; beforeChip: string; show: string; hide: string }> = {
   en: {
     eyebrow: 'THE PRACTICAL PART',
     heading: 'A calm start to your trip',
     subhead: 'Before you arrive, during your stay, and the errands in between.',
     beforeChip: 'Before you arrive',
+    show: 'Show the practical details',
+    hide: 'Hide the practical details',
   },
   es: {
     eyebrow: 'LO PRÁCTICO',
     heading: 'Un comienzo tranquilo',
     subhead: 'Antes de llegar, durante tu estancia, y los pendientes de en medio.',
     beforeChip: 'Antes de llegar',
+    show: 'Ver lo práctico',
+    hide: 'Ocultar lo práctico',
   },
 }
 
@@ -183,6 +187,7 @@ export default function PracticalSection({
   zone,
   pilotId,
   lang,
+  collapsible = false,
 }: {
   arrivalItems: ArrivalItem[]
   faqGroups: ResolvedFaqGroup[] | null
@@ -192,6 +197,8 @@ export default function PracticalSection({
   zone?: string
   pilotId: string
   lang: Lang
+  /** Agenda layout: the body folds behind a toggle (collapsed by default). It stays in the DOM, only hidden. */
+  collapsible?: boolean
 }) {
   const copy = MODULE_COPY[lang]
   const subhead = practicalSubhead?.[lang] ?? copy.subhead
@@ -243,6 +250,9 @@ export default function PracticalSection({
   const [hydrated, setHydrated] = useState(false)
   const [activePanel, setActivePanel] = useState<PanelId | null>(panels[0]?.id ?? null)
   const [highlightAnchor, setHighlightAnchor] = useState<string | null>(null)
+  const [open, setOpen] = useState(!collapsible)
+  // A card that is being scrolled to / highlighted (deep link, cross-link) must be visible.
+  useEffect(() => { if (highlightAnchor) setOpen(true) }, [highlightAnchor])
 
   // Mount: flip to the chip UI, and resolve any landing anchor to its panel
   // before the first interactive paint.
@@ -307,9 +317,18 @@ export default function PracticalSection({
                 ))}
               </div>
             )}
+            {collapsible && (
+              <button
+                type="button"
+                className={styles.practicalToggle}
+                aria-expanded={open}
+                aria-controls="practico-body"
+                onClick={() => setOpen((o) => !o)}
+              >{open ? copy.hide : copy.show}<span aria-hidden> {open ? '↑' : '↓'}</span></button>
+            )}
           </div>
 
-          <div className={styles.secBody}>
+          <div className={styles.secBody} id={collapsible ? 'practico-body' : undefined} hidden={collapsible && !open ? true : undefined}>
             {!hydrated ? (
               panels.map((panel) => (
                 <div className={styles.faqStackedGroup} key={panel.id}>

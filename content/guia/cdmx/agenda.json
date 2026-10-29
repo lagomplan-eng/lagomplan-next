@@ -425,6 +425,169 @@
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena",
       "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page (façades lit for Día de Muertos)."
+    },
+    {
+      "id": "ultra-mexico",
+      "title": {
+        "es": "Ultra México",
+        "en": "Ultra México"
+      },
+      "category": "music",
+      "start": "2026-11-07",
+      "end": "2026-11-08",
+      "dateLabel": {
+        "es": "7–8 nov",
+        "en": "7–8 Nov"
+      },
+      "place": {
+        "es": "Estadio Banorte",
+        "en": "Estadio Banorte"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: events.lat guide (https://events.lat/es/blog/cdmx-noviembre-2026-conciertos-eventos). Single source: confirm dates and venue with the organizer; add the official link."
+    },
+    {
+      "id": "vitae-fest",
+      "title": {
+        "es": "Vitae Fest",
+        "en": "Vitae Fest"
+      },
+      "category": "music",
+      "start": "2026-11-08",
+      "end": "2026-11-08",
+      "dateLabel": {
+        "es": "Dom 8 nov",
+        "en": "Sun 8 Nov"
+      },
+      "place": {
+        "es": "Zócalo",
+        "en": "Zócalo"
+      },
+      "time": {
+        "es": "17:00",
+        "en": "5pm"
+      },
+      "cost": {
+        "es": "Gratis",
+        "en": "Free"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: Telediario (https://www.telediario.mx/comunidad/zocalo-cdmx-conciertos-gratis-en-noviembre-2026-fechas-y-cartelera): free, from 17:00, with Enjambre, Mau y Ricky, Alexander Hacha and Banda Los Recoditos, announced by the Autoridad del Centro Histórico. Confirm and add the official link."
+    },
+    {
+      "id": "garbage-zocalo",
+      "title": {
+        "es": "Garbage",
+        "en": "Garbage"
+      },
+      "category": "music",
+      "start": "2026-11-14",
+      "end": "2026-11-14",
+      "dateLabel": {
+        "es": "Sáb 14 nov",
+        "en": "Sat 14 Nov"
+      },
+      "place": {
+        "es": "Zócalo",
+        "en": "Zócalo"
+      },
+      "time": {
+        "es": "20:00",
+        "en": "8pm"
+      },
+      "cost": {
+        "es": "Gratis",
+        "en": "Free"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: Telediario (https://www.telediario.mx/comunidad/zocalo-cdmx-conciertos-gratis-en-noviembre-2026-fechas-y-cartelera): free, 20:00, announced by the Secretaría de Cultura de la Ciudad de México. Confirm and add the official link."
+    },
+    {
+      "id": "time-warp-mexico",
+      "title": {
+        "es": "Time Warp México",
+        "en": "Time Warp México"
+      },
+      "category": "music",
+      "start": "2026-11-20",
+      "end": "2026-11-21",
+      "dateLabel": {
+        "es": "20–21 nov",
+        "en": "20–21 Nov"
+      },
+      "place": {
+        "es": "Expo Santa Fe",
+        "en": "Expo Santa Fe"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: events.lat guide (https://events.lat/es/blog/cdmx-noviembre-2026-conciertos-eventos). Single source: confirm dates and venue; add the official link."
+    },
+    {
+      "id": "nfl-mexico-city-game",
+      "title": {
+        "es": "NFL: 49ers vs. Vikings",
+        "en": "NFL: 49ers vs. Vikings"
+      },
+      "category": "sport",
+      "start": "2026-11-22",
+      "end": "2026-11-22",
+      "dateLabel": {
+        "es": "Dom 22 nov",
+        "en": "Sun 22 Nov"
+      },
+      "place": {
+        "es": "Estadio Banorte",
+        "en": "Estadio Banorte"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: events.lat guide (https://events.lat/es/blog/cdmx-noviembre-2026-conciertos-eventos). Single source: confirm the matchup, date and venue; add the official link."
+    },
+    {
+      "id": "flow-fest",
+      "title": {
+        "es": "Flow Fest",
+        "en": "Flow Fest"
+      },
+      "category": "music",
+      "start": "2026-11-28",
+      "end": "2026-11-29",
+      "dateLabel": {
+        "es": "28–29 nov",
+        "en": "28–29 Nov"
+      },
+      "place": {
+        "es": "Autódromo Hermanos Rodríguez",
+        "en": "Autódromo Hermanos Rodríguez"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: events.lat guide (https://events.lat/es/blog/cdmx-noviembre-2026-conciertos-eventos), also listed by the Rio Times. Confirm lineup and venue; add the official link."
+    },
+    {
+      "id": "aitana-auditorio",
+      "title": {
+        "es": "Aitana",
+        "en": "Aitana"
+      },
+      "category": "music",
+      "start": "2026-11-05",
+      "end": "2026-11-07",
+      "dateLabel": {
+        "es": "5–7 nov",
+        "en": "5–7 Nov"
+      },
+      "place": {
+        "es": "Auditorio Nacional",
+        "en": "Auditorio Nacional"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "Source: events.lat guide (https://events.lat/es/blog/cdmx-noviembre-2026-conciertos-eventos): 5, 6 and 7 Nov. Eventworld lists 5 and 7: confirm the exact dates; add the official link."
     }
   ],
   "recurring": [

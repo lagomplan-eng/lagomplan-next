@@ -522,6 +522,50 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     .map((item) => applyArrivalOverride(item, partner.arrivalItemOverrides, lang))
     .map((item) => ({ ...item, body: interp(item.body) }))
 
+  // Agenda layout (demos with display.agenda + agenda data, kill switch on): Experiences move under the
+  // 48-hour itinerary and "A calm start to your trip" becomes collapsible. Everything else is unchanged.
+  const agendaLayout = AGENDA_ENABLED && !!partner.agenda && !!agenda
+
+  const experiencesSection = (
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow}>{t.expEyebrow}</span>
+              <h2 className={styles.h2}>{t.expH2}</h2>
+              <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
+              <p className={styles.expPartnerNote}>
+                {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
+              </p>
+            </div>
+            <div className={styles.secBody}>
+              <div className={styles.expGrid}>
+                {ownTours.length > 0
+                  ? ownTours.map((tour) => (
+                      <ExperienceCard
+                        exp={ownAsExperience(tour)} own={tour} t={t} lang={lang}
+                        partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={tour.id}
+                        onOwnBook={() => track('host_guide_tour_click', { partner: partner.slug, city: city.id, tour: tour.id })}
+                      />
+                    ))
+                  : t.experiences.filter((exp) => exp.id !== 'exp-own-plan').map((exp) => (
+                      <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
+                    ))}
+              </div>
+              {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
+                <ExperienceBanner
+                  exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id}
+                  operator={ownTours.length > 0 && partner.operatorWhatsApp
+                    ? { label: partner.operatorWhatsApp.label[lang], href: partner.operatorWhatsApp.href }
+                    : undefined}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+
   return (
     <div
       className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}`}
@@ -675,6 +719,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         zone={partner.zone}
         pilotId={partner.pilotId}
         lang={lang}
+        collapsible={agendaLayout}
       />
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
@@ -775,6 +820,9 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </div>
       </section>
 
+      {/* Agenda layout: Experiences sit right under the 48-hour itinerary (otherwise they stay after the weekly/agenda section). */}
+      {agendaLayout && experiencesSection}
+
       {/* ── 5. Explore by mood ─────────────────────────────── */}
       <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
         <div className={styles.container}>
@@ -817,7 +865,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 6. Today ───────────────────────────────────────── */}
-      {AGENDA_ENABLED && partner.agenda && agenda ? (
+      {agendaLayout ? (
         <AgendaSection
           lang={lang}
           agenda={agenda}
@@ -849,44 +897,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
       )}
 
-      {/* ── 7. Experiences ─────────────────────────────────── */}
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <div className={styles.secHead}>
-              <span className={styles.eyebrow}>{t.expEyebrow}</span>
-              <h2 className={styles.h2}>{t.expH2}</h2>
-              <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
-              <p className={styles.expPartnerNote}>
-                {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
-              </p>
-            </div>
-            <div className={styles.secBody}>
-              <div className={styles.expGrid}>
-                {ownTours.length > 0
-                  ? ownTours.map((tour) => (
-                      <ExperienceCard
-                        exp={ownAsExperience(tour)} own={tour} t={t} lang={lang}
-                        partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={tour.id}
-                        onOwnBook={() => track('host_guide_tour_click', { partner: partner.slug, city: city.id, tour: tour.id })}
-                      />
-                    ))
-                  : t.experiences.filter((exp) => exp.id !== 'exp-own-plan').map((exp) => (
-                      <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
-                    ))}
-              </div>
-              {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
-                <ExperienceBanner
-                  exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id}
-                  operator={ownTours.length > 0 && partner.operatorWhatsApp
-                    ? { label: partner.operatorWhatsApp.label[lang], href: partner.operatorWhatsApp.href }
-                    : undefined}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
+      {!agendaLayout && experiencesSection}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
       <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
