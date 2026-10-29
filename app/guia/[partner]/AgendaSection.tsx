@@ -24,7 +24,7 @@ import { useEffect, useId, useMemo, useState } from 'react'
 import type { Lang } from '../../../content/guia/types'
 import type { Agenda } from '../../../content/guia/agenda/schema'
 import { AGENDA_COPY } from '../../../content/guia/agenda/copy'
-import { aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, weeklyCards, type AgendaRow } from '../../../content/guia/agenda/logic'
+import { aheadLabel, aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, weeklyCards, type AgendaRow } from '../../../content/guia/agenda/logic'
 import SectionHead from './SectionHead'
 import WeatherCard from './WeatherCard'
 import styles from './guia.module.css'
@@ -71,6 +71,7 @@ export default function AgendaSection({ lang, agenda, showUnverified, stay, onTr
         <span className={styles.agItemBody}>
           <span className={styles.agItemTitle}>{r.title}</span>
           <span className={styles.agItemMeta}>{r.meta}</span>
+          {r.afterStay && <span className={styles.agItemTime}>{c.afterStay}</span>}
           {r.toVerify && <span className={styles.agPill}>{c.toConfirm}</span>}
         </span>
       </>
@@ -142,7 +143,7 @@ export default function AgendaSection({ lang, agenda, showUnverified, stay, onTr
 
                 <div className={styles.agButtons}>
                   {ahead.length > 0 && (
-                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'ahead'} aria-controls={`${uid}-ahead`} onClick={() => toggle('ahead')}>{c.ahead}</button>
+                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'ahead'} aria-controls={`${uid}-ahead`} onClick={() => toggle('ahead')}>{aheadLabel(win!, today!, lang)}</button>
                   )}
                   {agenda.dayTrips.length > 0 && (
                     <button type="button" className={styles.agBtn} aria-expanded={panel === 'trips'} aria-controls={`${uid}-trips`} onClick={() => toggle('trips')}>{c.trips}</button>

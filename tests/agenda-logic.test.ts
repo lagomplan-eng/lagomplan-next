@@ -11,7 +11,7 @@ import path from 'node:path'
 import { loadAgenda } from '../content/guia/agenda'
 import { AGENDA_COPY } from '../content/guia/agenda/copy'
 import {
-  addDays, aheadRows, daysBetween, formatRange, highlightId, mexicoToday, rowsForRange, splitRanges, stayWindow,
+  addDays, aheadLabel, aheadRows, aheadWindow, daysBetween, formatRange, highlightId, mexicoToday, rowsForRange, splitRanges, stayWindow,
   timeRank, visibleEvents, weekdayOf, weeklyCards,
 } from '../content/guia/agenda/logic'
 
@@ -80,15 +80,15 @@ const win = R('2026-10-30', '2026-11-03')
 const ctx = (showUnverified: boolean, lang: 'es' | 'en' = 'es', w = win) => ({ lang, today: T, showUnverified, window: w })
 const r1 = rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(true))
 const r2 = rowsForRange(agenda, R('2026-11-02', '2026-11-03'), ctx(true))
-eq('range 1 (Preview): 6 dated events overlapping + 3 weekly occurrences', [r1.filter((r) => r.kind === 'event').length, r1.filter((r) => r.kind === 'recurring').length], [6, 3])
-eq('range 2 (Preview): the events that end Nov 2 + Tuesday lucha libre', r2.map((r) => r.id), ['cacao-para-todos', 'feria-no-estaban-muertos', 'ofrenda-monumental-zocalo', 'el-camino-reforma', 'lucha-libre-arena-mexico@2026-11-03'])
+eq('range 1 (Preview): 8 dated events overlapping + 3 weekly occurrences', [r1.filter((r) => r.kind === 'event').length, r1.filter((r) => r.kind === 'recurring').length], [8, 3])
+eq('range 2 (Preview): events still running on Nov 2–3 (Cacao ended Nov 1) + Tuesday lucha libre', r2.map((r) => r.id), ['feria-no-estaban-muertos', 'ofrenda-monumental-zocalo', 'el-camino-reforma', 'festival-chapultepec-dia-de-muertos', 'iluminacion-zocalo', 'lucha-libre-arena-mexico@2026-11-03'])
 eq('overlap: an event ending the day before the range is not listed', rowsForRange(agenda, R('2026-11-02', '2026-11-03'), ctx(true)).some((r) => r.id === 'gp-mexico-f1'), false)
 eq('overlap: an event starting the day after the range is not listed', rowsForRange(agenda, R('2026-10-30', '2026-10-30'), ctx(true)).some((r) => r.id === 'desfile-dia-de-muertos'), false)
 eq('overlap: touching either edge counts', ['2026-10-31', '2026-10-30'].map((d) => rowsForRange(agenda, R(d, d), ctx(true)).some((r) => r.id === 'desfile-dia-de-muertos')), [true, false])
 eq('sorted by date, then time: first rows of range 1', r1.slice(0, 5).map((r) => r.id), ['cacao-para-todos', 'feria-no-estaban-muertos', 'gp-mexico-f1', 'ofrenda-monumental-zocalo', 'el-camino-reforma'])
 eq('sorted: dates never go backwards', r1.every((r, i) => i === 0 || r1[i - 1].date <= r.date), true)
-eq('sorted: within a day, timed rows come before untimed ones', (() => { const rows = rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(true)).filter((r) => r.date === '2026-10-30'); return rows.map((r) => r.time) })(), ['10–19 h', '11–19 h', null, null, null, 'Noche'])
-eq('left column: single day = "SÁB 31", multi-day clipped to the range = "30 – 1"', [r1.find((r) => r.id === 'desfile-dia-de-muertos')!.dateLabel, r1.find((r) => r.id === 'cacao-para-todos')!.dateLabel, r2.find((r) => r.id === 'cacao-para-todos')!.dateLabel], ['SÁB 31', '30 – 1', 'LUN 2'])
+eq('sorted: within a day, timed rows come before untimed ones', (() => { const rows = rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(true)).filter((r) => r.date === '2026-10-30'); return rows.map((r) => r.time) })(), ['10–19 h', '11–19 h', null, null, null, null, null, 'Noche'])
+eq('left column: single day = "SÁB 31", multi-day clipped to the range = "30 – 1"', [r1.find((r) => r.id === 'desfile-dia-de-muertos')!.dateLabel, r1.find((r) => r.id === 'cacao-para-todos')!.dateLabel, r2.find((r) => r.id === 'feria-no-estaban-muertos')!.dateLabel], ['SÁB 31', '30 – 1', 'LUN 2'])
 eq('left column: time under the date', [r1.find((r) => r.id === 'desfile-dia-de-muertos')!.time, r1.find((r) => r.id === 'gp-mexico-f1')!.time], ['14:00', null])
 eq('right column: "Categoría · lugar"', r1.find((r) => r.id === 'gp-mexico-f1')!.meta, 'Deporte · Autódromo Hermanos Rodríguez')
 eq('right column: an event with no venue shows only the category', rowsForRange(agenda, R('2026-11-14', '2026-11-16'), ctx(true, 'es', R('2026-11-13', '2026-11-16'))).find((r) => r.id === 'puente-de-la-revolucion')!.meta, 'Ciudad')
@@ -104,36 +104,53 @@ eq('empty range: Wed–Thu has no event and no weekly occurrence', rowsForRange(
 eq('NOT empty: Thu–Sun still has the Fri/Sat/Sun weekly things', rowsForRange(agenda, R('2026-12-10', '2026-12-13'), ctx(true, 'es', R('2026-12-10', '2026-12-13'))).map((r) => r.id), ['lucha-libre-arena-mexico@2026-12-11', 'bazar-sabado-san-angel@2026-12-12', 'muevete-en-bici@2026-12-13'])
 // highlight
 eq('highlight: the featured Desfile inside the stay', highlightId(agenda, win, T, true), 'desfile-dia-de-muertos')
-eq('highlight: label is appended to its row only', [r1.find((r) => r.id === 'desfile-dia-de-muertos')!.meta, r1.filter((r) => r.highlight).length], ['Cultura · Paseo de la Reforma → Zócalo · lo más grande de tu estancia', 1])
+eq('highlight: label is appended to its row only', [r1.find((r) => r.id === 'desfile-dia-de-muertos')!.meta, r1.filter((r) => r.highlight).length], ['Cultura · Paseo de la Reforma (Diana Cazadora) → Zócalo · lo más grande de tu estancia', 1])
 eq('highlight EN label', rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(true, 'en')).find((r) => r.highlight)!.meta.endsWith('· the highlight of your stay'), true)
 eq('highlight: with two featured events in the stay, only the FIRST by date', highlightId(agenda, R('2026-10-30', '2026-11-25'), T, true), 'desfile-dia-de-muertos')
 eq('highlight: a stay with only Corona Capital highlights it', highlightId(agenda, R('2026-11-18', '2026-11-24'), T, true), 'corona-capital')
 eq('highlight: none when the stay has no featured event', highlightId(agenda, R('2026-11-02', '2026-11-12'), T, true), null)
-eq('highlight: a to_verify featured event is not a highlight in Production (it is hidden)', highlightId(agenda, win, T, false), null)
+eq('highlight: the parade is verified now → the highlight is the same in Production', highlightId(agenda, win, T, false), 'desfile-dia-de-muertos')
+eq('highlight: …and the label shows on the 30 oct – 1 nov chip in Production, on that row only', rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(false)).filter((r) => r.highlight).map((r) => r.id), ['desfile-dia-de-muertos'])
 // environment gating
-eq('Production: verified only → range 1 = F1 + 3 weekly, range 2 = 1 weekly', [rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(false)).map((r) => r.id), rowsForRange(agenda, R('2026-11-02', '2026-11-03'), ctx(false)).map((r) => r.id)], [['gp-mexico-f1', 'lucha-libre-arena-mexico@2026-10-30', 'bazar-sabado-san-angel@2026-10-31', 'muevete-en-bici@2026-11-01'], ['lucha-libre-arena-mexico@2026-11-03']])
-eq('Production: nothing is flagged toVerify', [rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(false)).some((r) => r.toVerify), r1.filter((r) => r.toVerify).length], [false, 5])
-eq('gating: an unverified event never leaks into Production', visibleEvents(agenda.events, T, false).map((e) => e.id), ['gp-mexico-f1'])
-eq('expired events are hidden (Nov 3: the Oct 29–Nov 2 ones are gone)', rowsForRange(agenda, R('2026-11-03', '2026-11-08'), { lang: 'es', today: '2026-11-03', showUnverified: true, window: R('2026-11-03', '2026-11-08') }).filter((r) => r.kind === 'event').map((r) => r.id), ['el-camino-reforma', 'food-wine-mirando-al-sur', 'nba-mexico-city-game'])
+eq('Production: verified only → range 1 = 8 events (the parade included) + 3 weekly, range 2 = 5 events + 1 weekly', [rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(false)).map((r) => r.id), rowsForRange(agenda, R('2026-11-02', '2026-11-03'), ctx(false)).map((r) => r.id)], [['cacao-para-todos', 'feria-no-estaban-muertos', 'gp-mexico-f1', 'ofrenda-monumental-zocalo', 'el-camino-reforma', 'festival-chapultepec-dia-de-muertos', 'iluminacion-zocalo', 'lucha-libre-arena-mexico@2026-10-30', 'desfile-dia-de-muertos', 'bazar-sabado-san-angel@2026-10-31', 'muevete-en-bici@2026-11-01'], ['feria-no-estaban-muertos', 'ofrenda-monumental-zocalo', 'el-camino-reforma', 'festival-chapultepec-dia-de-muertos', 'iluminacion-zocalo', 'lucha-libre-arena-mexico@2026-11-03']])
+eq('nothing is flagged toVerify in range 1 any more (Production and Preview)', [rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(false)).some((r) => r.toVerify), r1.filter((r) => r.toVerify).map((r) => r.id)], [false, []])
+eq('gating: Production sees exactly the verified events, never a to_verify one', visibleEvents(agenda.events, T, false).every((e) => e.status === 'verified') && visibleEvents(agenda.events, T, false).length === 12, true)
+eq('gating: the to_verify ones are the three still-unconfirmed', agenda.events.filter((e) => e.status === 'to_verify').map((e) => e.id), ['food-wine-mirando-al-sur', 'letape-cdmx', 'carrera-del-ring'])
+eq('expired events are hidden (Nov 3: the ones that ended Nov 1–2 are gone)', rowsForRange(agenda, R('2026-11-03', '2026-11-08'), { lang: 'es', today: '2026-11-03', showUnverified: true, window: R('2026-11-03', '2026-11-08') }).filter((r) => r.kind === 'event').map((r) => r.id), ['el-camino-reforma', 'festival-chapultepec-dia-de-muertos', 'iluminacion-zocalo', 'food-wine-mirando-al-sur', 'nba-mexico-city-game'])
 // Más adelante
 const ahead = aheadRows(agenda, win, { lang: 'es', today: T, showUnverified: true })
-eq('ahead: events that START after the window ends, up to +30 days', ahead.map((r) => r.id), ['food-wine-mirando-al-sur', 'nba-mexico-city-game', 'karol-g', 'puente-de-la-revolucion', 'letape-cdmx', 'corona-capital', 'carrera-del-ring'])
-eq('ahead: dates carry the month', ahead.map((r) => r.dateLabel), ['7 – 8 NOV', 'SÁB 7 NOV', 'VIE 13 NOV', '14 – 16 NOV', 'DOM 15 NOV', '20 – 22 NOV', 'DOM 29 NOV'])
-eq('ahead: nothing already shown in the window is repeated', ahead.some((r) => ['desfile-dia-de-muertos', 'el-camino-reforma', 'cacao-para-todos'].includes(r.id)), false)
-eq('ahead: stops at +30 days', aheadRows(agenda, R('2026-10-30', '2026-10-31'), { lang: 'es', today: T, showUnverified: true }).some((r) => r.id === 'carrera-del-ring'), true)
-eq('ahead: …and not beyond (window ends Nov 1 → limit Dec 1 includes Nov 29, window ends Oct 1-2 would not)', aheadRows(agenda, R('2026-10-01', '2026-10-02'), { lang: 'es', today: '2026-10-01', showUnverified: true }).some((r) => r.id === 'carrera-del-ring'), false)
-eq('ahead: empty (button hidden) for a stay that covers all of November', aheadRows(agenda, R('2026-11-01', '2026-11-30'), { lang: 'es', today: T, showUnverified: true }), [])
-eq('ahead: empty in Production (nothing verified starts later)', aheadRows(agenda, win, { lang: 'es', today: T, showUnverified: false }), [])
+const prodAhead = aheadRows(agenda, win, { lang: 'es', today: T, showUnverified: false })
+eq('ahead window: today → last day of the check-out month, at least +30 days', [aheadWindow(win, T), aheadWindow(R('2026-11-01', '2026-11-03'), '2026-11-20'), aheadWindow(R('2026-12-28', '2027-01-02'), T)], [R(T, '2026-11-30'), R('2026-11-20', '2026-12-20'), R(T, '2027-01-31')])
+eq('ahead window: the end can fall in the next month when today+30 is later', aheadWindow(R('2026-10-30', '2026-11-03'), '2026-11-12'), R('2026-11-12', '2026-12-12'))
+eq('ahead title (ES/EN): the month the window ends in', [aheadLabel(win, T, 'es'), aheadLabel(win, T, 'en'), aheadLabel(R('2026-10-30', '2026-11-03'), '2026-11-12', 'es'), aheadLabel(R('2026-10-30', '2026-11-03'), '2026-11-12', 'en')], ['Próximamente en noviembre →', 'Coming up in November →', 'Próximamente en diciembre →', 'Coming up in December →'])
+eq('ahead (Preview): events that overlap the window and no stay chip, sorted by start', ahead.map((r) => r.id), ['food-wine-mirando-al-sur', 'nba-mexico-city-game', 'karol-g', 'puente-de-la-revolucion', 'letape-cdmx', 'corona-capital', 'carrera-del-ring'])
+eq('ahead (Production): verified only', prodAhead.map((r) => r.id), ['nba-mexico-city-game', 'karol-g', 'puente-de-la-revolucion', 'corona-capital'])
+eq('ahead: each row shows its full date range, with the month', ahead.map((r) => r.dateLabel), ['7 – 8 NOV', 'SÁB 7 NOV', 'VIE 13 NOV', '14 – 16 NOV', 'DOM 15 NOV', '20 – 22 NOV', 'DOM 29 NOV'])
+eq('ahead: every one starts after check-out → tagged "after your stay"', ahead.every((r) => r.afterStay === true), true)
+eq('ahead: nothing that overlaps the stay is repeated', ahead.some((r) => ['desfile-dia-de-muertos', 'el-camino-reforma', 'cacao-para-todos', 'gp-mexico-f1', 'iluminacion-zocalo'].includes(r.id)), false)
+eq('ahead: an event that ended before check-in (the parade, Oct 31) is not listed for a Nov 1–3 stay', aheadRows(agenda, R('2026-11-01', '2026-11-03'), { lang: 'es', today: T, showUnverified: true }).some((r) => r.id === 'desfile-dia-de-muertos'), false)
+eq('ahead: the stay window itself is excluded by overlap, however long', aheadRows(agenda, R('2026-11-01', '2026-11-30'), { lang: 'es', today: T, showUnverified: true }), [])
+{ // stay Nov 20 → 23 with the clock at Nov 1: events over before check-in must not show
+  const late = aheadRows(agenda, R('2026-11-20', '2026-11-23'), { lang: 'es', today: '2026-11-01', showUnverified: true })
+  eq('ahead (stay Nov 20–23, today Nov 1): neither the parade nor the Ofrenda appear', late.some((r) => ['desfile-dia-de-muertos', 'ofrenda-monumental-zocalo'].includes(r.id)), false)
+  eq('ahead (stay Nov 20–23, today Nov 1): only events that end on/after check-in and miss the stay', late.map((r) => r.id), ['carrera-del-ring'])
+  eq('ahead: an event running through check-in but ending before today is hidden by the end >= today rule, one ending after today stays', aheadRows(agenda, R('2026-11-10', '2026-11-12'), { lang: 'es', today: '2026-11-05', showUnverified: true }).map((r) => r.id), ['karol-g', 'puente-de-la-revolucion', 'letape-cdmx', 'corona-capital', 'carrera-del-ring'])
+}
+eq('ahead: a stay ending Oct 31 → window ends Nov 28 (today+30), so Nov 29 is just outside and Nov 22 is in', ['carrera-del-ring', 'corona-capital'].map((id) => aheadRows(agenda, R('2026-10-30', '2026-10-31'), { lang: 'es', today: T, showUnverified: true }).some((r) => r.id === id)), [false, true])
+eq('ahead: …and not an event past the window end (stay in early Oct, today Oct 1)', aheadRows(agenda, R('2026-10-01', '2026-10-02'), { lang: 'es', today: '2026-10-01', showUnverified: true }).some((r) => r.id === 'carrera-del-ring'), false)
+eq('ahead: labels in English', aheadRows(agenda, win, { lang: 'en', today: T, showUnverified: false }).map((r) => r.dateLabel), ['SAT 7 NOV', 'FRI 13 NOV', '14 – 16 NOV', '20 – 22 NOV'])
+eq('ahead: empty when nothing qualifies (button hidden)', aheadRows({ events: agenda.events.filter((e) => e.status === 'verified' && e.end < '2026-11-02') }, win, { lang: 'es', today: T, showUnverified: false }), [])
 // time ordering helper
 eq('timeRank handles 24h, ranges, am/pm and unknowns', [timeRank('14:00'), timeRank('10–19 h'), timeRank('2 pm'), timeRank('8am–2pm'), timeRank('12 am'), timeRank('Noche'), timeRank(null)].map((n) => n), [840, 600, 840, 480, 0, 1441, 1441])
 eq('EN and ES order the same rows the same way', ['es', 'en'].map((l) => rowsForRange(agenda, R('2026-10-30', '2026-11-01'), ctx(true, l as 'es' | 'en')).map((r) => r.id)).reduce((a, b) => (JSON.stringify(a) === JSON.stringify(b) ? a : ['MISMATCH'])).length > 1, true)
 
 // ── ES / EN parity ──
+eq('copy: the ahead title carries a {month} slot and the tag exists in both languages', [AGENDA_COPY.es.ahead.includes('{month}'), AGENDA_COPY.en.ahead.includes('{month}'), AGENDA_COPY.es.afterStay, AGENDA_COPY.en.afterStay], [true, true, 'después de tu estancia', 'after your stay'])
 eq('copy: ES and EN have exactly the same keys', Object.keys(AGENDA_COPY.es).sort(), Object.keys(AGENDA_COPY.en).sort())
 eq('copy: no empty string in either language', Object.entries(AGENDA_COPY).flatMap(([l, c]) => Object.entries(c).filter(([, v]) => !String(v).replace(/,/g, '').trim()).map(([k]) => `${l}.${k}`)), [])
 eq('copy: weekday and month lists have 7 / 12 entries in both languages', (['es', 'en'] as const).map((l) => [AGENDA_COPY[l].weekdays.length, AGENDA_COPY[l].weekdaysShort.length, AGENDA_COPY[l].monthsShort.length]), [[7, 7, 12], [7, 7, 12]])
 eq('copy: the brief\'s exact strings', [AGENDA_COPY.es.subtitle, AGENDA_COPY.en.subtitle, AGENDA_COPY.es.weeklyTitle, AGENDA_COPY.en.weeklyTitle, AGENDA_COPY.es.ahead, AGENDA_COPY.en.ahead, AGENDA_COPY.es.trips, AGENDA_COPY.en.trips, AGENDA_COPY.es.quietTitle, AGENDA_COPY.en.quietTitle, AGENDA_COPY.es.highlight, AGENDA_COPY.en.highlight],
-  ['Lo que pasa en la ciudad durante tu estancia.', "What's happening in the city during your stay.", 'Cada semana en la ciudad', 'Every week in the city', 'Más adelante →', 'Coming up →', 'Escapadas de un día →', 'Day trips →', 'Días tranquilos en la ciudad', 'Quiet days in the city', 'lo más grande de tu estancia', 'the highlight of your stay'])
+  ['Lo que pasa en la ciudad durante tu estancia.', "What's happening in the city during your stay.", 'Cada semana en la ciudad', 'Every week in the city', 'Próximamente en {month} →', 'Coming up in {month} →', 'Escapadas de un día →', 'Day trips →', 'Días tranquilos en la ciudad', 'Quiet days in the city', 'lo más grande de tu estancia', 'the highlight of your stay'])
 eq('copy: the neutral pill names no operator', [AGENDA_COPY.es.toConfirm, AGENDA_COPY.en.toConfirm], ['Por confirmar', 'To confirm'])
 eq('data: every event and recurring item has both languages', [...agenda.events.map((e) => e.title), ...agenda.recurring.map((r) => r.title), ...agenda.recurring.map((r) => r.when_label), ...agenda.recurring.map((r) => r.line)].every((t) => t.es && t.en), true)
 eq('data: every event with a time has it in both languages', agenda.events.filter((e) => e.time).every((e) => e.time!.es && e.time!.en), true)
@@ -143,7 +160,7 @@ eq('data: every event with a time has it in both languages', agenda.events.filte
   const run = (extra: string[], env: Record<string, string> = {}) => spawnSync('npx', ['tsx', 'scripts/agenda-check.ts', ...extra], { encoding: 'utf8', env: { ...process.env, ...env } })
   const r = run(['--today', T])
   eq('agenda:check exits 0 on the seed', r.status, 0)
-  eq('agenda:check lists the 12 to_verify events and the 1 verified', /to_verify \(12\)/.test(r.stdout) && /verified \(1\)/.test(r.stdout) && r.stdout.includes('gp-mexico-f1'), true)
+  eq('agenda:check lists the 3 to_verify events and the 12 verified', /to_verify \(3\)/.test(r.stdout) && /verified \(12\)/.test(r.stdout) && r.stdout.includes('gp-mexico-f1'), true)
   eq('agenda:check reports no leftover placeholders', r.stdout.includes('left in any string: none'), true)
   eq('agenda:check lists the recurring items and the viewpoint that has no weekdays', r.stdout.includes('mirador-torre-latinoamericana') && r.stdout.includes('only in "Cada semana en la ciudad"'), true)
   eq('agenda:check flags the weeks with no verified event', /no verified event/.test(r.stdout), true)
@@ -153,7 +170,7 @@ eq('data: every event with a time has it in both languages', agenda.events.filte
   stale.events.find((e: any) => e.id === 'gp-mexico-f1').end = '2026-12-31'
   fs.writeFileSync(tmp, JSON.stringify(stale))
   const later = run(['--today', '2026-11-20'], { AGENDA_FILE: tmp })
-  eq('agenda:check flags a verification older than 14 days', /verified more than 14 days ago: 1/.test(later.stdout) && later.stdout.includes('re-verify'), true)
+  eq('agenda:check flags a verification older than 14 days', /verified more than 14 days ago: \d+/.test(later.stdout) && /gp-mexico-f1 \(verified 2026-10-22, 29 days ago\)/.test(later.stdout) && later.stdout.includes('re-verify'), true)
   const fresh = run(['--today', '2026-11-03'], { AGENDA_FILE: tmp })
   eq('…but not at 12 days', /verified more than 14 days ago: none/.test(fresh.stdout), true)
   stale.events[0].title.es = 'Mal [lugar]'

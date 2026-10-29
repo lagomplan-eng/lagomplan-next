@@ -12,7 +12,9 @@ export interface AgendaCopy {
   subtitle: string
   rangesLabel: string
   weeklyTitle: string
+  /** Button label; {month} is the month of the end of the "coming up" window. */
   ahead: string
+  afterStay: string
   trips: string
   quietTitle: string
   quietBody: string
@@ -23,6 +25,7 @@ export interface AgendaCopy {
   weekdays: string[] // 0 = Sunday
   weekdaysShort: string[]
   monthsShort: string[]
+  monthsLong: string[]
   catFood: string
   catCulture: string
   catSport: string
@@ -38,7 +41,8 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     subtitle: 'Lo que pasa en la ciudad durante tu estancia.',
     rangesLabel: 'Fechas de tu estancia',
     weeklyTitle: 'Cada semana en la ciudad',
-    ahead: 'Más adelante →',
+    ahead: 'Próximamente en {month} →',
+    afterStay: 'después de tu estancia',
     trips: 'Escapadas de un día →',
     quietTitle: 'Días tranquilos en la ciudad',
     quietBody: 'No hay eventos especiales en estas fechas. Buen momento para lo de cada semana o para salir de la ciudad.',
@@ -49,6 +53,7 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
     weekdaysShort: ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'],
     monthsShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
+    monthsLong: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
     catFood: 'Comida',
     catCulture: 'Cultura',
     catSport: 'Deporte',
@@ -62,7 +67,8 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     subtitle: "What's happening in the city during your stay.",
     rangesLabel: 'Dates of your stay',
     weeklyTitle: 'Every week in the city',
-    ahead: 'Coming up →',
+    ahead: 'Coming up in {month} →',
+    afterStay: 'after your stay',
     trips: 'Day trips →',
     quietTitle: 'Quiet days in the city',
     quietBody: 'There are no special events on these dates. A good time for the weekly highlights or to get out of the city.',
@@ -73,6 +79,7 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
     weekdaysShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
     monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    monthsLong: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
     catFood: 'Food',
     catCulture: 'Culture',
     catSport: 'Sport',
