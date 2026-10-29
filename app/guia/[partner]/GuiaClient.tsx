@@ -52,6 +52,7 @@ import StayGlance from './StayGlance'
 import SectionHead from './SectionHead'
 import AgendaSection from './AgendaSection'
 import type { Agenda } from '../../../content/guia/agenda/schema'
+import { AGENDA_ENABLED } from '../../../content/guia/agenda/config'
 import styles from './guia.module.css'
 
 const ICONS: Record<IconKey, LucideIcon> = {
@@ -371,11 +372,11 @@ export interface DemoMeta { slug: string; prospectName: string }
 
 /** recordVisits: true only on production deployments (VERCEL_ENV, read on the
  *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
-export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = true }: {
+export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false }: {
   partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
   /** Validated agenda data (server-loaded). Used only when partner.agenda is set. */
   agenda?: Agenda
-  /** Render events still "to_verify" (Preview / local). The page passes false on Production. */
+  /** Render events still "to_verify" (Preview / local on /demo). Default false: /guia/* and Production never show them. */
   showUnverified?: boolean
 }) {
   const [lang, setLang] = useState<Lang>('en')
@@ -816,15 +817,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 6. Today ───────────────────────────────────────── */}
-      {partner.agenda && agenda ? (
+      {AGENDA_ENABLED && partner.agenda && agenda ? (
         <AgendaSection
           lang={lang}
           agenda={agenda}
           showUnverified={showUnverified}
-          alwaysItems={t.todayItems.map((ti) => ({ ...ti, body: interp(ti.body) }))}
-          hostName={partner.displayName}
-          hostLogo={partner.brand?.logo ? <BrandLogo src={partner.brand.logo} alt={partner.displayName} className={styles.agHostLogo} /> : undefined}
-          hostPick={partner.agenda.hostPick}
+          stay={{ arrival: stay.arrival, nights: stay.nights }}
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
       ) : (

@@ -33,7 +33,11 @@
       "url": "https://visitmexico.com/es/actividad/28/desfile-de-dia-de-muertos-2025-en-cdmx",
       "featured": true,
       "status": "to_verify",
-      "checkNote": "The source is the 2025 page: confirm the 2026 date, time and route."
+      "checkNote": "The source is the 2025 page: confirm the 2026 date, time and route.",
+      "time": {
+        "es": "14:00",
+        "en": "2 pm"
+      }
     },
     {
       "id": "cacao-para-todos",
@@ -60,14 +64,14 @@
         "es": "10:00–19:00",
         "en": "10:00–19:00"
       },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
-      },
       "url": "https://www.gastrolabweb.com/donde-comer/2026/10/18/festival-cacao-para-todos-2026-fechas-sede-y-bebidas-en-cdmx-70420.html",
       "featured": false,
       "status": "to_verify",
-      "checkNote": "Confirm the price."
+      "checkNote": "Confirm the price.",
+      "time": {
+        "es": "10–19 h",
+        "en": "10am–7pm"
+      }
     },
     {
       "id": "gp-mexico-f1",
@@ -91,15 +95,15 @@
         "en": "Mexico City Grand Prix weekend at the Autódromo Hermanos Rodríguez."
       },
       "hours": {
-        "es": "Carrera el domingo 1 de noviembre · [hora de la carrera]",
-        "en": "Race on Sunday 1 November · [race time]"
+        "es": "Carrera el domingo 1 de noviembre",
+        "en": "Race on Sunday 1 November"
       },
       "url": "https://www.formula1.com/en/racing/2026/mexico",
       "featured": false,
       "status": "verified",
       "verifiedAt": "2026-10-22",
       "verifiedBy": "Elena",
-      "checkNote": "Dates confirmed on formula1.com (2026-10-22). The page shows the race at 20:00 without a time zone, so the time is left as a placeholder. The price was removed: it is not on that page."
+      "checkNote": "Dates confirmed on formula1.com (2026-10-22). The page shows the race at 20:00 without a time zone, so no clock time is shown. The price was removed: it is not on that page."
     },
     {
       "id": "ofrenda-monumental-zocalo",
@@ -121,10 +125,6 @@
       "why": {
         "es": "Ofrenda monumental de Día de Muertos en el Centro Histórico.",
         "en": "Monumental Day of the Dead ofrenda in the Historic Center."
-      },
-      "hours": {
-        "es": "[horario]",
-        "en": "[hours]"
       },
       "cost": {
         "es": "Gratis",
@@ -160,14 +160,14 @@
         "es": "11:00–19:00",
         "en": "11:00–19:00"
       },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
-      },
       "url": "https://mncp.cultura.gob.mx/event/feria-no-estaban-muertos-andaban-de-parranda/",
       "featured": false,
       "status": "to_verify",
-      "checkNote": "Confirm the price."
+      "checkNote": "Confirm the price.",
+      "time": {
+        "es": "11–19 h",
+        "en": "11am–7pm"
+      }
     },
     {
       "id": "el-camino-reforma",
@@ -189,10 +189,6 @@
       "why": {
         "es": "Iluminación de Día de Muertos en el Paseo de la Reforma.",
         "en": "Day of the Dead illumination on Paseo de la Reforma."
-      },
-      "hours": {
-        "es": "[horario]",
-        "en": "[hours]"
       },
       "cost": {
         "es": "Gratis",
@@ -228,10 +224,6 @@
         "es": "Sáb 13:00–22:00 · Dom 13:00–19:00",
         "en": "Sat 1:00–10:00 pm · Sun 1:00–7:00 pm"
       },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
-      },
       "url": "https://robbreportenespanol.com/travel/experiencias/food-wine-festival-2026-el-encuentro-gastronomico-que-reunira-a-mas-de-80-chefs-en-cdmx/",
       "featured": false,
       "status": "to_verify",
@@ -258,14 +250,6 @@
         "es": "Partido de la NBA en la Arena CDMX; equipos por confirmar.",
         "en": "NBA game at Arena CDMX; teams to be confirmed."
       },
-      "hours": {
-        "es": "[horario]",
-        "en": "[hours]"
-      },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
-      },
       "url": "https://www.mexicocity.cdmx.gob.mx/turismo-deportivo-en-la-ciudad-de-mexico/cartelera-de-encuentros-deportivos/?lang=en",
       "featured": false,
       "status": "to_verify",
@@ -284,21 +268,9 @@
         "es": "Dom 15 nov",
         "en": "Sun 15 Nov"
       },
-      "place": {
-        "es": "[lugar]",
-        "en": "[place]"
-      },
       "why": {
         "es": "Rodada ciclista de 40, 60 o 115 km.",
         "en": "Cycling ride of 40, 60 or 115 km."
-      },
-      "hours": {
-        "es": "[horario]",
-        "en": "[hours]"
-      },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
       },
       "url": "https://www.tritour.org/eventos/letape-cdmx",
       "featured": false,
@@ -318,26 +290,156 @@
         "es": "Dom 29 nov",
         "en": "Sun 29 Nov"
       },
-      "place": {
-        "es": "[lugar]",
-        "en": "[place]"
-      },
       "why": {
         "es": "Carrera de 5 y 10 km, con función de lucha libre en la meta.",
         "en": "5 and 10 km race, with a lucha libre show at the finish."
-      },
-      "hours": {
-        "es": "[horario]",
-        "en": "[hours]"
-      },
-      "cost": {
-        "es": "[costo]",
-        "en": "[cost]"
       },
       "url": "https://www.asdeporte.com/evento/carrera-del-ring-2026-k5c/datos-del-evento",
       "featured": false,
       "status": "to_verify",
       "checkNote": "Venue, time and price to confirm."
+    },
+    {
+      "id": "corona-capital",
+      "title": {
+        "es": "Corona Capital",
+        "en": "Corona Capital"
+      },
+      "category": "music",
+      "start": "2026-11-20",
+      "end": "2026-11-22",
+      "dateLabel": {
+        "es": "20–22 nov",
+        "en": "20–22 Nov"
+      },
+      "place": {
+        "es": "Autódromo Hermanos Rodríguez (Curva 4)",
+        "en": "Autódromo Hermanos Rodríguez (Curva 4)"
+      },
+      "url": "https://www.record.com.mx/historia/corona-capital-2026-confirma-a-the-strokes-gorillaz-y-twenty-one-pilots-2026051903244224452",
+      "featured": true,
+      "status": "to_verify",
+      "checkNote": "Dates and venue match the cited page (20–22 Nov 2026, Autódromo Hermanos Rodríguez). \"Curva 4\" is not on that page: confirm. Times unknown."
+    },
+    {
+      "id": "karol-g",
+      "title": {
+        "es": "Karol G",
+        "en": "Karol G"
+      },
+      "category": "music",
+      "start": "2026-11-13",
+      "end": "2026-11-13",
+      "dateLabel": {
+        "es": "Vie 13 nov",
+        "en": "Fri 13 Nov"
+      },
+      "place": {
+        "es": "Estadio GNP Seguros",
+        "en": "Estadio GNP Seguros"
+      },
+      "url": "https://www.nmas.com.mx/entretenimiento/nuevas-fechas-corona-capital-2026-cuando-sera-festival-de-musica-en-cdmx/",
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "The cited N+ article mentions Karol G on 13 Nov at Estadio GNP Seguros (it is mainly about Corona Capital): confirm with the venue or promoter. Time unknown."
+    },
+    {
+      "id": "puente-de-la-revolucion",
+      "title": {
+        "es": "Puente de la Revolución",
+        "en": "Revolution Day long weekend"
+      },
+      "category": "city",
+      "start": "2026-11-14",
+      "end": "2026-11-16",
+      "dateLabel": {
+        "es": "14–16 nov",
+        "en": "14–16 Nov"
+      },
+      "featured": false,
+      "status": "to_verify",
+      "checkNote": "City-wide, no venue and no source yet: confirm the dates of the long weekend."
+    }
+  ],
+  "recurring": [
+    {
+      "id": "muevete-en-bici",
+      "title": {
+        "es": "Muévete en Bici, Reforma",
+        "en": "Muévete en Bici, Reforma"
+      },
+      "weekdays": [
+        0
+      ],
+      "time": {
+        "es": "8–14 h",
+        "en": "8am–2pm"
+      },
+      "when_label": {
+        "es": "Domingos · 8–14 h",
+        "en": "Sundays · 8am–2pm"
+      },
+      "line": {
+        "es": "Reforma cierra a los coches: ciclistas, corredores y préstamo gratuito de bicis.",
+        "en": "Reforma closes to cars for cyclists, runners and free bike loans."
+      }
+    },
+    {
+      "id": "lucha-libre-arena-mexico",
+      "title": {
+        "es": "Lucha libre, Arena México",
+        "en": "Lucha libre, Arena México"
+      },
+      "weekdays": [
+        2,
+        5
+      ],
+      "time": {
+        "es": "Noche",
+        "en": "Evening"
+      },
+      "when_label": {
+        "es": "Martes y viernes",
+        "en": "Tuesdays and Fridays"
+      },
+      "line": {
+        "es": "Martes popular, viernes espectacular: el viernes es el cartel grande.",
+        "en": "Tuesday popular, Friday spectacular; Friday has the bigger card."
+      }
+    },
+    {
+      "id": "bazar-sabado-san-angel",
+      "title": {
+        "es": "Bazar Sábado, San Ángel",
+        "en": "Bazar Sábado, San Ángel"
+      },
+      "weekdays": [
+        6
+      ],
+      "when_label": {
+        "es": "Sábados",
+        "en": "Saturdays"
+      },
+      "line": {
+        "es": "Arte y artesanía en una plaza colonial empedrada.",
+        "en": "Art and crafts in a cobblestone colonial plaza."
+      }
+    },
+    {
+      "id": "mirador-torre-latinoamericana",
+      "title": {
+        "es": "Mirador Torre Latinoamericana",
+        "en": "Mirador Torre Latinoamericana"
+      },
+      "weekdays": [],
+      "when_label": {
+        "es": "Al atardecer",
+        "en": "At sunset"
+      },
+      "line": {
+        "es": "Los cielos suelen despejarse después de la lluvia de la tarde.",
+        "en": "Clearest skies tend to follow the afternoon rain."
+      }
     }
   ],
   "dayTrips": [

@@ -3,261 +3,169 @@
 /**
  * app/guia/[partner]/AgendaSection.tsx
  *
- * "Mientras estás aquí" / "While you're here" — the dated city agenda. It
- * replaces the weekly section ("Every week in Mexico City") on guides that opt
- * in (demo.json guide.display.agenda); the live WeatherCard stays above it and
- * the weekly items live on in the "Siempre en la ciudad" pill.
+ * "Mientras estás aquí" / "While you're here" — what happens in the city DURING THE
+ * GUEST'S STAY. It replaces the weekly section ("Every week in Mexico City") on guides
+ * that opt in (demo.json guide.display.agenda) and can be switched off for all of them
+ * with AGENDA_ENABLED (content/guia/agenda/config.ts).
  *
- * Collapsed by default. Open: pills (this month · next month · spare day ·
- * always), then the host pick. Everything reuses the guide's own pieces:
- * SectionHead, WeatherCard, the filterChip pills, the experience card image +
- * details typography, the weekly rows, withPlaceholders.
+ * The stay window comes from ?llegada & ?noches (check-out day included); without a
+ * valid pair it is today … today + 13 days. The window is cut into calendar weeks
+ * (Mon–Sun) shown as date-only chips; each chip lists, in one list, the dated events that
+ * overlap it plus every occurrence of the weekly things. Below: "Cada semana en la
+ * ciudad", and two buttons that open "Más adelante" (+30 days) and the day trips.
  *
- * Dates are computed IN THE BROWSER after mount (America/Mexico_City): the page
- * is statically generated, so computing "this month" at build time would freeze
- * it. Before mount only the closed header renders (summary reserved, empty).
- * Unverified events render only when `showUnverified` (Preview / local), each
- * with the existing "Por confirmar" pill; Production gets verified ones only.
+ * Dates are computed IN THE BROWSER after mount (America/Mexico_City): pages are static,
+ * so computing them at build time would freeze the window. Before mount only the header
+ * renders. Reuses SectionHead, WeatherCard (kept above the section, unchanged) and the
+ * guide's tokens / DM Mono; the chips have their own classes so the guide's filter-chip count stays comparable.
  */
 
-import { useEffect, useId, useState, type ReactNode } from 'react'
-import { Moon } from 'lucide-react'
-import type { Lang, TodayItem } from '../../../content/guia/types'
-import type { Agenda, AgendaEvent, Category } from '../../../content/guia/agenda/schema'
-import { AGENDA_COPY, type AgendaCopy } from '../../../content/guia/agenda/copy'
-import { addMonths, mexicoToday, monthPlans, monthTabLabel, shortMonth, summaryLine, type MonthPlans } from '../../../content/guia/agenda/logic'
+import { useEffect, useId, useMemo, useState } from 'react'
+import type { Lang } from '../../../content/guia/types'
+import type { Agenda } from '../../../content/guia/agenda/schema'
+import { AGENDA_COPY } from '../../../content/guia/agenda/copy'
+import { aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, weeklyCards, type AgendaRow } from '../../../content/guia/agenda/logic'
 import SectionHead from './SectionHead'
 import WeatherCard from './WeatherCard'
-import { withPlaceholders } from './placeholders'
 import styles from './guia.module.css'
 
-const COLLAPSED_LIMIT = 4
-
-type TabId = 'm0' | 'm1' | 'trips' | 'always'
+type Panel = 'ahead' | 'trips' | null
 
 export interface AgendaSectionProps {
   lang: Lang
   agenda: Agenda
-  /** Preview / local: also render events still "to_verify". Production: verified only. */
+  /** Preview / local on /demo: also render events still "to_verify", each with a neutral "Por confirmar" pill. */
   showUnverified: boolean
-  /** The city's recurring weekly items (already interpolated): the "Siempre en la ciudad" pill. */
-  alwaysItems: TodayItem[]
-  hostName: string
-  /** The operator's logo node (GuiaClient passes its BrandLogo). Missing → highlighted placeholder. */
-  hostLogo?: ReactNode
-  hostPick?: Partial<Record<Lang, string>>
+  /** From the link (?llegada, ?noches), already validated by parseStay. */
+  stay: { arrival?: string; nights?: number }
   onTrack?: (name: string, params: Record<string, string | number | boolean | undefined>) => void
 }
 
-const catLabel = (c: AgendaCopy, cat: Category) => ({ food: c.catFood, culture: c.catCulture, sport: c.catSport, outdoors: c.catOutdoors })[cat]
-
-function DateBlock({ e, lang }: { e: AgendaEvent; lang: Lang }) {
-  const multi = e.end !== e.start
-  return (
-    <div className={styles.agDate}>
-      <span className={styles.agDay}>{Number(e.start.slice(8))}</span>
-      <span className={styles.agMon}>{shortMonth(e.start, lang)}</span>
-      {multi && <span className={styles.agMon}>→ {Number(e.end.slice(8))} {shortMonth(e.end, lang)}</span>}
-    </div>
-  )
-}
-
-export default function AgendaSection({ lang, agenda, showUnverified, alwaysItems, hostName, hostLogo, hostPick, onTrack }: AgendaSectionProps) {
+export default function AgendaSection({ lang, agenda, showUnverified, stay, onTrack }: AgendaSectionProps) {
   const c = AGENDA_COPY[lang]
-  const panelId = useId()
+  const uid = useId()
   const [today, setToday] = useState<string | null>(null)
-  const [expanded, setExpanded] = useState(false)
-  const [tab, setTab] = useState<TabId>('m0')
-  const [openId, setOpenId] = useState<string | null>(null)
-  const [showAll, setShowAll] = useState(false)
+  const [sel, setSel] = useState(0)
+  const [panel, setPanel] = useState<Panel>(null)
 
   useEffect(() => { setToday(mexicoToday()) }, [])
 
-  const ym0 = today ? today.slice(0, 7) : null
-  const ym1 = ym0 ? addMonths(ym0, 1) : null
-  const m0 = today && ym0 ? monthPlans(agenda, ym0, today, showUnverified) : null
-  const m1 = today && ym1 ? monthPlans(agenda, ym1, today, showUnverified) : null
+  const win = useMemo(() => (today ? stayWindow(stay, today) : null), [today, stay.arrival, stay.nights])
+  const ranges = useMemo(() => (win ? splitRanges(win.start, win.end) : []), [win])
+  const sig = ranges.map((r) => `${r.start}_${r.end}`).join('|')
+  useEffect(() => { setSel(0); setPanel(null) }, [sig])
 
-  const pick = (next: TabId) => {
-    setTab(next); setOpenId(null); setShowAll(false)
-    onTrack?.('host_guide_agenda_tab', { tab: next })
-  }
+  const ctx = win && today ? { lang, today, showUnverified, window: win } : null
+  const range = ranges[Math.min(sel, ranges.length - 1)]
+  const rows = ctx && range ? rowsForRange(agenda, range, ctx) : []
+  const ahead = ctx && win ? aheadRows(agenda, win, { lang, today: ctx.today, showUnverified }) : []
+  const weekly = weeklyCards(agenda, lang)
 
-  const renderMonth = (m: MonthPlans) => {
-    if (m.total === 0) {
-      return (
-        <div className={`${styles.insiderCard} ${styles.agEmpty}`}>
-          <Moon size={32} color="var(--sage)" strokeWidth={1.5} aria-hidden />
-          <h3 className={styles.agEmptyTitle}>{c.emptyTitle}</h3>
-          <p className={styles.agBody}>{c.emptyBody}</p>
-          <button type="button" className={styles.agBtn} onClick={() => pick('trips')}>{c.emptyCta}</button>
-        </div>
-      )
-    }
-    const shown = showAll ? m.compact : m.compact.slice(0, COLLAPSED_LIMIT)
+  const renderRow = (r: AgendaRow) => {
+    const body = (
+      <>
+        <span className={styles.agItemDate}>
+          <span>{r.dateLabel}</span>
+          {r.time && <span className={styles.agItemTime}>{r.time}</span>}
+        </span>
+        <span className={styles.agItemBody}>
+          <span className={styles.agItemTitle}>{r.title}</span>
+          <span className={styles.agItemMeta}>{r.meta}</span>
+          {r.toVerify && <span className={styles.agPill}>{c.toConfirm}</span>}
+        </span>
+      </>
+    )
     return (
-      <div className={styles.agList}>
-        {m.featured && (
-          <article className={styles.expCard}>
-            <div className={`${styles.expImg} ${styles.expImgPlaceholder} ${styles.agFeaturedImg}`}>
-              <mark className={styles.placeholder}>{c.photo}</mark>
-              <span className={styles.agBadge}>{c.featuredBadge}</span>
-            </div>
-            <div className={styles.expBody}>
-              <div className={styles.expTextBlock}>
-                <span className={styles.agFeaturedDate}>{m.featured.dateLabel[lang]}</span>
-                <h3 className={styles.agFeaturedTitle}>{m.featured.title[lang]}</h3>
-                <p className={styles.agBody}>{withPlaceholders(m.featured.why[lang])}</p>
-                {m.featured.status === 'to_verify' && <span className={styles.agPill}>{withPlaceholders(c.toConfirm)}</span>}
-              </div>
-              <div className={styles.expActions}>
-                <a className={styles.link} href={m.featured.url} target="_blank" rel="noopener noreferrer">{c.official}</a>
-              </div>
-            </div>
-          </article>
+      <li key={r.id}>
+        {r.url ? (
+          <a className={`${styles.agItem} ${styles.agItemLink}`} href={r.url} target="_blank" rel="noopener noreferrer">
+            {body}
+            <span className={styles.agArrow} aria-hidden>↗</span>
+            <span className={styles.agSr}>{c.officialSite}</span>
+          </a>
+        ) : (
+          <div className={styles.agItem}>{body}</div>
         )}
-        {shown.map((e) => {
-          const open = openId === e.id
-          const title = e.title[lang]
-          const detailsId = `${panelId}-${e.id}`
-          return (
-            <article className={styles.agCard} key={e.id}>
-              <div className={styles.agRow}>
-                <DateBlock e={e} lang={lang} />
-                <div className={styles.agText}>
-                  <h4 className={styles.agTitle}>{title}</h4>
-                  <span className={styles.agMeta}>{catLabel(c, e.category)} · {withPlaceholders(e.place[lang])}</span>
-                  {e.status === 'to_verify' && <span className={styles.agPill}>{withPlaceholders(c.toConfirm)}</span>}
-                </div>
-                <button
-                  type="button"
-                  className={styles.agPlus}
-                  aria-expanded={open}
-                  aria-controls={detailsId}
-                  aria-label={`${open ? c.detailsHide : c.detailsShow} ${title}`}
-                  onClick={() => { setOpenId(open ? null : e.id); if (!open) onTrack?.('host_guide_agenda_details', { event: e.id }) }}
-                >{open ? '–' : '+'}</button>
-              </div>
-              {open && (
-                <div id={detailsId} className={styles.expDetailsInner}>
-                  <p className={styles.expDetailText}>{withPlaceholders(e.why[lang])}</p>
-                  <p className={styles.expDetailLabel}>{c.dates}</p>
-                  <p className={styles.expDetailText}>{e.dateLabel[lang]}</p>
-                  <p className={styles.expDetailLabel}>{c.hours}</p>
-                  <p className={styles.expDetailText}>{withPlaceholders(e.hours[lang])}</p>
-                  {e.cost && (
-                    <>
-                      <p className={styles.expDetailLabel}>{c.cost}</p>
-                      <p className={styles.expDetailText}>{withPlaceholders(e.cost[lang])}</p>
-                    </>
-                  )}
-                  <p className={styles.expDetailText}>
-                    <a className={styles.link} href={e.url} target="_blank" rel="noopener noreferrer">{c.official}</a>
-                  </p>
-                </div>
-              )}
-            </article>
-          )
-        })}
-        {m.compact.length > COLLAPSED_LIMIT && (
-          <button type="button" className={styles.agBtn} onClick={() => { setShowAll((v) => !v); setOpenId(null) }}>
-            {showAll ? c.showLess : c.showAll.replace('{n}', String(m.total))}
-          </button>
-        )}
-      </div>
+      </li>
     )
   }
 
-  const tabs: { id: TabId; label: string }[] = m0 && m1 && ym0 && ym1
-    ? [
-        { id: 'm0', label: monthTabLabel(ym0, lang) },
-        { id: 'm1', label: monthTabLabel(ym1, lang) },
-        { id: 'trips', label: c.tabTrips },
-        { id: 'always', label: c.tabAlways },
-      ]
-    : []
+  const toggle = (next: Exclude<Panel, null>) => {
+    setPanel((p) => (p === next ? null : next))
+    if (panel !== next) onTrack?.('host_guide_agenda_panel', { panel: next })
+  }
 
   return (
     <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
       <div className={styles.container}>
+        <WeatherCard lang={lang} />
         <div className={styles.secGrid}>
           <SectionHead eyebrow={c.eyebrow} title={c.title} lede={c.subtitle} />
           <div className={styles.secBody}>
-            <WeatherCard lang={lang} />
-            <button
-              type="button"
-              className={styles.agToggle}
-              aria-expanded={expanded}
-              aria-controls={panelId}
-              onClick={() => { setExpanded((v) => !v); onTrack?.('host_guide_agenda_toggle', { open: !expanded }) }}
-            >
-              <span className={styles.agToggleText}>
-                <span className={styles.agToggleLabel}>{expanded ? c.close : c.open}</span>
-                <span className={styles.agSummary}>{m0 && m1 ? summaryLine(m0, m1, lang, c) : ''}</span>
-              </span>
-              <span className={styles.agSign} aria-hidden>{expanded ? '–' : '+'}</span>
-            </button>
-
-            {expanded && m0 && m1 && (
-              <div id={panelId} className={styles.agPanel}>
-                <div className={styles.filterChips} role="group" aria-label={c.title}>
-                  {tabs.map((t) => (
+            {!ctx ? (
+              <div className={styles.agSkeleton} aria-hidden />
+            ) : (
+              <>
+                <div className={styles.agRanges} role="group" aria-label={c.rangesLabel}>
+                  {ranges.map((r, i) => (
                     <button
-                      key={t.id}
+                      key={sig + i}
                       type="button"
-                      aria-pressed={tab === t.id}
-                      className={`${styles.filterChip} ${styles.agChip} ${tab === t.id ? styles.filterChipActive : ''}`}
-                      onClick={() => pick(t.id)}
-                    >{t.label}</button>
+                      aria-pressed={i === sel}
+                      className={`${styles.agChip} ${i === sel ? styles.agChipActive : ''}`}
+                      onClick={() => { setSel(i); onTrack?.('host_guide_agenda_range', { index: i }) }}
+                    >{formatRange(r, lang)}</button>
                   ))}
                 </div>
 
-                {tab === 'm0' && renderMonth(m0)}
-                {tab === 'm1' && renderMonth(m1)}
+                {rows.length > 0 ? (
+                  <ul className={styles.agList}>{rows.map(renderRow)}</ul>
+                ) : (
+                  <div className={styles.agQuiet}>
+                    <h3 className={styles.agQuietTitle}>{c.quietTitle}</h3>
+                    <p className={styles.agQuietBody}>{c.quietBody}</p>
+                  </div>
+                )}
 
-                {tab === 'trips' && (
-                  <div className={styles.agList}>
+                <div className={styles.agWeeklyWrap}>
+                  <h3 className={styles.agWeeklyTitle}>{c.weeklyTitle}</h3>
+                  <ul className={styles.agWeekly}>
+                    {weekly.map((w) => (
+                      <li className={styles.agWeeklyCard} key={w.id}>
+                        <span className={styles.agItemTime}>{w.when}</span>
+                        <span className={styles.agItemTitle}>{w.title}</span>
+                        <span className={styles.agItemMeta}>{w.line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={styles.agButtons}>
+                  {ahead.length > 0 && (
+                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'ahead'} aria-controls={`${uid}-ahead`} onClick={() => toggle('ahead')}>{c.ahead}</button>
+                  )}
+                  {agenda.dayTrips.length > 0 && (
+                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'trips'} aria-controls={`${uid}-trips`} onClick={() => toggle('trips')}>{c.trips}</button>
+                  )}
+                </div>
+
+                {panel === 'ahead' && ahead.length > 0 && <ul id={`${uid}-ahead`} className={styles.agList}>{ahead.map(renderRow)}</ul>}
+                {panel === 'trips' && (
+                  <ul id={`${uid}-trips`} className={styles.agList}>
                     {agenda.dayTrips.map((d) => (
-                      <article className={`${styles.agCard} ${styles.agTrip}`} key={d.id}>
-                        <div className={`${styles.agThumb} ${styles.expImgPlaceholder}`}><mark className={styles.placeholder}>{c.photo}</mark></div>
-                        <div className={styles.agText}>
-                          <span className={styles.agTripLength}>{d.length[lang]}</span>
-                          <h4 className={styles.agTitle}>{d.title[lang]}</h4>
-                          <p className={styles.agBody}>{withPlaceholders(d.why[lang])}</p>
-                          {d.url
-                            ? <a className={styles.link} href={d.url} target="_blank" rel="noopener noreferrer">{c.official}</a>
-                            : <span>{withPlaceholders(c.link)}</span>}
+                      <li key={d.id}>
+                        <div className={styles.agItem}>
+                          <span className={styles.agItemDate}><span>{d.length[lang]}</span></span>
+                          <span className={styles.agItemBody}>
+                            <span className={styles.agItemTitle}>{d.title[lang]}</span>
+                            <span className={styles.agItemMeta}>{d.why[lang]}</span>
+                          </span>
                         </div>
-                      </article>
+                      </li>
                     ))}
-                  </div>
+                  </ul>
                 )}
-
-                {tab === 'always' && (
-                  <div className={styles.spotList}>
-                    {alwaysItems.map((ti, i) => (
-                      <div className={styles.todayRow} key={i}>
-                        <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
-                        <div>
-                          <div className={styles.todayTitle}>{ti.title}</div>
-                          <div className={styles.todayBody}>{ti.body}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                <article className={styles.insiderCard}>
-                  <div className={styles.agHostHead}>
-                    {hostLogo ?? <mark className={styles.placeholder}>[logo]</mark>}
-                    <div className={styles.agText}>
-                      <span className={`${styles.eyebrowMono} ${styles.agHostLabel}`}>{c.hostPickLabel}</span>
-                      <span className={styles.agTitle}>{hostName}</span>
-                    </div>
-                  </div>
-                  <p className={styles.agBody}>{withPlaceholders(hostPick?.[lang] ?? c.hostPickMissing)}</p>
-                </article>
-              </div>
+              </>
             )}
           </div>
         </div>

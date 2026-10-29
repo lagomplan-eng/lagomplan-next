@@ -92,11 +92,11 @@ eq('alejandro == host-me-tender except slug / review / display / tours / attribu
 // ── host-me-tender-agenda: the copy that hosts "Mientras estás aquí" (preview-only) ──
 const ag = getDemoProspect('host-me-tender-agenda')!
 const agPartner = buildDemoPartner(ag)
-eq('agenda demo: opts in to the agenda; no host_pick yet → placeholder', [agPartner.agenda, ag.guide?.host_pick], [{}, undefined])
+eq('agenda demo: opts in to the agenda', agPartner.agenda, true)
 eq('agenda demo: served in Production, with a valid review', [ag.environments, ag.review], [undefined, { by: 'Elena', date: '2026-10-22' }])
-eq('only the agenda demo opts in: every other demo has no agenda', ['host-me-tender', 'host-me-tender-alejandro', 'dave-nat'].map((s) => buildDemoPartner(getDemoProspect(s)!).agenda), [undefined, undefined, undefined])
-const stripAg = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.environments; delete d.guide.display.agenda; return d }
-eq('agenda demo == host-me-tender-alejandro except slug / environments / display.agenda', stripAg(ag), stripAg(getDemoProspect('host-me-tender-alejandro')))
+eq('agenda opt-in: the two Host Me Tender copies; the original and dave-nat stay on the weekly section', ['host-me-tender', 'host-me-tender-alejandro', 'host-me-tender-agenda', 'dave-nat'].map((s) => buildDemoPartner(getDemoProspect(s)!).agenda), [undefined, true, true, undefined])
+const stripAg = (c: any) => { const d = JSON.parse(JSON.stringify(c)); delete d.slug; delete d.environments; return d }
+eq('agenda demo == host-me-tender-alejandro except slug / environments', stripAg(ag), stripAg(getDemoProspect('host-me-tender-alejandro')))
 process.env.VERCEL_ENV = 'production'
 eq('agenda demo is served in Production', getDemoProspect('host-me-tender-agenda')?.slug, 'host-me-tender-agenda')
 delete process.env.VERCEL_ENV

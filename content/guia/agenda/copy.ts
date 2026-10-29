@@ -1,7 +1,8 @@
 // content/guia/agenda/copy.ts
 //
-// ES/EN strings of the "Mientras estás aquí" section. One flat shape per
-// language so a test can assert both have exactly the same keys.
+// ES/EN strings of the "Mientras estás aquí" / "While you're here" section. One flat
+// shape per language so a test can assert both have exactly the same keys. Day and
+// month names are fixed lists (not Intl) so labels never depend on the runtime's ICU.
 
 export type AgendaLang = 'es' | 'en'
 
@@ -9,98 +10,74 @@ export interface AgendaCopy {
   eyebrow: string
   title: string
   subtitle: string
-  open: string
-  close: string
-  plan: string
-  plans: string
-  tabAlways: string
-  tabTrips: string
-  featuredBadge: string
-  showAll: string // {n}
-  showLess: string
-  detailsShow: string // + title
-  detailsHide: string // + title
-  dates: string
-  hours: string
-  cost: string
-  official: string
-  emptyTitle: string
-  emptyBody: string
-  emptyCta: string
-  hostPickLabel: string
-  hostPickMissing: string
-  photo: string
+  rangesLabel: string
+  weeklyTitle: string
+  ahead: string
+  trips: string
+  quietTitle: string
+  quietBody: string
+  highlight: string
   toConfirm: string
-  link: string
+  officialSite: string
+  everyPrefix: string
+  weekdays: string[] // 0 = Sunday
+  weekdaysShort: string[]
+  monthsShort: string[]
   catFood: string
   catCulture: string
   catSport: string
   catOutdoors: string
+  catMusic: string
+  catCity: string
 }
 
 export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
   es: {
     eyebrow: 'La ciudad estos días',
     title: 'Mientras estás aquí',
-    subtitle: 'Lo que pasa en la ciudad este mes y el próximo, elegido por quien la vive.',
-    open: 'Ver la agenda de la ciudad',
-    close: 'Ocultar la agenda',
-    plan: 'plan',
-    plans: 'planes',
-    tabAlways: 'Siempre en la ciudad',
-    tabTrips: 'Si te sobra un día',
-    featuredBadge: 'Destacado del mes',
-    showAll: 'Ver los {n} planes',
-    showLess: 'Ver menos',
-    detailsShow: 'Ver detalles de',
-    detailsHide: 'Ocultar detalles de',
-    dates: 'Fechas',
-    hours: 'Horario',
-    cost: 'Costo',
-    official: 'Sitio oficial →',
-    emptyTitle: 'Mes tranquilo en la ciudad',
-    emptyBody: 'Todavía no tenemos eventos para este mes. Mientras tanto, mira los planes para cuando te sobre un día.',
-    emptyCta: 'Ver «Si te sobra un día» →',
-    hostPickLabel: 'La recomendación del anfitrión',
-    hostPickMissing: '[recomendación del anfitrión]',
-    photo: '[foto]',
-    toConfirm: '[Por confirmar]',
-    link: '[enlace]',
+    subtitle: 'Lo que pasa en la ciudad durante tu estancia.',
+    rangesLabel: 'Fechas de tu estancia',
+    weeklyTitle: 'Cada semana en la ciudad',
+    ahead: 'Más adelante →',
+    trips: 'Escapadas de un día →',
+    quietTitle: 'Días tranquilos en la ciudad',
+    quietBody: 'No hay eventos especiales en estas fechas. Buen momento para lo de cada semana o para salir de la ciudad.',
+    highlight: 'lo más grande de tu estancia',
+    toConfirm: 'Por confirmar',
+    officialSite: 'Abre el sitio oficial',
+    everyPrefix: 'Cada',
+    weekdays: ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'],
+    weekdaysShort: ['DOM', 'LUN', 'MAR', 'MIÉ', 'JUE', 'VIE', 'SÁB'],
+    monthsShort: ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'],
     catFood: 'Comida',
     catCulture: 'Cultura',
     catSport: 'Deporte',
     catOutdoors: 'Aire libre',
+    catMusic: 'Música',
+    catCity: 'Ciudad',
   },
   en: {
     eyebrow: 'The city these days',
     title: "While you're here",
-    subtitle: "What's happening in the city this month and next, picked by people who live here.",
-    open: 'See the city agenda',
-    close: 'Hide the agenda',
-    plan: 'plan',
-    plans: 'plans',
-    tabAlways: 'Always in the city',
-    tabTrips: 'If you have a spare day',
-    featuredBadge: 'Featured this month',
-    showAll: 'See all {n}',
-    showLess: 'See less',
-    detailsShow: 'Show details for',
-    detailsHide: 'Hide details for',
-    dates: 'Dates',
-    hours: 'Hours',
-    cost: 'Cost',
-    official: 'Official site →',
-    emptyTitle: 'A quiet month in the city',
-    emptyBody: "We don't have events for this month yet. In the meantime, see the plans for when you have a spare day.",
-    emptyCta: 'See “If you have a spare day” →',
-    hostPickLabel: "The host's pick",
-    hostPickMissing: '[host recommendation]',
-    photo: '[photo]',
-    toConfirm: '[To confirm]',
-    link: '[link]',
+    subtitle: "What's happening in the city during your stay.",
+    rangesLabel: 'Dates of your stay',
+    weeklyTitle: 'Every week in the city',
+    ahead: 'Coming up →',
+    trips: 'Day trips →',
+    quietTitle: 'Quiet days in the city',
+    quietBody: 'There are no special events on these dates. A good time for the weekly highlights or to get out of the city.',
+    highlight: 'the highlight of your stay',
+    toConfirm: 'To confirm',
+    officialSite: 'Opens the official site',
+    everyPrefix: 'Every',
+    weekdays: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    weekdaysShort: ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'],
+    monthsShort: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
     catFood: 'Food',
     catCulture: 'Culture',
     catSport: 'Sport',
     catOutdoors: 'Outdoors',
+    catMusic: 'Music',
+    catCity: 'City',
   },
 }
