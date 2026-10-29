@@ -15,8 +15,8 @@
         "en": "Sat 31 Oct · 2:00 pm"
       },
       "place": {
-        "es": "Paseo de la Reforma → Zócalo",
-        "en": "Paseo de la Reforma → Zócalo"
+        "es": "Paseo de la Reforma (Diana Cazadora) → Zócalo",
+        "en": "Paseo de la Reforma (Diana Cazadora) → Zócalo"
       },
       "why": {
         "es": "Desfile de Día de Muertos que va de Reforma al Zócalo.",
@@ -30,14 +30,16 @@
         "es": "Gratis",
         "en": "Free"
       },
-      "url": "https://visitmexico.com/es/actividad/28/desfile-de-dia-de-muertos-2025-en-cdmx",
+      "url": "https://www.chilango.com/que-hacer/gran-desfile-de-dia-de-muertos-2026-en-cdmx-fecha-hora-y-que-habra/",
       "featured": true,
-      "status": "to_verify",
-      "checkNote": "The source is the 2025 page: confirm the 2026 date, time and route.",
+      "status": "verified",
+      "checkNote": "Verified by Elena on 2026-10-29. Chilango (2026 article): Saturday 31 Oct, 14:00, from the Glorieta de la Diana Cazadora along Reforma to the Zócalo.",
       "time": {
         "es": "14:00",
         "en": "2 pm"
-      }
+      },
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "cacao-para-todos",
@@ -47,10 +49,10 @@
       },
       "category": "food",
       "start": "2026-10-29",
-      "end": "2026-11-02",
+      "end": "2026-11-01",
       "dateLabel": {
-        "es": "29 oct–2 nov",
-        "en": "29 Oct–2 Nov"
+        "es": "29 oct–1 nov",
+        "en": "29 Oct–1 Nov"
       },
       "place": {
         "es": "Museo Anahuacalli, Coyoacán",
@@ -66,12 +68,14 @@
       },
       "url": "https://www.gastrolabweb.com/donde-comer/2026/10/18/festival-cacao-para-todos-2026-fechas-sede-y-bebidas-en-cdmx-70420.html",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Confirm the price.",
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
       "time": {
         "es": "10–19 h",
         "en": "10am–7pm"
-      }
+      },
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "gp-mexico-f1",
@@ -132,8 +136,10 @@
       },
       "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Confirm the hours."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "feria-no-estaban-muertos",
@@ -162,12 +168,14 @@
       },
       "url": "https://mncp.cultura.gob.mx/event/feria-no-estaban-muertos-andaban-de-parranda/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Confirm the price.",
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
       "time": {
         "es": "11–19 h",
         "en": "11am–7pm"
-      }
+      },
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "el-camino-reforma",
@@ -196,8 +204,10 @@
       },
       "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Confirm the hours."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "food-wine-mirando-al-sur",
@@ -247,13 +257,15 @@
         "en": "Arena CDMX"
       },
       "why": {
-        "es": "Partido de la NBA en la Arena CDMX; equipos por confirmar.",
-        "en": "NBA game at Arena CDMX; teams to be confirmed."
+        "es": "Partido de la NBA en la Arena CDMX; equipos por confirmar. Boletos individuales agotados: solo quedan paquetes de experiencia oficiales.",
+        "en": "NBA game at Arena CDMX; teams to be confirmed. Individual tickets are sold out: only official experience packages remain."
       },
       "url": "https://www.mexicocity.cdmx.gob.mx/turismo-deportivo-en-la-ciudad-de-mexico/cartelera-de-encuentros-deportivos/?lang=en",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Teams, time and price to confirm."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Individual tickets sold out; only official experience packages remain (the note is in \"why\", which the list does not render).",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "letape-cdmx",
@@ -318,8 +330,10 @@
       },
       "url": "https://www.record.com.mx/historia/corona-capital-2026-confirma-a-the-strokes-gorillaz-y-twenty-one-pilots-2026051903244224452",
       "featured": true,
-      "status": "to_verify",
-      "checkNote": "Dates and venue match the cited page (20–22 Nov 2026, Autódromo Hermanos Rodríguez). \"Curva 4\" is not on that page: confirm. Times unknown."
+      "status": "verified",
+      "checkNote": "Verified by Elena on 2026-10-29. Dates and venue match the cited Récord page (20–22 Nov 2026, Autódromo Hermanos Rodríguez); \"Curva 4\" confirmed by press (elimparcial.com, informador.mx). Times unknown.",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "karol-g",
@@ -340,8 +354,10 @@
       },
       "url": "https://www.nmas.com.mx/entretenimiento/nuevas-fechas-corona-capital-2026-cuando-sera-festival-de-musica-en-cdmx/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "The cited N+ article mentions Karol G on 13 Nov at Estadio GNP Seguros (it is mainly about Corona Capital): confirm with the venue or promoter. Time unknown."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
     },
     {
       "id": "puente-de-la-revolucion",
@@ -357,8 +373,58 @@
         "en": "14–16 Nov"
       },
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "City-wide, no venue and no source yet: confirm the dates of the long weekend."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena"
+    },
+    {
+      "id": "festival-chapultepec-dia-de-muertos",
+      "title": {
+        "es": "La Puerta entre dos mundos",
+        "en": "La Puerta entre dos mundos"
+      },
+      "category": "culture",
+      "start": "2026-10-29",
+      "end": "2026-11-04",
+      "dateLabel": {
+        "es": "29 oct–4 nov",
+        "en": "29 Oct–4 Nov"
+      },
+      "place": {
+        "es": "Bosque de Chapultepec, 2ª sección",
+        "en": "Chapultepec Forest, 2nd section"
+      },
+      "url": "https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/",
+      "featured": false,
+      "status": "verified",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page."
+    },
+    {
+      "id": "iluminacion-zocalo",
+      "title": {
+        "es": "Iluminación del Zócalo y el Centro Histórico",
+        "en": "Zócalo and Historic Center lighting"
+      },
+      "category": "city",
+      "start": "2026-10-29",
+      "end": "2026-11-04",
+      "dateLabel": {
+        "es": "29 oct–4 nov",
+        "en": "29 Oct–4 Nov"
+      },
+      "place": {
+        "es": "Zócalo y Centro Histórico",
+        "en": "Zócalo and Historic Center"
+      },
+      "url": "https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/",
+      "featured": false,
+      "status": "verified",
+      "verifiedAt": "2026-10-29",
+      "verifiedBy": "Elena",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page (façades lit for Día de Muertos)."
     }
   ],
   "recurring": [

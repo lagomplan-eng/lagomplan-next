@@ -110,6 +110,8 @@ export interface AgendaRow {
   url: string | null
   toVerify: boolean
   highlight: boolean
+  /** Only in "coming up": the event starts after check-out. */
+  afterStay?: boolean
 }
 
 export interface RowContext {
@@ -199,13 +201,40 @@ export function rowsForRange(agenda: Pick<Agenda, 'events' | 'recurring'>, range
   return sortRows(rows)
 }
 
-/** "Más adelante": events that START after the stay window ends, up to AHEAD_DAYS later. Dates carry the month. */
-export function aheadRows(agenda: Pick<Agenda, 'events'>, window: Range, ctx: Omit<RowContext, 'window'>): AgendaRow[] {
+/** Last day of the month of an ISO date. */
+const lastDayOfMonth = (iso: string) => {
+  const y = Number(iso.slice(0, 4)), m = Number(iso.slice(5, 7))
+  return toIso(Date.UTC(y, m, 1) - 864e5)
+}
+
+/**
+ * The "coming up" window: today → the last day of the check-out month, at least AHEAD_DAYS
+ * (30) from today. Its end falls in the month the section title names.
+ */
+export function aheadWindow(stay: Range, today: string): Range {
+  return { start: today, end: maxIso(lastDayOfMonth(stay.end), addDays(today, AHEAD_DAYS)) }
+}
+
+/** "Próximamente en {mes}" / "Coming up in {month}": the button label, with the month of the window's end. */
+export function aheadLabel(stay: Range, today: string, lang: AgendaLang): string {
+  const c = AGENDA_COPY[lang]
+  const month = c.monthsLong[Number(aheadWindow(stay, today).end.slice(5, 7)) - 1]
+  return c.ahead.replace('{month}', month)
+}
+
+/**
+ * "Coming up": visible events that overlap aheadWindow() and appear in NO stay chip (the
+ * chips cover the whole stay, so: events that do not overlap the stay). Each row carries its
+ * full date range (with the month); `afterStay` marks the ones that start after check-out.
+ * Events that end before max(today, check-in) are left out: they are over before the guest arrives.
+ */
+export function aheadRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit<RowContext, 'window'>): AgendaRow[] {
   const c = AGENDA_COPY[ctx.lang]
-  const limit = addDays(window.end, AHEAD_DAYS)
+  const win = aheadWindow(stay, ctx.today)
   const rows: AgendaRow[] = []
   for (const e of visibleEvents(agenda.events, ctx.today, ctx.showUnverified)) {
-    if (!(e.start > window.end && e.start <= limit)) continue
+    if (!overlaps(e, win) || overlaps(e, stay)) continue
+    if (e.end < maxIso(ctx.today, stay.start)) continue // already over by the time the guest is here (or today)
     const mon = (iso: string) => c.monthsShort[Number(iso.slice(5, 7)) - 1].toUpperCase()
     const dateLabel = e.start === e.end
       ? `${dow(c, e.start)} ${day(e.start)} ${mon(e.start)}`
@@ -223,6 +252,7 @@ export function aheadRows(agenda: Pick<Agenda, 'events'>, window: Range, ctx: Om
       url: e.url ?? null,
       toVerify: e.status === 'to_verify',
       highlight: false,
+      afterStay: e.start > stay.end,
     })
   }
   return sortRows(rows)

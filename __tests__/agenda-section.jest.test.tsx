@@ -94,19 +94,21 @@ describe('AgendaSection — chips and rows', () => {
   })
 
   test('Preview: unverified rows get the neutral pill (no operator name); the verified one does not', async () => {
-    const { rows, container } = await mount({ showUnverified: true })
-    const f1 = rows().find((r) => /Gran Premio de México/.test(r.textContent!))!
-    expect(f1.querySelector('[class*="agPill"]')).toBeNull()
-    const parade = rows().find((r) => /Gran Desfile/.test(r.textContent!))!
-    expect(parade.querySelector('[class*="agPill"]')).toHaveTextContent('Por confirmar')
+    const { rows, container } = await mount({ showUnverified: true, stay: { arrival: '2026-11-06', nights: 3 } }) // Nov 6–9: Food & Wine (to_verify) + NBA (verified)
+    const fw = rows().find((r) => /Food & Wine/.test(r.textContent!))!
+    expect(fw.querySelector('[class*="agPill"]')).toHaveTextContent('Por confirmar')
+    const nba = rows().find((r) => /NBA Mexico City Game/.test(r.textContent!))!
+    expect(nba.querySelector('[class*="agPill"]')).toBeNull()
     expect(container.textContent).not.toMatch(/Host Me Tender|Livin/)
   })
 
-  test('Production: verified events only — F1 plus the weekly occurrences, no pills, no highlight', async () => {
+  test('Production: verified events only — the parade (verified) carries the highlight, no pills', async () => {
     const { rows, container } = await mount({ showUnverified: false })
-    expect(rows().map((r) => r.querySelector('[class*="agItemTitle"]')!.textContent)).toEqual(['Gran Premio de México de F1', 'Lucha libre, Arena México', 'Bazar Sábado, San Ángel', 'Muévete en Bici, Reforma'])
+    expect(rows().map((r) => r.querySelector('[class*="agItemTitle"]')!.textContent)).toEqual(['Festival Cacao para Todos', 'Feria «No estaban muertos, andaban de parranda»', 'Gran Premio de México de F1', 'Ofrenda monumental del Zócalo', 'El Camino · iluminación de Día de Muertos', 'La Puerta entre dos mundos', 'Iluminación del Zócalo y el Centro Histórico', 'Lucha libre, Arena México', 'Gran Desfile de Día de Muertos', 'Bazar Sábado, San Ángel', 'Muévete en Bici, Reforma'])
     expect(container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
-    expect(container.textContent).not.toContain('lo más grande')
+    expect(container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
+    expect(container.textContent!.match(/lo más grande de tu estancia/g)).toHaveLength(1)
+    expect(rows().find((r) => /lo más grande/.test(r.textContent!))).toHaveTextContent('Gran Desfile de Día de Muertos')
   })
 })
 
@@ -128,13 +130,15 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
 
   test('"Más adelante →" opens an inline panel (aria-expanded/controls) and closes again', async () => {
     const { click, container } = await mount()
-    const btn = screen.getByRole('button', { name: 'Más adelante →' })
+    const btn = screen.getByRole('button', { name: 'Próximamente en noviembre →' })
     expect(btn).toHaveAttribute('aria-expanded', 'false')
     await click(btn)
     expect(btn).toHaveAttribute('aria-expanded', 'true')
     const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
     expect(panel).toHaveTextContent('Corona Capital')
     expect(panel).toHaveTextContent('20 – 22 NOV')
+    expect(panel!.textContent!.match(/después de tu estancia/g)).toHaveLength(7) // every row starts after check-out
+    expect(panel).not.toHaveTextContent('Gran Premio de México') // overlaps the stay → already in a chip
     await click(btn)
     expect(document.getElementById(btn.getAttribute('aria-controls')!)).toBeNull()
   })
@@ -150,16 +154,16 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
 
   test('only one panel is open at a time', async () => {
     const { click } = await mount()
-    const ahead = screen.getByRole('button', { name: 'Más adelante →' })
+    const ahead = screen.getByRole('button', { name: 'Próximamente en noviembre →' })
     const trips = screen.getByRole('button', { name: 'Escapadas de un día →' })
     await click(ahead); await click(trips)
     expect(ahead).toHaveAttribute('aria-expanded', 'false')
     expect(trips).toHaveAttribute('aria-expanded', 'true')
   })
 
-  test('a button whose panel would be empty is hidden (Production: nothing verified later)', async () => {
-    await mount({ showUnverified: false })
-    expect(screen.queryByRole('button', { name: 'Más adelante →' })).toBeNull()
+  test('a button whose panel would be empty is hidden (Production, stay = all of November: nothing else verified)', async () => {
+    await mount({ showUnverified: false, stay: { arrival: '2026-11-01', nights: 29 } })
+    expect(screen.queryByRole('button', { name: 'Próximamente en noviembre →' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Escapadas de un día →' })).toBeInTheDocument()
   })
 
@@ -171,7 +175,7 @@ describe('AgendaSection — empty range, weekly row, buttons', () => {
   test('29 nights from Nov 1 → the four ranges of the brief', async () => {
     const { chips } = await mount({ stay: { arrival: '2026-11-01', nights: 29 } })
     expect(chips().map((c) => c.textContent)).toEqual(['1 – 8 nov', '9 – 15 nov', '16 – 22 nov', '23 – 30 nov'])
-    expect(screen.queryByRole('button', { name: 'Más adelante →' })).toBeNull() // nothing starts after Nov 30 within +30d? (Dec items none)
+    expect(screen.queryByRole('button', { name: 'Próximamente en noviembre →' })).toBeNull() // the parade ended before check-in: nothing is left to list
   })
 
   test('a stay change resets the selection to the first chip', async () => {
@@ -193,12 +197,19 @@ describe('AgendaSection — ES / EN', () => {
     expect(en.chips().map((c) => c.textContent)).toEqual(['Oct 30 – Nov 1', 'Nov 2 – 3'])
     expect(screen.getByText("What's happening in the city during your stay.")).toBeInTheDocument()
     expect(screen.getByText('Every week in the city')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Coming up →' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Coming up in November →' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Day trips →' })).toBeInTheDocument()
     expect(screen.getByText('Great Day of the Dead Parade')).toBeInTheDocument()
-    expect(screen.getAllByText('To confirm').length).toBeGreaterThan(0)
-    expect(en.container.textContent).toMatch(/the highlight of your stay/)
+        expect(en.container.textContent).toMatch(/the highlight of your stay/)
     expect(en.container.textContent).not.toMatch(/Por confirmar|Cada semana|estancia/)
+    expect(screen.getByText(/Gran Desfile|Great Day of the Dead Parade/)).toBeInTheDocument()
+  })
+
+  test('English: "To confirm" pill and the "after your stay" tag', async () => {
+    const { container, click } = await mount({ lang: 'en', stay: { arrival: '2026-11-06', nights: 3 } })
+    expect(screen.getByText('To confirm')).toBeInTheDocument()
+    await click(screen.getByRole('button', { name: 'Coming up in November →' }))
+    expect(container.textContent).toContain('after your stay')
   })
 
   test('quiet range in English', async () => {
