@@ -626,7 +626,7 @@
 }
 
 /* ── "Mientras estás aquí" / "While you're here" (AgendaSection.tsx) ──────────
-   Stay-window layout: range chips, one list, "Cada semana" row, two panels. New rules
+   Stay-window layout: range chips, one list, two panels. New rules
    only; the guide's own classes (secHead, weatherCard…) are reused as is.
    Tokens only (no new colours); dates and times use the guide's mono (--font-mono). */
 .agSkeleton { min-height: 360px; }
@@ -650,11 +650,10 @@
 .agQuiet { margin-top: 18px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
 .agQuietTitle { margin: 0; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); font-weight: 400; }
 .agQuietBody { margin: 0; font-size: 15px; line-height: 1.5; color: var(--pine); }
-.agWeeklyWrap { margin-top: 28px; display: flex; flex-direction: column; gap: 8px; }
-.agWeeklyTitle { margin: 0; font-size: 16px; font-weight: 800; color: var(--pine); }
-.agWeekly { list-style: none; margin: 0 -20px 0 0; padding: 0 20px 6px 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; }
-.agWeekly::-webkit-scrollbar { display: none; }
-.agWeeklyCard { flex: 0 0 180px; display: flex; flex-direction: column; gap: 4px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; padding: 12px 14px; }
 .agButtons { margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
 .agBtn { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--pine); background: transparent; color: var(--pine); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .agBtn:hover, .agBtn[aria-expanded="true"] { background: var(--mint); }
+
+/* Collapsible "A calm start to your trip" (agenda layout only). */
+.practicalToggle { margin-top: 20px; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; background: var(--paper); border: 1px solid var(--pine); color: var(--pine); font-family: var(--font-sans), sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
+.practicalToggle:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }

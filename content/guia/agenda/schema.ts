@@ -66,13 +66,13 @@ export const eventSchema = z.object({
 export const recurringSchema = z.object({
   id,
   title: bilingual('title'),
-  /** Weekdays on which an occurrence row appears in the calendar. Empty = it is only listed in "Cada semana en la ciudad" (e.g. a daily thing). */
+  /** Weekdays on which an occurrence row appears in the calendar. Empty = it never appears in the calendar (e.g. a daily thing). */
   weekdays: z.array(z.number().int().min(0).max(6)).max(7).refine((d) => new Set(d).size === d.length, 'weekdays must be unique'),
   /** Short clock label under the date in the list (e.g. "8–14 h", "Noche"). Omit when unknown. */
   time: bilingual('time').optional(),
-  /** Label of the "Cada semana" card, e.g. "Domingos · 8–14 h". */
+  /** Reference label, e.g. "Domingos · 8–14 h". */
   when_label: bilingual('when_label'),
-  /** One line under the title on the "Cada semana" card. */
+  /** One-line description (reference; the "Cada semana" row was removed). */
   line: bilingual('line'),
 }).strict()
 

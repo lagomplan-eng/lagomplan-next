@@ -11,7 +11,6 @@ export interface AgendaCopy {
   title: string
   subtitle: string
   rangesLabel: string
-  weeklyTitle: string
   /** Button label; {month} is the month of the end of the "coming up" window. */
   ahead: string
   afterStay: string
@@ -40,7 +39,6 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     title: 'Mientras estás aquí',
     subtitle: 'Lo que pasa en la ciudad durante tu estancia.',
     rangesLabel: 'Fechas de tu estancia',
-    weeklyTitle: 'Cada semana en la ciudad',
     ahead: 'Próximamente en {month} →',
     afterStay: 'después de tu estancia',
     trips: 'Escapadas de un día →',
@@ -66,7 +64,6 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     title: "While you're here",
     subtitle: "What's happening in the city during your stay.",
     rangesLabel: 'Dates of your stay',
-    weeklyTitle: 'Every week in the city',
     ahead: 'Coming up in {month} →',
     afterStay: 'after your stay',
     trips: 'Day trips →',
