@@ -28,9 +28,16 @@ const ALLOWED = [
  * section (by design: it "renders only when provided"): one section and one
  * letter block fewer, nothing else.
  */
-function conditional(cfg: { guide?: { host_letter?: unknown } }, livin: { sections: number }) {
-  if (cfg.guide?.host_letter) return { keys: [] as string[], expect: {} as Record<string, unknown> }
-  return { keys: ['sections', 'letterBlocks'], expect: { sections: livin.sections - 1, letterBlocks: 0 } }
+function conditional(cfg: { guide?: { host_letter?: unknown; display?: { agenda?: boolean } } }, livin: { sections: number }) {
+  const out = cfg.guide?.host_letter
+    ? { keys: [] as string[], expect: {} as Record<string, unknown> }
+    : { keys: ['sections', 'letterBlocks'], expect: { sections: livin.sections - 1, letterBlocks: 0 } }
+  // Demo guides (/demo/*) have their own layout; Livin (/guia/*) is untouched. Demos: section anchors, the practical
+  // part shows its first 4 cards per tab ("Show N more"), and with the agenda Experiences sit under the 48-hour itinerary.
+  out.keys.push('sectionIds', 'practicalCards')
+  out.expect.practicalCards = 4
+  out.expect.sectionIds = ['practico', 'zonas', 'itinerario', ...(cfg.guide?.display?.agenda ? ['experiencias', 'aqui'] : ['aqui', 'experiencias']), 'comer']
+  return out
 }
 
 async function fingerprint(page: Page, url: string, lang: 'es' | 'en') {

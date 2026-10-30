@@ -42,22 +42,25 @@ import { withPilotUtm } from '../../../lib/guia/links'
 import styles from './guia.module.css'
 import { withPlaceholders } from './placeholders'
 
-const MODULE_COPY: Record<Lang, { eyebrow: string; heading: string; subhead: string; beforeChip: string; show: string; hide: string }> = {
+/** Cards shown per tab before "Show N more". */
+const CARDS_SHOWN = 4
+
+const MODULE_COPY: Record<Lang, { eyebrow: string; heading: string; subhead: string; beforeChip: string; more: string; less: string }> = {
   en: {
     eyebrow: 'THE PRACTICAL PART',
     heading: 'A calm start to your trip',
     subhead: 'Before you arrive, during your stay, and the errands in between.',
     beforeChip: 'Before you arrive',
-    show: 'Show the practical details',
-    hide: 'Hide the practical details',
+    more: 'Show {n} more',
+    less: 'Show less',
   },
   es: {
     eyebrow: 'LO PRÁCTICO',
     heading: 'Un comienzo tranquilo',
     subhead: 'Antes de llegar, durante tu estancia, y los pendientes de en medio.',
     beforeChip: 'Antes de llegar',
-    show: 'Ver lo práctico',
-    hide: 'Ocultar lo práctico',
+    more: 'Mostrar {n} más',
+    less: 'Mostrar menos',
   },
 }
 
@@ -187,7 +190,8 @@ export default function PracticalSection({
   zone,
   pilotId,
   lang,
-  collapsible = false,
+  rhythm = false,
+  toneClass = '',
 }: {
   arrivalItems: ArrivalItem[]
   faqGroups: ResolvedFaqGroup[] | null
@@ -197,13 +201,19 @@ export default function PracticalSection({
   zone?: string
   pilotId: string
   lang: Lang
-  /** Agenda layout: the body folds behind a toggle (collapsed by default). It stays in the DOM, only hidden. */
-  collapsible?: boolean
+  /** Demo guides only: reordered arrival cards, first 4 cards per tab + "Show N more", rhythm padding and tone. Off = the section exactly as before. */
+  rhythm?: boolean
+  /** Section background (alternating rhythm): '' = cream, the sectionAlt class = grey. */
+  toneClass?: string
 }) {
   const copy = MODULE_COPY[lang]
   const subhead = practicalSubhead?.[lang] ?? copy.subhead
 
-  const beforeItems: PracticalCardItem[] = arrivalItems.map((item, i) => ({
+  // Airport, Transportation, Money, Connectivity first (by icon, so it holds in ES/EN and per-partner overrides); the rest keep their order.
+  const FIRST = ['plane', 'car', 'banknote', 'wifi']
+  const rank = (icon: string) => { const i = FIRST.indexOf(icon); return i === -1 ? FIRST.length : i }
+  const orderedArrival = !rhythm ? arrivalItems : arrivalItems.map((item, i) => ({ item, i })).sort((a, b) => rank(a.item.icon) - rank(b.item.icon) || a.i - b.i).map((x) => x.item)
+  const beforeItems: PracticalCardItem[] = orderedArrival.map((item, i) => ({
     key: item.id ?? `before-${i}`,
     anchor: item.id,
     icon: item.icon,
@@ -250,9 +260,8 @@ export default function PracticalSection({
   const [hydrated, setHydrated] = useState(false)
   const [activePanel, setActivePanel] = useState<PanelId | null>(panels[0]?.id ?? null)
   const [highlightAnchor, setHighlightAnchor] = useState<string | null>(null)
-  const [open, setOpen] = useState(!collapsible)
-  // A card that is being scrolled to / highlighted (deep link, cross-link) must be visible.
-  useEffect(() => { if (highlightAnchor) setOpen(true) }, [highlightAnchor])
+  // Per tab: first CARDS_SHOWN cards, the rest behind "Show N more". Panels listed here are expanded.
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
 
   // Mount: flip to the chip UI, and resolve any landing anchor to its panel
   // before the first interactive paint.
@@ -264,6 +273,7 @@ export default function PracticalSection({
       const match = panels.find((p) => p.items.some((it) => it.anchor === hash))
       if (match) {
         setActivePanel(match.id)
+        setExpanded((e) => ({ ...e, [match.id]: true })) // the target card may be past the first CARDS_SHOWN
         setHighlightAnchor(hash)
         return
       }
@@ -303,7 +313,7 @@ export default function PracticalSection({
   const activePanelData = panels.find((p) => p.id === activePanel) ?? panels[0]
 
   return (
-    <section id="practico" className={styles.section}>
+    <section id="practico" className={rhythm ? `${styles.section} ${styles.rhythm} ${toneClass}` : styles.section}>
       <div className={styles.container}>
         <div className={styles.secGrid}>
           <div className={styles.secHead}>
@@ -317,18 +327,9 @@ export default function PracticalSection({
                 ))}
               </div>
             )}
-            {collapsible && (
-              <button
-                type="button"
-                className={styles.practicalToggle}
-                aria-expanded={open}
-                aria-controls="practico-body"
-                onClick={() => setOpen((o) => !o)}
-              >{open ? copy.hide : copy.show}<span aria-hidden> {open ? '↑' : '↓'}</span></button>
-            )}
           </div>
 
-          <div className={styles.secBody} id={collapsible ? 'practico-body' : undefined} hidden={collapsible && !open ? true : undefined}>
+          <div className={styles.secBody}>
             {!hydrated ? (
               panels.map((panel) => (
                 <div className={styles.faqStackedGroup} key={panel.id}>
@@ -356,8 +357,9 @@ export default function PracticalSection({
                   </div>
                 )}
                 {activePanelData && (
+                  <>
                   <div className={`${styles.cardGrid} ${styles.fade}`} key={activePanelData.id}>
-                    {activePanelData.items.map((item) => (
+                    {(!rhythm || expanded[activePanelData.id] ? activePanelData.items : activePanelData.items.slice(0, CARDS_SHOWN)).map((item) => (
                       <PracticalCard
                         item={item}
                         highlighted={item.anchor === highlightAnchor}
@@ -369,6 +371,19 @@ export default function PracticalSection({
                       />
                     ))}
                   </div>
+                  {rhythm && activePanelData.items.length > CARDS_SHOWN && (
+                    <button
+                      type="button"
+                      className={styles.practicalMore}
+                      aria-expanded={!!expanded[activePanelData.id]}
+                      onClick={() => setExpanded((e) => ({ ...e, [activePanelData.id]: !e[activePanelData.id] }))}
+                    >
+                      {expanded[activePanelData.id]
+                        ? <>{copy.less} ↑</>
+                        : <>{copy.more.replace('{n}', String(activePanelData.items.length - CARDS_SHOWN))} ↓</>}
+                    </button>
+                  )}
+                  </>
                 )}
               </>
             )}
