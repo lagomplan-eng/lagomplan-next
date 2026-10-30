@@ -106,6 +106,10 @@ import { guide as mauricioEn } from './mauricio/en'
 import { guide as hongKongEs } from './hong-kong/es'
 import { guide as hongKongEn } from './hong-kong/en'
 
+// Seasonal guide (Day of the Dead 2026)
+import { guide as diaDeMuertosCdmxPatzcuaroEs } from './dia-de-muertos-cdmx-patzcuaro/es'
+import { guide as diaDeMuertosCdmxPatzcuaroEn } from './dia-de-muertos-cdmx-patzcuaro/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -156,6 +160,8 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'udaipur':             { es: udaipurEs,             en: udaipurEn },
   'mauricio':            { es: mauricioEs,            en: mauricioEn },
   'hong-kong':           { es: hongKongEs,            en: hongKongEn },
+  // Seasonal guide (Day of the Dead 2026). One shared key for both locales for now (no per-locale slug yet).
+  'dia-de-muertos-cdmx-patzcuaro': { es: diaDeMuertosCdmxPatzcuaroEs, en: diaDeMuertosCdmxPatzcuaroEn },
 }
 
 // ── Public helpers ─────────────────────────────────────────────────────────────
