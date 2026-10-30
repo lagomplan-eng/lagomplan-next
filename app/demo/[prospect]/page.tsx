@@ -9,6 +9,7 @@ import { notFound } from 'next/navigation'
 import { getCity } from '../../../content/guia'
 import { buildDemoPartner, getDemoProspect, listDemoSlugs } from '../../../content/guia/demos'
 import { loadAgenda } from '../../../content/guia/agenda'
+import { agendaPageProps } from '../../../content/guia/agenda/public'
 import GuiaClient from '../../guia/[partner]/GuiaClient'
 
 export const dynamicParams = false
@@ -57,9 +58,10 @@ export default async function DemoPage(
   return (
     <GuiaClient partner={partner} city={city} demo={{ slug: prospect.slug, prospectName: prospect.partner.name }}
       recordVisits={process.env.VERCEL_ENV === 'production'}
-      // Dated agenda ("Mientras estás aquí"): only for demos that opt in. Production shows
-      // verified events only; Preview and local also show the ones still to verify.
-      {...(partner.agenda ? { agenda: loadAgenda(), showUnverified: process.env.VERCEL_ENV !== 'production' } : {})}
+      // Dated agenda ("Mientras estás aquí"): only for demos that opt in. The props are page data sent to
+      // every visitor, so they go through agendaPageProps(): Production gets verified events only, and no
+      // environment gets the internal notes (see content/guia/agenda/public.ts).
+      {...(partner.agenda ? agendaPageProps(loadAgenda(), process.env.VERCEL_ENV) : {})}
     />
   )
 }
