@@ -67,6 +67,7 @@ const FULLY_POPULATED_GUIDES = {
   udaipur:   { esSlug: 'udaipur',   enSlug: 'udaipur',   image: 'udaipur',   hasShadow: true },
   mauricio:  { esSlug: 'mauricio',  enSlug: 'mauritius', image: 'mauricio',  hasShadow: true },
   'hong-kong': { esSlug: 'hong-kong', enSlug: 'hong-kong', image: 'hong-kong', hasShadow: true },
+  'dia-de-muertos-cdmx-patzcuaro': { esSlug: 'dia-de-muertos-cdmx-patzcuaro', enSlug: 'dia-de-muertos-cdmx-patzcuaro', image: 'dia-de-muertos-cdmx-patzcuaro', hasShadow: true },
   oaxaca:    { esSlug: 'oaxaca',    enSlug: 'oaxaca',    image: null,        hasShadow: false },
   guatemala: { esSlug: 'guatemala', enSlug: 'guatemala', image: null,        hasShadow: true },
 } as const

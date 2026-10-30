@@ -1310,6 +1310,23 @@ const GUIDES: Guide[] = [
     cover_img: '/images/guides/hong-kong.png',
     sections: [],
   },
+
+  // ── Día de Muertos en familia: CDMX y Pátzcuaro (seasonal, 2026) ──
+  // One shared slug for both locales for now; a per-locale EN slug can be added later via LOCALE_SLUGS in lib/guide-slugs.ts.
+  {
+    slug_es: 'dia-de-muertos-cdmx-patzcuaro',
+    slug_en: 'dia-de-muertos-cdmx-patzcuaro',
+    title_es: 'Día de Muertos: CDMX y Pátzcuaro',
+    title_en: 'Day of the Dead: Mexico City and Pátzcuaro',
+    excerpt_es: 'Dos celebraciones en un solo viaje: la Catrina de 32 metros del Zócalo y la velación silenciosa de las familias purépechas en el lago de Pátzcuaro. Ruta de 5 días, por autopista y con niños.',
+    excerpt_en: "Two celebrations in a single trip: the Zócalo's 32-meter Catrina and the silent night vigil of Purépecha families on Lake Pátzcuaro. A 5-day route, by highway and with kids.",
+    destination_es: 'CDMX y Pátzcuaro',
+    destination_en: 'Mexico City and Pátzcuaro',
+    tags_es: ['Familia', 'Cultura', 'Roadtrip', 'Día de Muertos'],
+    tags_en: ['Family', 'Culture', 'Road trip', 'Day of the Dead'],
+    cover_img: '/images/guides/dia-de-muertos-cdmx-patzcuaro.png',
+    sections: [],
+  },
 ]
 
 // ── Helpers ───────────────────────────────────────────────
