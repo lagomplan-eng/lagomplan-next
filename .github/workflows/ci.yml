@@ -60,3 +60,27 @@ jobs:
             echo "   as literals (process.env.NEXT_PUBLIC_X). See lib/supabase/env.ts."
             exit 1
           fi
+
+      # Page data is serialized into the HTML of every visitor. This rebuilds with VERCEL_ENV=production
+      # (the flag that makes the guide pages Production pages) and fails if any guide page carries an
+      # unverified agenda event, a QA note or an internal agenda field. See tests/page-data-leak.mjs.
+      - name: Production-mode build (VERCEL_ENV=production)
+        run: npm run build
+        env:
+          VERCEL_ENV: production
+
+      - name: Guard — no unverified events or internal notes in the page data
+        env:
+          VERCEL_ENV: production
+        run: |
+          npx next start -p 3200 > /tmp/next-start.log 2>&1 &
+          server=$!
+          for i in $(seq 1 60); do
+            curl -sf -o /dev/null http://localhost:3200/guia/livin_condesa && break
+            sleep 1
+          done
+          status=0
+          node tests/page-data-leak.mjs http://localhost:3200 --production || status=$?
+          kill $server 2>/dev/null || true
+          if [ "$status" -ne 0 ]; then echo "--- next start log ---"; tail -40 /tmp/next-start.log; fi
+          exit $status
