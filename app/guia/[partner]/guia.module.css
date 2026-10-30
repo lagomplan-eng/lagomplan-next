@@ -64,6 +64,9 @@
 
 /* ── Layout primitives ──────────────────────────────────── */
 .section { padding: 72px 0; }
+/* Demo guides: one section padding everywhere (96px desktop / 64px mobile). */
+.rhythm { padding: 96px 0; }
+@media (max-width: 768px) { .rhythm { padding: 64px 0; } }
 .sectionAlt { background: var(--sand); }
 .sectionPine { background: var(--pine); color: var(--cream); }
 /* Match the site standard: ~1160px content, 24px gutters (20px on mobile). */
@@ -295,6 +298,7 @@
   transition: background .15s, transform .1s; font-family: var(--font-sans), sans-serif; color: var(--pine);
 }
 .moodBtn:hover { background: var(--mint); transform: translateY(-2px); }
+.moodLink { display: block; text-decoration: none; }
 .moodBtnActive { background: var(--mint); border-color: rgba(15, 58, 51, .3); }
 .moodLabel { font-size: 14px; font-weight: 600; color: var(--pine); margin-top: 10px; }
 .moodPanel { margin-top: 28px; background: var(--paper); border-radius: var(--radius-xl); padding: 26px; box-shadow: var(--shadow-card); }
@@ -316,6 +320,10 @@
 @keyframes wxPulse { 0%, 100% { opacity: .6; } 50% { opacity: 1; } }
 .weatherTemp { font-family: var(--font-mono), monospace; font-size: 20px; }
 .weatherBody { font-size: 13px; opacity: .85; }
+/* Weather, inline under a section's subtitle: small mono text; keeps its line while loading. */
+.wxInline { display: flex; align-items: center; gap: 8px; min-height: 20px; margin: 10px 0 0; font-family: var(--font-mono), monospace; font-size: 12px; letter-spacing: .02em; color: var(--sage); }
+.wxInlineSkeleton { width: 220px; height: 12px; border-radius: 6px; background: rgba(107, 143, 134, .2); }
+@media (prefers-reduced-motion: no-preference) { .wxInlineSkeleton { animation: wxPulse 1.2s ease-in-out infinite; } }
 .todayRow { display: flex; gap: 16px; padding: 16px 0; border-top: 1px solid rgba(107, 143, 134, .2); }
 /* Wide enough for the longest tag in either language ("Martes y viernes"
    runs ~120px at this size) so neither language wraps to 2-3 lines. */
@@ -654,6 +662,44 @@
 .agBtn { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--pine); background: transparent; color: var(--pine); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
 .agBtn:hover, .agBtn[aria-expanded="true"] { background: var(--mint); }
 
-/* Collapsible "A calm start to your trip" (agenda layout only). */
-.practicalToggle { margin-top: 20px; display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 999px; background: var(--paper); border: 1px solid var(--pine); color: var(--pine); font-family: var(--font-sans), sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; }
-.practicalToggle:focus-visible { outline: 2px solid var(--pine); outline-offset: 2px; }
+/* "Show N more ↓" / "Show less ↑" under a practical tab: a text link, no border, no pill. */
+.practicalMore { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; padding: 0; background: none; border: 0; color: var(--pine); font-family: var(--font-sans), sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(107, 143, 134, .5); }
+.practicalMore:hover { text-decoration-color: var(--pine); }
+
+/* The 48-hour itinerary and the planner CTA used to be Pine bands; the rhythm is now grey/cream only,
+   so inside .lightBand the dark-section text colours flip to the light-section ones (same tokens). */
+.lightBand .itinTitle, .lightBand .itinDayTitle, .lightBand .continueH2, .lightBand .nlTitle, .lightBand .nlDone, .lightBand .itinText { color: var(--pine); }
+.lightBand .itinLede, .lightBand .itinNote, .lightBand .continueLede, .lightBand .nlBody, .lightBand .nlFine, .lightBand .continueEyebrow { color: var(--sage); }
+.lightBand .itinDayTitle { border-bottom-color: rgba(107, 143, 134, .3); }
+.lightBand .itinRow { border-bottom-color: rgba(107, 143, 134, .22); }
+.lightBand .itinMapsBtn { background: var(--pine); color: var(--cream); box-shadow: none; }
+.lightBand .itinMapsBtn:hover { background: var(--fjord); }
+.lightBand .ctaPlanner, .lightBand .nlBtn { background: var(--pine); color: var(--cream); }
+.lightBand .nlBtn:hover { background: var(--fjord); }
+.lightBand .nlRule { background: rgba(107, 143, 134, .3); }
+.lightBand .nlInput { border-color: rgba(107, 143, 134, .4); background: var(--paper); color: var(--pine); }
+.lightBand .nlInput::placeholder { color: var(--sage); }
+.lightBand .nlInput:focus-visible { outline-color: var(--pine); }
+.lightBand .nlError { color: #b3261e; }
+
+/* Agenda: list column capped at 720px; compact month rows; "All through your stay" lines. */
+.agBody { max-width: 720px; }
+.agItemCompact { padding: 10px 14px; align-items: center; }
+.agThrough { margin-top: 28px; }
+.agThroughTitle { margin: 0 0 8px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; color: var(--sage); }
+.agThroughList { list-style: none; margin: 0; padding: 0; }
+.agThroughList li { padding: 9px 0; border-top: 1px solid rgba(107, 143, 134, .2); font-size: 14px; line-height: 1.4; color: var(--pine); }
+.agThroughList a { color: var(--pine); text-decoration: none; }
+.agThroughList a:hover { text-decoration: underline; }
+.agThroughList .agPill { margin-left: 8px; }
+
+/* Kids block inside Must-sees (demo guides): same cards as the rest of Must-sees, under a small title. */
+.kidsBlock { margin-top: 40px; scroll-margin-top: 90px; }
+.kidsTitle { margin: 0 0 14px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; color: var(--sage); }
+
+/* "Every week in the city" group inside the agenda section (never inside the dated tabs). */
+.agWeeklyWrap { margin-top: 36px; }
+.agWeeklyTitle { margin: 0 0 12px; font-size: 15px; font-weight: 800; color: var(--pine); }
+.agWeekly { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-right: -20px; padding-right: 20px; }
+.agWeekly::-webkit-scrollbar { display: none; }
+.agWeeklyCard { flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; }

@@ -51,6 +51,7 @@ import { WhatsAppIcon } from './WhatsAppIcon'
 import StayGlance from './StayGlance'
 import SectionHead from './SectionHead'
 import AgendaSection from './AgendaSection'
+import WeatherInline from './WeatherInline'
 import type { Agenda } from '../../../content/guia/agenda/schema'
 import { AGENDA_ENABLED } from '../../../content/guia/agenda/config'
 import styles from './guia.module.css'
@@ -526,8 +527,20 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // 48-hour itinerary and "A calm start to your trip" becomes collapsible. Everything else is unchanged.
   const agendaLayout = AGENDA_ENABLED && !!partner.agenda && !!agenda
 
-  const experiencesSection = (
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+  // Demo guides only (the `demo` prop): alternating section backgrounds (grey, cream, …, starting with
+  // grey on "Explore by mood"), one section padding, mood tiles as anchors, kids block in Must-sees.
+  // Everything else (Livin and every non-demo guide) keeps the previous markup exactly.
+  const rhythm = !!demo
+  let toneN = 0
+  const nextTone = () => (toneN++ % 2 === 0 ? styles.sectionAlt : '')
+  const kidsMood = t.moods.find((m) => m.id === 'kids' && m.items.length > 0) ?? null
+  const MOOD_TARGET: Record<string, string> = { hungry: 'comer', culture: 'itinerario', hidden: 'zonas', short: 'itinerario' }
+  const moodTarget = (id: string) => (id === 'kids' ? (kidsMood ? 'ninos' : undefined) : MOOD_TARGET[id])
+
+  const renderExperiences = (tone: string) => (
+      <section
+        {...(rhythm ? { id: 'experiencias', className: `${styles.section} ${styles.rhythm} ${tone}` } : { className: `${styles.section} ${styles.sectionAlt}`, style: { paddingTop: 88, paddingBottom: 88 } })}
+      >
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <div className={styles.secHead}>
@@ -560,6 +573,48 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     : undefined}
                 />
               ))}
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+
+  const moodOriginal = (
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
+            <div className={styles.secBody}>
+              <div className={styles.moodGrid}>
+                {t.moods.map((m) => (
+                  <button
+                    key={m.id}
+                    type="button"
+                    aria-pressed={mood === m.id}
+                    className={`${styles.moodBtn} ${mood === m.id ? styles.moodBtnActive : ''}`}
+                    onClick={() => setMood(m.id)}
+                  >
+                    <Icon name={m.icon} color={PINE} />
+                    <div className={styles.moodLabel}>{m.label}</div>
+                  </button>
+                ))}
+              </div>
+              {selectedMood && (
+                <div className={`${styles.moodPanel} ${styles.fade}`}>
+                  <div className={styles.moodPanelHead}>
+                    <h4 className={styles.h4}>{selectedMood.title}</h4>
+                    <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
+                  </div>
+                  <div className={styles.moodItems}>
+                    {selectedMood.items.map((it, i) => (
+                      <div key={i}>
+                        <div className={styles.moodItemName}>{it.name}</div>
+                        <div className={styles.moodItemNote}>{it.note}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -659,7 +714,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
       {/* ── Host letter (renders when the partner provides a signature) ── */}
       {splitLetter && partner.hostLetter?.[lang]?.paragraphs && (
-        <section className={styles.section}>
+        <section className={rhythm ? `${styles.section} ${styles.rhythm}` : styles.section}>
           <div className={styles.container}>
             <div className={styles.letterSplit}>
               <article className={styles.letterMain}>
@@ -691,7 +746,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       {partner.hostLetterSignature && !splitLetter && (
-        <section className={styles.section}>
+        <section className={rhythm ? `${styles.section} ${styles.rhythm}` : styles.section}>
           <div className={styles.container}>
             <div className={styles.letterCard}>
               <span className={styles.eyebrow} style={{ color: 'var(--sage)' }}>{letter.eyebrow}</span>
@@ -709,6 +764,33 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </section>
       )}
 
+      {/* Demo guides: "Explore by mood" tiles jump to the section they belong to; a tile without a target is not shown. */}
+      {rhythm && (
+      <section className={`${styles.section} ${styles.rhythm} ${nextTone()}`}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
+            <div className={styles.secBody}>
+              <div className={styles.moodGrid}>
+                {t.moods.filter((m) => moodTarget(m.id)).map((m) => (
+                  <a
+                    key={m.id}
+                    href={`#${moodTarget(m.id)}`}
+                    className={`${styles.moodBtn} ${styles.moodLink}`}
+                    onClick={() => track('host_guide_mood_click', { partner: partner.slug, city: city.id, mood: m.id, target: moodTarget(m.id) })}
+                  >
+                    <Icon name={m.icon} color={PINE} />
+                    <div className={styles.moodLabel}>{m.label}</div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      )}
+
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
       <PracticalSection
         arrivalItems={visibleArrivalItems}
@@ -719,11 +801,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         zone={partner.zone}
         pilotId={partner.pilotId}
         lang={lang}
-        collapsible={agendaLayout}
+        rhythm={rhythm}
+        toneClass={rhythm ? nextTone() : ''}
       />
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
-      <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <div className={styles.secHead}>
@@ -785,11 +868,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 4. 48-hour itinerary (dark) ────────────────────── */}
-      <section className={`${styles.section} ${styles.sectionPine}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })}>
         <div className={styles.container}>
           <div className={styles.itinGrid}>
             <div className={styles.itinIntro}>
-              <span className={styles.eyebrowMono} style={{ color: 'var(--sage-soft)' }}>{itin.eyebrow}</span>
+              <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{itin.eyebrow}</span>
               <h2 className={styles.itinTitle}>{itin.title}</h2>
               <p className={styles.itinLede}>{itin.lede}</p>
             </div>
@@ -821,48 +904,9 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* Agenda layout: Experiences sit right under the 48-hour itinerary (otherwise they stay after the weekly/agenda section). */}
-      {agendaLayout && experiencesSection}
+      {agendaLayout && renderExperiences(nextTone())}
 
-      {/* ── 5. Explore by mood ─────────────────────────────── */}
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
-            <div className={styles.secBody}>
-              <div className={styles.moodGrid}>
-                {t.moods.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    aria-pressed={mood === m.id}
-                    className={`${styles.moodBtn} ${mood === m.id ? styles.moodBtnActive : ''}`}
-                    onClick={() => setMood(m.id)}
-                  >
-                    <Icon name={m.icon} color={PINE} />
-                    <div className={styles.moodLabel}>{m.label}</div>
-                  </button>
-                ))}
-              </div>
-              {selectedMood && (
-                <div className={`${styles.moodPanel} ${styles.fade}`}>
-                  <div className={styles.moodPanelHead}>
-                    <h4 className={styles.h4}>{selectedMood.title}</h4>
-                    <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
-                  </div>
-                  <div className={styles.moodItems}>
-                    {selectedMood.items.map((it, i) => (
-                      <div key={i}>
-                        <div className={styles.moodItemName}>{it.name}</div>
-                        <div className={styles.moodItemNote}>{it.note}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
+      {!rhythm && moodOriginal}
 
       {/* ── 6. Today ───────────────────────────────────────── */}
       {agendaLayout ? (
@@ -870,16 +914,25 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           lang={lang}
           agenda={agenda}
           showUnverified={showUnverified}
+          toneClass={nextTone()}
           stay={{ arrival: stay.arrival, nights: stay.nights }}
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
       ) : (
-      <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
+            {rhythm ? (
+              <div className={styles.secHead}>
+                <span className={styles.eyebrow}>{t.todayDateLabel}</span>
+                <h2 className={styles.h2}>{t.todayH2}</h2>
+                <WeatherInline lang={lang} />
+              </div>
+            ) : (
+              <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
+            )}
             <div className={styles.secBody}>
-              <WeatherCard lang={lang} />
+              {!rhythm && <WeatherCard lang={lang} />}
               <div className={styles.spotList}>
                 {t.todayItems.map((ti, i) => (
                   <div className={styles.todayRow} key={i}>
@@ -897,10 +950,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
       )}
 
-      {!agendaLayout && experiencesSection}
+      {!agendaLayout && renderExperiences(rhythm ? nextTone() : '')}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
-      <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section {...(rhythm ? { id: 'comer', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.foodEyebrow} title={t.foodH2} lede={t.foodLede} />
@@ -914,6 +967,20 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                   </div>
                 ))}
               </div>
+              {/* Demo guides: the kids picks of the city layer (same data as the "Traveling with kids" mood), as a small block. */}
+              {rhythm && kidsMood && (
+                <div id="ninos" className={styles.kidsBlock}>
+                  <h3 className={styles.kidsTitle}>{kidsMood.title}</h3>
+                  <div className={styles.foodGrid}>
+                    {kidsMood.items.slice(0, 6).map((it, i) => (
+                      <div className={styles.foodCard} key={i}>
+                        <h5 className={`${styles.h5} ${styles.foodName}`}>{it.name}</h5>
+                        <p className={styles.foodNote}>{it.note}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -923,8 +990,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       {insidersPublished && insiders?.items && (
         <section
           ref={insidersRef}
-          className={`${styles.section} ${styles.sectionAlt}`}
-          style={{ paddingTop: 88, paddingBottom: 88 }}
+          {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}`, style: { paddingTop: 88, paddingBottom: 88 } })}
         >
           <div className={styles.container}>
             <div className={styles.secGrid}>
@@ -945,7 +1011,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       {/* ── 9. Continue your trip (planner CTA) ────────────── */}
-      <section className={`${styles.section} ${styles.sectionPine}`} style={{ paddingTop: 96, paddingBottom: 96 }}>
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })}>
         <div className={`${styles.container} ${styles.continueWrap}`}>
           <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
           <h2 className={styles.continueH2}>{t.continueH2}</h2>
@@ -972,7 +1038,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 10. Discover more ──────────────────────────────── */}
-      <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
         <div className={styles.containerWide}>
           <span className={styles.eyebrow}>{t.discoverEyebrow}</span>
           <h2 className={styles.h2}>{t.discoverH2}</h2>

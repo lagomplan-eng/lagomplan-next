@@ -8,27 +8,28 @@
  * that opt in (demo.json guide.display.agenda) and can be switched off for all of them
  * with AGENDA_ENABLED (content/guia/agenda/config.ts).
  *
- * The stay window comes from ?llegada & ?noches (check-out day included); without a
- * valid pair it is today … today + 13 days. The window is cut into calendar weeks
- * (Mon–Sun) shown as date-only chips; each chip lists, in one list, the dated events that
- * overlap it plus every occurrence of the weekly things. Below: two buttons that open "Próximamente en {mes}" (the whole month) and the day trips.
+ * The stay window comes from ?llegada & ?noches (check-out day included); without a valid
+ * pair it is today … today + 13 days. Tabs: "Your stay" + the check-out month + the next month
+ * (a month with no visible event is left out). "Your stay": the featured event first, the dated
+ * events (max 6, then "See all N →"), and an "All through your stay" group for events that cover
+ * every night. Month tabs: compact rows. Recurring items are never rows of a tab: they have their own
+ * group, "Every week in the city", right after the agenda. Weather sits inline in the header.
  *
  * Dates are computed IN THE BROWSER after mount (America/Mexico_City): pages are static,
  * so computing them at build time would freeze the window. Before mount only the header
- * renders. Reuses SectionHead, WeatherCard (kept above the section, unchanged) and the
- * guide's tokens / DM Mono; the chips have their own classes so the guide's filter-chip count stays comparable.
+ * renders.
  */
 
 import { useEffect, useId, useMemo, useState } from 'react'
 import type { Lang } from '../../../content/guia/types'
 import type { Agenda } from '../../../content/guia/agenda/schema'
 import { AGENDA_COPY } from '../../../content/guia/agenda/copy'
-import { aheadLabel, aheadRows, formatRange, mexicoToday, rowsForRange, splitRanges, stayWindow, type AgendaRow } from '../../../content/guia/agenda/logic'
-import SectionHead from './SectionHead'
-import WeatherCard from './WeatherCard'
+import { mexicoToday, monthTabs, stayTabRows, stayWindow, weeklyCards, type AgendaRow } from '../../../content/guia/agenda/logic'
+import WeatherInline from './WeatherInline'
 import styles from './guia.module.css'
 
-type Panel = 'ahead' | 'trips' | null
+/** Rows shown in the "Your stay" tab before "See all N →". */
+const STAY_ROWS_SHOWN = 6
 
 export interface AgendaSectionProps {
   lang: Lang
@@ -37,29 +38,33 @@ export interface AgendaSectionProps {
   showUnverified: boolean
   /** From the link (?llegada, ?noches), already validated by parseStay. */
   stay: { arrival?: string; nights?: number }
+  /** Section background (alternating rhythm). */
+  toneClass?: string
   onTrack?: (name: string, params: Record<string, string | number | boolean | undefined>) => void
 }
 
-export default function AgendaSection({ lang, agenda, showUnverified, stay, onTrack }: AgendaSectionProps) {
+export default function AgendaSection({ lang, agenda, showUnverified, stay, toneClass = '', onTrack }: AgendaSectionProps) {
   const c = AGENDA_COPY[lang]
   const uid = useId()
   const [today, setToday] = useState<string | null>(null)
-  const [sel, setSel] = useState(0)
-  const [panel, setPanel] = useState<Panel>(null)
+  const [tab, setTab] = useState('stay')
+  const [all, setAll] = useState(false)
+  const [tripsOpen, setTripsOpen] = useState(false)
 
   useEffect(() => { setToday(mexicoToday()) }, [])
 
   const win = useMemo(() => (today ? stayWindow(stay, today) : null), [today, stay.arrival, stay.nights])
-  const ranges = useMemo(() => (win ? splitRanges(win.start, win.end) : []), [win])
-  const sig = ranges.map((r) => `${r.start}_${r.end}`).join('|')
-  useEffect(() => { setSel(0); setPanel(null) }, [sig])
+  const ctx = win && today ? { lang, today, showUnverified } : null
+  const stayTab = ctx && win ? stayTabRows(agenda, win, ctx) : null
+  const months = ctx && win ? monthTabs(agenda, win, ctx) : []
+  const sig = win ? `${win.start}_${win.end}` : ''
+  useEffect(() => { setTab('stay'); setAll(false) }, [sig])
 
-  const ctx = win && today ? { lang, today, showUnverified, window: win } : null
-  const range = ranges[Math.min(sel, ranges.length - 1)]
-  const rows = ctx && range ? rowsForRange(agenda, range, ctx) : []
-  const ahead = ctx && win ? aheadRows(agenda, win, { lang, today: ctx.today, showUnverified }) : []
+  const tabs = [{ id: 'stay', label: c.tabStay }, ...months.map((m) => ({ id: m.id, label: m.label }))]
+  const activeMonth = months.find((m) => m.id === tab)
+  const current = activeMonth ? activeMonth.id : 'stay'
 
-  const renderRow = (r: AgendaRow) => {
+  const renderRow = (r: AgendaRow, compact = false) => {
     const body = (
       <>
         <span className={styles.agItemDate}>
@@ -77,66 +82,113 @@ export default function AgendaSection({ lang, agenda, showUnverified, stay, onTr
     return (
       <li key={r.id}>
         {r.url ? (
-          <a className={`${styles.agItem} ${styles.agItemLink}`} href={r.url} target="_blank" rel="noopener noreferrer">
+          <a className={`${styles.agItem} ${styles.agItemLink} ${compact ? styles.agItemCompact : ''}`} href={r.url} target="_blank" rel="noopener noreferrer">
             {body}
             <span className={styles.agArrow} aria-hidden>↗</span>
             <span className={styles.agSr}>{c.officialSite}</span>
           </a>
         ) : (
-          <div className={styles.agItem}>{body}</div>
+          <div className={`${styles.agItem} ${compact ? styles.agItemCompact : ''}`}>{body}</div>
         )}
       </li>
     )
   }
 
-  const toggle = (next: Exclude<Panel, null>) => {
-    setPanel((p) => (p === next ? null : next))
-    if (panel !== next) onTrack?.('host_guide_agenda_panel', { panel: next })
-  }
+  const stayRows = stayTab?.rows ?? []
+  const shownStay = all ? stayRows : stayRows.slice(0, STAY_ROWS_SHOWN)
 
   return (
-    <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+    <section id="aqui" className={`${styles.section} ${toneClass}`}>
       <div className={styles.container}>
-        <WeatherCard lang={lang} />
         <div className={styles.secGrid}>
-          <SectionHead eyebrow={c.eyebrow} title={c.title} lede={c.subtitle} />
-          <div className={styles.secBody}>
-            {!ctx ? (
+          <div className={styles.secHead}>
+            <span className={styles.eyebrow}>{c.eyebrow}</span>
+            <h2 className={styles.h2}>{c.title}</h2>
+            <p className={styles.lede}>{c.subtitle}</p>
+            <WeatherInline lang={lang} />
+          </div>
+          <div className={`${styles.secBody} ${styles.agBody}`}>
+            {!ctx || !stayTab ? (
               <div className={styles.agSkeleton} aria-hidden />
             ) : (
               <>
                 <div className={styles.agRanges} role="group" aria-label={c.rangesLabel}>
-                  {ranges.map((r, i) => (
+                  {tabs.map((t) => (
                     <button
-                      key={sig + i}
+                      key={t.id}
                       type="button"
-                      aria-pressed={i === sel}
-                      className={`${styles.agChip} ${i === sel ? styles.agChipActive : ''}`}
-                      onClick={() => { setSel(i); onTrack?.('host_guide_agenda_range', { index: i }) }}
-                    >{formatRange(r, lang)}</button>
+                      aria-pressed={t.id === current}
+                      className={`${styles.agChip} ${t.id === current ? styles.agChipActive : ''}`}
+                      onClick={() => { setTab(t.id); onTrack?.('host_guide_agenda_tab', { tab: t.id }) }}
+                    >{t.label}</button>
                   ))}
                 </div>
 
-                {rows.length > 0 ? (
-                  <ul className={styles.agList}>{rows.map(renderRow)}</ul>
+                {current === 'stay' ? (
+                  <>
+                    {stayRows.length > 0 ? (
+                      <ul className={styles.agList}>{shownStay.map((r) => renderRow(r))}</ul>
+                    ) : stayTab.allThrough.length === 0 ? (
+                      <div className={styles.agQuiet}>
+                        <h3 className={styles.agQuietTitle}>{c.quietTitle}</h3>
+                        <p className={styles.agQuietBody}>{c.quietBody}</p>
+                      </div>
+                    ) : null}
+                    {stayRows.length > STAY_ROWS_SHOWN && !all && (
+                      <button type="button" className={styles.practicalMore} onClick={() => { setAll(true); onTrack?.('host_guide_agenda_see_all', {}) }}>
+                        {c.seeAll.replace('{n}', String(stayRows.length))}
+                      </button>
+                    )}
+                    {stayTab.allThrough.length > 0 && (
+                      <div className={styles.agThrough}>
+                        <h3 className={styles.agThroughTitle}>{c.allThrough}</h3>
+                        <ul className={styles.agThroughList}>
+                          {stayTab.allThrough.map((l) => (
+                            <li key={l.id}>
+                              {l.url ? (
+                                <a href={l.url} target="_blank" rel="noopener noreferrer">
+                                  {l.title}{l.area ? ` · ${l.area}` : ''}<span className={styles.agSr}> — {c.officialSite}</span>
+                                </a>
+                              ) : (
+                                <span>{l.title}{l.area ? ` · ${l.area}` : ''}</span>
+                              )}
+                              {l.toVerify && <span className={styles.agPill}>{c.toConfirm}</span>}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </>
                 ) : (
-                  <div className={styles.agQuiet}>
-                    <h3 className={styles.agQuietTitle}>{c.quietTitle}</h3>
-                    <p className={styles.agQuietBody}>{c.quietBody}</p>
-                  </div>
+                  <ul className={styles.agList}>{activeMonth!.rows.map((r) => renderRow(r, true))}</ul>
                 )}
 
+                <div className={styles.agWeeklyWrap}>
+                  <h3 className={styles.agWeeklyTitle}>{c.weeklyTitle}</h3>
+                  <ul className={styles.agWeekly}>
+                    {weeklyCards(agenda, lang).map((w) => (
+                      <li className={styles.agWeeklyCard} key={w.id}>
+                        <span className={styles.agItemTime}>{w.when}</span>
+                        <span className={styles.agItemTitle}>{w.title}</span>
+                        <span className={styles.agItemMeta}>{w.line}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
                 <div className={styles.agButtons}>
-                  {ahead.length > 0 && (
-                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'ahead'} aria-controls={`${uid}-ahead`} onClick={() => toggle('ahead')}>{aheadLabel(win!, today!, lang)}</button>
-                  )}
                   {agenda.dayTrips.length > 0 && (
-                    <button type="button" className={styles.agBtn} aria-expanded={panel === 'trips'} aria-controls={`${uid}-trips`} onClick={() => toggle('trips')}>{c.trips}</button>
+                    <button
+                      type="button"
+                      className={styles.agBtn}
+                      aria-expanded={tripsOpen}
+                      aria-controls={`${uid}-trips`}
+                      onClick={() => { setTripsOpen((o) => !o); if (!tripsOpen) onTrack?.('host_guide_agenda_panel', { panel: 'trips' }) }}
+                    >{c.trips}</button>
                   )}
                 </div>
 
-                {panel === 'ahead' && ahead.length > 0 && <ul id={`${uid}-ahead`} className={styles.agList}>{ahead.map(renderRow)}</ul>}
-                {panel === 'trips' && (
+                {tripsOpen && (
                   <ul id={`${uid}-trips`} className={styles.agList}>
                     {agenda.dayTrips.map((d) => (
                       <li key={d.id}>

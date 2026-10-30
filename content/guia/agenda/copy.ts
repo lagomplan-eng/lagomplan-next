@@ -11,9 +11,12 @@ export interface AgendaCopy {
   title: string
   subtitle: string
   rangesLabel: string
-  /** Button label; {month} is the month of the end of the "coming up" window. */
-  ahead: string
+  weeklyTitle: string
   afterStay: string
+  tabStay: string
+  allThrough: string
+  /** {n} = total rows of the tab. */
+  seeAll: string
   trips: string
   quietTitle: string
   quietBody: string
@@ -39,8 +42,11 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     title: 'Mientras estás aquí',
     subtitle: 'Lo que pasa en la ciudad durante tu estancia.',
     rangesLabel: 'Fechas de tu estancia',
-    ahead: 'Próximamente en {month} →',
+    weeklyTitle: 'Cada semana en la ciudad',
     afterStay: 'después de tu estancia',
+    tabStay: 'Tu estancia',
+    allThrough: 'Durante toda tu estancia',
+    seeAll: 'Ver todos los {n} →',
     trips: 'Escapadas de un día →',
     quietTitle: 'Días tranquilos en la ciudad',
     quietBody: 'No hay eventos especiales en estas fechas. Buen momento para lo de cada semana o para salir de la ciudad.',
@@ -64,8 +70,11 @@ export const AGENDA_COPY: Record<AgendaLang, AgendaCopy> = {
     title: "While you're here",
     subtitle: "What's happening in the city during your stay.",
     rangesLabel: 'Dates of your stay',
-    ahead: 'Coming up in {month} →',
+    weeklyTitle: 'Every week in the city',
     afterStay: 'after your stay',
+    tabStay: 'Your stay',
+    allThrough: 'All through your stay',
+    seeAll: 'See all {n} →',
     trips: 'Day trips →',
     quietTitle: 'Quiet days in the city',
     quietBody: 'There are no special events on these dates. A good time for the weekly highlights or to get out of the city.',

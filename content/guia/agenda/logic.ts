@@ -12,7 +12,6 @@ export const MX_TZ = 'America/Mexico_City'
 /** Without a valid stay in the link: today … today + 13 days. */
 export const FALLBACK_DAYS = 13
 /** "Más adelante" reaches this many days past the end of the stay window. */
-export const AHEAD_DAYS = 30
 
 /** YYYY-MM-DD of `now` in Mexico City. */
 export function mexicoToday(now: Date = new Date()): string {
@@ -27,7 +26,6 @@ export const addDays = (iso: string, n: number) => toIso(utc(iso) + n * 864e5)
 export const daysBetween = (a: string, b: string) => Math.round((utc(b) - utc(a)) / 864e5)
 export const weekdayOf = (iso: string) => new Date(utc(iso)).getUTCDay()
 const maxIso = (a: string, b: string) => (a > b ? a : b)
-const minIso = (a: string, b: string) => (a < b ? a : b)
 
 // ── The stay window ─────────────────────────────────────────────────────────────
 
@@ -45,44 +43,6 @@ export function stayWindow(stay: { arrival?: string; nights?: number }, today: s
     if (end >= today) return { start: stay.arrival, end, fromLink: true }
   }
   return { start: today, end: addDays(today, FALLBACK_DAYS), fromLink: false }
-}
-
-/**
- * Calendar weeks (Monday → Sunday) trimmed to the window. A first or last piece of a
- * single day is merged into its neighbour (two days or more stay on their own).
- * Fri Oct 30 → Tue Nov 3 = [Oct 30–Nov 1] [Nov 2–3]; Nov 1 → Nov 30 = four ranges.
- */
-export function splitRanges(start: string, end: string): Range[] {
-  const pieces: Range[] = []
-  let cur = start
-  while (cur <= end) {
-    const dow = weekdayOf(cur)
-    const sunday = addDays(cur, dow === 0 ? 0 : 7 - dow)
-    const pieceEnd = minIso(end, sunday)
-    pieces.push({ start: cur, end: pieceEnd })
-    cur = addDays(pieceEnd, 1)
-  }
-  const len = (r: Range) => daysBetween(r.start, r.end) + 1
-  if (pieces.length > 1 && len(pieces[0]) === 1) {
-    pieces[1] = { start: pieces[0].start, end: pieces[1].end }
-    pieces.shift()
-  }
-  if (pieces.length > 1 && len(pieces[pieces.length - 1]) === 1) {
-    const last = pieces.pop()!
-    pieces[pieces.length - 1] = { start: pieces[pieces.length - 1].start, end: last.end }
-  }
-  return pieces
-}
-
-/** Dates only, never "Semana 1": "2 – 3 nov", "30 oct – 1 nov" / "Nov 2 – 3", "Oct 30 – Nov 1". */
-export function formatRange(r: Range, lang: AgendaLang): string {
-  const c = AGENDA_COPY[lang]
-  const [d1, m1] = [Number(r.start.slice(8)), Number(r.start.slice(5, 7)) - 1]
-  const [d2, m2] = [Number(r.end.slice(8)), Number(r.end.slice(5, 7)) - 1]
-  const mon = (m: number) => c.monthsShort[m]
-  if (r.start === r.end) return lang === 'es' ? `${d1} ${mon(m1)}` : `${mon(m1)} ${d1}`
-  if (m1 === m2) return lang === 'es' ? `${d1} – ${d2} ${mon(m1)}` : `${mon(m1)} ${d1} – ${d2}`
-  return lang === 'es' ? `${d1} ${mon(m1)} – ${d2} ${mon(m2)}` : `${mon(m1)} ${d1} – ${mon(m2)} ${d2}`
 }
 
 // ── Rows ─────────────────────────────────────────────────────────────────────
@@ -163,22 +123,50 @@ function spanLabel(c: AgendaCopy, e: Pick<AgendaEvent, 'start' | 'end'>): string
     : `${day(e.start)} ${mon(e.start)} – ${day(e.end)} ${mon(e.end)}`
 }
 
-/** One list for a range: dated events that overlap it + one row per occurrence of each recurring item. */
-export function rowsForRange(agenda: Pick<Agenda, 'events' | 'recurring'>, range: Range, ctx: RowContext): AgendaRow[] {
-  const c = AGENDA_COPY[ctx.lang]
-  const hl = highlightId(agenda, ctx.window, ctx.today, ctx.showUnverified)
-  const rows: AgendaRow[] = []
+const monthShort = (c: AgendaCopy, iso: string) => c.monthsShort[Number(iso.slice(5, 7)) - 1].toUpperCase()
 
-  for (const e of visibleEvents(agenda.events, ctx.today, ctx.showUnverified)) {
-    if (!overlaps(e, range)) continue
-    const from = maxIso(e.start, range.start)
+/** Does the event cover every night of the stay (arrival … the night before check-out)? */
+export function coversEveryNight(e: Pick<AgendaEvent, 'start' | 'end'>, stay: Range): boolean {
+  const lastNight = stay.end > stay.start ? addDays(stay.end, -1) : stay.start
+  return e.start <= stay.start && e.end >= lastNight
+}
+
+/** A line of the "All through your stay" group: title · area. */
+export interface AllThroughLine { id: string; title: string; area: string | null; url: string | null; toVerify: boolean }
+
+export interface StayTab {
+  /** Featured event first (with the highlight label), then the dated events by start. */
+  rows: AgendaRow[]
+  /** Events that cover every night of the stay, as compact lines. */
+  allThrough: AllThroughLine[]
+}
+
+/**
+ * The "Your stay" tab. Recurring items never appear here (nor in any dated tab).
+ *  a) the first featured event of the stay first (with "lo más grande de tu estancia");
+ *  b) the other dated events that overlap the stay and do NOT span all of it, by start;
+ *  c) the events that cover every night of the stay go to the "All through your stay" group.
+ * Each event is listed once.
+ */
+export function stayTabRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit<RowContext, 'window'>): StayTab {
+  const c = AGENDA_COPY[ctx.lang]
+  const hl = highlightId(agenda, stay, ctx.today, ctx.showUnverified)
+  const inStay = visibleEvents(agenda.events, ctx.today, ctx.showUnverified).filter((e) => overlaps(e, stay))
+  const rows: AgendaRow[] = []
+  const allThrough: AllThroughLine[] = []
+  for (const e of inStay) {
     const highlight = e.id === hl
+    if (!highlight && coversEveryNight(e, stay)) {
+      allThrough.push({ id: e.id, title: e.title[ctx.lang], area: e.place?.[ctx.lang] ?? null, url: e.url ?? null, toVerify: e.status === 'to_verify' })
+      continue
+    }
+    const from = maxIso(e.start, stay.start)
     const meta = [categoryLabel(c, e.category), e.place?.[ctx.lang]].filter(Boolean).join(' · ')
     rows.push({
       id: e.id,
       kind: 'event',
       date: from,
-      dateLabel: e.start === e.end ? `${dow(c, from)} ${day(from)}` : spanLabel(c, e), // the event's own dates, not clipped to the chip
+      dateLabel: e.start === e.end ? `${dow(c, from)} ${day(from)}` : spanLabel(c, e), // the event's own dates
       time: e.time?.[ctx.lang] ?? null,
       title: e.title[ctx.lang],
       meta: highlight ? `${meta} · ${c.highlight}` : meta,
@@ -187,72 +175,45 @@ export function rowsForRange(agenda: Pick<Agenda, 'events' | 'recurring'>, range
       highlight,
     })
   }
-
-  for (const r of agenda.recurring) {
-    for (let d = range.start; d <= range.end; d = addDays(d, 1)) {
-      if (!r.weekdays.includes(weekdayOf(d))) continue
-      rows.push({
-        id: `${r.id}@${d}`,
-        kind: 'recurring',
-        date: d,
-        dateLabel: `${dow(c, d)} ${day(d)}`,
-        time: r.time?.[ctx.lang] ?? null,
-        title: r.title[ctx.lang],
-        meta: `${c.everyPrefix} ${c.weekdays[weekdayOf(d)]}`,
-        url: null,
-        toVerify: false,
-        highlight: false,
-      })
-    }
-  }
-  return sortRows(rows)
+  const sorted = sortRows(rows)
+  const first = sorted.findIndex((r) => r.highlight)
+  if (first > 0) sorted.unshift(...sorted.splice(first, 1))
+  return { rows: sorted, allThrough }
 }
 
-/** Last day of the month of an ISO date. */
+// ── Month tabs ───────────────────────────────────────────────────────────────
+
 const lastDayOfMonth = (iso: string) => {
   const y = Number(iso.slice(0, 4)), m = Number(iso.slice(5, 7))
   return toIso(Date.UTC(y, m, 1) - 864e5)
 }
-
-/**
- * The "coming up" window: today → the last day of the check-out month, at least AHEAD_DAYS
- * (30) from today. Its end falls in the month the section title names.
- */
-export function aheadWindow(stay: Range, today: string): Range {
-  return { start: today, end: maxIso(lastDayOfMonth(stay.end), addDays(today, AHEAD_DAYS)) }
+const nextMonth = (ym: string) => {
+  const y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7))
+  return m === 12 ? `${y + 1}-01` : `${y}-${String(m + 1).padStart(2, '0')}`
 }
 
-/** "Próximamente en {mes}" / "Coming up in {month}": the button label, with the month of the window's end. */
-export function aheadLabel(stay: Range, today: string, lang: AgendaLang): string {
-  const c = AGENDA_COPY[lang]
-  const month = c.monthsLong[Number(aheadWindow(stay, today).end.slice(5, 7)) - 1]
-  return c.ahead.replace('{month}', month)
-}
+export interface MonthTab { id: string; ym: string; label: string; rows: AgendaRow[] }
 
 /**
- * "Coming up in {month}": every visible event from the start of the check-out month (or today) to the window end — the stay included —
- * each listed ONCE with its full date range (with the month). `afterStay` marks the
- * ones that start after check-out.
- * Events that end before max(today, check-in) are left out: they are over before the guest arrives.
+ * One month's events as compact rows (date range · title · category, no venue), by start. An event
+ * shows when it overlaps the month from today on and ends on/after max(today, check-in). Rows that
+ * start after check-out carry `afterStay`. A date label never repeats an event inside one tab.
  */
-export function aheadRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit<RowContext, 'window'>): AgendaRow[] {
+export function monthRows(agenda: Pick<Agenda, 'events'>, stay: Range, ym: string, ctx: Omit<RowContext, 'window'>): AgendaRow[] {
   const c = AGENDA_COPY[ctx.lang]
-  const full = aheadWindow(stay, ctx.today)
-  const win = { start: maxIso(ctx.today, `${stay.end.slice(0, 7)}-01`), end: full.end } // the check-out month (from today on) up to the window end
+  const span = { start: maxIso(`${ym}-01`, ctx.today), end: lastDayOfMonth(`${ym}-01`) }
   const rows: AgendaRow[] = []
   for (const e of visibleEvents(agenda.events, ctx.today, ctx.showUnverified)) {
-    if (!overlaps(e, win)) continue
-    if (e.end < maxIso(ctx.today, stay.start)) continue // already over by the time the guest is here (or today)
-    const mon = (iso: string) => c.monthsShort[Number(iso.slice(5, 7)) - 1].toUpperCase()
-    const dateLabel = e.start === e.end ? `${dow(c, e.start)} ${day(e.start)} ${mon(e.start)}` : spanLabel(c, e)
+    if (!overlaps(e, span)) continue
+    if (e.end < maxIso(ctx.today, stay.start)) continue // over before the guest is here
     rows.push({
       id: e.id,
       kind: 'event',
       date: e.start,
-      dateLabel,
-      time: e.time?.[ctx.lang] ?? null,
+      dateLabel: e.start === e.end ? `${dow(c, e.start)} ${day(e.start)} ${monthShort(c, e.start)}` : spanLabel(c, e),
+      time: null,
       title: e.title[ctx.lang],
-      meta: [categoryLabel(c, e.category), e.place?.[ctx.lang]].filter(Boolean).join(' · '),
+      meta: categoryLabel(c, e.category),
       url: e.url ?? null,
       toVerify: e.status === 'to_verify',
       highlight: false,
@@ -261,3 +222,22 @@ export function aheadRows(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit
   }
   return sortRows(rows)
 }
+
+/** The checkout month and the one after it; a month without any visible event is left out. */
+export function monthTabs(agenda: Pick<Agenda, 'events'>, stay: Range, ctx: Omit<RowContext, 'window'>): MonthTab[] {
+  const c = AGENDA_COPY[ctx.lang]
+  const first = stay.end.slice(0, 7)
+  return [first, nextMonth(first)]
+    .map((ym, i) => {
+      const name = c.monthsLong[Number(ym.slice(5, 7)) - 1]
+      return { id: `m${i + 1}`, ym, label: name.charAt(0).toUpperCase() + name.slice(1), rows: monthRows(agenda, stay, ym, ctx) }
+    })
+    .filter((t) => t.rows.length > 0)
+}
+
+/**
+ * "Every week in the city": every recurring item (daily ones included) as its own group, shown right after
+ * the agenda. Recurring items are NEVER rows of "Your stay" or of a month tab.
+ */
+export const weeklyCards = (agenda: Pick<Agenda, 'recurring'>, lang: AgendaLang) =>
+  agenda.recurring.map((r) => ({ id: r.id, when: r.when_label[lang], title: r.title[lang], line: r.line[lang] }))
