@@ -408,6 +408,8 @@ async function callGenerateTrip(payload: Record<string, any>, signal: AbortSigna
       'Content-Type':  'application/json',
       apikey:          LEGACY_ANON_KEY,
       Authorization:   `Bearer ${LEGACY_ANON_KEY}`,
+      // Internal-caller secret (H2): generate-trip rejects callers without it.
+      'x-internal-secret': Deno.env.get('GENERATE_TRIP_SECRET') ?? '',
     },
     body: JSON.stringify(payload),
     signal,

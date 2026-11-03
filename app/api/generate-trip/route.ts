@@ -180,6 +180,9 @@ export async function POST(req: NextRequest) {
           headers: {
             'Content-Type':  'application/json',
             'Authorization': `Bearer ${anonKey}`,
+            // Internal-caller secret (H2): proves this request comes from our
+            // own server, not a stranger holding the public anon key.
+            'x-internal-secret': process.env.GENERATE_TRIP_SECRET ?? '',
           },
           body: JSON.stringify({ ...body, ...extraBody, nights, overnight }),
           signal: controller.signal,

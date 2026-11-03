@@ -119,6 +119,21 @@
     if (req.method !== "POST") {  
       return errorResponse(405, "method_not_allowed", "Only POST is supported");                                 
     }                                                       
+
+    // ── Internal-caller gate (H2) ───────────────────────────────────────────
+    // Only our own server callers (the Next.js /api/generate-trip route and the
+    // generate-trip-worker) know GENERATE_TRIP_SECRET, so the public anon key
+    // alone can no longer invoke this billable AI endpoint. Fail OPEN but log
+    // loudly if the secret is unset, so deploying this before the secret is
+    // configured cannot take generation down; setting the secret activates it.
+    const REQUIRED_SECRET = Deno.env.get("GENERATE_TRIP_SECRET");
+    if (REQUIRED_SECRET) {
+      if (req.headers.get("x-internal-secret") !== REQUIRED_SECRET) {
+        return errorResponse(401, "unauthorized", "Invalid internal caller credentials");
+      }
+    } else {
+      console.error("[generate-trip] GENERATE_TRIP_SECRET not set — internal-caller gate DISABLED (set it in Supabase secrets to enable)");
+    }
                                                                                                                
     const startedAt = Date.now();                                                                                
                                                                                                                
