@@ -61,9 +61,13 @@ describe('AgendaSection — tabs and lists', () => {
     expect(tabs().map((t) => t.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
   })
 
-  test('Production: December has no verified event yet, so only the November tab shows', async () => {
-    const { tabs, container } = await mount({ showUnverified: false })
-    expect(tabs().map((t) => t.textContent)).toEqual(['Noviembre'])
+  test('Production: November and December tabs, the verified events only (no "Por confirmar" pill anywhere)', async () => {
+    const { tabs, container, click, rows } = await mount({ showUnverified: false })
+    expect(tabs().map((t) => t.textContent)).toEqual(['Noviembre', 'Diciembre'])
+    expect(rows()).toHaveLength(6)
+    expect(container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
+    await click(tabs()[1])
+    expect(rows()).toHaveLength(10)
     expect(container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
   })
 
@@ -81,13 +85,13 @@ describe('AgendaSection — tabs and lists', () => {
     expect(karol).not.toHaveTextContent('Estadio')
   })
 
-  test('December tab: the December events, each with the neutral "Por confirmar" pill', async () => {
+  test('December tab: the ten verified December events, no pill', async () => {
     const { tabs, rows, titles, click, container } = await mount()
     await click(tabs()[1])
     expect(tabs().map((t) => t.getAttribute('aria-pressed'))).toEqual(['false', 'true'])
     expect(rows()).toHaveLength(10)
     expect(titles()).toEqual(expect.arrayContaining(['Maná', 'Santa Run', 'Marvel Run 2026']))
-    expect(container.querySelectorAll('ul[class*="agList"] [class*="agPill"]')).toHaveLength(10)
+    expect(container.querySelectorAll('ul[class*="agList"] [class*="agPill"]')).toHaveLength(0)
   })
 
   test('recurring items NEVER appear inside a month tab; they live in their own group "Cada semana en la ciudad"', async () => {
@@ -171,9 +175,8 @@ describe('AgendaSection — ES / EN', () => {
     expect(en.container.textContent).not.toMatch(/Cada semana|Escapadas|Domingos|Martes|Sábados|Al atardecer|estancia/)
   })
 
-  test('English: the December tab shows "To confirm"', async () => {
-    const { tabs, click } = await mount({ lang: 'en', showUnverified: true })
-    await click(tabs()[1])
+  test('English: Preview shows "To confirm" on the still-unverified November events', async () => {
+    await mount({ lang: 'en', showUnverified: true })
     expect(screen.getAllByText('To confirm').length).toBeGreaterThan(0)
   })
 

@@ -612,8 +612,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Time Out México: 7 Nov–13 Dec 2026. Admission details are on the source page (not copied here). That page's header date reads 1 Dec 2025 (possible template carryover): confirm with the museum."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 7 Nov–13 Dec 2026. Admission details are on the source page (not copied here). That page's header date reads 1 Dec 2025 (possible template carryover): confirm with the museum.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "bruno-mars-gnp-3-4-dic",
@@ -634,8 +636,10 @@
       },
       "url": "https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Publimetro (5 Mar 2026): four shows, 3, 4, 7 and 8 Dec 2026, Estadio GNP Seguros. Times not found: none shown."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Publimetro (5 Mar 2026): four shows, 3, 4, 7 and 8 Dec 2026, Estadio GNP Seguros. Times not found: none shown.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "bruno-mars-gnp-7-8-dic",
@@ -656,8 +660,10 @@
       },
       "url": "https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Same source as bruno-mars-gnp-3-4-dic; extra dates up to 11 Dec appear on one aggregator only and are NOT used."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Same source as bruno-mars-gnp-3-4-dic; extra dates up to 11 Dec appear on one aggregator only and are NOT used.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "los-bukis-gnp",
@@ -678,8 +684,10 @@
       },
       "url": "https://www.viveusa.mx/en/showbiz/los-bukis-en-mexico-2026-fechas-boletos-precios-preventa-y-donde-seran-los-conciertos/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Viveusa lists Sat 12 Dec 2026, Estadio GNP Seguros; secondary sources only (also says 21:00; time not shown until confirmed)."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Viveusa lists Sat 12 Dec 2026, Estadio GNP Seguros; secondary sources only (also says 21:00; time not shown until confirmed).",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "mana-gnp",
@@ -700,8 +708,10 @@
       },
       "url": "https://www.chilango.com/que-hacer/musica/mana-anuncia-concierto-en-cdmx-boletos-fecha/",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Chilango / Milenio / Los40 (Jun 2026): 17 Dec 2026, second show added 16 Dec, Estadio GNP Seguros, Ticketmaster. One reseller says Foro Sol (probably wrong): confirm."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Chilango / Milenio / Los40 (Jun 2026): 17 Dec 2026, second show added 16 Dec, Estadio GNP Seguros, Ticketmaster. One reseller says Foro Sol (probably wrong): confirm.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "concierto-navidad-bellas-artes-11-dic",
@@ -722,8 +732,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Time Out México lists 11 and 13 Dec 2026, ages 8+, no time. Page header date 1 Dec 2025: confirm with INBAL."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México lists 11 and 13 Dec 2026, ages 8+, no time. Page header date 1 Dec 2025: confirm with INBAL.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "concierto-navidad-bellas-artes-13-dic",
@@ -744,8 +756,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Second date of concierto-navidad-bellas-artes-11-dic; same caveats."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Second date of concierto-navidad-bellas-artes-11-dic; same caveats.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "santa-run-la-mexicana",
@@ -770,8 +784,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Time Out México: 13 Dec 2026, 7am, 1K/5K/10K with concert, family activities and breakfast."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 13 Dec 2026, 7am, 1K/5K/10K with concert, family activities and breakfast.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "marvel-run-2026",
@@ -796,8 +812,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Time Out México: Sun 13 Dec 2026, from 6:30 am by distance block."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: Sun 13 Dec 2026, from 6:30 am by distance block.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     },
     {
       "id": "munal-mexico-ruta-y-destino",
@@ -818,8 +836,10 @@
       },
       "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
-      "status": "to_verify",
-      "checkNote": "Research 2026-11-05, NOT yet checked by a person. Time Out México: open through 14 Feb 2027; not December-specific, so it is listed for December only."
+      "status": "verified",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: open through 14 Feb 2027; not December-specific, so it is listed for December only.",
+      "verifiedAt": "2026-11-05",
+      "verifiedBy": "Elena"
     }
   ],
   "recurring": [
