@@ -62,14 +62,13 @@ for (const r of agenda.recurring) {
 }
 console.log(`   day trips without an official link: ${agenda.dayTrips.filter((t) => !t.url).length}/${agenda.dayTrips.length} (they are never links)`)
 
-// Month by month from the current month (the "Your stay" and month tabs of the guide).
+// Month by month from the current month (the month tabs of the guide).
 console.log(`\nnext ${months} months: dated events a guest would see in a month tab (from today on)`)
-const stayNow = { start: today, end: today }
 for (let m = 0; m < months; m++) {
   const ym = (() => { const y = Number(today.slice(0, 4)), mo = Number(today.slice(5, 7)) - 1 + m; return `${y + Math.floor(mo / 12)}-${String((mo % 12) + 1).padStart(2, '0')}` })()
-  const count = (showUnverified: boolean) => monthRows(agenda, stayNow, ym, { lang: 'es', today, showUnverified }).length
+  const count = (showUnverified: boolean) => monthRows(agenda, ym, { lang: 'es', today, showUnverified }).length
   const prev = count(true), prod = count(false)
   console.log(`   ${ym}  Preview ${String(prev).padStart(2)} events · Production ${String(prod).padStart(2)} events${prod === 0 ? '   ⚠ no verified event: Production hides this month tab' : ''}`)
 }
 const featured = live.filter((e) => e.featured)
-console.log(`\nfeatured events (the first one by date inside a stay is listed first, with "lo más grande de tu estancia"): ${featured.map((e) => e.id).join(', ') || 'none'}`)
+console.log(`\nfeatured events (listed in the month tabs like any other event): ${featured.map((e) => e.id).join(', ') || 'none'}`)

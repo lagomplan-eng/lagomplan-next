@@ -658,9 +658,6 @@
 .agQuiet { margin-top: 18px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
 .agQuietTitle { margin: 0; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--sage); font-weight: 400; }
 .agQuietBody { margin: 0; font-size: 15px; line-height: 1.5; color: var(--pine); }
-.agButtons { margin-top: 18px; display: flex; gap: 8px; flex-wrap: wrap; }
-.agBtn { min-height: 44px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--pine); background: transparent; color: var(--pine); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
-.agBtn:hover, .agBtn[aria-expanded="true"] { background: var(--mint); }
 
 /* "Show N more ↓" / "Show less ↑" under a practical tab: a text link, no border, no pill. */
 .practicalMore { display: inline-flex; align-items: center; min-height: 44px; margin-top: 12px; padding: 0; background: none; border: 0; color: var(--pine); font-family: var(--font-sans), sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: rgba(107, 143, 134, .5); }
@@ -682,24 +679,18 @@
 .lightBand .nlInput:focus-visible { outline-color: var(--pine); }
 .lightBand .nlError { color: #b3261e; }
 
-/* Agenda: list column capped at 720px; compact month rows; "All through your stay" lines. */
+/* Agenda: list column capped at 720px; compact month rows. */
 .agBody { max-width: 720px; }
 .agItemCompact { padding: 10px 14px; align-items: center; }
-.agThrough { margin-top: 28px; }
-.agThroughTitle { margin: 0 0 8px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; color: var(--sage); }
-.agThroughList { list-style: none; margin: 0; padding: 0; }
-.agThroughList li { padding: 9px 0; border-top: 1px solid rgba(107, 143, 134, .2); font-size: 14px; line-height: 1.4; color: var(--pine); }
-.agThroughList a { color: var(--pine); text-decoration: none; }
-.agThroughList a:hover { text-decoration: underline; }
-.agThroughList .agPill { margin-left: 8px; }
 
 /* Kids block inside Must-sees (demo guides): same cards as the rest of Must-sees, under a small title. */
 .kidsBlock { margin-top: 40px; scroll-margin-top: 90px; }
 .kidsTitle { margin: 0 0 14px; font-family: var(--font-mono), monospace; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; font-weight: 400; color: var(--sage); }
 
-/* "Every week in the city" group inside the agenda section (never inside the dated tabs). */
-.agWeeklyWrap { margin-top: 36px; }
-.agWeeklyTitle { margin: 0 0 12px; font-size: 15px; font-weight: 800; color: var(--pine); }
-.agWeekly { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-right: -20px; padding-right: 20px; }
-.agWeekly::-webkit-scrollbar { display: none; }
-.agWeeklyCard { flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; }
+/* "Every week in the city" and "Day trips": one group layout (title + a row of cards), never inside the dated tabs. */
+.agGroup { margin-top: 36px; }
+.agGroupTitle { margin: 0 0 12px; font-size: 15px; font-weight: 800; color: var(--pine); }
+.agCards { list-style: none; margin: 0; padding: 0; display: flex; gap: 10px; overflow-x: auto; scrollbar-width: none; margin-right: -20px; padding-right: 20px; }
+.agCards::-webkit-scrollbar { display: none; }
+.agCard { flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; }
+@media (min-width: 720px) { .agCards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); overflow: visible; margin-right: 0; padding-right: 0; } .agCard { flex: none; } }
