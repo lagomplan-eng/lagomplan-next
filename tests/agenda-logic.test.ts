@@ -43,20 +43,20 @@ eq('recurring items are in no month tab (ES and EN, Preview)', (['es', 'en'] as 
 
 // ── month tabs: the current month + the next one, from today on ──
 const mP = monthTabs(agenda, cx(false, 'es', N)), mV = monthTabs(agenda, cx(true, 'es', N))
-eq('month tabs (Production, Nov 5): November only — December has no verified event yet, so it is hidden', mP.map((m) => m.label), ['Noviembre'])
+eq('month tabs (Production, Nov 5): November and December (both have verified events)', mP.map((m) => m.label), ['Noviembre', 'Diciembre'])
 eq('month tabs (Preview, Nov 5): November, then December', mV.map((m) => m.label), ['Noviembre', 'Diciembre'])
 eq('month tabs: labels in English', monthTabs(agenda, cx(true, 'en', N)).map((m) => m.label), ['November', 'December'])
 eq('month tabs: the tabs follow today, not a stay (Oct 29 → Oct + Nov)', monthTabs(agenda, cx(true, 'es', '2026-10-29')).map((m) => m.label), ['Octubre', 'Noviembre'])
 eq('month tabs: Dec 20 → December only (Jan has no event, hidden)', monthTabs(agenda, cx(true, 'es', '2026-12-20')).map((m) => m.label), ['Diciembre'])
 eq('month tabs: Dec 31 rolls over to Jan without throwing', monthTabs(agenda, cx(true, 'es', '2026-12-31')).map((m) => m.ym), ['2026-12'])
 const nov = mP[0].rows, novV = mV[0].rows, decV = mV[1].rows
-eq('November (Production): everything from today on, sorted by start, each event once', [nov.map((r) => r.id), new Set(nov.map((r) => r.id)).size === nov.length], [['el-camino-reforma', 'nba-mexico-city-game', 'karol-g', 'puente-de-la-revolucion', 'corona-capital'], true])
-eq('November (Preview): all November events, to_verify flagged, sorted by start', [novV.length, novV.every((r, i) => i === 0 || novV[i - 1].date <= r.date), novV.filter((r) => r.toVerify).length], [16, true, 11])
+eq('November (Production): the verified events from today on, sorted by start, each once', [nov.map((r) => r.id), new Set(nov.map((r) => r.id)).size === nov.length], [['el-camino-reforma', 'nba-mexico-city-game', 'pinatas-map', 'karol-g', 'puente-de-la-revolucion', 'corona-capital'], true])
+eq('November (Preview): all November events, to_verify flagged, sorted by start', [novV.length, novV.every((r, i) => i === 0 || novV[i - 1].date <= r.date), novV.filter((r) => r.toVerify).length], [16, true, 10])
 eq('November: events already over today are hidden', novV.some((r) => ['desfile-dia-de-muertos', 'cacao-para-todos', 'ofrenda-monumental-zocalo'].includes(r.id)), false)
 eq('November: compact rows = date range + title + category only (no venue line)', nov.find((r) => r.id === 'karol-g')!.meta, 'Música')
-eq('November: date ranges', nov.map((r) => r.dateLabel), ['23 OCT – 8 NOV', 'SÁB 7 NOV', 'VIE 13 NOV', '14 – 16 NOV', '20 – 22 NOV'])
-eq('December (Preview): every December event, sorted by start, all to_verify', [decV.map((r) => r.id), decV.every((r) => r.toVerify)], [['pinatas-map', 'munal-mexico-ruta-y-destino', 'bruno-mars-gnp-3-4-dic', 'bruno-mars-gnp-7-8-dic', 'concierto-navidad-bellas-artes-11-dic', 'los-bukis-gnp', 'concierto-navidad-bellas-artes-13-dic', 'santa-run-la-mexicana', 'marvel-run-2026', 'mana-gnp'], true])
-eq('December (Production): nothing leaks — no unverified event', monthRows(agenda, '2026-12', cx(false, 'es', N)), [])
+eq('November: date ranges', nov.map((r) => r.dateLabel), ['23 OCT – 8 NOV', 'SÁB 7 NOV', '7 NOV – 13 DIC', 'VIE 13 NOV', '14 – 16 NOV', '20 – 22 NOV'])
+eq('December (Preview): every December event, sorted by start, all verified (no pill)', [decV.map((r) => r.id), decV.every((r) => !r.toVerify)], [['pinatas-map', 'munal-mexico-ruta-y-destino', 'bruno-mars-gnp-3-4-dic', 'bruno-mars-gnp-7-8-dic', 'concierto-navidad-bellas-artes-11-dic', 'los-bukis-gnp', 'concierto-navidad-bellas-artes-13-dic', 'santa-run-la-mexicana', 'marvel-run-2026', 'mana-gnp'], true])
+eq('December (Production): the same ten events, none flagged', [monthRows(agenda, '2026-12', cx(false, 'es', N)).map((r) => r.id), monthRows(agenda, '2026-12', cx(false, 'es', N)).some((r) => r.toVerify)], [decV.map((r) => r.id), false])
 eq('an event that spans two months is listed once in each tab, with its own full range', [novV, decV].map((rows) => rows.find((r) => r.id === 'pinatas-map')!.dateLabel), ['7 NOV – 13 DIC', '7 NOV – 13 DIC'])
 eq('November: recurring items never appear', novV.some((r) => agenda.recurring.some((x) => r.id.startsWith(x.id))), false)
 eq('month rule: events already over today are hidden (Nov 20)', monthRows(agenda, '2026-11', cx(true, 'es', '2026-11-20')).some((r) => ['karol-g', 'puente-de-la-revolucion'].includes(r.id)), false)
@@ -82,9 +82,9 @@ eq('data: every event with a time has it in both languages', agenda.events.filte
 // ── agenda:check ──
 {
   const run = (extra: string[], env: Record<string, string> = {}) => spawnSync('npx', ['tsx', 'scripts/agenda-check.ts', ...extra], { encoding: 'utf8', env: { ...process.env, ...env } })
-  const r = run(['--today', T])
+  const r = run(['--today', '2026-11-05'])
   eq('agenda:check exits 0 on the seed', r.status, 0)
-  eq('agenda:check lists the to_verify (incl. the December research) and the verified events', /to_verify \(20\)/.test(r.stdout) && /verified \(12\)/.test(r.stdout) && r.stdout.includes('gp-mexico-f1') && r.stdout.includes('mana-gnp'), true)
+  eq('agenda:check lists the 10 to_verify and the 15 verified events still to come (Nov 5)', /to_verify \(10\)/.test(r.stdout) && /verified \(15\)/.test(r.stdout) && r.stdout.includes('karol-g') && r.stdout.includes('mana-gnp'), true)
   eq('agenda:check reports no leftover placeholders', r.stdout.includes('left in any string: none'), true)
   eq('agenda:check lists the recurring items and the viewpoint that has no weekdays', r.stdout.includes('mirador-torre-latinoamericana') && r.stdout.includes('no weekdays'), true)
   eq('agenda:check flags the month with no verified event', /Production hides this month tab/.test(r.stdout), true)
