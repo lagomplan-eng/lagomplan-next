@@ -30,10 +30,9 @@
         "es": "Gratis",
         "en": "Free"
       },
-      "url": "https://www.chilango.com/que-hacer/gran-desfile-de-dia-de-muertos-2026-en-cdmx-fecha-hora-y-que-habra/",
       "featured": true,
       "status": "verified",
-      "checkNote": "Verified by Elena on 2026-10-29. Chilango (2026 article): Saturday 31 Oct, 14:00, from the Glorieta de la Diana Cazadora along Reforma to the Zócalo.",
+      "checkNote": "Verified by Elena on 2026-10-29. Chilango (2026 article): Saturday 31 Oct, 14:00, from the Glorieta de la Diana Cazadora along Reforma to the Zócalo. Former link (removed 2026-11-05, internal only): https://www.chilango.com/que-hacer/gran-desfile-de-dia-de-muertos-2026-en-cdmx-fecha-hora-y-que-habra/",
       "time": {
         "es": "14:00",
         "en": "2 pm"
@@ -66,10 +65,9 @@
         "es": "10:00–19:00",
         "en": "10:00–19:00"
       },
-      "url": "https://www.gastrolabweb.com/donde-comer/2026/10/18/festival-cacao-para-todos-2026-fechas-sede-y-bebidas-en-cdmx-70420.html",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Former link (removed 2026-11-05, internal only): https://www.gastrolabweb.com/donde-comer/2026/10/18/festival-cacao-para-todos-2026-fechas-sede-y-bebidas-en-cdmx-70420.html",
       "time": {
         "es": "10–19 h",
         "en": "10am–7pm"
@@ -102,12 +100,11 @@
         "es": "Carrera el domingo 1 de noviembre",
         "en": "Race on Sunday 1 November"
       },
-      "url": "https://www.formula1.com/en/racing/2026/mexico",
       "featured": false,
       "status": "verified",
       "verifiedAt": "2026-10-22",
       "verifiedBy": "Elena",
-      "checkNote": "Dates confirmed on formula1.com (2026-10-22). The page shows the race at 20:00 without a time zone, so no clock time is shown. The price was removed: it is not on that page."
+      "checkNote": "Dates confirmed on formula1.com (2026-10-22). The page shows the race at 20:00 without a time zone, so no clock time is shown. The price was removed: it is not on that page. Former link (removed 2026-11-05, internal only): https://www.formula1.com/en/racing/2026/mexico"
     },
     {
       "id": "ofrenda-monumental-zocalo",
@@ -134,10 +131,9 @@
         "es": "Gratis",
         "en": "Free"
       },
-      "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Former link (removed 2026-11-05, internal only): https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena"
     },
@@ -166,10 +162,9 @@
         "es": "11:00–19:00",
         "en": "11:00–19:00"
       },
-      "url": "https://mncp.cultura.gob.mx/event/feria-no-estaban-muertos-andaban-de-parranda/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Former link (removed 2026-11-05, internal only): https://mncp.cultura.gob.mx/event/feria-no-estaban-muertos-andaban-de-parranda/",
       "time": {
         "es": "11–19 h",
         "en": "11am–7pm"
@@ -202,10 +197,9 @@
         "es": "Gratis",
         "en": "Free"
       },
-      "url": "https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Former link (removed 2026-11-05, internal only): https://www.mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/?lang=en",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena"
     },
@@ -234,10 +228,9 @@
         "es": "Sáb 13:00–22:00 · Dom 13:00–19:00",
         "en": "Sat 1:00–10:00 pm · Sun 1:00–7:00 pm"
       },
-      "url": "https://robbreportenespanol.com/travel/experiencias/food-wine-festival-2026-el-encuentro-gastronomico-que-reunira-a-mas-de-80-chefs-en-cdmx/",
       "featured": false,
       "status": "to_verify",
-      "checkNote": "Confirm the price."
+      "checkNote": "Confirm the price. Former link (removed 2026-11-05, internal only): https://robbreportenespanol.com/travel/experiencias/food-wine-festival-2026-el-encuentro-gastronomico-que-reunira-a-mas-de-80-chefs-en-cdmx/"
     },
     {
       "id": "nba-mexico-city-game",
@@ -260,10 +253,9 @@
         "es": "Partido de la NBA en la Arena CDMX; equipos por confirmar. Boletos individuales agotados: solo quedan paquetes de experiencia oficiales.",
         "en": "NBA game at Arena CDMX; teams to be confirmed. Individual tickets are sold out: only official experience packages remain."
       },
-      "url": "https://www.mexicocity.cdmx.gob.mx/turismo-deportivo-en-la-ciudad-de-mexico/cartelera-de-encuentros-deportivos/?lang=en",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Individual tickets sold out; only official experience packages remain (the note is in \"why\", which the list does not render).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Individual tickets sold out; only official experience packages remain (the note is in \"why\", which the list does not render). Former link (removed 2026-11-05, internal only): https://www.mexicocity.cdmx.gob.mx/turismo-deportivo-en-la-ciudad-de-mexico/cartelera-de-encuentros-deportivos/?lang=en",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena"
     },
@@ -284,10 +276,9 @@
         "es": "Rodada ciclista de 40, 60 o 115 km.",
         "en": "Cycling ride of 40, 60 or 115 km."
       },
-      "url": "https://www.tritour.org/eventos/letape-cdmx",
       "featured": false,
       "status": "to_verify",
-      "checkNote": "Venue, time and price to confirm."
+      "checkNote": "Venue, time and price to confirm. Former link (removed 2026-11-05, internal only): https://www.tritour.org/eventos/letape-cdmx"
     },
     {
       "id": "carrera-del-ring",
@@ -306,10 +297,9 @@
         "es": "Carrera de 5 y 10 km, con función de lucha libre en la meta.",
         "en": "5 and 10 km race, with a lucha libre show at the finish."
       },
-      "url": "https://www.asdeporte.com/evento/carrera-del-ring-2026-k5c/datos-del-evento",
       "featured": false,
       "status": "to_verify",
-      "checkNote": "Venue, time and price to confirm."
+      "checkNote": "Venue, time and price to confirm. Former link (removed 2026-11-05, internal only): https://www.asdeporte.com/evento/carrera-del-ring-2026-k5c/datos-del-evento"
     },
     {
       "id": "corona-capital",
@@ -328,10 +318,9 @@
         "es": "Autódromo Hermanos Rodríguez (Curva 4)",
         "en": "Autódromo Hermanos Rodríguez (Curva 4)"
       },
-      "url": "https://www.record.com.mx/historia/corona-capital-2026-confirma-a-the-strokes-gorillaz-y-twenty-one-pilots-2026051903244224452",
       "featured": true,
       "status": "verified",
-      "checkNote": "Verified by Elena on 2026-10-29. Dates and venue match the cited Récord page (20–22 Nov 2026, Autódromo Hermanos Rodríguez); \"Curva 4\" confirmed by press (elimparcial.com, informador.mx). Times unknown.",
+      "checkNote": "Verified by Elena on 2026-10-29. Dates and venue match the cited Récord page (20–22 Nov 2026, Autódromo Hermanos Rodríguez); \"Curva 4\" confirmed by press (elimparcial.com, informador.mx). Times unknown. Former link (removed 2026-11-05, internal only): https://www.record.com.mx/historia/corona-capital-2026-confirma-a-the-strokes-gorillaz-y-twenty-one-pilots-2026051903244224452",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena"
     },
@@ -352,10 +341,9 @@
         "es": "Estadio GNP Seguros",
         "en": "Estadio GNP Seguros"
       },
-      "url": "https://www.nmas.com.mx/entretenimiento/nuevas-fechas-corona-capital-2026-cuando-sera-festival-de-musica-en-cdmx/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat).",
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Former link (removed 2026-11-05, internal only): https://www.nmas.com.mx/entretenimiento/nuevas-fechas-corona-capital-2026-cuando-sera-festival-de-musica-en-cdmx/",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena"
     },
@@ -395,12 +383,11 @@
         "es": "Bosque de Chapultepec, 2ª sección",
         "en": "Chapultepec Forest, 2nd section"
       },
-      "url": "https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/",
       "featured": false,
       "status": "verified",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page."
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page. Former link (removed 2026-11-05, internal only): https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/"
     },
     {
       "id": "iluminacion-zocalo",
@@ -419,12 +406,11 @@
         "es": "Zócalo y Centro Histórico",
         "en": "Zócalo and Historic Center"
       },
-      "url": "https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/",
       "featured": false,
       "status": "verified",
       "verifiedAt": "2026-10-29",
       "verifiedBy": "Elena",
-      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page (façades lit for Día de Muertos)."
+      "checkNote": "Marked verified by Elena on 2026-10-29 (instruction in chat). Source: the CDMX tourism page (façades lit for Día de Muertos). Former link (removed 2026-11-05, internal only): https://mexicocity.cdmx.gob.mx/e/dia-de-muertos-en-la-ciudad-de-mexico/"
     },
     {
       "id": "ultra-mexico",
@@ -610,10 +596,9 @@
         "es": "10–18 h",
         "en": "10–18 h"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 7 Nov–13 Dec 2026. Admission details are on the source page (not copied here). That page's header date reads 1 Dec 2025 (possible template carryover): confirm with the museum.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 7 Nov–13 Dec 2026. Admission details are on the source page (not copied here). That page's header date reads 1 Dec 2025 (possible template carryover): confirm with the museum. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -634,10 +619,9 @@
         "es": "Estadio GNP Seguros (Iztacalco)",
         "en": "Estadio GNP Seguros (Iztacalco)"
       },
-      "url": "https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Publimetro (5 Mar 2026): four shows, 3, 4, 7 and 8 Dec 2026, Estadio GNP Seguros. Times not found: none shown.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Publimetro (5 Mar 2026): four shows, 3, 4, 7 and 8 Dec 2026, Estadio GNP Seguros. Times not found: none shown. Former link (removed 2026-11-05, internal only): https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -658,10 +642,9 @@
         "es": "Estadio GNP Seguros (Iztacalco)",
         "en": "Estadio GNP Seguros (Iztacalco)"
       },
-      "url": "https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Same source as bruno-mars-gnp-3-4-dic; extra dates up to 11 Dec appear on one aggregator only and are NOT used.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Same source as bruno-mars-gnp-3-4-dic; extra dates up to 11 Dec appear on one aggregator only and are NOT used. Former link (removed 2026-11-05, internal only): https://www.publimetro.com.mx/entretenimiento/2026/03/05/bruno-mars-anuncia-cuatro-conciertos-en-mexico-descubre-fechas-venta-de-boletos-y-precios/",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -682,10 +665,9 @@
         "es": "Estadio GNP Seguros (Iztacalco)",
         "en": "Estadio GNP Seguros (Iztacalco)"
       },
-      "url": "https://www.viveusa.mx/en/showbiz/los-bukis-en-mexico-2026-fechas-boletos-precios-preventa-y-donde-seran-los-conciertos/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Viveusa lists Sat 12 Dec 2026, Estadio GNP Seguros; secondary sources only (also says 21:00; time not shown until confirmed).",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Viveusa lists Sat 12 Dec 2026, Estadio GNP Seguros; secondary sources only (also says 21:00; time not shown until confirmed). Former link (removed 2026-11-05, internal only): https://www.viveusa.mx/en/showbiz/los-bukis-en-mexico-2026-fechas-boletos-precios-preventa-y-donde-seran-los-conciertos/",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -706,10 +688,9 @@
         "es": "Estadio GNP Seguros (Iztacalco)",
         "en": "Estadio GNP Seguros (Iztacalco)"
       },
-      "url": "https://www.chilango.com/que-hacer/musica/mana-anuncia-concierto-en-cdmx-boletos-fecha/",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Chilango / Milenio / Los40 (Jun 2026): 17 Dec 2026, second show added 16 Dec, Estadio GNP Seguros, Ticketmaster. One reseller says Foro Sol (probably wrong): confirm.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Chilango / Milenio / Los40 (Jun 2026): 17 Dec 2026, second show added 16 Dec, Estadio GNP Seguros, Ticketmaster. One reseller says Foro Sol (probably wrong): confirm. Former link (removed 2026-11-05, internal only): https://www.chilango.com/que-hacer/musica/mana-anuncia-concierto-en-cdmx-boletos-fecha/",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -730,10 +711,9 @@
         "es": "Palacio de Bellas Artes",
         "en": "Palacio de Bellas Artes"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México lists 11 and 13 Dec 2026, ages 8+, no time. Page header date 1 Dec 2025: confirm with INBAL.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México lists 11 and 13 Dec 2026, ages 8+, no time. Page header date 1 Dec 2025: confirm with INBAL. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -754,10 +734,9 @@
         "es": "Palacio de Bellas Artes",
         "en": "Palacio de Bellas Artes"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Second date of concierto-navidad-bellas-artes-11-dic; same caveats.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Second date of concierto-navidad-bellas-artes-11-dic; same caveats. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -782,10 +761,9 @@
         "es": "7:00 h",
         "en": "7:00 am"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 13 Dec 2026, 7am, 1K/5K/10K with concert, family activities and breakfast.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: 13 Dec 2026, 7am, 1K/5K/10K with concert, family activities and breakfast. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -810,10 +788,9 @@
         "es": "Desde 6:30 h",
         "en": "From 6:30 am"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: Sun 13 Dec 2026, from 6:30 am by distance block.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: Sun 13 Dec 2026, from 6:30 am by distance block. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     },
@@ -834,10 +811,9 @@
         "es": "Museo Nacional de Arte (MUNAL), Centro",
         "en": "Museo Nacional de Arte (MUNAL), Centro"
       },
-      "url": "https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "featured": false,
       "status": "verified",
-      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: open through 14 Feb 2027; not December-specific, so it is listed for December only.",
+      "checkNote": "Marked verified by Elena on 2026-11-05 (instruction in chat); the sources below were not re-checked by a person. Research 2026-11-05: Time Out México: open through 14 Feb 2027; not December-specific, so it is listed for December only. Former link (removed 2026-11-05, internal only): https://www.timeoutmexico.mx/ciudad-de-mexico/que-hacer/eventos-en-diciembre-en-cdmx",
       "verifiedAt": "2026-11-05",
       "verifiedBy": "Elena"
     }

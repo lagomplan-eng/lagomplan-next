@@ -37,7 +37,7 @@ for (const env of ['production', 'preview', 'development', undefined]) {
   ok('production: the count equals the verified events of the file', p.agenda.events.length === raw.events.length - unverified.length)
   ok('production: no unverified id, title or place anywhere in the page data', !unverified.some((e) => json.includes(`"${e.id}"`) || json.includes(JSON.stringify(e.title.es)) || json.includes(JSON.stringify(e.title.en))), unverified.filter((e) => json.includes(`"${e.id}"`)).map((e) => e.id))
   ok('production: the string "to_verify" is not in the page data', !json.includes('to_verify'))
-  ok('production: displayed fields survive (title, dates, category, place, url) for a verified event', (() => { const e = p.agenda.events.find((x) => x.id === 'gp-mexico-f1')!; return !!(e.title.es && e.start && e.end && e.category && e.place && e.url) })())
+  ok('production: displayed fields survive (title, dates, category, place) for a verified event', (() => { const e = p.agenda.events.find((x) => x.id === 'gp-mexico-f1')!; return !!(e.title.es && e.start && e.end && e.category && e.place) })())
   ok('production: recurring items and day trips are still sent (they are rendered)', p.agenda.recurring.length === raw.recurring.length && p.agenda.dayTrips.length === raw.dayTrips.length)
 }
 
