@@ -1,13 +1,13 @@
 /**
  * __tests__/agenda-section.jest.test.tsx
  *
- * "Mientras estás aquí" / "While you're here", stay-window version:
- *   - AgendaSection: tabs (Your stay + checkout month + next month, empty months hidden), the
- *     "Your stay" list (featured first, cap 6 + "See all N →", "All through your stay" group),
- *     compact month rows, link rows vs plain rows, "Por confirmar" pill, day trips, ES/EN.
+ * "Mientras estás aquí" / "While you're here", month-tab version:
+ *   - AgendaSection: tabs (current month + next month, empty months hidden), compact rows from
+ *     today on, link rows vs plain rows, "Por confirmar" pill, the two card groups (weekly and
+ *     day trips, one layout), ES/EN.
  *   - GuiaClient: agenda opt-in + kill switch; mood tiles → anchors; practical tabs (first 4
  *     cards + "Show N more"); alternating backgrounds; weather inline.
- * Only Date is faked; the clock is frozen to Thursday 29 Oct 2026 in Mexico City.
+ * Only Date is faked; the clock is frozen to Thursday 5 Nov 2026 in Mexico City.
  */
 import '@testing-library/jest-dom'
 import { act, fireEvent, render, screen } from '@testing-library/react'
@@ -24,20 +24,19 @@ const agenda = loadAgenda()
 const city = getCity('cdmx')!
 const NO_FAKE = ['setTimeout', 'clearTimeout', 'setInterval', 'clearInterval', 'setImmediate', 'clearImmediate', 'nextTick', 'queueMicrotask', 'requestAnimationFrame', 'cancelAnimationFrame', 'requestIdleCallback', 'cancelIdleCallback', 'performance', 'hrtime'] as const
 const freeze = (iso: string) => jest.useFakeTimers({ now: new Date(iso), doNotFake: [...NO_FAKE] })
-const STAY = { arrival: '2026-10-30', nights: 4 } // Fri → Tue
 
 beforeEach(() => {
   mockEnabled = true
   window.localStorage.clear()
   ;(global as any).fetch = jest.fn(() => Promise.reject(new Error('offline'))) // WeatherCard hides itself
   ;(window as any).IntersectionObserver = class { observe() {} disconnect() {} unobserve() {} }
-  freeze('2026-10-29T18:00:00Z') // Thu 29 Oct 2026, 12:00 in Mexico City
+  freeze('2026-11-05T18:00:00Z') // Thu 5 Nov 2026, 12:00 in Mexico City
 })
 afterEach(() => jest.useRealTimers())
 
 async function mount(over: Partial<React.ComponentProps<typeof AgendaSection>> = {}) {
   let u!: ReturnType<typeof render>
-  await act(async () => { u = render(<AgendaSection lang="es" agenda={agenda} showUnverified stay={STAY} {...over} />) })
+  await act(async () => { u = render(<AgendaSection lang="es" agenda={agenda} showUnverified {...over} />) })
   const tabs = () => [...u.container.querySelectorAll('button[aria-pressed]')] as HTMLButtonElement[]
   const rows = () => [...u.container.querySelectorAll('ul[class*="agList"] > li')] as HTMLElement[]
   const titles = () => rows().map((r) => r.querySelector('[class*="agItemTitle"]')!.textContent)
@@ -50,82 +49,29 @@ describe('AgendaSection — tabs and lists', () => {
     ;(global as any).fetch = jest.fn(() => Promise.resolve({ ok: true, json: () => Promise.resolve({ current: { weather_code: 2 }, daily: { temperature_2m_max: [24], temperature_2m_min: [14], precipitation_probability_max: [10] } }) }))
     const { container } = await mount()
     expect(screen.getByRole('heading', { name: 'Mientras estás aquí' })).toBeInTheDocument()
-    expect(screen.getByText('Lo que pasa en la ciudad durante tu estancia.')).toBeInTheDocument()
+    expect(screen.getByText('Lo que pasa en la ciudad este mes y el siguiente.')).toBeInTheDocument()
     expect(container.querySelector('[class*="weatherCard"]')).toBeNull()
     expect(container.querySelector('[class*="wxInline"]')).not.toBeNull()
-    expect(container.querySelectorAll('button[aria-expanded]')).toHaveLength(1) // only "Escapadas de un día"
+    expect(container.querySelectorAll('button[aria-expanded]')).toHaveLength(0) // nothing collapses any more
   })
 
-  test('tabs: "Tu estancia" first and selected, then the checkout month; December (no event) is hidden', async () => {
+  test('tabs: the current month first and selected, then the next one (Preview: Noviembre, Diciembre); no "Tu estancia"', async () => {
     const { tabs } = await mount()
-    expect(tabs().map((t) => t.textContent)).toEqual(['Tu estancia', 'Noviembre'])
+    expect(tabs().map((t) => t.textContent)).toEqual(['Noviembre', 'Diciembre'])
     expect(tabs().map((t) => t.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
   })
 
-  test('Your stay: featured first with the highlight label, then dated events; ≥6 rows would be capped', async () => {
+  test('Production: December has no verified event yet, so only the November tab shows', async () => {
+    const { tabs, container } = await mount({ showUnverified: false })
+    expect(tabs().map((t) => t.textContent)).toEqual(['Noviembre'])
+    expect(container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
+  })
+
+  test('November: every event from today on (the ones already over are hidden), compact rows sorted by start', async () => {
     const { titles, rows } = await mount()
-    expect(titles()).toEqual(['Gran Desfile de Día de Muertos', 'Festival Cacao para Todos', 'Gran Premio de México de F1'])
-    expect(rows()[0]).toHaveTextContent('lo más grande de tu estancia')
-    expect(rows()[0]).toHaveTextContent('SÁB 31')
-    expect(rows()[0]).toHaveTextContent('14:00')
-    expect(rows().filter((r) => /lo más grande/.test(r.textContent!))).toHaveLength(1)
-  })
-
-  test('Your stay: "All through your stay" group = the events that cover every night, as title · area lines', async () => {
-    const { container } = await mount()
-    const group = container.querySelector('[class*="agThrough"]') as HTMLElement
-    expect(group).toHaveTextContent('Durante toda tu estancia')
-    const lines = [...group.querySelectorAll('li')].map((l) => l.textContent)
-    expect(lines).toHaveLength(5)
-    expect(lines[0]).toContain('Ofrenda monumental del Zócalo · Centro Histórico')
-    expect(lines.join('|')).toContain('El Camino · iluminación de Día de Muertos · Paseo de la Reforma')
-  })
-
-  test('no event renders twice in one tab (stay tab: rows + group; month tab)', async () => {
-    const { container, tabs, titles, click } = await mount({ showUnverified: true })
-    const stayTitles = [...titles(), ...[...container.querySelectorAll('[class*="agThrough"] li')].map((l) => l.textContent!.replace(/ ·.*/, ''))]
-    expect(new Set(stayTitles).size).toBe(stayTitles.length)
-    await click(tabs()[1])
-    expect(new Set(titles()).size).toBe(titles().length)
-  })
-
-  test('recurring items NEVER appear inside "Your stay" or the month tabs; they live in their own group "Cada semana en la ciudad"', async () => {
-    const { container, tabs, rows, click } = await mount({ showUnverified: true })
-    const RECURRING = ['Lucha libre', 'Bazar Sábado', 'Muévete en Bici', 'Mirador']
-    const dated = () => [...rows().map((r) => r.textContent!), ...[...container.querySelectorAll('[class*="agThrough"] li')].map((l) => l.textContent!)].join('|')
-    for (const t of RECURRING) expect(dated()).not.toContain(t)
-    await click(tabs()[1])
-    for (const t of RECURRING) expect(dated()).not.toContain(t)
-    // …and the group exists, outside the lists, with all four
-    const weekly = container.querySelector('[class*="agWeeklyWrap"]') as HTMLElement
-    expect(weekly).toHaveTextContent('Cada semana en la ciudad')
-    expect(weekly.querySelectorAll('[class*="agWeeklyCard"]')).toHaveLength(4)
-    for (const t of RECURRING) expect(weekly).toHaveTextContent(t)
-    expect(weekly.closest('ul[class*="agList"]')).toBeNull()
-    expect(container.querySelectorAll('ul[class*="agList"] [class*="agWeeklyCard"]')).toHaveLength(0)
-  })
-
-
-  test('cap: 6 rows, then "Ver todos los N →" expands the rest (Preview, a stay with many events)', async () => {
-    const { rows, click } = await mount({ showUnverified: true, stay: { arrival: '2026-11-06', nights: 20 } })
-    expect(rows()).toHaveLength(6)
-    const more = screen.getByRole('button', { name: /^Ver todos los \d+ →$/ })
-    const n = Number(more.textContent!.match(/\d+/)![0])
-    expect(n).toBeGreaterThan(6)
-    await click(more)
-    expect(rows()).toHaveLength(n)
-    expect(screen.queryByRole('button', { name: /^Ver todos/ })).toBeNull()
-  })
-
-  test('no "Ver todos" when there are 6 or fewer rows', async () => {
-    await mount()
-    expect(screen.queryByRole('button', { name: /^Ver todos/ })).toBeNull()
-  })
-
-  test('month tab: compact rows (full date range, title, category — no venue), sorted by start, "after your stay" tag', async () => {
-    const { tabs, rows, click } = await mount()
-    await click(tabs()[1])
-    expect(tabs().map((t) => t.getAttribute('aria-pressed'))).toEqual(['false', 'true'])
+    expect(rows()).toHaveLength(16)
+    expect(titles()).not.toContain('Gran Desfile de Día de Muertos') // Oct 31, over
+    expect(titles()).not.toContain('Festival Cacao para Todos') // ends Nov 1, over
     const first = rows()[0]
     expect(first).toHaveTextContent('23 OCT – 8 NOV')
     expect(first).toHaveTextContent('Cultura')
@@ -133,69 +79,75 @@ describe('AgendaSection — tabs and lists', () => {
     const karol = rows().find((r) => /Karol G/.test(r.textContent!))!
     expect(karol).toHaveTextContent('Música')
     expect(karol).not.toHaveTextContent('Estadio')
-    expect(karol).toHaveTextContent('después de tu estancia')
-    expect(rows().find((r) => /Gran Premio/.test(r.textContent!))).not.toHaveTextContent('después de tu estancia')
   })
 
-  test('month tab (Production): the verified events only; Preview adds the researched ones with the neutral pill', async () => {
-    const p = await mount({ showUnverified: false })
-    await p.click(p.tabs()[1])
-    expect(p.rows()).toHaveLength(11)
-    expect(p.container.querySelectorAll('[class*="agPill"]')).toHaveLength(0)
-    p.unmount()
-    const v = await mount({ showUnverified: true })
-    await v.click(v.tabs()[1])
-    expect(v.rows()).toHaveLength(21)
-    expect(v.container.querySelectorAll('[class*="agPill"]')).toHaveLength(10)
-    expect(v.container.textContent).not.toMatch(/Host Me Tender|Livin/)
+  test('December tab: the December events, each with the neutral "Por confirmar" pill', async () => {
+    const { tabs, rows, titles, click, container } = await mount()
+    await click(tabs()[1])
+    expect(tabs().map((t) => t.getAttribute('aria-pressed'))).toEqual(['false', 'true'])
+    expect(rows()).toHaveLength(10)
+    expect(titles()).toEqual(expect.arrayContaining(['Maná', 'Santa Run', 'Marvel Run 2026']))
+    expect(container.querySelectorAll('ul[class*="agList"] [class*="agPill"]')).toHaveLength(10)
+  })
+
+  test('recurring items NEVER appear inside a month tab; they live in their own group "Cada semana en la ciudad"', async () => {
+    const { container, tabs, rows, click } = await mount({ showUnverified: true })
+    const RECURRING = ['Lucha libre', 'Bazar Sábado', 'Muévete en Bici', 'Mirador']
+    const dated = () => rows().map((r) => r.textContent!).join('|')
+    for (const t of RECURRING) expect(dated()).not.toContain(t)
+    await click(tabs()[1])
+    for (const t of RECURRING) expect(dated()).not.toContain(t)
+    const weekly = [...container.querySelectorAll('div[class*="agGroup"]')].find((g) => /Cada semana en la ciudad/.test(g.textContent!)) as HTMLElement
+    expect(weekly.querySelectorAll('li[class*="agCard"]')).toHaveLength(4)
+    for (const t of RECURRING) expect(weekly).toHaveTextContent(t)
+    expect(container.querySelectorAll('ul[class*="agList"] [class*="agCard"]')).toHaveLength(0)
+  })
+
+  test('no event renders twice in one tab (two shows of one artist on different dates are two rows with different dates)', async () => {
+    const { tabs, rows, click } = await mount({ showUnverified: true })
+    for (const i of [0, 1]) {
+      await click(tabs()[i])
+      const keys = rows().map((r) => r.textContent)
+      expect(new Set(keys).size).toBe(keys.length)
+    }
   })
 
   test('a row with an official URL is one link (new tab, ↗, sr-only hint); one without is plain', async () => {
-    const { rows, tabs, click } = await mount()
-    const f1 = rows().find((r) => /Gran Premio de México/.test(r.textContent!))!
-    const a = f1.querySelector('a')!
-    expect(a).toHaveAttribute('href', agenda.events.find((e) => e.id === 'gp-mexico-f1')!.url)
+    const { rows } = await mount()
+    const camino = rows().find((r) => /El Camino/.test(r.textContent!))!
+    const a = camino.querySelector('a')!
+    expect(a).toHaveAttribute('href', agenda.events.find((e) => e.id === 'el-camino-reforma')!.url)
     expect(a).toHaveAttribute('target', '_blank')
     expect(a.getAttribute('rel')).toContain('noopener')
     expect(a.textContent).toContain('↗')
-    await click(tabs()[1])
     const puente = rows().find((r) => /Puente de la Revolución/.test(r.textContent!))!
     expect(puente.querySelector('a')).toBeNull()
     expect(rows().every((r) => !r.querySelector('button'))).toBe(true)
   })
 
-  test('the stay changing resets the tab to "Tu estancia"', async () => {
-    const { tabs, click, rerender } = await mount()
-    await click(tabs()[1])
-    await act(async () => { rerender(<AgendaSection lang="es" agenda={agenda} showUnverified stay={{ arrival: '2026-11-02', nights: 10 }} />) })
-    expect(tabs()[0]).toHaveAttribute('aria-pressed', 'true')
+  test('the day trips are always visible, in the same card layout as "Every week in the city" (text only, no links)', async () => {
+    const { container } = await mount()
+    const groups = [...container.querySelectorAll('div[class*="agGroup"]')] as HTMLElement[]
+    expect(groups.map((g) => g.querySelector('h3')!.textContent)).toEqual(['Cada semana en la ciudad', 'Escapadas de un día'])
+    // identical markup shape: title h3 + ul.agCards of li.agCard (when · title · line)
+    for (const g of groups) {
+      expect(g.querySelector('ul[class*="agCards"]')).not.toBeNull()
+      for (const li of g.querySelectorAll('li')) {
+        expect(li.className).toMatch(/agCard/)
+        expect(li.querySelectorAll('span')).toHaveLength(3)
+      }
+    }
+    const trips = groups[1]
+    for (const t of ['Xochimilco', 'Teotihuacán', 'Los Dinamos', 'Tepoztlán']) expect(trips).toHaveTextContent(t)
+    expect(trips.querySelectorAll('a, img, button, [class*="agPill"]')).toHaveLength(0)
   })
 
-  test('quiet stay (December): the quiet card, no month tab, day trips still there', async () => {
-    const { container, tabs } = await mount({ stay: { arrival: '2026-12-09', nights: 1 } })
-    expect(tabs().map((t) => t.textContent)).toEqual(['Tu estancia'])
+  test('quiet state: no month with an event → the quiet card and no tabs, the two groups still there', async () => {
+    freeze('2027-03-10T18:00:00Z')
+    const { container, tabs } = await mount()
+    expect(tabs()).toHaveLength(0)
     expect(screen.getByText('Días tranquilos en la ciudad')).toBeInTheDocument()
-    expect(container.querySelector('[class*="agThrough"]')).toBeNull()
-    expect(screen.getByRole('button', { name: 'Escapadas de un día →' })).toBeInTheDocument()
-  })
-
-  test('no params → today … today+13: a stay tab and the month tabs', async () => {
-    const { tabs } = await mount({ stay: {} })
-    expect(tabs()[0]).toHaveTextContent('Tu estancia')
-    expect(tabs().length).toBeGreaterThanOrEqual(2)
-  })
-
-  test('the "Próximamente en {mes}" button is gone; "Escapadas de un día →" opens the day trips (text only), toggles', async () => {
-    const { container, click } = await mount()
-    expect(screen.queryByRole('button', { name: /Próximamente|Más adelante/ })).toBeNull()
-    const btn = screen.getByRole('button', { name: 'Escapadas de un día →' })
-    expect(btn).toHaveAttribute('aria-expanded', 'false')
-    await click(btn)
-    const panel = document.getElementById(btn.getAttribute('aria-controls')!)!
-    for (const t of ['Xochimilco', 'Teotihuacán', 'Los Dinamos', 'Tepoztlán']) expect(panel).toHaveTextContent(t)
-    expect(panel.querySelectorAll('a, img, [class*="agPill"]')).toHaveLength(0)
-    await click(btn)
-    expect(container.querySelector(`[id$="-trips"]`)).toBeNull()
+    expect(container.querySelectorAll('div[class*="agGroup"]')).toHaveLength(2)
   })
 
   test('the list column is capped at 720px (class on the body)', async () => {
@@ -207,30 +159,27 @@ describe('AgendaSection — tabs and lists', () => {
 describe('AgendaSection — ES / EN', () => {
   test('same structure in both languages; every visible string switches', async () => {
     const es = await mount({ lang: 'es' })
-    const shape = (u: typeof es) => ({ tabs: u.tabs().length, rows: u.rows().length, links: u.container.querySelectorAll('a').length, group: u.container.querySelectorAll('[class*="agThrough"] li').length })
+    const shape = (u: typeof es) => ({ tabs: u.tabs().length, rows: u.rows().length, links: u.container.querySelectorAll('a').length, cards: u.container.querySelectorAll('[class*="agCard"]').length })
     const esShape = shape(es); es.unmount()
     const en = await mount({ lang: 'en' })
     expect(shape(en)).toEqual(esShape)
     expect(screen.getByRole('heading', { name: "While you're here" })).toBeInTheDocument()
-    expect(en.tabs().map((t) => t.textContent)).toEqual(['Your stay', 'November'])
-    expect(screen.getByText("What's happening in the city during your stay.")).toBeInTheDocument()
-    expect(screen.getByText('All through your stay')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Day trips →' })).toBeInTheDocument()
-    expect(screen.getByText('Great Day of the Dead Parade')).toBeInTheDocument()
-    expect(en.container.textContent).toMatch(/the highlight of your stay/)
+    expect(en.tabs().map((t) => t.textContent)).toEqual(['November', 'December'])
+    expect(screen.getByText("What's happening in the city this month and next.")).toBeInTheDocument()
     expect(screen.getByText('Every week in the city')).toBeInTheDocument()
-    expect(en.container.textContent).not.toMatch(/Por confirmar|Durante toda|estancia|Cada semana|Domingos|Martes|Sábados|Al atardecer/)
+    expect(screen.getByText('Day trips')).toBeInTheDocument()
+    expect(en.container.textContent).not.toMatch(/Cada semana|Escapadas|Domingos|Martes|Sábados|Al atardecer|estancia/)
   })
 
-  test('English: month tab shows "after your stay"; Preview shows "To confirm"', async () => {
-    const { tabs, container, click } = await mount({ lang: 'en', showUnverified: true })
+  test('English: the December tab shows "To confirm"', async () => {
+    const { tabs, click } = await mount({ lang: 'en', showUnverified: true })
     await click(tabs()[1])
-    expect(container.textContent).toContain('after your stay')
     expect(screen.getAllByText('To confirm').length).toBeGreaterThan(0)
   })
 
-  test('quiet stay in English', async () => {
-    await mount({ lang: 'en', stay: { arrival: '2026-12-09', nights: 1 } })
+  test('quiet state in English', async () => {
+    freeze('2027-03-10T18:00:00Z')
+    await mount({ lang: 'en' })
     expect(screen.getByText('Quiet days in the city')).toBeInTheDocument()
   })
 })
@@ -293,6 +242,25 @@ describe('GuiaClient — opt-in, kill switch, weekly section intact elsewhere', 
     const agendaH = screen.getByRole('heading', { name: "While you're here" })
     expect(before(itin, exp)).toBe(true)
     expect(before(exp, agendaH)).toBe(true)
+  })
+
+  test('agenda layout: "Explore by mood" sits right below "Worth the time" and above the agenda, and no longer under the host letter', async () => {
+    const slug = 'host-me-tender-agenda'
+    await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
+    const exp = screen.getByRole('heading', { name: 'Worth the time' })
+    const mood = screen.getByRole('heading', { name: 'What are you in the mood for?' })
+    const practical = document.getElementById('practico')!
+    expect(before(exp, mood)).toBe(true)
+    expect(before(mood, screen.getByRole('heading', { name: "While you're here" }))).toBe(true)
+    expect(before(practical, mood)).toBe(true) // it was above the practical section before
+  })
+
+  test('other demo guides keep "Explore by mood" above the practical section', async () => {
+    const slug = 'host-me-tender'
+    await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
+    const mood = screen.getByRole('heading', { name: 'What are you in the mood for?' })
+    expect(before(mood, document.getElementById('practico')!)).toBe(true)
+    expect(before(mood, screen.getByRole('heading', { name: 'Worth the time' }))).toBe(true)
   })
 
   test('other guides: Experiences stay AFTER the weekly section, unchanged (Livin and host-me-tender)', async () => {
@@ -404,12 +372,12 @@ describe('GuiaClient — opt-in, kill switch, weekly section intact elsewhere', 
 
   test('demo guides — backgrounds alternate grey/cream from the mood section on (agenda layout and weekly layout)', async () => {
     for (const [slug, expected] of [
-      ['host-me-tender-alejandro', ['mood', 'practical', 'zones', 'itin', 'exp', 'agenda', 'food', 'beyond', 'discover']],
+      ['host-me-tender-agenda', ['practical', 'zones', 'itin', 'exp', 'mood', 'agenda', 'food', 'beyond', 'discover']],
       ['host-me-tender', ['mood', 'practical', 'zones', 'itin', 'weekly', 'exp', 'food', 'beyond', 'discover']],
     ] as const) {
       const { container, unmount } = await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
       const secs = [...container.querySelectorAll('section')].filter((x) => x.querySelector('h2'))
-      const from = secs.findIndex((x) => /What are you in the mood for\?/.test(x.textContent!))
+      const from = secs.findIndex((x) => (slug === 'host-me-tender-agenda' ? x.id === 'practico' : /What are you in the mood for\?/.test(x.textContent!)))
       const tones = secs.slice(from, from + expected.length).map((x) => (/sectionAlt/.test(x.className) ? 'grey' : 'cream'))
       expect(tones).toEqual(expected.map((_, i) => (i % 2 === 0 ? 'grey' : 'cream')))
       unmount()
@@ -424,10 +392,10 @@ describe('GuiaClient — opt-in, kill switch, weekly section intact elsewhere', 
     expect(container.querySelector('[class*="weatherCard"]')).toBeNull()
   })
 
-  test('demo guides (agenda layout): the weekly group "Every week in the city" comes right after the agenda lists, in English', async () => {
+  test('demo guides (agenda layout): the weekly group "Every week in the city" comes right after the agenda list, in English', async () => {
     const slug = 'host-me-tender-alejandro'
     const { container } = await renderGuide(buildDemoPartner(getDemoProspect(slug)!), demoProps(slug))
-    const weekly = container.querySelector('#aqui [class*="agWeeklyWrap"]') as HTMLElement
+    const weekly = container.querySelector('#aqui [class*="agGroup"]') as HTMLElement
     expect(weekly).toHaveTextContent('Every week in the city')
     expect(weekly).toHaveTextContent('Sundays · 8am–2pm')
     expect(weekly).not.toHaveTextContent(/Cada semana|Domingos|Martes y viernes|Sábados|Al atardecer/)

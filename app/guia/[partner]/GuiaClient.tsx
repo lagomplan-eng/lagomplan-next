@@ -537,6 +537,32 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const MOOD_TARGET: Record<string, string> = { hungry: 'comer', culture: 'itinerario', hidden: 'zonas', short: 'itinerario' }
   const moodTarget = (id: string) => (id === 'kids' ? (kidsMood ? 'ninos' : undefined) : MOOD_TARGET[id])
 
+  // Demo guides: "Explore by mood" tiles jump to the section they belong to; a tile without a target is not shown.
+  const renderMood = (tone: string) => (
+      <section className={`${styles.section} ${styles.rhythm} ${tone}`}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
+            <div className={styles.secBody}>
+              <div className={styles.moodGrid}>
+                {t.moods.filter((m) => moodTarget(m.id)).map((m) => (
+                  <a
+                    key={m.id}
+                    href={`#${moodTarget(m.id)}`}
+                    className={`${styles.moodBtn} ${styles.moodLink}`}
+                    onClick={() => track('host_guide_mood_click', { partner: partner.slug, city: city.id, mood: m.id, target: moodTarget(m.id) })}
+                  >
+                    <Icon name={m.icon} color={PINE} />
+                    <div className={styles.moodLabel}>{m.label}</div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+
   const renderExperiences = (tone: string) => (
       <section
         {...(rhythm ? { id: 'experiencias', className: `${styles.section} ${styles.rhythm} ${tone}` } : { className: `${styles.section} ${styles.sectionAlt}`, style: { paddingTop: 88, paddingBottom: 88 } })}
@@ -764,32 +790,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </section>
       )}
 
-      {/* Demo guides: "Explore by mood" tiles jump to the section they belong to; a tile without a target is not shown. */}
-      {rhythm && (
-      <section className={`${styles.section} ${styles.rhythm} ${nextTone()}`}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
-            <div className={styles.secBody}>
-              <div className={styles.moodGrid}>
-                {t.moods.filter((m) => moodTarget(m.id)).map((m) => (
-                  <a
-                    key={m.id}
-                    href={`#${moodTarget(m.id)}`}
-                    className={`${styles.moodBtn} ${styles.moodLink}`}
-                    onClick={() => track('host_guide_mood_click', { partner: partner.slug, city: city.id, mood: m.id, target: moodTarget(m.id) })}
-                  >
-                    <Icon name={m.icon} color={PINE} />
-                    <div className={styles.moodLabel}>{m.label}</div>
-                  </a>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      )}
+      {rhythm && !agendaLayout && renderMood(nextTone())}
 
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
       <PracticalSection
@@ -905,6 +906,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
       {/* Agenda layout: Experiences sit right under the 48-hour itinerary (otherwise they stay after the weekly/agenda section). */}
       {agendaLayout && renderExperiences(nextTone())}
+      {/* Agenda layout: "Explore by mood" follows "Worth the time" instead of the host letter. */}
+      {agendaLayout && renderMood(nextTone())}
 
       {!rhythm && moodOriginal}
 
@@ -915,7 +918,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           agenda={agenda}
           showUnverified={showUnverified}
           toneClass={nextTone()}
-          stay={{ arrival: stay.arrival, nights: stay.nights }}
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
       ) : (
