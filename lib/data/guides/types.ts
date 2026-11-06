@@ -28,7 +28,7 @@ export interface HotelData {
   name: string
   /** e.g. "Hotel boutique · Lago" */
   type: string
-  priceTier: '$' | '$$' | '$$$'
+  priceTier: '$' | '$$' | '$$$' | '$$$$'
   description: string
   /** Short pill text: "Mejor para familias con niños" */
   highlight: string
@@ -142,7 +142,7 @@ export interface FlatHotel {
   name: string
   /** e.g. "Hotel boutique · Lago" */
   type: string
-  priceTier: '$' | '$$' | '$$$'
+  priceTier: '$' | '$$' | '$$$' | '$$$$'
   description: string
   /** Short pill text */
   tag: string
@@ -171,6 +171,43 @@ export interface FlatTransport {
   tip?: string
 }
 
+export interface TimelyRow {
+  /** "Qué pasa" */
+  what: string
+  /** "Fechas" */
+  when: string
+  /** "Qué cambia para tu viaje" */
+  impact: string
+  /** Optional last day (YYYY-MM-DD, inclusive) this row is shown; defaults to the block's validUntil. */
+  until?: string
+}
+
+/**
+ * Dated info shown in a block at the bottom of the guide, only for a period. From the day after
+ * `validUntil` (America/Mexico_City) the whole block disappears on its own. Strings are final text in
+ * the guide's language; only `validUntil` / `until` are logic.
+ */
+export interface FlatTimely {
+  /** Last day (YYYY-MM-DD, inclusive) the block is shown. */
+  validUntil: string
+  /** e.g. "Esta temporada" */
+  eyebrow: string
+  /** e.g. "Semana de Thanksgiving 2026" */
+  title: string
+  /** e.g. "Datos verificados el 23 de octubre de 2026. Eventos, horarios y precios valen para…" */
+  verifiedNote: string
+  /** e.g. "Lo esencial antes de reservar" */
+  essentialsTitle?: string
+  essentials?: string[]
+  /** e.g. "Cuándo ir" */
+  whenTitle: string
+  whenIntro?: string
+  /** e.g. "Ventana sugerida: del miércoles 25 al lunes 30 de noviembre de 2026…" */
+  window?: string
+  table?: { headers: [string, string, string]; rows: TimelyRow[] }
+  booking?: { label: string; links: Array<{ name: string; url: string }> }
+}
+
 export interface FlatGuide {
   slug: string
   locale: string
@@ -183,6 +220,8 @@ export interface FlatGuide {
     image: string
   }
   itinerary: FlatDay[]
+  /** Optional intro line under the itinerary heading (from the source doc). */
+  itineraryDescription?: string
   hotels: FlatHotel[]
   /** Guide-specific hotels section description (from source doc) */
   hotelsDescription?: string
@@ -193,6 +232,8 @@ export interface FlatGuide {
   funFact?: string
   checklist: string[]
   transport: FlatTransport[]
+  /** Optional dated block at the bottom (see FlatTimely); disappears by itself after `validUntil`. */
+  timely?: FlatTimely
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
@@ -209,4 +250,6 @@ export interface GuidePageData {
   checklist: ChecklistSection
   transport: TransportSection
   planCta: PlanCtaSection
+  /** Present only while the block is current (the adapter drops it once expired). */
+  timely?: FlatTimely
 }

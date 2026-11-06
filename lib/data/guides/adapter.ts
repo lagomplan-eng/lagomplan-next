@@ -9,6 +9,7 @@
  */
 
 import type { FlatGuide, GuidePageData, ChecklistItem } from './types'
+import { activeTimely, mexicoToday } from './timely'
 
 // ── UI label maps ──────────────────────────────────────────────────────────────
 
@@ -125,7 +126,7 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
     itinerary: {
       eyebrow:     l.itineraryEyebrow,
       title:       itineraryTitle,
-      description: '',
+      description: flat.itineraryDescription ?? '',
       days: flat.itinerary.map((d) => ({
         dayNumber: d.day,
         dayLabel:  '',
@@ -201,5 +202,9 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
       description: l.planCtaDesc,
       buttonText:  l.planCtaButton,
     },
+
+    // Dated block: dropped here once expired (static pages are rebuilt); the component checks again in the
+    // browser so a page built before the last day still hides it the day after.
+    timely: activeTimely(flat.timely, mexicoToday()),
   }
 }
