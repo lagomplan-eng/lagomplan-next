@@ -42,9 +42,11 @@ const stale = verified.filter((e) => daysBetween(e.verifiedAt!, today) > staleDa
 console.log(`\n${stale.length ? '⚠' : '✔'} verified more than ${staleDays} days ago: ${stale.length || 'none'}`)
 for (const e of stale) console.log(`   ${e.id} (verified ${e.verifiedAt}, ${daysBetween(e.verifiedAt!, today)} days ago) — re-verify`)
 
-const noUrl = live.filter((e) => !e.url)
-console.log(`\n${noUrl.length ? '⚠' : '✔'} live events with no official link (the row is not tappable): ${noUrl.length || 'none'}`)
-for (const e of noUrl) console.log(`   ${e.id}`)
+// Event links were removed on 2026-11-05 (several were wrong): no row is tappable. Informational only;
+// an event that does carry a url is listed so a link is never shipped by accident.
+const withUrl = live.filter((e) => e.url)
+console.log(`\n${withUrl.length ? '⚠' : '✔'} live events with a link (rows are plain text by decision): ${withUrl.length || 'none'}`)
+for (const e of withUrl) console.log(`   ${e.id}  ${e.url}`)
 
 const ph: string[] = []
 const walk = (v: unknown, path: string) => {

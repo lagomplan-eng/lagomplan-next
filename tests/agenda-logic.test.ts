@@ -88,7 +88,7 @@ eq('data: every event with a time has it in both languages', agenda.events.filte
   eq('agenda:check reports no leftover placeholders', r.stdout.includes('left in any string: none'), true)
   eq('agenda:check lists the recurring items and the viewpoint that has no weekdays', r.stdout.includes('mirador-torre-latinoamericana') && r.stdout.includes('no weekdays'), true)
   eq('agenda:check flags the month with no verified event', /Production hides this month tab/.test(r.stdout), true)
-  eq('agenda:check flags the event with no link', r.stdout.includes('puente-de-la-revolucion') && r.stdout.includes('not tappable'), true)
+  eq('agenda:check reports that no live event carries a link (links were removed on purpose)', r.stdout.includes('live events with a link (rows are plain text by decision): none'), true)
   const tmp = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'agenda-check-')), 'agenda.json')
   const stale = JSON.parse(fs.readFileSync('content/guia/cdmx/agenda.json', 'utf8'))
   stale.events.find((e: any) => e.id === 'gp-mexico-f1').end = '2026-12-31'

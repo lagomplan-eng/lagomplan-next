@@ -116,16 +116,22 @@ describe('AgendaSection — tabs and lists', () => {
     }
   })
 
-  test('a row with an official URL is one link (new tab, ↗, sr-only hint); one without is plain', async () => {
-    const { rows } = await mount()
-    const camino = rows().find((r) => /El Camino/.test(r.textContent!))!
-    const a = camino.querySelector('a')!
-    expect(a).toHaveAttribute('href', agenda.events.find((e) => e.id === 'el-camino-reforma')!.url)
+  test('the real data has no links: no row is a link, none shows the ↗', async () => {
+    const { rows, container } = await mount({ showUnverified: true })
+    expect(rows().length).toBeGreaterThan(0)
+    expect(container.querySelectorAll('ul[class*="agList"] a')).toHaveLength(0)
+    expect(container.querySelector('ul[class*="agList"]')!.textContent).not.toContain('↗')
+  })
+
+  test('a row WITH a url (the component still supports it) is one link (new tab, ↗, sr-only hint); one without is plain', async () => {
+    const withUrl = { ...agenda, events: agenda.events.map((e) => (e.id === 'el-camino-reforma' ? { ...e, url: 'https://example.com/camino' } : e)) }
+    const { rows } = await mount({ agenda: withUrl })
+    const a = rows().find((r) => /El Camino/.test(r.textContent!))!.querySelector('a')!
+    expect(a).toHaveAttribute('href', 'https://example.com/camino')
     expect(a).toHaveAttribute('target', '_blank')
     expect(a.getAttribute('rel')).toContain('noopener')
     expect(a.textContent).toContain('↗')
-    const puente = rows().find((r) => /Puente de la Revolución/.test(r.textContent!))!
-    expect(puente.querySelector('a')).toBeNull()
+    expect(rows().find((r) => /Karol G/.test(r.textContent!))!.querySelector('a')).toBeNull()
     expect(rows().every((r) => !r.querySelector('button'))).toBe(true)
   })
 
