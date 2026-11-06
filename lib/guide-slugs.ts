@@ -67,12 +67,14 @@ export const SLUG_ALIASES: Record<string, string> = {
 export const LOCALE_SLUGS: Record<string, { es: string; en: string }> = {
   roma:     { es: 'roma',     en: 'rome' },
   mauricio: { es: 'mauricio', en: 'mauritius' },
+  'nueva-york': { es: 'nueva-york', en: 'new-york' },
 }
 
 // EN spellings that resolve to a key (so lookups by the real EN slug work).
 const LOCALE_SLUG_TO_KEY: Record<string, string> = {
   rome: 'roma',
   mauritius: 'mauricio',
+  'new-york': 'nueva-york',
 }
 
 export function resolveGuideKey(slug: string): string {

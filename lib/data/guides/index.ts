@@ -110,6 +110,16 @@ import { guide as hongKongEn } from './hong-kong/en'
 import { guide as diaDeMuertosCdmxPatzcuaroEs } from './dia-de-muertos-cdmx-patzcuaro/es'
 import { guide as diaDeMuertosCdmxPatzcuaroEn } from './dia-de-muertos-cdmx-patzcuaro/en'
 
+// November 2026 batch
+import { guide as houstonEs } from './houston/es'
+import { guide as houstonEn } from './houston/en'
+import { guide as ixtapaZihuatanejoEs } from './ixtapa-zihuatanejo/es'
+import { guide as ixtapaZihuatanejoEn } from './ixtapa-zihuatanejo/en'
+import { guide as nuevaYorkEs } from './nueva-york/es'
+import { guide as nuevaYorkEn } from './nueva-york/en'
+import { guide as puntaCanaEs } from './punta-cana/es'
+import { guide as puntaCanaEn } from './punta-cana/en'
+
 // ── Registry ───────────────────────────────────────────────────────────────────
 // { [slug]: { [locale]: FlatGuide } }
 
@@ -162,6 +172,11 @@ const FLAT_REGISTRY: Record<string, Record<string, FlatGuide>> = {
   'hong-kong':           { es: hongKongEs,            en: hongKongEn },
   // Seasonal guide (Day of the Dead 2026). One shared key for both locales for now (no per-locale slug yet).
   'dia-de-muertos-cdmx-patzcuaro': { es: diaDeMuertosCdmxPatzcuaroEs, en: diaDeMuertosCdmxPatzcuaroEn },
+  // November 2026 batch. 'nueva-york' has a real per-locale slug (en: 'new-york', see LOCALE_SLUGS in lib/guide-slugs.ts).
+  'houston':             { es: houstonEs,             en: houstonEn },
+  'ixtapa-zihuatanejo':  { es: ixtapaZihuatanejoEs,   en: ixtapaZihuatanejoEn },
+  'nueva-york':          { es: nuevaYorkEs,           en: nuevaYorkEn },
+  'punta-cana':          { es: puntaCanaEs,           en: puntaCanaEn },
 }
 
 // ── Public helpers ─────────────────────────────────────────────────────────────
