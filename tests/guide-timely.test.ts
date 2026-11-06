@@ -6,6 +6,7 @@
  */
 import { activeRows, activeTimely, isTimelyActive, mexicoToday } from '../lib/data/guides/timely'
 import { adaptFlatGuide } from '../lib/data/guides/adapter'
+import { guideNow } from '../lib/data/guides/now'
 import type { FlatGuide, FlatTimely } from '../lib/data/guides/types'
 
 let failed = 0
@@ -39,13 +40,23 @@ eq('activeTimely: returns the block with its still-current rows', activeTimely(T
 eq('activeTimely: undefined once expired', activeTimely(T, '2026-12-01'), undefined)
 eq('activeTimely: undefined for a guide without the block', activeTimely(undefined, '2026-11-01'), undefined)
 
-// The adapter drops an expired block, keeps a current one (real clock: validUntil far in the past / future)
+// The adapter decides on the server, from the `now` it is given (guide pages revalidate hourly)
 const flat = (timely?: FlatTimely): FlatGuide => ({
   slug: 'x', locale: 'es', hero: { title: 'X', subtitle: '', tags: [], image: '' }, itinerary: [], hotels: [], experiences: [], tips: [], checklist: [], transport: [], timely,
 })
-eq('adapter: an expired block is dropped from the page data', adaptFlatGuide(flat({ ...T, validUntil: '2020-01-01' })).timely, undefined)
-eq('adapter: a current block is passed through', adaptFlatGuide(flat({ ...T, validUntil: '2099-01-01' })).timely?.title, 'Semana de Thanksgiving 2026')
-eq('adapter: a guide with no block has none', adaptFlatGuide(flat()).timely, undefined)
+const at = (iso: string) => new Date(iso)
+eq('adapter: last day (Nov 30, 12:00 CDMX) still has the block', adaptFlatGuide(flat(T), at('2026-11-30T18:00:00Z')).timely?.title, 'Semana de Thanksgiving 2026')
+eq('adapter: Dec 1 00:00 in Mexico City: the block is gone', adaptFlatGuide(flat(T), at('2026-12-01T06:00:00Z')).timely, undefined)
+eq('adapter: 05:59Z on Dec 1 is still Nov 30 in CDMX: still there', adaptFlatGuide(flat(T), at('2026-12-01T05:59:00Z')).timely?.title, 'Semana de Thanksgiving 2026')
+eq('adapter: a row past its own until is dropped, the block stays (Nov 29)', adaptFlatGuide(flat(T), at('2026-11-29T18:00:00Z')).timely?.table?.rows.map((r) => r.what), ['Desfile'])
+eq('adapter: a guide with no block has none', adaptFlatGuide(flat(), at('2026-11-01T18:00:00Z')).timely, undefined)
+
+// GUIDE_NOW_OVERRIDE: dev only, never in production
+eq('override: honoured outside production', guideNow({ GUIDE_NOW_OVERRIDE: '2026-12-01T12:00:00Z', NODE_ENV: 'development' }).toISOString(), '2026-12-01T12:00:00.000Z')
+eq('override: ignored when NODE_ENV is production (every Vercel build, Preview included)', Math.abs(guideNow({ GUIDE_NOW_OVERRIDE: '2020-01-01T00:00:00Z', NODE_ENV: 'production' }).getTime() - Date.now()) < 5000, true)
+eq('override: ignored on Vercel Production even if NODE_ENV were not production', Math.abs(guideNow({ GUIDE_NOW_OVERRIDE: '2020-01-01T00:00:00Z', NODE_ENV: 'development', VERCEL_ENV: 'production' }).getTime() - Date.now()) < 5000, true)
+eq('override: a garbage value is ignored', Math.abs(guideNow({ GUIDE_NOW_OVERRIDE: 'not-a-date', NODE_ENV: 'development' }).getTime() - Date.now()) < 5000, true)
+eq('override: unset means the real clock', Math.abs(guideNow({ NODE_ENV: 'development' }).getTime() - Date.now()) < 5000, true)
 
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('guide-timely: all passed')

@@ -23,6 +23,10 @@ import { GuidePageClientV2 }        from '../../../../components/guides/GuidePag
 
 type Props = { params: Promise<{ locale: Locale; slug: string }> }
 
+// Guide pages are static but re-rendered hourly, so dated blocks (timely / seasonal editions) switch state
+// within the hour of their end date without a deploy.
+export const revalidate = 3600
+
 export function generateStaticParams() {
   // Merge params from both data systems (deduplicated by slug+locale)
   const legacy  = getAllGuideParams()
