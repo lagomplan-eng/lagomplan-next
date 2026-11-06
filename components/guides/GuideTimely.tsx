@@ -1,24 +1,16 @@
-'use client'
-
 /**
  * components/guides/GuideTimely.tsx
  *
  * The dated block at the bottom of a guide (verified-on note, essentials, "when to go" calendar,
- * dated booking links). It is rendered only while it is current: the date is checked in the
- * BROWSER (America/Mexico_City) after mount, because guide pages are static and a build-time check
- * would freeze. Before mount, and after `validUntil`, nothing renders.
+ * dated booking links). Presentational and server-rendered: whether it is still current is decided by
+ * the adapter on the server (lib/data/guides/adapter.ts) every time the page is rebuilt, and guide pages
+ * revalidate hourly, so the text is in the HTML and an expired block disappears without a deploy.
  */
 
-import { useEffect, useState } from 'react'
 import type { FlatTimely } from '../../lib/data/guides/types'
-import { activeTimely, mexicoToday } from '../../lib/data/guides/timely'
 
 export function GuideTimely({ data }: { data: FlatTimely }) {
-  const [today, setToday] = useState<string | null>(null)
-  useEffect(() => { setToday(mexicoToday()) }, [])
-
-  const t = today ? activeTimely(data, today) : undefined
-  if (!t) return null
+  const t = data
 
   return (
     <section

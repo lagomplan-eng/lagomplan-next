@@ -171,7 +171,11 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
               completionMessage={checklistDone}
             />
             <Transport data={data.transport} />
-            <NewsletterSidebarCard />
+            {/* In the sidebar on desktop; below 960px the grid is one column and this card would sit right above
+                 NewsletterEndOfGuide (two newsletter blocks back to back), so it is hidden there. */}
+            <div className="max-[960px]:hidden">
+              <NewsletterSidebarCard />
+            </div>
           </div>
 
         </div>

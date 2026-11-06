@@ -10,6 +10,7 @@
 
 import type { FlatGuide, GuidePageData, ChecklistItem } from './types'
 import { activeTimely, mexicoToday } from './timely'
+import { guideNow } from './now'
 
 // ── UI label maps ──────────────────────────────────────────────────────────────
 
@@ -60,10 +61,11 @@ const L = {
 
 // ── Checklist parser ───────────────────────────────────────────────────────────
 
-function parseChecklistItem(s: string): ChecklistItem {
-  // Split "🎒 Description text" → emoji + label
+export function parseChecklistItem(s: string): ChecklistItem {
+  // Split "🎒 Description text" → emoji + label. The first token is an icon only when it has no letters or
+  // digits ("Una maleta vacía" and "Sun protection" are plain text: "Una" / "Sun" are not emoji).
   const match = s.match(/^(\S+)\s+(.+)$/)
-  if (match && match[1].length <= 4) {
+  if (match && match[1].length <= 8 && !/[\p{L}\p{N}]/u.test(match[1])) {
     return { emoji: match[1], label: match[2] }
   }
   return { emoji: '•', label: s }
@@ -86,7 +88,7 @@ function transportIcon(mode: string): string {
 
 // ── Main adapter ───────────────────────────────────────────────────────────────
 
-export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
+export function adaptFlatGuide(flat: FlatGuide, now: Date = guideNow()): GuidePageData {
   const loc = flat.locale === 'en' ? 'en' : 'es'
   const l = L[loc]
 
@@ -203,8 +205,8 @@ export function adaptFlatGuide(flat: FlatGuide): GuidePageData {
       buttonText:  l.planCtaButton,
     },
 
-    // Dated block: dropped here once expired (static pages are rebuilt); the component checks again in the
-    // browser so a page built before the last day still hides it the day after.
-    timely: activeTimely(flat.timely, mexicoToday()),
+    // Dated block: decided here, on the server, each time the page is (re)built; guide pages revalidate hourly,
+    // so an expired block is gone within the hour with no deploy.
+    timely: activeTimely(flat.timely, mexicoToday(now)),
   }
 }
