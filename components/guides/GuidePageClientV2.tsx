@@ -27,6 +27,7 @@ import { Transport }               from './RightColumn/Transport'
 import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
 import { GuideFreeIndicator }      from './GuideFreeIndicator'
+import { GuideTimely }            from './GuideTimely'
 import NewsletterSidebarCard       from '../newsletter/NewsletterSidebarCard'
 import NewsletterEndOfGuide        from '../newsletter/NewsletterEndOfGuide'
 import NewsletterPdfPrompt         from '../newsletter/NewsletterPdfPrompt'
@@ -174,6 +175,9 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
           </div>
 
         </div>
+
+        {/* ── Dated block (verified-on note, when-to-go calendar): only while current, gone by itself after validUntil ── */}
+        {data.timely && <GuideTimely data={data.timely} />}
 
         {/* ── End-of-guide newsletter (hidden on print) ─────────────────
              Sits INSIDE the max-w-[1200px] px-8 wrapper so its inner
