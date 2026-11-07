@@ -44,6 +44,16 @@ const REF_ID = 'lagomplan'
  */
 export function withRef(url: string | undefined): string {
   if (!url) return '#'
-  const separator = url.includes('?') ? '&' : '?'
-  return `${url}${separator}ref=${REF_ID}`
+  // Idempotent: many guide URLs already carry ref=lagomplan in their data, and appending it again
+  // produced "?ref=lagomplan&ref=lagomplan". Set it (replace in place, or add once) instead of concatenating.
+  try {
+    const u = new URL(url)
+    u.searchParams.set('ref', REF_ID)
+    return u.toString()
+  } catch {
+    // Not an absolute URL: same rule on the raw string.
+    const without = url.replace(/([?&])ref=[^&#]*(&|(?=#)|$)/g, (_m, lead, tail) => (tail === '&' ? lead : '')).replace(/[?&](?=#|$)/, '')
+    const separator = without.includes('?') ? '&' : '?'
+    return `${without}${separator}ref=${REF_ID}`
+  }
 }
