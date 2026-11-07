@@ -11,6 +11,7 @@
 import type { FlatGuide, GuidePageData, ChecklistItem } from './types'
 import { activeTimely, mexicoToday } from './timely'
 import { guideNow } from './now'
+import { seasonalState, withBookingDates } from './seasonal'
 
 // ── UI label maps ──────────────────────────────────────────────────────────────
 
@@ -112,6 +113,9 @@ export function adaptFlatGuide(flat: FlatGuide, now: Date = guideNow()): GuidePa
       ? `${l.tipsTitle} para ${flat.hero.title}`
       : `${l.tipsTitle} for ${flat.hero.title}`
 
+  // Seasonal edition: active/expired is decided here, on the server, in the destination's timezone.
+  const seasonal = flat.seasonalEdition ? { edition: flat.seasonalEdition, state: seasonalState(flat.seasonalEdition, now) } : undefined
+
   return {
     slug:   flat.slug,
     locale: flat.locale,
@@ -153,7 +157,8 @@ export function adaptFlatGuide(flat: FlatGuide, now: Date = guideNow()): GuidePa
         priceTier:  h.priceTier,
         description: h.description,
         highlight:   h.tag,
-        bookingUrl:  h.affiliateUrl || undefined,
+        // Only guides with an edition get dated/undated Booking links; every other guide's URLs pass through untouched.
+        bookingUrl:  seasonal ? withBookingDates(h.affiliateUrl || undefined, seasonal.edition.bookingDates, seasonal.state) : (h.affiliateUrl || undefined),
       })),
     },
 
@@ -208,5 +213,6 @@ export function adaptFlatGuide(flat: FlatGuide, now: Date = guideNow()): GuidePa
     // Dated block: decided here, on the server, each time the page is (re)built; guide pages revalidate hourly,
     // so an expired block is gone within the hour with no deploy.
     timely: activeTimely(flat.timely, mexicoToday(now)),
+    seasonal,
   }
 }

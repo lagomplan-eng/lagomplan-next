@@ -28,6 +28,8 @@ import { CuratedGuideShareModal }  from './CuratedGuideShareModal'
 import type { GuideShare }         from './CuratedGuideShareModal'
 import { GuideFreeIndicator }      from './GuideFreeIndicator'
 import { GuideTimely }            from './GuideTimely'
+import { SeasonalEdition }        from './SeasonalEdition'
+import { withRef }                from '../../lib/affiliate'
 import NewsletterSidebarCard       from '../newsletter/NewsletterSidebarCard'
 import NewsletterEndOfGuide        from '../newsletter/NewsletterEndOfGuide'
 import NewsletterPdfPrompt         from '../newsletter/NewsletterPdfPrompt'
@@ -150,6 +152,19 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
         onPdf={handlePdf}
       />
 
+      {/* ── Seasonal edition (only guides that have one): directly under the hero, above the itinerary ── */}
+      {data.seasonal && (
+        <div className="pt-10">
+          <SeasonalEdition
+            edition={data.seasonal.edition}
+            state={data.seasonal.state}
+            locale={locale}
+            dayNumbers={data.itinerary.days.map((d) => d.dayNumber)}
+            hotels={data.hotels.items.map((h) => ({ name: h.name, bookingUrl: h.bookingUrl ? withRef(h.bookingUrl) : undefined }))}
+          />
+        </div>
+      )}
+
       {/* ── Main two-column layout ── */}
       <div className="max-w-[1200px] mx-auto px-8 max-[768px]:px-5">
         <div className="grid grid-cols-[1fr_320px] gap-12 py-12 pb-20 items-start max-[960px]:grid-cols-1 max-[960px]:gap-10">
@@ -188,7 +203,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
              Pine card aligns with the "Recommended experiences" card
              rendered just above it on the left column. The -mt-8 closes
              the dead air the grid's pb-20 leaves behind. */}
-        <div className="-mt-8 print:hidden">
+        <div id="newsletter" className="-mt-8 print:hidden scroll-mt-24">
           <NewsletterEndOfGuide />
         </div>
 

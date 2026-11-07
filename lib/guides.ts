@@ -1332,8 +1332,8 @@ const GUIDES: Guide[] = [
   {
     slug_es: 'houston',
     slug_en: 'houston',
-    title_es: 'Houston con adolescentes',
-    title_en: 'Houston with Teens',
+    title_es: 'Houston en Thanksgiving con adolescentes',
+    title_en: 'Houston at Thanksgiving with Teens',
     excerpt_es: 'La Galleria el día de Black Friday, globos gigantes en el desfile de Thanksgiving y el control de misión de la NASA. Seis días con adolescentes.',
     excerpt_en: "The Galleria on Black Friday, giant parade balloons and NASA's mission control. Six days with teenagers.",
     destination_es: 'Houston',

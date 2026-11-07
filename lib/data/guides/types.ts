@@ -208,6 +208,48 @@ export interface FlatTimely {
   booking?: { label: string; links: Array<{ name: string; url: string }> }
 }
 
+/** A fixed-date event pinned to one itinerary day (1-based). */
+export interface SeasonalDayEvent {
+  dayIndex: number
+  /** ISO date (YYYY-MM-DD) of that day. */
+  date: string
+  title: string
+  detail?: string
+}
+
+/** Something that runs through the whole season, shown as one line. */
+export interface SeasonalLongItem {
+  title: string
+  /** Final text, e.g. "19 nov–3 ene". */
+  dateRange: string
+  detail?: string
+}
+
+/**
+ * A guide built around one dated edition (Thanksgiving week, Día de Muertos, Navidad, Spring Break).
+ * Empty > invented: a missing field renders nothing. The edition is `active` through `windowEnd` (inclusive,
+ * in `timezone`) and `expired` after it; the state is computed on the server (see lib/data/guides/seasonal.ts).
+ */
+export interface FlatSeasonalEdition {
+  /** e.g. "Edición Thanksgiving 2026" */
+  label: string
+  /** ISO dates, e.g. 2026-11-25 / 2026-11-30. Day N of the itinerary is windowStart + N - 1. */
+  windowStart: string
+  windowEnd: string
+  /** ISO date the facts were verified. */
+  verifiedAt: string
+  /** IANA timezone of the destination, e.g. "America/Chicago". */
+  timezone: string
+  /** Short strings, at most 4. */
+  essentials?: string[]
+  dayEvents?: SeasonalDayEvent[]
+  seasonLong?: SeasonalLongItem[]
+  /** Shown after expiry, e.g. "La de 2027 sale en octubre." */
+  nextEditionNote?: string
+  /** Prefill for Booking.com links while the edition is active (dropped when expired). */
+  bookingDates?: { checkin: string; checkout: string }
+}
+
 export interface FlatGuide {
   slug: string
   locale: string
@@ -234,6 +276,8 @@ export interface FlatGuide {
   transport: FlatTransport[]
   /** Optional dated block at the bottom (see FlatTimely); disappears by itself after `validUntil`. */
   timely?: FlatTimely
+  /** Optional dated edition shown under the hero (see FlatSeasonalEdition). */
+  seasonalEdition?: FlatSeasonalEdition
 }
 
 // ── Root ───────────────────────────────────────────────────────────────────────
@@ -252,4 +296,6 @@ export interface GuidePageData {
   planCta: PlanCtaSection
   /** Present only while the block is current (the adapter drops it once expired). */
   timely?: FlatTimely
+  /** The seasonal edition plus its server-computed state; absent when the guide has none. */
+  seasonal?: { edition: FlatSeasonalEdition; state: 'active' | 'expired' }
 }

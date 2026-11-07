@@ -4,7 +4,7 @@ export const guide: FlatGuide = {
   slug: "houston",
   locale: "es",
   hero: {
-    title: "Houston con adolescentes",
+    title: "Houston en Thanksgiving con adolescentes",
     subtitle: "La Galleria abre temprano en Black Friday y tus hijos llegan con una lista. Un día antes vieron pasar globos gigantes por el centro; al siguiente van a pararse frente al control de misión que llevó al hombre a la Luna. Esta ruta usa la semana de Thanksgiving en Houston para mezclar compras, deporte en vivo, NASA y luces navideñas.",
     eyebrow: "Guía curada · Familia con adolescentes · Compras y diversión · 6 días · Presupuesto alto",
     tags: ["Familia", "Adolescentes", "Compras", "Ciudad"],
@@ -30,7 +30,7 @@ export const guide: FlatGuide = {
         {
           time: "Noche",
           title: "Partido de los Houston Rockets si juegan en casa",
-          description: "En 2026 reciben a los Phoenix Suns (ver Cuándo ir).",
+          description: "En 2026 reciben a los Phoenix Suns en el Toyota Center.",
           tags: [],
         },
       ],
@@ -60,7 +60,7 @@ export const guide: FlatGuide = {
         {
           time: "Desde las 17:30",
           title: "Zoo Lights en el Zoológico de Houston, abierto incluso en Thanksgiving",
-          description: "Horarios y precio en Cuándo ir.",
+          description: "Abre del 19 de noviembre al 3 de enero, de 17:30 a 22:30; desde US$24.95.",
           tags: [],
         },
       ],
@@ -72,7 +72,7 @@ export const guide: FlatGuide = {
         {
           time: "A primera hora",
           title: "Galleria, que en Black Friday abre antes de lo habitual",
-          description: "Horarios en Cuándo ir.",
+          description: "Los horarios de 2026 se publican cerca de la fecha en las páginas de cada centro comercial.",
           tags: [],
         },
         {
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
         {
           time: "Al atardecer",
           title: "Si quieren quedarse, Galaxy Lights, el festival de luces de Space Center Houston",
-          description: "Fechas en Cuándo ir.",
+          description: "Del 14 de noviembre al 3 de enero.",
           tags: [],
         },
         {
@@ -247,90 +247,32 @@ export const guide: FlatGuide = {
       mode: "Clima",
       description: "A finales de noviembre la máxima normal en Houston ronda los 21 °C y la mínima los 10 °C. Los frentes fríos pueden bajar las mínimas a menos de 10 °C, y también hay días cálidos cercanos a 28 °C. Lleva capas.",
     },
-    {
-      mode: "Compras",
-      description: "En 2025 la Galleria abrió a las 7:00 en Black Friday y los outlets Houston Premium y Tanger a las 6:00. Los horarios 2026 se publican cerca de la fecha en las páginas de cada centro comercial.",
-    },
   ],
-  timely: {
-    validUntil: "2026-11-30",
-    eyebrow: "Esta temporada",
-    title: "Semana de Thanksgiving 2026",
-    verifiedNote: "Datos verificados el 23 de octubre de 2026. Eventos, horarios y precios valen para la semana de Thanksgiving de 2026.",
-    essentialsTitle: "Lo esencial antes de reservar",
+  seasonalEdition: {
+    label: "Edición Thanksgiving 2026",
+    windowStart: "2026-11-25",
+    windowEnd: "2026-11-30",
+    verifiedAt: "2026-10-23",
+    timezone: "America/Chicago",
     essentials: [
       "Todos necesitan pasaporte y visa estadounidense vigente.",
-      "Esta ruta está hecha para la semana de Thanksgiving: desfile el jueves, Black Friday el viernes. Fuera de esa semana funciona igual, sin esos dos días.",
+      "Calendario SEP: el viernes 27 no hay clases (Consejo Técnico); el 25, 26 y 30 sí hay. Alternativa sin faltar: el puente del 13 al 16 de noviembre, sin desfile ni Black Friday.",
       "El jueves de Thanksgiving muchos restaurantes cierran o solo abren con reservación. Asegura la comida de ese día con tiempo.",
     ],
-    whenTitle: "Cuándo ir",
-    whenIntro: "La semana de Thanksgiving concentra en seis días el desfile, el Black Friday, la apertura de las luces navideñas y deporte en casa. Este es el calendario de 2026.",
-    window: "Ventana sugerida: del miércoles 25 al lunes 30 de noviembre de 2026. Thanksgiving es el jueves 26 y el Black Friday el viernes 27.",
-    table: {
-      headers: ["Qué pasa", "Fechas 2026", "Qué cambia para tu viaje"],
-      rows: [
-        {
-          what: "Houston Rockets contra Phoenix Suns",
-          when: "Miércoles 25 de noviembre, Toyota Center",
-          impact: "Primera noche del viaje; confirma el horario al comprar boletos",
-          until: "2026-11-25",
-        },
-        {
-          what: "77.º Desfile de Thanksgiving H-E-B",
-          when: "Jueves 26 de noviembre, 9:00, centro de Houston",
-          impact: "Gratuito; llega temprano por lugar",
-          until: "2026-11-26",
-        },
-        {
-          what: "Black Friday",
-          when: "Viernes 27 de noviembre",
-          impact: "En 2025 la Galleria abrió a las 7:00 y los outlets Houston Premium y Tanger a las 6:00; los horarios 2026 se publican cerca de la fecha",
-          until: "2026-11-27",
-        },
-        {
-          what: "Zoo Lights",
-          when: "Del 19 de noviembre al 3 de enero, 17:30 a 22:30",
-          impact: "Abre también en Thanksgiving; desde 24.95 dólares",
-        },
-        {
-          what: "Galaxy Lights en Space Center Houston",
-          when: "Del 14 de noviembre al 3 de enero",
-          impact: "Se combina con el día de la NASA",
-        },
-        {
-          what: "El Cascanueces, Houston Ballet",
-          when: "Del 27 de noviembre al 28 de diciembre",
-          impact: "Estreno de temporada el viernes de Black Friday",
-        },
-        {
-          what: "Houston Texans contra Baltimore Ravens",
-          when: "Domingo 29 de noviembre, 12:00, NRG Park",
-          impact: "Compra boletos y estacionamiento con anticipación",
-          until: "2026-11-29",
-        },
-        {
-          what: "Calendario SEP",
-          when: "Viernes 27 sin clases (Consejo Técnico); 25, 26 y 30 con clases",
-          impact: "Alternativa sin faltar a clases: el puente del 13 al 16 de noviembre, sin desfile ni Black Friday",
-        },
-      ],
-    },
-    booking: {
-      label: "Reserva con las fechas sugeridas:",
-      links: [
-        {
-          name: "The Post Oak Hotel",
-          url: "https://www.booking.com/hotel/us/the-post-oak.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-        {
-          name: "JW Marriott by the Galleria",
-          url: "https://www.booking.com/hotel/us/jw-marriott-houston.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-        {
-          name: "Marriott Marquis Houston",
-          url: "https://www.booking.com/hotel/us/marriott-marquis-houston.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-      ],
-    },
+    dayEvents: [
+      { dayIndex: 1, date: "2026-11-25", title: "Houston Rockets contra Phoenix Suns", detail: "Toyota Center. Confirma el horario al comprar boletos." },
+      { dayIndex: 2, date: "2026-11-26", title: "77.º Desfile de Thanksgiving H-E-B", detail: "9:00, centro de Houston. Gratuito; llega temprano por lugar." },
+      { dayIndex: 2, date: "2026-11-26", title: "Zoo Lights", detail: "Abre también en Thanksgiving." },
+      { dayIndex: 3, date: "2026-11-27", title: "Black Friday", detail: "En 2025 la Galleria abrió a las 7:00 y los outlets Houston Premium y Tanger a las 6:00; los horarios 2026 se publican cerca de la fecha." },
+      { dayIndex: 3, date: "2026-11-27", title: "El Cascanueces, Houston Ballet", detail: "Estreno de temporada." },
+      { dayIndex: 5, date: "2026-11-29", title: "Houston Texans contra Baltimore Ravens", detail: "12:00, NRG Park. Compra boletos y estacionamiento con anticipación." },
+    ],
+    seasonLong: [
+      { title: "Zoo Lights", dateRange: "19 nov–3 ene", detail: "17:30 a 22:30, desde US$24.95" },
+      { title: "Galaxy Lights en Space Center Houston", dateRange: "14 nov–3 ene" },
+      { title: "El Cascanueces, Houston Ballet", dateRange: "27 nov–28 dic" },
+    ],
+    nextEditionNote: "La de 2027 sale en octubre.",
+    bookingDates: { checkin: "2026-11-25", checkout: "2026-11-30" },
   },
 }
