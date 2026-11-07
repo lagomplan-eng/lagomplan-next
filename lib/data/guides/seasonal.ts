@@ -56,12 +56,19 @@ export interface DayColumn {
   weekday: string
   /** "27 NOV" */
   date: string
+  /** "27" */
+  dayOfMonth: string
+  /** The itinerary day's own title (existing copy, never written here). */
+  title: string
   events: Array<{ title: string; detail?: string }>
 }
 
-/** One column per itinerary day: its date is windowStart + n - 1, its events are the dayEvents with that dayIndex. */
-export function dayColumns(se: FlatSeasonalEdition, dayNumbers: readonly number[], l: SeasonalLocale): DayColumn[] {
-  return dayNumbers.map((n) => {
+/**
+ * One column per itinerary day: its date is windowStart + n - 1, its title is the itinerary day's title, its
+ * events are the dayEvents with that dayIndex (a day with none has none: no empty cell, no placeholder).
+ */
+export function dayColumns(se: FlatSeasonalEdition, days: ReadonlyArray<{ dayNumber: number; title: string }>, l: SeasonalLocale): DayColumn[] {
+  return days.map(({ dayNumber: n, title }) => {
     const date = addDays(se.windowStart, n - 1)
     return {
       n,
@@ -69,6 +76,8 @@ export function dayColumns(se: FlatSeasonalEdition, dayNumbers: readonly number[
       label: String(n).padStart(2, '0'),
       weekday: WEEKDAYS_SHORT[l][weekdayOf(date)],
       date: `${day(date)} ${mon(date, l)}`,
+      dayOfMonth: String(day(date)),
+      title,
       events: (se.dayEvents ?? []).filter((e) => e.dayIndex === n).map((e) => ({ title: e.title, detail: e.detail })),
     }
   })
@@ -91,4 +100,14 @@ export function withBookingDates(url: string | undefined, bookingDates: FlatSeas
     u.searchParams.delete('checkout')
   }
   return u.toString()
+}
+
+/** WCAG 2.x contrast ratio between two #RRGGBB colours (used to keep the edition's text AA on its backgrounds). */
+export function contrastRatio(fg: string, bg: string): number {
+  const lum = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4))
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+  }
+  const [a, c] = [lum(fg), lum(bg)].sort((x, y) => y - x)
+  return (a + 0.05) / (c + 0.05)
 }

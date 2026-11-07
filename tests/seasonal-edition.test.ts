@@ -9,7 +9,8 @@ import { guide as hEs } from '../lib/data/guides/houston/es'
 import { guide as hEn } from '../lib/data/guides/houston/en'
 import { guide as ixEs } from '../lib/data/guides/ixtapa-zihuatanejo/es'
 import { adaptFlatGuide } from '../lib/data/guides/adapter'
-import { bandLabel, dayColumns, seasonalState, todayIn, windowLabel, withBookingDates } from '../lib/data/guides/seasonal'
+import { bandLabel, contrastRatio, dayColumns, seasonalState, todayIn, windowLabel, withBookingDates } from '../lib/data/guides/seasonal'
+import { SEASONAL_COLORS } from '../components/guides/SeasonalEdition'
 import { withRef } from '../lib/affiliate'
 
 let failed = 0
@@ -32,11 +33,14 @@ eq('todayIn follows the given zone', [todayIn('America/Chicago', at('2026-12-01T
 eq('band (ES)', bandLabel(SE, 'es'), 'EDICIÓN THANKSGIVING 2026 — 25/30 NOV — VERIFICADO 23 OCT')
 eq('band (EN)', bandLabel(hEn.seasonalEdition!, 'en'), 'THANKSGIVING 2026 EDITION — 25/30 NOV — VERIFIED 23 OCT')
 eq('window across two months', windowLabel('2026-12-28', '2027-01-03', 'es'), '28 DIC/3 ENE')
-const cols = dayColumns(SE, hEs.itinerary.map((d) => d.day), 'es')
+const daysOf = (g: typeof hEs) => g.itinerary.map((d) => ({ dayNumber: d.day, title: d.title }))
+const cols = dayColumns(SE, daysOf(hEs), 'es')
 eq('six columns, leading zeros, ids dia-01…dia-06', cols.map((c) => [c.label, c.id]), [['01', 'dia-01'], ['02', 'dia-02'], ['03', 'dia-03'], ['04', 'dia-04'], ['05', 'dia-05'], ['06', 'dia-06']])
 eq('weekday + date per day', cols.map((c) => `${c.weekday} ${c.date}`), ['MIÉ 25 NOV', 'JUE 26 NOV', 'VIE 27 NOV', 'SÁB 28 NOV', 'DOM 29 NOV', 'LUN 30 NOV'])
-eq('events per day (days 4 and 6 have none: empty, not invented)', cols.map((c) => c.events.length), [1, 2, 2, 0, 1, 0])
-eq('English weekdays', dayColumns(hEn.seasonalEdition!, hEn.itinerary.map((d) => d.day), 'en').map((c) => c.weekday), ['WED', 'THU', 'FRI', 'SAT', 'SUN', 'MON'])
+eq('events per day: at most one; days 4 and 6 have none (empty, not invented)', cols.map((c) => c.events.length), [1, 1, 1, 0, 1, 0])
+eq("each column carries the itinerary day's own title (no new copy)", cols.map((c) => c.title), hEs.itinerary.map((d) => d.title))
+eq('day of month for the one-line header', cols.map((c) => c.dayOfMonth), ['25', '26', '27', '28', '29', '30'])
+eq('English weekdays', dayColumns(hEn.seasonalEdition!, daysOf(hEn), 'en').map((c) => c.weekday), ['WED', 'THU', 'FRI', 'SAT', 'SUN', 'MON'])
 
 // ── Booking.com dates ──
 const U = 'https://www.booking.com/hotel/us/the-post-oak.html?ref=lagomplan'
@@ -65,12 +69,21 @@ for (const [name, g] of [['es', hEs], ['en', hEn]] as const) {
   ok(`${name}: no dangling "Cuándo ir" / "When to go" in the page`, !/cuándo ir|when to go/i.test(itinText), itinText.match(/.{30}(cuándo ir|when to go).{10}/i)?.[0])
   ok(`${name}: essentials are at most 4 (3 here)`, (se.essentials ?? []).length === 3)
   ok(`${name}: every dayEvent is on a real itinerary day and its date is windowStart + day − 1`, (se.dayEvents ?? []).every((e) => e.dayIndex >= 1 && e.dayIndex <= g.itinerary.length && cols[e.dayIndex - 1] && e.date === `2026-11-${24 + e.dayIndex}`))
+  ok(`${name}: at most one dayEvent per day, and none carries a second line`, new Set((se.dayEvents ?? []).map((e) => e.dayIndex)).size === (se.dayEvents ?? []).length && (se.dayEvents ?? []).every((e) => e.detail === undefined))
+  // Dedupe rule: dated to one day goes in dayEvents; spans the season goes in seasonLong. Never both.
+  const dayText = (se.dayEvents ?? []).map((e) => e.title).join(' | ')
+  ok(`${name}: Zoo Lights and the Nutcracker are in seasonLong only, not in dayEvents`, !/zoo lights|cascanueces|nutcracker/i.test(dayText) && (se.seasonLong ?? []).filter((x) => /zoo lights/i.test(x.title)).length === 1 && (se.seasonLong ?? []).filter((x) => /cascanueces|nutcracker/i.test(x.title)).length === 1, dayText)
   eq(`${name}: three season-long items`, se.seasonLong?.length, 3)
   const all = JSON.stringify(g)
   eq(`${name}: Black Friday hours (7:00 / 6:00 outlets) appear in one place only`, (all.match(/Houston Premium/g) ?? []).length, 1)
   ok(`${name}: the SEP calendar is in the essentials, not a table row`, (se.essentials ?? []).some((e) => /SEP/.test(e)))
   ok(`${name}: bookingDates are the window`, se.bookingDates?.checkin === se.windowStart && se.bookingDates?.checkout === se.windowEnd)
 }
+eq('dayEvents (ES), exactly as specified', (SE.dayEvents ?? []).map((e) => `${e.dayIndex}: ${e.title}`), ['1: Rockets vs Suns, Toyota Center', '2: Desfile H-E-B 9:00, gratis', '3: Galleria desde 7:00 (horario 2025)', '5: Texans vs Ravens 12:00, NRG Park'])
+eq('seasonLong detail lines (ES) as specified', (SE.seasonLong ?? []).map((x) => [x.dateRange, x.detail].filter(Boolean).join(' · ')), ['19 nov–3 ene · abre en Thanksgiving · desde US$24.95', '14 nov–3 ene', '27 nov–28 dic · estreno en Black Friday'])
+eq('dayEvents (EN)', (hEn.seasonalEdition!.dayEvents ?? []).map((e) => `${e.dayIndex}: ${e.title}`), ['1: Rockets vs Suns, Toyota Center', '2: H-E-B Parade 9:00 am, free', '3: Galleria from 7:00 am (2025 hours)', '5: Texans vs Ravens 12:00 pm, NRG Park'])
+const d3 = (g: typeof hEs) => JSON.stringify(g.itinerary[2])
+ok('the full Black Friday hours stay in the itinerary Day 03 note (ES and EN)', /Houston Premium y Tanger a las 6:00/.test(d3(hEs)) && /Houston Premium and Tanger outlets at 6:00 am/.test(d3(hEn)))
 eq('essentials order (ES): visa, SEP, Thursday restaurants', (SE.essentials ?? []).map((e) => e.split(' ')[0]), ['Todos', 'Calendario', 'El'])
 eq('retitle ES', hEs.hero.title, 'Houston en Thanksgiving con adolescentes')
 eq('retitle EN', hEn.hero.title, 'Houston at Thanksgiving with Teens')
@@ -78,6 +91,17 @@ eq('adapter derives the headings from the new title', [adaptFlatGuide(hEs).planC
 const cards = fs.readFileSync('lib/guides.ts', 'utf8')
 ok('guide-card titles updated in lib/guides.ts (ES and EN)', cards.includes("title_es: 'Houston en Thanksgiving con adolescentes'") && cards.includes("title_en: 'Houston at Thanksgiving with Teens'"))
 ok('slug is unchanged', hEs.slug === 'houston' && hEn.slug === 'houston' && cards.includes("slug_es: 'houston'") && cards.includes("slug_en: 'houston'"))
+
+// ── colour: AA on every background the block can sit on; muted body = Near Black at 70% on the page background ──
+const { forest, nearBlack, mutedBody } = SEASONAL_COLORS
+for (const [bgName, bg] of [['page #FFF9F3', '#FFF9F3'], ['Off-White #FDFCF9', '#FDFCF9'], ['Warm Cream #F4F0E8', '#F4F0E8']] as const) {
+  ok(`AA: muted body text on ${bgName} (${contrastRatio(mutedBody, bg).toFixed(2)}:1)`, contrastRatio(mutedBody, bg) >= 4.5)
+  ok(`AA: Near Black on ${bgName}`, contrastRatio(nearBlack, bg) >= 7)
+  ok(`AA: Forest Green links on ${bgName}`, contrastRatio(forest, bg) >= 7)
+}
+const blend = (fg: string, bg: string, a: number) => [1, 3, 5].map((i) => Math.round(a * parseInt(fg.slice(i, i + 2), 16) + (1 - a) * parseInt(bg.slice(i, i + 2), 16)))
+const muted = [1, 3, 5].map((i) => parseInt(mutedBody.slice(i, i + 2), 16))
+ok('the muted body token is Near Black at ~70% blended on the page background (±2 per channel)', blend(nearBlack, '#FFF9F3', 0.7).every((v, i) => Math.abs(v - muted[i]) <= 2), [blend(nearBlack, '#FFF9F3', 0.7), muted])
 
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('seasonal-edition: all passed')

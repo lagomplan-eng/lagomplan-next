@@ -72,7 +72,7 @@ export const guide: FlatGuide = {
         {
           time: "A primera hora",
           title: "Galleria, que en Black Friday abre antes de lo habitual",
-          description: "Los horarios de 2026 se publican cerca de la fecha en las páginas de cada centro comercial.",
+          description: "En 2025 la Galleria abrió a las 7:00 y los outlets Houston Premium y Tanger a las 6:00; los horarios 2026 se publican cerca de la fecha.",
           tags: [],
         },
         {
@@ -260,17 +260,15 @@ export const guide: FlatGuide = {
       "El jueves de Thanksgiving muchos restaurantes cierran o solo abren con reservación. Asegura la comida de ese día con tiempo.",
     ],
     dayEvents: [
-      { dayIndex: 1, date: "2026-11-25", title: "Houston Rockets contra Phoenix Suns", detail: "Toyota Center. Confirma el horario al comprar boletos." },
-      { dayIndex: 2, date: "2026-11-26", title: "77.º Desfile de Thanksgiving H-E-B", detail: "9:00, centro de Houston. Gratuito; llega temprano por lugar." },
-      { dayIndex: 2, date: "2026-11-26", title: "Zoo Lights", detail: "Abre también en Thanksgiving." },
-      { dayIndex: 3, date: "2026-11-27", title: "Black Friday", detail: "En 2025 la Galleria abrió a las 7:00 y los outlets Houston Premium y Tanger a las 6:00; los horarios 2026 se publican cerca de la fecha." },
-      { dayIndex: 3, date: "2026-11-27", title: "El Cascanueces, Houston Ballet", detail: "Estreno de temporada." },
-      { dayIndex: 5, date: "2026-11-29", title: "Houston Texans contra Baltimore Ravens", detail: "12:00, NRG Park. Compra boletos y estacionamiento con anticipación." },
+      { dayIndex: 1, date: "2026-11-25", title: "Rockets vs Suns, Toyota Center" },
+      { dayIndex: 2, date: "2026-11-26", title: "Desfile H-E-B 9:00, gratis" },
+      { dayIndex: 3, date: "2026-11-27", title: "Galleria desde 7:00 (horario 2025)" },
+      { dayIndex: 5, date: "2026-11-29", title: "Texans vs Ravens 12:00, NRG Park" },
     ],
     seasonLong: [
-      { title: "Zoo Lights", dateRange: "19 nov–3 ene", detail: "17:30 a 22:30, desde US$24.95" },
+      { title: "Zoo Lights", dateRange: "19 nov–3 ene", detail: "abre en Thanksgiving · desde US$24.95" },
       { title: "Galaxy Lights en Space Center Houston", dateRange: "14 nov–3 ene" },
-      { title: "El Cascanueces, Houston Ballet", dateRange: "27 nov–28 dic" },
+      { title: "El Cascanueces, Houston Ballet", dateRange: "27 nov–28 dic", detail: "estreno en Black Friday" },
     ],
     nextEditionNote: "La de 2027 sale en octubre.",
     bookingDates: { checkin: "2026-11-25", checkout: "2026-11-30" },
