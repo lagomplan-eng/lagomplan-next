@@ -72,7 +72,7 @@ export const guide: FlatGuide = {
         {
           time: "First thing",
           title: "The Galleria, which opens earlier than usual on Black Friday",
-          description: "2026 hours are published closer to the date on each shopping center's page.",
+          description: "In 2025 the Galleria opened at 7:00 am and the Houston Premium and Tanger outlets at 6:00 am; 2026 hours are published closer to the date.",
           tags: [],
         },
         {
@@ -260,17 +260,15 @@ export const guide: FlatGuide = {
       "On Thanksgiving Thursday many restaurants close or take reservations only. Lock in that day's meal early.",
     ],
     dayEvents: [
-      { dayIndex: 1, date: "2026-11-25", title: "Houston Rockets vs. Phoenix Suns", detail: "Toyota Center. Confirm the start time when you buy tickets." },
-      { dayIndex: 2, date: "2026-11-26", title: "77th H-E-B Thanksgiving Parade", detail: "9:00 am, downtown Houston. Free; arrive early for a spot." },
-      { dayIndex: 2, date: "2026-11-26", title: "Zoo Lights", detail: "Open on Thanksgiving too." },
-      { dayIndex: 3, date: "2026-11-27", title: "Black Friday", detail: "In 2025 the Galleria opened at 7:00 am and the Houston Premium and Tanger outlets at 6:00 am; 2026 hours are published closer to the date." },
-      { dayIndex: 3, date: "2026-11-27", title: "The Nutcracker, Houston Ballet", detail: "Season opener." },
-      { dayIndex: 5, date: "2026-11-29", title: "Houston Texans vs. Baltimore Ravens", detail: "12:00 pm, NRG Park. Buy tickets and parking in advance." },
+      { dayIndex: 1, date: "2026-11-25", title: "Rockets vs Suns, Toyota Center" },
+      { dayIndex: 2, date: "2026-11-26", title: "H-E-B Parade 9:00 am, free" },
+      { dayIndex: 3, date: "2026-11-27", title: "Galleria from 7:00 am (2025 hours)" },
+      { dayIndex: 5, date: "2026-11-29", title: "Texans vs Ravens 12:00 pm, NRG Park" },
     ],
     seasonLong: [
-      { title: "Zoo Lights", dateRange: "Nov 19–Jan 3", detail: "5:30 pm to 10:30 pm, from US$24.95" },
+      { title: "Zoo Lights", dateRange: "Nov 19–Jan 3", detail: "open on Thanksgiving · from US$24.95" },
       { title: "Galaxy Lights at Space Center Houston", dateRange: "Nov 14–Jan 3" },
-      { title: "The Nutcracker, Houston Ballet", dateRange: "Nov 27–Dec 28" },
+      { title: "The Nutcracker, Houston Ballet", dateRange: "Nov 27–Dec 28", detail: "season opener on Black Friday" },
     ],
     nextEditionNote: "The 2027 edition comes out in October.",
     bookingDates: { checkin: "2026-11-25", checkout: "2026-11-30" },

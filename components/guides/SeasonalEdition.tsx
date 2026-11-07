@@ -2,13 +2,14 @@
  * components/guides/SeasonalEdition.tsx
  *
  * A guide's dated edition (Thanksgiving week today; Día de Muertos, Navidad, Spring Break next), placed under
- * the hero and above the itinerary. Presentational and server-rendered: the state (active/expired) is computed
- * on the server by the adapter in the destination's timezone and guide pages revalidate hourly, so the text is
- * in the HTML and the state flips without a deploy.
+ * the hero and above the itinerary, on the page background and in the same content column as the hero text.
+ * Structure is rules only: a 1px Pale Sage rule opens the block and one closes it; no panel, no boxes.
  *
- * Empty > invented: a missing field renders nothing; there is no placeholder or fallback copy.
- * Active: label band, essentials, one column per itinerary day, the whole-season lines, a dated-hotels line.
- * Expired: one compact band that says the edition has passed and links to the existing newsletter block.
+ * Presentational and server-rendered: the state (active/expired) is computed on the server by the adapter in the
+ * destination's timezone and guide pages revalidate hourly, so the text is in the HTML and the state flips
+ * without a deploy. Empty > invented: a missing field renders nothing; there is no placeholder or fallback copy.
+ *
+ * Colour: green is for links only. Everything else is Near Black or the muted body token (70% Near Black).
  */
 
 import type { FlatSeasonalEdition } from '../../lib/data/guides/types'
@@ -33,24 +34,25 @@ const COPY = {
   },
 } as const
 
-// Brand tokens (strict): Forest Green, Warm Cream, Off-White, Near Black, Muted Green, Pale Sage.
-const FOREST = '#1B4D3E'
-const CREAM = '#F4F0E8'
-const NEAR_BLACK = '#0F1A16'
-const MUTED = '#2D6B57'
-const SAGE = '#C8D9D3'
+// Brand tokens (strict): Forest Green, Near Black, Pale Sage, plus the muted body token (Near Black at 70%,
+// pre-blended on the page background so it stays a solid colour: AA is asserted in tests/seasonal-edition.test.ts).
+export const SEASONAL_COLORS = { forest: '#1B4D3E', nearBlack: '#0F1A16', sage: '#C8D9D3', mutedBody: '#575C58' } as const
+const { forest: FOREST, nearBlack: NEAR_BLACK, sage: SAGE, mutedBody: MUTED_BODY } = SEASONAL_COLORS
+
+/** Same column as the hero text and the main grid. */
+const COLUMN = 'max-w-[1200px] mx-auto px-8 max-[768px]:px-5'
 
 export interface SeasonalEditionProps {
   edition: FlatSeasonalEdition
   state: SeasonalState
   locale: string
-  /** Day numbers of the itinerary (1-based), one strip column each. */
-  dayNumbers: readonly number[]
+  /** The itinerary's days (number + its own title), one strip column each. */
+  days: ReadonlyArray<{ dayNumber: number; title: string }>
   /** Hotels already carrying (or not) the suggested dates, for the one-line "book" list. */
   hotels: ReadonlyArray<{ name: string; bookingUrl?: string }>
 }
 
-export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: SeasonalEditionProps) {
+export function SeasonalEdition({ edition, state, locale, days, hotels }: SeasonalEditionProps) {
   const l: SeasonalLocale = locale === 'en' ? 'en' : 'es'
   const c = COPY[l]
 
@@ -58,15 +60,15 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
     // Nothing to say without a next-edition note: empty > invented.
     if (!edition.nextEditionNote) return null
     return (
-      <section id="temporada" data-guide="seasonal" data-state="expired" className="px-5 sm:px-8" aria-label={edition.label}>
+      <section id="temporada" data-guide="seasonal" data-state="expired" aria-label={edition.label} className={COLUMN}>
         <div
-          className="max-w-[1200px] mx-auto flex flex-wrap items-baseline gap-x-4 gap-y-2 py-4 border-y font-sans text-[14px] leading-[1.6]"
+          className="flex flex-wrap items-baseline gap-x-4 gap-y-2 py-4 border-y font-sans text-[14px] leading-[1.6]"
           style={{ borderColor: SAGE, color: NEAR_BLACK }}
         >
           <span>
-            <span className="font-medium">{c.expired}</span> {edition.nextEditionNote}
+            <span className="font-medium">{c.expired}</span> <span style={{ color: MUTED_BODY }}>{edition.nextEditionNote}</span>
           </span>
-          <a href="#newsletter" className="font-mono text-[11px] tracking-[.08em] uppercase underline underline-offset-4" style={{ color: MUTED, textDecorationColor: SAGE }}>
+          <a href="#newsletter" className="font-mono text-[11px] tracking-[.08em] uppercase underline underline-offset-4" style={{ color: FOREST, textDecorationColor: SAGE }}>
             {c.notify}
           </a>
         </div>
@@ -74,76 +76,79 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
     )
   }
 
-  const columns = dayColumns(edition, dayNumbers, l)
+  const columns = dayColumns(edition, days, l)
   const essentials = (edition.essentials ?? []).slice(0, 4)
   const season = edition.seasonLong ?? []
   // Only links that actually carry the suggested dates belong in the "suggested dates" line.
   const dated = hotels.filter((h) => h.bookingUrl && /[?&]checkin=/.test(h.bookingUrl))
 
   return (
-    <section id="temporada" data-guide="seasonal" data-state="active" className="px-5 sm:px-8" aria-label={edition.label}>
-      <div className="max-w-[1200px] mx-auto py-8 border-y" style={{ borderColor: SAGE, background: CREAM, borderRadius: 4 }}>
-        <div className="px-4 sm:px-8">
-          <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-4" style={{ color: MUTED }}>
-            {bandLabel(edition, l)}
-          </p>
+    <section id="temporada" data-guide="seasonal" data-state="active" aria-label={edition.label} className={COLUMN}>
+      <div className="pt-6 pb-10 border-y" style={{ borderColor: SAGE }}>
+        <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-8" style={{ color: MUTED_BODY }}>
+          {bandLabel(edition, l)}
+        </p>
 
-          {essentials.length > 0 && (
-            <div className="mb-8">
-              <h3 className="font-sans font-medium text-[16px] mb-2" style={{ color: NEAR_BLACK }}>{c.essentials}</h3>
-              <ul className="list-disc pl-5 space-y-1 font-sans text-[14px] leading-[1.7]" style={{ color: NEAR_BLACK }}>
-                {essentials.map((e, i) => <li key={i}>{e}</li>)}
-              </ul>
-            </div>
-          )}
+        {(essentials.length > 0 || season.length > 0) && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-y-8 mb-10">
+            {essentials.length > 0 && (
+              <div className="lg:col-span-8 lg:pr-10">
+                <h3 className="font-display text-[22px] font-normal leading-[1.2] mb-3" style={{ color: NEAR_BLACK }}>{c.essentials}</h3>
+                <ul className="list-disc pl-5 space-y-1.5 max-w-[68ch] font-sans text-[14px] leading-[1.7]" style={{ color: NEAR_BLACK }}>
+                  {essentials.map((e, i) => <li key={i}>{e}</li>)}
+                </ul>
+              </div>
+            )}
+            {season.length > 0 && (
+              <div className={`lg:col-span-4 ${essentials.length > 0 ? 'lg:border-l lg:pl-8' : ''}`} style={{ borderColor: SAGE }}>
+                <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-3" style={{ color: MUTED_BODY }}>{c.season}</p>
+                <ul className="space-y-3 font-sans text-[14px] leading-[1.5]">
+                  {season.map((s, i) => (
+                    <li key={i}>
+                      <div className="font-medium" style={{ color: NEAR_BLACK }}>{s.title}</div>
+                      <div style={{ color: MUTED_BODY }}>{[s.dateRange, s.detail].filter(Boolean).join(' · ')}</div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        )}
 
-          <ol
-            aria-label={c.strip}
-            className="flex lg:grid lg:grid-cols-6 gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none border-t border-l"
-            style={{ borderColor: SAGE }}
-          >
-            {columns.map((col) => (
-              <li key={col.n} className="snap-start shrink-0 w-[184px] lg:w-auto border-r border-b p-3 lg:p-4" style={{ borderColor: SAGE }}>
-                <a href={`#${col.id}`} className="block no-underline" style={{ color: NEAR_BLACK }}>
-                  <span className="block font-mono text-[18px] font-medium leading-none" style={{ color: FOREST }}>{col.label}</span>
-                  <span className="block font-mono text-[10px] tracking-[.1em] uppercase mt-1 mb-3" style={{ color: MUTED }}>{col.weekday} {col.date}</span>
-                </a>
-                {col.events.map((ev, i) => (
-                  <div key={i} className="mb-3 last:mb-0 font-sans text-[13px] leading-[1.5]" style={{ color: NEAR_BLACK }}>
-                    <div className="font-medium">{ev.title}</div>
-                    {ev.detail && <div style={{ color: MUTED }}>{ev.detail}</div>}
-                  </div>
-                ))}
-              </li>
+        <ol aria-label={c.strip} className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-6">
+          {columns.map((col, i) => (
+            <li
+              key={col.n}
+              className={`border-t border-[#C8D9D3] sm:border-[#0F1A16] ${i % 3 !== 0 ? 'sm:border-l-[1px] sm:border-l-[#C8D9D3]' : ''} ${i !== 0 ? 'lg:border-l-[1px] lg:border-l-[#C8D9D3]' : ''}`}
+            >
+              <a href={`#${col.id}`} className="group block no-underline py-3 sm:px-4 sm:first:pl-0 lg:first:pl-0" style={{ color: NEAR_BLACK }}>
+                <div className="flex gap-4 sm:block">
+                  <span className="font-mono text-[11px] font-medium tracking-[.08em] uppercase whitespace-nowrap w-[104px] shrink-0 sm:w-auto sm:block sm:mb-2" style={{ color: NEAR_BLACK }}>
+                    {col.label} · {col.weekday} {col.dayOfMonth}
+                  </span>
+                  <span className="block min-w-0">
+                    <span className="block font-sans text-[14px] font-medium leading-[1.35] decoration-[#1B4D3E] underline-offset-4 group-hover:underline group-focus-visible:underline">{col.title}</span>
+                    {col.events[0] && (
+                      <span className="block mt-1 font-sans text-[13px] leading-[1.45]" style={{ color: MUTED_BODY }}>{col.events[0].title}</span>
+                    )}
+                  </span>
+                </div>
+              </a>
+            </li>
+          ))}
+        </ol>
+
+        {dated.length > 0 && (
+          <p className="mt-8 font-sans text-[14px] leading-[1.7]" style={{ color: MUTED_BODY }}>
+            <span className="font-medium">{c.book} </span>
+            {dated.map((h, i) => (
+              <span key={h.name}>
+                {i > 0 && ' · '}
+                <a href={h.bookingUrl} target="_blank" rel="noopener noreferrer sponsored" className="underline underline-offset-2" style={{ color: FOREST, textDecorationColor: SAGE }}>{h.name}</a>
+              </span>
             ))}
-          </ol>
-
-          {season.length > 0 && (
-            <div className="mt-8">
-              <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-2" style={{ color: MUTED }}>{c.season}</p>
-              <ul className="space-y-1 font-sans text-[14px] leading-[1.6]" style={{ color: NEAR_BLACK }}>
-                {season.map((s, i) => (
-                  <li key={i}>
-                    <span className="font-medium">{s.title}</span>
-                    <span style={{ color: MUTED }}> · {s.dateRange}{s.detail ? ` · ${s.detail}` : ''}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {dated.length > 0 && (
-            <p className="mt-8 font-sans text-[14px] leading-[1.7]" style={{ color: NEAR_BLACK }}>
-              <span className="font-medium">{c.book} </span>
-              {dated.map((h, i) => (
-                <span key={h.name}>
-                  {i > 0 && ' · '}
-                  <a href={h.bookingUrl} target="_blank" rel="noopener noreferrer sponsored" className="underline underline-offset-2" style={{ color: FOREST, textDecorationColor: SAGE }}>{h.name}</a>
-                </span>
-              ))}
-            </p>
-          )}
-        </div>
+          </p>
+        )}
       </div>
     </section>
   )

@@ -159,7 +159,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
             edition={data.seasonal.edition}
             state={data.seasonal.state}
             locale={locale}
-            dayNumbers={data.itinerary.days.map((d) => d.dayNumber)}
+            days={data.itinerary.days.map((d) => ({ dayNumber: d.dayNumber, title: d.title }))}
             hotels={data.hotels.items.map((h) => ({ name: h.name, bookingUrl: h.bookingUrl ? withRef(h.bookingUrl) : undefined }))}
           />
         </div>
