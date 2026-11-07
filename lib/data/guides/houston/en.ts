@@ -4,7 +4,7 @@ export const guide: FlatGuide = {
   slug: "houston",
   locale: "en",
   hero: {
-    title: "Houston with Teens",
+    title: "Houston at Thanksgiving with Teens",
     subtitle: "The Galleria opens early on Black Friday, and your kids arrive with a list. The day before, they watched giant balloons float through downtown; the next, they will stand in front of the mission control room that sent humans to the Moon. This route uses Thanksgiving week in Houston to mix shopping, live sports, NASA and holiday lights.",
     eyebrow: "Curated guide · Family with teens · Shopping and fun · 6 days · High budget",
     tags: ["Family", "Teens", "Shopping", "City"],
@@ -30,7 +30,7 @@ export const guide: FlatGuide = {
         {
           time: "Evening",
           title: "Houston Rockets game, if they are playing at home",
-          description: "In 2026 they host the Phoenix Suns (see When to go).",
+          description: "In 2026 they host the Phoenix Suns at the Toyota Center.",
           tags: [],
         },
       ],
@@ -60,7 +60,7 @@ export const guide: FlatGuide = {
         {
           time: "From 5:30 pm",
           title: "Zoo Lights at the Houston Zoo, open even on Thanksgiving",
-          description: "Hours and prices in When to go.",
+          description: "Open from November 19 to January 3, 5:30 pm to 10:30 pm; from US$24.95.",
           tags: [],
         },
       ],
@@ -72,7 +72,7 @@ export const guide: FlatGuide = {
         {
           time: "First thing",
           title: "The Galleria, which opens earlier than usual on Black Friday",
-          description: "Hours in When to go.",
+          description: "2026 hours are published closer to the date on each shopping center's page.",
           tags: [],
         },
         {
@@ -108,7 +108,7 @@ export const guide: FlatGuide = {
         {
           time: "At sunset",
           title: "If you want to stay, Galaxy Lights, the Space Center Houston light festival",
-          description: "Dates in When to go.",
+          description: "From November 14 to January 3.",
           tags: [],
         },
         {
@@ -247,90 +247,32 @@ export const guide: FlatGuide = {
       mode: "Weather",
       description: "In late November the normal high in Houston is around 21 °C and the low around 10 °C. Cold fronts can push lows below 10 °C, and there are also warm days near 28 °C. Bring layers.",
     },
-    {
-      mode: "Shopping",
-      description: "In 2025 the Galleria opened at 7:00 am on Black Friday and the Houston Premium and Tanger outlets at 6:00 am. 2026 hours are published closer to the date on each shopping center's website.",
-    },
   ],
-  timely: {
-    validUntil: "2026-11-30",
-    eyebrow: "This season",
-    title: "Thanksgiving Week 2026",
-    verifiedNote: "Data verified on October 23, 2026. Events, hours and prices apply to Thanksgiving week 2026.",
-    essentialsTitle: "The essentials before you book",
+  seasonalEdition: {
+    label: "Thanksgiving 2026 Edition",
+    windowStart: "2026-11-25",
+    windowEnd: "2026-11-30",
+    verifiedAt: "2026-10-23",
+    timezone: "America/Chicago",
     essentials: [
       "Everyone needs a valid passport and U.S. visa.",
-      "This route is built for Thanksgiving week: the parade on Thursday, Black Friday on Friday. Outside that week it works just as well, minus those two days.",
+      "SEP school calendar (Mexico): no classes on Friday the 27th (Consejo Técnico); classes on the 25th, 26th and 30th. An alternative that avoids missing school: the long weekend of November 13 to 16, with no parade or Black Friday.",
       "On Thanksgiving Thursday many restaurants close or take reservations only. Lock in that day's meal early.",
     ],
-    whenTitle: "When to go",
-    whenIntro: "Thanksgiving week packs the parade, Black Friday, the opening of the holiday lights and home games into six days. Here is the 2026 calendar.",
-    window: "Suggested window: Wednesday, November 25 to Monday, November 30, 2026. Thanksgiving is Thursday the 26th and Black Friday is Friday the 27th.",
-    table: {
-      headers: ["What's happening", "2026 dates", "What it changes for your trip"],
-      rows: [
-        {
-          what: "Houston Rockets vs. Phoenix Suns",
-          when: "Wednesday, November 25, Toyota Center",
-          impact: "First night of the trip; confirm the start time when you buy tickets",
-          until: "2026-11-25",
-        },
-        {
-          what: "77th H-E-B Thanksgiving Parade",
-          when: "Thursday, November 26, 9:00 am, downtown Houston",
-          impact: "Free; arrive early for a spot",
-          until: "2026-11-26",
-        },
-        {
-          what: "Black Friday",
-          when: "Friday, November 27",
-          impact: "In 2025 the Galleria opened at 7:00 am and the Houston Premium and Tanger outlets at 6:00 am; 2026 hours are published closer to the date",
-          until: "2026-11-27",
-        },
-        {
-          what: "Zoo Lights",
-          when: "November 19 to January 3, 5:30 pm to 10:30 pm",
-          impact: "Open on Thanksgiving too; from US$24.95",
-        },
-        {
-          what: "Galaxy Lights at Space Center Houston",
-          when: "November 14 to January 3",
-          impact: "Pairs well with the NASA day",
-        },
-        {
-          what: "The Nutcracker, Houston Ballet",
-          when: "November 27 to December 28",
-          impact: "Season opener on Black Friday",
-        },
-        {
-          what: "Houston Texans vs. Baltimore Ravens",
-          when: "Sunday, November 29, 12:00 pm, NRG Park",
-          impact: "Buy tickets and parking in advance",
-          until: "2026-11-29",
-        },
-        {
-          what: "SEP school calendar (Mexico)",
-          when: "No classes Friday the 27th (Consejo Técnico); classes on the 25th, 26th and 30th",
-          impact: "An alternative that avoids missing school: the long weekend of November 13 to 16, with no parade or Black Friday",
-        },
-      ],
-    },
-    booking: {
-      label: "Book with the suggested dates:",
-      links: [
-        {
-          name: "The Post Oak Hotel",
-          url: "https://www.booking.com/hotel/us/the-post-oak.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-        {
-          name: "JW Marriott by the Galleria",
-          url: "https://www.booking.com/hotel/us/jw-marriott-houston.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-        {
-          name: "Marriott Marquis Houston",
-          url: "https://www.booking.com/hotel/us/marriott-marquis-houston.html?checkin=2026-11-25&checkout=2026-11-30&ref=lagomplan",
-        },
-      ],
-    },
+    dayEvents: [
+      { dayIndex: 1, date: "2026-11-25", title: "Houston Rockets vs. Phoenix Suns", detail: "Toyota Center. Confirm the start time when you buy tickets." },
+      { dayIndex: 2, date: "2026-11-26", title: "77th H-E-B Thanksgiving Parade", detail: "9:00 am, downtown Houston. Free; arrive early for a spot." },
+      { dayIndex: 2, date: "2026-11-26", title: "Zoo Lights", detail: "Open on Thanksgiving too." },
+      { dayIndex: 3, date: "2026-11-27", title: "Black Friday", detail: "In 2025 the Galleria opened at 7:00 am and the Houston Premium and Tanger outlets at 6:00 am; 2026 hours are published closer to the date." },
+      { dayIndex: 3, date: "2026-11-27", title: "The Nutcracker, Houston Ballet", detail: "Season opener." },
+      { dayIndex: 5, date: "2026-11-29", title: "Houston Texans vs. Baltimore Ravens", detail: "12:00 pm, NRG Park. Buy tickets and parking in advance." },
+    ],
+    seasonLong: [
+      { title: "Zoo Lights", dateRange: "Nov 19–Jan 3", detail: "5:30 pm to 10:30 pm, from US$24.95" },
+      { title: "Galaxy Lights at Space Center Houston", dateRange: "Nov 14–Jan 3" },
+      { title: "The Nutcracker, Houston Ballet", dateRange: "Nov 27–Dec 28" },
+    ],
+    nextEditionNote: "The 2027 edition comes out in October.",
+    bookingDates: { checkin: "2026-11-25", checkout: "2026-11-30" },
   },
 }

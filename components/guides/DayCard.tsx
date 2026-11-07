@@ -7,7 +7,7 @@
  * Manages its own open/closed state; parent can seed initial value via `defaultOpen`.
  */
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ItineraryDay } from '../../lib/data/guides/types'
 
 interface Props {
@@ -18,11 +18,22 @@ interface Props {
 
 export function DayCard({ day, dayOrdinalLabel, defaultOpen = false }: Props) {
   const [isOpen, setIsOpen] = useState(defaultOpen)
+  // "dia-01", "dia-02", …: anchor target of the seasonal edition's day strip (and of any #dia-NN link).
+  const anchorId = `dia-${String(day.dayNumber).padStart(2, '0')}`
+
+  // A link to #dia-NN opens that day (days are collapsed except the first).
+  useEffect(() => {
+    const openIfTargeted = () => { if (window.location.hash === `#${anchorId}`) setIsOpen(true) }
+    openIfTargeted()
+    window.addEventListener('hashchange', openIfTargeted)
+    return () => window.removeEventListener('hashchange', openIfTargeted)
+  }, [anchorId])
 
   return (
     <div
+      id={anchorId}
       data-day="card"
-      className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06),0_1px_2px_rgba(0,0,0,.04)] hover:shadow-[0_4px_16px_rgba(15,58,51,.08),0_1px_3px_rgba(0,0,0,.05)] transition-shadow"
+      className="scroll-mt-28 bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06),0_1px_2px_rgba(0,0,0,.04)] hover:shadow-[0_4px_16px_rgba(15,58,51,.08),0_1px_3px_rgba(0,0,0,.05)] transition-shadow"
     >
       {/* ── Header ── */}
       <button
