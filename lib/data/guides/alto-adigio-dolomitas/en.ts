@@ -205,18 +205,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'lago-di-braies-early-morning-tour',
       name: 'Lake Braies Early Morning Tour',
       description: 'The most photographed lake in the Dolomites — impossible turquoise water ringed by vertical dolomite rock walls — has one problem: by 10am in August, it\'s busier than a shopping street. The solution is the usual one: get there before everyone else. An early departure from the San Candido area gets you to the lake with the first light, mountains reflected in the water with not a single kayak and no one else on the trail. For kids of any age: the rowboat on the lake costs €10 and is the most-remembered part of the four days.',
       tags: ['Lake Braies', 'Early morning', 'Rowboat'],
       affiliateUrl: 'https://www.getyourguide.com/urtijei-l102963/lago-di-braies-tour-a-day-tour-to-the-magic-lago-di-braies-t947430/',
     },
     {
+      id: 'tre-cime-di-lavaredo-guided-family-hike',
       name: 'Tre Cime di Lavaredo Guided Family Hike',
       description: 'The Tre Cime di Lavaredo are the most recognizable rock formations in the Alps and the visual symbol of the Dolomites. The loop trail at the base of the three spires (2,999 meters) is flat and accessible — 10 kilometers with no significant elevation gain — and the route is so well marked that the guide earns their keep more through geological context than navigation. For kids age 4 and up with an all-terrain stroller or baby carrier: the first hour from the parking lot is fully accessible.',
       tags: ['Tre Cime', 'Loop trail', 'Kid-friendly'],
       affiliateUrl: 'https://www.getyourguide.com/auronzo-l213997/misurinadolomites-tour-of-the-tre-cime-di-lavaredo-t1275876/',
     },
     {
+      id: 'dolomites-cable-car-y-family-alpine-meadow-experience',
       name: 'Dolomites Cable Car & Family Alpine Meadow Experience',
       description: 'Alpe di Siusi (Seiser Alm) is the largest high-alpine meadow in Europe: 56 square kilometers of green grass above the Dolomites, reachable by cable car from Ortisei in Val Gardena. In August it has seasonal wildflowers, cowbells, and 1,800-meter-altitude air that has toddlers asleep in the stroller within 20 minutes. Family tour with cable car included and lunch at a rifugio.',
       tags: ['Alpe di Siusi', 'Cable car', 'Alpine meadow'],

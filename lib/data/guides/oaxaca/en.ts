@@ -161,18 +161,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'taller-de-alebrijes-en-arrazola',
       name: 'Alebrije workshop in Arrazola',
       description: 'More than just viewing them, kids can sit with the artisans to paint their own wooden figure. It\'s the most valuable souvenir.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Ks1TFH0f9j',
     },
     {
+      id: 'hierve-el-agua',
       name: 'Hierve el Agua',
       description: 'The "petrified waterfalls" are a natural spectacle. Going early guarantees photos without crowds and comfortable temperatures for swimming in the pools.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/nY3lrv2Fhx',
     },
     {
+      id: 'mercado-de-tlacolula-domingo',
       name: 'Tlacolula Market (Sunday)',
       description: 'A total cultural immersion. The oldest market in the region — ideal for trying "pan de cazuela" and witnessing live bartering.',
       tags: [],

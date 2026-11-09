@@ -36,6 +36,8 @@ export interface HotelData {
 }
 
 export interface ExperienceData {
+  /** Stable experience id (FlatExperience.id); the DOM anchor on the guide page is `exp-<id>`. */
+  id: string
   number: string
   name: string
   description: string
@@ -159,6 +161,13 @@ export interface FlatHotel {
 }
 
 export interface FlatExperience {
+  /**
+   * Stable kebab-case id, unique across ALL guides, derived from the ES name.
+   * The ES and EN entries for the same experience carry the same id (they are
+   * paired by array position). Never change an id once shipped: it is the
+   * "Ver en la guía" anchor (#exp-<id>) and the key of the saved plan.
+   */
+  id: string
   name: string
   description: string
   tags: string[]

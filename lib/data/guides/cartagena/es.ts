@@ -211,18 +211,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'castillo-de-san-felipe',
       name: 'Castillo de San Felipe',
       description: 'Es la fortificación más grande construida por los españoles en América. Para niños de 6-8 años, recorrer sus túneles y rampas con una historia de piratas es la aventura definitiva.',
       tags: ['Historia', 'Familia', 'Aventura'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/VSUxS_YUGc',
     },
     {
+      id: 'islas-del-rosario-lancha-privada',
       name: 'Islas del Rosario (Lancha Privada)',
       description: 'Eviten los tours masivos de "playa blanca". Lo más Lagom es rentar un bote privado pequeño para ir a Isla Grande. Snorkel en aguas cristalinas y un almuerzo de pescado fresco en un club de playa privado.',
       tags: ['Islas', 'Snorkel', 'Privado'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/sDiNuW-An8',
     },
     {
+      id: 'aviario-nacional-de-colombia',
       name: 'Aviario Nacional de Colombia',
       description: 'Ubicado en Barú. Es uno de los más impresionantes del mundo. Los niños pueden ver flamencos, cóndores y tucanes en hábitats casi libres. Es una inmersión educativa y visualmente potente.',
       tags: ['Naturaleza', 'Aves', 'Familia'],

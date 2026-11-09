@@ -125,18 +125,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'ascenso-mistico-al-tepozteco',
       name: 'Ascenso místico al Tepozteco',
       description: 'Una caminata de 1.5 horas. La clave es el horario: inicia a las 8:30 AM para tener la cima casi para ti solo y una luz perfecta para fotos.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'ritual-de-temazcal-en-pareja',
       name: 'Ritual de temazcal en pareja',
       description: 'Una experiencia de purificación tradicional. Muchos hoteles lo ofrecen de forma privada, convirtiéndolo en un ritual íntimo y renovador.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'cena-en-la-terraza-al-atardecer',
       name: 'Cena en la terraza al atardecer',
       description: 'Degustación de cocina contemporánea de Morelos con vista a las montañas iluminadas.',
       tags: [],

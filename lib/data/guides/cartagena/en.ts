@@ -211,18 +211,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'castillo-de-san-felipe',
       name: 'Castillo de San Felipe',
       description: 'The largest fortification the Spanish built in the Americas. For kids 6 to 8, walking its tunnels and ramps with a pirate story is the ultimate adventure.',
       tags: ['History', 'Family', 'Adventure'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/VSUxS_YUGc',
     },
     {
+      id: 'islas-del-rosario-lancha-privada',
       name: 'Rosario Islands (private boat)',
       description: 'Skip the crowded "white-beach" tours. The most Lagom move is renting a small private boat to Isla Grande. Snorkel in crystal-clear water and lunch on fresh fish at a private beach club.',
       tags: ['Islands', 'Snorkel', 'Private'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/sDiNuW-An8',
     },
     {
+      id: 'aviario-nacional-de-colombia',
       name: 'National Aviary of Colombia',
       description: 'On Barú. One of the most impressive in the world. Kids can see flamingos, condors and toucans in nearly free habitats. An educational, visually powerful immersion.',
       tags: ['Nature', 'Birds', 'Family'],

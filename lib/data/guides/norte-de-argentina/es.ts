@@ -193,18 +193,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'visita-a-la-bodega-cachi-y-cata-de-torrontes',
       name: 'Visita a la bodega Cachi y cata de torrontés',
       description: 'El torrontés salteño es el vino blanco más representativo de Argentina — aromático, floral y completamente diferente al torrontés que se cultiva en Galicia. Las bodegas de los Valles Calchaquíes (Cachi, Cafayate) ofrecen visitas con cata desde $20–40 USD. El paisaje de viñedos a 1,700 metros de altura con los cerros anaranjados de fondo es el argumento visual más convincente del viaje.',
       tags: ['Bodega', 'Vino', 'Paisaje'],
       affiliateUrl: '',
     },
     {
+      id: 'tren-a-las-nubes-opcional-segun-disponibilidad',
       name: 'Tren a las Nubes (opcional, según disponibilidad)',
       description: 'El tren que sube desde Salta hasta el viaducto La Polvorilla a 4,200 metros de altura opera de forma irregular — verificar disponibilidad en el sitio oficial antes de planificar el itinerario alrededor de él. Si opera: es uno de los recorridos ferroviarios más espectaculares de América del Sur.',
       tags: ['Tren', 'Altitud', 'Paisaje'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/j4LbWaVi1o',
     },
     {
+      id: 'recorrido-por-la-quebrada-de-humahuaca',
       name: 'Recorrido por la Quebrada de Humahuaca',
       description: 'El tramo de 155 kilómetros entre Jujuy y Humahuaca fue declarado Patrimonio de la Humanidad por la UNESCO en 2003. Purmamarca (el cerro de los Siete Colores), Tilcara (el Pucará y el mercado de artesanías), Humahuaca (el cabildo y los músicos de charango en la plaza) y la Serranía de Hornocal (el Cerro de los Catorce Colores, a 70 kilómetros de Humahuaca) son las cuatro paradas que justifican el desvío hasta el norte.',
       tags: ['UNESCO', 'Cultura', 'Paisaje'],

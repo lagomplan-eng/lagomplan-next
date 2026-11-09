@@ -277,18 +277,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'camino-salkantay-4-dias-alternativa-al-camino-inca',
       name: 'Camino Salkantay (4 días / alternativa al Camino Inca)',
       description: 'El Camino Inca está limitado a 500 personas por día y se agota con meses de anticipación. El Salkantay — que cruza la montaña nevada de 6,271 metros y desciende por la selva hasta Aguas Calientes — tiene las mismas vistas, más naturaleza y menos cola. Operadores como Salkantay Trekking y Peru Treks ofrecen el recorrido de 4 días con carpa, cocinero y guía por $300–450 USD. Para el viajero solo, el trekking en grupo organizado es la forma más eficiente de hacerlo y la más probable de terminar con amigos de viaje.',
       tags: ['Trekking', 'Aventura', 'Grupo'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/eaI_sDFz2h',
     },
     {
+      id: 'cena-en-central-lima-si-el-itinerario-incluye-escala',
       name: 'Cena en Central (Lima) — si el itinerario incluye escala',
       description: 'El restaurante de Virgilio Martínez en Lima es el mejor de América Latina según la lista de los 50 Best. Si el vuelo a Cusco hace escala en Lima — lo que es frecuente — una noche en Miraflores con cena en Central convierte la escala en parte del viaje. Reserva con dos meses de anticipación.',
       tags: ['Fine dining', '50 Best', 'Escala'],
       affiliateUrl: 'https://centralrestaurante.com.pe/reservations',
     },
     {
+      id: 'valle-sagrado-en-un-dia',
       name: 'Valle Sagrado en un día',
       description: 'Pisac, Ollantaytambo y Moray en un solo recorrido en taxi compartido o tour organizado. El mercado de artesanías de Pisac los domingos es el más activo de la región; las ruinas circulares de Moray son las menos fotografiadas y las más sorprendentes. Tour de día completo desde Cusco: $20–35 USD.',
       tags: ['Valle Sagrado', 'Ruinas', 'Día completo'],

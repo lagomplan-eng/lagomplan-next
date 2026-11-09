@@ -229,18 +229,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cruce-en-ferry-a-colonia-desde-buenos-aires',
       name: 'Ferry to Colonia from Buenos Aires',
       description: 'If the trip starts in Argentina, the 1-hour Buquebus is the best first memory of Uruguay for kids. The muddy Río de la Plata, the open-air deck and arrival at the Colonia pier work as a threshold into the country.',
       tags: ['Ferry', 'Family', 'Crossing'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
     },
     {
+      id: 'estancia-de-un-dia-en-el-campo-uruguayo',
       name: 'Day at a Uruguayan estancia',
       description: '60–80 kilometers from Montevideo, the historic estancias open their gates for full-day visits: rheas and capybaras roaming free, horseback rides through eucalyptus fields, and a traditional asado lunch. Estancia La Magdalena in Canelones and Estancia Panagea in San José run day trips without an overnight stay. For kids 4 and up: the most memorable experience of the trip.',
       tags: ['Estancia', 'Countryside', 'Asado'],
       affiliateUrl: '',
     },
     {
+      id: 'visita-a-las-ruinas-de-colonia-valdense',
       name: 'Visit to the Colonia Valdense ruins',
       description: 'The Waldensian colonist village founded in 1858, 30 kilometers from Colonia del Sacramento, has Uruguay\'s most unusual architecture — stone houses with European roofs in the middle of the pampa. For teenagers and adults who want to step off the standard tourist circuit.',
       tags: ['History', 'Architecture', 'Off the beaten path'],

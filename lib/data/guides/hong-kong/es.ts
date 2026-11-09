@@ -223,18 +223,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'kowloon-tour-privado-de-mercados-nocturnos-y-comida',
       name: 'Kowloon: tour privado de mercados nocturnos y comida callejera',
       description: 'El tour más auténtico de Hong Kong para grupos: cuatro horas por los mercados nocturnos y las calles de Kowloon con un local hongkonés. Pasa por el Temple Street Night Market, los callejones de Mong Kok, los puestos de curry fish balls y el dim sum de barrio que no aparece en ninguna lista de Michelin pero que los locales comen cada domingo desde siempre.',
       tags: ['Comida callejera', 'Nocturno', 'Kowloon'],
       affiliateUrl: 'https://www.getyourguide.com/hong-kong-l174/kowloon-private-night-markets-street-food-experience-t225462/',
     },
     {
+      id: 'tour-de-dia-con-dim-sum',
       name: 'Tour de día con dim sum',
       description: 'El Victoria Peak al amanecer tiene las vistas más claras del año en octubre, sin la neblina de verano. El tranvía histórico que sube a 45 grados es el transporte más singularmente hongkonés de la ciudad. El tour combina el Peak con Central y termina con dim sum en un restaurante de referencia local.',
       tags: ['Peak', 'Dim sum', 'Central'],
       affiliateUrl: 'https://www.getyourguide.com/hong-kong-l174/',
     },
     {
+      id: 'star-ferry-symphony-of-lights-y-mercado-mayorista',
       name: 'Star Ferry, Symphony of Lights y mercado mayorista',
       description: 'El Star Ferry cruzando Victoria Harbour, la Symphony of Lights a las 8pm sobre el skyline completo, el mercado mayorista de frutas de Kowloon en plena actividad nocturna y el Kowloon Peak para las vistas finales. El plan para la noche en que el grupo quiere el Hong Kong de película.',
       tags: ['Star Ferry', 'Nocturno', 'Skyline'],

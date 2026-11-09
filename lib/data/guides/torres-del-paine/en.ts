@@ -307,18 +307,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'glacier-grey-boat-tour',
       name: 'Glacier Grey Boat Tour',
       description: 'Glacier Grey has a 6-kilometer-wide blue ice front over Grey Lake. The catamaran tour from the Refugio Grey dock brings the boat close to icebergs calved from the glacier front — some the size of four-story buildings, with the impossible blue of ice compressed over thousands of years. For the couple who doesn\'t want the full W Trek: the boat ride to Grey is the park\'s most striking half-day plan.',
       tags: ['Glacier Grey', 'Catamaran', 'Half day'],
       affiliateUrl: 'https://www.getyourguide.com/torres-del-paine-national-park-l95549/torres-del-paine-3-hour-scenic-boat-tour-to-grey-glacier-t297935/',
     },
     {
+      id: 'torres-del-paine-w-trek',
       name: 'Torres del Paine W Trek',
       description: 'The W Trek covers 80 kilometers over 4–5 days, using the Las Torres and Vértice Patagonia refugios. The route, named for the shape it draws on the map, includes the Base Torres Lookout (the most iconic), French Valley, and Glacier Grey. In August, snow on the towers makes for the most dramatic photos of the year, and the trails see less traffic than in high season. Book ahead.',
       tags: ['W Trek', 'Multi-day', 'Refugios'],
       affiliateUrl: 'https://www.getyourguide.com/s/?q=Torres%20del%20Paine%20W%20Trek',
     },
     {
+      id: 'torres-del-paine-full-day-tour-desde-puerto-natales',
       name: 'Torres del Paine: Full Day Tour from Puerto Natales',
       description: 'A full day from Puerto Natales with stops at the park\'s main viewpoints: Lake Nordenskjöld, Salto Grande waterfall, Lake Pehoé, and Glacier Grey. The most complete orientation to the park before hiking it. Hotel pickup included.',
       tags: ['Full day', 'Viewpoints', 'Pickup included'],

@@ -119,18 +119,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'casa-luis-barragan',
       name: 'Casa Luis Barragán',
       description: 'Es indispensable reservar con meses de antelación. Es una lección de luz, color y silencio; la experiencia arquitectónica más íntima que puedes tener en pareja.',
       tags: ['Reserva con meses de anticipación'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
     },
     {
+      id: 'ruta-de-galerias-en-la-san-rafael',
       name: 'Ruta de galerías en la San Rafael',
       description: 'Salgan de la Roma y exploren el barrio de la San Rafael. Visiten galerías como Hilario Galguera o Eco; encontrarán arte contemporáneo de alto nivel sin las multitudes.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'cena-en-barra-de-autor',
       name: 'Cena en barra de autor',
       description: 'Busquen lugares como Expendio de Maíz o la barra de Máximo. Ver la precisión de los chefs a pocos centímetros mientras comparten un vino natural es el epítome del lujo relajado.',
       tags: [],

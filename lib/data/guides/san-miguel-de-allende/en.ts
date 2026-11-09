@@ -155,18 +155,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'dia-de-vinedos-en-cuna-de-tierra',
       name: 'Vineyard day at Cuna de Tierra',
       description: 'Just 40 minutes away. The most award-winning winery in the region. A pairing tasting among the vines is the perfect activity for two or four adults.',
       tags: [],
       affiliateUrl: 'https://www.opentable.com/r/raigal-en-vinedo-cuna-de-tierra-guanajuato?corrid=523da62e-91b2-45e9-a52b-d53476d0d209&avt=eyJ2IjoyLCJtIjowLCJwIjowLCJzIjoxLCJuIjowfQ&p=2&sd=2026-04-14T19%3A00%3A00',
     },
     {
+      id: 'fabrica-la-aurora',
       name: 'Fábrica La Aurora',
       description: 'A former textile mill converted into art and design galleries. Ideal for unhurried browsing, buying home décor, or simply finding inspiration.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'manana-de-aguas-termales',
       name: 'Morning at the thermal baths',
       description: 'Visit The Mayan Baths or Escondida Place. Hot spring pools in settings designed for relaxation, ideal for a morning "reset."',
       tags: [],

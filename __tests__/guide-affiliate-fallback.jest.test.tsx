@@ -51,6 +51,7 @@ function experiencesData(bookingUrl: string | undefined): ExperiencesSectionData
     description: '',
     items: [
       {
+        id: 'clase-de-pasta-en-trastevere',
         number: '01',
         name: 'Clase de pasta en Trastevere',
         description: 'Three hours in the alleys.',

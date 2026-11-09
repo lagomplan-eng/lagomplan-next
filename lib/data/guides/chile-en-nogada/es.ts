@@ -205,18 +205,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'tour-culinario-extraordinario-de-5-horas',
       name: 'Tour Culinario Extraordinario de 5 Horas',
       description: 'El tour gastronómico más completo para Puebla: visita a los mercados donde se compran los ingredientes del chile en nogada, los molinos de mole, las fondas de barrio y degustación de cemitas, chalupas, molotes, tamales y mole poblano. El guía explica por qué cada ingrediente del chile en nogada tiene temporada propia y cómo los conventos del siglo XVII inventaron el plato. Para niños de 4 años en adelante: el mercado y las fondas son el plan más sensorial disponible en Puebla.',
       tags: ['Mercados', 'Degustación', '5 horas'],
       affiliateUrl: 'https://www.getyourguide.com/es-mx/estado-libre-y-soberano-de-puebla-l1470/tour-culinario-extraordinario-por-puebla-t34817/',
     },
     {
+      id: 'experiencia-culinaria-puebla-clase-de-cocina',
       name: 'Experiencia Culinaria Puebla: Clase de Cocina',
       description: 'Clase de cocina poblana con visita al mercado local y preparación de platos tradicionales en el taller. Para la familia que quiere que los niños participen activamente en el proceso — hacer tortillas, picar ingredientes, probar — y no solo observar. Duración: 3–4 horas con ingredientes incluidos.',
       tags: ['Clase de cocina', 'Mercado', 'Familias'],
       affiliateUrl: 'https://www.getyourguide.com/puebla-l1471/puebla-culinary-experience-cooking-class-t781637/',
     },
     {
+      id: 'valquirico-puebla-y-ciudades-tour-gastronomico-y-cultural',
       name: "Val'Quirico, Puebla y Ciudades: Tour Gastronómico y Cultural",
       description: "Recorrido desde CDMX o Puebla por el centro histórico con paradas gastronómicas que incluyen chile en nogada en temporada, cemitas, pulque artesanal y mezcal local. Pasa también por Val'Quirico — el pueblo de arquitectura italiana en medio de Puebla que los niños identifican instantáneamente como \"el lugar de las películas europeas\".",
       tags: ["Val'Quirico", 'Chile en nogada', 'Día completo'],

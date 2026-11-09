@@ -161,18 +161,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cenotes-de-santa-barbara',
       name: 'Santa Bárbara Cenotes',
       description: 'Three different cenotes covered by truck (a wagon pulled by horses on rails) or bicycle. Safe, organized, and the water is crystal clear.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'uxmal-y-choco-story',
       name: 'Uxmal and Choco-Story',
       description: 'Explore the Uxmal archaeological zone (less crowded than Chichén Itzá) and cross the street to the chocolate museum. Kids can see rescued animals and learn how the Mayans made cacao.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/MfDnM-RL5D',
     },
     {
+      id: 'reserva-de-el-corchito',
       name: 'El Corchito Reserve',
       description: 'A short boat ride from Progreso to an oasis of mangroves and shallow cenotes. The ideal place to spot raccoons and coatis in their natural habitat as they swim.',
       tags: [],

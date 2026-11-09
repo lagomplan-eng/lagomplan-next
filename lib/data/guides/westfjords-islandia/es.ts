@@ -277,18 +277,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'dynjandi-waterfall-day-tour-from-isafjor-ur',
       name: 'Dynjandi Waterfall Day Tour from Ísafjörður',
       description: 'Dynjandi, también llamada Fjallfoss, tiene 100 metros de caída total en siete cascadas escalonadas, cada una con su propio nombre. La base mide 60 metros de ancho y la cima 30, la forma de abanico invertido que hace de Dynjandi la imagen más reconocida de los Westfjords y una de las más fotografiadas de Islandia. El tour desde Ísafjörður incluye transporte por la carretera de cornisa del fiordo Arnarfjörður y tiempo libre en el sitio. Para adolescentes: el sendero hasta la cima (45 min) es accesible y las vistas desde arriba cambian completamente la perspectiva.',
       tags: ['Dynjandi', 'Cascada', 'Día completo'],
       affiliateUrl: 'https://www.getyourguide.com/isafjordur-l32303/isafjordur-dynjandi-express-t488601/',
     },
     {
+      id: 'hornstrandir-nature-reserve-boat-tour-y-hike',
       name: 'Hornstrandir Nature Reserve Boat Tour & Hike',
       description: 'La reserva natural más remota de Islandia, sin carreteras, sin habitantes permanentes desde 1952 y accesible solo en ferry desde Ísafjörður. Zorros árticos que se acercan a menos de un metro sin miedo porque nunca han sido cazados, acantilados de 534 metros y senderismo en un paisaje que no ha sido intervenido en décadas. Para adolescentes con energía: el nivel de inmersión en naturaleza sin infraestructura turística es único en Europa. Tour de día completo con guía.',
       tags: ['Hornstrandir', 'Zorros árticos', 'Ferry'],
       affiliateUrl: 'https://www.getyourguide.com/isafjordur-l32303/isafjordur-hornstrandir-guided-hike-adalvik-to-hesteyri-t1005278/',
     },
     {
+      id: 'kayaking-in-the-westfjords-fjords',
       name: 'Kayaking in the Westfjords Fjords',
       description: 'Tour de kayak de 2–3 horas desde Ísafjörður por los fiordos con guía local. Las focas grises y barbudas nadan alrededor de los kayaks en los fiordos del norte, presencia constante en agosto. El nivel de agua fría del Atlántico Norte requiere traje seco, incluido en el tour. Para adolescentes de 12 años en adelante sin experiencia previa en kayak: el nivel de los fiordos es plano y manejable.',
       tags: ['Kayak', 'Focas', 'Medio día'],

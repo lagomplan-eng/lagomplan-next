@@ -301,18 +301,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'ceremonia-del-te-en-casa-de-te-con-jardin',
       name: 'Tea Ceremony in a Garden Tea House',
       description: 'Kyoto\'s most recommended tea ceremony: in a traditional tea house with a private garden steps from Kiyomizu-dera temple, with garden views throughout the 45-minute ceremony. The tea master explains wabi-sabi — the philosophy of deliberate imperfection — while preparing matcha through a 400-year-old ritual. The best single-format introduction to Japanese culture available: calm, specific, and completely authentic.',
       tags: ['Tea', 'Kiyomizu-dera', '45 min'],
       affiliateUrl: 'https://www.getyourguide.com/kyoto-l96826/kyoto-tea-ceremony-in-a-traditional-tea-house-in-kiyomizu-t551173/',
     },
     {
+      id: 'hungry-osaka-street-food-tour-15-degustaciones-y-3-bebidas',
       name: 'Hungry Osaka Street Food Tour: 15 Tastings & 3 Drinks',
       description: 'Osaka\'s top-rated food tour for seven consecutive years. Shinsekai — the city\'s most authentic and least touristy neighborhood — with five local stops: kushikatsu (fried skewers in sauce), takoyaki (octopus balls), karaage, oden, and a full meal at a neighborhood izakaya. 15 dishes and 3 drinks included over 3 hours. The guide speaks fluent English, and the neighborhood operates exclusively in Japanese — which is exactly the point.',
       tags: ['Shinsekai', 'Food', '3 hours'],
       affiliateUrl: 'https://www.getyourguide.com/osaka-l1204/hungry-osaka-street-food-tour-15-tastings-3-drinks-t513983/',
     },
     {
+      id: 'osaka-tour-gastronomico-con-15-platos-y-3-bebidas',
       name: 'Osaka: 15-Dish Food Tour with 3 Drinks',
       description: 'The alternative tour from Hungry Osaka Tours — same company, different format: five different venues in Shinsekai, authentic local cooking with no adjustments for the Western palate, and cultural context for every dish explained by a guide who lives in the neighborhood. For the couple who wants to repeat Osaka\'s food-tour experience with a different operator, or on a date when the main tour is sold out.',
       tags: ['Shinsekai', 'Alternative', 'Food'],

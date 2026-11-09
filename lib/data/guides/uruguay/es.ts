@@ -229,18 +229,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cruce-en-ferry-a-colonia-desde-buenos-aires',
       name: 'Cruce en ferry a Colonia desde Buenos Aires',
       description: 'Si el viaje arranca desde Argentina, el Buquebus de 1 hora es el mejor primer recuerdo de Uruguay para niños. El río marrón del Plata, la cubierta al aire libre y la llegada al muelle de Colonia funcionan como umbral de entrada al país.',
       tags: ['Ferry', 'Familia', 'Cruce'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
     },
     {
+      id: 'estancia-de-un-dia-en-el-campo-uruguayo',
       name: 'Estancia de un día en el campo uruguayo',
       description: 'A 60–80 kilómetros de Montevideo, las estancias históricas abren sus puertas para jornadas completas: avistamiento de ñandúes y carpinchos en libertad, recorrido a caballo por campos de eucaliptos y almuerzo de asado tradicional. La Estancia La Magdalena en Canelones y la Estancia Panagea en San José operan excursiones de día sin necesidad de pernoctar. Para niños de 4 años en adelante: la experiencia más memorable del viaje.',
       tags: ['Estancia', 'Campo', 'Asado'],
       affiliateUrl: '',
     },
     {
+      id: 'visita-a-las-ruinas-de-colonia-valdense',
       name: 'Visita a las ruinas de Colonia Valdense',
       description: 'El pueblo de colonos valdenses fundado en 1858 a 30 kilómetros de Colonia del Sacramento tiene la arquitectura más inusual del Uruguay — casas de piedra con techos europeos en medio de la pampa. Para adolescentes y adultos que quieran salir del circuito turístico estándar.',
       tags: ['Historia', 'Arquitectura', 'Off the beaten path'],

@@ -193,18 +193,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'visita-a-la-bodega-cachi-y-cata-de-torrontes',
       name: 'Cachi winery visit and torrontés tasting',
       description: 'Salta\'s torrontés is the most representative white wine in Argentina — aromatic, floral and completely different from the torrontés grown in Galicia. The wineries of the Calchaquí Valleys (Cachi, Cafayate) offer tastings from $20–40 USD. The landscape of vineyards at 1,700 meters with orange-hued hills in the background is the trip\'s most convincing visual argument.',
       tags: ['Winery', 'Wine', 'Landscape'],
       affiliateUrl: '',
     },
     {
+      id: 'tren-a-las-nubes-opcional-segun-disponibilidad',
       name: 'Tren a las Nubes (optional, subject to availability)',
       description: 'The train climbing from Salta to the La Polvorilla viaduct at 4,200 meters runs irregularly — check availability on the official site before building the itinerary around it. If it runs: one of the most spectacular railway journeys in South America.',
       tags: ['Train', 'Altitude', 'Landscape'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/j4LbWaVi1o',
     },
     {
+      id: 'recorrido-por-la-quebrada-de-humahuaca',
       name: 'Driving tour of the Quebrada de Humahuaca',
       description: 'The 155-kilometer stretch between Jujuy and Humahuaca was declared a UNESCO World Heritage Site in 2003. Purmamarca (the Seven-Color Hill), Tilcara (the Pucará and the crafts market), Humahuaca (the cabildo and the charango players on the square) and the Serranía de Hornocal (the Fourteen-Color Hill, 70 kilometers from Humahuaca) are the four stops that justify the detour north.',
       tags: ['UNESCO', 'Culture', 'Landscape'],

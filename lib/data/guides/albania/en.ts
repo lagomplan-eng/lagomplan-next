@@ -558,18 +558,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'day-tour-gjirokastra-blue-eye',
       name: 'Day Tour: Gjirokastra + Blue Eye',
       description: 'The most complete combination in southern Albania in a single day: the Stone City of Gjirokastra — the slate roofs and cobblestone streets where writer Ismail Kadaré was born — plus the Syri i Kaltër (Blue Eye), a 50-meter-deep karst spring where the water rises at 18°C in an impossible shade of blue from the depths. Full-day tour with an English-speaking guide, departing from Sarandë. For teenagers aged 12 to 17: Gjirokastra has the labyrinths and the history that work as a city outing without needing to sell them on it.',
       tags: ['Stone city', 'Karst spring', 'English-speaking guide'],
       affiliateUrl: 'https://www.getyourguide.com/sarande-l122815/gjirokastra-la-ciudad-de-piedra-y-ojo-azul-el-monumento-de-la-naturaleza-t634221/',
     },
     {
+      id: 'day-tour-butrint-y-las-islas-ksamil',
       name: 'Day Tour: Butrint and the Ksamil Islands',
       description: 'The Butrint ruins — a Greco-Roman-Byzantine city inside a UNESCO World Heritage national park — plus the turquoise-water beaches of the Ksamil Islands, all in the same day. Butrint park has a 2nd-century Roman theater, Venetian walls, and a trail along the lake edge with water turtles. The Ksamil Islands are Albania\'s answer to the Greek Islands: the same water quality, without the price tag. A private boat from Ksamil is available through the same operator.',
       tags: ['UNESCO ruins', 'Turquoise beaches', 'Private boat'],
       affiliateUrl: 'https://www.getyourguide.com/ksamil-l120680/ksamil-excursion-en-barco-a-las-5-islas-de-ksamil-y-las-islas-gemelas-t992657/',
     },
     {
+      id: 'canon-de-osumi-termas-de-benja',
       name: 'Osumi Canyon + Benja Thermal Springs',
       description: 'Albania\'s most spectacular canyon — 80-meter limestone walls above the Osumi River — with the option of kayaking or rafting depending on water level. Combine it with the Roman thermal springs of Benja: natural thermal-water pools in the middle of the Albanian landscape that teenagers discover as "the coolest place nobody knows about." Full-day excursion from Sarandë or Berat with a local guide.',
       tags: ['Kayaking or rafting', 'Roman thermal springs', 'Full day'],

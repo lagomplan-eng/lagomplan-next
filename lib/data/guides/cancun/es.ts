@@ -125,18 +125,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'dia-en-isla-mujeres',
       name: 'Día en Isla Mujeres',
       description: 'Tomen el ferry de UltraMar (un plan económico y divertido). Al llegar, renten un carrito de golf y pasen el día en Playa Norte; el agua es tan baja y tranquila que parece una alberca gigante.',
       tags: [],
       affiliateUrl: 'https://booking.stay22.com/lagomplan/UGkuXdeIfI',
     },
     {
+      id: 'parque-xcaret',
       name: 'Parque Xcaret',
       description: 'Es una inversión, pero es el parque más completo. El show nocturno está lleno de cultura: una experiencia que los niños recordarán toda la vida.',
       tags: ['Reservar 21 días antes para 15% de descuento'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
     },
     {
+      id: 'cenote-azul',
       name: 'Cenote Azul',
       description: 'A una hora y media de Cancún. Es un cenote abierto, ideal para niños que no se sienten cómodos en cuevas cerradas. Es el deal perfecto para un día de naturaleza por poco dinero.',
       tags: ['~1.5 hrs desde Cancún', 'Ideal para niños'],

@@ -125,18 +125,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'manana-de-spa-y-agua',
       name: 'Morning spa and water circuit',
       description: 'Dedicate 2–3 hours to the hydrotherapy circuit (steam room, sauna, cold plunge). In Los Cabos, the spa is one of the main activities of the trip.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'sunset-sail-privado',
       name: 'Private sunset sail',
       description: 'A catamaran just for your group heading to the Arch. Watching the sunset with a glass of wine from the sea is the peak moment of the entire stay.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
     },
     {
+      id: 'cena-en-el-huerto-flora-farms-o-acre',
       name: 'Garden dinner: Flora Farms or Acre',
       description: 'Farm-to-table gastronomy in San José surrounded by flowers and botanical cocktails.',
       tags: [],

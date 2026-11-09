@@ -283,18 +283,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'mountain-gorilla-trekking',
       name: 'Mountain Gorilla Trekking',
       description: 'El permiso de gorila ($1,500 USD) se compra a través del Rwanda Development Board en la plataforma Irembo o a través de un operador registrado. El briefing arranca a las 7am en el headquarters de Kinigi: asignación de familia de gorilas según nivel de forma física, instrucciones de comportamiento (distancia mínima de 7 metros, sin flash, sin alimentos visibles) y salida hacia el trailhead. El trek dura entre 1 y 4 horas según dónde se movió la familia durante la noche. Al llegar: una hora con los gorilas. No hay segunda hora.',
       tags: ['Gorilas', 'Permiso RDB', 'Trekking'],
       affiliateUrl: 'https://visitrwandabookings.rdb.rw/rdbportal/mountain-gorilla-tracking',
     },
     {
+      id: 'dian-fossey-hike-to-karisoke-research-centre',
       name: 'Dian Fossey Hike to Karisoke Research Centre',
       description: 'El sendero de 4 horas ida y vuelta hasta la tumba de Dian Fossey y el Karisoke Research Centre en las faldas del Monte Bisoke. El lugar donde la primatóloga que inspiró Gorillas in the Mist vivió y trabajó durante 18 años, y donde está enterrada junto a varios de los gorilas que estudió. La excursión más reflexiva disponible en el parque, y la que da contexto completo a lo que se vio el día anterior.',
       tags: ['Karisoke', 'Historia', 'Medio día'],
       affiliateUrl: 'https://www.getyourguide.com/kigali-l32466/1-journee-de-randonnee-pour-les-gorilles-et-le-centre-de-recherche-de-karisoke-pn-des-volcans-t867231/',
     },
     {
+      id: 'golden-monkey-trekking',
       name: 'Golden Monkey Trekking',
       description: 'Los monos dorados de las Virunga, endémicos de la región y con una densidad de población aún más vulnerable que la de los gorilas, viven en los bambusales de las laderas bajas del parque. El trekking dura 2-3 horas con guía y el permiso cuesta $100 USD por persona, significativamente menos que el gorila pero con el mismo nivel de encuentro cercano. Para el día en que el cuerpo pide algo menos exigente que cuatro horas de bosque vertical.',
       tags: ['Monos dorados', 'Permiso $100 USD', 'Medio día'],

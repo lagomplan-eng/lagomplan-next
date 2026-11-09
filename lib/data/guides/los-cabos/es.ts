@@ -125,18 +125,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'manana-de-spa-y-agua',
       name: 'Mañana de spa y agua',
       description: 'Dedicar 2–3 horas al circuito de hidroterapia (vapor, sauna, fosa fría). En Los Cabos, el spa es una de las principales actividades del viaje.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'sunset-sail-privado',
       name: 'Sunset sail privado',
       description: 'Un catamarán solo para ustedes hacia el Arco. Ver el atardecer con una copa de vino desde el mar es el momento cumbre de la desconexión.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
     },
     {
+      id: 'cena-en-el-huerto-flora-farms-o-acre',
       name: 'Cena en el huerto: Flora Farms o Acre',
       description: 'Gastronomía farm-to-table en San José rodeadas de flores y coctelería botánica.',
       tags: [],

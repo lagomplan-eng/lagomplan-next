@@ -119,18 +119,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'tour-de-tequila-artesanal',
       name: 'Artisan tequila tour',
       description: 'Skip the mass tourist train. Hire a private driver to the Tequila region to visit boutique distilleries like Cascahuín or Fortaleza. Liquid adventure for connoisseurs.',
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/mcSDi9xF38',
     },
     {
+      id: 'safari-de-tortas-ahogadas',
       name: 'Torta ahogada safari',
       description: 'Don\'t settle for just one. Do a tour of the classics (like El Güerito) and the modern spots. The mandatory initiation rite for any foodie.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'caminata-por-la-colonia-americana',
       name: 'Walk through Colonia Americana',
       description: 'Explore independent design galleries and shops. End the afternoon with a specialty coffee tasting at Pólvora or Taller de Espresso.',
       tags: [],

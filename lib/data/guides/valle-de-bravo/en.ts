@@ -185,18 +185,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'vuelo-en-parapente',
       name: 'Paragliding flight',
       description: "Valle's signature activity. Flying in tandem over the lake at sunset is an experience that kids (ages 6-7+) and adults will always remember for the absolute sense of freedom.",
       tags: [],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/SIyPiBZ8-2',
     },
     {
+      id: 'reserva-monte-alto',
       name: 'Monte Alto Reserve',
       description: 'A perfect state park for hiking or mountain biking. Well-marked trails with spectacular viewpoints for watching paragliders take off and views of the entire lake basin.',
       tags: [],
       affiliateUrl: '',
     },
     {
+      id: 'manana-de-esqui-o-wakeboard-en-el-lago',
       name: 'Morning of water skiing or wakeboarding',
       description: 'Rent a private boat for water sports. The lake is the ideal setting for kids to learn to ski in a controlled environment, finishing with a picnic on board.',
       tags: [],

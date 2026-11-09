@@ -193,18 +193,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'corcovado-en-tren-cremallera',
       name: 'Corcovado en tren cremallera',
       description: 'La única forma de subir al Cristo Redentor que mantiene la promesa. El tren del Corcovado sale desde la estación de Cosme Velho (15 minutos en taxi desde Leblon) y sube 3.8 kilómetros de selva atlántica en 20 minutos. La llegada a la cima — con el Cristo emergiendo sobre la ciudad a 710 metros — es el momento que los adolescentes van a usar de foto de perfil durante al menos dos años. Reserva online con semanas de anticipación.',
       tags: ['Icónico', 'Adolescentes', 'Vistas'],
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/URtSQgjsmC',
     },
     {
+      id: 'museu-do-amanha-y-area-portuaria',
       name: 'Museu do Amanhã y área portuaria',
       description: 'El museo de ciencias diseñado por Santiago Calatrava en el puerto de Río es el edificio contemporáneo más importante de Brasil. Para adolescentes curiosos, las exposiciones interactivas sobre cambio climático, neurociencia y cosmos son el plan de mañana más interesante de la ciudad. Combina con una caminata por el barrio de Santa Teresa, accesible en bonde (tranvía histórico) o a pie desde el Centro.',
       tags: ['Museo', 'Arquitectura', 'Familia'],
       affiliateUrl: 'https://museudoamanha.org.br/en',
     },
     {
+      id: 'cena-de-degustacion-en-lasai',
       name: 'Cena de degustación en Lasai',
       description: 'El único restaurante de Río de Janeiro con estrella Michelin, a cinco minutos del JANEIRO Hotel en Botafogo. Menú de degustación con productos del huerto propio, maridaje de vinos y una cocina que fusiona técnica francesa con ingredientes cariocas. Para la noche de mayor inversión del viaje — y la que más se recuerda. Reserva obligatoria con semanas de anticipación.',
       tags: ['Fine dining', 'Michelin', 'Cocina carioca'],

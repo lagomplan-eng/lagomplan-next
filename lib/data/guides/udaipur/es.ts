@@ -253,18 +253,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'city-palace-y-tour-en-barco-por-el-lago-pichola',
       name: 'City Palace y tour en barco por el Lago Pichola',
       description: 'Recorrido por el City Palace (el mayor complejo palaciego de Rajastán, construido durante 400 años por sucesivos Maharanas de la dinastía Mewar) seguido de un paseo en barco por el Lago Pichola. El guía explica la historia de la familia real de Mewar, que nunca se sometió al Imperio Mughal ni al británico.',
       tags: ['Historia', 'City Palace', 'Barco'],
       affiliateUrl: 'https://www.getyourguide.com/udaipur-l1930/guided-tour-udaipur-city-palace-museum-lake-pichola-tour-t393134/',
     },
     {
+      id: 'clase-de-cocina-india-con-shashi',
       name: 'Clase de cocina india con Shashi',
       description: 'Cuatro horas en la cocina de Shashi aprendiendo cocina india y rajasthani con menú regular o especial de Rajastán. El plan más distinto del itinerario: nada de palacios, nada de lagos, solo especias, fuego y una mesa puesta para comer lo que preparaste.',
       tags: ['Gastronomía', 'Clase', 'Familia'],
       affiliateUrl: 'https://www.getyourguide.com/udaipur-l1930/udaipur-authentic-indian-cooking-class-with-lunch-or-dinner-t808453/',
     },
     {
+      id: 'paseo-en-barco-con-recorrido-por-la-ciudad-antigua',
       name: 'Paseo en barco con recorrido por la ciudad antigua',
       description: 'Cuatro horas combinando los callejones del bazar histórico (talleres de miniatura, havelis del siglo XVII, los ghats donde los locales hacen sus rituales matutinos) con un paseo en barco privado al atardecer con vistas al City Palace, el Lake Palace y el Jag Mandir. Incluye una demostración en vivo de pintura en miniatura.',
       tags: ['Barco', 'Ciudad antigua', 'Artesanía'],

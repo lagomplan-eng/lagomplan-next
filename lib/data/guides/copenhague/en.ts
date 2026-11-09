@@ -208,18 +208,21 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'copenhagen-food-tour-vesterbro-y-meatpacking-district',
       name: 'Copenhagen Food Tour — Vesterbro & Meatpacking District',
       description: 'The city\'s most complete food tour: smørrebrød (the rye bread with toppings that is the breakfast of serious Danes), Mikkeller craft beer, stegt flæsk (the crispy pork belly that won the title of Denmark\'s national dish by popular vote), and salty black licorice — the country\'s strangest and most addictive sweet. 3 hours, small groups, guide in English. For the group that wants to understand Danish food before heading out to the restaurants.',
       tags: ['Food', 'Small groups', 'Vesterbro'],
       affiliateUrl: 'https://www.getyourguide.com/copenhague-l12/copenhague-tour-gastronomico-con-mas-de-6-degustaciones-de-clasicos-daneses-t612757/',
     },
     {
+      id: 'copenhagen-canal-boat-tour',
       name: 'Copenhagen Canal Boat Tour',
       description: 'Copenhagen\'s canals are the most efficient way to understand the city\'s geography: Nyhavn, the Port of Christianshavn, Henning Larsen\'s Opera House, and the residential waterside neighborhoods in 1 hour. The tour includes a guide and departs every 30 minutes from Nyhavn. For the group that wants the map of the city before getting lost in its neighborhoods: the canal tour first, everything else after.',
       tags: ['Canals', 'Orientation', 'Nyhavn'],
       affiliateUrl: 'https://www.getyourguide.com/copenhague-l12/copenhague-tour-en-barco-por-los-canales-desde-gammel-strand-t37848/',
     },
     {
+      id: 'n-rrebro-street-food-y-nightlife-experience',
       name: 'Nørrebro Street Food & Nightlife Experience',
       description: 'Nørrebro is Copenhagen\'s most multicultural neighborhood and the one with the highest density of quality non-Nordic restaurants: Turkish, Ethiopian, Mexican, Arab. The evening tour covers the Reffen Street Food Market (the city\'s largest open-air market), three food stops, and an introduction to the local bar circuit far from the tourist circuit of Nyhavn. 3 hours, groups of max 8 people. The most interesting night plan of the five days.',
       tags: ['Street food', 'Nightlife', 'Nørrebro'],
