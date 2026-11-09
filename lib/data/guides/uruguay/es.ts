@@ -197,6 +197,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'radisson-hotel-colonia-del-sacramento',
       name: 'Radisson Hotel Colonia del Sacramento',
       type: 'Hotel · Colonia del Sacramento',
       priceTier: '$$$',
@@ -206,6 +207,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hyatt-centric-montevideo',
       name: 'Hyatt Centric Montevideo',
       type: 'Hotel · Montevideo · Pocitos',
       priceTier: '$$$',
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'posada-boutique-las-terrazas',
       name: 'Posada Boutique Las Terrazas',
       type: 'Hotel · Montevideo · Barrio Histórico',
       priceTier: '$$',

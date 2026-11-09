@@ -269,6 +269,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-the-celestine-kyoto-gion',
       name: 'Hotel The Celestine Kyoto Gion',
       type: 'Hotel boutique · Gion, Kioto',
       priceTier: '$$$',
@@ -278,6 +279,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'gion-shinmonso',
       name: 'Gion Shinmonso',
       type: 'Ryokan con onsen · Gion, Kioto',
       priceTier: '$$',
@@ -287,6 +289,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'ryokan-uemura',
       name: 'Ryokan Uemura',
       type: 'Ryokan · Gion, Kioto',
       priceTier: '$',

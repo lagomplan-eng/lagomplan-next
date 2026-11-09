@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'amomoxtli',
       name: 'Amomoxtli',
       type: 'Hotel boutique · Tepoztlán',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'posada-del-tepozteco',
       name: 'Posada del Tepozteco',
       type: 'Hotel · Centro',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-boutique-casa-fernanda',
       name: 'Hotel Boutique Casa Fernanda',
       type: 'Hotel boutique · Tepoztlán',
       priceTier: '$$',

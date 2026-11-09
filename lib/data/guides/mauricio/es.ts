@@ -269,6 +269,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'sands-suites-resort-spa',
       name: 'Sands Suites Resort & Spa',
       type: 'Resort familiar · Flic-en-Flac Beach',
       priceTier: '$$$',
@@ -278,6 +279,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'la-pirogue-mauritius',
       name: 'La Pirogue Mauritius',
       type: 'Resort clásico · Flic-en-Flac Beach',
       priceTier: '$$$',
@@ -287,6 +289,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'c-mauritius',
       name: 'C Mauritius',
       type: 'Boutique resort · Belle Mare, Costa Este',
       priceTier: '$$$',

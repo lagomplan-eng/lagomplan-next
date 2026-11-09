@@ -161,6 +161,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'legado-mitico-salta',
       name: 'Legado Mítico Salta',
       type: 'Boutique hotel · Salta historic center',
       priceTier: '$$$',
@@ -170,6 +171,7 @@ export const guide: FlatGuide = {
       archetypes: ['Couples'],
     },
     {
+      id: 'casacalma-hotel-boutique',
       name: 'CasaCalma Hotel Boutique',
       type: 'Boutique hotel · Tilcara',
       priceTier: '$$$',
@@ -179,6 +181,7 @@ export const guide: FlatGuide = {
       archetypes: ['Couples'],
     },
     {
+      id: 'las-marias-hotel-boutique',
       name: 'Las Marías Hotel Boutique',
       type: 'Boutique hotel · Tilcara',
       priceTier: '$$$',

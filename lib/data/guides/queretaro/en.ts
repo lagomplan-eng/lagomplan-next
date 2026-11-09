@@ -113,6 +113,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-boutique-casa-del-atrio',
       name: 'Hotel Boutique Casa del Atrio',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$$',
@@ -122,6 +123,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-danza-del-sol',
       name: 'Hotel Danza del Sol',
       type: 'Hotel · Downtown',
       priceTier: '$$',
@@ -131,6 +133,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'morazul-hotel-boutique',
       name: 'Morazul Hotel Boutique',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$',

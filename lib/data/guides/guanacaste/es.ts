@@ -119,6 +119,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'tamarindo-diria-beach-resort',
       name: 'Tamarindo Diria Beach Resort',
       type: 'Resort · Playa Tamarindo',
       priceTier: '$$',
@@ -128,6 +129,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas'],
     },
     {
+      id: 'wyndham-tamarindo',
       name: 'Wyndham Tamarindo',
       type: 'Hotel · Colina sobre Tamarindo',
       priceTier: '$$',
@@ -137,6 +139,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'capit-an-suizo-beachfront-boutique-hotel',
       name: 'Capit[an Suizo Beachfront Boutique Hotel',
       type: 'Hotel · Frente al mar Bahía Tamarindo',
       priceTier: '$$$',

@@ -233,6 +233,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'sensi-azores-nature-and-spa',
       name: 'SENSI Azores Nature and SPA',
       type: 'Villas · Ginetes, São Miguel',
       priceTier: '$$$',
@@ -242,6 +243,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'white-exclusive-suites-villas',
       name: 'White Exclusive Suites & Villas',
       type: 'Suites y Villas · Lagoa, São Miguel',
       priceTier: '$$$',
@@ -251,6 +253,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'octant-furnas',
       name: 'Octant Furnas',
       type: 'Hotel · Vale das Furnas, São Miguel',
       priceTier: '$$$',

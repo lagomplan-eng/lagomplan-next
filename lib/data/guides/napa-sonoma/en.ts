@@ -203,6 +203,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'bardessono-hotel-spa',
       name: 'Bardessono Hotel & Spa',
       type: 'LEED Platinum hotel · Yountville, Napa Valley',
       priceTier: '$$$',
@@ -212,6 +213,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'h2hotel',
       name: 'H2Hotel',
       type: 'Eco-boutique hotel · Healdsburg, Sonoma',
       priceTier: '$$',
@@ -221,6 +223,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'river-terrace-inn',
       name: 'River Terrace Inn',
       type: 'Hotel · Napa',
       priceTier: '$$',

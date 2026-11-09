@@ -1,5 +1,7 @@
 /**
  * lib/hotels.ts
+ * Builds the hotel feed (server side; the pure filters, keys and provider logic live in
+ * lib/hotels-catalog.ts so client components don't bundle the guide data).
  * Builds the Hotels index from the curated FlatGuide dataset
  * (lib/data/guides), which is the only source that carries the
  * affiliate booking URL for each hotel.
@@ -17,245 +19,146 @@
 
 import { getAllGuides }                        from './guides'
 import { getGuideUrl }                         from './routes'
-import { getAllFlatGuides, resolveCanonicalSlug } from './data/guides'
+import { getAllFlatGuides, getPublicGuideSlug, GUIDE_META, resolveCanonicalSlug } from './data/guides'
 import { getAllCityGuides, getCityHeroImage }  from './worldcup/data'
+import { normSearch }                          from './catalog-search'
+import {
+  hotelProviderFromUrl, normalizeTravelers,
+  type HotelDestination, type HotelListing, type PriceLevel, type TravelerKey,
+} from './hotels-catalog'
 import type { Locale }                         from '../i18n'
 
-// ── Types ──────────────────────────────────────────────────────────────────────
+export * from './hotels-catalog'
 
-export type HotelListing = {
-  id:          string
-  name:        string
-  priceLevel:  '$' | '$$' | '$$$' | '$$$$'
-  description: string
-  tags:        string[]          // highlight pills from raw data
-  sourceGuide: string            // canonical guide key (e.g. 'cancun', 'cdmx')
-  source:      'guide' | 'worldcup'  // which corpus the record came from
-  destination: string            // localised city/state label
-  cover_img:   string            // borrowed from rich guide or worldcup city hero
-  guideUrl:    string            // link to the parent guide / city page
-  bookingUrl?: string            // direct booking link (affiliate URL)
-  archetypes?: string[]          // traveler archetypes (Familias, Parejas, …)
-}
-
-// ── Archetype filter config ───────────────────────────────────────────────────
-// One source of truth for the Hotels-page archetype filter row. Active filters
-// drive the actual filtering logic. `comingSoon` filters render in the UI as
-// disabled `próx.` pills — clicking shows a toast instead of filtering.
-
-export type ArchetypeId =
-  | 'Todos'
-  | 'Familias'
-  | 'Parejas'
-  | 'Solo'
-  | 'Negocios'
-  | 'Aventura'
-  | 'Bienestar'
-  | 'Workation'
-  | 'Eco'
-  | 'Pet Friendly'
-  | 'LGBTQ+ Friendly'
-
-export interface ArchetypeFilter {
-  id:         ArchetypeId
-  /** localised label */
-  labelES:    string
-  labelEN:    string
-  icon:       string
-  active:     boolean       // false = render in row but don't filter
-  comingSoon: boolean
-}
-
-export const ARCHETYPE_FILTERS: ArchetypeFilter[] = [
-  { id: 'Todos',           labelES: 'Todos',           labelEN: 'All',              icon: '',    active: true,  comingSoon: false },
-  { id: 'Familias',        labelES: 'Con niños',       labelEN: 'With kids',        icon: '👨‍👩‍👧', active: true,  comingSoon: false },
-  { id: 'Parejas',         labelES: 'Parejas',         labelEN: 'Couples',          icon: '💑',  active: true,  comingSoon: false },
-  { id: 'Solo',            labelES: 'Solo',            labelEN: 'Solo',             icon: '🎒',  active: true,  comingSoon: false },
-  { id: 'Negocios',        labelES: 'Negocios',        labelEN: 'Business',         icon: '💼',  active: true,  comingSoon: false },
-  { id: 'Aventura',        labelES: 'Aventura',        labelEN: 'Adventure',        icon: '🗺️',  active: true,  comingSoon: false },
-  { id: 'Bienestar',       labelES: 'Bienestar',       labelEN: 'Wellness',         icon: '🧘',  active: true,  comingSoon: false },
-  { id: 'Workation',       labelES: 'Workation',       labelEN: 'Workation',        icon: '💻',  active: true,  comingSoon: false },
-  { id: 'Eco',             labelES: 'Eco',             labelEN: 'Eco',              icon: '🌿',  active: true,  comingSoon: false },
-  { id: 'Pet Friendly',    labelES: 'Pet Friendly',    labelEN: 'Pet Friendly',     icon: '🐾',  active: false, comingSoon: true  },
-  { id: 'LGBTQ+ Friendly', labelES: 'LGBTQ+ Friendly', labelEN: 'LGBTQ+ Friendly',  icon: '🏳️‍🌈', active: false, comingSoon: true  },
-]
-
-// Price filter buckets — same trick: locale-aware label, single source.
-export interface PriceFilter {
-  id:      '$' | '$$' | '$$$'
-  labelES: string
-  labelEN: string
-}
-
-export const PRICE_FILTERS: PriceFilter[] = [
-  { id: '$',   labelES: 'Económico',  labelEN: 'Budget'    },
-  { id: '$$',  labelES: 'Intermedio', labelEN: 'Mid-range' },
-  { id: '$$$', labelES: 'Lujo',       labelEN: 'Luxury'    },
-]
-
-// ── Filter helpers ────────────────────────────────────────────────────────────
-
-export function matchesArchetype(hotel: HotelListing, archetype: ArchetypeId): boolean {
-  if (archetype === 'Todos') return true
-  return !!hotel.archetypes?.includes(archetype)
-}
-
-export function matchesPrice(hotel: HotelListing, price: '$' | '$$' | '$$$' | null): boolean {
-  if (!price) return true
-  // $$$ catches both $$$ and $$$$ ranges (luxury bucket).
-  if (price === '$$$') return hotel.priceLevel === '$$$' || hotel.priceLevel === '$$$$'
-  return hotel.priceLevel === price
-}
-
-export function matchesSearch(hotel: HotelListing, search: string): boolean {
-  if (!search) return true
-  const q = search.toLowerCase().trim()
-  return (
-    hotel.name.toLowerCase().includes(q) ||
-    hotel.destination.toLowerCase().includes(q) ||
-    hotel.sourceGuide.toLowerCase().includes(q)
-  )
-}
+const other = (l: Locale): Locale => (l === 'es' ? 'en' : 'es')
 
 /**
- * Destination filter — exact-match on the localized destination label so
- * the filter pill row matches whatever the user clicks. `null` = all.
+ * World Cup city → guide registry key when the destination has a guide (matched by short
+ * name), so a city's hotels and its guide share one `?destino=` value and one name.
  */
-export function matchesDestination(hotel: HotelListing, destination: string | null): boolean {
-  if (!destination) return true
-  return hotel.destination === destination
+function destinationForCity(cityId: string, cityName: Record<Locale, string>): { key: string; name: Record<Locale, string> } {
+  const target = normSearch(cityName.es)
+  for (const [key, meta] of Object.entries(GUIDE_META)) {
+    if (normSearch(meta.shortName.es) === target) return { key, name: meta.shortName }
+  }
+  return { key: `wc-${cityId}`, name: cityName }
 }
 
 /**
- * Returns the deduped list of destinations present in a hotel set, sorted
- * alphabetically. Feeds the "+ Destinos" expander pill row in the client.
- */
-export function listDestinations(hotels: HotelListing[]): string[] {
-  const set = new Set<string>()
-  for (const h of hotels) set.add(h.destination)
-  return [...set].sort((a, b) => a.localeCompare(b))
-}
-
-// ── Utility ────────────────────────────────────────────────────────────────────
-
-function slugifyHotelName(name: string): string {
-  return name
-    .toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g, '')  // strip accents
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-}
-
-/**
- * Returns every hotel from the curated FlatGuide dataset for the given locale,
- * deduplicated by (canonical guide, hotel name), enriched with cover image,
- * destination label, and guide URL from lib/guides.ts.
- *
- * `bookingUrl` is populated from each hotel's `affiliateUrl` so the Hotels
- * index cards can link straight to the booking provider.
+ * Guides' hotels: id, price, booking link and (Spanish) traveler types come from the same
+ * record in both locales; text comes from the requested locale.
  */
 export function getAllHotelsFromGuides(locale: Locale): HotelListing[] {
-  // Build a lookup from canonical slug (e.g. 'oaxaca') → rich Guide so we can
-  // reuse the bilingual destination label, cover image, and canonical URL.
-  const richGuides = getAllGuides(locale)
-  const richByCanonical = new Map<string, typeof richGuides[number]>()
-  for (const g of richGuides) {
-    const canonical = resolveCanonicalSlug(g.slug_es)
-    richByCanonical.set(canonical, g)
-  }
+  const richByCanonical = new Map<string, ReturnType<typeof getAllGuides>[number]>()
+  for (const g of getAllGuides(locale)) richByCanonical.set(resolveCanonicalSlug(g.slug_es), g)
 
-  const seen   = new Set<string>()
-  const hotels: HotelListing[] = []
+  const esByKey = new Map(getAllFlatGuides('es').map(g => [g.canonical, g.flat]))
+  const altByKey = new Map(getAllFlatGuides(other(locale)).map(g => [g.canonical, g.flat]))
+  const out: HotelListing[] = []
 
   for (const { canonical, flat } of getAllFlatGuides(locale)) {
-    const richGuide = richByCanonical.get(canonical)
-    const destination = richGuide
-      ? (locale === 'es' ? richGuide.destination_es : richGuide.destination_en)
-      : flat.hero.title
+    const rich = richByCanonical.get(canonical)
+    const meta = GUIDE_META[canonical]
+    const esFlat = esByKey.get(canonical)
+    const cityLabel = rich ? (locale === 'es' ? rich.destination_es : rich.destination_en) : flat.hero.title
 
-    for (const h of flat.hotels) {
-      const id = `${canonical}-${slugifyHotelName(h.name)}`
-      if (seen.has(id)) continue
-      seen.add(id)
-
-      hotels.push({
-        id,
+    flat.hotels.forEach((h, i) => {
+      const es = esFlat?.hotels[i]
+      const sameHotel = !!es && normSearch(es.name) === normSearch(h.name)
+      // The English files carry fewer traveler labels: when it is the same hotel, merge both.
+      const { keys } = normalizeTravelers([...(h.archetypes ?? []), ...(sameHotel ? es!.archetypes ?? [] : [])])
+      out.push({
+        id:          h.id,
         name:        h.name,
-        priceLevel:  h.priceTier,
+        altName:     altByKey.get(canonical)?.hotels[i]?.name ?? h.name,
+        priceLevel:  h.priceTier as PriceLevel,
         description: h.description,
         tags:        h.tag ? [h.tag] : [],
-        sourceGuide: canonical,
         source:      'guide',
-        destination,
-        cover_img:   richGuide?.cover_img ?? flat.hero.image,
-        guideUrl:    richGuide ? getGuideUrl(locale, richGuide) : '#',
+        destinationKey: canonical,
+        destination: meta.shortName[locale],
+        cityLabel,
+        cover_img:   rich?.cover_img ?? flat.hero.image,
+        guideUrl:    rich ? getGuideUrl(locale, rich) : '#',
         bookingUrl:  h.affiliateUrl || undefined,
-        archetypes:  h.archetypes,
+        provider:    hotelProviderFromUrl(h.affiliateUrl),
+        travelers:   keys,
       })
-    }
+    })
   }
-
-  return hotels
+  return out
 }
 
-/**
- * Returns every stay from the worldcup city guides as a HotelListing. Each
- * stay's affiliate URL comes from `stay.url` (Stay22 / Booking links the
- * editorial team curated). Cover image falls back to the city's hero
- * illustration in `/public/images/WC images/` since stays don't carry
- * per-hotel imagery.
- */
 export function getAllHotelsFromWorldcup(locale: Locale): HotelListing[] {
   const out: HotelListing[] = []
-  const seen = new Set<string>()
   const mundialSegment = locale === 'es' ? 'mundial' : 'worldcup'
+  const esCities = new Map(getAllCityGuides('es'))
+  const altCities = new Map(getAllCityGuides(other(locale)))
 
   for (const [cityId, city] of getAllCityGuides(locale)) {
     const hero = getCityHeroImage(cityId) ?? ''
     const cityUrl = `/${locale}/${mundialSegment}/${cityId}`
-    for (const stay of city.stays ?? []) {
-      const id = `wc-${cityId}-${slugifyHotelName(stay.name)}`
-      if (seen.has(id)) continue
-      seen.add(id)
+    const esCity = esCities.get(cityId)
+    const dest = destinationForCity(cityId, { es: esCity?.city ?? city.city, en: (locale === 'en' ? city.city : altCities.get(cityId)?.city) ?? city.city })
 
-      // Worldcup `price` is one of '$' / '$$' / '$$$' / '$$$$'. Normalize to
-      // the HotelListing union (which now allows $$$$). Anything else falls
-      // back to '$$'.
-      const rawPrice = stay.price?.trim() as HotelListing['priceLevel']
-      const priceLevel: HotelListing['priceLevel'] =
-        rawPrice === '$' || rawPrice === '$$' || rawPrice === '$$$' || rawPrice === '$$$$'
-          ? rawPrice
-          : '$$'
-
+    ;(city.stays ?? []).forEach((stay, i) => {
+      const es = esCity?.stays?.[i]
+      const sameHotel = !!es && normSearch(es.name) === normSearch(stay.name)
+      const alt = altCities.get(cityId)?.stays?.[i]
+      const { keys } = normalizeTravelers([...(stay.archetypes ?? []), ...(sameHotel ? es!.archetypes ?? [] : [])])
+      // Worldcup `price` is '$'..'$$$$'; anything else falls back to '$$'.
+      const raw = stay.price?.trim()
+      const priceLevel: PriceLevel = raw === '$' || raw === '$$' || raw === '$$$' || raw === '$$$$' ? raw : '$$'
+      const url = stay.url || stay.hotel_link || undefined
       out.push({
-        id,
+        id:          stay.id,
         name:        stay.name,
+        altName:     alt?.name ?? stay.name,
         priceLevel,
         description: stay.note,
         tags:        Array.isArray(stay.tags) ? stay.tags.slice(0, 3) : [],
-        sourceGuide: cityId,
         source:      'worldcup',
-        destination: city.city,
+        destinationKey: dest.key,
+        destination: dest.name[locale],
+        cityLabel:   city.city,
         cover_img:   hero,
         guideUrl:    cityUrl,
-        bookingUrl:  stay.url || stay.hotel_link || undefined,
-        archetypes:  stay.archetypes,
+        bookingUrl:  url,
+        provider:    hotelProviderFromUrl(url),
+        travelers:   keys,
       })
-    }
+    })
   }
-
   return out
 }
 
-/**
- * Combined hotel feed for the Hotels index page. Pulls from the curated
- * guides corpus + the worldcup city guides corpus and returns them as a
- * single deduped list. The two corpora are the only sources of truth —
- * no hallucinated or synthesized records.
- */
+/** Combined feed: curated guides + World Cup city stays, the only authoritative sources. */
 export function getAllHotels(locale: Locale): HotelListing[] {
-  return [
-    ...getAllHotelsFromGuides(locale),
-    ...getAllHotelsFromWorldcup(locale),
-  ]
+  return [...getAllHotelsFromGuides(locale), ...getAllHotelsFromWorldcup(locale)]
 }
+
+/**
+ * Every destination the search can offer, in the current and the other locale's name:
+ * the hotels' destinations plus any guide without hotels (search never comes back empty
+ * for a destination we have a guide for).
+ */
+export function getHotelDestinations(locale: Locale): HotelDestination[] {
+  const hotels = getAllHotels(locale)
+  const altName = new Map<string, string>()
+  for (const h of getAllHotels(other(locale))) altName.set(h.destinationKey, h.destination)
+  const seen = new Map<string, HotelDestination>()
+  for (const h of hotels) {
+    const d = seen.get(h.destinationKey)
+    if (d) d.hotels++
+    else seen.set(h.destinationKey, {
+      key: h.destinationKey, name: h.destination, altName: altName.get(h.destinationKey) ?? h.destination, hotels: 1,
+      ...(h.destinationKey in GUIDE_META ? { guideSlug: getPublicGuideSlug(h.destinationKey, locale) } : {}),
+    })
+  }
+  for (const [key, meta] of Object.entries(GUIDE_META)) {
+    if (!seen.has(key)) seen.set(key, { key, name: meta.shortName[locale], altName: meta.shortName[other(locale)], hotels: 0, guideSlug: getPublicGuideSlug(key, locale) })
+  }
+  return [...seen.values()]
+}
+
+export type { TravelerKey }

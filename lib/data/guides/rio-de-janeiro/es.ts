@@ -161,6 +161,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'janeiro-hotel',
       name: 'Janeiro Hotel',
       type: 'Hotel · Leblon',
       priceTier: '$$$',
@@ -170,6 +171,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas'],
     },
     {
+      id: 'sol-ipanema-hotel',
       name: 'Sol Ipanema Hotel',
       type: 'Hotel · Ipanema',
       priceTier: '$$',
@@ -179,6 +181,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hotel-fasano-rio-de-janeiro',
       name: 'Hotel Fasano Rio de Janeiro',
       type: 'Hotel de lujo · Ipanema',
       priceTier: '$$$',

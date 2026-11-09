@@ -527,6 +527,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'grandview-hotel',
       name: 'GrandView Hotel',
       type: 'Hotel · Berat',
       priceTier: '$$',
@@ -536,6 +537,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'bougainville-bay-hotel',
       name: 'Bougainville Bay Hotel',
       type: 'Hotel · Sarandë, Ionian Riviera',
       priceTier: '$$',
@@ -545,6 +547,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'hotel-apollon-sarande',
       name: 'Hotel Apollon Sarande',
       type: 'Hotel · Sarandë',
       priceTier: '$$',

@@ -215,6 +215,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'cappadocia-cave-lodge',
       name: 'Cappadocia Cave Lodge',
       type: 'Hotel cueva · Göreme',
       priceTier: '$$$',
@@ -224,6 +225,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'cappadocia-cave-suites',
       name: 'Cappadocia Cave Suites',
       type: 'Suites cueva · Göreme',
       priceTier: '$$$',
@@ -233,6 +235,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'grand-cave-suites',
       name: 'Grand Cave Suites',
       type: 'Hotel cueva · Göreme',
       priceTier: '$$$',

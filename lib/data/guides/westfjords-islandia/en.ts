@@ -245,6 +245,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-isafjordur-torg',
       name: 'Hotel Isafjordur Torg',
       type: 'Hotel · Ísafjörður',
       priceTier: '$$',
@@ -254,6 +255,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'country-hotel-heydalur',
       name: 'Country Hotel Heydalur',
       type: 'Farm hotel · Heydalur Valley',
       priceTier: '$$',
@@ -263,6 +265,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'fosshotel-westfjords',
       name: 'Fosshotel Westfjords',
       type: 'Hotel · Patreksfjörður',
       priceTier: '$$',

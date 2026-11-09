@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'anticavilla-hotel',
       name: 'Anticavilla Hotel',
       type: 'Hotel · Villa histórica',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Bienestar'],
     },
     {
+      id: 'hacienda-de-cortes',
       name: 'Hacienda de Cortés',
       type: 'Hacienda · Siglo XVI',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'las-casas-b-b',
       name: 'Las Casas B+B',
       type: 'Hotel boutique · Centro',
       priceTier: '$',

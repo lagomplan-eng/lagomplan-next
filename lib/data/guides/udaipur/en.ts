@@ -221,6 +221,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-leela-palace-udaipur',
       name: 'The Leela Palace Udaipur',
       type: 'Luxury hotel · Lake Pichola shore',
       priceTier: '$$$',
@@ -230,6 +231,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'taj-lake-palace',
       name: 'Taj Lake Palace',
       type: 'Palace hotel · Island on Lake Pichola',
       priceTier: '$$$',
@@ -239,6 +241,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'fateh-garh',
       name: 'Fateh Garh',
       type: 'Boutique fort-palace · Hills above Udaipur',
       priceTier: '$$$',

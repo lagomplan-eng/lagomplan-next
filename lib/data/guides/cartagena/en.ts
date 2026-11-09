@@ -179,6 +179,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-bastion-luxury',
       name: 'Hotel Bastión Luxury',
       type: 'Boutique hotel · Walled city center',
       priceTier: '$$$',
@@ -188,6 +189,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families', 'Couples'],
     },
     {
+      id: 'ananda-boutique-hotel',
       name: 'Ananda Boutique Hotel',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$',
@@ -197,6 +199,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families', 'Couples'],
     },
     {
+      id: 'san-lazaro-art-hotel',
       name: 'San Lazaro Art Hotel',
       type: 'Hotel · Facing Castillo de San Felipe',
       priceTier: '$',

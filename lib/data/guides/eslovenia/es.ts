@@ -419,6 +419,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'celica-hostel',
       name: 'Celica Hostel',
       type: 'Hostel · Ljubljana',
       priceTier: '$',
@@ -427,6 +428,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'https://www.booking.com/hotel/si/hostel-celica.en-gb.html',
     },
     {
+      id: 'bled-hostel',
       name: 'Bled Hostel',
       type: 'Hostel · Lago Bled',
       priceTier: '$',
@@ -435,6 +437,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'https://www.booking.com/hotel/si/hostel-joya.html',
     },
     {
+      id: 'camp-korita',
       name: 'Camp Korita',
       type: 'Camping · Valle del Soča',
       priceTier: '$',

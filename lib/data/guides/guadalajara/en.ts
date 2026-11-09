@@ -89,6 +89,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-habita',
       name: 'Casa Habita',
       type: 'Boutique hotel · Colonia Americana',
       priceTier: '$$',
@@ -98,6 +99,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Aventura'],
     },
     {
+      id: 'villa-ganz',
       name: 'Villa Ganz',
       type: 'Restored mansion · Foodie zone',
       priceTier: '$$$',
@@ -107,6 +109,7 @@ export const guide: FlatGuide = {
       archetypes: ['Aventura'],
     },
     {
+      id: 'hilton-doubletree-centro-historico',
       name: 'Hilton DoubleTree Centro Histórico',
       type: 'Hotel · Historic center',
       priceTier: '$',

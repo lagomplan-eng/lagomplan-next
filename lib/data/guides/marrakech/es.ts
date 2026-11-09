@@ -305,6 +305,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'maipa-boutique-riad',
       name: 'Maïpa Boutique Riad',
       type: 'Riad boutique · Medina',
       priceTier: '$$$',
@@ -314,6 +315,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-mint-luxury-oasis-in-the-medina',
       name: 'Riad Mint — Luxury Oasis in the Medina',
       type: 'Riad de lujo · Mouassine, Medina',
       priceTier: '$$$',
@@ -323,6 +325,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-anya-spa',
       name: 'Riad Anya & SPA',
       type: 'Riad con spa · Medina',
       priceTier: '$$$',

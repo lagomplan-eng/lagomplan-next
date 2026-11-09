@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'nizuc-resort-spa',
       name: 'Nizuc Resort & Spa',
       type: 'Resort · Southern Hotel Zone',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Bienestar'],
     },
     {
+      id: 'grand-fiesta-americana-coral-beach',
       name: 'Grand Fiesta Americana Coral Beach',
       type: 'All-inclusive resort · Beachfront',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas'],
     },
     {
+      id: 'aloft-cancun',
       name: 'Aloft Cancun',
       type: 'Hotel · Smart value',
       priceTier: '$',

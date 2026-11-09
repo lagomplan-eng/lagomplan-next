@@ -141,6 +141,8 @@ export interface FlatDay {
 }
 
 export interface FlatHotel {
+  /** Stable id: slug of the Spanish name, the same in es and en (scripts/hotels/add-ids.ts). */
+  id: string
   name: string
   /** e.g. "Hotel boutique · Lago" */
   type: string

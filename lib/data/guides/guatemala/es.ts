@@ -149,6 +149,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-santo-domingo',
       name: 'Casa Santo Domingo',
       type: 'Hotel · Antigua',
       priceTier: '$$$',
@@ -158,6 +159,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'casa-palopo',
       name: 'Casa Palopó',
       type: 'Villa boutique · Lago Atitlán',
       priceTier: '$$$',
@@ -167,6 +169,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'meson-panza-verde',
       name: 'Mesón Panza Verde',
       type: 'Hotel Boutique · Antigua',
       priceTier: '$$$',

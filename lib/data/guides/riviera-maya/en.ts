@@ -167,6 +167,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'mayakoba',
       name: 'Mayakoba',
       type: 'Resort · Playa del Carmen',
       priceTier: '$$$',
@@ -176,6 +177,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-esencia-xpu-ha',
       name: 'Hotel Esencia, Xpu-Há',
       type: 'Hotel · Xpu-Há',
       priceTier: '$$$',
@@ -185,6 +187,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'habitas-tulum',
       name: 'Habitas Tulum',
       type: 'Eco-resort · Tulum',
       priceTier: '$$',

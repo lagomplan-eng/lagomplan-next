@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'our-habitas',
       name: 'Our Habitas',
       type: 'Eco-resort · Hotel zone',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Solo', 'Eco'],
     },
     {
+      id: 'dune-boutique-hotel',
       name: 'Dune Boutique Hotel',
       type: 'Boutique hotel · Hotel zone',
       priceTier: '$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Aventura', 'Bienestar'],
     },
     {
+      id: 'astral-tulum',
       name: 'Astral Tulum',
       type: 'Hotel · Hotel zone',
       priceTier: '$',

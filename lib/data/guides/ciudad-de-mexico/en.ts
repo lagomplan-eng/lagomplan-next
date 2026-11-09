@@ -89,6 +89,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-ritz-carlton-mexico-city',
       name: 'The Ritz-Carlton, Mexico City',
       type: 'Hotel · Paseo de la Reforma',
       priceTier: '$$$',
@@ -98,6 +99,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'brick-hotel',
       name: 'Brick Hotel',
       type: 'Boutique hotel · Roma Norte',
       priceTier: '$$',
@@ -107,6 +109,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'casa-cuenca',
       name: 'Casa Cuenca',
       type: 'Boutique hotel · Roma',
       priceTier: '$$',

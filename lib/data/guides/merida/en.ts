@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'chable-yucatan',
       name: 'Chablé Yucatán',
       type: 'Resort · Jungle hacienda',
       priceTier: '$$$',
@@ -140,6 +141,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Aventura'],
     },
     {
+      id: 'hacienda-xcanatun-by-angsana',
       name: 'Hacienda Xcanatun by Angsana',
       type: 'Hacienda · Mérida',
       priceTier: '$$',
@@ -149,6 +151,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Aventura'],
     },
     {
+      id: 'las-brisas',
       name: 'Las Brisas',
       type: 'Hotel · Paseo de Montejo',
       priceTier: '$',

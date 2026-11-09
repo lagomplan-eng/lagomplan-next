@@ -155,6 +155,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-rodavento',
       name: 'Hotel Rodavento',
       type: 'Hotel · Avándaro forest',
       priceTier: '$$$',
@@ -164,6 +165,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Aventura', 'Bienestar'],
     },
     {
+      id: 'hotel-avandaro-golf-spa',
       name: 'Hotel Avándaro Golf & Spa',
       type: 'Resort · Avándaro',
       priceTier: '$$',
@@ -173,6 +175,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Aventura', 'Bienestar'],
     },
     {
+      id: 'wander-cabins',
       name: 'Wander Cabins',
       type: 'Cabins · Valle de Bravo',
       priceTier: '$',

@@ -185,6 +185,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hoteles-pueblo-de-tierra',
       name: 'Hoteles Pueblo de Tierra',
       type: 'Hotel · San Pedro de Atacama',
       priceTier: '$$',
@@ -194,6 +195,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'lodge-quelana',
       name: 'Lodge Quelana',
       type: 'Hotel · Solor, San Pedro de Atacama',
       priceTier: '$$',
@@ -203,6 +205,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hostal-belen',
       name: 'Hostal Belen',
       type: 'Hostal · San Pedro de Atacama',
       priceTier: '$',

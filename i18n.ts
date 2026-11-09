@@ -31,6 +31,7 @@ export const pathnames = {
   '/planner': { es: '/planificador', en: '/planner' },
   '/guides': { es: '/guias', en: '/guides' },
   '/guides/[slug]': { es: '/guias/[slug]', en: '/guides/[slug]' },
+  '/experiences': { es: '/experiencias', en: '/experiences' },
   '/destinations': { es: '/destinos', en: '/destinations' },
   '/destinations/[slug]': { es: '/destinos/[slug]', en: '/destinations/[slug]' },
   '/hotels': { es: '/hoteles', en: '/hotels' },

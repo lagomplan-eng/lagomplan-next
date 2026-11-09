@@ -77,7 +77,9 @@ export function gaPageView(path: string, title?: string): void {
  */
 // services_contact added 2026-09-28 (Livin brief, Take care tab) — chef
 // and massage outbound links (WhatsApp, Book online, Mapa, Take a Chef).
-export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact'
+// experience_hub added for the /experiencias hub (GetYourGuide booking links on its cards and plan panel).
+// hotels_index added for the Hoteles page (booking links on its cards and in the plan panel).
+export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact' | 'experience_hub' | 'hotels_index'
 
 /**
  * Fires partner_link_click for any of the four tracked render sites
@@ -87,13 +89,26 @@ export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'expe
  * the UTM side of this (Insider only, never Airalo).
  */
 export function trackOutboundLink(params: {
-  linkName: 'insider' | 'airalo' | 'chef_whatsapp' | 'chef_take_a_chef' | 'massage_book' | 'massage_whatsapp' | 'massage_map'
+  linkName: 'insider' | 'airalo' | 'chef_whatsapp' | 'chef_take_a_chef' | 'massage_book' | 'massage_whatsapp' | 'massage_map' | 'gyg_experience' | 'hotel_booking'
   href: string
   partnerSlug: string
   zone?: string
   lang: string
   section: PartnerLinkSection
   experienceName?: string
+  /** Hub only (gyg_experience). Stable experience id from the guide file. */
+  experienceId?: string
+  /** Hoteles only (hotel_booking). Stable hotel id from the guide / World Cup data. */
+  hotelId?: string
+  /** Hub and Hoteles. 1-based position in the list the traveler was looking at. */
+  position?: number
+  /** Hub only. The booking provider, passed explicitly ('gyg'). */
+  provider?: string
+  /**
+   * Hub only. Registry key of the place (e.g. 'ciudad-de-mexico'). Kept apart from
+   * `destination`, which stays the outbound hostname for every link_name.
+   */
+  destinationSlug?: string
 }): void {
   let destination = params.href
   try { destination = new URL(params.href).hostname } catch { /* leave as-is if unparseable */ }
@@ -106,5 +121,10 @@ export function trackOutboundLink(params: {
     section: params.section,
     destination,
     ...(params.experienceName ? { experience_name: params.experienceName } : {}),
+    ...(params.experienceId ? { experience_id: params.experienceId } : {}),
+    ...(params.hotelId ? { hotel_id: params.hotelId } : {}),
+    ...(params.position !== undefined ? { position: params.position } : {}),
+    ...(params.provider ? { provider: params.provider } : {}),
+    ...(params.destinationSlug ? { destination_slug: params.destinationSlug } : {}),
   })
 }

@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'quinta-real-oaxaca',
       name: 'Quinta Real Oaxaca',
       type: 'Hotel · Centro histórico',
       priceTier: '$$$',
@@ -140,6 +141,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'hotel-con-corazon',
       name: 'Hotel con Corazón',
       type: 'Hotel boutique · Centro',
       priceTier: '$$',
@@ -149,6 +151,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'city-centro-oaxaca',
       name: 'City Centro Oaxaca',
       type: 'Hotel · Barrio de Jalatlaco',
       priceTier: '$$',

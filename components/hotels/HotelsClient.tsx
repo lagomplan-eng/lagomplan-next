@@ -1,535 +1,271 @@
 'use client'
+
 /**
  * components/hotels/HotelsClient.tsx
  *
- * Hotels page client — v2 (revamp).
+ * Hoteles page on the shared catalog components (same system as Experiencias).
+ * Filtering is client-side over the hotels the server passed in; the URL is the source
+ * of truth for filter state (?destino= ?precio= ?viajero=), updated with
+ * history.replaceState. Order is editorial (guides, then World Cup stays) and never
+ * changes: filtering only removes cards.
  *
- * Implements the prototype's Hero + filter rows + curated hotels grid.
- * Pulls from the combined `getAllHotels(locale)` feed (guides + worldcup),
- * which is the only source of truth — no synthesized records.
- *
- * Scope of this revision:
- *   - Hero with section label, headline, sub, search input
- *   - Filter row 1: price (Todos / $ / $$ / $$$)
- *   - Filter row 2: archetype (Todos / Familias / Parejas / próx. pills)
- *   - Single curated grid of all filtered hotels using the prototype card spec
- *
- * Out of scope here (Phase B):
- *   - Neighborhoods section (no data)
- *   - Curated vs Inventory split (everything is curated today)
- *   - Smart Finds section (no data)
- *   - Dedicated PlannerBanner / NewsletterBanner (existing NewsletterEndOfGuide
- *     is rendered by the page wrapper)
+ * The search offers destinations, hotels (picking one selects its destination and
+ * scrolls to its card) and guides without hotels. The plan is shared with Experiencias.
  */
 
-import { useMemo, useState } from 'react'
-import Image from 'next/image'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useLocale, useTranslations } from 'next-intl'
+import { getPathname } from '../../lib/navigation'
 import {
-  type HotelListing,
-  type ArchetypeId,
-  type ArchetypeFilter,
-  ARCHETYPE_FILTERS,
-  PRICE_FILTERS,
-  matchesArchetype,
-  matchesPrice,
-  matchesSearch,
-  matchesDestination,
-  listDestinations,
-} from '../../lib/hotels'
+  EMPTY_HOTEL_FILTERS, PRICE_FILTER_IDS, filterHotels, parseHotelFilters, priceBucket, serializeHotelFilters, travelerOptions,
+  type HotelDestination, type HotelFilters, type HotelListing, type TravelerKey,
+} from '../../lib/hotels-catalog'
+import { searchCatalog } from '../../lib/catalog-search'
+import { resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
+import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
 import type { CityNeighborhoods } from '../../lib/hotels-neighborhoods'
+import {
+  CatalogCard, Chip, DestinationBanner, FilterPanel, PageHeader, PlanButton, ResultsBar, type FilterRow,
+} from '../catalog'
+import PlanTray from '../catalog/PlanTray'
+import { usePlan } from '../catalog/usePlan'
 import NeighborhoodsSection from './NeighborhoodsSection'
 
-// ── Visual tokens — locked to the prototype + the production design system ──
-// Inline so the component is self-contained and matches the prototype 1:1.
-// Same hex values used by other planner/guide surfaces.
-const PINE   = '#0F3A33'
-const SAGE   = '#6B8F86'
-const SAND   = '#EDE7E1'
-const WHITE  = '#FFFFFF'
-const NK     = '#131313'
-const MU     = '#8A8480'
-const BD     = '#DDD8D2'
-
-// Gradient fallbacks used when a hotel has no cover image (worldcup stays
-// derive their image from the city hero; if that's missing too, a
-// category-tinted gradient ships instead of an empty box). Pulled from the
-// prototype.
-const CATEGORY_GRAD: Record<string, string> = {
-  Lujo:           'linear-gradient(170deg, #1a4a6e 0%, #2d7a8a 40%, #3a9a8a 70%, #2d6a5a 100%)',
-  Boutique:       'linear-gradient(170deg, #1B4D3E 0%, #2d7a5a 40%, #4a9a6a 70%, #2d5a44 100%)',
-  Familiar:       'linear-gradient(170deg, #5a3a1a 0%, #8a5a2a 40%, #b4803a 70%, #8a6030 100%)',
-  'Design Hotel': 'linear-gradient(170deg, #1a2a5e 0%, #2d4a8a 40%, #4a6aaa 70%, #2d3a6a 100%)',
-  Budget:         'linear-gradient(170deg, #2d4a3a 0%, #4a7a5a 40%, #6a9a7a 70%, #4a6a5a 100%)',
-}
-const DEFAULT_GRAD = CATEGORY_GRAD.Boutique
-
-// ── Component ────────────────────────────────────────────────────────────────
-
 interface Props {
-  hotels:        HotelListing[]
+  hotels: HotelListing[]
+  destinations: HotelDestination[]
   neighborhoods: CityNeighborhoods[]
-  locale:        'es' | 'en'
+  locale: 'es' | 'en'
+  /** Everything that can be in the plan (experiences and hotels), so the tray shows all of it. */
+  planCatalog: PlanEntry[]
 }
 
-export default function HotelsClient({ hotels, neighborhoods, locale }: Props) {
-  const isES = locale === 'es'
+export default function HotelsClient({ hotels, destinations, neighborhoods, locale, planCatalog }: Props) {
+  const t = useTranslations('hotels')
+  const tc = useTranslations('catalog')
+  const lang = useLocale()
+  const searchParams = useSearchParams()
 
-  // Feature flag — guide + worldcup hotels are now tagged across the
-  // full 8-archetype set via scripts/derive-archetypes.mjs (59 records
-  // gained tags in the last pass). Safe to surface the Viajero filter
-  // row. Flip back to false if a future data wipe leaves pills empty.
-  const SHOW_ARCHETYPE_FILTERS = true
+  const validDestinations = useMemo(() => new Set(destinations.filter(d => d.hotels > 0).map(d => d.key)), [destinations])
+  const filters = useMemo(() => parseHotelFilters(searchParams, validDestinations), [searchParams, validDestinations])
+  const visible = useMemo(() => filterHotels(hotels, filters), [hotels, filters])
 
-  const [searchVal,         setSearchVal]         = useState('')
-  // null = "Todos" pill. Same convention as the prototype's "Todos" sentinel.
-  const [priceFilter,       setPriceFilter]       = useState<'$' | '$$' | '$$$' | null>(null)
-  const [archetypeFilter,   setArchetypeFilter]   = useState<ArchetypeId>('Todos')
-  const [destinationFilter, setDestinationFilter] = useState<string | null>(null)
-  const [destinationsOpen,  setDestinationsOpen]  = useState(false)
-  const [comingSoonToast,   setComingSoonToast]   = useState<string | null>(null)
+  const setFilters = useCallback((next: HotelFilters) => {
+    const qs = serializeHotelFilters(next)
+    window.history.replaceState(null, '', qs ? `${window.location.pathname}?${qs}` : window.location.pathname)
+    trackHotelFilter(lang, filters, next, filterHotels(hotels, next).length)
+  }, [hotels, filters, lang])
+  const set = (patch: Partial<HotelFilters>) => setFilters({ ...filters, ...patch })
 
-  // Destination list is stable for a given hotel set — compute once.
-  const destinations = useMemo(() => listDestinations(hotels), [hotels])
+  // ── plan ───────────────────────────────────────────────────────────────────
+  const plan = usePlan()
+  const planItems = useMemo(() => resolvePlan(plan.items, planCatalog), [plan.items, planCatalog])
+  const inPlan = useMemo(() => new Set(plan.items.filter(i => i.type === 'hotel').map(i => i.id)), [plan.items])
 
-  const filtered = useMemo(
-    () => hotels.filter(h =>
-      matchesPrice(h, priceFilter) &&
-      matchesArchetype(h, archetypeFilter) &&
-      matchesDestination(h, destinationFilter) &&
-      matchesSearch(h, searchVal)
+  const trackPlan = useCallback((ref: PlanRef, was: boolean, next: PlanRef[]) => {
+    const entry = planCatalog.find(x => x.type === ref.type && x.id === ref.id)
+    const now = next.some(i => i.type === ref.type && i.id === ref.id)
+    if (entry && was !== now) trackPlanChange(now ? 'add' : 'remove', entry, next.length, lang)
+  }, [planCatalog, lang])
+
+  const togglePlan = useCallback((id: string) => {
+    const ref: PlanRef = { type: 'hotel', id }
+    const was = plan.items.some(i => i.type === 'hotel' && i.id === id)
+    trackPlan(ref, was, plan.toggle(ref))
+  }, [plan, trackPlan])
+
+  const removeFromPlan = useCallback((ref: PlanRef) => {
+    plan.remove(ref)
+    trackPlan(ref, true, plan.items.filter(i => !(i.type === ref.type && i.id === ref.id)))
+  }, [plan, trackPlan])
+
+  // ── search ─────────────────────────────────────────────────────────────────
+  const [search, setSearch] = useState('')
+  const [pendingScroll, setPendingScroll] = useState<string | null>(null)
+  const nameOf = (key: string) => destinations.find(d => d.key === key)?.name ?? key
+  const guideHref = (slug: string) => getPathname({ href: { pathname: '/guides/[slug]', params: { slug } }, locale: lang })
+
+  const suggestions = useMemo(() => {
+    const byKey = new Map(destinations.map(d => [d.key, d]))
+    const byId = new Map(hotels.map(h => [h.id, h]))
+    return searchCatalog(search, {
+      destinations: destinations.map(d => ({ slug: d.key, name: d.name, altName: d.altName, count: d.hotels })),
+      items: hotels.map(h => ({ id: h.id, name: h.name, altName: h.altName, destinationSlug: h.destinationKey })),
+      excludeSlugs: filters.destino ? [filters.destino] : [],
+    }).map(hit => {
+      if (hit.kind === 'item') {
+        const h = byId.get(hit.id)!
+        return { key: `hotel:${h.id}`, label: h.name, hint: `${h.destination} · ${t('filters.hotelTag')}` }
+      }
+      if (hit.kind === 'region') return { key: '', label: '' } // no region filter on this page
+      const d = byKey.get(hit.slug)!
+      if (hit.kind === 'guide-only') {
+        return {
+          key: `guide:${d.key}`, label: d.name, hint: t('filters.noHotels'),
+          ...(d.guideSlug ? { link: { label: t('filters.guideLink'), href: guideHref(d.guideSlug) } } : {}),
+        }
+      }
+      return { key: `dest:${d.key}`, label: d.name, hint: t('results.count', { count: d.hotels }) }
+    }).filter(s => s.key)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, destinations, hotels, filters.destino, t, lang])
+
+  const onPick = (key: string) => {
+    if (key.startsWith('dest:')) set({ destino: key.slice(5) })
+    else if (key.startsWith('hotel:')) {
+      const id = key.slice(6)
+      const h = hotels.find(x => x.id === id)
+      if (!h) return
+      setFilters({ ...filters, destino: h.destinationKey })
+      setPendingScroll(id)
+    }
+  }
+
+  // After a hotel pick the grid re-renders; scroll to its card once it exists.
+  useEffect(() => {
+    if (!pendingScroll) return
+    const el = document.getElementById(`hotel-${pendingScroll}`)
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      setPendingScroll(null)
+    }
+  }, [pendingScroll, visible])
+
+  // ── filter rows ────────────────────────────────────────────────────────────
+  const rows: FilterRow[] = [{
+    id: 'price',
+    label: t('filters.price'),
+    chips: (
+      <>
+        <Chip label={t('filters.priceAll')} selected={filters.price === null} onClick={() => set({ price: null })} />
+        {PRICE_FILTER_IDS.map(p => (
+          <Chip key={p} label={t(`filters.prices.${p}`)} selected={filters.price === p} onClick={() => set({ price: filters.price === p ? null : p })} />
+        ))}
+      </>
     ),
-    [hotels, priceFilter, archetypeFilter, destinationFilter, searchVal],
-  )
+  }]
+  const travelers = travelerOptions(hotels, filters)
+  if (travelers.length > 0) {
+    rows.push({
+      id: 'traveler',
+      label: t('filters.traveler'),
+      chips: (
+        <>
+          <Chip label={t('filters.travelerAll')} selected={filters.viajero === null} onClick={() => set({ viajero: null })} />
+          {travelers.map((k: TravelerKey) => (
+            <Chip key={k} label={t(`filters.travelers.${k}`)} selected={filters.viajero === k} onClick={() => set({ viajero: filters.viajero === k ? null : k })} />
+          ))}
+        </>
+      ),
+    })
+  }
 
-  // Neighborhoods are contextual — surface only the picked city's barrios.
-  // Two paths land here:
-  //   1. Explicit destination filter pill — exact match on cityName.
-  //   2. Search input narrows the visible hotels to a single destination
-  //      (e.g. typing "cdmx" or "mexico" matches CDMX hotels only) — fall
-  //      through to inferring the city from the filtered set.
-  // If filters span more than one city, the section stays hidden.
+  // ── one destination chosen → banner, and cards drop the thumbnail + eyebrow ─
+  const single = filters.destino ? hotels.find(h => h.destinationKey === filters.destino) ?? null : null
+  const countLabel = single
+    ? t('results.countIn', { count: visible.length, name: single.destination })
+    : t('results.count', { count: visible.length })
+
+  // Neighborhoods are contextual: only the chosen destination's barrios.
   const selectedNeighborhoods = useMemo(() => {
-    if (destinationFilter) {
-      return neighborhoods.filter(n => n.cityName === destinationFilter)
-    }
-    const dests = new Set(filtered.map(h => h.destination))
-    if (dests.size === 1) {
-      const only = dests.values().next().value as string
-      return neighborhoods.filter(n => n.cityName === only)
-    }
-    return []
-  }, [neighborhoods, destinationFilter, filtered])
+    if (!filters.destino) return []
+    const labels = new Set(hotels.filter(h => h.destinationKey === filters.destino).map(h => h.cityLabel))
+    return neighborhoods.filter(n => labels.has(n.cityName))
+  }, [neighborhoods, hotels, filters.destino])
 
-  const handleArchetypeClick = (f: ArchetypeFilter) => {
-    if (f.comingSoon) {
-      const label = isES ? f.labelES : f.labelEN
-      setComingSoonToast(label)
-      setTimeout(() => setComingSoonToast(null), 2400)
-      return
-    }
-    setArchetypeFilter(f.id)
-  }
-
-  // ── L10N strings (inline — keeps the component standalone) ────────────────
-  const L = {
-    eyebrow:     isES ? 'Dónde quedarse'                                   : 'Where to stay',
-    headline:    isES ? 'Hoteles que\nelegimos bien'                       : 'Hotels we\npick well',
-    sub:         isES ? 'Seleccionados por carácter, ubicación y valor real — no por patrocinio.'
-                      : 'Picked for character, location, and honest value — not commission.',
-    searchPlaceholder: isES ? 'ej. méxico, cancún, nueva york…'            : 'e.g. mexico, cancun, new york…',
-    travelerLabel:     isES ? 'Viajero'                                    : 'Traveler',
-    pricePillAll:      isES ? 'Todos'                                      : 'All',
-    sectionLabel:      isES ? 'Hoteles curados'                            : 'Curated hotels',
-    sectionHeadline:   isES ? 'Dónde quedarse bien'                        : 'Where to stay, well',
-    countOne:          isES ? 'hotel'                                      : 'hotel',
-    countMany:         isES ? 'hoteles'                                    : 'hotels',
-    emptyHeadline:     isES ? 'Sin coincidencias'                          : 'No matches',
-    emptyBody:         isES ? 'Probá quitar un filtro o cambiar la búsqueda.'
-                            : 'Try removing a filter or clearing the search.',
-    bookCta:           isES ? 'Ver disponibilidad'                         : 'See availability',
-    guideCta:          isES ? 'Ver guía →'                                 : 'See guide →',
-    proxBadge:         isES ? 'próx.'                                      : 'soon',
-    comingSoonSuffix:  isES ? '— próximamente 🙌'                          : '— coming soon 🙌',
-  }
 
   return (
-    // No local background — the page wrapper sets var(--sand) on <main>
-    // so the bridge CTA and newsletter below the client inherit cleanly.
-    <div>
-      {/* ─────── HERO ─────── */}
-      <section style={{ padding: '64px 0 40px' }}>
-        {/* Hero uses the same page-inner container as the curated grid
-            below so the left edge of "DÓNDE QUEDARSE" / "Hoteles que…"
-            aligns with "HOTELES CURADOS" — no maxWidth override here. */}
-        <div className="page-inner">
-        <p style={sectionLabelStyle}>{L.eyebrow}</p>
+    <div className="bg-cream text-pine">
+      <div className="mx-auto max-w-[1280px] px-[18px] pb-16 pt-8 md:px-6">
+        <PageHeader eyebrow={t('eyebrow')} title={t('title')} subtitle={t('subtitle')} />
 
-        <h1 style={{
-          fontFamily: "'Manrope', sans-serif", fontWeight: 800,
-          fontSize: 'clamp(36px, 5.5vw, 56px)',
-          color: NK, lineHeight: 1.05, letterSpacing: '-1px',
-          marginBottom: 16, whiteSpace: 'pre-line',
-          // Headline-only constraint so it doesn't read across the
-          // full 1280px container.
-          maxWidth: 720,
-        }}>{L.headline}</h1>
-
-        <p style={{
-          fontFamily: "'Manrope', sans-serif", fontSize: 15, fontWeight: 400,
-          color: MU, lineHeight: 1.65, marginBottom: 40, maxWidth: 420,
-        }}>{L.sub}</p>
-
-        {/* Search + filter card */}
-        <div style={{
-          background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-          padding: '16px 20px', position: 'relative',
-        }}>
-          {/* Search — visual parity with the /guias search bar:
-              full-pill chrome, cream fill (#FFFDF9), sage SVG glyph,
-              pine input text. Wrapped in <label> so the whole pill is
-              a click target (matches GuidesClient.tsx pattern). */}
-          <label style={{
-            display: 'flex', alignItems: 'center', gap: 12,
-            padding: '16px 20px', border: `1px solid ${BD}`,
-            borderRadius: 999, background: '#FFFDF9',
-            cursor: 'text', marginBottom: 14,
-          }}>
-            <svg
-              width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" strokeWidth={2} aria-hidden
-              style={{ color: SAGE, flexShrink: 0 }}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-            </svg>
-            <input
-              value={searchVal}
-              onChange={e => setSearchVal(e.target.value)}
-              placeholder={L.searchPlaceholder}
-              style={{
-                flex: 1, border: 0, outline: 0, background: 'transparent',
-                color: PINE, fontFamily: 'inherit', fontSize: 14,
+        <div className="mt-8 flex flex-col gap-6 md:mt-10">
+          <section aria-label={t('filters.title')}>
+            <FilterPanel
+              search={{
+                label: t('filters.searchLabel'),
+                placeholder: t('filters.search'),
+                value: search,
+                onChange: setSearch,
+                tokens: filters.destino ? [{ key: filters.destino, label: nameOf(filters.destino), removeLabel: t('filters.destinoRemove', { name: nameOf(filters.destino) }) }] : [],
+                onRemoveToken: () => set({ destino: null }),
+                suggestions,
+                onPick,
+                noResultsText: t('filters.searchNone'),
               }}
+              rows={rows}
             />
-            {searchVal && (
-              <button
-                onClick={() => setSearchVal('')}
-                aria-label={isES ? 'Limpiar búsqueda' : 'Clear search'}
-                style={{ border: 'none', background: 'transparent', color: MU, fontSize: 18, cursor: 'pointer', lineHeight: 1, padding: 0 }}
-              >×</button>
+          </section>
+
+          <section aria-label={t('results.count', { count: visible.length })} className="flex flex-col gap-5">
+            <ResultsBar count={countLabel} orderLabel={t('results.order')} trustText={t('trust')} />
+
+            {single && single.cover_img && (
+              <DestinationBanner
+                name={single.destination}
+                illustration={single.cover_img}
+                {...(single.guideUrl !== '#' ? { guideHref: single.guideUrl } : {})}
+              />
             )}
-          </label>
 
-          {/* Row 1 — price filters + destinations expander */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
-            {/* "Todos" sentinel */}
-            <button
-              onClick={() => setPriceFilter(null)}
-              style={pillStyle(priceFilter === null)}
-            >{L.pricePillAll}</button>
-            {PRICE_FILTERS.map(p => (
-              <button
-                key={p.id}
-                onClick={() => setPriceFilter(p.id)}
-                style={pillStyle(priceFilter === p.id)}
-              >
-                {p.id} · {isES ? p.labelES : p.labelEN}
-              </button>
-            ))}
-            {/* "+ Destinos" expander — toggles the destination chip row.
-                When a destination is selected, the pill goes active and
-                shows the picked city for visibility. */}
-            <button
-              onClick={() => setDestinationsOpen(o => !o)}
-              style={pillStyle(destinationFilter !== null)}
-              aria-expanded={destinationsOpen}
-            >
-              {destinationFilter
-                ? `📍 ${destinationFilter}`
-                : (isES ? '+ Destinos' : '+ Destinations')}
-            </button>
-          </div>
-
-          {/* Row 1a — destinations chip row (expander) */}
-          {destinationsOpen && (
-            <div style={{
-              display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 10,
-              paddingBottom: 4,
-            }}>
-              <button
-                onClick={() => { setDestinationFilter(null); setDestinationsOpen(false) }}
-                style={pillStyle(destinationFilter === null)}
-              >{L.pricePillAll}</button>
-              {destinations.map(d => (
+            {visible.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-line-btn px-6 py-12 text-center">
+                <p className="m-0 text-[17px] font-bold">{t('empty.title')}</p>
                 <button
-                  key={d}
-                  onClick={() => { setDestinationFilter(d); setDestinationsOpen(false) }}
-                  style={pillStyle(destinationFilter === d)}
-                >{d}</button>
-              ))}
-            </div>
-          )}
-
-          {/* Row 2 — archetype filters.
-              Hidden until guide hotels are tagged with archetypes. Today
-              the catalog only carries Familias/Parejas tags on worldcup
-              stays, so the pills would render mostly empty result sets.
-              Flip SHOW_ARCHETYPE_FILTERS to true once tagging lands. The
-              filter state + ARCHETYPE_FILTERS data stays wired so this
-              is a one-line revival. */}
-          {SHOW_ARCHETYPE_FILTERS && (
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 700,
-              letterSpacing: '1px', textTransform: 'uppercase', color: MU,
-              marginRight: 4, whiteSpace: 'nowrap',
-            }}>{L.travelerLabel}</span>
-
-            {ARCHETYPE_FILTERS.map(f => {
-              const isActive = archetypeFilter === f.id && !f.comingSoon
-              const label = isES ? f.labelES : f.labelEN
-              return (
-                <button
-                  key={f.id}
-                  onClick={() => handleArchetypeClick(f)}
-                  title={f.comingSoon ? L.comingSoonSuffix.replace('— ', '') : undefined}
-                  style={{
-                    fontFamily: "'Manrope', sans-serif", fontSize: 12, fontWeight: 600,
-                    padding: '6px 16px', borderRadius: 100,
-                    display: 'flex', alignItems: 'center', gap: 5,
-                    border: isActive ? 'none' : `1.5px solid ${f.comingSoon ? '#E8E4DE' : BD}`,
-                    background: isActive ? PINE : f.comingSoon ? '#F5F2EE' : 'transparent',
-                    color:      isActive ? WHITE : f.comingSoon ? '#BDB8B2' : NK,
-                    cursor: f.comingSoon ? 'default' : 'pointer',
-                    transition: 'all 0.15s',
-                  }}
+                  type="button"
+                  onClick={() => setFilters(EMPTY_HOTEL_FILTERS)}
+                  className="inline-flex min-h-[48px] items-center rounded-full border border-line-btn bg-transparent px-6 text-[15px] font-semibold text-pine hover:border-pine"
                 >
-                  {f.icon && <span style={{ fontSize: 13 }}>{f.icon}</span>}
-                  {label}
-                  {f.comingSoon && (
-                    <span style={{
-                      fontFamily: "'Manrope', sans-serif", fontSize: 8, fontWeight: 700,
-                      letterSpacing: '0.8px', textTransform: 'uppercase',
-                      background: '#E8E4DE', color: '#A8A4A0',
-                      padding: '1px 5px', borderRadius: 100, marginLeft: 2,
-                    }}>{L.proxBadge}</span>
-                  )}
+                  {t('empty.clear')}
                 </button>
-              )
-            })}
-          </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 gap-[14px] md:gap-6 md:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]">
+                {visible.map((h, i) => {
+                  const tier = t(`filters.tier.${priceBucket(h.priceLevel)}`)
+                  const traveler = h.travelers[0] ? t(`filters.travelers.${h.travelers[0]}`) : undefined
+                  const hasGuide = !!h.guideUrl && h.guideUrl !== '#'
+                  return (
+                    <CatalogCard
+                      key={h.id}
+                      id={`hotel-${h.id}`}
+                      data-hotel={h.id}
+                      className="scroll-mt-32"
+                      {...(single ? { meta: `${h.priceLevel} · ${tier}` } : {
+                        ...(h.cover_img ? { thumb: { src: h.cover_img } } : {}),
+                        eyebrow: `${h.destination} · ${h.priceLevel}`,
+                        onEyebrowClick: () => set({ destino: h.destinationKey }),
+                        eyebrowAriaLabel: t('card.filterByDestination', { name: h.destination }),
+                      })}
+                      title={h.name}
+                      titleAs={single ? 'h3' : 'h2'}
+                      description={h.description || undefined}
+                      tags={[h.tags[0], traveler].filter((x): x is string => !!x).slice(0, 2)}
+                      {...(h.bookingUrl ? { primary: { label: t('card.book'), href: h.bookingUrl, external: true, onClick: () => trackHotelBook(h, i + 1, lang) } } : {})}
+                      {...(hasGuide ? { secondary: { label: t('card.seeGuide'), href: h.guideUrl } } : {})}
+                      {...(h.bookingUrl ? { providerLine: t('card.provider', { provider: tc(`provider.${h.provider}`) }) } : {})}
+                      planButton={<PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} />}
+                    />
+                  )
+                })}
+              </div>
+            )}
+          </section>
+
+          {selectedNeighborhoods.length > 0 && (
+            <NeighborhoodsSection cities={selectedNeighborhoods} locale={locale} />
           )}
-
-          {/* Coming-soon toast (anchored above the filter card) */}
-          {comingSoonToast && (
-            <div style={{
-              position: 'absolute', bottom: 'calc(100% + 10px)', left: '50%',
-              transform: 'translateX(-50%)',
-              background: NK, color: WHITE, padding: '8px 18px',
-              borderRadius: 100, fontFamily: "'Manrope', sans-serif",
-              fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)', zIndex: 10,
-            }}>
-              {comingSoonToast} {L.comingSoonSuffix}
-            </div>
-          )}
         </div>
-        </div>
-      </section>
+      </div>
 
-      {/* ─────── CURATED GRID ─────── */}
-      <section style={{ padding: '0 0 64px' }}>
-        <div className="page-inner">
-        <div style={{ marginBottom: 28 }}>
-          <p style={sectionLabelStyle}>{L.sectionLabel}</p>
-          <h2 style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
-            color: NK, marginBottom: 4,
-          }}>{L.sectionHeadline}</h2>
-          <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 13, color: MU,
-          }}>
-            {filtered.length} {filtered.length === 1 ? L.countOne : L.countMany}
-          </p>
-        </div>
-
-        {filtered.length === 0 ? (
-          <div style={{
-            background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-            padding: '40px 32px', textAlign: 'center',
-          }}>
-            <h3 style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 18, fontWeight: 800,
-              color: NK, marginBottom: 6,
-            }}>{L.emptyHeadline}</h3>
-            <p style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
-            }}>{L.emptyBody}</p>
-          </div>
-        ) : (
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-            gap: 20,
-          }}>
-            {filtered.map(h => (
-              <HotelCard key={h.id} hotel={h} locale={locale} bookCta={L.bookCta} guideCta={L.guideCta} />
-            ))}
-          </div>
-        )}
-        </div>
-      </section>
-
-      {/* ─────── NEIGHBORHOODS · contextual to picked destination ───────
-          Only renders when the user has chosen a destination AND that
-          city has at least one neighborhood with editorial body copy.
-          Otherwise stays hidden. Hides itself again the moment the
-          destination filter resets to Todos. */}
-      {selectedNeighborhoods.length > 0 && (
-        <NeighborhoodsSection cities={selectedNeighborhoods} locale={locale} />
-      )}
+      <PlanTray
+        items={planItems}
+        onRemove={removeFromPlan}
+        onClear={plan.clear}
+        onBook={(x, pos) => trackPlanBook(x, pos, lang)}
+        onHandoff={(slug, count, mixed) => trackPlanHandoff(slug, count, mixed, 'panel', lang)}
+      />
     </div>
   )
-}
-
-// ── HotelCard — matches the prototype spec ───────────────────────────────────
-
-interface CardProps {
-  hotel:     HotelListing
-  locale:    'es' | 'en'
-  bookCta:   string
-  guideCta:  string
-}
-
-function HotelCard({ hotel, bookCta, guideCta }: CardProps) {
-  const hasImage = !!hotel.cover_img
-  const hasBooking = !!hotel.bookingUrl
-  const hasGuide = !!hotel.guideUrl && hotel.guideUrl !== '#'
-
-  return (
-    <article
-      style={{
-        background: WHITE, borderRadius: 14,
-        border: `1.5px solid ${BD}`,
-        overflow: 'hidden', transition: 'border-color .2s, transform .2s',
-        display: 'flex', flexDirection: 'column', height: '100%',
-      }}
-      className="group hover:-translate-y-[2px] hover:border-[#0F3A33]"
-    >
-      {/* ── Photo area ───────────────────────────────────────────────── */}
-      <div style={{ position: 'relative', flexShrink: 0 }}>
-        {hasImage ? (
-          <div style={{ position: 'relative', width: '100%', height: 220 }}>
-            <Image
-              src={hotel.cover_img}
-              alt={hotel.name}
-              fill
-              style={{ objectFit: 'cover', display: 'block' }}
-              sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            />
-          </div>
-        ) : (
-          <div style={{
-            height: 220,
-            background: DEFAULT_GRAD,
-            position: 'relative', overflow: 'hidden',
-          }}>
-            {/* Initial watermark for visual interest on gradient fallback */}
-            <div aria-hidden style={{
-              position: 'absolute', bottom: -20, right: 8,
-              fontFamily: "'Manrope', sans-serif", fontSize: 130, fontWeight: 800,
-              color: 'rgba(255,255,255,0.06)', lineHeight: 1, userSelect: 'none',
-            }}>{hotel.name.charAt(0)}</div>
-          </div>
-        )}
-
-        {/* Price pill — top right */}
-        <div style={{
-          position: 'absolute', top: 12, right: 12,
-          background: WHITE, color: NK, padding: '4px 12px',
-          borderRadius: 100, fontFamily: "'Manrope', sans-serif",
-          fontSize: 13, fontWeight: 700,
-        }}>{hotel.priceLevel}</div>
-      </div>
-
-      {/* ── Body ─────────────────────────────────────────────────────── */}
-      <div style={{ padding: '18px 20px 20px', display: 'flex', flexDirection: 'column', flex: 1 }}>
-        <p style={{
-          fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 700,
-          letterSpacing: '1.5px', textTransform: 'uppercase', color: SAGE,
-          marginBottom: 7,
-        }}>{hotel.destination.toUpperCase()}</p>
-
-        <h3 style={{
-          fontFamily: "'Manrope', sans-serif", fontSize: 20, fontWeight: 800,
-          color: NK, lineHeight: 1.2, marginBottom: 10,
-        }}>{hotel.name}</h3>
-
-        {hotel.description && (
-          <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
-            lineHeight: 1.6, marginBottom: 16,
-          }}>{hotel.description}</p>
-        )}
-
-        {hotel.tags.length > 0 && (
-          <div style={{ marginBottom: 20 }}>
-            <span style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 12, fontWeight: 600,
-              padding: '5px 14px', borderRadius: 100,
-              border: `1.5px solid ${BD}`, color: NK, background: 'transparent',
-            }}>{hotel.tags[0]}</span>
-          </div>
-        )}
-
-        {/* CTAs — primary 60% / guide 38% per prototype. "Ver guía" hides
-            if there's no guideUrl to avoid a dead link. */}
-        <div style={{ display: 'flex', gap: 8, marginTop: 'auto' }}>
-          <a
-            href={hasBooking ? hotel.bookingUrl! : '#'}
-            {...(hasBooking ? { target: '_blank', rel: 'noopener noreferrer sponsored' } : {})}
-            style={{
-              flex: hasGuide ? '0 0 calc(60% - 4px)' : 1,
-              display: 'block', background: PINE, color: WHITE,
-              padding: '11px 0', borderRadius: 100, textAlign: 'center',
-              fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: 700,
-              textDecoration: 'none',
-            }}
-          >{bookCta}</a>
-
-          {hasGuide && (
-            <a
-              href={hotel.guideUrl}
-              style={{
-                flex: '0 0 calc(38% - 4px)', display: 'block',
-                border: `1.5px solid ${BD}`, color: NK,
-                padding: '11px 0', borderRadius: 100, textAlign: 'center',
-                fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: 600,
-                background: 'transparent', textDecoration: 'none',
-              }}
-            >{guideCta}</a>
-          )}
-        </div>
-      </div>
-    </article>
-  )
-}
-
-// ── Reusable style fragments ─────────────────────────────────────────────────
-
-const sectionLabelStyle: React.CSSProperties = {
-  fontFamily: "'Manrope', sans-serif",
-  fontSize: 11, fontWeight: 600,
-  letterSpacing: '1.5px', textTransform: 'uppercase',
-  color: SAGE, marginBottom: 8,
-}
-
-function pillStyle(active: boolean): React.CSSProperties {
-  return {
-    fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: 600,
-    padding: '7px 18px', borderRadius: 100, cursor: 'pointer',
-    border: active ? 'none' : `1.5px solid ${BD}`,
-    background: active ? PINE : 'transparent',
-    color:      active ? WHITE : NK,
-    transition: 'all 0.15s',
-  }
 }

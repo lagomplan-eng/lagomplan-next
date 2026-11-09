@@ -275,6 +275,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'ecocamp-patagonia-standard-dome',
       name: 'EcoCamp Patagonia — Standard Dome',
       type: 'Domo geodésico · Torres del Paine',
       priceTier: '$$',
@@ -284,6 +285,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hostal-the-singing-lamb',
       name: 'Hostal The Singing Lamb',
       type: 'Hostal · Puerto Natales',
       priceTier: '$',
@@ -293,6 +295,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'patagonia-camp',
       name: 'Patagonia Camp',
       type: 'Yurtas de lujo · Lago Toro, Torres del Paine',
       priceTier: '$$$',

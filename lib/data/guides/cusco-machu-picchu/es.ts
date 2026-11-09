@@ -245,6 +245,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'tierra-viva-cusco-san-blas',
       name: 'Tierra Viva Cusco San Blas',
       type: 'Hotel boutique · Cusco · San Blas',
       priceTier: '$$',
@@ -254,6 +255,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'el-mapi-by-inkaterra',
       name: 'El MaPi by Inkaterra',
       type: 'Hotel · Aguas Calientes',
       priceTier: '$$',
@@ -263,6 +265,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'sumaq-machu-picchu-hotel',
       name: 'Sumaq Machu Picchu Hotel',
       type: 'Hotel · Aguas Calientes',
       priceTier: '$$$',

@@ -173,6 +173,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casona-de-los-sapos-hotel-boutique',
       name: 'Casona de los Sapos Hotel Boutique',
       type: 'Hotel boutique · Centro Histórico de Puebla',
       priceTier: '$$',
@@ -182,6 +183,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hotel-boutique-la-rioja',
       name: 'Hotel Boutique La Rioja',
       type: 'Hotel boutique · Atlixco',
       priceTier: '$$',
@@ -191,6 +193,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'casa-eva-hotel-boutique-spa',
       name: 'Casa Eva Hotel Boutique & Spa',
       type: 'Hotel boutique & spa · Cholula',
       priceTier: '$$$',

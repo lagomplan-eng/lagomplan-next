@@ -281,6 +281,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-f-royar',
       name: 'Hotel Føroyar',
       type: 'Hotel · Tórshavn',
       priceTier: '$$$',
@@ -290,6 +291,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'havgrim-seaside-hotel-1948',
       name: 'Havgrim Seaside Hotel 1948',
       type: 'Boutique hotel · Tórshavn',
       priceTier: '$$$',
@@ -299,6 +301,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'hotel-brandan',
       name: 'Hotel Brandan',
       type: '4-star hotel · Tórshavn',
       priceTier: '$$$',

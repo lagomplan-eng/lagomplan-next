@@ -197,6 +197,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-monti-roma',
       name: 'Casa Monti Roma',
       type: 'Boutique hotel · Monti',
       priceTier: '$$$',
@@ -206,6 +207,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'trastevere-luxury-rooms',
       name: 'Trastevere Luxury Rooms',
       type: 'Hotel · Trastevere',
       priceTier: '$$$',
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'condominio-monti-boutique-hotel',
       name: 'Condominio Monti Boutique Hotel',
       type: 'Hotel · Monti',
       priceTier: '$$',

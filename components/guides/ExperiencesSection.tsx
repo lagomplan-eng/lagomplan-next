@@ -2,26 +2,32 @@
  * components/guides/ExperiencesSection.tsx
  *
  * Curated experiences list — single bordered container with inline items.
- * Each item has a booking action with affiliate URL.
+ * Each item with a link has a booking action; an item without one renders no
+ * button (no invented fallback link).
  */
 
 import type { ExperiencesSection as ExperiencesSectionData } from '../../lib/data/guides/types'
-import { withRef, buildAffiliateLink } from '../../lib/affiliate'
+import { withRef } from '../../lib/affiliate'
+import { isGygTourUrl, buildGygBookingUrl } from '../../lib/affiliate/gyg'
+import { getRoute } from '../../lib/routes'
 
 interface Props {
   data: ExperiencesSectionData
   onToast?: (msg: string) => void
   locale: string
-  /** City/destination name, used as the fallback search-link target when an experience has no pre-resolved bookingUrl. */
-  destination: string
+  /** Registry key of the guide (e.g. 'ciudad-de-mexico'); feeds the GYG cmp param `guia-<key>`. */
+  guideKey: string
 }
 
-export function ExperiencesSection({ data, onToast, locale, destination }: Props) {
-  const ctxLocale = locale === 'en' ? 'en' : 'es'
-
-  function expHref(bookingUrl: string | undefined): string {
-    if (bookingUrl) return withRef(bookingUrl)
-    return buildAffiliateLink('getyourguide', { city: destination, locale: ctxLocale, surface: 'guide' })
+export function ExperiencesSection({ data, onToast, locale, guideKey }: Props) {
+  /**
+   * GYG tour links go direct with our partner ID + cmp; any other link (OpenTable,
+   * venue sites, GYG pages that aren't tours) renders as before. No link → null → no button.
+   */
+  function expHref(bookingUrl: string | undefined): string | null {
+    if (!bookingUrl) return null
+    if (isGygTourUrl(bookingUrl)) return buildGygBookingUrl(bookingUrl, { cmp: `guia-${guideKey}` })
+    return withRef(bookingUrl)
   }
 
   return (
@@ -43,11 +49,14 @@ export function ExperiencesSection({ data, onToast, locale, destination }: Props
 
       {/* Experience list */}
       <div data-exp="list" className="flex flex-col bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
-        {data.items.map((exp) => (
+        {data.items.map((exp) => {
+          const href = expHref(exp.bookingUrl)
+          return (
           <div
             key={exp.number}
+            id={`exp-${exp.id}`}
             data-exp="item"
-            className="grid grid-cols-[48px_1fr_auto] gap-4 items-start p-5 px-6 border-b border-[#E2DDD5] last:border-0 hover:bg-[rgba(15,58,51,.02)] transition-colors max-[640px]:grid-cols-[40px_1fr]"
+            className="scroll-mt-28 grid grid-cols-[48px_1fr_auto] gap-4 items-start p-5 px-6 border-b border-[#E2DDD5] last:border-0 hover:bg-[rgba(15,58,51,.02)] transition-colors max-[640px]:grid-cols-[40px_1fr]"
           >
             {/* Number */}
             <div data-exp="number" className="font-mono text-[11px] font-medium text-[#BDBDBD] tracking-[.06em] pt-0.5">
@@ -74,21 +83,34 @@ export function ExperiencesSection({ data, onToast, locale, destination }: Props
               </div>
             </div>
 
-            {/* Action */}
-            <div className="flex-shrink-0 pt-0.5 max-[640px]:hidden">
-              <a
-                href={expHref(exp.bookingUrl)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => onToast?.(locale === 'en' ? 'Opening booking…' : 'Abriendo reserva…')}
-                className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] font-medium tracking-[.08em] text-white bg-[#0F3A33] px-3 py-[7px] rounded-md transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_3px_10px_rgba(15,58,51,.2)]"
-              >
-                {exp.bookingLabel}
-              </a>
-            </div>
+            {/* Action — only when the experience has a link */}
+            {href && (
+              <div className="flex-shrink-0 pt-0.5 max-[640px]:hidden">
+                <a
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => onToast?.(locale === 'en' ? 'Opening booking…' : 'Abriendo reserva…')}
+                  className="flex items-center gap-1.5 whitespace-nowrap font-mono text-[10px] font-medium tracking-[.08em] text-white bg-[#0F3A33] px-3 py-[7px] rounded-md transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_3px_10px_rgba(15,58,51,.2)]"
+                >
+                  {exp.bookingLabel}
+                </a>
+              </div>
+            )}
           </div>
-        ))}
+          )
+        })}
       </div>
+
+      {/* Same bookable rule as the hub: only offer the link when the hub has something for this guide. */}
+      {data.items.some(exp => isGygTourUrl(exp.bookingUrl ?? '')) && (
+        <a
+          href={`${getRoute(locale === 'en' ? 'en' : 'es', 'experiencesIndex')}?destino=${encodeURIComponent(guideKey)}`}
+          className="mt-4 inline-flex min-h-[44px] items-center text-[13px] font-medium text-[#2D4F6C] underline underline-offset-2 hover:text-[#0F3A33]"
+        >
+          {locale === 'en' ? 'See all bookable experiences →' : 'Ver todas las experiencias para reservar →'}
+        </a>
+      )}
     </div>
   )
 }

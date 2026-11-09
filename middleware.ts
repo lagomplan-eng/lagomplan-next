@@ -13,6 +13,8 @@ import createMiddleware from 'next-intl/middleware'
 import { NextRequest, NextResponse } from 'next/server'
 import { locales, defaultLocale, pathnames } from './i18n'
 import { getGuideRedirectSlug } from './lib/guide-slugs'
+import { hasFilterParams } from './lib/experiences/filters'
+import { HOTEL_FILTER_PARAMS } from './lib/hotels-catalog'
 
 const intlMiddleware = createMiddleware({
   locales,
@@ -88,7 +90,19 @@ export default function middleware(req: NextRequest) {
   }
 
   // Hand off to next-intl
-  return intlMiddleware(req)
+  const response = intlMiddleware(req)
+
+  // Experiencias hub: a filtered URL (?region=, ?destino=, ?para=, ?tipo=, ?duracion=) is a
+  // view of the same page, not a new one. Its canonical already points at the unfiltered
+  // page; the header keeps it out of the index for crawlers that don't run JavaScript.
+  if (/^\/(es|en)\/(experiencias|experiences)\/?$/.test(pathname) && hasFilterParams(req.nextUrl.searchParams)) {
+    response.headers.set('X-Robots-Tag', 'noindex, follow')
+  }
+  // Hoteles: a filtered view (?destino= ?precio= ?viajero=) is not a page of its own.
+  if (/^\/(es|en)\/(hoteles|hotels)\/?$/.test(pathname) && HOTEL_FILTER_PARAMS.some(k => req.nextUrl.searchParams.has(k))) {
+    response.headers.set('X-Robots-Tag', 'noindex, follow')
+  }
+  return response
 }
 
 export const config = {

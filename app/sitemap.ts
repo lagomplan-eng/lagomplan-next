@@ -52,6 +52,7 @@ const SITEMAP_ROUTES: RouteKey[] = [
   'planner',
   'pricing',
   'guidesIndex',
+  'experiencesIndex',
   'hotelsIndex',
   'worldcupIndex',
   'about',

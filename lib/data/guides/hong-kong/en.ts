@@ -191,6 +191,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-murray-hong-kong',
       name: 'The Murray Hong Kong',
       type: 'Design hotel · Central, Hong Kong Island',
       priceTier: '$$$',
@@ -200,6 +201,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'hotel-indigo-hong-kong-island',
       name: 'Hotel Indigo Hong Kong Island',
       type: 'Boutique hotel · Wan Chai, Hong Kong Island',
       priceTier: '$$$',
@@ -209,6 +211,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'rosewood-hong-kong',
       name: 'Rosewood Hong Kong',
       type: 'Hotel · Tsim Sha Tsui, Kowloon',
       priceTier: '$$$',

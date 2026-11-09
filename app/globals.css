@@ -42,6 +42,16 @@
   --card:    #FFF9F3;
   --border:  #C8BFB5;
 
+  /* Catalog system (Experiencias · Hoteles · Smart Finds) */
+  --ink-2:        #3E5650;               /* secondary text */
+  --label:        #4F6B64;               /* eyebrows, labels, provider lines */
+  --line-card:    rgba(15, 58, 51, .12); /* card border */
+  --line-panel:   rgba(15, 58, 51, .14); /* filter panel border */
+  --line-chip:    rgba(15, 58, 51, .18); /* chip border */
+  --line-btn:     rgba(15, 58, 51, .22); /* outline button border */
+  --radius-card:  20px;
+  --radius-panel: 24px;
+
   /* Type scale */
   --text-xs:   0.75rem;
   --text-sm:   0.875rem;

@@ -179,6 +179,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'coco-hotel',
       name: 'Coco Hotel',
       type: 'Hotel boutique · Vesterbro',
       priceTier: '$$',
@@ -187,6 +188,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'http://booking.com/hotel/dk/copenhagen-crown.en-gb.html',
     },
     {
+      id: 'cityhub-copenhagen',
       name: 'Cityhub Copenhagen',
       type: 'Hotel cápsula · Vesterbro',
       priceTier: '$$',
@@ -195,6 +197,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'https://www.booking.com/hotel/dk/cityhub-copenhagen.en-gb.html',
     },
     {
+      id: 'hotel-ottilia',
       name: 'Hotel Ottilia',
       type: 'Hotel de diseño · Carlsberg City District',
       priceTier: '$$',

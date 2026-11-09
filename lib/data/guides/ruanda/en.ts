@@ -251,6 +251,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'le-bambou-gorilla-lodge',
       name: 'Le Bambou Gorilla Lodge',
       type: 'Eco-lodge · Musanze',
       priceTier: '$',
@@ -260,6 +261,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'five-volcanoes-boutique-hotel',
       name: 'Five Volcanoes Boutique Hotel',
       type: 'Boutique hotel · Musanze',
       priceTier: '$$',
@@ -269,6 +271,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'mountain-gorilla-view-lodge',
       name: 'Mountain Gorilla View Lodge',
       type: 'Stone cottages · Kinigi',
       priceTier: '$$$',

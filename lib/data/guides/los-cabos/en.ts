@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-cape-a-thompson-hotel',
       name: 'The Cape, a Thompson Hotel',
       type: 'Hotel · Tourist Corridor',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'hacienda-encantada-resort-residences',
       name: 'Hacienda Encantada Resort & Residences',
       type: 'Resort · Tourist Corridor',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'drift-san-jose',
       name: 'Drift San José',
       type: 'Boutique hotel · Art District',
       priceTier: '$',

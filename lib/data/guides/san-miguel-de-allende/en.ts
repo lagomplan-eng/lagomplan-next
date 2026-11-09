@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'rosewood-san-miguel-de-allende',
       name: 'Rosewood San Miguel de Allende',
       type: 'Hotel · Historic center',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-casa-blanca-7',
       name: 'Hotel Casa Blanca 7',
       type: 'Boutique hotel · Downtown',
       priceTier: '$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'selina-san-miguel-de-allende',
       name: 'Selina San Miguel de Allende',
       type: 'Boutique hotel · Historic center',
       priceTier: '$',

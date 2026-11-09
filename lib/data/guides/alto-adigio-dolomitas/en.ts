@@ -173,6 +173,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'naturhotel-leitlhof',
       name: 'Naturhotel Leitlhof',
       type: 'Eco-boutique hotel · San Candido',
       priceTier: '$$',
@@ -182,6 +183,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hotel-cavallino-bianco',
       name: 'Hotel Cavallino Bianco',
       type: 'Family hotel · San Candido',
       priceTier: '$$',
@@ -191,6 +193,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'sonnwies-family-resort',
       name: 'Sonnwies Family Resort',
       type: 'Organic-farm resort · Lüsen',
       priceTier: '$$',

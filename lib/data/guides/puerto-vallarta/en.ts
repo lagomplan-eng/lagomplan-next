@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-kimberly',
       name: 'Casa Kimberly',
       type: 'Boutique hotel · Romantic Zone',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'hotel-mousai',
       name: 'Hotel Mousai',
       type: 'Hotel · South Zone (Adults Only)',
       priceTier: '$$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-amapa',
       name: 'Hotel Amapa',
       type: 'Boutique hotel · Romantic Zone (Adults Only)',
       priceTier: '$$',

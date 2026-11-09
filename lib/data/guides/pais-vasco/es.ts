@@ -143,6 +143,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-arbaso',
       name: 'Hotel Arbaso',
       type: 'Hotel boutique · Parte Vieja',
       priceTier: '$$',
@@ -152,6 +153,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'lasala-plaza-hotel',
       name: 'Lasala Plaza Hotel',
       type: 'Hotel de diseño · Puerto Deportivo',
       priceTier: '$$',
@@ -161,6 +163,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-de-londres-y-de-inglaterra',
       name: 'Hotel de Londres y de Inglaterra',
       type: 'Hotel histórico · La Concha',
       priceTier: '$$$',
