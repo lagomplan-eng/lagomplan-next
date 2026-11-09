@@ -37,6 +37,7 @@ import PartnerAttributionCapture from '../../components/analytics/PartnerAttribu
 import CookieBanner from '../../components/layout/CookieBanner'
 import DomMutationGuard from '../../components/util/DomMutationGuard'
 import Stay22Guard from '../../components/affiliate/Stay22Guard'
+import Stay22Loader from '../../components/affiliate/Stay22Loader'
 import '../globals.css'
 
 // GA4 loader stays in the layout (with Consent Mode v2 defaults set
@@ -206,19 +207,7 @@ export default async function RootLayout({
             fixed on the Stay22 dashboard. The CTAs we generate
             through lib/affiliate/build.ts already carry our `aid`
             so LetMeAllez is supplementary — not the source of truth. */}
-        <Script id="stay22-letmeallez" strategy="afterInteractive">
-          {`
-            (function (s, t, a, y, twenty, two) {
-              s.Stay22 = s.Stay22 || {};
-              s.Stay22.params = { lmaID: '69b992c248666aca4133dbbe' };
-              twenty = t.createElement(a);
-              two = t.getElementsByTagName(a)[0];
-              twenty.async = 1;
-              twenty.src = y;
-              two.parentNode.insertBefore(twenty, two);
-            })(window, document, 'script', 'https://scripts.stay22.com/letmeallez.js');
-          `}
-        </Script>
+        {/* Loaded by <Stay22Loader> below: skipped on the Experiencias hub, excludes GetYourGuide links. */}
 
         {/* ── Meta Pixel — gated behind cookie consent ──
             The Pixel base loader + init + first PageView are emitted by
@@ -237,6 +226,7 @@ export default async function RootLayout({
               {/* Protects already-built stay22.com affiliate links from the
                   LetMeAllez interceptor site-wide (see Stay22Guard). */}
               <Stay22Guard />
+              <Stay22Loader />
               {/* Nav is position:fixed — every first section needs pt-[100px] */}
               <Nav />
               {children}
