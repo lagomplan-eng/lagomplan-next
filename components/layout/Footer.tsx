@@ -79,10 +79,10 @@ export default async function Footer() {
                 className="h-10 w-auto mb-3"
               />
             </Link>
-            <p className="font-sans text-[13px] text-[#6B8F86] leading-[1.65] max-w-[220px] mb-3">
+            <p className="font-sans text-[13px] text-[#4F6B64] leading-[1.65] max-w-[220px] mb-3">
               {t('tagline')}
             </p>
-            <p className="font-mono text-[10px] text-[#6B8F86] mb-4">
+            <p className="font-mono text-[10px] text-[#4F6B64] mb-4">
               {t('email')}
             </p>
             <div className="flex gap-4">
@@ -92,7 +92,7 @@ export default async function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Instagram"
               >
-                <InstagramIcon className="w-[18px] h-[18px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors" />
+                <InstagramIcon className="w-[18px] h-[18px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors" />
               </a>
               <a
                 href="https://www.facebook.com/profile.php?id=61582151266836"
@@ -100,7 +100,7 @@ export default async function Footer() {
                 rel="noopener noreferrer"
                 aria-label="Facebook"
               >
-                <FacebookIcon className="w-[18px] h-[18px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors" />
+                <FacebookIcon className="w-[18px] h-[18px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors" />
               </a>
               <a
                 href="https://www.linkedin.com/company/lagomplan/"
@@ -108,21 +108,21 @@ export default async function Footer() {
                 rel="noopener noreferrer"
                 aria-label="LinkedIn"
               >
-                <LinkedinIcon className="w-[18px] h-[18px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors" />
+                <LinkedinIcon className="w-[18px] h-[18px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors" />
               </a>
             </div>
           </div>
 
           {/* Explore column */}
           <div>
-            <p className="font-sans text-[11px] font-medium tracking-[0.1em] text-[#6B8F86] uppercase mb-4">
+            <p className="font-sans text-[11px] font-medium tracking-[0.1em] text-[#4F6B64] uppercase mb-4">
               {t('explore')}
             </p>
             {exploreLinks.map(({ key, labelKey }) => (
               <Link
                 key={key}
                 href={key}
-                className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#6B8F86] transition-colors"
+                className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#4F6B64] transition-colors"
               >
                 {t(labelKey)}
               </Link>
@@ -131,13 +131,13 @@ export default async function Footer() {
 
           {/* Connect column */}
           <div>
-            <p className="font-sans text-[11px] font-medium tracking-[0.1em] text-[#6B8F86] uppercase mb-4">
+            <p className="font-sans text-[11px] font-medium tracking-[0.1em] text-[#4F6B64] uppercase mb-4">
               {t('connect')}
             </p>
             {/* Nosotras → homepage anchor, not a separate page */}
             <NextLink
               href={`/${locale}#nosotras`}
-              className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#6B8F86] transition-colors"
+              className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#4F6B64] transition-colors"
             >
               {t('links.about')}
             </NextLink>
@@ -145,7 +145,7 @@ export default async function Footer() {
               <Link
                 key={key}
                 href={key}
-                className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#6B8F86] transition-colors"
+                className="block font-sans text-[13px] text-[#0F3A33] mb-2 hover:text-[#4F6B64] transition-colors"
               >
                 {t(labelKey)}
               </Link>
@@ -157,19 +157,19 @@ export default async function Footer() {
           className="pt-5 flex items-center justify-between flex-wrap gap-3"
           style={{ borderTop: '1px solid rgba(107,143,134,.25)' }}
         >
-          <p className="font-sans text-[11px] text-[#6B8F86]">
+          <p className="font-sans text-[11px] text-[#4F6B64]">
             {t('copyright', { year })}
           </p>
           <div className="flex gap-4 flex-wrap">
             <Link
               href="/terms"
-              className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors"
+              className="font-sans text-[11px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors"
             >
               {t('terms')}
             </Link>
             <Link
               href="/privacy"
-              className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors"
+              className="font-sans text-[11px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors"
             >
               {t('privacy')}
             </Link>

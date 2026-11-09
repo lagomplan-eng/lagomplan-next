@@ -24,7 +24,7 @@ export default function CookieSettingsLink() {
     <button
       type="button"
       onClick={() => clearConsent()}
-      className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors"
+      className="font-sans text-[11px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors"
     >
       {isES ? 'Configuración de cookies' : 'Cookie settings'}
     </button>

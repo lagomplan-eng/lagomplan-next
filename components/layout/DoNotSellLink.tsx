@@ -55,7 +55,7 @@ export default function DoNotSellLink() {
     <button
       type="button"
       onClick={handleClick}
-      className="font-sans text-[11px] text-[#6B8F86] hover:text-[#0F3A33] transition-colors text-left"
+      className="font-sans text-[11px] text-[#4F6B64] hover:text-[#0F3A33] transition-colors text-left"
     >
       {isES
         ? 'No vender ni compartir mi información personal'
