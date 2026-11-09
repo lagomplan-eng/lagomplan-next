@@ -147,6 +147,7 @@ export const guide: FlatGuide = {
       name: 'Wine and Cheese Route',
       description: 'A getaway just 45 minutes away to Tequisquiapan or Ezequiel Montes. Visit Freixenet or De Cote for a tasting with views of the Peña de Bernal.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/?ranking_uuid=9eab0807-6e3c-4a0f-b173-2fb752f7e2ca&adults=1',
     },
     {
@@ -154,6 +155,7 @@ export const guide: FlatGuide = {
       name: 'Rooftop bar hopping',
       description: 'Querétaro has the best views from above. Places like La Grupa or Dodo Café are essential for the evening "pre-game."',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
@@ -161,6 +163,7 @@ export const guide: FlatGuide = {
       name: 'Walk along the Aqueduct',
       description: 'A photographic tour through the iconic arches and alleys of the historic center (UNESCO World Heritage Site).',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
   ],

@@ -197,6 +197,7 @@ export const guide: FlatGuide = {
       name: 'Corcovado on the cog train',
       description: 'The only way up to Christ the Redeemer that delivers on the promise. The Corcovado train leaves from Cosme Velho station (15 minutes by taxi from Leblon) and climbs 3.8 kilometers of Atlantic rainforest in 20 minutes. Arrival at the top — with Christ rising over the city at 710 meters — is the moment teenagers will use as their profile picture for at least two years. Book online weeks in advance.',
       tags: ['Iconic', 'Teenagers', 'Views'],
+      category: 'cultura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/URtSQgjsmC',
     },
     {
@@ -204,6 +205,7 @@ export const guide: FlatGuide = {
       name: 'Museu do Amanhã and the port district',
       description: 'The science museum designed by Santiago Calatrava on Rio\'s port is the most important contemporary building in Brazil. For curious teenagers, the interactive exhibits on climate change, neuroscience and cosmos are the city\'s most interesting morning plan. Combine with a walk through the Santa Teresa neighborhood, reachable by bonde (historic tram) or on foot from downtown.',
       tags: ['Museum', 'Architecture', 'Family'],
+      category: 'cultura',
       affiliateUrl: 'https://museudoamanha.org.br/en',
     },
     {
@@ -211,6 +213,7 @@ export const guide: FlatGuide = {
       name: 'Tasting dinner at Lasai',
       description: 'Rio de Janeiro\'s only Michelin-starred restaurant, five minutes from JANEIRO Hotel in Botafogo. Tasting menu with produce from the restaurant\'s own garden, wine pairings and a kitchen that fuses French technique with carioca ingredients. The biggest splurge of the trip — and the night you\'ll remember most. Booking required weeks in advance.',
       tags: ['Fine dining', 'Michelin', 'Carioca cuisine'],
+      category: 'comida',
       affiliateUrl: 'https://lasai.com.br/reservar-una-mesa/',
     },
   ],

@@ -123,6 +123,7 @@ export const guide: FlatGuide = {
       name: 'Tour de tequila artesanal',
       description: 'Eviten el tren turístico masivo. Renten un conductor privado hacia la zona de Tequila para visitar destilerías boutique como Cascahuín o Fortaleza. Es aventura líquida para conocedores.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/mcSDi9xF38',
     },
     {
@@ -130,6 +131,7 @@ export const guide: FlatGuide = {
       name: 'Safari de tortas ahogadas',
       description: 'No se queden con una. Hagan un recorrido por las clásicas (como El Güerito) y las modernas. Es el rito de iniciación obligatorio para cualquier foodie.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
@@ -137,6 +139,7 @@ export const guide: FlatGuide = {
       name: 'Caminata por la Colonia Americana',
       description: 'Exploren las galerías y tiendas de diseño independiente. Terminen la tarde en una cata de café de especialidad en Pólvora o Taller de Espresso.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
   ],

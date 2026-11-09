@@ -251,6 +251,7 @@ export const guide: FlatGuide = {
       name: 'Vuelo en Globo al Amanecer sobre Göreme',
       description: 'El vuelo en globo sobre las chimeneas de hadas de Göreme al amanecer es la experiencia más fotografiada de Turquía y una de las más impresionantes a nivel mundial. Recogida en el hotel 1 hora antes del amanecer, desayuno ligero en el punto de despegue, 1 hora de vuelo a hasta 600 metros de altura sobre el paisaje volcánico y brindis de champán al aterrizar. Certificado de vuelo incluido. Para el grupo que tiene un solo plan inamovible en los seis días: este es.',
       tags: ['Globo', 'Amanecer', 'Imprescindible'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/cappadocia-goreme-hot-air-balloon-flight-at-sunrise-t26992/',
     },
     {
@@ -258,6 +259,7 @@ export const guide: FlatGuide = {
       name: 'Royal Queen Hot Air Balloon Tour',
       description: 'La versión premium del vuelo en globo: canasta más pequeña, servicio más personalizado, desayuno incluido y cobertura de seguro de Eureko Insurance. Para el grupo que quiere repetir la experiencia o para quienes buscan la versión con más espacio y menos personas en la misma cesta. Organizado por Royal Balloon, uno de los operadores más veteranos de Capadocia.',
       tags: ['Globo premium', 'Royal Balloon', 'Amanecer'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/cappadocia-royal-queen-hot-air-balloon-tour-at-sunrise-t13752/',
     },
     {
@@ -265,6 +267,8 @@ export const guide: FlatGuide = {
       name: 'Globo + Tour de lo Mejor de Capadocia: Día Completo',
       description: 'Combinación de vuelo en globo al amanecer más tour de día completo por los principales sitios de Capadocia: Museo al Aire Libre de Göreme (iglesias del siglo X excavadas en la roca con frescos bizantinos), Uchisar (el castillo más alto de la región), el Valle de los Monjes de Paşabağ (chimeneas de hadas con cabezas dobles) y una visita a un taller de cerámica en Avanos. La opción más eficiente para el grupo que tiene solo 6 días y quiere el panorama completo sin renunciar al globo.',
       tags: ['Globo', 'Tour día completo', 'Panorama'],
+      category: 'aventura',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/hot-air-balloon-and-best-of-cappadocia-city-tour-t377126/',
     },
   ],

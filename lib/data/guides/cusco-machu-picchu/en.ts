@@ -281,6 +281,7 @@ export const guide: FlatGuide = {
       name: 'Salkantay Trek (4 days / alternative to the Inca Trail)',
       description: 'The Inca Trail is capped at 500 people per day and sells out months in advance. The Salkantay — which crosses the 6,271-meter snowcapped mountain and drops through cloud forest to Aguas Calientes — has the same views, more nature, and no waiting list. Operators like Salkantay Trekking and Peru Treks run the 4-day route with tent, cook and guide for $300–450 USD. For the solo traveler, the organized group trek is the most efficient way to do it and the most likely way to end with travel friends.',
       tags: ['Trekking', 'Adventure', 'Group'],
+      category: 'aventura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/eaI_sDFz2h',
     },
     {
@@ -288,6 +289,7 @@ export const guide: FlatGuide = {
       name: 'Dinner at Central (Lima) — if the itinerary includes a layover',
       description: 'Virgilio Martínez\'s restaurant in Lima is the best in Latin America according to the 50 Best list. If the flight to Cusco connects through Lima — which is common — a night in Miraflores with dinner at Central turns the layover into part of the trip. Book two months in advance.',
       tags: ['Fine dining', '50 Best', 'Layover'],
+      category: 'comida',
       affiliateUrl: 'https://centralrestaurante.com.pe/reservations',
     },
     {
@@ -295,6 +297,8 @@ export const guide: FlatGuide = {
       name: 'Sacred Valley in a day',
       description: 'Pisac, Ollantaytambo and Moray in a single circuit by shared taxi or organized tour. The Pisac crafts market on Sundays is the most active in the region; Moray\'s circular ruins are the least photographed and the most surprising. Full-day tour from Cusco: $20–35 USD.',
       tags: ['Sacred Valley', 'Ruins', 'Full day'],
+      category: 'cultura',
+      duration: 'completo',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/x0uQNF9TUN',
     },
   ],

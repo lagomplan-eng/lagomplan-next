@@ -209,6 +209,7 @@ export const guide: FlatGuide = {
       name: 'Lago di Braies Early Morning Tour',
       description: 'El lago más fotografiado de los Dolomitas, agua turquesa imposible rodeada de paredes verticales de roca dolomítica, tiene un problema: en agosto a las 10am hay más gente que en una calle comercial. La solución es la misma de siempre: llegar antes que nadie. Salida temprana desde la zona de San Candido, llegada al lago con la primera luz, con las montañas reflejadas en el agua sin un solo kayak y sin nadie más en el sendero. Para niños de cualquier edad: el bote de remos en el lago cuesta €10 y es el plan más recordado de los cuatro días.',
       tags: ['Lago di Braies', 'Madrugada', 'Bote de remos'],
+      category: 'naturaleza',
       affiliateUrl: 'https://www.getyourguide.com/urtijei-l102963/lago-di-braies-tour-a-day-tour-to-the-magic-lago-di-braies-t947430/',
     },
     {
@@ -216,6 +217,7 @@ export const guide: FlatGuide = {
       name: 'Tre Cime di Lavaredo Guided Family Hike',
       description: 'Las Tres Cimas de Lavaredo son las formaciones de roca más reconocibles de los Alpes y el símbolo visual de los Dolomitas. El sendero circular a los pies de las tres agujas (2,999 metros) es llano y accesible, 10 kilómetros sin desnivel significativo, y la ruta está tan bien señalizada que el guía vale más por el contexto geológico que por la orientación. Para niños de 4 años en adelante con cochecito todo-terreno o portabebés: la primera hora desde el aparcamiento es completamente accesible.',
       tags: ['Tre Cime', 'Sendero circular', 'Apto para niños'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/auronzo-l213997/misurinadolomites-tour-of-the-tre-cime-di-lavaredo-t1275876/',
     },
     {
@@ -223,6 +225,7 @@ export const guide: FlatGuide = {
       name: 'Dolomites Cable Car & Family Alpine Meadow Experience',
       description: 'La Alpe di Siusi (Seiser Alm) es el prado alpino de alta montaña más grande de Europa: 56 kilómetros cuadrados de hierba verde sobre las Dolomitas, accesibles en telecabina desde Ortisei en Val Gardena. En agosto tiene flores de temporada, vacas con cencerro y el aire a 1,800 metros que hace que los niños pequeños se duerman en el cochecito a los 20 minutos. Tour familiar con telecabina incluida y almuerzo en rifugio.',
       tags: ['Alpe di Siusi', 'Telecabina', 'Prado alpino'],
+      category: 'naturaleza',
       affiliateUrl: 'https://www.getyourguide.com/alpe-di-siusi-l96607/',
     },
   ],

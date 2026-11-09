@@ -155,6 +155,7 @@ export const guide: FlatGuide = {
       name: 'Surf o clases de surf en Playa Tamarindo',
       description: 'La ola de Tamarindo es larga, suave y perfecta para principiantes. Las escuelas de surf del pueblo (Witch\'s Rock Surf Camp, Tamarindo Surf School) ofrecen clases de dos horas por $60–80 USD con instructor privado. Para el grupo que nunca ha surfeado — o que lleva años queriendo intentarlo — este es el plan del sábado por la mañana.',
       tags: ['Surf', 'Principiantes', 'Playa'],
+      category: 'aventura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/gGkZgcCnzP',
     },
     {
@@ -162,6 +163,7 @@ export const guide: FlatGuide = {
       name: 'Tour en kayak por el Estero El Salado',
       description: 'A 15 minutos en auto de Tamarindo, el manglar del Estero tiene cocodrilos tomando el sol en los bancos de arena, aves tropicales en los árboles y el silencio que no existe en el pueblo. Tours de 2 horas en kayak con guía por $40–55 USD por persona. El plan del domingo antes del vuelo de regreso.',
       tags: ['Kayak', 'Manglar', 'Naturaleza'],
+      category: 'aventura',
       affiliateUrl: '',
     },
     {
@@ -169,6 +171,7 @@ export const guide: FlatGuide = {
       name: 'Atardecer en Playa Langosta',
       description: 'A dos kilómetros al sur de Tamarindo, Playa Langosta no tiene vendedores ni turistas con altavoces. Arena oscura, olas más fuertes y el atardecer más fotogénico de la zona. Se llega caminando por la playa en 25 minutos o en tuk-tuk en 10. El plan del viernes en la noche, recién llegados.',
       tags: ['Atardecer', 'Playa', 'Foto'],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

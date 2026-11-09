@@ -160,6 +160,16 @@ export interface FlatHotel {
   archetypes?: string[]
 }
 
+/**
+ * Editorial classification of an experience. Our own taxonomy, not GYG's.
+ * UI label for 'comida' is "Comida y bebida" / "Food & drink".
+ */
+export type ExperienceCategory =
+  | 'comida' | 'cultura' | 'naturaleza' | 'aventura' | 'excursion' | 'bienestar'
+
+/** corto ≤ 4 h, medio > 4–7 h, completo > 7 h. Set only from an explicit duration tag. */
+export type ExperienceDuration = 'corto' | 'medio' | 'completo'
+
 export interface FlatExperience {
   /**
    * Stable kebab-case id, unique across ALL guides, derived from the ES name.
@@ -172,6 +182,21 @@ export interface FlatExperience {
   description: string
   tags: string[]
   affiliateUrl: string
+  /** Absent when no category fits. Absent renders nothing. */
+  category?: ExperienceCategory
+  /** Absent unless an existing tag states the duration. Never inferred. */
+  duration?: ExperienceDuration
+}
+
+// ── Guide-level metadata (lives in GUIDE_META, not in the guide files) ────────
+
+export type GuideRegion =
+  | 'mexico' | 'latam' | 'norteamerica' | 'europa' | 'asia' | 'africa' | 'oceania'
+
+export interface GuideMeta {
+  region: GuideRegion
+  /** Short label for filters and cards, e.g. "Alto Adigio" / "South Tyrol". */
+  shortName: { es: string; en: string }
 }
 
 export interface FlatTransport {

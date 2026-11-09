@@ -129,6 +129,7 @@ export const guide: FlatGuide = {
       name: 'Mexican food tasting',
       description: 'Step into a local home in Cuernavaca for a guided tasting session of traditional Mexican dishes and drinks, carefully curated to showcase the country\'s rich culinary culture.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
@@ -136,6 +137,7 @@ export const guide: FlatGuide = {
       name: 'Jardines de México',
       description: 'Minutes from the city, it\'s the largest floral garden in the world. Walking the Japanese or Italian garden at sunset is a visually stunning and very Instagrammable experience.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: 'https://jardinesdemexico.com/',
     },
     {
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       name: 'Mezcal or tequila tasting in the garden',
       description: 'Arrange a private tasting in your hotel\'s gardens. Cuernavaca is made for long post-dinner conversations that start with an expert-guided tasting before dinner.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
   ],

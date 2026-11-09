@@ -123,6 +123,7 @@ export const guide: FlatGuide = {
       name: 'Casa Luis Barragán',
       description: 'Essential to book months in advance. A lesson in light, color, and silence — the most intimate architectural experience you can have as a couple.',
       tags: ['Book months in advance'],
+      category: 'cultura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
     },
     {
@@ -130,6 +131,7 @@ export const guide: FlatGuide = {
       name: 'Gallery route in La San Rafael',
       description: 'Leave Roma and explore the San Rafael neighborhood. Visit galleries like Hilario Galguera or Eco — high-level contemporary art without the crowds.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
     {
@@ -137,6 +139,7 @@ export const guide: FlatGuide = {
       name: 'Dinner at a chef\'s counter',
       description: 'Look for places like Expendio de Maíz or the counter at Máximo. Watching the chefs\' precision just inches away while sharing a natural wine is the epitome of relaxed luxury.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/',
     },
   ],

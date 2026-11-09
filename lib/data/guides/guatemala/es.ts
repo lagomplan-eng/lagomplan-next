@@ -185,6 +185,7 @@ export const guide: FlatGuide = {
       name: 'Cata privada de café',
       description: 'Guatemala produce algunos de los mejores granos del mundo. Realizar una cata sensorial en una finca histórica como La Azotea permite entender la relación entre el suelo volcánico y la taza perfecta.',
       tags: ['Café', 'Cata', 'Finca'],
+      category: 'comida',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/grDEZhey3a',
     },
     {
@@ -192,6 +193,7 @@ export const guide: FlatGuide = {
       name: 'Navegación privada en Atitlán',
       description: 'Evita las lanchas públicas. Renta un bote privado para visitar San Juan La Laguna (el pueblo del arte y textiles) y Santa Catarina. Ver los tres volcanes (Atitlán, Tolimán y San Pedro) desde el centro del lago en silencio es una experiencia espiritual.',
       tags: ['Lago', 'Volcanes', 'Privado'],
+      category: 'naturaleza',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Vj80TjtAwX',
     },
     {
@@ -199,6 +201,7 @@ export const guide: FlatGuide = {
       name: 'Vuelo en helicóptero',
       description: 'Para el máximo nivel de lujo y evitar el tráfico, el traslado de Antigua a Atitlán en helicóptero ofrece una perspectiva aérea de los volcanes que es simplemente inolvidable.',
       tags: ['Helicóptero', 'Vista aérea', 'Lujo'],
+      category: 'excursion',
       affiliateUrl: 'https://flyinguate.com/experiencias',
     },
   ],

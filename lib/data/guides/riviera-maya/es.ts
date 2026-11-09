@@ -201,6 +201,7 @@ export const guide: FlatGuide = {
       name: 'Río Secreto',
       description: 'Al ser una reserva con grupos controlados y horarios estrictos, es la mejor forma de vivir la aventura subterránea sin sentir el peso de la temporada alta. La versión "Plus" incluye actividades que mantienen a los jóvenes en constante movimiento.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ygCQ8dKAja',
     },
     {
@@ -208,6 +209,7 @@ export const guide: FlatGuide = {
       name: 'Sian Ka\'an por Muyil',
       description: 'En lugar de entrar por la saturada zona hotelera de Tulum, entren por Muyil. Flotar por los canales milenarios en total silencio es el antídoto perfecto para el ruido de temporada alta.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
     {
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       name: 'Cenote Zapote (ruta de los cenotes)',
       description: 'Mientras todos se agolpan en los cenotes famosos de Tulum, este cenote en Puerto Morelos ofrece plataformas de saltos y una arquitectura natural impresionante con mucha menos gente.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

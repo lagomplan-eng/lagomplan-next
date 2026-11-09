@@ -269,6 +269,7 @@ export const guide: FlatGuide = {
       name: 'Whale watching — Terra Azul',
       description: 'A 3-hour catamaran excursion from the Vila Franca do Campo dock with marine biologists on board. The Azores are one of the ten best destinations in the world for cetacean watching. Sperm whales, sei whales, and four dolphin species are the regulars. Safety and marine-ethics briefing before departure, with no minimum age limit for couples. Available with free cancellation 24 hours in advance.',
       tags: ['Catamaran', 'Marine biologists', 'Cetaceans'],
+      category: 'naturaleza',
       affiliateUrl: 'https://www.getyourguide.com/azores-whale-watching-terra-azul-s9545/',
     },
     {
@@ -276,6 +277,8 @@ export const guide: FlatGuide = {
       name: 'Sete Cidades & Lagoa do Fogo — Full Day Tour',
       description: 'The single most important route on São Miguel: the twin lake inside the Sete Cidades crater — blue and green at once depending on where you look from — plus Lagoa do Fogo at the island\'s central peak. An 8-hour tour with lunch included, a local guide in English and Spanish, and stops at all the main viewpoints. For the couple renting a car, it can be done independently — but the local guide brings volcanic context that doesn\'t come up on Google Maps.',
       tags: ['Full day', 'Volcanic crater', 'Viewpoints'],
+      category: 'naturaleza',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/sao-miguel-l1663/sete-cidades-y-lagoa-do-fogo-tour-de-dia-completo-con-almuerzo-t62199/',
     },
     {
@@ -283,6 +286,7 @@ export const guide: FlatGuide = {
       name: 'Furnas: nighttime thermal pools & dinner',
       description: 'The island\'s most unusual experience: a nighttime visit to the Furnas valley with a swim in the illuminated outdoor thermal pools, followed by dinner with an authentic Cozido das Furnas — seven meats and vegetables cooked in the ground\'s fumaroles for 7-8 hours. A 6-hour tour with pickup available from Ponta Delgada. Booking required.',
       tags: ['Thermal pools', 'Nighttime', 'Cozido das Furnas'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/sao-miguel-l1663/experiencia-nocturna-en-furnas-con-bano-termal-y-cena-t120166/',
     },
   ],

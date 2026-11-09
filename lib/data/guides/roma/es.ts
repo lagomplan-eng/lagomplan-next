@@ -233,6 +233,7 @@ export const guide: FlatGuide = {
       name: 'Clase de pasta en Trastevere',
       description: 'Tres horas recorriendo los callejones de Trastevere con paradas en el mercado de San Cosimato (donde los romanos hacen sus compras cada mañana) seguidas de una clase de pasta fresca en la trattoria Rione XIII con vino ilimitado incluido. Aprenderás a hacer fettuccine y ravioli desde cero. Incluye catas de porchetta y gelato artesanal.',
       tags: ['Gastronomía', 'Clase', 'Trastevere'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-trastevere-street-food-tour-t261067/',
     },
     {
@@ -240,6 +241,7 @@ export const guide: FlatGuide = {
       name: 'Tour exclusivo del Coliseo con acceso al sótano de la arena',
       description: 'Acceso a las zonas restringidas del Coliseo: los túneles subterráneos donde los gladiadores y los animales esperaban antes de subir a la arena, y el suelo donde pelearon. Incluye el Foro Romano y el Palatino. Lo más distinto que puedes hacer en el Coliseo respecto a la entrada estándar.',
       tags: ['Historia', 'Coliseo', 'Acceso exclusivo'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-exclusive-colosseum-underground-and-arena-guided-tour-t431012/',
     },
     {
@@ -247,6 +249,7 @@ export const guide: FlatGuide = {
       name: 'Tour gastronómico nocturno en Trastevere con cata de vinos',
       description: "Cuatro horas al atardecer por las calles de Trastevere con un guía local que sabe exactamente qué trattoria tiene la carbonara correcta y en cuál bodega hay que bajar al sótano para encontrar el vino de la zona. Pizza romana, pasta, porchetta, gelato y vino en bodega de 150 años incluidos.",
       tags: ['Gastronomía', 'Vino', 'Nocturno'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-4-hour-twilight-trastevere-food-tour-t252097/',
     },
   ],

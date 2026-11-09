@@ -165,6 +165,7 @@ export const guide: FlatGuide = {
       name: 'Alebrije workshop in Arrazola',
       description: 'More than just viewing them, kids can sit with the artisans to paint their own wooden figure. It\'s the most valuable souvenir.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Ks1TFH0f9j',
     },
     {
@@ -172,6 +173,7 @@ export const guide: FlatGuide = {
       name: 'Hierve el Agua',
       description: 'The "petrified waterfalls" are a natural spectacle. Going early guarantees photos without crowds and comfortable temperatures for swimming in the pools.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/nY3lrv2Fhx',
     },
     {
@@ -179,6 +181,7 @@ export const guide: FlatGuide = {
       name: 'Tlacolula Market (Sunday)',
       description: 'A total cultural immersion. The oldest market in the region — ideal for trying "pan de cazuela" and witnessing live bartering.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A_1997xjG3',
     },
   ],

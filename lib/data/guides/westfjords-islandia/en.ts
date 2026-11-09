@@ -281,6 +281,8 @@ export const guide: FlatGuide = {
       name: 'Dynjandi Waterfall Day Tour from Ísafjörður',
       description: 'Dynjandi, also called Fjallfoss, drops 100 meters total across seven cascading tiers, each with its own name. The base spans 60 meters wide and the top 30 — the inverted-fan shape that makes Dynjandi the Westfjords\' most recognizable image and one of Iceland\'s most photographed. The tour from Ísafjörður includes transport along the Arnarfjörður coastal road and free time on site. For teens: the trail to the top (45 min) is accessible, and the view from above completely changes the perspective.',
       tags: ['Dynjandi', 'Waterfall', 'Full day'],
+      category: 'naturaleza',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/isafjordur-l32303/isafjordur-dynjandi-express-t488601/',
     },
     {
@@ -288,6 +290,7 @@ export const guide: FlatGuide = {
       name: 'Hornstrandir Nature Reserve Boat Tour & Hike',
       description: 'Iceland\'s most remote nature reserve — no roads, no permanent residents since 1952, and reachable only by ferry from Ísafjörður. Arctic foxes that approach within a meter without fear, since they\'ve never been hunted, 534-meter cliffs, and hiking through landscape untouched for decades. For energetic teens: this level of nature immersion with zero tourist infrastructure is unique in Europe. Full-day guided tour.',
       tags: ['Hornstrandir', 'Arctic foxes', 'Ferry'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/isafjordur-l32303/isafjordur-hornstrandir-guided-hike-adalvik-to-hesteyri-t1005278/',
     },
     {
@@ -295,6 +298,8 @@ export const guide: FlatGuide = {
       name: 'Kayaking in the Westfjords Fjords',
       description: 'A 2–3 hour kayak tour from Ísafjörður through the fjords with a local guide. Grey and bearded seals swim around the kayaks in the northern fjords — a constant presence in August. The cold North Atlantic water means a dry suit is required, included in the tour. For teens 12 and up with no prior kayak experience: the fjords are flat and manageable.',
       tags: ['Kayak', 'Seals', 'Half day'],
+      category: 'aventura',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/s/?q=Kayaking%20Isafjordur%20fjords',
     },
   ],

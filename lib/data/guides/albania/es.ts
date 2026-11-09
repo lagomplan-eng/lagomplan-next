@@ -562,6 +562,7 @@ export const guide: FlatGuide = {
       name: 'Day Tour: Gjirokastra + Blue Eye',
       description: 'La combinación más completa del sur de Albania en un solo día: la Ciudad de Piedra de Gjirokastra — los tejados de pizarra y las calles empedradas donde nació el escritor Ismail Kadaré — más el Syri i Kaltër (Blue Eye), un manantial kárstico de 50 metros de profundidad donde el agua sube a 18°C con un azul imposible desde las profundidades. Tour de día completo con guía en inglés, desde Sarandë. Para adolescentes entre 12 y 17 años: Gjirokastra tiene los laberintos y la historia que funcionan como plan de ciudad sin necesidad de convencerlos.',
       tags: ['Ciudad de piedra', 'Manantial kárstico', 'Guía en inglés'],
+      category: 'excursion',
       affiliateUrl: 'https://www.getyourguide.com/sarande-l122815/gjirokastra-la-ciudad-de-piedra-y-ojo-azul-el-monumento-de-la-naturaleza-t634221/',
     },
     {
@@ -569,6 +570,7 @@ export const guide: FlatGuide = {
       name: 'Day Tour: Butrint y las Islas Ksamil',
       description: 'Las ruinas de Butrint — la ciudad greco-romana-bizantina dentro de un parque nacional Patrimonio UNESCO — más las playas de aguas turquesas de las Islas Ksamil en el mismo día. El parque de Butrint tiene teatro romano del siglo II, murallas venecianas y un sendero por el borde del lago con tortugas de agua. Las islas de Ksamil son la respuesta albanesa a las Islas Griegas: misma calidad de agua, sin el precio. Bote privado desde Ksamil disponible a través del mismo operador.',
       tags: ['Ruinas UNESCO', 'Playas turquesas', 'Bote privado'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/ksamil-l120680/ksamil-excursion-en-barco-a-las-5-islas-de-ksamil-y-las-islas-gemelas-t992657/',
     },
     {
@@ -576,6 +578,8 @@ export const guide: FlatGuide = {
       name: 'Cañón de Osumi + Termas de Benja',
       description: 'El cañón más espectacular de Albania — paredes de piedra caliza de 80 metros sobre el río Osumi — con opción de kayak o rafting dependiendo del nivel del agua. Combina con las termas romanas de Benja: piscinas naturales de agua termal en medio del paisaje albano que los adolescentes descubren como "el lugar más cool que nadie conoce." Excursión de día completo desde Sarandë o Berat con guía local.',
       tags: ['Kayak o rafting', 'Termas romanas', 'Día completo'],
+      category: 'bienestar',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/tirana-l2468/desde-tirana-tour-a-la-cascada-de-peshtura-y-a-los-banos-termales-de-benja-t1320735/',
     },
   ],

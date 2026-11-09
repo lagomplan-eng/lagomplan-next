@@ -179,6 +179,7 @@ export const guide: FlatGuide = {
       name: 'Private Pintxos Tour in Parte Vieja',
       description: 'El tour de pintxos más bien valorado de San Sebastián: guía local con selección curada de seis bares de Parte Vieja, maridaje de txakoli y sidra asturiana con cada parada y contexto sobre la cultura de la barra vasca — las reglas no escritas del pintxo, la diferencia entre los bares de pintxos fríos y calientes y por qué se come de pie. Para las tres parejas que quieren la introducción correcta antes de explorar por libre. 3 horas, grupos de máximo 8 personas. Disponible en inglés y español.',
       tags: ['Pintxos', 'Maridaje', 'Grupo reducido'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/san-sebastian-food-tour-pintxo-tasting-wines-t110908/',
     },
     {
@@ -186,6 +187,7 @@ export const guide: FlatGuide = {
       name: 'Txakoli Winery Tour in Getaria',
       description: 'Getaria está a 20 km al oeste de San Sebastián — el pueblo de pescadores donde nació Juan Sebastián Elcano y donde crece el txakoli, el vino blanco con burbuja natural que es el vino del País Vasco por excelencia. El tour incluye visita a una bodega familiar en activo, recorrido por los viñedos sobre el Cantábrico y degustación de cuatro txakolis con pintxos de anchoa local. Medio día, transporte desde San Sebastián incluido.',
       tags: ['Vino', 'Viñedos', 'Getaria'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/discover-the-essence-of-txakoli-wine-from-san-sebastian-t110959/',
     },
     {
@@ -193,6 +195,7 @@ export const guide: FlatGuide = {
       name: 'San Sebastián Market Tour + Cooking Experience',
       description: 'El Mercado de La Bretxa en el centro de Parte Vieja tiene los mejores productos del Cantábrico: anchoa fresca de Bermeo, txipirón de temporada, hongos de Navarra y queso Idiazabal. El tour combina recorrido matutino por el mercado con el cocinero que compra los ingredientes y una clase de cocina vasca de 2 horas (bacalao al pil-pil o merluza en salsa verde). Para el grupo que quiere entender la cocina vasca antes de sentarse a comerla.',
       tags: ['Mercado', 'Clase de cocina', 'Cocina vasca'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/san-sebastian-market-tour-and-basque-cooking-class-english-t980847/',
     },
   ],

@@ -201,6 +201,7 @@ export const guide: FlatGuide = {
       name: 'Río Secreto',
       description: 'With controlled groups and strict schedules, it\'s the best way to experience underground adventure without peak season overwhelm. The "Plus" version includes activities that keep teenagers constantly engaged.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ygCQ8dKAja',
     },
     {
@@ -208,6 +209,7 @@ export const guide: FlatGuide = {
       name: 'Sian Ka\'an via Muyil',
       description: 'Instead of entering through the crowded Tulum hotel zone, enter via Muyil. Floating through the ancient canals in total silence is the perfect antidote to peak season noise.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
     {
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       name: 'Cenote Zapote (cenote route)',
       description: 'While everyone crowds the famous Tulum cenotes, this cenote in Puerto Morelos offers jumping platforms and stunning natural architecture with far fewer people.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

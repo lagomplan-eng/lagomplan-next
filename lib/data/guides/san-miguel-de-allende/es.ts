@@ -159,6 +159,7 @@ export const guide: FlatGuide = {
       name: 'Día de viñedos en Cuna de Tierra',
       description: 'A solo 40 minutos. Es la bodega más premiada de la zona. Una cata con maridaje entre los viñedos es la actividad perfecta para dos o cuatro adultos.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/r/raigal-en-vinedo-cuna-de-tierra-guanajuato?corrid=523da62e-91b2-45e9-a52b-d53476d0d209&avt=eyJ2IjoyLCJtIjowLCJwIjowLCJzIjoxLCJuIjowfQ&p=2&sd=2026-04-14T19%3A00%3A00',
     },
     {
@@ -166,6 +167,7 @@ export const guide: FlatGuide = {
       name: 'Fábrica La Aurora',
       description: 'Un antiguo centro textil convertido en galerías de arte y diseño. Ideal para caminar sin prisa, comprar decoración o simplemente inspirarse.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
     {
@@ -173,6 +175,7 @@ export const guide: FlatGuide = {
       name: 'Mañana de aguas termales',
       description: 'Visita a The Mayan Baths o Escondida Place. Pozas de agua caliente en entornos diseñados para la relajación, ideales para una mañana de "reset".',
       tags: [],
+      category: 'bienestar',
       affiliateUrl: '',
     },
   ],

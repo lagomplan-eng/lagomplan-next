@@ -129,6 +129,7 @@ export const guide: FlatGuide = {
       name: 'Day trip to Isla Mujeres',
       description: 'Take the UltraMar ferry (an affordable and fun plan). Once there, rent a golf cart and spend the day at Playa Norte; the water is so shallow and calm it feels like a giant swimming pool.',
       tags: [],
+      category: 'excursion',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/UGkuXdeIfI',
     },
     {
@@ -136,6 +137,7 @@ export const guide: FlatGuide = {
       name: 'Xcaret Park',
       description: 'An investment, but the most complete park. The evening show is packed with culture — an experience kids will remember their whole lives.',
       tags: ['Book 21 days ahead for 15% off'],
+      category: 'excursion',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
     },
     {
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       name: 'Cenote Azul',
       description: 'An hour and a half from Cancún. An open cenote, ideal for kids who are not comfortable in closed caves. The perfect deal for a day in nature on a small budget.',
       tags: ['~1.5 hrs from Cancún', 'Ideal for kids'],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

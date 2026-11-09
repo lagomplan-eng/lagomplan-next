@@ -287,6 +287,7 @@ export const guide: FlatGuide = {
       name: 'Mountain Gorilla Trekking',
       description: 'The gorilla permit ($1,500 USD) is purchased through the Rwanda Development Board on the Irembo platform or through a registered operator. The briefing starts at 7am at the Kinigi headquarters: gorilla family assignment based on fitness level, behavior instructions (7-meter minimum distance, no flash, no visible food), and departure for the trailhead. The trek lasts between 1 and 4 hours depending on where the family moved overnight. On arrival: one hour with the gorillas. There is no second hour.',
       tags: ['Gorillas', 'RDB permit', 'Trekking'],
+      category: 'naturaleza',
       affiliateUrl: 'https://visitrwandabookings.rdb.rw/rdbportal/mountain-gorilla-tracking',
     },
     {
@@ -294,6 +295,8 @@ export const guide: FlatGuide = {
       name: 'Dian Fossey Hike to Karisoke Research Centre',
       description: 'The 4-hour round-trip trail to Dian Fossey\'s grave and the Karisoke Research Centre on the slopes of Mount Bisoke. The place where the primatologist who inspired Gorillas in the Mist lived and worked for 18 years, and where she\'s buried alongside several of the gorillas she studied. The most reflective excursion available in the park, and the one that gives full context to what you saw the day before.',
       tags: ['Karisoke', 'History', 'Half day'],
+      category: 'naturaleza',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/kigali-l32466/1-journee-de-randonnee-pour-les-gorilles-et-le-centre-de-recherche-de-karisoke-pn-des-volcans-t867231/',
     },
     {
@@ -301,6 +304,8 @@ export const guide: FlatGuide = {
       name: 'Golden Monkey Trekking',
       description: 'The golden monkeys of the Virunga — endemic to the region and with an even more vulnerable population density than the gorillas — live in the bamboo forests on the park\'s lower slopes. The trek lasts 2-3 hours with a guide, and the permit costs $100 USD per person — significantly less than the gorilla permit but with the same level of close encounter. For the day your body asks for something less demanding than four hours of vertical forest.',
       tags: ['Golden monkeys', '$100 USD permit', 'Half day'],
+      category: 'aventura',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/parc-national-des-volcans-l144502/kigali-trekking-au-singe-dore-et-transfert-vers-les-volcans--t850037/',
     },
   ],

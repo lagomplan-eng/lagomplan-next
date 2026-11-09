@@ -129,6 +129,7 @@ export const guide: FlatGuide = {
       name: 'Mystical climb to the Tepozteco',
       description: 'A 1.5-hour hike. The key is timing: start at 8:30 AM to have the summit almost to yourself and perfect light for photos.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: '',
     },
     {
@@ -136,6 +137,7 @@ export const guide: FlatGuide = {
       name: 'Couples temazcal ritual',
       description: 'A traditional purification experience. Many hotels offer it privately, turning it into an intimate and restorative ritual.',
       tags: [],
+      category: 'bienestar',
       affiliateUrl: '',
     },
     {
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       name: 'Terrace dinner at sunset',
       description: 'Contemporary Morelos cuisine tasting with views of the illuminated mountains.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/neighborhood/mx/morelos/tepoztlan-restaurants',
     },
   ],

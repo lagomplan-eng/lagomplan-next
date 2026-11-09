@@ -317,6 +317,8 @@ export const guide: FlatGuide = {
       name: 'Islas Feroe: Full Day Highlights Tour',
       description: 'El recorrido más completo de las islas en un día: el pueblo de Saksun (casas de turba en el fondo de un fiordo cerrado), el lago Sørvágsvatn — el que tiene el efecto óptico de estar sobre el océano — y los acantilados de Trælanípa. Para familias con niños de 5 años en adelante. Tour de 8 horas con guía, almuerzo incluido y recogida desde Tórshavn. El día más fotogénico disponible en las islas.',
       tags: ['Full day', 'Saksun', 'Trælanípa'],
+      category: 'excursion',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
     },
     {
@@ -324,6 +326,7 @@ export const guide: FlatGuide = {
       name: 'Puffin Watching & Mykines Island Day Trip',
       description: 'La isla de Mykines — accesible solo en ferry o helicóptero — tiene la mayor colonia de frailecillos del Atlántico Norte. En julio, los frailecillos aterrizan a distancia de brazo mientras crían en las grietas de los acantilados. Para niños de cualquier edad: el encuentro con un frailecillo es el momento del viaje que más tiempo permanece en la memoria. Ferry desde Sørvágur (1.5 horas) + caminata de 45 minutos hasta el faro.',
       tags: ['Frailecillos', 'Mykines', 'Ferry'],
+      category: 'naturaleza',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
     },
     {
@@ -331,6 +334,8 @@ export const guide: FlatGuide = {
       name: 'Gasadalur Village & Múlafossur Waterfall Tour',
       description: 'Gásadalur es el pueblo más aislado de las Feroe — accesible solo por un túnel que se construyó en 2004, antes lo era por sendero de montaña. La cascada Múlafossur cae directamente al Atlántico desde el borde del acantilado con el pueblo de fondo: la imagen más compartida de las islas. Tour de medio día desde Tórshavn con guía, tiempo libre en el pueblo y acceso al mirador. Para familias con niños pequeños: la caminata es corta y el impacto visual es inmediato.',
       tags: ['Gásadalur', 'Múlafossur', 'Medio día'],
+      category: 'naturaleza',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/en-gb/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
     },
   ],

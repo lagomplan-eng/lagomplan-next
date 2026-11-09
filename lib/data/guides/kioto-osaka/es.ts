@@ -305,6 +305,8 @@ export const guide: FlatGuide = {
       name: 'Ceremonia del Té en Casa de Té con Jardín',
       description: 'La ceremonia del té más recomendada de Kioto: en una casa de té tradicional con jardín privado a pasos del templo Kiyomizu-dera, con vistas al jardín durante los 45 minutos de la ceremonia. El maestro de té explica el wabi-sabi — la filosofía de la imperfección deliberada — mientras prepara el matcha con el ritual de 400 años. La mejor introducción a la cultura japonesa disponible en un solo formato: tranquila, concreta y completamente auténtica.',
       tags: ['Té', 'Kiyomizu-dera', '45 min'],
+      category: 'cultura',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/kyoto-l96826/kyoto-tea-ceremony-in-a-traditional-tea-house-in-kiyomizu-t551173/',
     },
     {
@@ -312,6 +314,8 @@ export const guide: FlatGuide = {
       name: 'Hungry Osaka Street Food Tour: 15 Degustaciones & 3 Bebidas',
       description: 'El tour gastronómico mejor valorado de Osaka durante siete años consecutivos. Shinsekai — el barrio más auténtico y menos turístico de la ciudad — con cinco paradas locales: kushikatsu (pinchos fritos en salsa), takoyaki (bolas de pulpo), karaage, oden y una comida completa en un izakaya de barrio. 15 platos y 3 bebidas incluidos en 3 horas. El guía habla inglés con fluidez y el barrio opera en japonés exclusivamente, que es exactamente el punto.',
       tags: ['Shinsekai', 'Gastronomía', '3 horas'],
+      category: 'comida',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/osaka-l1204/hungry-osaka-street-food-tour-15-tastings-3-drinks-t513983/',
     },
     {
@@ -319,6 +323,7 @@ export const guide: FlatGuide = {
       name: 'Osaka: Tour Gastronómico con 15 Platos y 3 Bebidas',
       description: 'El tour alternativo de Hungry Osaka Tours: la misma empresa con formato diferente, cinco locales distintos en Shinsekai, cocina local auténtica sin adaptaciones para el paladar occidental y el contexto cultural de cada plato explicado por un guía que vive en el barrio. Para la pareja que quiere repetir la experiencia gastronómica de Osaka con un operador diferente o en una fecha en que el tour principal no tiene disponibilidad.',
       tags: ['Shinsekai', 'Alternativa', 'Gastronomía'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/osaka-l1204/osaka-shinsekai-food-tour-t315237/',
     },
   ],

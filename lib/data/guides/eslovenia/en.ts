@@ -452,6 +452,8 @@ export const guide: FlatGuide = {
       name: 'Lake Bled & Vintgar Gorge Half Day Tour',
       description: 'Vintgar Gorge — 1.6 kilometers of wooden boardwalks over a canyon with waterfalls, emerald pools, and limestone walls — is the must-do excursion from Bled that most people get wrong: they arrive at 11am with everyone else. This tour departs at 8am, when the light comes through the walls and the canyon is practically empty. Includes transport from Ljubljana or Bled and trail entry. Total time: 4 hours.',
       tags: ['Vintgar Gorge', 'Waterfalls', '4 hours'],
+      category: 'naturaleza',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/bled-l1336/bled-la-mejor-experiencia-y-degustacion-gastronomica-del-desfiladero-de-vintgar-t704583/',
     },
     {
@@ -459,6 +461,7 @@ export const guide: FlatGuide = {
       name: 'Soča River Rafting — Bovec',
       description: 'The Soča River has the best rafting in the Alps, with glacier-fed water at 8-12°C and an impossible green that opticians say doesn\'t occur in nature. Rafting trips from Bovec last 2-3 hours with a guide, helmet, and wetsuit included. For the solo traveler: the groups are mixed, and the money spent on the rental car pays off in pure experience. Beginner or intermediate level available.',
       tags: ['Rafting', 'Glacier river', 'Mixed groups'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/bovec-l32330/bovec-rafting-de-aventura-en-el-rio-esmeralda-soca-fotos-gratis-t609351/',
     },
     {
@@ -466,6 +469,8 @@ export const guide: FlatGuide = {
       name: 'Ljubljana Bike Tour with Local Guide',
       description: 'The Slovenian capital has a fully pedestrian historic center and a bike-lane network that covers most of its notable neighborhoods. The bike tour with a local guide lasts 3 hours and passes Ljubljana Castle, Plečnik\'s Central Market (the architect who designed nearly the entire city in the 1930s), the Metelkova murals, and the triple bridges. The best possible introduction for your first day in the country. Available in English and Spanish.',
       tags: ['Bike tour', 'Local guide', '3 hours'],
+      category: 'cultura',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/liubliana-l318/liubliana-tour-en-bici-por-el-arte-urbano-y-la-cultura-alternativa-t1158847/',
     },
   ],

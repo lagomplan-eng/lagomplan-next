@@ -189,6 +189,7 @@ export const guide: FlatGuide = {
       name: 'Vuelo en parapente',
       description: 'La actividad insignia de Valle. Volar en tándem sobre el lago al atardecer es una experiencia que los niños (mayores de 6-7 años) y adultos recordarán siempre por la sensación de libertad absoluta.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/SIyPiBZ8-2',
     },
     {
@@ -196,6 +197,7 @@ export const guide: FlatGuide = {
       name: 'Reserva Monte Alto',
       description: 'Un parque estatal perfecto para el senderismo o el ciclismo de montaña. Las rutas están bien marcadas y ofrecen miradores espectaculares para ver el despegue de los parapentes y toda la cuenca del lago.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: '',
     },
     {
@@ -203,6 +205,7 @@ export const guide: FlatGuide = {
       name: 'Mañana de esquí o wakeboard en el lago',
       description: 'Rentar una lancha privada para practicar deportes acuáticos. El lago es el escenario ideal para que los peques aprendan a esquiar en un ambiente controlado antes de disfrutar de un picnic a bordo.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ILOlIwzoK7',
     },
   ],

@@ -251,6 +251,7 @@ export const guide: FlatGuide = {
       name: 'Sunrise Hot Air Balloon Flight over Göreme',
       description: 'The sunrise balloon flight over Göreme\'s fairy chimneys is Turkey\'s most photographed experience and one of the most striking anywhere in the world. Hotel pickup 1 hour before sunrise, a light breakfast at the launch site, a 1-hour flight up to 600 meters over the volcanic landscape, and a champagne toast on landing. Flight certificate included. For the group with exactly one fixed, non-negotiable plan across the six days: this is it.',
       tags: ['Balloon', 'Sunrise', 'Must-do'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/cappadocia-goreme-hot-air-balloon-flight-at-sunrise-t26992/',
     },
     {
@@ -258,6 +259,7 @@ export const guide: FlatGuide = {
       name: 'Royal Queen Hot Air Balloon Tour',
       description: 'The premium version of the balloon flight: a smaller basket, more personalized service, breakfast included, and Eureko Insurance coverage. For the group that wants to do it again, or for those after the version with more room and fewer people sharing the same basket. Run by Royal Balloon, one of Cappadocia\'s most established operators.',
       tags: ['Premium balloon', 'Royal Balloon', 'Sunrise'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/cappadocia-royal-queen-hot-air-balloon-tour-at-sunrise-t13752/',
     },
     {
@@ -265,6 +267,8 @@ export const guide: FlatGuide = {
       name: 'Balloon + Best of Cappadocia Full-Day Tour',
       description: 'A sunrise balloon flight combined with a full-day tour of Cappadocia\'s main sites: the Göreme Open Air Museum (10th-century rock-cut churches with Byzantine frescoes), Uchisar (the region\'s highest castle), the Paşabağ Monks Valley (double-headed fairy chimneys), and a pottery workshop visit in Avanos. The most efficient option for the group with only 6 days that wants the full picture without giving up the balloon.',
       tags: ['Balloon', 'Full-day tour', 'Highlights'],
+      category: 'aventura',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/cappadocia-l1400/hot-air-balloon-and-best-of-cappadocia-city-tour-t377126/',
     },
   ],
