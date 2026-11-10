@@ -209,7 +209,7 @@ export const guide: FlatGuide = {
       description: 'The train climbing from Salta to the La Polvorilla viaduct at 4,200 meters runs irregularly — check availability on the official site before building the itinerary around it. If it runs: one of the most spectacular railway journeys in South America.',
       tags: ['Train', 'Altitude', 'Landscape'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/j4LbWaVi1o',
+      affiliateUrl: 'https://www.getyourguide.com/capital-l1153/salta-movitren-tren-a-las-nubes-con-traslado-en-movitrack-t1184416/',
     },
     {
       id: 'recorrido-por-la-quebrada-de-humahuaca',
@@ -217,7 +217,7 @@ export const guide: FlatGuide = {
       description: 'The 155-kilometer stretch between Jujuy and Humahuaca was declared a UNESCO World Heritage Site in 2003. Purmamarca (the Seven-Color Hill), Tilcara (the Pucará and the crafts market), Humahuaca (the cabildo and the charango players on the square) and the Serranía de Hornocal (the Fourteen-Color Hill, 70 kilometers from Humahuaca) are the four stops that justify the detour north.',
       tags: ['UNESCO', 'Culture', 'Landscape'],
       category: 'cultura',
-      affiliateUrl: 'https://www.getyourguide.com/es-mx/capital-l1153/salta-quebrada-de-humahuaca-t476303/?ranking_uuid=1c537976-cb7c-48b1-9ef4-09a014a70f1f',
+      affiliateUrl: 'https://www.getyourguide.com/capital-l1153/salta-quebrada-de-humahuaca-t476303/',
     },
   ],
 

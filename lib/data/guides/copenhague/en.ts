@@ -232,7 +232,7 @@ export const guide: FlatGuide = {
       description: 'Nørrebro is Copenhagen\'s most multicultural neighborhood and the one with the highest density of quality non-Nordic restaurants: Turkish, Ethiopian, Mexican, Arab. The evening tour covers the Reffen Street Food Market (the city\'s largest open-air market), three food stops, and an introduction to the local bar circuit far from the tourist circuit of Nyhavn. 3 hours, groups of max 8 people. The most interesting night plan of the five days.',
       tags: ['Street food', 'Nightlife', 'Nørrebro'],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/copenhagen-l12/copenhagen-s-a-taste-of-denmark-tasting-tour-t21977/',
+      affiliateUrl: 'https://www.getyourguide.com/copenhagen-l12/copenhagen-s-a-taste-of-denmark-tasting-tour-t21977/',
     },
   ],
 

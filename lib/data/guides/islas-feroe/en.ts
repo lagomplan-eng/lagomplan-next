@@ -322,7 +322,7 @@ export const guide: FlatGuide = {
       tags: ['Full day', 'Saksun', 'Trælanípa'],
       category: 'excursion',
       duration: 'completo',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
+      affiliateUrl: 'https://www.getyourguide.com/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
     },
     {
       id: 'puffin-watching-y-mykines-island-day-trip',
@@ -330,7 +330,7 @@ export const guide: FlatGuide = {
       description: 'The island of Mykines — reachable only by ferry or helicopter — has the largest puffin colony in the North Atlantic. In July, puffins land within arm\'s reach while nesting in the cliff crevices. For kids of any age: the encounter with a puffin is the moment of the trip that stays in memory the longest. Ferry from Sørvágur (1.5 hours) plus a 45-minute walk to the lighthouse.',
       tags: ['Puffins', 'Mykines', 'Ferry'],
       category: 'naturaleza',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
+      affiliateUrl: 'https://www.getyourguide.com/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
     },
     {
       id: 'gasadalur-village-y-mulafossur-waterfall-tour',
@@ -339,7 +339,7 @@ export const guide: FlatGuide = {
       tags: ['Gásadalur', 'Múlafossur', 'Half day'],
       category: 'naturaleza',
       duration: 'medio',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
+      affiliateUrl: 'https://www.getyourguide.com/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
     },
   ],
 

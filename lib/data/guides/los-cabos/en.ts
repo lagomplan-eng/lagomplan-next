@@ -141,7 +141,7 @@ export const guide: FlatGuide = {
       description: 'A catamaran just for your group heading to the Arch. Watching the sunset with a glass of wine from the sea is the peak moment of the entire stay.',
       tags: [],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
+      affiliateUrl: 'https://www.getyourguide.com/los-cabos-l264/cabos-cruise-with-snorkeling-luxury-lunch-and-open-bar-t263547/',
     },
     {
       id: 'cena-en-el-huerto-flora-farms-o-acre',

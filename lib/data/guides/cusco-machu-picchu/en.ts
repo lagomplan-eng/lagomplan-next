@@ -285,7 +285,7 @@ export const guide: FlatGuide = {
       description: 'The Inca Trail is capped at 500 people per day and sells out months in advance. The Salkantay — which crosses the 6,271-meter snowcapped mountain and drops through cloud forest to Aguas Calientes — has the same views, more nature, and no waiting list. Operators like Salkantay Trekking and Peru Treks run the 4-day route with tent, cook and guide for $300–450 USD. For the solo traveler, the organized group trek is the most efficient way to do it and the most likely way to end with travel friends.',
       tags: ['Trekking', 'Adventure', 'Group'],
       category: 'aventura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/eaI_sDFz2h',
+      affiliateUrl: 'https://www.getyourguide.com/cuzco-l359/cusco-caminata-salkantay-a-machu-picchu-y-tren-panoramico-5d-t183392/',
     },
     {
       id: 'cena-en-central-lima-si-el-itinerario-incluye-escala',
@@ -302,7 +302,7 @@ export const guide: FlatGuide = {
       tags: ['Sacred Valley', 'Ruins', 'Full day'],
       category: 'cultura',
       duration: 'completo',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/x0uQNF9TUN',
+      affiliateUrl: 'https://www.getyourguide.com/ollantaytambo-l93095/desde-cuzco-valle-sagrado-y-salinas-de-moray-t317787/',
     },
   ],
 

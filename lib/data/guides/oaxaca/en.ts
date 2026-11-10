@@ -177,7 +177,7 @@ export const guide: FlatGuide = {
       description: 'The "petrified waterfalls" are a natural spectacle. Going early guarantees photos without crowds and comfortable temperatures for swimming in the pools.',
       tags: [],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/nY3lrv2Fhx',
+      affiliateUrl: 'https://www.getyourguide.com/san-jeronimo-tlacochahuaya-l164686/only-hierve-el-agua-tour-t475852/',
     },
     {
       id: 'mercado-de-tlacolula-domingo',
@@ -185,7 +185,7 @@ export const guide: FlatGuide = {
       description: 'A total cultural immersion. The oldest market in the region — ideal for trying "pan de cazuela" and witnessing live bartering.',
       tags: [],
       category: 'comida',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A_1997xjG3',
+      affiliateUrl: 'https://www.getyourguide.com/tlacolula-de-matamoros-l164684/vamos-a-comer-al-mercado-de-tlacolula-en-domingo-y-a-tomar-mezcal-t990319/',
     },
   ],
 

@@ -141,7 +141,7 @@ export const guide: FlatGuide = {
       description: 'An investment, but the most complete park. The evening show is packed with culture — an experience kids will remember their whole lives.',
       tags: ['Book 21 days ahead for 15% off'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
+      affiliateUrl: 'https://www.getyourguide.com/cancun-l150/from-cancun-xcaret-park-full-package-t980056/',
     },
     {
       id: 'cenote-azul',

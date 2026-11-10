@@ -151,7 +151,7 @@ export const guide: FlatGuide = {
       description: 'Escapada a solo 45 minutos hacia Tequisquiapan o Ezequiel Montes. Visita a Freixenet o De Cote para una cata con vista a la Peña de Bernal.',
       tags: [],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/?ranking_uuid=9eab0807-6e3c-4a0f-b173-2fb752f7e2ca&adults=1',
+      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/',
     },
     {
       id: 'bar-hopping-de-terrazas',

@@ -190,7 +190,7 @@ export const guide: FlatGuide = {
       description: 'Guatemala produces some of the best beans in the world. A sensory tasting at a historic estate like La Azotea lets you understand the connection between volcanic soil and the perfect cup.',
       tags: ['Coffee', 'Tasting', 'Estate'],
       category: 'comida',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/grDEZhey3a',
+      affiliateUrl: 'https://www.getyourguide.com/antigua-guatemala-l1619/tour-del-cafe-en-antigua-guatemala-t906996/',
     },
     {
       id: 'navegacion-privada-en-atitlan',
@@ -198,7 +198,7 @@ export const guide: FlatGuide = {
       description: 'Avoid the public boats. Rent a private launch to visit San Juan La Laguna (the village of art and textiles) and Santa Catarina. Seeing the three volcanoes (Atitlán, Tolimán and San Pedro) from the middle of the lake in silence is a spiritual experience.',
       tags: ['Lake', 'Volcanoes', 'Private'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Vj80TjtAwX',
+      affiliateUrl: 'https://www.getyourguide.com/guatemala-l1654/tour-en-barco-por-el-lago-de-atitlan-t33886/',
     },
     {
       id: 'vuelo-en-helicoptero',

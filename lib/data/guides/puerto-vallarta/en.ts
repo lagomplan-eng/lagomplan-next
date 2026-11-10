@@ -163,7 +163,7 @@ export const guide: FlatGuide = {
       description: 'Skip the mass tourist boats. Rent a luxury panga or small yacht to reach the southern coves. The water is clearer, the setting is jungle-clad, and privacy is the real luxury of the day.',
       tags: [],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/pFK0IfOG3p',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-vallarta-l265/from-puerto-vallarta-luxury-yacht-snorkeling-tour-t295260/',
     },
     {
       id: 'atardecer-en-the-iguana',

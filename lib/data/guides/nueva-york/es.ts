@@ -162,7 +162,7 @@ export const guide: FlatGuide = {
       tags: ["Tour de comida", "3 horas", "Grupo pequeño", "Cancelación gratis"],
       category: 'comida',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-trendy-greenwich-village-food-tour-with-6-tastings-t105856/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/new-york-city-l59/nyc-trendy-greenwich-village-food-tour-with-6-tastings-t105856/',
     },
     {
       id: 'chelsea-market-meatpacking-y-high-line-food-tour',
@@ -171,7 +171,7 @@ export const guide: FlatGuide = {
       tags: ["Tour de comida", "3 horas", "Máximo 10 personas", "Almuerzo incluido"],
       category: 'comida',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-chelsea-market-meatpacking-high-line-food-tour-t210972/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/new-york-city-l59/nyc-chelsea-market-meatpacking-high-line-food-tour-t210972/',
     },
     {
       id: 'brunch-almuerzo-o-cena-a-bordo-del-bateaux-new-york',
@@ -180,7 +180,7 @@ export const guide: FlatGuide = {
       tags: ["Crucero", "2 a 3 horas", "Comida incluida", "Código de vestimenta en la cena"],
       category: 'comida',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-city-cruises-luxury-brunch-lunch-or-dinner-cruise-t279782/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/new-york-city-l59/nyc-city-cruises-luxury-brunch-lunch-or-dinner-cruise-t279782/',
     },
   ],
   experiencesDescription: "Tres experiencias de GetYourGuide para comer la ciudad por barrios. Calificación y precio por persona de GetYourGuide al 23 de octubre de 2026, en dólares.",

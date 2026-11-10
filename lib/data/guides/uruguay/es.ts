@@ -237,7 +237,7 @@ export const guide: FlatGuide = {
       description: 'Si el viaje arranca desde Argentina, el Buquebus de 1 hora es el mejor primer recuerdo de Uruguay para niños. El río marrón del Plata, la cubierta al aire libre y la llegada al muelle de Colonia funcionan como umbral de entrada al país.',
       tags: ['Ferry', 'Familia', 'Cruce'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
+      affiliateUrl: 'https://www.getyourguide.com/ciudad-de-buenos-aires-l1/desde-buenos-aires-excursion-de-1-dia-en-ferri-a-colonia-del-sacramento-t1176553/',
     },
     {
       id: 'estancia-de-un-dia-en-el-campo-uruguayo',

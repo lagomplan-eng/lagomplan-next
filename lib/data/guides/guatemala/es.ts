@@ -189,7 +189,7 @@ export const guide: FlatGuide = {
       description: 'Guatemala produce algunos de los mejores granos del mundo. Realizar una cata sensorial en una finca histórica como La Azotea permite entender la relación entre el suelo volcánico y la taza perfecta.',
       tags: ['Café', 'Cata', 'Finca'],
       category: 'comida',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/grDEZhey3a',
+      affiliateUrl: 'https://www.getyourguide.com/antigua-guatemala-l1619/tour-del-cafe-en-antigua-guatemala-t906996/',
     },
     {
       id: 'navegacion-privada-en-atitlan',
@@ -197,7 +197,7 @@ export const guide: FlatGuide = {
       description: 'Evita las lanchas públicas. Renta un bote privado para visitar San Juan La Laguna (el pueblo del arte y textiles) y Santa Catarina. Ver los tres volcanes (Atitlán, Tolimán y San Pedro) desde el centro del lago en silencio es una experiencia espiritual.',
       tags: ['Lago', 'Volcanes', 'Privado'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Vj80TjtAwX',
+      affiliateUrl: 'https://www.getyourguide.com/guatemala-l1654/tour-en-barco-por-el-lago-de-atitlan-t33886/',
     },
     {
       id: 'vuelo-en-helicoptero',

@@ -205,7 +205,7 @@ export const guide: FlatGuide = {
       description: 'With controlled groups and strict schedules, it\'s the best way to experience underground adventure without peak season overwhelm. The "Plus" version includes activities that keep teenagers constantly engaged.',
       tags: [],
       category: 'aventura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ygCQ8dKAja',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-morelos-l112372/riviera-maya-rio-secreto-tour-transporte-incluido-t3149/',
     },
     {
       id: 'sian-kaan-por-muyil',

@@ -163,7 +163,7 @@ export const guide: FlatGuide = {
       description: 'Evita los barcos turísticos masivos. Renta una panga de lujo o un yate pequeño para ir a las calas del sur. El agua es más clara, el entorno es selvático y la privacidad es el verdadero lujo de la jornada.',
       tags: [],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/pFK0IfOG3p',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-vallarta-l265/from-puerto-vallarta-luxury-yacht-snorkeling-tour-t295260/',
     },
     {
       id: 'atardecer-en-the-iguana',

@@ -225,7 +225,7 @@ export const guide: FlatGuide = {
       description: 'El campo geotérmico más alto del mundo (4,320 metros) a 90 kilómetros de San Pedro. El tour sale a las 4am para llegar al amanecer, cuando los géiseres alcanzan su máxima actividad con el contraste de temperatura. Para niños de 4 años en adelante: el espectáculo de vapor, agua hirviendo y sol naciendo sobre los volcanes no requiere explicación. Todos los tours incluyen desayuno caliente en el sitio. Tour organizado por agencia: $20–30 USD por persona.',
       tags: ['Géiseres', 'Amanecer', 'Familia'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/klCBsc0o2Q',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/tour-geysers-del-tatio-t1052726/',
     },
     {
       id: 'valle-de-la-luna-al-atardecer',
@@ -233,7 +233,7 @@ export const guide: FlatGuide = {
       description: 'A 15 kilómetros de San Pedro, el valle de formaciones de sal y arcilla que la NASA usa como análogo marciano para entrenar astronautas. El recorrido en bicicleta — alquiler disponible en el pueblo por $8–12 USD/día — o en tour grupal tiene dunas de sal para trepar y el atardecer más fotogénico del desierto. Para niños de cualquier edad: las dunas funcionan como tobogán natural.',
       tags: ['Atardecer', 'Bicicleta', 'Dunas'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/zMkLv3dwE-',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/san-pedro-de-atacama-valle-de-la-luna-t347041/',
     },
     {
       id: 'lagunas-altiplanicas-y-flamencos',
@@ -241,7 +241,7 @@ export const guide: FlatGuide = {
       description: 'Las lagunas Miscanti y Miñiques, a 4,200 metros, tienen colonias de flamencos rosados que se alimentan de algas rojas en el agua salada. Tour de día completo: $25–35 USD por persona. Para niños que ya saben qué es un flamenco y los ven en zoológico: verlos en libertad a veinte metros es una experiencia de otra categoría.',
       tags: ['Lagunas', 'Flamencos', 'Altiplano'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/_NIFOG54ed',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/excursion-de-un-dia-al-salar-de-atacama-lagunas-altiplanicas-y-toconao-t190865/',
     },
   ],
 

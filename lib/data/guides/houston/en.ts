@@ -204,7 +204,7 @@ export const guide: FlatGuide = {
       tags: ["Science", "8 hours", "Small group", "Tram to Mission Control"],
       category: 'excursion',
       duration: 'completo',
-      affiliateUrl: "https://www.getyourguide.com/houston-l719/houston-driving-tour-nasa-space-center-tickettransport-t600673/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/houston-l719/houston-driving-tour-nasa-space-center-tickettransport-t600673/',
     },
     {
       id: 'downtown-aquarium-pase-de-todo-el-dia',
@@ -213,7 +213,7 @@ export const guide: FlatGuide = {
       tags: ["Aquarium", "Half day", "Unlimited rides", "Flexible entry"],
       category: 'naturaleza',
       duration: 'medio',
-      affiliateUrl: "https://www.getyourguide.com/houston-l719/houston-downtown-aquarium-all-day-pass-t431145/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/houston-l719/houston-downtown-aquarium-all-day-pass-t431145/',
     },
     {
       id: 'escape-room-de-una-hora-en-la-galleria',

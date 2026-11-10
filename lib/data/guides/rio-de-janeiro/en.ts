@@ -201,7 +201,7 @@ export const guide: FlatGuide = {
       description: 'The only way up to Christ the Redeemer that delivers on the promise. The Corcovado train leaves from Cosme Velho station (15 minutes by taxi from Leblon) and climbs 3.8 kilometers of Atlantic rainforest in 20 minutes. Arrival at the top — with Christ rising over the city at 710 meters — is the moment teenagers will use as their profile picture for at least two years. Book online weeks in advance.',
       tags: ['Iconic', 'Teenagers', 'Views'],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/URtSQgjsmC',
+      affiliateUrl: 'https://www.getyourguide.com/rio-de-janeiro-l9/rio-de-janeiro-entrada-al-cristo-redentor-en-el-tren-del-corcovado-t975564/',
     },
     {
       id: 'museu-do-amanha-y-area-portuaria',

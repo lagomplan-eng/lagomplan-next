@@ -192,7 +192,7 @@ export const guide: FlatGuide = {
       tags: ["Isla", "Día completo", "Recogida en hotel", "Lancha y catamarán"],
       category: 'excursion',
       duration: 'completo',
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/',
     },
     {
       id: 'hoyo-azul-y-scape-park-en-cap-cana',
@@ -201,7 +201,7 @@ export const guide: FlatGuide = {
       tags: ["Naturaleza", "Día completo", "Transporte incluido", "Para todas las edades"],
       category: 'naturaleza',
       duration: 'completo',
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/',
     },
     {
       id: 'bavaro-adventure-park-con-acceso-total-y-comida',
@@ -210,7 +210,7 @@ export const guide: FlatGuide = {
       tags: ["Aventura", "6 horas", "Comida incluida", "Guía en español"],
       category: 'aventura',
       duration: 'medio',
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/',
     },
   ],
   experiencesDescription: "Tres excursiones de día completo de GetYourGuide con recogida en el hotel. Calificación y precio por persona de GetYourGuide al 23 de octubre de 2026, en dólares.",

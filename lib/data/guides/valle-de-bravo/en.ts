@@ -209,7 +209,7 @@ export const guide: FlatGuide = {
       description: 'Rent a private boat for water sports. The lake is the ideal setting for kids to learn to ski in a controlled environment, finishing with a picnic on board.',
       tags: [],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ILOlIwzoK7',
+      affiliateUrl: 'https://www.getyourguide.com/valle-de-bravo-l95795/valle-de-bravo-esqui-t455011/',
     },
   ],
 

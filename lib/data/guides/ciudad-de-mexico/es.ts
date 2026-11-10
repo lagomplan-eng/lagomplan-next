@@ -127,7 +127,7 @@ export const guide: FlatGuide = {
       description: 'Es indispensable reservar con meses de antelación. Es una lección de luz, color y silencio; la experiencia arquitectónica más íntima que puedes tener en pareja.',
       tags: ['Reserva con meses de anticipación'],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
+      affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-casa-ortega-by-luis-barragan-architectural-tour-t998831/',
     },
     {
       id: 'ruta-de-galerias-en-la-san-rafael',

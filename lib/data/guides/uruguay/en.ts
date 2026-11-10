@@ -237,7 +237,7 @@ export const guide: FlatGuide = {
       description: 'If the trip starts in Argentina, the 1-hour Buquebus is the best first memory of Uruguay for kids. The muddy Río de la Plata, the open-air deck and arrival at the Colonia pier work as a threshold into the country.',
       tags: ['Ferry', 'Family', 'Crossing'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
+      affiliateUrl: 'https://www.getyourguide.com/ciudad-de-buenos-aires-l1/desde-buenos-aires-excursion-de-1-dia-en-ferri-a-colonia-del-sacramento-t1176553/',
     },
     {
       id: 'estancia-de-un-dia-en-el-campo-uruguayo',

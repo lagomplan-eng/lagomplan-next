@@ -183,7 +183,7 @@ export const guide: FlatGuide = {
       description: 'San Sebastián\'s best-rated pintxos tour: a local guide with a curated selection of six bars in Parte Vieja, txakoli and Asturian cider pairings at every stop, and context on the culture of the Basque bar — the unwritten rules of pintxos, the difference between cold and hot pintxos bars, and why you eat standing up. For the three couples who want the right introduction before exploring on their own. 3 hours, groups of up to 8 people. Available in English and Spanish.',
       tags: ['Pintxos', 'Pairing', 'Small group'],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/san-sebastian-food-tour-pintxo-tasting-wines-t110908/',
+      affiliateUrl: 'https://www.getyourguide.com/san-sebastian-l94/san-sebastian-food-tour-pintxo-tasting-wines-t110908/',
     },
     {
       id: 'txakoli-winery-tour-in-getaria',
@@ -191,7 +191,7 @@ export const guide: FlatGuide = {
       description: 'Getaria is 20 km west of San Sebastián — the fishing village where Juan Sebastián Elcano was born and where txakoli grows, the naturally sparkling white wine that is the Basque Country\'s signature wine. The tour includes a visit to a working family winery, a walk through the vineyards above the Cantabrian Sea, and a tasting of four txakolis with local anchovy pintxos. Half-day, transport from San Sebastián included.',
       tags: ['Wine', 'Vineyards', 'Getaria'],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/discover-the-essence-of-txakoli-wine-from-san-sebastian-t110959/',
+      affiliateUrl: 'https://www.getyourguide.com/san-sebastian-l94/discover-the-essence-of-txakoli-wine-from-san-sebastian-t110959/',
     },
     {
       id: 'san-sebastian-market-tour-cooking-experience',
@@ -199,7 +199,7 @@ export const guide: FlatGuide = {
       description: 'The Mercado de La Bretxa in the heart of Parte Vieja has the best products from the Cantabrian coast: fresh anchovy from Bermeo, seasonal txipirón, mushrooms from Navarra, and Idiazabal cheese. The tour combines a morning walk through the market with the chef who buys the ingredients and a 2-hour Basque cooking class (bacalao al pil-pil or hake in green sauce). For the group that wants to understand Basque cuisine before sitting down to eat it.',
       tags: ['Market', 'Cooking class', 'Basque cuisine'],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/san-sebastian-l94/san-sebastian-market-tour-and-basque-cooking-class-english-t980847/',
+      affiliateUrl: 'https://www.getyourguide.com/san-sebastian-l94/san-sebastian-market-tour-and-basque-cooking-class-english-t980847/',
     },
   ],
 

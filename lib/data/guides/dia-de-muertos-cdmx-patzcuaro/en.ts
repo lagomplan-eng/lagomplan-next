@@ -233,7 +233,7 @@ export const guide: FlatGuide = {
       tags: ["Workshop", "Families", "45 minutes", "South Mexico City"],
       category: 'cultura',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/mexico-city-l194/mexico-city-day-of-the-dead-house-and-craft-workshop-t819667/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-day-of-the-dead-house-and-craft-workshop-t819667/',
     },
     {
       id: 'patzcuaro-de-dia-piramides-panteones-y-espiritus',
@@ -242,7 +242,7 @@ export const guide: FlatGuide = {
       tags: ["Archaeology", "Small group", "Full day", "English-speaking guide"],
       category: 'cultura',
       duration: 'completo',
-      affiliateUrl: "https://www.getyourguide.com/ihuatzio-mexico-l279061/patzcuaro-day-of-the-dead-pyramids-cemeteries-spirits-t1505915/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/ihuatzio-mexico-l279061/patzcuaro-day-of-the-dead-pyramids-cemeteries-spirits-t1505915/',
     },
     {
       id: 'noche-de-muertos-en-michoacan-tour-nocturno-desde-morelia',
@@ -251,7 +251,7 @@ export const guide: FlatGuide = {
       tags: ["Night tour", "No driving", "10 hours", "Free cancellation"],
       category: 'cultura',
       duration: 'completo',
-      affiliateUrl: "https://www.getyourguide.com/patzcuaro-l152029/day-of-the-dead-in-michoacan-patzcuaro-and-purepecha-cemeteries-t1075127/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/patzcuaro-l152029/day-of-the-dead-in-michoacan-patzcuaro-and-purepecha-cemeteries-t1075127/',
     },
   ],
   experiencesDescription: "Three experiences booked on GetYourGuide. Rating and price per person taken from GetYourGuide on October 22, 2026, in dollars. Two are new activities and do not have reviews yet.",

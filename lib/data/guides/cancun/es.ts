@@ -141,7 +141,7 @@ export const guide: FlatGuide = {
       description: 'Es una inversión, pero es el parque más completo. El show nocturno está lleno de cultura: una experiencia que los niños recordarán toda la vida.',
       tags: ['Reservar 21 días antes para 15% de descuento'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Q74zZ8LQfv',
+      affiliateUrl: 'https://www.getyourguide.com/cancun-l150/from-cancun-xcaret-park-full-package-t980056/',
     },
     {
       id: 'cenote-azul',

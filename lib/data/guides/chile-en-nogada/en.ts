@@ -214,7 +214,7 @@ export const guide: FlatGuide = {
       tags: ['Markets', 'Tastings', '5 hours'],
       category: 'comida',
       duration: 'medio',
-      affiliateUrl: 'https://www.getyourguide.com/es-mx/estado-libre-y-soberano-de-puebla-l1470/tour-culinario-extraordinario-por-puebla-t34817/',
+      affiliateUrl: 'https://www.getyourguide.com/estado-libre-y-soberano-de-puebla-l1470/tour-culinario-extraordinario-por-puebla-t34817/',
     },
     {
       id: 'experiencia-culinaria-puebla-clase-de-cocina',

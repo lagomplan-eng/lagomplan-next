@@ -232,7 +232,7 @@ export const guide: FlatGuide = {
       description: 'Nørrebro es el barrio más multicultural de Copenhague y el que tiene la mayor densidad de restaurantes no-nórdicos de calidad: turco, etíope, mexicano, árabe. El tour de tarde-noche cubre el Reffen Street Food Market (el mercado al aire libre más grande de la ciudad), tres paradas de comida y una introducción al circuito de bares locales lejos del circuito turístico de Nyhavn. 3 horas, grupos de máximo 8 personas. El plan de la noche más interesante de los cinco días.',
       tags: ['Street food', 'Nightlife', 'Nørrebro'],
       category: 'comida',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/copenhagen-l12/copenhagen-s-a-taste-of-denmark-tasting-tour-t21977/',
+      affiliateUrl: 'https://www.getyourguide.com/copenhagen-l12/copenhagen-s-a-taste-of-denmark-tasting-tour-t21977/',
     },
   ],
 

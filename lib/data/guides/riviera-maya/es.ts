@@ -205,7 +205,7 @@ export const guide: FlatGuide = {
       description: 'Al ser una reserva con grupos controlados y horarios estrictos, es la mejor forma de vivir la aventura subterránea sin sentir el peso de la temporada alta. La versión "Plus" incluye actividades que mantienen a los jóvenes en constante movimiento.',
       tags: [],
       category: 'aventura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ygCQ8dKAja',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-morelos-l112372/riviera-maya-rio-secreto-tour-transporte-incluido-t3149/',
     },
     {
       id: 'sian-kaan-por-muyil',

@@ -177,7 +177,7 @@ export const guide: FlatGuide = {
       description: 'Explore the Uxmal archaeological zone (less crowded than Chichén Itzá) and cross the street to the chocolate museum. Kids can see rescued animals and learn how the Mayans made cacao.',
       tags: [],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/MfDnM-RL5D',
+      affiliateUrl: 'https://www.getyourguide.com/uxmal-l114187/from-meridauxmal-and-amazing-cenotes-guided-tour-with-lunch-t970984/',
     },
     {
       id: 'reserva-de-el-corchito',

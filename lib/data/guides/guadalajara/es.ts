@@ -127,7 +127,7 @@ export const guide: FlatGuide = {
       description: 'Eviten el tren turístico masivo. Renten un conductor privado hacia la zona de Tequila para visitar destilerías boutique como Cascahuín o Fortaleza. Es aventura líquida para conocedores.',
       tags: [],
       category: 'comida',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/mcSDi9xF38',
+      affiliateUrl: 'https://www.getyourguide.com/guadalajara-l677/guadalajara-premium-tequila-tour-with-tastings-and-pairings-t714925/',
     },
     {
       id: 'safari-de-tortas-ahogadas',

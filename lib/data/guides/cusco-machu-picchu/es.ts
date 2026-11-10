@@ -285,7 +285,7 @@ export const guide: FlatGuide = {
       description: 'El Camino Inca está limitado a 500 personas por día y se agota con meses de anticipación. El Salkantay — que cruza la montaña nevada de 6,271 metros y desciende por la selva hasta Aguas Calientes — tiene las mismas vistas, más naturaleza y menos cola. Operadores como Salkantay Trekking y Peru Treks ofrecen el recorrido de 4 días con carpa, cocinero y guía por $300–450 USD. Para el viajero solo, el trekking en grupo organizado es la forma más eficiente de hacerlo y la más probable de terminar con amigos de viaje.',
       tags: ['Trekking', 'Aventura', 'Grupo'],
       category: 'aventura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/eaI_sDFz2h',
+      affiliateUrl: 'https://www.getyourguide.com/cuzco-l359/cusco-caminata-salkantay-a-machu-picchu-y-tren-panoramico-5d-t183392/',
     },
     {
       id: 'cena-en-central-lima-si-el-itinerario-incluye-escala',
@@ -302,7 +302,7 @@ export const guide: FlatGuide = {
       tags: ['Valle Sagrado', 'Ruinas', 'Día completo'],
       category: 'cultura',
       duration: 'completo',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/x0uQNF9TUN',
+      affiliateUrl: 'https://www.getyourguide.com/ollantaytambo-l93095/desde-cuzco-valle-sagrado-y-salinas-de-moray-t317787/',
     },
   ],
 

@@ -219,7 +219,7 @@ export const guide: FlatGuide = {
       description: 'Es la fortificación más grande construida por los españoles en América. Para niños de 6-8 años, recorrer sus túneles y rampas con una historia de piratas es la aventura definitiva.',
       tags: ['Historia', 'Familia', 'Aventura'],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/VSUxS_YUGc',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/cartagena-citytourmonumentos-castillo-casco-antiguo-todo-incluido-t610530/',
     },
     {
       id: 'islas-del-rosario-lancha-privada',
@@ -227,7 +227,7 @@ export const guide: FlatGuide = {
       description: 'Eviten los tours masivos de "playa blanca". Lo más Lagom es rentar un bote privado pequeño para ir a Isla Grande. Snorkel en aguas cristalinas y un almuerzo de pescado fresco en un club de playa privado.',
       tags: ['Islas', 'Snorkel', 'Privado'],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/sDiNuW-An8',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/dia-completo-islas-del-rosario-oceanario-snorkel-t931275/',
     },
     {
       id: 'aviario-nacional-de-colombia',
@@ -235,7 +235,7 @@ export const guide: FlatGuide = {
       description: 'Ubicado en Barú. Es uno de los más impresionantes del mundo. Los niños pueden ver flamencos, cóndores y tucanes en hábitats casi libres. Es una inmersión educativa y visualmente potente.',
       tags: ['Naturaleza', 'Aves', 'Familia'],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/HoNk7mwnx4',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/cartagena-entrada-al-aviario-con-traslado-incluido-t651322/',
     },
   ],
 

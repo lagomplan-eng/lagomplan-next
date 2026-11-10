@@ -141,7 +141,7 @@ export const guide: FlatGuide = {
       description: 'Un catamarán solo para ustedes hacia el Arco. Ver el atardecer con una copa de vino desde el mar es el momento cumbre de la desconexión.',
       tags: [],
       category: 'excursion',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
+      affiliateUrl: 'https://www.getyourguide.com/los-cabos-l264/cabos-cruise-with-snorkeling-luxury-lunch-and-open-bar-t263547/',
     },
     {
       id: 'cena-en-el-huerto-flora-farms-o-acre',

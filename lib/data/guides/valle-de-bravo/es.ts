@@ -209,7 +209,7 @@ export const guide: FlatGuide = {
       description: 'Rentar una lancha privada para practicar deportes acuáticos. El lago es el escenario ideal para que los peques aprendan a esquiar en un ambiente controlado antes de disfrutar de un picnic a bordo.',
       tags: [],
       category: 'naturaleza',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/ILOlIwzoK7',
+      affiliateUrl: 'https://www.getyourguide.com/valle-de-bravo-l95795/valle-de-bravo-esqui-t455011/',
     },
   ],
 

@@ -174,7 +174,7 @@ export const guide: FlatGuide = {
       tags: ["Nature", "4 hours", "Hotel pickup", "Lunch included"],
       category: 'naturaleza',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-turtle-release-tour-t819389/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-turtle-release-tour-t819389/',
     },
     {
       id: 'tirolesas-en-ixtapa-zihuatanejo',
@@ -183,7 +183,7 @@ export const guide: FlatGuide = {
       tags: ["Adventure", "2.5 hours", "Small group", "Transportation included"],
       category: 'aventura',
       duration: 'corto',
-      affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-excursion-en-tirolesa-t657047/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-excursion-en-tirolesa-t657047/',
     },
     {
       id: 'tour-por-el-campo-y-barra-de-potosi',
@@ -192,7 +192,7 @@ export const guide: FlatGuide = {
       tags: ["Local culture", "5 hours", "Air-conditioned transportation", "Lunch included"],
       category: 'excursion',
       duration: 'medio',
-      affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/zihuatanejo-ixtapa-countryside-tour-t658438/?ref=lagomplan",
+      affiliateUrl: 'https://www.getyourguide.com/zihuatanejo-l392/zihuatanejo-ixtapa-countryside-tour-t658438/',
     },
   ],
   experiencesDescription: "Three GetYourGuide outings with hotel pickup. Rating and per-person price from GetYourGuide as of October 23, 2026, in US dollars. These are small local operators with few reviews so far.",

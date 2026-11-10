@@ -322,7 +322,7 @@ export const guide: FlatGuide = {
       tags: ['Full day', 'Saksun', 'Trælanípa'],
       category: 'excursion',
       duration: 'completo',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
+      affiliateUrl: 'https://www.getyourguide.com/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
     },
     {
       id: 'puffin-watching-y-mykines-island-day-trip',
@@ -330,7 +330,7 @@ export const guide: FlatGuide = {
       description: 'La isla de Mykines — accesible solo en ferry o helicóptero — tiene la mayor colonia de frailecillos del Atlántico Norte. En julio, los frailecillos aterrizan a distancia de brazo mientras crían en las grietas de los acantilados. Para niños de cualquier edad: el encuentro con un frailecillo es el momento del viaje que más tiempo permanece en la memoria. Ferry desde Sørvágur (1.5 horas) + caminata de 45 minutos hasta el faro.',
       tags: ['Frailecillos', 'Mykines', 'Ferry'],
       category: 'naturaleza',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
+      affiliateUrl: 'https://www.getyourguide.com/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
     },
     {
       id: 'gasadalur-village-y-mulafossur-waterfall-tour',
@@ -339,7 +339,7 @@ export const guide: FlatGuide = {
       tags: ['Gásadalur', 'Múlafossur', 'Medio día'],
       category: 'naturaleza',
       duration: 'medio',
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
+      affiliateUrl: 'https://www.getyourguide.com/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
     },
   ],
 

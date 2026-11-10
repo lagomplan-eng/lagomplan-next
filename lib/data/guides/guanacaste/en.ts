@@ -159,7 +159,7 @@ export const guide: FlatGuide = {
       description: 'Tamarindo\'s wave is long, gentle, and perfect for beginners. The town\'s surf schools (Witch\'s Rock Surf Camp, Tamarindo Surf School) offer two-hour lessons for $60–80 USD with a private instructor. For the group that has never surfed — or has been meaning to try for years — this is the Saturday morning plan.',
       tags: ['Surf', 'Beginners', 'Beach'],
       category: 'aventura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/gGkZgcCnzP',
+      affiliateUrl: 'https://www.getyourguide.com/tamarindo-l995/tamarindo-surf-tours-clases-de-surf-para-todos-los-niveles-t561020/',
     },
     {
       id: 'tour-en-kayak-por-el-estero-el-salado',

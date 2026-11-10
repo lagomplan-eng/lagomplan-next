@@ -163,7 +163,7 @@ export const guide: FlatGuide = {
       description: 'Visit Cenote Dos Ojos or Gran Cenote at 8:00 AM. Being alone in the crystal-clear water before tour groups arrive is the definition of absolute peace.',
       tags: [],
       category: 'naturaleza',
-      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/?ranking_uuid=0a7034f0-a336-4254-ae29-a13110c59460&adults=1',
+      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/',
     },
     {
       id: 'beach-club-day-en-papaya-playa-project',

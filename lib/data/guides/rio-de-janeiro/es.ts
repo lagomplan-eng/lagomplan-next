@@ -201,7 +201,7 @@ export const guide: FlatGuide = {
       description: 'La única forma de subir al Cristo Redentor que mantiene la promesa. El tren del Corcovado sale desde la estación de Cosme Velho (15 minutos en taxi desde Leblon) y sube 3.8 kilómetros de selva atlántica en 20 minutos. La llegada a la cima — con el Cristo emergiendo sobre la ciudad a 710 metros — es el momento que los adolescentes van a usar de foto de perfil durante al menos dos años. Reserva online con semanas de anticipación.',
       tags: ['Icónico', 'Adolescentes', 'Vistas'],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/URtSQgjsmC',
+      affiliateUrl: 'https://www.getyourguide.com/rio-de-janeiro-l9/rio-de-janeiro-entrada-al-cristo-redentor-en-el-tren-del-corcovado-t975564/',
     },
     {
       id: 'museu-do-amanha-y-area-portuaria',

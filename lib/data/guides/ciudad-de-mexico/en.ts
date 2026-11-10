@@ -127,7 +127,7 @@ export const guide: FlatGuide = {
       description: 'Essential to book months in advance. A lesson in light, color, and silence — the most intimate architectural experience you can have as a couple.',
       tags: ['Book months in advance'],
       category: 'cultura',
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
+      affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-casa-ortega-by-luis-barragan-architectural-tour-t998831/',
     },
     {
       id: 'ruta-de-galerias-en-la-san-rafael',
