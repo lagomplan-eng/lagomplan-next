@@ -16,6 +16,22 @@ npm run dev        # http://localhost:3000
 Env lives in `.env.local` (Supabase, Stripe, Mailchimp, …). On Vercel, set vars for
 **Production AND every Preview** — see `CLAUDE.md` for the env-scope gotchas.
 
+## Local database (Supabase)
+
+```bash
+npm install        # installs the pinned Supabase CLI (devDependency, 3.1.0)
+npm run db:start   # = supabase start: local Postgres + API from supabase/config.toml and migrations
+```
+
+**You do not need a global Supabase CLI for this repo.** `npm run db:start` (and
+`npx supabase <command>`) use the version pinned in `package.json`, the same one the `e2e`
+workflow runs, so local and CI always agree. Docker must be running. Other commands go through
+npx, e.g. `npx supabase stop`, `npx supabase status`.
+
+A global CLI older than 2.122 cannot read this repo's `supabase/config.toml` (it uses
+`[local_smtp]`, which 3.x requires and older CLIs reject), so prefer the local one. Bump the
+version in `package.json` and in `.github/workflows/e2e.yml` together.
+
 ## Test
 
 ```bash
