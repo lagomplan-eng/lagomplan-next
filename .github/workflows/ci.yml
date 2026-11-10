@@ -47,6 +47,11 @@ jobs:
           done
           exit $fail
 
+      # The jest specs under __tests__/ (jsdom component tests, e.g. ExperiencesSection / guides).
+      # tests/*.ts above are standalone tsx scripts and are never run by jest (see jest.config.js).
+      - name: Unit tests (jest)
+        run: npx jest --ci
+
       - name: Production build
         run: npm run build
 
