@@ -22,7 +22,8 @@ env:
 
 jobs:
   e2e:
-    runs-on: ubuntu-latest
+    # Pinned: ubuntu-latest moved to 26.04, which Playwright 1.60 does not support.
+    runs-on: ubuntu-24.04
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
@@ -37,7 +38,8 @@ jobs:
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
-          version: latest
+          # Pinned: `latest` became 3.x and dropped [inbucket] without notice. Bump deliberately.
+          version: 3.1.0
 
       # `supabase start` pulls several images from ghcr.io/supabase/*.
       # Anonymous pulls share a low, easily-exhausted rate limit and
