@@ -175,13 +175,13 @@ function durationFromTags(tags: string[]): { value: Duration | ''; note: string 
 
 type Persona = 'familia' | 'pareja' | 'amigos'
 const PERSONA_ES: Record<string, Persona> = {
-  'Familia': 'familia', 'Niños pequeños': 'familia', 'Familia con adolescentes': 'familia', 'Adolescentes': 'familia',
+  'Familia': 'familia', 'Familia multigeneracional': 'familia', 'Niños pequeños': 'familia', 'Familia con adolescentes': 'familia', 'Adolescentes': 'familia',
   'Pareja': 'pareja', 'Parejas': 'pareja', 'Romance': 'pareja',
   'Amigos': 'amigos', 'Amigas': 'amigos', 'Grupo de amigos': 'amigos',
 }
 // Only used to FLAG disagreement; the EN guide inherits the ES set regardless.
 const PERSONA_EN: Record<string, Persona> = {
-  'Family': 'familia', 'Young kids': 'familia', 'Small kids': 'familia', 'Family with teenagers': 'familia', 'Teenagers': 'familia', 'Teens': 'familia',
+  'Family': 'familia', 'Multigenerational family': 'familia', 'Young kids': 'familia', 'Small kids': 'familia', 'Family with teenagers': 'familia', 'Teenagers': 'familia', 'Teens': 'familia',
   'Couple': 'pareja', 'Couples': 'pareja', 'Romance': 'pareja',
   'Friends': 'amigos', 'Group of friends': 'amigos',
 }

@@ -45,7 +45,7 @@ const es = getPlanCatalog('es')
 const en = getPlanCatalog('en')
 const exps = es.filter(e => e.type === 'experience')
 const hotels = es.filter(e => e.type === 'hotel')
-eq([exps.length, hotels.length], [53, 171], 'catalog: 53 experiences + 171 hotels')
+eq([exps.length, hotels.length], [67, 186], 'catalog: 67 experiences + 186 hotels')
 eq(new Set(es.map(e => `${e.type}:${e.id}`)).size, es.length, 'catalog keys are unique')
 const byDest = (list: PlanEntry[]) => { const m = new Map<string, PlanEntry[]>(); for (const e of list) m.set(e.destinationSlug, [...(m.get(e.destinationSlug) ?? []), e]); return Array.from(m.values()) }
 const A = byDest(exps).find(d => d.length >= 2)!

@@ -21,6 +21,10 @@ import ExperiencesHub          from '../../../components/experiences/Experiences
 
 type Props = { params: Promise<{ locale: Locale }> }
 
+// A guide with a hubWindow (e.g. Día de Muertos) enters and leaves the hub on its own: re-render hourly
+// so the window is evaluated against today's date, not the build date (same cadence as the guide pages).
+export const revalidate = 3600
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: 'experiences.meta' })

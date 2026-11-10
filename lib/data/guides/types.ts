@@ -195,10 +195,22 @@ export interface FlatExperience {
 export type GuideRegion =
   | 'mexico' | 'latam' | 'norteamerica' | 'europa' | 'asia' | 'africa' | 'oceania'
 
+/**
+ * Recurring annual window in which a guide's experiences appear on the Experiencias hub.
+ * "MM-DD" strings, both ends inclusive, evaluated in Mexico City time (lib/experiences/window.ts).
+ * from > until wraps the year end (e.g. 11-15 .. 01-10). No window = always on the hub.
+ */
+export interface HubWindow {
+  from: string
+  until: string
+}
+
 export interface GuideMeta {
   region: GuideRegion
   /** Short label for filters and cards, e.g. "Alto Adigio" / "South Tyrol". */
   shortName: { es: string; en: string }
+  /** Optional. Absent = on the hub all year. */
+  hubWindow?: HubWindow
 }
 
 export interface FlatTransport {

@@ -123,6 +123,7 @@ export const guide: FlatGuide = {
   itineraryDescription: "Three nights in Manhattan, based in SoHo, Tribeca or NoMad. Two food tours, a brunch cruise and three dinners to book right now.",
   hotels: [
     {
+      id: 'crosby-street-hotel',
       name: "Crosby Street Hotel",
       type: "Boutique hotel · SoHo",
       priceTier: "$$$$",
@@ -132,6 +133,7 @@ export const guide: FlatGuide = {
       archetypes: ["Parejas"],
     },
     {
+      id: 'the-greenwich-hotel',
       name: "The Greenwich Hotel",
       type: "Boutique hotel · Tribeca",
       priceTier: "$$$$",
@@ -141,6 +143,7 @@ export const guide: FlatGuide = {
       archetypes: ["Parejas"],
     },
     {
+      id: 'the-ned-nomad',
       name: "The Ned NoMad",
       type: "Hotel · NoMad",
       priceTier: "$$$",
@@ -153,21 +156,30 @@ export const guide: FlatGuide = {
   hotelsDescription: "Three hotels in neighborhoods made for eating on foot. Booking.com ratings; average nightly prices from comparison sites in 2026, in dollars. Confirm the rate for your dates at the link.",
   experiences: [
     {
+      id: 'greenwich-village-food-tour-con-6-degustaciones',
       name: "Greenwich Village Food Tour with 6 tastings",
       description: "GetYourGuide: 4.9/5 (116 reviews) · From US$101 per person. Three hours through Manhattan's bohemian neighborhood with a local guide: bagel with cream cheese, New York pizza, cupcakes, gourmet donuts and a secret dish revealed on the day. Groups of up to 12 people, free cancellation up to 24 hours before. Run by Secret Food Tours, in English.",
       tags: ["Food tour", "3 hours", "Small group", "Free cancellation"],
+      category: 'comida',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-trendy-greenwich-village-food-tour-with-6-tastings-t105856/?ref=lagomplan",
     },
     {
+      id: 'chelsea-market-meatpacking-y-high-line-food-tour',
       name: "Chelsea Market, Meatpacking and High Line Food Tour",
       description: "GetYourGuide: 4.7/5 (140 reviews) · From US$88 per person. A three-hour route with a maximum of 10 people: an hour of tastings at Chelsea Market, another at Market 57 facing the Hudson and the last walking the High Line with the story of its architecture. Includes a full lunch. Meeting point in front of Buddakan, 75 Ninth Avenue.",
       tags: ["Food tour", "3 hours", "Max 10 people", "Lunch included"],
+      category: 'comida',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-chelsea-market-meatpacking-high-line-food-tour-t210972/?ref=lagomplan",
     },
     {
+      id: 'brunch-almuerzo-o-cena-a-bordo-del-bateaux-new-york',
       name: "Brunch, Lunch or Dinner Cruise aboard the Bateaux New York",
       description: "GetYourGuide: 4.5/5 (1,055 reviews) · From US$115 per person. A City Cruises sailing on a glass-enclosed boat that leaves from Chelsea Piers and cruises the Hudson and East Rivers facing the skyline, with a private table, a three-course menu and live music. Brunch includes unlimited mimosas; dinner calls for smart-casual attire and costs more than the entry price. For a couple, it's the way to see the Statue of Liberty without the lines.",
       tags: ["Cruise", "2 to 3 hours", "Meal included", "Dress code at dinner"],
+      category: 'comida',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/new-york-city-l59/nyc-city-cruises-luxury-brunch-lunch-or-dinner-cruise-t279782/?ref=lagomplan",
     },
   ],

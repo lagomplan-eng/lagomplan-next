@@ -130,7 +130,7 @@ describe('ExperiencesSection links', () => {
     render(<ExperiencesSection data={experiencesData('https://www.getyourguide.com/s/?q=Torres%20del%20Paine')} locale="es" guideKey="torres-del-paine" />)
     const href = screen.getByRole('link', { name: 'Reservar →' }).getAttribute('href')!
     expect(href).not.toContain('partner_id')
-    expect(href).toBe('https://www.getyourguide.com/s/?q=Torres%20del%20Paine&ref=lagomplan')
+    expect(href).toBe('https://www.getyourguide.com/s/?q=Torres+del+Paine&ref=lagomplan')
   })
 
   it('empty bookingUrl → no link and no button (no Stay22 fallback)', () => {

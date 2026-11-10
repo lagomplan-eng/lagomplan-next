@@ -194,6 +194,7 @@ export const guide: FlatGuide = {
   ],
   hotels: [
     {
+      id: 'hampton-inn-suites-mexico-city-centro-historico',
       name: "Hampton Inn & Suites Mexico City Centro Histórico",
       type: "Hotel · Centro Histórico, CDMX · noches del 30 y 31 de octubre",
       priceTier: "$$",
@@ -203,6 +204,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'hotel-mansion-iturbe',
       name: "Hotel Mansión Iturbe",
       type: "Hotel boutique · Centro de Pátzcuaro · noches del 1 y 2 de noviembre",
       priceTier: "$$",
@@ -212,6 +214,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'holiday-inn-express-morelia-centro-historico',
       name: "Holiday Inn Express Morelia Centro Histórico",
       type: "Hotel · Centro Histórico de Morelia · Plan B para el 1 y 2 de noviembre",
       priceTier: "$$",
@@ -224,21 +227,30 @@ export const guide: FlatGuide = {
   hotelsDescription: "Tres bases: el Centro Histórico para caminar al desfile, la plaza de Pátzcuaro para tener el tianguis en la puerta y Morelia como Plan B. La calificación es la de Booking.com. El precio promedio por noche es el que publican los comparadores en 2026, en dólares; para el 30 de octubre al 2 de noviembre espera tarifas más altas y confirma la de tus fechas en el link.",
   experiences: [
     {
+      id: 'casa-ofrenda-y-taller-artesanal-de-dia-de-muertos-cdmx',
       name: "Casa-ofrenda y taller artesanal de Día de Muertos, CDMX",
       description: "Visita guiada a una casa con una ofrenda tradicional que funciona también como taller de artesanos: ahí se pintan a mano botellas y caballitos con motivos de calaveras que se exportan a más de 20 países. El guía explica el origen de la celebración y la visita incluye pan de muerto. Dura 45 minutos y la casa está a 10 minutos de los embarcaderos de Xochimilco. Para niños es un primer contacto con la tradición a su escala: corto, con artistas trabajando y algo rico al final. Desde US$12 por persona.",
       tags: ["Taller", "Familias", "45 minutos", "Sur de la CDMX"],
+      category: 'cultura',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/mexico-city-l194/mexico-city-day-of-the-dead-house-and-craft-workshop-t819667/?ref=lagomplan",
     },
     {
+      id: 'patzcuaro-de-dia-piramides-panteones-y-espiritus',
       name: "Pátzcuaro de día: pirámides, panteones y espíritus",
       description: "Tour de día completo en grupo pequeño alrededor del lago, con guía en inglés. Empieza en las pirámides de Ihuatzio, la primera capital purépecha, sigue a Tzintzuntzan, con sus yácatas y el convento franciscano del siglo XVI, y explica la Noche de Muertos con respeto por cada fecha. El 1 de noviembre se ve a las familias terminar sus altares; el 2, los panteones siguen decorados. No incluye la velación nocturna. Sirve a quien prefiere no manejar entre comunidades o quiere el contexto histórico antes de la noche. Desde US$147 por persona.",
       tags: ["Arqueología", "Grupo pequeño", "Día completo", "Guía en inglés"],
+      category: 'cultura',
+      duration: 'completo',
       affiliateUrl: "https://www.getyourguide.com/ihuatzio-mexico-l279061/patzcuaro-day-of-the-dead-pyramids-cemeteries-spirits-t1505915/?ref=lagomplan",
     },
     {
+      id: 'noche-de-muertos-en-michoacan-tour-nocturno-desde-morelia',
       name: "Noche de Muertos en Michoacán: tour nocturno desde Morelia",
       description: "Para quien duerme en Morelia (Plan B) o no quiere manejar de noche. Sale el 1 de noviembre del Jardín de las Rosas, en el centro de Morelia, y recorre los panteones de Tzurumútaro, la feria de Ihuatzio con música, tamales, corundas y atole, la isla de Pacanda en lancha con chalecos salvavidas y el panteón de Cucuchucho. Dura 10 horas, con guía en español e inglés, transporte redondo y seguro de viajero; no incluye comida. Cancelación gratis hasta 24 horas antes. No se permiten carriolas: funciona mejor con niños grandes y adolescentes. Desde US$136 por persona.",
       tags: ["Tour nocturno", "Sin manejar", "10 horas", "Cancelación gratis"],
+      category: 'cultura',
+      duration: 'completo',
       affiliateUrl: "https://www.getyourguide.com/patzcuaro-l152029/day-of-the-dead-in-michoacan-patzcuaro-and-purepecha-cemeteries-t1075127/?ref=lagomplan",
     },
   ],

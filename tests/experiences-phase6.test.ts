@@ -18,7 +18,7 @@ function eq(a: unknown, b: unknown, msg: string) {
 const ok = (c: boolean, msg: string) => eq(c, true, msg)
 
 ;(async () => {
-  const es = getExperiences('es'), en = getExperiences('en')
+  const es = getExperiences('es', { ignoreWindow: true }), en = getExperiences('en', { ignoreWindow: true })
 
   // ── JSON-LD ───────────────────────────────────────────────────────────────
   for (const [loc, list] of [['es', es], ['en', en]] as const) {

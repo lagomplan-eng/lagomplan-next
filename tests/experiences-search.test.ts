@@ -22,8 +22,8 @@ Object.assign(regionNames, {
 })
 
 for (const loc of ['es', 'en'] as const) {
-  const dests = getDestinations(loc)
-  const exps = getExperiences(loc)
+  const dests = getDestinations(loc, { ignoreWindow: true })
+  const exps = getExperiences(loc, { ignoreWindow: true })
   const regions = new Set(exps.map(e => e.region))
 
   // every guide is a destination, with the right bookable count
@@ -48,8 +48,8 @@ for (const loc of ['es', 'en'] as const) {
   ok(!searchHub('europe', dests, regionNames, new Set<GuideRegion>(['mexico'])).some(h => h.kind === 'region'), `${loc}: region without experiences isn't offered`)
 }
 
-const es = getDestinations('es')
-const regionsEs = new Set(getExperiences('es').map(e => e.region))
+const es = getDestinations('es', { ignoreWindow: true })
+const regionsEs = new Set(getExperiences('es', { ignoreWindow: true }).map(e => e.region))
 eq(searchHub('', es, regionNames, regionsEs), [], 'empty query → nothing')
 eq(searchHub('   ', es, regionNames, regionsEs), [], 'blank query → nothing')
 eq(searchHub('zzzz', es, regionNames, regionsEs), [], 'no match → nothing')

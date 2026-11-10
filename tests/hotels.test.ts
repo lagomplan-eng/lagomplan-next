@@ -26,8 +26,8 @@ const es = getAllHotels('es')
 const en = getAllHotels('en')
 
 // ── ids ──────────────────────────────────────────────────────────────────────
-eq([es.length, en.length], [171, 171], '171 hotels in both locales')
-eq(new Set(es.map(h => h.id)).size, 171, 'ids are unique across all 171')
+eq([es.length, en.length], [186, 186], '186 hotels in both locales')
+eq(new Set(es.map(h => h.id)).size, 186, 'ids are unique across all 186')
 eq(es.map(h => h.id), en.map(h => h.id), 'same ids, same order in ES and EN')
 ok(es.every(h => /^[a-z0-9]+(-[a-z0-9]+)*$/.test(h.id)), 'ids are slugs')
 ok(es.every(h => h.id === slugifyHotelName(h.name)), 'id = slug of the Spanish name')
@@ -48,8 +48,8 @@ for (const l of ['es', 'en'] as const) {
   for (const [, c] of getAllCityGuides(l)) (c.stays ?? []).forEach(s => normalizeTravelers(s.archetypes).unmapped.forEach(u => unmapped.add(u)))
 }
 eq([...unmapped], [], 'every label in the data maps to a key')
-eq(tally(es.flatMap(h => h.travelers)), { ninos: 50, parejas: 100, bienestar: 23, aventura: 11, eco: 2, solo: 9, negocios: 1 }, 'ES: hotels per key')
-eq(tally(en.flatMap(h => h.travelers)), { ninos: 48, parejas: 100, bienestar: 28, aventura: 12, eco: 2, solo: 8, negocios: 1 }, 'EN: hotels per key')
+eq(tally(es.flatMap(h => h.travelers)), { ninos: 62, parejas: 103, bienestar: 23, aventura: 11, eco: 2, solo: 9, negocios: 1 }, 'ES: hotels per key')
+eq(tally(en.flatMap(h => h.travelers)), { ninos: 60, parejas: 103, bienestar: 28, aventura: 12, eco: 2, solo: 8, negocios: 1 }, 'EN: hotels per key')
 
 // ── booking provider ─────────────────────────────────────────────────────────
 const P = hotelProviderFromUrl
@@ -64,8 +64,8 @@ eq(P('https://wandercabins.mx/?x=1'), 'hotel-site', 'a hotel site (tld mx) → h
 eq(P('https://getyourguide.stay22.com/x'), 'other', 'a Stay22 product we do not recognise → other')
 eq(P('https://www.expedia.com/x'), 'other', 'a direct OTA we do not label → other (not "the hotel site")')
 eq([P(undefined), P(''), P('not a url')], ['other', 'other', 'other'], 'missing / broken → other')
-eq(tally(es.map(h => h.provider)), { booking: 158, other: 1, expedia: 6, hotelscom: 3, 'hotel-site': 2, kayak: 1 }, 'ES: hotels per provider')
-eq(tally(en.map(h => h.provider)), { booking: 153, other: 6, expedia: 6, hotelscom: 3, 'hotel-site': 2, kayak: 1 }, 'EN: hotels per provider')
+eq(tally(es.map(h => h.provider)), { booking: 173, other: 1, expedia: 6, hotelscom: 3, 'hotel-site': 2, kayak: 1 }, 'ES: hotels per provider')
+eq(tally(en.map(h => h.provider)), { booking: 168, other: 6, expedia: 6, hotelscom: 3, 'hotel-site': 2, kayak: 1 }, 'EN: hotels per provider')
 eq(en.filter(h => !h.bookingUrl).map(h => h.id), ['casa-pancha', 'hostal-nube-mia', 'rusk-house', 'hilton-kansas-city', 'hotel-indigo-kansas-city'], 'EN: the five stays without a booking link')
 ok(es.every(h => !!h.bookingUrl), 'ES: every hotel has a booking link')
 
@@ -74,7 +74,7 @@ for (const loc of ['es', 'en'] as const) {
   const dests = getHotelDestinations(loc)
   eq(new Set(dests.map(d => d.key)).size, dests.length, `${loc}: destination keys unique`)
   ok(Object.keys(GUIDE_META).every(k => dests.some(d => d.key === k)), `${loc}: every guide is a search destination`)
-  eq(dests.reduce((n, d) => n + d.hotels, 0), 171, `${loc}: hotels per destination add up`)
+  eq(dests.reduce((n, d) => n + d.hotels, 0), 186, `${loc}: hotels per destination add up`)
 }
 ok(es.some(h => h.source === 'worldcup' && h.destinationKey === 'ciudad-de-mexico'), 'World Cup CDMX stays share the guide destination key')
 ok(es.some(h => h.destinationKey.startsWith('wc-')), 'cities without a guide keep a wc- key')

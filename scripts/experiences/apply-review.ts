@@ -6,6 +6,8 @@
  *   review.csv        → `id`, `category`, `duration` on every experience in
  *                       lib/data/guides/<guide>/{es,en}.ts (same values in both)
  *   guides-review.csv → the GUIDE_META block in lib/data/guides/index.ts
+ *                       (region, short names, and the optional hub_window_from / hub_window_until
+ *                       columns, MM-DD, which become GuideMeta.hubWindow)
  *
  * Line-based on purpose: every guide file has the same shape
  * (`  experiences: [` / 4-space `{` objects / 6-space props), and the script
@@ -27,6 +29,7 @@ const CHECK = process.argv.includes('--check')
 const CATEGORIES = ['comida', 'cultura', 'naturaleza', 'aventura', 'excursion', 'bienestar']
 const DURATIONS = ['corto', 'medio', 'completo']
 const REGIONS = ['mexico', 'latam', 'norteamerica', 'europa', 'asia', 'africa', 'oceania']
+const MMDD = /^(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/
 
 // ── CSV (RFC 4180: quoted cells, "" escapes, newlines inside quotes) ────────────
 
@@ -157,7 +160,11 @@ const metaLines = [
 for (const g of guides) {
   if (!REGIONS.includes(g.proposed_region)) throw new Error(`${g.guide}: bad region ${JSON.stringify(g.proposed_region)}`)
   if (!g.proposed_shortName_es || !g.proposed_shortName_en) throw new Error(`${g.guide}: missing shortName`)
-  metaLines.push(`  ${q(g.guide)}: { region: ${q(g.proposed_region)}, shortName: { es: ${q(g.proposed_shortName_es)}, en: ${q(g.proposed_shortName_en)} } },`)
+  const from = (g.hub_window_from ?? '').trim(), until = (g.hub_window_until ?? '').trim()
+  if (Boolean(from) !== Boolean(until)) throw new Error(`${g.guide}: hub_window_from and hub_window_until must both be set or both be empty`)
+  if (from && !(MMDD.test(from) && MMDD.test(until))) throw new Error(`${g.guide}: hub window must be MM-DD, got ${JSON.stringify(from)}..${JSON.stringify(until)}`)
+  const win = from ? `, hubWindow: { from: ${q(from)}, until: ${q(until)} }` : ''
+  metaLines.push(`  ${q(g.guide)}: { region: ${q(g.proposed_region)}, shortName: { es: ${q(g.proposed_shortName_es)}, en: ${q(g.proposed_shortName_en)} }${win} },`)
 }
 metaLines.push('}', END)
 const metaBlock = metaLines.join('\n')

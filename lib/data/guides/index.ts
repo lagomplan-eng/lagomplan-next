@@ -223,6 +223,11 @@ export const GUIDE_META: Record<string, GuideMeta> = {
   'udaipur': { region: 'asia', shortName: { es: 'Udaipur', en: 'Udaipur' } },
   'mauricio': { region: 'africa', shortName: { es: 'Mauricio', en: 'Mauritius' } },
   'hong-kong': { region: 'asia', shortName: { es: 'Hong Kong', en: 'Hong Kong' } },
+  'dia-de-muertos-cdmx-patzcuaro': { region: 'mexico', shortName: { es: 'Día de Muertos', en: 'Day of the Dead' }, hubWindow: { from: '09-15', until: '11-02' } },
+  'houston': { region: 'norteamerica', shortName: { es: 'Houston', en: 'Houston' } },
+  'ixtapa-zihuatanejo': { region: 'mexico', shortName: { es: 'Ixtapa-Zihuatanejo', en: 'Ixtapa-Zihuatanejo' } },
+  'nueva-york': { region: 'norteamerica', shortName: { es: 'Nueva York', en: 'New York' } },
+  'punta-cana': { region: 'latam', shortName: { es: 'Punta Cana', en: 'Punta Cana' } },
 }
 // <guide-meta:end>
 

@@ -30,8 +30,9 @@ function expectEq<T>(name: string, got: T, expected: T) {
 
 // ── data layer ──────────────────────────────────────────────────────────────────
 
-const es = getExperiences('es')
-const en = getExperiences('en')
+// The membership rule is tested independent of the calendar; the hubWindow has its own file (experiences-window.test.ts).
+const es = getExperiences('es', { ignoreWindow: true })
+const en = getExperiences('en', { ignoreWindow: true })
 
 // Independent count straight from the registry: experiences whose affiliateUrl is a GYG tour page.
 const bookableInRegistry = getAllFlatGuides('es').flatMap(g => g.flat.experiences).filter(e => isGygTourUrl(e.affiliateUrl))
@@ -77,6 +78,9 @@ expectEq('alto-adigio: shortName es', es.find(e => e.destinationSlug === 'alto-a
 expectEq('personas: Familia + Niños pequeños → familia once', personasFromEsTags(['Familia', 'Niños pequeños']), ['familia'])
 expectEq('personas: Parejas/Romance → pareja', personasFromEsTags(['Romance', 'Parejas']), ['pareja'])
 expectEq('personas: Amigas / Grupo de amigos → amigos', personasFromEsTags(['Amigas', 'Grupo de amigos']), ['amigos'])
+expectEq('personas: Familia multigeneracional → familia', personasFromEsTags(['Familia multigeneracional', 'Playa']), ['familia'])
+expectEq('personas: Familia + Familia multigeneracional → familia once', personasFromEsTags(['Familia', 'Familia multigeneracional']), ['familia'])
+expectEq('Punta Cana (Familia multigeneracional) experiences are tagged familia', es.filter(e => e.destinationSlug === 'punta-cana').map(e => e.personas), [['familia'], ['familia'], ['familia']])
 expectEq('personas: Solo, Lujo and topics are ignored', personasFromEsTags(['Solo', 'Lujo', 'Gastronomía', 'Viajero solo']), [])
 expectEq('personas: mixed keeps first-seen order', personasFromEsTags(['Amigos', 'Pareja', 'Familia']), ['amigos', 'pareja', 'familia'])
 

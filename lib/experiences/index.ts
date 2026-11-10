@@ -6,6 +6,8 @@
  *
  *   getExperiences('es')  → every experience whose affiliateUrl is a GYG tour page,
  *                            in editorial order (registry order, then position in guide).
+ *                            A guide with GuideMeta.hubWindow only appears inside its yearly window
+ *                            (Mexico City time); `ignoreWindow` lifts that for the saved-plan catalog.
  *
  * Bookable rule: isGygTourUrl(affiliateUrl). Search / location / supplier pages,
  * Stay22 redirectors, OpenTable, venue sites and empty links are not on the hub.
@@ -13,6 +15,7 @@
 
 import { getAllFlatGuides, getPublicGuideSlug, GUIDE_META } from '../data/guides'
 import { buildGygBookingUrl, isGygTourUrl } from '../affiliate/gyg'
+import { isInHubWindow, mexicoMonthDay, type HubOptions } from './window'
 import type { Destination, Experience, Persona } from './types'
 
 export type { Destination, Experience, Persona } from './types'
@@ -23,7 +26,7 @@ export type { Destination, Experience, Persona } from './types'
  * tags imply the same set today). Every other tag (Solo, Lujo, topics…) is ignored.
  */
 const PERSONA_BY_ES_TAG: Record<string, Persona> = {
-  'Familia': 'familia', 'Niños pequeños': 'familia', 'Familia con adolescentes': 'familia', 'Adolescentes': 'familia',
+  'Familia': 'familia', 'Familia multigeneracional': 'familia', 'Niños pequeños': 'familia', 'Familia con adolescentes': 'familia', 'Adolescentes': 'familia',
   'Pareja': 'pareja', 'Parejas': 'pareja', 'Romance': 'pareja',
   'Amigos': 'amigos', 'Amigas': 'amigos', 'Grupo de amigos': 'amigos',
 }
@@ -37,8 +40,9 @@ export function personasFromEsTags(tags: string[]): Persona[] {
   return out
 }
 
-export function getExperiences(locale: string): Experience[] {
+export function getExperiences(locale: string, opts: HubOptions = {}): Experience[] {
   const loc = locale === 'en' ? 'en' : 'es'
+  const monthDay = mexicoMonthDay(opts.now)
   const esByKey = new Map(getAllFlatGuides('es').map(g => [g.canonical, g.flat]))
   const out: Experience[] = []
   let order = 0
@@ -47,7 +51,8 @@ export function getExperiences(locale: string): Experience[] {
     const meta = GUIDE_META[canonical]
     const personas = personasFromEsTags((esByKey.get(canonical) ?? flat).hero.tags)
     flat.experiences.forEach(e => {
-      const position = order++ // editorial position counts every experience, bookable or not
+      const position = order++ // editorial position counts every experience, bookable or not, in or out of window
+      if (!opts.ignoreWindow && !isInHubWindow(meta.hubWindow, monthDay)) return
       if (!isGygTourUrl(e.affiliateUrl)) return
       out.push({
         id: e.id,
@@ -72,9 +77,10 @@ export function getExperiences(locale: string): Experience[] {
 }
 
 /** Every guide in registry order, with how many of its experiences are bookable on the hub. */
-export function getDestinations(locale: string): Destination[] {
+export function getDestinations(locale: string, opts: HubOptions = {}): Destination[] {
   const loc = locale === 'en' ? 'en' : 'es'
-  return getAllFlatGuides(loc).map(({ canonical, flat }) => {
+  const monthDay = mexicoMonthDay(opts.now)
+  return getAllFlatGuides(loc).filter(({ canonical }) => opts.ignoreWindow || isInHubWindow(GUIDE_META[canonical].hubWindow, monthDay)).map(({ canonical, flat }) => {
     const meta = GUIDE_META[canonical]
     return {
       slug: canonical,

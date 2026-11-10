@@ -135,6 +135,7 @@ export const guide: FlatGuide = {
   itineraryDescription: "Cuatro noches en Ixtapa, frente a Playa El Palmar. Tres salidas cortas con recogida en el hotel y tardes de alberca para la siesta.",
   hotels: [
     {
+      id: 'holiday-inn-resort-ixtapa-all-inclusive',
       name: "Holiday Inn Resort Ixtapa All-Inclusive",
       type: "Todo incluido · Playa El Palmar",
       priceTier: "$$",
@@ -144,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'barcelo-ixtapa-all-inclusive',
       name: "Barceló Ixtapa All Inclusive",
       type: "Todo incluido · Playa El Palmar",
       priceTier: "$$",
@@ -153,6 +155,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'emporio-ixtapa',
       name: "Emporio Ixtapa",
       type: "Hotel con todo incluido opcional · Playa El Palmar",
       priceTier: "$",
@@ -165,21 +168,30 @@ export const guide: FlatGuide = {
   hotelsDescription: "Tres hoteles frente a Playa El Palmar, a pocos metros entre sí. Calificación de Booking.com; precio de referencia por noche para dos adultos tomado de comparadores en 2026, en dólares. Con niños el total cambia según edades: confírmalo en el link.",
   experiences: [
     {
+      id: 'liberacion-de-tortugas-en-ixtapa-zihuatanejo',
       name: "Liberación de tortugas en Ixtapa-Zihuatanejo",
       description: "GetYourGuide: 5.0/5 (4 reseñas) · Desde US$71 por persona. Cuatro horas en un campamento tortuguero a 40 minutos de Ixtapa. Los guías explican cómo se protege a la tortuga golfina, el proceso de los nidos, y los niños ayudan a liberar crías. Incluye transporte, refrigerio, bebida y comida. El guía habla inglés y francés; pregunta por español al reservar.",
       tags: ["Naturaleza", "4 horas", "Recogida en hotel", "Comida incluida"],
+      category: 'naturaleza',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-turtle-release-tour-t819389/?ref=lagomplan",
     },
     {
+      id: 'tirolesas-en-ixtapa-zihuatanejo',
       name: "Tirolesas en Ixtapa-Zihuatanejo",
       description: "GetYourGuide: 4.5/5 (3 reseñas) · Desde US$68 por persona. Dos horas y media en un parque ecológico en la selva, con tirolesas, escaleras, puentes colgantes y obstáculos móviles. Incluye arnés, guías bilingües y transporte desde las zonas hoteleras de Ixtapa y Zihuatanejo. Pide zapato cerrado. Confirma la edad y estatura mínimas antes de reservar para los más chicos.",
       tags: ["Aventura", "2.5 horas", "Grupo pequeño", "Transporte incluido"],
+      category: 'aventura',
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/ixtapa-zihuatanejo-excursion-en-tirolesa-t657047/?ref=lagomplan",
     },
     {
+      id: 'tour-por-el-campo-y-barra-de-potosi',
       name: "Tour por el campo y Barra de Potosí",
       description: "GetYourGuide: 5.0/5 (1 reseña) · Desde US$103 por persona. Cinco horas con guía en español o inglés para conocer cómo se vive y se trabaja fuera de la zona hotelera: una huerta de cocos con degustación, un taller familiar de ladrillos y tejas, y comida de mariscos frente a la playa en el pueblo pesquero de Barra de Potosí. El paseo en lancha por la laguna es opcional y se paga aparte. También se puede tomar sin comida.",
       tags: ["Cultura local", "5 horas", "Transporte con aire acondicionado", "Comida incluida"],
+      category: 'excursion',
+      duration: 'medio',
       affiliateUrl: "https://www.getyourguide.com/zihuatanejo-l392/zihuatanejo-ixtapa-countryside-tour-t658438/?ref=lagomplan",
     },
   ],
