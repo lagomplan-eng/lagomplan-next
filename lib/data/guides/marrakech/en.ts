@@ -305,6 +305,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'maipa-boutique-riad',
       name: 'Maïpa Boutique Riad',
       type: 'Boutique riad · Medina',
       priceTier: '$$$',
@@ -314,6 +315,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-mint-luxury-oasis-in-the-medina',
       name: 'Riad Mint — Luxury Oasis in the Medina',
       type: 'Luxury riad · Mouassine, Medina',
       priceTier: '$$$',
@@ -323,6 +325,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-anya-spa',
       name: 'Riad Anya & SPA',
       type: 'Riad with spa · Medina',
       priceTier: '$$$',
@@ -337,21 +340,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'taller-de-ceramica-en-marrakech',
       name: 'Pottery Workshop in Marrakech',
       description: 'Marrakech\'s most recommended workshop for learning the two core techniques of Moroccan pottery: the traditional potter\'s wheel and hand-molding. The artisan Tariq — named by title in dozens of reviews — has run his workshop facing Jemaa el-Fna Square for 30 years, working through his translator Khaoula, who turns every instruction into a short lesson on the history of Moroccan craft. Includes clay preparation, firing and glazing, and the requisite mint tea between pieces. For the solo woman traveling with the intention to learn something: this is the most recommended workshop available.',
       tags: ['Pottery', 'Tariq', 'Half day'],
+      category: 'cultura',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/marrakesh-l208/pottery-workshop-t157266/',
     },
     {
+      id: 'taller-de-ceramica-con-te-marroqui-atelier-lamsaty',
       name: 'Pottery Workshop with Moroccan Tea — Atelier Lamsaty',
       description: 'The atelier of a certified craftswoman specializing in the two molding techniques most practiced in the workshops of Fez and Marrakech. The class includes a break for Moroccan tea with pastries made on-site — the only moment of the day when clay-covered hands and sugar in your tea coexist without contradiction. For the woman who wants the more intimate workshop: Lamsaty works with small groups.',
       tags: ['Pottery', 'Moroccan tea', 'Small groups'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/marrakesh-l208/marrakech-pottery-workshop-with-moroccan-tea-t422038/',
     },
     {
+      id: 'experiencia-sidi-safou-cocina-ceramica-y-mosaico',
       name: 'Sidi Safou Experience: Cooking, Pottery and Mosaic',
       description: 'The sanctuary of Ferme Sidi Safou, 20 minutes from Marrakech, combines a traditional Moroccan cooking class, a pottery workshop, and a mosaic workshop into one full day, with lunch prepared on-site. The countryside setting — olive trees, pomegranates, aromatic herbs — makes this the day furthest from the Medina\'s tourist circuit, and the closest to the crafts the whole trip is built around.',
       tags: ['Farm', 'Cooking', 'Full day'],
+      category: 'comida',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/marrakech-l208/experience-cooking-peotry-mosaic-class-spa-t462755/',
     },
   ],

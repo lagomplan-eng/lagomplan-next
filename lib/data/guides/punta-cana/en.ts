@@ -153,6 +153,7 @@ export const guide: FlatGuide = {
   itineraryDescription: "Six nights at an all-inclusive on Bávaro Beach. Three full-day excursions separated by free days so the grandparents and the little ones can rest.",
   hotels: [
     {
+      id: 'barcelo-bavaro-palace-all-inclusive',
       name: "Barceló Bávaro Palace All Inclusive",
       type: "All-inclusive · Bávaro Beach",
       priceTier: "$$$",
@@ -162,6 +163,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'iberostar-selection-bavaro-suites',
       name: "Iberostar Selection Bávaro Suites",
       type: "All-inclusive · Bávaro Beach",
       priceTier: "$$$",
@@ -171,6 +173,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'lopesan-costa-bavaro-resort-spa-casino',
       name: "Lopesan Costa Bávaro Resort, Spa & Casino",
       type: "All-inclusive · Bávaro Beach",
       priceTier: "$$$$",
@@ -183,22 +186,31 @@ export const guide: FlatGuide = {
   hotelsDescription: "Three all-inclusives on Bávaro Beach, designed for groups spanning several generations. Ratings are from Booking.com; reference prices per night come from 2026 comparison sites, in US dollars, for a double room. For large groups, ask the hotel directly for a room-block quote and compare it with Booking's.",
   experiences: [
     {
+      id: 'isla-saona-en-lancha-rapida-y-catamaran',
       name: "Saona Island by speedboat and catamaran",
       description: "GetYourGuide: 4.3/5 (36 reviews) · From US$70 per person. A full day from Punta Cana to Bayahibe, where you board the speedboat or catamaran to Saona Island, inside Del Este National Park. Includes a stop at the natural starfish pool, a white-sand beach and entertainment on board. The excursion runs rain or shine. For groups of ten or more, GetYourGuide also offers private catamarans to Saona.",
       tags: ["Island", "Full day", "Hotel pickup", "Speedboat and catamaran"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/?ref=lagomplan",
+      category: 'excursion',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/',
     },
     {
+      id: 'hoyo-azul-y-scape-park-en-cap-cana',
       name: "Hoyo Azul and Scape Park in Cap Cana",
       description: "GetYourGuide: 4.4/5 (176 reviews) · From US$129 per person. Air-conditioned bus transfer to Scape Park, a 100-hectare eco-park inside Cap Cana. The star is Hoyo Azul, a turquoise-water cenote; around it you will find zip lines, caves, a cultural trail and a small animal ranch. It works for all ages: everyone picks their own level of adventure.",
       tags: ["Nature", "Full day", "Transportation included", "All ages"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/?ref=lagomplan",
+      category: 'naturaleza',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/',
     },
     {
+      id: 'bavaro-adventure-park-con-acceso-total-y-comida',
       name: "Bávaro Adventure Park with full access and lunch",
       description: "GetYourGuide: 4.4/5 (105 reviews) · From US$169 per person. Six hours at an adventure park with buggies, a zip line and a blue lagoon for swimming, with lunch and hotel pickup included. Guides in Spanish, English and French. Ideal for the part of the group that wants adrenaline while the rest stays on the beach. You can book now and pay later.",
       tags: ["Adventure", "6 hours", "Lunch included", "Spanish-speaking guide"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/?ref=lagomplan",
+      category: 'aventura',
+      duration: 'medio',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/',
     },
   ],
   experiencesDescription: "Three full-day excursions from GetYourGuide with hotel pickup. Rating and price per person from GetYourGuide as of October 23, 2026, in US dollars.",

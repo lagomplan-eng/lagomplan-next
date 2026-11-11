@@ -185,6 +185,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hoteles-pueblo-de-tierra',
       name: 'Hoteles Pueblo de Tierra',
       type: 'Hotel · San Pedro de Atacama',
       priceTier: '$$',
@@ -194,6 +195,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'lodge-quelana',
       name: 'Lodge Quelana',
       type: 'Hotel · Solor, San Pedro de Atacama',
       priceTier: '$$',
@@ -203,6 +205,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'hostal-belen',
       name: 'Hostal Belen',
       type: 'Guesthouse · San Pedro de Atacama',
       priceTier: '$',
@@ -217,22 +220,28 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'geiseres-del-tatio-al-amanecer',
       name: 'Tatio Geysers at dawn',
       description: 'The highest geothermal field in the world (4,320 meters), 90 kilometers from San Pedro. The tour leaves at 4am to arrive at sunrise, when the geysers reach peak activity with the temperature contrast. For kids 4 and up: the show of steam, boiling water and rising sun over the volcanoes needs no explanation. All tours include a hot breakfast on site. Agency tour: $20–30 USD per person.',
       tags: ['Geysers', 'Sunrise', 'Family'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/klCBsc0o2Q',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/tour-geysers-del-tatio-t1052726/',
     },
     {
+      id: 'valle-de-la-luna-al-atardecer',
       name: 'Valle de la Luna at sunset',
       description: '15 kilometers from San Pedro, the valley of salt and clay formations that NASA uses as a Martian analog to train astronauts. The ride by bike — rentals in town for $8–12 USD/day — or by group tour features salt dunes to climb and the most photogenic sunset in the desert. For kids of any age: the dunes work as natural slides.',
       tags: ['Sunset', 'Bike', 'Dunes'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/zMkLv3dwE-',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/san-pedro-de-atacama-valle-de-la-luna-t347041/',
     },
     {
+      id: 'lagunas-altiplanicas-y-flamencos',
       name: 'Altiplanic Lagoons and flamingos',
       description: 'The Miscanti and Miñiques lagoons, at 4,200 meters, have colonies of pink flamingos feeding on red algae in salt water. Full-day tour: $25–35 USD per person. For kids who already know what a flamingo is and have seen them at the zoo: seeing them in the wild at twenty meters is another category of experience.',
       tags: ['Lagoons', 'Flamingos', 'Altiplano'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/_NIFOG54ed',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/san-pedro-de-atacama-l1862/excursion-de-un-dia-al-salar-de-atacama-lagunas-altiplanicas-y-toconao-t190865/',
     },
   ],
 

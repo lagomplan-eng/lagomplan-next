@@ -4,8 +4,9 @@
  * NewsletterPopup — slide-in bottom-right card.
  *
  * Behavior:
- *  - Hidden until the user has scrolled ≥ 40% of the page, then shown once
- *    per session (sessionStorage).
+ *  - Hidden until the user has scrolled ≥ 40% of the page (≥ 50% on the
+ *    catalog pages: Experiencias, Hoteles, Smart Finds; see
+ *    lib/newsletter-trigger.ts), then shown once per session (sessionStorage).
  *  - "×" dismisses for 7 days (localStorage timestamp).
  *  - Successful submit → ✓ confirmation, auto-hide after 3.5s.
  *  - Submits to /api/subscribe — same server route used by the footer
@@ -15,9 +16,10 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { events } from '../../lib/analytics'
+import { usePathname } from '../../lib/navigation'
+import { scrollTriggerFor } from '../../lib/newsletter-trigger'
 import styles from './NewsletterPopup.module.css'
 
-const SCROLL_TRIGGER = 0.40
 const DISMISS_DAYS   = 7
 const DISMISS_MS     = DISMISS_DAYS * 86_400_000
 const SESSION_KEY    = 'lgm_popup_seen'
@@ -62,6 +64,7 @@ export default function NewsletterPopup() {
   const [error,   setError]   = useState<string>(t('common.errorEmail'))
   const [email,   setEmail]   = useState('')
   const shownRef = useRef(false)
+  const scrollTrigger = scrollTriggerFor(usePathname())
 
   // Scroll-trigger
   useEffect(() => {
@@ -79,12 +82,12 @@ export default function NewsletterPopup() {
       if (shownRef.current) return
       const max = document.body.scrollHeight - window.innerHeight
       if (max <= 0) return
-      if (window.scrollY / max >= SCROLL_TRIGGER) reveal()
+      if (window.scrollY / max >= scrollTrigger) reveal()
     }
 
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  }, [scrollTrigger])
 
   // Dismiss for 7 days
   const dismiss = useCallback(() => {

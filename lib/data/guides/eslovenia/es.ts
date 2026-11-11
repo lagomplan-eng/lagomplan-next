@@ -419,6 +419,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'celica-hostel',
       name: 'Celica Hostel',
       type: 'Hostel · Ljubljana',
       priceTier: '$',
@@ -427,6 +428,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'https://www.booking.com/hotel/si/hostel-celica.en-gb.html',
     },
     {
+      id: 'bled-hostel',
       name: 'Bled Hostel',
       type: 'Hostel · Lago Bled',
       priceTier: '$',
@@ -435,6 +437,7 @@ export const guide: FlatGuide = {
       affiliateUrl: 'https://www.booking.com/hotel/si/hostel-joya.html',
     },
     {
+      id: 'camp-korita',
       name: 'Camp Korita',
       type: 'Camping · Valle del Soča',
       priceTier: '$',
@@ -448,21 +451,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'lake-bled-y-vintgar-gorge-half-day-tour',
       name: 'Lake Bled & Vintgar Gorge Half Day Tour',
       description: 'La garganta de Vintgar — 1.6 kilómetros de tablones de madera sobre un cañón con cascadas, pozas esmeraldas y paredes de roca caliza — es la excursión obligatoria desde Bled que la mayoría hace mal: llegan a las 11am con todo el mundo. El tour sale a las 8am cuando la luz entra entre las paredes y el cañón está prácticamente solo. Incluye transporte desde Ljubljana o desde Bled y entrada al sendero. Tiempo total: 4 horas.',
       tags: ['Vintgar Gorge', 'Cascadas', '4 horas'],
+      category: 'naturaleza',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/bled-l1336/bled-la-mejor-experiencia-y-degustacion-gastronomica-del-desfiladero-de-vintgar-t704583/',
     },
     {
+      id: 'soca-river-rafting-bovec',
       name: 'Soča River Rafting — Bovec',
       description: 'El río Soča tiene el mejor rafting de los Alpes con agua a 8–12°C de origen glaciar y un verde imposible que los ópticos dicen que no existe en la naturaleza. Las excursiones de rafting desde Bovec duran 2–3 horas con guía, casco y traje de neopreno incluidos. Para el viajero solo: los grupos son mixtos y el dinero empleado en el alquiler del carro se recupera en experiencia pura. Nivel principiante o intermedio disponible.',
       tags: ['Rafting', 'Río glaciar', 'Grupos mixtos'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/bovec-l32330/bovec-rafting-de-aventura-en-el-rio-esmeralda-soca-fotos-gratis-t609351/',
     },
     {
+      id: 'ljubljana-bike-tour-with-local-guide',
       name: 'Ljubljana Bike Tour with Local Guide',
       description: 'La capital eslovena tiene un centro histórico completamente peatonal y una red de carriles bici que cubre la mayor parte de los barrios de interés. El bike tour con guía local dura 3 horas, pasa por el Castillo de Ljubljana, el Mercado Central de Plečnik (el arquitecto que diseñó la ciudad casi entera en los años 30), los murales de Metelkova y los puentes triples. La mejor introducción posible para el primer día en el país. Disponible en inglés y español.',
       tags: ['Bike tour', 'Guía local', '3 horas'],
+      category: 'cultura',
+      duration: 'corto',
       affiliateUrl: 'https://www.getyourguide.com/liubliana-l318/liubliana-tour-en-bici-por-el-arte-urbano-y-la-cultura-alternativa-t1158847/',
     },
   ],

@@ -113,6 +113,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-boutique-casa-del-atrio',
       name: 'Hotel Boutique Casa del Atrio',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$$',
@@ -122,6 +123,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-danza-del-sol',
       name: 'Hotel Danza del Sol',
       type: 'Hotel · Downtown',
       priceTier: '$$',
@@ -131,6 +133,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'morazul-hotel-boutique',
       name: 'Morazul Hotel Boutique',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$',
@@ -143,21 +146,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'ruta-del-queso-y-vino',
       name: 'Wine and Cheese Route',
       description: 'A getaway just 45 minutes away to Tequisquiapan or Ezequiel Montes. Visit Freixenet or De Cote for a tasting with views of the Peña de Bernal.',
       tags: [],
-      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/?ranking_uuid=9eab0807-6e3c-4a0f-b173-2fb752f7e2ca&adults=1',
+      category: 'comida',
+      affiliateUrl: 'https://www.getyourguide.com/tequisquiapan-l176257/queretaro-cheese-wine-tour-in-a-day-t640458/',
     },
     {
+      id: 'bar-hopping-de-terrazas',
       name: 'Rooftop bar hopping',
       description: 'Querétaro has the best views from above. Places like La Grupa or Dodo Café are essential for the evening "pre-game."',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
+      id: 'caminata-por-el-acueducto',
       name: 'Walk along the Aqueduct',
       description: 'A photographic tour through the iconic arches and alleys of the historic center (UNESCO World Heritage Site).',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
   ],

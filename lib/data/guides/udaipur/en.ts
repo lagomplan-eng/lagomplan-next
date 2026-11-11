@@ -221,6 +221,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-leela-palace-udaipur',
       name: 'The Leela Palace Udaipur',
       type: 'Luxury hotel · Lake Pichola shore',
       priceTier: '$$$',
@@ -230,6 +231,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'taj-lake-palace',
       name: 'Taj Lake Palace',
       type: 'Palace hotel · Island on Lake Pichola',
       priceTier: '$$$',
@@ -239,6 +241,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'fateh-garh',
       name: 'Fateh Garh',
       type: 'Boutique fort-palace · Hills above Udaipur',
       priceTier: '$$$',
@@ -253,21 +256,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'city-palace-y-tour-en-barco-por-el-lago-pichola',
       name: 'City Palace and a Lake Pichola boat tour',
       description: "A tour of the City Palace (Rajasthan's largest palace complex, built over 400 years by successive Mewar Maharanas) followed by a boat ride on Lake Pichola. The guide covers the history of the Mewar royal family, who never submitted to either the Mughal or the British Empire.",
       tags: ['History', 'City Palace', 'Boat'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/udaipur-l1930/guided-tour-udaipur-city-palace-museum-lake-pichola-tour-t393134/',
     },
     {
+      id: 'clase-de-cocina-india-con-shashi',
       name: 'Indian cooking class with Shashi',
       description: "Four hours in Shashi's kitchen learning Indian and Rajasthani cooking, with a regular or a special Rajasthani menu. The itinerary's most different plan: no palaces, no lakes, just spices, fire, and a table set with what you made yourself.",
       tags: ['Food', 'Class', 'Family'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/udaipur-l1930/udaipur-authentic-indian-cooking-class-with-lunch-or-dinner-t808453/',
     },
     {
+      id: 'paseo-en-barco-con-recorrido-por-la-ciudad-antigua',
       name: 'Boat ride with an old-city walking tour',
       description: 'Four hours combining the alleys of the historic bazaar (miniature-painting workshops, 17th-century havelis, the ghats where locals do their morning rituals) with a private sunset boat ride past the City Palace, the Lake Palace, and the Jag Mandir. Includes a live miniature-painting demonstration.',
       tags: ['Boat', 'Old city', 'Craft'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/udaipur-l1930/udaipur-bootsfahrt-auf-dem-pichola-see-mit-altstadt-sightseeing-rundgang-t1405641/',
     },
   ],

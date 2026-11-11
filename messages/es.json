@@ -6,6 +6,7 @@
   "nav": {
     "planner": "Mi Viaje",
     "guides": "Guías",
+    "experiences": "Experiencias",
     "smartFinds": "Smart Finds",
     "hotels": "Hoteles",
     "worldcup": "Mundial",
@@ -323,5 +324,171 @@
     "anonLimitReached": "Ya generaste tu viaje gratuito. Crea una cuenta para seguir generando itinerarios.",
     "notAuthenticated": "Necesitas una cuenta para generar este viaje.",
     "tripTooLarge": "Los viajes de más de {threshold} días o con varias ciudades necesitan una cuenta — así podemos generarlos por partes sin que se corten a la mitad."
+  },
+  "catalog": {
+    "plan": {
+      "add": "+ Mi plan",
+      "added": "✓ En mi plan",
+      "bar": "{count, plural, one {# cosa en tu plan} other {# cosas en tu plan}}",
+      "view": "Ver mi plan →",
+      "title": "Tu plan",
+      "close": "Cerrar",
+      "remove": "Quitar {name} del plan",
+      "clear": "Vaciar plan",
+      "saved": "Tu plan se guarda solo en este navegador.",
+      "mixed": "Tu plan mezcla destinos. Armaremos el viaje a {name}, que es donde tienes más cosas en tu plan ({count}).",
+      "mixedTie": "Tu plan mezcla destinos. Armaremos el viaje a {name}, el primero que agregaste.",
+      "cta": "Crear mi viaje a {name} →",
+      "book": "Reservar en {provider}",
+      "group": {
+        "experience": "Experiencias",
+        "hotel": "Hoteles"
+      }
+    },
+    "banner": {
+      "eyebrow": "Destino",
+      "guide": "Ver la guía completa →"
+    },
+    "provider": {
+      "gyg": "GetYourGuide",
+      "booking": "Booking.com",
+      "expedia": "Expedia",
+      "hotelscom": "Hotels.com",
+      "kayak": "Kayak",
+      "hotel-site": "el sitio del hotel",
+      "other": "el sitio de reservas"
+    }
+  },
+  "experiences": {
+    "meta": {
+      "title": "Experiencias: qué hacer en tu próximo viaje",
+      "description": "Las experiencias que recomendamos en nuestras guías, en el orden de cada guía y con reserva directa en GetYourGuide."
+    },
+    "breadcrumbRoot": "Experiencias",
+    "eyebrow": "Experiencias",
+    "title": "Qué hacer en tu próximo viaje",
+    "subtitle": "Lo que recomendamos en nuestras guías, con reserva directa en GetYourGuide.",
+    "filters": {
+      "title": "Filtros",
+      "clear": "Quitar filtros",
+      "region": "Región",
+      "regionAll": "Todas",
+      "regions": {
+        "mexico": "México",
+        "latam": "Latinoamérica",
+        "norteamerica": "Norteamérica",
+        "europa": "Europa",
+        "asia": "Asia",
+        "africa": "África",
+        "oceania": "Oceanía"
+      },
+      "destinoSearch": "Busca un destino",
+      "regionTag": "región",
+      "noExperiences": "Aún sin experiencias para reservar",
+      "guideLink": "Ver la guía →",
+      "destinoNone": "Ningún destino coincide",
+      "destinoRemove": "Quitar {name}",
+      "para": "Para quién",
+      "paraAll": "Todos",
+      "para_familia": "Familia con niños",
+      "para_pareja": "Pareja",
+      "para_amigos": "Amigos",
+      "tipo": "Tipo",
+      "categories": {
+        "comida": "Comida y bebida",
+        "cultura": "Cultura",
+        "naturaleza": "Naturaleza",
+        "aventura": "Aventura",
+        "excursion": "Excursión de un día",
+        "bienestar": "Bienestar"
+      },
+      "destinoLabel": "Buscar destino"
+    },
+    "results": {
+      "count": "{count, plural, one {# experiencia} other {# experiencias}}",
+      "order": "Orden: el de nuestras guías",
+      "countIn": "{count, plural, one {# experiencia} other {# experiencias}} en {name}"
+    },
+    "trust": "Nadie paga por aparecer. Si reservas, GetYourGuide nos paga una comisión; a ti no te cuesta más.",
+    "empty": {
+      "title": "Ninguna experiencia coincide con estos filtros.",
+      "clear": "Quitar filtros"
+    },
+    "card": {
+      "personas": {
+        "familia": "Familia",
+        "pareja": "Pareja",
+        "amigos": "Amigos"
+      },
+      "book": "Ver disponibilidad",
+      "seeGuide": "Ver guía →",
+      "provider": "En GetYourGuide",
+      "filterByDestination": "Ver experiencias en {name}"
+    },
+    "concierge": {
+      "title": "¿Lo armamos por ti?",
+      "body": "Dinos qué te gustó y lo convertimos en un plan día por día.",
+      "cta": "Planear con estas experiencias →"
+    },
+    "jsonld": {
+      "home": "Inicio",
+      "listName": "Experiencias recomendadas en nuestras guías"
+    },
+    "finePrint": "Reservas, pagos y cancelaciones las opera GetYourGuide. Precio y disponibilidad se ven allá."
+  },
+  "hotels": {
+    "eyebrow": "Dónde quedarse",
+    "title": "Hoteles que elegimos bien",
+    "subtitle": "Seleccionados por carácter, ubicación y valor real, no por patrocinio.",
+    "filters": {
+      "title": "Filtros",
+      "price": "Precio",
+      "priceAll": "Todos",
+      "prices": {
+        "economico": "$ · Económico",
+        "intermedio": "$$ · Intermedio",
+        "lujo": "$$$ · Lujo"
+      },
+      "tier": {
+        "economico": "Económico",
+        "intermedio": "Intermedio",
+        "lujo": "Lujo"
+      },
+      "traveler": "Viajero",
+      "travelerAll": "Todos",
+      "travelers": {
+        "ninos": "Con niños",
+        "parejas": "Parejas",
+        "solo": "Solo",
+        "negocios": "Negocios",
+        "aventura": "Aventura",
+        "bienestar": "Bienestar",
+        "workation": "Workation",
+        "eco": "Eco"
+      },
+      "search": "Busca un destino u hotel",
+      "searchLabel": "Buscar destino u hotel",
+      "searchNone": "Ningún destino ni hotel coincide",
+      "destinoRemove": "Quitar {name}",
+      "hotelTag": "hotel",
+      "noHotels": "Aún sin hoteles",
+      "guideLink": "Ver la guía →"
+    },
+    "results": {
+      "count": "{count, plural, one {# hotel} other {# hoteles}}",
+      "countIn": "{count, plural, one {# hotel} other {# hoteles}} en {name}",
+      "order": "Orden: el de nuestras guías"
+    },
+    "trust": "Nadie paga por aparecer. Si reservas, el sitio de reservas nos paga una comisión; a ti no te cuesta más.",
+    "card": {
+      "book": "Ver disponibilidad",
+      "seeGuide": "Ver guía →",
+      "provider": "En {provider}",
+      "filterByDestination": "Ver hoteles en {name}"
+    },
+    "empty": {
+      "title": "Ningún hotel coincide con estos filtros.",
+      "clear": "Quitar filtros"
+    }
   }
 }

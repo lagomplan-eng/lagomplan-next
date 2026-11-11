@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-kimberly',
       name: 'Casa Kimberly',
       type: 'Hotel boutique · Zona Romántica',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-mousai',
       name: 'Hotel Mousai',
       type: 'Hotel · Zona Sur (Adults Only)',
       priceTier: '$$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-amapa',
       name: 'Hotel Amapa',
       type: 'Hotel boutique · Zona Romántica (Adults Only)',
       priceTier: '$$',
@@ -155,21 +158,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'navegacion-privada-a-majahuitas',
       name: 'Navegación privada a Majahuitas',
       description: 'Evita los barcos turísticos masivos. Renta una panga de lujo o un yate pequeño para ir a las calas del sur. El agua es más clara, el entorno es selvático y la privacidad es el verdadero lujo de la jornada.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/pFK0IfOG3p',
+      category: 'excursion',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-vallarta-l265/from-puerto-vallarta-luxury-yacht-snorkeling-tour-t295260/',
     },
     {
+      id: 'atardecer-en-the-iguana',
       name: 'Atardecer en The Iguana',
       description: 'Cenar o tomar un coctel en el restaurante de Casa Kimberly. La vista de las cúpulas de la Iglesia de Guadalupe bajo el cielo rosado es, probablemente, el momento más romántico de todo el Pacífico mexicano.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&latitude=20.6516335&longitude=-105.2487681&term=kimberly%20puerto%20vallarta&shouldUseLatLongSearch=true&originCorrelationId=f18ba663-55a3-4747-8807-49a5713c0263&corrid=e08b4372-b84f-4f1c-8374-8bc07cc41ed1&intentModifiedTerm=kimberly&metroId=328&originalTerm=kimberly%20puerto%20vallarta&queryUnderstandingType=location&showMap=true&sortBy=web_conversion',
     },
     {
+      id: 'visita-al-mercado-y-clase-de-cocina-mexicana',
       name: 'Visita al mercado y clase de cocina mexicana',
       description: 'Del mercado a la cocina, despierta tus sentidos con sabores atrevidos y un ambiente vibrante. Descubre la magia de la cultura mexicana con una divertida y auténtica aventura culinaria.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
   ],

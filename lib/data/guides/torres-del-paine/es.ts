@@ -275,6 +275,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'ecocamp-patagonia-standard-dome',
       name: 'EcoCamp Patagonia — Standard Dome',
       type: 'Domo geodésico · Torres del Paine',
       priceTier: '$$',
@@ -284,6 +285,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hostal-the-singing-lamb',
       name: 'Hostal The Singing Lamb',
       type: 'Hostal · Puerto Natales',
       priceTier: '$',
@@ -293,6 +295,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'patagonia-camp',
       name: 'Patagonia Camp',
       type: 'Yurtas de lujo · Lago Toro, Torres del Paine',
       priceTier: '$$$',
@@ -307,21 +310,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'glacier-grey-boat-tour',
       name: 'Glacier Grey Boat Tour',
       description: 'El Glaciar Grey tiene 6 kilómetros de frente azul de hielo sobre el Lago Grey. El tour en catamarán desde el muelle del Refugio Grey acerca la embarcación hasta los icebergs desprendidos del frente glaciar, algunos del tamaño de edificios de cuatro pisos, con el azul imposible del hielo comprimido durante miles de años. Para la pareja que no quiere el W Trek completo: el paseo en barca al Grey es el plan más impactante del parque en medio día.',
       tags: ['Glaciar Grey', 'Catamarán', 'Medio día'],
+      category: 'naturaleza',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/torres-del-paine-national-park-l95549/torres-del-paine-3-hour-scenic-boat-tour-to-grey-glacier-t297935/',
     },
     {
+      id: 'torres-del-paine-w-trek',
       name: 'Torres del Paine W Trek',
       description: 'El W Trek recorre 80 kilómetros en 4–5 días usando los refugios de Las Torres y Vértice Patagonia. La ruta nombrada por la forma que dibuja en el mapa incluye el Mirador Base Las Torres (el más icónico), el Valle del Francés y el Glaciar Grey. En agosto la nieve en las torres hace las fotos más dramáticas del año y los senderos tienen menos tráfico que en temporada alta. Reserva con antelación.',
       tags: ['W Trek', 'Multi-día', 'Refugios'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/s/?q=Torres%20del%20Paine%20W%20Trek',
     },
     {
+      id: 'torres-del-paine-full-day-tour-desde-puerto-natales',
       name: 'Torres del Paine: Full Day Tour desde Puerto Natales',
       description: 'Día completo desde Puerto Natales con paradas en los miradores principales del parque: Lago Nordenskjöld, Salto Grande, Lago Pehoé y Glaciar Grey. La orientación más completa del parque antes de entrar a caminar. Pickup incluido desde el hotel.',
       tags: ['Full day', 'Miradores', 'Pickup incluido'],
+      category: 'excursion',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/puerto-natales-l32145/torres-del-paine-park-full-day-tour-from-puerto-natales-t216822/',
     },
   ],

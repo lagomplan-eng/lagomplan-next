@@ -197,6 +197,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'radisson-hotel-colonia-del-sacramento',
       name: 'Radisson Hotel Colonia del Sacramento',
       type: 'Hotel · Colonia del Sacramento',
       priceTier: '$$$',
@@ -206,6 +207,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hyatt-centric-montevideo',
       name: 'Hyatt Centric Montevideo',
       type: 'Hotel · Montevideo · Pocitos',
       priceTier: '$$$',
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'posada-boutique-las-terrazas',
       name: 'Posada Boutique Las Terrazas',
       type: 'Hotel · Montevideo · Barrio Histórico',
       priceTier: '$$',
@@ -229,21 +232,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cruce-en-ferry-a-colonia-desde-buenos-aires',
       name: 'Cruce en ferry a Colonia desde Buenos Aires',
       description: 'Si el viaje arranca desde Argentina, el Buquebus de 1 hora es el mejor primer recuerdo de Uruguay para niños. El río marrón del Plata, la cubierta al aire libre y la llegada al muelle de Colonia funcionan como umbral de entrada al país.',
       tags: ['Ferry', 'Familia', 'Cruce'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/xaxxoTIWnn',
+      category: 'excursion',
+      affiliateUrl: 'https://www.getyourguide.com/ciudad-de-buenos-aires-l1/desde-buenos-aires-excursion-de-1-dia-en-ferri-a-colonia-del-sacramento-t1176553/',
     },
     {
+      id: 'estancia-de-un-dia-en-el-campo-uruguayo',
       name: 'Estancia de un día en el campo uruguayo',
       description: 'A 60–80 kilómetros de Montevideo, las estancias históricas abren sus puertas para jornadas completas: avistamiento de ñandúes y carpinchos en libertad, recorrido a caballo por campos de eucaliptos y almuerzo de asado tradicional. La Estancia La Magdalena en Canelones y la Estancia Panagea en San José operan excursiones de día sin necesidad de pernoctar. Para niños de 4 años en adelante: la experiencia más memorable del viaje.',
       tags: ['Estancia', 'Campo', 'Asado'],
+      category: 'excursion',
       affiliateUrl: '',
     },
     {
+      id: 'visita-a-las-ruinas-de-colonia-valdense',
       name: 'Visita a las ruinas de Colonia Valdense',
       description: 'El pueblo de colonos valdenses fundado en 1858 a 30 kilómetros de Colonia del Sacramento tiene la arquitectura más inusual del Uruguay — casas de piedra con techos europeos en medio de la pampa. Para adolescentes y adultos que quieran salir del circuito turístico estándar.',
       tags: ['Historia', 'Arquitectura', 'Off the beaten path'],
+      category: 'cultura',
       affiliateUrl: '',
     },
   ],

@@ -245,6 +245,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'tierra-viva-cusco-san-blas',
       name: 'Tierra Viva Cusco San Blas',
       type: 'Boutique hotel · Cusco · San Blas',
       priceTier: '$$',
@@ -254,6 +255,7 @@ export const guide: FlatGuide = {
       archetypes: ['Couples'],
     },
     {
+      id: 'el-mapi-by-inkaterra',
       name: 'El MaPi by Inkaterra',
       type: 'Hotel · Aguas Calientes',
       priceTier: '$$',
@@ -263,6 +265,7 @@ export const guide: FlatGuide = {
       archetypes: ['Couples'],
     },
     {
+      id: 'sumaq-machu-picchu-hotel',
       name: 'Sumaq Machu Picchu Hotel',
       type: 'Hotel · Aguas Calientes',
       priceTier: '$$$',
@@ -277,22 +280,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'camino-salkantay-4-dias-alternativa-al-camino-inca',
       name: 'Salkantay Trek (4 days / alternative to the Inca Trail)',
       description: 'The Inca Trail is capped at 500 people per day and sells out months in advance. The Salkantay — which crosses the 6,271-meter snowcapped mountain and drops through cloud forest to Aguas Calientes — has the same views, more nature, and no waiting list. Operators like Salkantay Trekking and Peru Treks run the 4-day route with tent, cook and guide for $300–450 USD. For the solo traveler, the organized group trek is the most efficient way to do it and the most likely way to end with travel friends.',
       tags: ['Trekking', 'Adventure', 'Group'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/eaI_sDFz2h',
+      category: 'aventura',
+      affiliateUrl: 'https://www.getyourguide.com/cuzco-l359/cusco-caminata-salkantay-a-machu-picchu-y-tren-panoramico-5d-t183392/',
     },
     {
+      id: 'cena-en-central-lima-si-el-itinerario-incluye-escala',
       name: 'Dinner at Central (Lima) — if the itinerary includes a layover',
       description: 'Virgilio Martínez\'s restaurant in Lima is the best in Latin America according to the 50 Best list. If the flight to Cusco connects through Lima — which is common — a night in Miraflores with dinner at Central turns the layover into part of the trip. Book two months in advance.',
       tags: ['Fine dining', '50 Best', 'Layover'],
+      category: 'comida',
       affiliateUrl: 'https://centralrestaurante.com.pe/reservations',
     },
     {
+      id: 'valle-sagrado-en-un-dia',
       name: 'Sacred Valley in a day',
       description: 'Pisac, Ollantaytambo and Moray in a single circuit by shared taxi or organized tour. The Pisac crafts market on Sundays is the most active in the region; Moray\'s circular ruins are the least photographed and the most surprising. Full-day tour from Cusco: $20–35 USD.',
       tags: ['Sacred Valley', 'Ruins', 'Full day'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/x0uQNF9TUN',
+      category: 'cultura',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/ollantaytambo-l93095/desde-cuzco-valle-sagrado-y-salinas-de-moray-t317787/',
     },
   ],
 

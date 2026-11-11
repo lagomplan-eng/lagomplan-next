@@ -179,6 +179,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-bastion-luxury',
       name: 'Hotel Bastión Luxury',
       type: 'Boutique hotel · Walled city center',
       priceTier: '$$$',
@@ -188,6 +189,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families', 'Couples'],
     },
     {
+      id: 'ananda-boutique-hotel',
       name: 'Ananda Boutique Hotel',
       type: 'Boutique hotel · Historic center',
       priceTier: '$$',
@@ -197,6 +199,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families', 'Couples'],
     },
     {
+      id: 'san-lazaro-art-hotel',
       name: 'San Lazaro Art Hotel',
       type: 'Hotel · Facing Castillo de San Felipe',
       priceTier: '$',
@@ -211,22 +214,28 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'castillo-de-san-felipe',
       name: 'Castillo de San Felipe',
       description: 'The largest fortification the Spanish built in the Americas. For kids 6 to 8, walking its tunnels and ramps with a pirate story is the ultimate adventure.',
       tags: ['History', 'Family', 'Adventure'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/VSUxS_YUGc',
+      category: 'cultura',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/cartagena-citytourmonumentos-castillo-casco-antiguo-todo-incluido-t610530/',
     },
     {
+      id: 'islas-del-rosario-lancha-privada',
       name: 'Rosario Islands (private boat)',
       description: 'Skip the crowded "white-beach" tours. The most Lagom move is renting a small private boat to Isla Grande. Snorkel in crystal-clear water and lunch on fresh fish at a private beach club.',
       tags: ['Islands', 'Snorkel', 'Private'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/sDiNuW-An8',
+      category: 'excursion',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/dia-completo-islas-del-rosario-oceanario-snorkel-t931275/',
     },
     {
+      id: 'aviario-nacional-de-colombia',
       name: 'National Aviary of Colombia',
       description: 'On Barú. One of the most impressive in the world. Kids can see flamingos, condors and toucans in nearly free habitats. An educational, visually powerful immersion.',
       tags: ['Nature', 'Birds', 'Family'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/HoNk7mwnx4',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/cartagena-de-indias-l362/cartagena-entrada-al-aviario-con-traslado-incluido-t651322/',
     },
   ],
 

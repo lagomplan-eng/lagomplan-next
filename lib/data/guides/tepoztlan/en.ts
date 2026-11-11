@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'amomoxtli',
       name: 'Amomoxtli',
       type: 'Boutique hotel · Tepoztlán',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'posada-del-tepozteco',
       name: 'Posada del Tepozteco',
       type: 'Hotel · Downtown',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-boutique-casa-fernanda',
       name: 'Hotel Boutique Casa Fernanda',
       type: 'Boutique hotel · Tepoztlán',
       priceTier: '$$',
@@ -125,21 +128,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'ascenso-mistico-al-tepozteco',
       name: 'Mystical climb to the Tepozteco',
       description: 'A 1.5-hour hike. The key is timing: start at 8:30 AM to have the summit almost to yourself and perfect light for photos.',
       tags: [],
+      category: 'aventura',
       affiliateUrl: '',
     },
     {
+      id: 'ritual-de-temazcal-en-pareja',
       name: 'Couples temazcal ritual',
       description: 'A traditional purification experience. Many hotels offer it privately, turning it into an intimate and restorative ritual.',
       tags: [],
+      category: 'bienestar',
       affiliateUrl: '',
     },
     {
+      id: 'cena-en-la-terraza-al-atardecer',
       name: 'Terrace dinner at sunset',
       description: 'Contemporary Morelos cuisine tasting with views of the illuminated mountains.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/neighborhood/mx/morelos/tepoztlan-restaurants',
     },
   ],

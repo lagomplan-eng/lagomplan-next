@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-kimberly',
       name: 'Casa Kimberly',
       type: 'Boutique hotel · Romantic Zone',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'hotel-mousai',
       name: 'Hotel Mousai',
       type: 'Hotel · South Zone (Adults Only)',
       priceTier: '$$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'hotel-amapa',
       name: 'Hotel Amapa',
       type: 'Boutique hotel · Romantic Zone (Adults Only)',
       priceTier: '$$',
@@ -155,21 +158,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'navegacion-privada-a-majahuitas',
       name: 'Private sail to Majahuitas',
       description: 'Skip the mass tourist boats. Rent a luxury panga or small yacht to reach the southern coves. The water is clearer, the setting is jungle-clad, and privacy is the real luxury of the day.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/pFK0IfOG3p',
+      category: 'excursion',
+      affiliateUrl: 'https://www.getyourguide.com/puerto-vallarta-l265/from-puerto-vallarta-luxury-yacht-snorkeling-tour-t295260/',
     },
     {
+      id: 'atardecer-en-the-iguana',
       name: 'Sunset at The Iguana',
       description: 'Dinner or cocktails at Casa Kimberly\'s restaurant. The view of the Guadalupe Church domes under the pink sky is probably the most romantic moment on the entire Mexican Pacific coast.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&latitude=20.6516335&longitude=-105.2487681&term=kimberly%20puerto%20vallarta&shouldUseLatLongSearch=true&originCorrelationId=f18ba663-55a3-4747-8807-49a5713c0263&corrid=e08b4372-b84f-4f1c-8374-8bc07cc41ed1&intentModifiedTerm=kimberly&metroId=328&originalTerm=kimberly%20puerto%20vallarta&queryUnderstandingType=location&showMap=true&sortBy=web_conversion',
     },
     {
+      id: 'visita-al-mercado-y-clase-de-cocina-mexicana',
       name: 'Market visit and Mexican cooking class',
       description: 'From market to kitchen, awaken your senses with bold flavors and a vibrant atmosphere. Discover the magic of Mexican culture with a fun and authentic culinary adventure.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
   ],

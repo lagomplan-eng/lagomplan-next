@@ -6,10 +6,12 @@
  * HotelsClient (client component) which handles search, filtering, and layout.
  */
 
+import { Suspense }                         from 'react'
 import type { Metadata }                    from 'next'
 import { buildAlternates, buildOpenGraph }  from '../../../lib/seo'
 import type { Locale }                      from '../../../i18n'
-import { getAllHotels }                     from '../../../lib/hotels'
+import { getAllHotels, getHotelDestinations } from '../../../lib/hotels'
+import { getPlanCatalog }                   from '../../../lib/plan-catalog'
 import { getRenderableCityNeighborhoods }   from '../../../lib/hotels-neighborhoods'
 import HotelsClient                         from '../../../components/hotels/HotelsClient'
 import SmartFindsSection                    from '../../../components/hotels/SmartFindsSection'
@@ -45,11 +47,15 @@ export default async function HotelsIndexPage({ params }: Props) {
     // made the Hotels page visually disconnected from the rest of
     // the site. Set on <main> so bridge CTA + newsletter inherit.
     <main className="pt-[100px] bg-[#FFF9F3]">
-      <HotelsClient
-        hotels={hotels}
-        neighborhoods={neighborhoods}
-        locale={locale}
-      />
+      <Suspense fallback={null}>
+        <HotelsClient
+          hotels={hotels}
+          destinations={getHotelDestinations(locale)}
+          neighborhoods={neighborhoods}
+          locale={locale}
+          planCatalog={getPlanCatalog(locale)}
+        />
+      </Suspense>
       <SmartFindsSection locale={locale} />
       <PlannerBridgeCTA locale={locale} />
       <div className="page-inner">

@@ -203,6 +203,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'bardessono-hotel-spa',
       name: 'Bardessono Hotel & Spa',
       type: 'Hotel LEED Platinum · Yountville, Napa Valley',
       priceTier: '$$$',
@@ -212,6 +213,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'h2hotel',
       name: 'H2Hotel',
       type: 'Hotel eco-boutique · Healdsburg, Sonoma',
       priceTier: '$$',
@@ -221,6 +223,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'river-terrace-inn',
       name: 'River Terrace Inn',
       type: 'Hotel · Napa',
       priceTier: '$$',
@@ -235,21 +238,28 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'napa-valley-guided-bike-tour-through-sustainable-vineyards',
       name: 'Napa Valley: Guided Bike Tour through Sustainable Vineyards',
       description: 'El Napa Valley Vine Trail conecta el centro de Napa con Yountville y San Helena en 47 kilómetros pavimentados sin tráfico. El tour guiado de día completo pasa por tres viñedos certificados Napa Green con paradas para degustación, explica la diferencia entre viticultura convencional, orgánica y biodinámica, y termina con un almuerzo de temporada en una bodega activa. Para la pareja que quiere entender qué están bebiendo antes de pedir la siguiente copa.',
       tags: ['Vine Trail', 'Napa Green', 'Día completo'],
+      category: 'comida',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/yountville-l145323/napa-valley-guided-e-bike-tour-with-winery-visits-t1146315/',
     },
     {
+      id: 'sonoma-explore-natural-wineries-with-a-local-sommelier',
       name: 'Sonoma: Explore Natural Wineries with a Local Sommelier',
       description: 'Tour de 6 horas con sommelier local a dos bodegas independientes y familiares de vinos naturales de Sonoma, con degustación incluida e introducción a prácticas de viticultura sostenible. Lo más cercano al espíritu biodinámico.',
       tags: ['Vinos naturales', 'Sommelier', 'Sonoma'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/sonoma-l2495/sonoma-explore-natural-wineries-with-a-local-sommeliere-t592711/',
     },
     {
+      id: 'farm-to-table-dinner-y-winery-experience-en-napa',
       name: 'Farm-to-Table Dinner & Winery Experience en Napa',
       description: 'Cena privada en una bodega activa con chef residente: ingredientes del huerto de la finca, maridaje de vinos de esa misma cosecha y una mesa bajo las vides al atardecer. Tour de la bodega incluido antes de cenar. Para la noche más memorable de los cinco días, la que reemplaza cualquier restaurante con estrella Michelin en términos de contexto.',
       tags: ['Farm-to-table', 'Cena privada', 'Bodega'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/s/?q=Farm%20to%20Table%20Dinner%20Winery%20Napa',
     },
   ],

@@ -153,6 +153,7 @@ export const guide: FlatGuide = {
   itineraryDescription: "Seis noches en un todo incluido de Playa Bávaro. Tres excursiones de día completo separadas por días libres para que los abuelos y los más chicos descansen.",
   hotels: [
     {
+      id: 'barcelo-bavaro-palace-all-inclusive',
       name: "Barceló Bávaro Palace All Inclusive",
       type: "Todo incluido · Playa Bávaro",
       priceTier: "$$$",
@@ -162,6 +163,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'iberostar-selection-bavaro-suites',
       name: "Iberostar Selection Bávaro Suites",
       type: "Todo incluido · Playa Bávaro",
       priceTier: "$$$",
@@ -171,6 +173,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'lopesan-costa-bavaro-resort-spa-casino',
       name: "Lopesan Costa Bávaro Resort, Spa & Casino",
       type: "Todo incluido · Playa Bávaro",
       priceTier: "$$$$",
@@ -183,22 +186,31 @@ export const guide: FlatGuide = {
   hotelsDescription: "Tres todo incluido sobre Playa Bávaro, pensados para grupos con varias generaciones. Calificación de Booking.com; precio de referencia por noche de comparadores en 2026, en dólares, para habitación doble. Para grupos grandes pide cotización por bloque de habitaciones directo al hotel y compárala con la de Booking.",
   experiences: [
     {
+      id: 'isla-saona-en-lancha-rapida-y-catamaran',
       name: "Isla Saona en lancha rápida y catamarán",
       description: "GetYourGuide: 4.3/5 (36 reseñas) · Desde US$70 por persona. Día completo desde Punta Cana hasta Bayahibe, donde se aborda la lancha o el catamarán hacia la Isla Saona, dentro del Parque Nacional del Este. Incluye una parada en la piscina natural de estrellas de mar, playa de arena blanca y animación a bordo. La excursión sale con lluvia o sol. Para grupos de diez o más, GetYourGuide también ofrece catamaranes privados a Saona.",
       tags: ["Isla", "Día completo", "Recogida en hotel", "Lancha y catamarán"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/?ref=lagomplan",
+      category: 'excursion',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-saona-island-tour-speedboat-and-catamaran-t471626/',
     },
     {
+      id: 'hoyo-azul-y-scape-park-en-cap-cana',
       name: "Hoyo Azul y Scape Park en Cap Cana",
       description: "GetYourGuide: 4.4/5 (176 reseñas) · Desde US$129 por persona. Traslado en autobús con aire acondicionado hasta Scape Park, un parque ecológico de 100 hectáreas dentro de Cap Cana. El protagonista es el Hoyo Azul, un cenote de agua turquesa; alrededor hay tirolesas, cuevas, ruta cultural y un pequeño rancho de animales. Funciona para todas las edades: cada quien elige su nivel de aventura.",
       tags: ["Naturaleza", "Día completo", "Transporte incluido", "Para todas las edades"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/?ref=lagomplan",
+      category: 'naturaleza',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/punta-cana-hoyo-azul-and-scape-park-cap-cana-full-day-trip-t50328/',
     },
     {
+      id: 'bavaro-adventure-park-con-acceso-total-y-comida',
       name: "Bávaro Adventure Park con acceso total y comida",
       description: "GetYourGuide: 4.4/5 (105 reseñas) · Desde US$169 por persona. Seis horas en un parque de aventura con buggies, tirolesa y una laguna azul para nadar, con comida y recogida en el hotel incluidas. Guías en español, inglés y francés. Ideal para la parte del grupo que quiere adrenalina mientras el resto se queda en la playa. Puedes reservar ahora y pagar después.",
       tags: ["Aventura", "6 horas", "Comida incluida", "Guía en español"],
-      affiliateUrl: "https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/?ref=lagomplan",
+      category: 'aventura',
+      duration: 'medio',
+      affiliateUrl: 'https://www.getyourguide.com/punta-cana-l411/full-access-to-bavaro-adventure-park-t468196/',
     },
   ],
   experiencesDescription: "Tres excursiones de día completo de GetYourGuide con recogida en el hotel. Calificación y precio por persona de GetYourGuide al 23 de octubre de 2026, en dólares.",

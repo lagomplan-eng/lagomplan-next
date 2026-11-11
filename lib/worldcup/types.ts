@@ -57,6 +57,8 @@ export interface VibeSection {
 }
 
 export interface Stay {
+  /** Stable id: slug of the Spanish name, the same in es and en (scripts/hotels/add-ids.ts). */
+  id: string
   name: string
   area: string
   price: string

@@ -197,6 +197,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casa-monti-roma',
       name: 'Casa Monti Roma',
       type: 'Boutique hotel · Monti',
       priceTier: '$$$',
@@ -206,6 +207,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'trastevere-luxury-rooms',
       name: 'Trastevere Luxury Rooms',
       type: 'Hotel · Trastevere',
       priceTier: '$$$',
@@ -215,6 +217,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'condominio-monti-boutique-hotel',
       name: 'Condominio Monti Boutique Hotel',
       type: 'Hotel · Monti',
       priceTier: '$$',
@@ -229,21 +232,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'clase-de-pasta-en-trastevere',
       name: 'Pasta class in Trastevere',
       description: 'Three hours through the Trastevere alleys with stops at the San Cosimato market (where Romans do their own shopping every morning), followed by a fresh pasta class at Rione XIII trattoria with unlimited wine included. You\'ll learn to make fettuccine and ravioli from scratch. Porchetta and artisanal gelato tastings included.',
       tags: ['Food', 'Class', 'Trastevere'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-trastevere-street-food-tour-t261067/',
     },
     {
+      id: 'tour-exclusivo-del-coliseo-con-acceso-al-sotano-de-la-arena',
       name: 'Exclusive Colosseum tour with arena underground access',
       description: 'Access to the Colosseum\'s restricted areas: the underground tunnels where gladiators and animals waited before entering the arena, and the arena floor itself. Includes the Roman Forum and Palatine Hill. The most different thing you can do at the Colosseum compared to a standard ticket.',
       tags: ['History', 'Colosseum', 'Exclusive access'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-exclusive-colosseum-underground-and-arena-guided-tour-t431012/',
     },
     {
+      id: 'tour-gastronomico-nocturno-en-trastevere-con-cata-de-vinos',
       name: 'Trastevere night food tour with wine tasting',
       description: 'Four hours at dusk through the streets of Trastevere with a local guide who knows exactly which trattoria has the real carbonara and which cellar to go down into for the local wine. Roman pizza, pasta, porchetta, gelato, and wine in a 150-year-old cellar included.',
       tags: ['Food', 'Wine', 'Night'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/rome-l33/rome-4-hour-twilight-trastevere-food-tour-t252097/',
     },
   ],

@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'anticavilla-hotel',
       name: 'Anticavilla Hotel',
       type: 'Hotel · Historic villa',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'hacienda-de-cortes',
       name: 'Hacienda de Cortés',
       type: 'Hacienda · 16th century',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'las-casas-b-b',
       name: 'Las Casas B+B',
       type: 'Boutique hotel · Downtown',
       priceTier: '$',
@@ -125,21 +128,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'degustacion-de-comida-mexicana',
       name: 'Mexican food tasting',
       description: 'Step into a local home in Cuernavaca for a guided tasting session of traditional Mexican dishes and drinks, carefully curated to showcase the country\'s rich culinary culture.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
+      id: 'jardines-de-mexico',
       name: 'Jardines de México',
       description: 'Minutes from the city, it\'s the largest floral garden in the world. Walking the Japanese or Italian garden at sunset is a visually stunning and very Instagrammable experience.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: 'https://jardinesdemexico.com/',
     },
     {
+      id: 'cata-de-mezcal-o-tequila-en-el-jardin',
       name: 'Mezcal or tequila tasting in the garden',
       description: 'Arrange a private tasting in your hotel\'s gardens. Cuernavaca is made for long post-dinner conversations that start with an expert-guided tasting before dinner.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
   ],

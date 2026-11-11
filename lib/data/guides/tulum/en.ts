@@ -125,6 +125,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'our-habitas',
       name: 'Our Habitas',
       type: 'Eco-resort · Hotel zone',
       priceTier: '$$$',
@@ -134,6 +135,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Solo', 'Eco'],
     },
     {
+      id: 'dune-boutique-hotel',
       name: 'Dune Boutique Hotel',
       type: 'Boutique hotel · Hotel zone',
       priceTier: '$$',
@@ -143,6 +145,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Aventura', 'Bienestar'],
     },
     {
+      id: 'astral-tulum',
       name: 'Astral Tulum',
       type: 'Hotel · Hotel zone',
       priceTier: '$',
@@ -155,21 +158,26 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cenotes-al-amanecer',
       name: 'Cenotes at dawn',
       description: 'Visit Cenote Dos Ojos or Gran Cenote at 8:00 AM. Being alone in the crystal-clear water before tour groups arrive is the definition of absolute peace.',
       tags: [],
-      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/?ranking_uuid=0a7034f0-a336-4254-ae29-a13110c59460&adults=1',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/tulum-l248/tulum-dos-ojos-cenote-2-scuba-dives-with-transfer-option-t828977/',
     },
     {
+      id: 'beach-club-day-en-papaya-playa-project',
       name: 'Beach Club Day at Papaya Playa Project',
       description: 'Spend the afternoon at Papaya Playa Project. The perfect balance: world-class DJ music, great cocktails, and an atmosphere where being solo feels completely natural.',
       tags: [],
       affiliateUrl: 'https://www.opentable.com/s?dateTime=2026-04-14T19%3A00%3A00&covers=2&ridsAddons%5B%5D=1070665&metroId=346&regionIds%5B%5D=2557&shouldUseLatLongSearch=false&originCorrelationId=0d8fc157-9a52-4653-8126-3c6c62f2d9db',
     },
     {
+      id: 'sanacion-de-sonido-sound-healing',
       name: 'Sound healing ceremony',
       description: 'Take part in a jungle ceremony. The essential mystical experience to rebalance your energy after a night of dancing.',
       tags: [],
+      category: 'bienestar',
       affiliateUrl: 'https://www.viator.com/tours/Tulum/Sunset-floating-sound-bath-meditation-with-mindful-bites/d23012-5575705P2?gclsrc=aw.ds&&m=63845&supag=157612424879&supca=20987506069&supsc=dsa-1583450326707&supai=698438660399&supdv=c&supnt=g&suplp=9047093&supli=&supti=dsa-1583450326707&tsem=true&supci=dsa-1583450326707&supap1=&supap2=&synthetic_keyword=&suppmas=&gad_source=1&gad_campaignid=20987506069&gbraid=0AAAAAD-gbd7O1RmmPDRCT5M2ktkY7dOpf&gclid=Cj0KCQjwy_fOBhC6ARIsAHKFB78igLfudmxujQGBg2rIIqvWm_D-q3hPmK7eVyP9iSMimp0g2hGUm40aAkAgEALw_wcB',
     },
   ],

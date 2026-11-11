@@ -269,6 +269,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'sands-suites-resort-spa',
       name: 'Sands Suites Resort & Spa',
       type: 'Family resort · Flic-en-Flac Beach',
       priceTier: '$$$',
@@ -278,6 +279,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'la-pirogue-mauritius',
       name: 'La Pirogue Mauritius',
       type: 'Classic resort · Flic-en-Flac Beach',
       priceTier: '$$$',
@@ -287,6 +289,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'c-mauritius',
       name: 'C Mauritius',
       type: 'Boutique resort · Belle Mare, East Coast',
       priceTier: '$$$',
@@ -301,21 +304,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'crucero-en-catamaran-costa-oeste-con-delfines-esnorquel-y',
       name: 'Catamaran cruise, West Coast, with dolphins, snorkeling, and beach',
       description: 'The west-coast route takes in Crystal Rock — the coral formation rising dramatically out of the turquoise lagoon — plus Île aux Bénitiers, a white-sand island with flat water perfect for young kids. Onboard BBQ, drinks included, and a chance to swim alongside spinner dolphins in the Le Morne bays.',
       tags: ['Dolphins', 'Catamaran', 'Family'],
+      category: 'excursion',
       affiliateUrl: 'https://www.getyourguide.com/grande-riviere-noire-l110567/southwest-of-mauritius-catamaran-cruise-w-snorkeling-t876466/',
     },
     {
+      id: 'tour-de-dia-completo-chamarel-7-colores-y-cataratas-del',
       name: 'Full-day tour: Chamarel, seven colors, and southwest waterfalls',
       description: "Volcanic earth in seven natural colors, the Trou aux Cerfs volcano, the sacred Grand Bassin lake with wild monkeys nearby, the Chamarel waterfalls, and a rum distillery. For kids: the colored dunes and the park's giant tortoises are the highlight. For adults: Chamarel rum, with a tasting included.",
       tags: ['Nature', 'Chamarel', 'Family'],
+      category: 'naturaleza',
       affiliateUrl: 'https://www.getyourguide.com/chamarel-l2088/mauritius-chamarel-7-colours-waterfalls-south-west-tour-t756434/',
     },
     {
+      id: 'tour-de-quad-por-el-sur-de-mauricio',
       name: 'Quad-bike tour through southern Mauritius',
       description: "Sugar cane fields, the Gris Gris coast, the La Roche qui Pleure cliffs, and a stop to swim at a quiet, tourist-free beach — all by quad bike along the roads of the island's south. Best suited to kids 8 and up; for younger ones, check with the operator about passenger-seat options.",
       tags: ['Quad bike', 'Adventure', 'South coast'],
+      category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/mauritius-l2105/mahebourg-south-mauritius-quad-bike-tour-t259177/',
     },
   ],

@@ -89,6 +89,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-ritz-carlton-mexico-city',
       name: 'The Ritz-Carlton, Mexico City',
       type: 'Hotel · Paseo de la Reforma',
       priceTier: '$$$',
@@ -98,6 +99,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'brick-hotel',
       name: 'Brick Hotel',
       type: 'Boutique hotel · Roma Norte',
       priceTier: '$$',
@@ -107,6 +109,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'casa-cuenca',
       name: 'Casa Cuenca',
       type: 'Boutique hotel · Roma',
       priceTier: '$$',
@@ -119,21 +122,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'casa-luis-barragan',
       name: 'Casa Luis Barragán',
       description: 'Essential to book months in advance. A lesson in light, color, and silence — the most intimate architectural experience you can have as a couple.',
       tags: ['Book months in advance'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
+      category: 'cultura',
+      affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-casa-ortega-by-luis-barragan-architectural-tour-t998831/',
     },
     {
+      id: 'ruta-de-galerias-en-la-san-rafael',
       name: 'Gallery route in La San Rafael',
       description: 'Leave Roma and explore the San Rafael neighborhood. Visit galleries like Hilario Galguera or Eco — high-level contemporary art without the crowds.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
     {
+      id: 'cena-en-barra-de-autor',
       name: 'Dinner at a chef\'s counter',
       description: 'Look for places like Expendio de Maíz or the counter at Máximo. Watching the chefs\' precision just inches away while sharing a natural wine is the epitome of relaxed luxury.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/',
     },
   ],

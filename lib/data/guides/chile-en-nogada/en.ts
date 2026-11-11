@@ -173,6 +173,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'casona-de-los-sapos-hotel-boutique',
       name: 'Casona de los Sapos Hotel Boutique',
       type: 'Boutique hotel · Historic Center, Puebla',
       priceTier: '$$',
@@ -182,6 +183,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'hotel-boutique-la-rioja',
       name: 'Hotel Boutique La Rioja',
       type: 'Boutique hotel · Atlixco',
       priceTier: '$$',
@@ -191,6 +193,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias'],
     },
     {
+      id: 'casa-eva-hotel-boutique-spa',
       name: 'Casa Eva Hotel Boutique & Spa',
       type: 'Boutique hotel & spa · Cholula',
       priceTier: '$$$',
@@ -205,21 +208,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'tour-culinario-extraordinario-de-5-horas',
       name: '5-Hour Extraordinary Culinary Tour',
       description: "Puebla's most complete food tour: the markets where chile en nogada's ingredients are bought, the mole mills, neighborhood fondas, and tastings of cemitas, chalupas, molotes, tamales, and mole poblano. The guide explains why every ingredient in chile en nogada has its own season, and how 17th-century convents invented the dish. For kids 4 and up: the market and the fondas are the most sensory experience Puebla has to offer.",
       tags: ['Markets', 'Tastings', '5 hours'],
-      affiliateUrl: 'https://www.getyourguide.com/es-mx/estado-libre-y-soberano-de-puebla-l1470/tour-culinario-extraordinario-por-puebla-t34817/',
+      category: 'comida',
+      duration: 'medio',
+      affiliateUrl: 'https://www.getyourguide.com/estado-libre-y-soberano-de-puebla-l1470/tour-culinario-extraordinario-por-puebla-t34817/',
     },
     {
+      id: 'experiencia-culinaria-puebla-clase-de-cocina',
       name: 'Puebla Culinary Experience: Cooking Class',
       description: 'A Pueblan cooking class that starts with a local market visit and moves to hands-on preparation of traditional dishes in the workshop kitchen. For the family that wants the kids actively involved — making tortillas, chopping ingredients, tasting as they go — not just watching. Duration: 3–4 hours, ingredients included.',
       tags: ['Cooking class', 'Market visit', 'Families'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/puebla-l1471/puebla-culinary-experience-cooking-class-t781637/',
     },
     {
+      id: 'valquirico-puebla-y-ciudades-tour-gastronomico-y-cultural',
       name: "Val'Quirico, Puebla, and Towns: Food and Culture Tour",
       description: "A route from Mexico City or Puebla through the historic center with food stops that include in-season chile en nogada, cemitas, artisanal pulque, and local mezcal. It also passes through Val'Quirico — the Italian-style village in the middle of Puebla state that kids instantly clock as \"the place from the European movies.\"",
       tags: ["Val'Quirico", 'Chile en nogada', 'Full day'],
+      category: 'cultura',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/val-quirico-puebla-mexico-walking-tour-food-and-towns-t855901/',
     },
   ],

@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'quinta-real-oaxaca',
       name: 'Quinta Real Oaxaca',
       type: 'Hotel · Centro histórico',
       priceTier: '$$$',
@@ -140,6 +141,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'hotel-con-corazon',
       name: 'Hotel con Corazón',
       type: 'Hotel boutique · Centro',
       priceTier: '$$',
@@ -149,6 +151,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'city-centro-oaxaca',
       name: 'City Centro Oaxaca',
       type: 'Hotel · Barrio de Jalatlaco',
       priceTier: '$$',
@@ -161,22 +164,28 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'taller-de-alebrijes-en-arrazola',
       name: 'Taller de alebrijes en Arrazola',
       description: 'Más que verlos, los niños pueden sentarse con los artesanos a pintar su propia figura de madera. Es el souvenir más valioso.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/Ks1TFH0f9j',
     },
     {
+      id: 'hierve-el-agua',
       name: 'Hierve el Agua',
       description: 'Las "cascadas petrificadas" son un espectáculo natural. Ir temprano garantiza fotos sin gente y una temperatura agradable para nadar en las pozas.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/nY3lrv2Fhx',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/san-jeronimo-tlacochahuaya-l164686/only-hierve-el-agua-tour-t475852/',
     },
     {
+      id: 'mercado-de-tlacolula-domingo',
       name: 'Mercado de Tlacolula (Domingo)',
       description: 'Una inmersión cultural total. Es el mercado más antiguo; ideal para probar "pan de cazuela" y ver el trueque vivo.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/A_1997xjG3',
+      category: 'comida',
+      affiliateUrl: 'https://www.getyourguide.com/tlacolula-de-matamoros-l164684/vamos-a-comer-al-mercado-de-tlacolula-en-domingo-y-a-tomar-mezcal-t990319/',
     },
   ],
 

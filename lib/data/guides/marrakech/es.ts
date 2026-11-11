@@ -305,6 +305,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'maipa-boutique-riad',
       name: 'Maïpa Boutique Riad',
       type: 'Riad boutique · Medina',
       priceTier: '$$$',
@@ -314,6 +315,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-mint-luxury-oasis-in-the-medina',
       name: 'Riad Mint — Luxury Oasis in the Medina',
       type: 'Riad de lujo · Mouassine, Medina',
       priceTier: '$$$',
@@ -323,6 +325,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'riad-anya-spa',
       name: 'Riad Anya & SPA',
       type: 'Riad con spa · Medina',
       priceTier: '$$$',
@@ -337,21 +340,29 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'taller-de-ceramica-en-marrakech',
       name: 'Taller de Cerámica en Marrakech',
       description: 'El taller más recomendado de Marrakech para aprender las dos técnicas principales de la cerámica marroquí: el torno tradicional de alfarero y el moldeado a mano. El artesano Tariq, mencionado por nombre en decenas de reseñas, lleva 30 años en su taller frente a la Plaza Jemaa el-Fna y habla a través de su traductora Khaoula, que convierte cada instrucción en una clase de historia de la artesanía marroquí. Incluye preparación de arcilla, cocción y vidriado, y el té de menta de rigor entre piezas. Para la mujer sola que viaja con intención de aprender: este taller es el más recomendado de los disponibles.',
       tags: ['Cerámica', 'Tariq', 'Medio día'],
+      category: 'cultura',
+      duration: 'medio',
       affiliateUrl: 'https://www.getyourguide.com/marrakesh-l208/pottery-workshop-t157266/',
     },
     {
+      id: 'taller-de-ceramica-con-te-marroqui-atelier-lamsaty',
       name: 'Taller de Cerámica con Té Marroquí — Atelier Lamsaty',
       description: 'El atelier de una artesana certificada especializada en las dos técnicas de moldeado que más practican los talleres de Fez y Marrakech. El taller incluye una pausa de té marroquí con pastelería hecha en el mismo espacio, el único momento del día en que la arcilla en las manos y el azúcar en el té conviven sin contradicción. Para la mujer que quiere el taller más íntimo: Lamsaty trabaja con grupos pequeños.',
       tags: ['Cerámica', 'Té marroquí', 'Grupos pequeños'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/marrakesh-l208/marrakech-pottery-workshop-with-moroccan-tea-t422038/',
     },
     {
+      id: 'experiencia-sidi-safou-cocina-ceramica-y-mosaico',
       name: 'Experiencia Sidi Safou: Cocina, Cerámica y Mosaico',
       description: 'El santuario de la Granja Sidi Safou, a 20 minutos de Marrakech, combina una clase de cocina marroquí tradicional, un taller de cerámica y un taller de mosaico en una jornada completa con almuerzo preparado en el propio espacio. El contexto de granja en el campo, con olivos, granados y hierbas aromáticas, hace de este el día más alejado del circuito turístico de la Medina y el más cercano a los saberes que organizan el viaje.',
       tags: ['Granja', 'Cocina', 'Día completo'],
+      category: 'comida',
+      duration: 'completo',
       affiliateUrl: 'https://www.getyourguide.com/marrakech-l208/experience-cooking-peotry-mosaic-class-spa-t462755/',
     },
   ],

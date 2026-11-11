@@ -119,6 +119,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'tamarindo-diria-beach-resort',
       name: 'Tamarindo Diria Beach Resort',
       type: 'Resort · Playa Tamarindo',
       priceTier: '$$',
@@ -128,6 +129,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families', 'Couples'],
     },
     {
+      id: 'wyndham-tamarindo',
       name: 'Wyndham Tamarindo',
       type: 'Hotel · Hilltop above Tamarindo',
       priceTier: '$$',
@@ -135,7 +137,9 @@ export const guide: FlatGuide = {
       tag: 'Infinity views and shuttle into town',
       affiliateUrl: 'https://booking.stay22.com/lagomplan/xwSkTk6GWZ',
       archetypes: ['Couples'],
-    },{
+    },
+    {
+      id: 'capit-an-suizo-beachfront-boutique-hotel',
       name: 'Capitan Suizo Beachfront Boutique',
       type: 'Hotel · Beachfront Tamarindo',
       priceTier: '$$',
@@ -150,21 +154,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'surf-o-clases-de-surf-en-playa-tamarindo',
       name: 'Surf or surf lessons at Playa Tamarindo',
       description: 'Tamarindo\'s wave is long, gentle, and perfect for beginners. The town\'s surf schools (Witch\'s Rock Surf Camp, Tamarindo Surf School) offer two-hour lessons for $60–80 USD with a private instructor. For the group that has never surfed — or has been meaning to try for years — this is the Saturday morning plan.',
       tags: ['Surf', 'Beginners', 'Beach'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/gGkZgcCnzP',
+      category: 'aventura',
+      affiliateUrl: 'https://www.getyourguide.com/tamarindo-l995/tamarindo-surf-tours-clases-de-surf-para-todos-los-niveles-t561020/',
     },
     {
+      id: 'tour-en-kayak-por-el-estero-el-salado',
       name: 'Kayak tour through Estero El Salado',
       description: 'A 15-minute drive from Tamarindo, the Estero mangrove has crocodiles sunning on sandbanks, tropical birds in the trees, and the silence that doesn\'t exist in town. Two-hour guided kayak tours run $40–55 USD per person. The Sunday plan before the flight home.',
       tags: ['Kayak', 'Mangrove', 'Nature'],
+      category: 'aventura',
       affiliateUrl: '',
     },
     {
+      id: 'atardecer-en-playa-langosta',
       name: 'Sunset on Playa Langosta',
       description: 'Two kilometers south of Tamarindo, Playa Langosta has no vendors and no tourists with speakers. Dark sand, stronger waves and the most photogenic sunset in the area. Reach it by walking along the beach in 25 minutes or by tuk-tuk in 10. The Friday-night plan, fresh off the plane.',
       tags: ['Sunset', 'Beach', 'Photo'],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

@@ -281,6 +281,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'hotel-f-royar',
       name: 'Hotel Føroyar',
       type: 'Hotel · Tórshavn',
       priceTier: '$$$',
@@ -290,6 +291,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'havgrim-seaside-hotel-1948',
       name: 'Havgrim Seaside Hotel 1948',
       type: 'Boutique hotel · Tórshavn',
       priceTier: '$$$',
@@ -299,6 +301,7 @@ export const guide: FlatGuide = {
       archetypes: ['Families'],
     },
     {
+      id: 'hotel-brandan',
       name: 'Hotel Brandan',
       type: '4-star hotel · Tórshavn',
       priceTier: '$$$',
@@ -313,22 +316,30 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'islas-feroe-full-day-highlights-tour',
       name: 'Faroe Islands: Full Day Highlights Tour',
       description: 'The most complete route through the islands in a single day: the village of Saksun (turf houses at the bottom of an enclosed fjord), Lake Sørvágsvatn — the one with the optical illusion of sitting above the ocean — and the Trælanípa cliffs. For families with kids age 5 and up. An 8-hour guided tour with lunch included and pickup from Tórshavn. The most photogenic day available on the islands.',
       tags: ['Full day', 'Saksun', 'Trælanípa'],
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
+      category: 'excursion',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/gjogv-l137328/faroe-islands-private-highlights-tour-t938909/',
     },
     {
+      id: 'puffin-watching-y-mykines-island-day-trip',
       name: 'Puffin Watching & Mykines Island Day Trip',
       description: 'The island of Mykines — reachable only by ferry or helicopter — has the largest puffin colony in the North Atlantic. In July, puffins land within arm\'s reach while nesting in the cliff crevices. For kids of any age: the encounter with a puffin is the moment of the trip that stays in memory the longest. Ferry from Sørvágur (1.5 hours) plus a 45-minute walk to the lighthouse.',
       tags: ['Puffins', 'Mykines', 'Ferry'],
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
+      category: 'naturaleza',
+      affiliateUrl: 'https://www.getyourguide.com/reykjavik-l30/reykjavik-puffin-watching-boat-tour-t22613/',
     },
     {
+      id: 'gasadalur-village-y-mulafossur-waterfall-tour',
       name: 'Gasadalur Village & Múlafossur Waterfall Tour',
       description: 'Gásadalur is the most isolated village in the Faroe Islands — accessible only through a tunnel built in 2004; before that, only by mountain trail. The Múlafossur waterfall falls straight into the Atlantic from the cliff edge with the village in the background: the most shared image of the islands. Half-day guided tour from Tórshavn with free time in the village and access to the viewpoint. For families with young kids: the walk is short and the visual impact is immediate.',
       tags: ['Gásadalur', 'Múlafossur', 'Half day'],
-      affiliateUrl: 'https://www.getyourguide.com/en-gb/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
+      category: 'naturaleza',
+      duration: 'medio',
+      affiliateUrl: 'https://www.getyourguide.com/sorvagur-l190518/exclusive-15-hour-drangarnir-boat-tour-t468221/',
     },
   ],
 

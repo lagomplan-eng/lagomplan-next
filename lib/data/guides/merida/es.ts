@@ -131,6 +131,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'chable-yucatan',
       name: 'Chablé Yucatán',
       type: 'Resort · Hacienda en la selva',
       priceTier: '$$$',
@@ -140,6 +141,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Aventura'],
     },
     {
+      id: 'hacienda-xcanatun-by-angsana',
       name: 'Hacienda Xcanatun by Angsana',
       type: 'Hacienda · Mérida',
       priceTier: '$$',
@@ -149,6 +151,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Aventura'],
     },
     {
+      id: 'las-brisas',
       name: 'Las Brisas',
       type: 'Hotel · Paseo de Montejo',
       priceTier: '$',
@@ -161,21 +164,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'cenotes-de-santa-barbara',
       name: 'Cenotes de Santa Bárbara',
       description: 'Se recorren tres cenotes diferentes en un truck (vagón jalado por caballos sobre rieles) o en bicicleta. Es seguro, organizado y el agua es cristalina.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
     {
+      id: 'uxmal-y-choco-story',
       name: 'Uxmal y Choco-Story',
       description: 'Exploren la zona arqueológica de Uxmal (menos saturada que Chichén Itzá) y crucen la calle hacia el museo del chocolate. Los niños pueden ver animales rescatados y aprender cómo los mayas hacían cacao.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/MfDnM-RL5D',
+      category: 'cultura',
+      affiliateUrl: 'https://www.getyourguide.com/uxmal-l114187/from-meridauxmal-and-amazing-cenotes-guided-tour-with-lunch-t970984/',
     },
     {
+      id: 'reserva-de-el-corchito',
       name: 'Reserva de El Corchito',
       description: 'Un viaje corto en lancha desde Progreso hacia un oasis de manglares y cenotes bajos. Es el lugar ideal para ver mapaches y coatíes en su hábitat natural mientras nadan.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: '',
     },
   ],

@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'anticavilla-hotel',
       name: 'Anticavilla Hotel',
       type: 'Hotel · Villa histórica',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Familias', 'Parejas', 'Bienestar'],
     },
     {
+      id: 'hacienda-de-cortes',
       name: 'Hacienda de Cortés',
       type: 'Hacienda · Siglo XVI',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'las-casas-b-b',
       name: 'Las Casas B+B',
       type: 'Hotel boutique · Centro',
       priceTier: '$',
@@ -125,21 +128,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'degustacion-de-comida-mexicana',
       name: 'Degustación de comida mexicana',
       description: 'Entra en una casa local en Cuernavaca para una sesión de degustación guiada con comidas y bebidas tradicionales mexicanas, cuidadosamente seleccionadas para mostrar la rica cultura culinaria del país.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
     {
+      id: 'jardines-de-mexico',
       name: 'Jardines de México',
       description: 'A unos minutos de la ciudad, es el jardín floral más grande del mundo. Recorrer el jardín japonés o el italiano al atardecer es una experiencia visualmente impactante y muy instagrameable.',
       tags: [],
+      category: 'naturaleza',
       affiliateUrl: 'https://jardinesdemexico.com/',
     },
     {
+      id: 'cata-de-mezcal-o-tequila-en-el-jardin',
       name: 'Cata de mezcal o tequila en el jardín',
       description: 'Organizar una degustación privada en los jardines del hotel. Cuernavaca se presta para largas sobremesas que comienzan con una cata guiada por un experto antes de la cena.',
       tags: [],
+      category: 'comida',
       affiliateUrl: '',
     },
   ],

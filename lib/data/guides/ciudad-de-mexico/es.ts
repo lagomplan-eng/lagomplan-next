@@ -89,6 +89,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-ritz-carlton-mexico-city',
       name: 'The Ritz-Carlton, Mexico City',
       type: 'Hotel · Paseo de la Reforma',
       priceTier: '$$$',
@@ -98,6 +99,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'brick-hotel',
       name: 'Brick Hotel',
       type: 'Hotel boutique · Roma Norte',
       priceTier: '$$',
@@ -107,6 +109,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas'],
     },
     {
+      id: 'casa-cuenca',
       name: 'Casa Cuenca',
       type: 'Hotel boutique · Roma',
       priceTier: '$$',
@@ -119,21 +122,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'casa-luis-barragan',
       name: 'Casa Luis Barragán',
       description: 'Es indispensable reservar con meses de antelación. Es una lección de luz, color y silencio; la experiencia arquitectónica más íntima que puedes tener en pareja.',
       tags: ['Reserva con meses de anticipación'],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/YC8OoqqWnR',
+      category: 'cultura',
+      affiliateUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-casa-ortega-by-luis-barragan-architectural-tour-t998831/',
     },
     {
+      id: 'ruta-de-galerias-en-la-san-rafael',
       name: 'Ruta de galerías en la San Rafael',
       description: 'Salgan de la Roma y exploren el barrio de la San Rafael. Visiten galerías como Hilario Galguera o Eco; encontrarán arte contemporáneo de alto nivel sin las multitudes.',
       tags: [],
+      category: 'cultura',
       affiliateUrl: '',
     },
     {
+      id: 'cena-en-barra-de-autor',
       name: 'Cena en barra de autor',
       description: 'Busquen lugares como Expendio de Maíz o la barra de Máximo. Ver la precisión de los chefs a pocos centímetros mientras comparten un vino natural es el epítome del lujo relajado.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/',
     },
   ],

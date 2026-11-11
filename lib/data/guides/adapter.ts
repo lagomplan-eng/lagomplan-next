@@ -167,6 +167,7 @@ export function adaptFlatGuide(flat: FlatGuide, now: Date = guideNow()): GuidePa
       title:       l.expTitle,
       description: flat.experiencesDescription ?? l.expDesc,
       items: flat.experiences.map((e, i) => ({
+        id:          e.id,
         number:      String(i + 1).padStart(2, '0'),
         name:        e.name,
         description: e.description,

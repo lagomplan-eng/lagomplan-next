@@ -147,6 +147,7 @@ export default function Nav() {
   const navLinks = [
     { key: 'planner' as const,           label: t('planner')    },
     { key: 'guidesIndex' as const,       label: t('guides')     },
+    { key: 'experiencesIndex' as const,  label: t('experiences') },
     ...(SHOW_SMART_FINDS
       ? [{ key: 'smartFindsFamilias' as const, label: t('smartFinds') }]
       : []),
@@ -160,6 +161,7 @@ export default function Nav() {
   const LINK_PATHS = {
     planner:             '/planner',
     guidesIndex:         '/guides',
+    experiencesIndex:    '/experiences',
     smartFindsFamilias:  '/smart-finds/familias',
     hotelsIndex:         '/hotels',
     worldcupIndex:       '/worldcup',

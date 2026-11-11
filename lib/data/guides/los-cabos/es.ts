@@ -95,6 +95,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-cape-a-thompson-hotel',
       name: 'The Cape, a Thompson Hotel',
       type: 'Hotel · Corredor Turístico',
       priceTier: '$$$',
@@ -104,6 +105,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'hacienda-encantada-resort-residences',
       name: 'Hacienda Encantada Resort & Residences',
       type: 'Resort · Corredor Turístico',
       priceTier: '$$',
@@ -113,6 +115,7 @@ export const guide: FlatGuide = {
       archetypes: ['Parejas', 'Bienestar'],
     },
     {
+      id: 'drift-san-jose',
       name: 'Drift San José',
       type: 'Hotel boutique · Distrito del Arte',
       priceTier: '$',
@@ -125,21 +128,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'manana-de-spa-y-agua',
       name: 'Mañana de spa y agua',
       description: 'Dedicar 2–3 horas al circuito de hidroterapia (vapor, sauna, fosa fría). En Los Cabos, el spa es una de las principales actividades del viaje.',
       tags: [],
+      category: 'bienestar',
       affiliateUrl: '',
     },
     {
+      id: 'sunset-sail-privado',
       name: 'Sunset sail privado',
       description: 'Un catamarán solo para ustedes hacia el Arco. Ver el atardecer con una copa de vino desde el mar es el momento cumbre de la desconexión.',
       tags: [],
-      affiliateUrl: 'https://getyourguide.stay22.com/lagomplan/-uH48XyB3E',
+      category: 'excursion',
+      affiliateUrl: 'https://www.getyourguide.com/los-cabos-l264/cabos-cruise-with-snorkeling-luxury-lunch-and-open-bar-t263547/',
     },
     {
+      id: 'cena-en-el-huerto-flora-farms-o-acre',
       name: 'Cena en el huerto: Flora Farms o Acre',
       description: 'Gastronomía farm-to-table en San José rodeadas de flores y coctelería botánica.',
       tags: [],
+      category: 'comida',
       affiliateUrl: 'https://www.opentable.com/',
     },
   ],

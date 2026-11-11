@@ -36,6 +36,8 @@ export interface HotelData {
 }
 
 export interface ExperienceData {
+  /** Stable experience id (FlatExperience.id); the DOM anchor on the guide page is `exp-<id>`. */
+  id: string
   number: string
   name: string
   description: string
@@ -139,6 +141,8 @@ export interface FlatDay {
 }
 
 export interface FlatHotel {
+  /** Stable id: slug of the Spanish name, the same in es and en (scripts/hotels/add-ids.ts). */
+  id: string
   name: string
   /** e.g. "Hotel boutique · Lago" */
   type: string
@@ -158,11 +162,55 @@ export interface FlatHotel {
   archetypes?: string[]
 }
 
+/**
+ * Editorial classification of an experience. Our own taxonomy, not GYG's.
+ * UI label for 'comida' is "Comida y bebida" / "Food & drink".
+ */
+export type ExperienceCategory =
+  | 'comida' | 'cultura' | 'naturaleza' | 'aventura' | 'excursion' | 'bienestar'
+
+/** corto ≤ 4 h, medio > 4–7 h, completo > 7 h. Set only from an explicit duration tag. */
+export type ExperienceDuration = 'corto' | 'medio' | 'completo'
+
 export interface FlatExperience {
+  /**
+   * Stable kebab-case id, unique across ALL guides, derived from the ES name.
+   * The ES and EN entries for the same experience carry the same id (they are
+   * paired by array position). Never change an id once shipped: it is the
+   * "Ver en la guía" anchor (#exp-<id>) and the key of the saved plan.
+   */
+  id: string
   name: string
   description: string
   tags: string[]
   affiliateUrl: string
+  /** Absent when no category fits. Absent renders nothing. */
+  category?: ExperienceCategory
+  /** Absent unless an existing tag states the duration. Never inferred. */
+  duration?: ExperienceDuration
+}
+
+// ── Guide-level metadata (lives in GUIDE_META, not in the guide files) ────────
+
+export type GuideRegion =
+  | 'mexico' | 'latam' | 'norteamerica' | 'europa' | 'asia' | 'africa' | 'oceania'
+
+/**
+ * Recurring annual window in which a guide's experiences appear on the Experiencias hub.
+ * "MM-DD" strings, both ends inclusive, evaluated in Mexico City time (lib/experiences/window.ts).
+ * from > until wraps the year end (e.g. 11-15 .. 01-10). No window = always on the hub.
+ */
+export interface HubWindow {
+  from: string
+  until: string
+}
+
+export interface GuideMeta {
+  region: GuideRegion
+  /** Short label for filters and cards, e.g. "Alto Adigio" / "South Tyrol". */
+  shortName: { es: string; en: string }
+  /** Optional. Absent = on the hub all year. */
+  hubWindow?: HubWindow
 }
 
 export interface FlatTransport {

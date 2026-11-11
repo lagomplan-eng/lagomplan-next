@@ -191,6 +191,7 @@ export const guide: FlatGuide = {
 
   hotels: [
     {
+      id: 'the-murray-hong-kong',
       name: 'The Murray Hong Kong',
       type: 'Design hotel · Central, Hong Kong Island',
       priceTier: '$$$',
@@ -200,6 +201,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'hotel-indigo-hong-kong-island',
       name: 'Hotel Indigo Hong Kong Island',
       type: 'Boutique hotel · Wan Chai, Hong Kong Island',
       priceTier: '$$$',
@@ -209,6 +211,7 @@ export const guide: FlatGuide = {
       archetypes: [],
     },
     {
+      id: 'rosewood-hong-kong',
       name: 'Rosewood Hong Kong',
       type: 'Hotel · Tsim Sha Tsui, Kowloon',
       priceTier: '$$$',
@@ -223,21 +226,27 @@ export const guide: FlatGuide = {
 
   experiences: [
     {
+      id: 'kowloon-tour-privado-de-mercados-nocturnos-y-comida',
       name: 'Kowloon: private night market and street food tour',
       description: "Hong Kong's most authentic tour for groups: four hours through the night markets and streets of Kowloon with a Hong Kong local. It passes the Temple Street Night Market, the Mong Kok alleys, the curry fish ball stalls, and the neighborhood dim sum spots that never make a Michelin list but that locals have eaten at every Sunday for as long as anyone can remember.",
       tags: ['Street food', 'Night', 'Kowloon'],
+      category: 'comida',
       affiliateUrl: 'https://www.getyourguide.com/hong-kong-l174/kowloon-private-night-markets-street-food-experience-t225462/',
     },
     {
+      id: 'tour-de-dia-con-dim-sum',
       name: 'Day tour with dim sum',
       description: "Victoria Peak at dawn has the clearest views of the year in October, without summer's haze. The historic tram climbing a 45-degree incline is the city's single most Hong Kong mode of transport. The tour pairs the Peak with Central and ends with dim sum at a local go-to restaurant.",
       tags: ['Peak', 'Dim sum', 'Central'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/hong-kong-l174/',
     },
     {
+      id: 'star-ferry-symphony-of-lights-y-mercado-mayorista',
       name: 'Star Ferry, Symphony of Lights, and the wholesale market',
       description: "The Star Ferry crossing Victoria Harbour, the Symphony of Lights at 8pm over the full skyline, Kowloon's wholesale fruit market in full night-time swing, and Kowloon Peak for the final views. The plan for the night the group wants the cinematic version of Hong Kong.",
       tags: ['Star Ferry', 'Night', 'Skyline'],
+      category: 'cultura',
       affiliateUrl: 'https://www.getyourguide.com/china-l169032/hong-kong-night-adventure-and-foodie-tour-t830029/',
     },
   ],

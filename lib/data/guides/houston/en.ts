@@ -165,6 +165,7 @@ export const guide: FlatGuide = {
   itineraryDescription: "Five nights based near the Galleria (Uptown) or downtown. In Houston it pays to rent a car: distances are long.",
   hotels: [
     {
+      id: 'the-post-oak-hotel-at-uptown-houston',
       name: "The Post Oak Hotel at Uptown Houston",
       type: "Luxury hotel · Uptown, 1.6 km from the Galleria",
       priceTier: "$$$$",
@@ -174,6 +175,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'jw-marriott-houston-by-the-galleria',
       name: "JW Marriott Houston by the Galleria",
       type: "Hotel · Across from the Galleria",
       priceTier: "$$$",
@@ -183,6 +185,7 @@ export const guide: FlatGuide = {
       archetypes: ["Familias"],
     },
     {
+      id: 'marriott-marquis-houston',
       name: "Marriott Marquis Houston",
       type: "Hotel · Downtown Houston",
       priceTier: "$$$",
@@ -195,21 +198,29 @@ export const guide: FlatGuide = {
   hotelsDescription: "Two hotels by the Galleria and one downtown, steps from the Rockets and the parade. Booking.com ratings; reference prices per night taken from comparison sites in 2026, in US dollars. Thanksgiving week usually costs more: confirm the rate at the link.",
   experiences: [
     {
+      id: 'control-de-mision-historico-de-la-nasa-entrada-general',
       name: "NASA Historic Mission Control + general admission",
       description: "GetYourGuide: 4.8/5 (177 reviews) · From US$150. Marked as top rated on GetYourGuide: general admission plus the tram ride to Historic Mission Control, the room from which the Apollo missions were directed. It lasts about eight hours in a small group. Tram availability is set by NASA and may vary; tickets arrive by email or message one hour before your entry time. If you only want the museum, general admission on GetYourGuide starts at US$30 (4.5/5, more than 3,800 reviews).",
       tags: ["Science", "8 hours", "Small group", "Tram to Mission Control"],
-      affiliateUrl: "https://www.getyourguide.com/houston-l719/houston-driving-tour-nasa-space-center-tickettransport-t600673/?ref=lagomplan",
+      category: 'excursion',
+      duration: 'completo',
+      affiliateUrl: 'https://www.getyourguide.com/houston-l719/houston-driving-tour-nasa-space-center-tickettransport-t600673/',
     },
     {
+      id: 'downtown-aquarium-pase-de-todo-el-dia',
       name: "Downtown Aquarium: all-day pass",
       description: "GetYourGuide: 4.4/5 (339 reviews) · From US$27 per person. An aquarium in downtown Houston with the Aquarium Adventure exhibit, Stingray Reef and unlimited rides, including the Shark Voyage train that runs through a shark tunnel. You can go in any time of day, with no ticket line. A good half-day plan or an alternative to the Sunday game.",
       tags: ["Aquarium", "Half day", "Unlimited rides", "Flexible entry"],
-      affiliateUrl: "https://www.getyourguide.com/houston-l719/houston-downtown-aquarium-all-day-pass-t431145/?ref=lagomplan",
+      category: 'naturaleza',
+      duration: 'medio',
+      affiliateUrl: 'https://www.getyourguide.com/houston-l719/houston-downtown-aquarium-all-day-pass-t431145/',
     },
     {
+      id: 'escape-room-de-una-hora-en-la-galleria',
       name: "One-hour escape room at the Galleria",
       description: "GetYourGuide: 5.0/5 (4 reviews) · From US$43 per person. One hour to complete the mission in one of four themed rooms: recover a stolen painting, a special operation, an underwater lab or a train ride through time. Up to eight players, suggested age 13 and up. It is on the Galleria's lower level, next to the ice rink: it fits right into the middle of Black Friday.",
       tags: ["Team game", "1 hour", "Up to 8 people", "At the Galleria"],
+      duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/houston-l719/escape-rooms-tc357/?ref=lagomplan",
     },
   ],
