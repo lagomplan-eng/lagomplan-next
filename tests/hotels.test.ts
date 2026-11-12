@@ -136,10 +136,11 @@ trackHotelFilter('es', EMPTY_HOTEL_FILTERS, { destino: 'ciudad-de-mexico', price
 trackHotelFilter('es', { destino: 'x', price: null, viajero: 'solo' }, EMPTY_HOTEL_FILTERS, 171)
 trackHotelFilter('es', EMPTY_HOTEL_FILTERS, EMPTY_HOTEL_FILTERS, 171)
 const hf = sent.filter(s => s[1] === 'hotel_filter').map(s => s[2])
-eq(hf[0], { lang: 'es', filter_group: 'destino', filter_value: 'ciudad-de-mexico', result_count: 7 }, 'hotel_filter: destino')
-eq(hf[1], { lang: 'es', filter_group: 'precio', filter_value: 'lujo', result_count: 7 }, 'hotel_filter: precio')
+eq(hf[0], { lang: 'es', filter_group: 'destino', filter_value: 'ciudad-de-mexico', results_count: 7 }, 'hotel_filter: destino')
+eq(hf[1], { lang: 'es', filter_group: 'precio', filter_value: 'lujo', results_count: 7 }, 'hotel_filter: precio')
 eq(hf.slice(2).map(p => [p.filter_group, p.filter_value]), [['destino', '(cleared)'], ['viajero', '(cleared)']], 'hotel_filter: cleared values')
 eq(hf.length, 4, 'one event per changed group, none when nothing changed')
+ok(hf.every(p => !('result_count' in p)), 'hotel_filter sends results_count only (same name as experience_filter)')
 const b = es.find(h => h.id === 'brick-hotel')!
 trackHotelBook(b, 2, 'es')
 const book = sent.filter(s => s[1] === 'partner_link_click').pop()![2]

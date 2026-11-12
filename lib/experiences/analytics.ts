@@ -6,9 +6,9 @@
  *
  *   experience_list_view     lang, experiences_total
  *   experience_filter        lang, filter_group, filter_value, results_count
- *   partner_link_click       link_name=gyg_experience, section=experience_hub,
- *                            experience_id, position, provider=gyg, destination_slug
- *                            (destination stays the hostname, as for every partner link)
+ *   partner_link_click       link_name=gyg_experience, section=experience_hub (card) or
+ *                            experience_plan (plan panel), experience_id, position, provider=gyg,
+ *                            destination_slug (destination stays the hostname, as for every partner link)
  *   experience_guide_click   lang, experience_id, destination_slug, position
  *
 
@@ -42,13 +42,21 @@ export function trackFilterChange(lang: string, prev: FilterState, next: FilterS
   }
 }
 
-export function trackBookClick(e: Pick<Experience, 'id' | 'bookingUrl' | 'destinationSlug'>, position: number, lang: string) {
+/** Where the click happened: a hub card, or the plan panel. Position is within that list. */
+export type ExperienceBookSection = 'experience_hub' | 'experience_plan'
+
+export function trackBookClick(
+  e: Pick<Experience, 'id' | 'bookingUrl' | 'destinationSlug'>,
+  position: number,
+  lang: string,
+  section: ExperienceBookSection = 'experience_hub',
+) {
   trackOutboundLink({
     linkName: 'gyg_experience',
     href: e.bookingUrl,
     partnerSlug: 'getyourguide',
     lang,
-    section: 'experience_hub',
+    section,
     experienceId: e.id,
     position,
     provider: 'gyg',

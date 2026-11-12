@@ -77,9 +77,13 @@ export function gaPageView(path: string, title?: string): void {
  */
 // services_contact added 2026-09-28 (Livin brief, Take care tab) — chef
 // and massage outbound links (WhatsApp, Book online, Mapa, Take a Chef).
-// experience_hub added for the /experiencias hub (GetYourGuide booking links on its cards and plan panel).
-// hotels_index added for the Hoteles page (booking links on its cards and in the plan panel).
-export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact' | 'experience_hub' | 'hotels_index'
+// Catalog pages: the card and the plan panel are separate sections, so a booking click can be
+// attributed to where it happened:
+//   experience_hub  booking link on a card of the /experiencias hub
+//   experience_plan booking link inside the plan panel, for an experience
+//   hotels_index    booking link on a card of the Hoteles page
+//   hotels_plan     booking link inside the plan panel, for a hotel
+export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact' | 'experience_hub' | 'experience_plan' | 'hotels_index' | 'hotels_plan'
 
 /**
  * Fires partner_link_click for any of the four tracked render sites
@@ -100,7 +104,7 @@ export function trackOutboundLink(params: {
   experienceId?: string
   /** Hoteles only (hotel_booking). Stable hotel id from the guide / World Cup data. */
   hotelId?: string
-  /** Hub and Hoteles. 1-based position in the list the traveler was looking at. */
+  /** Hub and Hoteles. 1-based position in the list the traveler was looking at (the card list, or the plan panel for the *_plan sections). */
   position?: number
   /** Hub only. The booking provider, passed explicitly ('gyg'). */
   provider?: string
