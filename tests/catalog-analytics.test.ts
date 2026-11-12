@@ -11,7 +11,7 @@ import { getExperiences } from '../lib/experiences'
 import { getPlanCatalog } from '../lib/plan-catalog'
 import { getAllHotels } from '../lib/hotels'
 import { trackBookClick, trackFilterChange, trackGuideClick, trackListView } from '../lib/experiences/analytics'
-import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff } from '../lib/catalog-analytics'
+import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff, trackPlannerCta } from '../lib/catalog-analytics'
 import { parseFilters } from '../lib/experiences/filters'
 import { EMPTY_HOTEL_FILTERS } from '../lib/hotels-catalog'
 
@@ -27,6 +27,8 @@ const sent: Sent[] = []
 ;(globalThis as any).window = { gtag: (...a: any[]) => sent.push(a as Sent) }
 const last = (name: string) => sent.filter(s => s[1] === name).pop()![2]
 const keys = (o: Record<string, unknown>) => Object.keys(o).sort()
+
+process.env.NEXT_PUBLIC_FEATURE_SAVED_PLAN = 'true' // the plan_* events only fire with the saved-plan flag on (tests/saved-plan-flag.test.ts)
 
 // ── fixtures ───────────────────────────────────────────────────────────────────────
 const exp = getExperiences('es', { ignoreWindow: true })[0]
@@ -109,12 +111,24 @@ let threw = false
 try { trackBookClick(exp, 1, 'es'); trackPlanBook(planHotel, 1, 'es'); trackHotelFilter('es', EMPTY_HOTEL_FILTERS, { destino: 'x', price: null, viajero: null }, 1) } catch { threw = true }
 ok(!threw, 'tracking without window.gtag does not throw')
 
+// planner_cta_click: not a plan_* event, no flag needed
+delete process.env.NEXT_PUBLIC_FEATURE_SAVED_PLAN
+;(globalThis as any).window = { gtag: (...a: any[]) => sent.push(a as Sent) }
+trackPlannerCta('roma', 'experience_hub', 'es')
+eq(last('planner_cta_click'), { lang: 'es', section: 'experience_hub', destination_slug: 'roma' }, 'planner_cta_click params')
+trackPlannerCta(null, 'experience_hub', 'es')
+eq(keys(last('planner_cta_click')), ['lang', 'section'], 'planner_cta_click omits destination_slug when none')
+process.env.NEXT_PUBLIC_FEATURE_SAVED_PLAN = 'true'
+
 // ── 4. the taxonomy doc names every event, parameter and section value ─────────────────────
 const doc = readFileSync('docs/analytics/mxcity-pilot-taxonomy.md', 'utf8')
 const mentioned = (t: string) => doc.includes('`' + t + '`')
 const names = [...new Set(sent.map(s => s[1]))]
 const params = [...new Set(sent.flatMap(s => Object.keys(s[2])))]
 for (const e of names) ok(mentioned(e) || (e.startsWith('plan_') && doc.includes('`plan_add` / `plan_remove`')), `doc names event ${e}`)
+ok(mentioned('planner_cta_click'), 'doc names planner_cta_click')
+ok(doc.includes('NEXT_PUBLIC_FEATURE_SAVED_PLAN=true'), 'doc: plan_* events only fire with NEXT_PUBLIC_FEATURE_SAVED_PLAN=true')
+for (const e of ['plan_add', 'plan_remove', 'plan_handoff']) ok(doc.includes('`' + e + '`'), `doc (flag): ${e}`)
 for (const q of params) ok(mentioned(q), `doc names parameter ${q}`)
 for (const v of ['experience_hub', 'experience_plan', 'hotels_index', 'hotels_plan', 'gyg_experience', 'hotel_booking']) ok(mentioned(v), `doc names ${v}`)
 ok(/\| Plan item ID \| Event \| `plan_item_id` \|/.test(doc), 'doc: dimension registration row for plan_item_id')

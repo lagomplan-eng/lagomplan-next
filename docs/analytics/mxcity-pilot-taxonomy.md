@@ -126,10 +126,19 @@ exact parameter set, and checks this section names each of them.
 | `experience_guide_click` | "Ver en la guía" button on a hub card | `lang`, `experience_id` (`parque-xcaret`), `destination_slug` (`cancun`), `position` (`3`) |
 | `hotel_filter` | One event per filter group that changed, on Hoteles | `lang`, `filter_group` (`destino` \| `precio` \| `viajero`), `filter_value`, `results_count` (`12`) |
 | `plan_add` / `plan_remove` | An item is added to / removed from the plan, on either page | `lang`, `item_type` (`experience` \| `hotel`), `plan_item_id` (`parque-xcaret`), `destination_slug`, `plan_size` (`3`, the size after the change) |
-| `plan_handoff` | "Plan this trip" from the plan panel, or the concierge CTA | `lang`, `plan_size`, `mixed` (`true` when the plan has both experiences and hotels; always `false` for `concierge`), `source` (`panel` \| `concierge`), `destination_slug` (omitted when there is none) |
+| `plan_handoff` | "Plan this trip" from the plan panel | `lang`, `plan_size`, `mixed` (`true` when the plan has both experiences and hotels), `source` (`panel`; the `concierge` value is no longer sent, see `planner_cta_click`), `destination_slug` (omitted when there is none) |
+| `planner_cta_click` | The "Planear mi viaje" CTA in the "¿Lo armamos por ti?" block is clicked. **Not gated by the saved-plan flag**; fires whether or not the plan is shown | `lang`, `section` (`experience_hub` \| `hotels_index`), `destination_slug` (the destination being browsed; omitted when there is none). Today only the hub has the CTA, so only `experience_hub` is sent; `hotels_index` is reserved for a Hoteles CTA |
 | `partner_link_click` | A booking link is clicked | see below |
 
 `hotel_filter` and `experience_filter` use the same count parameter, `results_count`.
+
+**The saved plan is behind a flag.** `plan_add`, `plan_remove`, `plan_handoff` and the plan-panel
+booking clicks (`partner_link_click` with `section` = `experience_plan` / `hotels_plan`) are sent
+**only when `NEXT_PUBLIC_FEATURE_SAVED_PLAN=true`**. The flag is off by default (the plan is hidden
+until account-based "Guardados" ships), and it is read at build time, so a change needs a redeploy.
+While it is off none of those events exist in GA4, and `planner_cta_click` is the only plan-related
+signal. Don't read a drop to zero in `plan_*` as a tracking fault. Card-level booking clicks
+(`experience_hub`, `hotels_index`) are not affected.
 
 ### Catalog `partner_link_click`
 
@@ -165,6 +174,7 @@ event name. Registration is not retroactive.
 | Plan item type | Event | `item_type` | `plan_add`, `plan_remove` |
 | Plan includes hotels and experiences | Event | `mixed` | `plan_handoff` |
 | Plan handoff source | Event | `source` | `plan_handoff` |
+| Destination slug (above) / `section` / `lang` | Event | (existing) | `planner_cta_click` reuses `destination_slug`, `section` and `lang`; no new dimension is needed |
 | Provider | Event | `provider` | `partner_link_click` |
 | Click position | Event | `position` | `experience_guide_click`, `partner_link_click` |
 
@@ -184,6 +194,7 @@ The catalog went live in production on 2026-11-12. Events sent before the change
 - `partner_link_click.section`: added `experience_plan` and `hotels_plan`. Plan-panel clicks were
   previously reported as `experience_hub` / `hotels_index`, indistinguishable from card clicks.
 - `hotel_filter`: `result_count` is now `results_count`.
+- `plan_*` events and plan-panel booking clicks are now sent only when `NEXT_PUBLIC_FEATURE_SAVED_PLAN=true` (off by default). New event `planner_cta_click`. The concierge CTA no longer sends `plan_handoff` with `source=concierge`.
 - `plan_add` / `plan_remove`: `item_id` is now `plan_item_id`. Other events that use `item_id`
   (the planner and trip-result events) are unchanged.
 
