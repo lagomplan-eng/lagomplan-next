@@ -6,7 +6,7 @@
  */
 import { readFileSync } from 'fs'
 import { isSavedPlanEnabled } from '../lib/feature-flags'
-import { trackPlanBook, trackPlanChange, trackPlanHandoff } from '../lib/catalog-analytics'
+import { trackPlanBook, trackPlanChange, trackPlanHandoff, trackPlannerCta } from '../lib/catalog-analytics'
 import type { PlanEntry } from '../lib/plan'
 
 let pass = 0, fail = 0
@@ -37,6 +37,25 @@ process.env[KEY] = 'true'; eq(isSavedPlanEnabled(), true, '"true": on')
 delete process.env[KEY]; sent.length = 0
 fireAll()
 eq(sent.length, 0, 'flag off: no gtag call at all from the plan trackers (no plan_*, no plan-panel partner_link_click)')
+
+// ── planner_cta_click: the concierge CTA, not a plan_* event, fires with the flag off ──
+delete process.env[KEY]; sent.length = 0
+trackPlannerCta('roma', 'experience_hub', 'es')
+trackPlannerCta(null, 'experience_hub', 'en')
+trackPlannerCta('cancun', 'hotels_index', 'es')
+eq(sent.map(s => [s[0], s[1]]), [['event', 'planner_cta_click'], ['event', 'planner_cta_click'], ['event', 'planner_cta_click']], 'flag off: planner_cta_click fires')
+eq(sent[0][2], { lang: 'es', section: 'experience_hub', destination_slug: 'roma' }, 'planner_cta_click params (destination)')
+eq(sent[1][2], { lang: 'en', section: 'experience_hub' }, 'planner_cta_click: destination_slug omitted when none')
+eq('destination_slug' in sent[1][2], false, 'planner_cta_click: no empty destination_slug key')
+eq(sent[2][2].section, 'hotels_index', 'planner_cta_click: hotels_index section')
+eq(sent.some(s => String(s[1]).startsWith('plan_')), false, 'planner_cta_click is not a plan_* event')
+process.env[KEY] = 'true'; sent.length = 0
+trackPlannerCta('roma', 'experience_hub', 'es')
+eq(sent.length, 1, 'flag on: planner_cta_click still fires once')
+const hubSrc = readFileSync('components/experiences/ExperiencesHub.tsx', 'utf8')
+ok(/trackPlannerCta\(conciergeDestination\?\.slug \?\? null, 'experience_hub', lang\)/.test(hubSrc), 'hub CTA sends planner_cta_click with its destination')
+ok(!/trackPlanHandoff\([^)]*'concierge'/.test(hubSrc), 'hub CTA no longer sends plan_handoff')
+delete process.env[KEY]
 
 // ── events unchanged while on ──────────────────────────────────────────────
 process.env[KEY] = 'true'; sent.length = 0

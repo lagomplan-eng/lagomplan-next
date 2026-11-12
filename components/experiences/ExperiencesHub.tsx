@@ -32,7 +32,7 @@ import { usePlan } from '../catalog/usePlan'
 import { isSavedPlanEnabled } from '../../lib/feature-flags'
 import { planDestination, resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
 import { trackBookClick, trackFilterChange, trackGuideClick, trackListView } from '../../lib/experiences/analytics'
-import { trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
+import { trackPlanBook, trackPlanChange, trackPlanHandoff, trackPlannerCta } from '../../lib/catalog-analytics'
 
 interface Props {
   experiences: Experience[]
@@ -282,7 +282,7 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
               </div>
               <Link
                 href={conciergeDestination ? { pathname: '/planner', query: { destination: conciergeDestination.name } } : '/planner'}
-                onClick={() => trackPlanHandoff(conciergeDestination?.slug ?? null, planItems.length, false, 'concierge', lang)}
+                onClick={() => trackPlannerCta(conciergeDestination?.slug ?? null, 'experience_hub', lang)}
                 className="inline-flex min-h-[48px] items-center rounded-full bg-pine px-6 text-[15px] font-bold text-white no-underline hover:bg-[#2D6B5A]"
               >
                 {t('concierge.cta')}
