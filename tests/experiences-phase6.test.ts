@@ -41,6 +41,7 @@ const ok = (c: boolean, msg: string) => eq(c, true, msg)
   const sent: Array<[string, string, any]> = []
   ;(globalThis as any).window = { gtag: (...a: any[]) => sent.push(a as any) }
   const e = es[0]
+  process.env.NEXT_PUBLIC_FEATURE_SAVED_PLAN = 'true' // the plan_* events only fire with the saved-plan flag on (tests/saved-plan-flag.test.ts)
   trackListView('es', 53)
   trackBookClick(e, 3, 'es')
   trackGuideClick(e, 3, 'es')
