@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
 
 import type { Metadata }              from 'next'
 import Script                         from 'next/script'
-import { Manrope, Fraunces, DM_Mono } from 'next/font/google'
+import { fontVariables } from '../../lib/fonts'
 import { notFound }                   from 'next/navigation'
 import { NextIntlClientProvider }     from 'next-intl'
 import { getMessages, getTranslations } from 'next-intl/server'
@@ -47,28 +47,6 @@ import '../globals.css'
 // Preview; keep unset locally so dev requests don't pollute analytics.
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-// ── Fonts ──────────────────────────────────────────────────
-const manrope = Manrope({
-  subsets:  ['latin'],
-  variable: '--font-sans',
-  display:  'swap',
-  weight:   ['400', '500', '700'],
-})
-
-const fraunces = Fraunces({
-  subsets:  ['latin'],
-  variable: '--font-display',
-  display:  'swap',
-  weight:   ['500', '600'],
-  style:    ['normal', 'italic'],
-})
-
-const dmMono = DM_Mono({
-  subsets:  ['latin'],
-  variable: '--font-mono',
-  display:  'swap',
-  weight:   ['400'],
-})
 
 // ── Static params ──────────────────────────────────────────
 export function generateStaticParams() {
@@ -122,7 +100,7 @@ export default async function RootLayout({
   return (
     <html
       lang={locale}
-      className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}
+      className={fontVariables}
       suppressHydrationWarning
     >
       <head>

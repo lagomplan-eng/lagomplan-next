@@ -19,7 +19,21 @@
  *  --font-mono     DM Mono   (kept for utility labels — not in brand guide but functional)
  */
 
+/* Size-adjusted fallbacks shown while a web font loads (font-display: swap). The values are the ones
+   next/font/google generated for these fonts; see lib/fonts/index.ts. */
+@font-face { font-family: 'Manrope Fallback';  src: local('Arial');           ascent-override: 103.31%; descent-override: 29.07%; line-gap-override: 0.00%; size-adjust: 103.19%; }
+@font-face { font-family: 'Fraunces Fallback'; src: local('Times New Roman'); ascent-override: 84.71%;  descent-override: 22.09%; line-gap-override: 0.00%; size-adjust: 115.45%; }
+@font-face { font-family: 'DM Mono Fallback';  src: local('Arial');           ascent-override: 73.71%;  descent-override: 23.03%; line-gap-override: 0.00%; size-adjust: 134.59%; }
+
 :root {
+  /* Fonts. next/font/local defines one variable per unicode-range subset (lib/fonts/index.ts; the
+     layouts put them on <html>). Combined here back into the names the rest of the code uses.
+     Order matters: wider subsets first, latin last, so latin and its size-adjusted fallback end
+     the stack exactly as with next/font/google. */
+  --font-sans:    var(--font-sans-cyrillic-ext), var(--font-sans-cyrillic), var(--font-sans-greek), var(--font-sans-vietnamese), var(--font-sans-latin-ext), var(--font-sans-latin), 'Manrope Fallback';
+  --font-display: var(--font-display-vietnamese), var(--font-display-latin-ext), var(--font-display-latin), 'Fraunces Fallback';
+  --font-mono:    var(--font-mono-latin-ext), var(--font-mono-latin), 'DM Mono Fallback';
+
   /* Brand primaries */
   --pine:    #0F3A33;
   --sage:    #6B8F86;
