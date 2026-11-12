@@ -6,12 +6,15 @@
  * Every plan_* event and the plan-panel booking click is a no-op while the saved-plan
  * flag is off (lib/feature-flags.ts).
  *
- *   plan_add / plan_remove  lang, item_type (experience|hotel), item_id, destination_slug, plan_size
+ *   plan_add / plan_remove  lang, item_type (experience|hotel), plan_item_id, destination_slug, plan_size
  *   plan_handoff            lang, destination_slug, plan_size, mixed, source (panel|concierge)
- *   hotel_filter            lang, filter_group (destino|precio|viajero), filter_value, result_count
- *   partner_link_click      link_name=hotel_booking, section=hotels_index, hotel_id, position,
- *                           provider, destination_slug (destination stays the hostname)
- *                           (plan-panel clicks on experiences use link_name=gyg_experience)
+ *   planner_cta_click       lang, section (experience_hub|hotels_index), destination_slug (omitted when none);
+ *                           the "Planear mi viaje" CTA, not a plan_* event, fires with the saved-plan flag off
+ *   hotel_filter            lang, filter_group (destino|precio|viajero), filter_value, results_count
+ *   partner_link_click      link_name=hotel_booking, section=hotels_index (card) or hotels_plan (plan
+ *                           panel), hotel_id, position, provider, destination_slug (destination stays
+ *                           the hostname). Plan-panel clicks on experiences use link_name=gyg_experience
+ *                           with section=experience_plan.
  */
 
 import { gaTrack, trackOutboundLink } from './analytics/ga'
@@ -22,7 +25,7 @@ import type { HotelFilters, HotelListing } from './hotels-catalog'
 
 export function trackPlanChange(kind: 'add' | 'remove', e: Pick<PlanEntry, 'type' | 'id' | 'destinationSlug'>, planSize: number, lang: string) {
   if (!isSavedPlanEnabled()) return
-  gaTrack(`plan_${kind}`, { lang, item_type: e.type, item_id: e.id, destination_slug: e.destinationSlug, plan_size: planSize })
+  gaTrack(`plan_${kind}`, { lang, item_type: e.type, plan_item_id: e.id, destination_slug: e.destinationSlug, plan_size: planSize })
 }
 
 export function trackPlanHandoff(destinationSlug: string | null, planSize: number, mixed: boolean, source: 'panel' | 'concierge', lang: string) {
@@ -43,14 +46,22 @@ export function trackPlannerCta(destinationSlug: string | null, section: Planner
   gaTrack('planner_cta_click', { lang, section, ...(destinationSlug ? { destination_slug: destinationSlug } : {}) })
 }
 
-export function trackHotelBook(h: Pick<HotelListing, 'id' | 'bookingUrl' | 'provider' | 'destinationKey'>, position: number, lang: string) {
+/** Where the click happened: a hotel card, or the plan panel. Position is within that list. */
+export type HotelBookSection = 'hotels_index' | 'hotels_plan'
+
+export function trackHotelBook(
+  h: Pick<HotelListing, 'id' | 'bookingUrl' | 'provider' | 'destinationKey'>,
+  position: number,
+  lang: string,
+  section: HotelBookSection = 'hotels_index',
+) {
   if (!h.bookingUrl) return
   trackOutboundLink({
     linkName: 'hotel_booking',
     href: h.bookingUrl,
     partnerSlug: h.provider,
     lang,
-    section: 'hotels_index',
+    section,
     hotelId: h.id,
     position,
     provider: h.provider,
@@ -62,9 +73,9 @@ export function trackHotelBook(h: Pick<HotelListing, 'id' | 'bookingUrl' | 'prov
 export function trackPlanBook(e: PlanEntry, position: number, lang: string) {
   if (!isSavedPlanEnabled() || !e.bookingUrl) return
   if (e.type === 'hotel') {
-    trackHotelBook({ id: e.id, bookingUrl: e.bookingUrl, provider: e.provider as HotelListing['provider'], destinationKey: e.destinationSlug }, position, lang)
+    trackHotelBook({ id: e.id, bookingUrl: e.bookingUrl, provider: e.provider as HotelListing['provider'], destinationKey: e.destinationSlug }, position, lang, 'hotels_plan')
   } else {
-    trackBookClick({ id: e.id, bookingUrl: e.bookingUrl, destinationSlug: e.destinationSlug }, position, lang)
+    trackBookClick({ id: e.id, bookingUrl: e.bookingUrl, destinationSlug: e.destinationSlug }, position, lang, 'experience_plan')
   }
 }
 
@@ -75,6 +86,6 @@ export function trackHotelFilter(lang: string, prev: HotelFilters, next: HotelFi
   if ((prev.price ?? '') !== (next.price ?? '')) changes.push(['precio', next.price ?? ''])
   if ((prev.viajero ?? '') !== (next.viajero ?? '')) changes.push(['viajero', next.viajero ?? ''])
   for (const [group, value] of changes) {
-    gaTrack('hotel_filter', { lang, filter_group: group, filter_value: value || '(cleared)', result_count: resultCount })
+    gaTrack('hotel_filter', { lang, filter_group: group, filter_value: value || '(cleared)', results_count: resultCount })
   }
 }
