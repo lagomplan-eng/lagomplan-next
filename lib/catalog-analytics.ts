@@ -33,6 +33,16 @@ export function trackPlanHandoff(destinationSlug: string | null, planSize: numbe
   })
 }
 
+/**
+ * The "Planear mi viaje" CTA on the catalog pages (the planner handoff, destination only).
+ * Not a plan_* event: it fires whether or not the saved plan is shown.
+ *   planner_cta_click  lang, section (experience_hub|hotels_index), destination_slug (omitted when none)
+ */
+export type PlannerCtaSection = 'experience_hub' | 'hotels_index'
+export function trackPlannerCta(destinationSlug: string | null, section: PlannerCtaSection, lang: string) {
+  gaTrack('planner_cta_click', { lang, section, ...(destinationSlug ? { destination_slug: destinationSlug } : {}) })
+}
+
 export function trackHotelBook(h: Pick<HotelListing, 'id' | 'bookingUrl' | 'provider' | 'destinationKey'>, position: number, lang: string) {
   if (!h.bookingUrl) return
   trackOutboundLink({
