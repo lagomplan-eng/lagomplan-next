@@ -30,6 +30,7 @@ import {
 } from '../catalog'
 import PlanTray from '../catalog/PlanTray'
 import { usePlan } from '../catalog/usePlan'
+import { isSavedPlanEnabled } from '../../lib/feature-flags'
 import NeighborhoodsSection from './NeighborhoodsSection'
 
 interface Props {
@@ -59,7 +60,8 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   const set = (patch: Partial<HotelFilters>) => setFilters({ ...filters, ...patch })
 
   // ── plan ───────────────────────────────────────────────────────────────────
-  const plan = usePlan()
+  const planEnabled = isSavedPlanEnabled()
+  const plan = usePlan(planEnabled)
   const planItems = useMemo(() => resolvePlan(plan.items, planCatalog), [plan.items, planCatalog])
   const inPlan = useMemo(() => new Set(plan.items.filter(i => i.type === 'hotel').map(i => i.id)), [plan.items])
 
@@ -245,7 +247,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                       {...(h.bookingUrl ? { primary: { label: t('card.book'), href: h.bookingUrl, external: true, onClick: () => trackHotelBook(h, i + 1, lang) } } : {})}
                       {...(hasGuide ? { secondary: { label: t('card.seeGuide'), href: h.guideUrl } } : {})}
                       {...(h.bookingUrl ? { providerLine: t('card.provider', { provider: tc(`provider.${h.provider}`) }) } : {})}
-                      planButton={<PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} />}
+                      planButton={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}
                     />
                   )
                 })}
@@ -259,13 +261,15 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
         </div>
       </div>
 
-      <PlanTray
-        items={planItems}
-        onRemove={removeFromPlan}
-        onClear={plan.clear}
-        onBook={(x, pos) => trackPlanBook(x, pos, lang)}
-        onHandoff={(slug, count, mixed) => trackPlanHandoff(slug, count, mixed, 'panel', lang)}
-      />
+      {planEnabled && (
+        <PlanTray
+          items={planItems}
+          onRemove={removeFromPlan}
+          onClear={plan.clear}
+          onBook={(x, pos) => trackPlanBook(x, pos, lang)}
+          onHandoff={(slug, count, mixed) => trackPlanHandoff(slug, count, mixed, 'panel', lang)}
+        />
+      )}
     </div>
   )
 }

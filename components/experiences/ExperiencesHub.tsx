@@ -10,8 +10,9 @@
  *
  * Order is editorial and never changes: filtering only removes cards.
  *
- * The plan ("+ Mi plan" on each card, sticky bar, panel) is kept in localStorage; see
- * useExperiencePlan and ExperiencePlan. Its only handoff is ?destination=<name>.
+ * The plan ("+ Mi plan" on each card, sticky bar, panel) is kept in localStorage and is
+ * hidden unless NEXT_PUBLIC_FEATURE_SAVED_PLAN=true (lib/feature-flags.ts). Its only
+ * handoff is ?destination=<name>.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -28,6 +29,7 @@ import {
 } from '../catalog'
 import PlanTray from '../catalog/PlanTray'
 import { usePlan } from '../catalog/usePlan'
+import { isSavedPlanEnabled } from '../../lib/feature-flags'
 import { planDestination, resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
 import { trackBookClick, trackFilterChange, trackGuideClick, trackListView } from '../../lib/experiences/analytics'
 import { trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
@@ -55,7 +57,8 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
   const visible = useMemo(() => filterExperiences(experiences, filters), [experiences, filters])
 
   // ── plan ───────────────────────────────────────────────────────────────────
-  const plan = usePlan()
+  const planEnabled = isSavedPlanEnabled()
+  const plan = usePlan(planEnabled)
   const planItems = useMemo(() => resolvePlan(plan.items, planCatalog), [plan.items, planCatalog])
   const inPlan = useMemo(() => new Set(plan.items.filter(i => i.type === 'experience').map(i => i.id)), [plan.items])
 
@@ -265,7 +268,7 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
                     primary={{ label: t('card.book'), href: e.bookingUrl, external: true, onClick: () => trackBookClick(e, i + 1, lang) }}
                     secondary={{ label: t('card.seeGuide'), href: guideHref(e.guideSlug, e.guideAnchor), onClick: () => trackGuideClick(e, i + 1, lang) }}
                     providerLine={t('card.provider')}
-                    planButton={<PlanButton pressed={inPlan.has(e.id)} onClick={() => togglePlan(e.id)} name={e.name} />}
+                    planButton={planEnabled ? <PlanButton pressed={inPlan.has(e.id)} onClick={() => togglePlan(e.id)} name={e.name} /> : undefined}
                   />
                 ))}
               </div>
@@ -291,13 +294,15 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
         </div>
       </div>
 
-      <PlanTray
-        items={planItems}
-        onRemove={removeFromPlan}
-        onClear={plan.clear}
-        onBook={(x, pos) => trackPlanBook(x, pos, lang)}
-        onHandoff={(slug, count, mixed) => trackPlanHandoff(slug, count, mixed, 'panel', lang)}
-      />
+      {planEnabled && (
+        <PlanTray
+          items={planItems}
+          onRemove={removeFromPlan}
+          onClear={plan.clear}
+          onBook={(x, pos) => trackPlanBook(x, pos, lang)}
+          onHandoff={(slug, count, mixed) => trackPlanHandoff(slug, count, mixed, 'panel', lang)}
+        />
+      )}
     </main>
   )
 }
