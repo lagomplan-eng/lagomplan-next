@@ -9,7 +9,7 @@
 
 import type { Metadata } from 'next'
 import Script from 'next/script'
-import { Manrope, Fraunces, DM_Mono } from 'next/font/google'
+import { fontVariables } from '../../lib/fonts'
 import { BASE_URL } from '../../lib/seo'
 import ConsentSync from '../../components/analytics/ConsentSync'
 import { GoogleAnalyticsTracker } from '../../components/analytics/GoogleAnalyticsTracker'
@@ -18,15 +18,6 @@ import '../globals.css'
 
 const GA_MEASUREMENT_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID
 
-const manrope = Manrope({
-  subsets: ['latin'], variable: '--font-sans', display: 'swap', weight: ['400', '500', '700'],
-})
-const fraunces = Fraunces({
-  subsets: ['latin'], variable: '--font-display', display: 'swap', weight: ['500', '600'], style: ['normal', 'italic'],
-})
-const dmMono = DM_Mono({
-  subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400'],
-})
 
 export const metadata: Metadata = {
   metadataBase: new URL(BASE_URL),
@@ -36,7 +27,7 @@ export default function PuenteLayout({ children }: { children: React.ReactNode }
   return (
     <html
       lang="es"
-      className={`${manrope.variable} ${fraunces.variable} ${dmMono.variable}`}
+      className={fontVariables}
       suppressHydrationWarning
     >
       <body>
