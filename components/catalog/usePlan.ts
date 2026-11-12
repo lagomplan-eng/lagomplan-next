@@ -25,7 +25,7 @@ function write(items: PlanRef[]) {
   } catch { /* storage unavailable: the plan lasts for this visit only */ }
 }
 
-export function usePlan() {
+export function usePlan(enabled = true) {
   const [items, setItems] = useState<PlanRef[]>([])
   const [ready, setReady] = useState(false)
   const latest = useRef<PlanRef[]>([])
@@ -37,6 +37,7 @@ export function usePlan() {
   }, [])
 
   useEffect(() => {
+    if (!enabled) return // flag off: never touch storage; a saved plan stays as it is
     const initial = read()
     latest.current = initial
     setItems(initial)
@@ -49,7 +50,7 @@ export function usePlan() {
     }
     window.addEventListener('storage', onStorage)
     return () => window.removeEventListener('storage', onStorage)
-  }, [])
+  }, [enabled])
 
   const toggle = useCallback((ref: PlanRef) => {
     const next = togglePlan(latest.current, ref)
