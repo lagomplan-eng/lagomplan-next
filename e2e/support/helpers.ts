@@ -5,7 +5,7 @@
 // session is established) and must be filled in by the tester — see
 // e2e/README.md.
 
-import type { Page } from '@playwright/test'
+import type { Locator, Page } from '@playwright/test'
 import { createClient } from '@supabase/supabase-js'
 import type { Fixture } from '../fixtures/trips'
 
@@ -68,6 +68,35 @@ export async function captureGaEvents(page: Page) {
 }
 
 /**
+ * Keep the third-party Stay22 LetMeAllez script out of the page. Once it has loaded it
+ * converts affiliate anchors and handles their clicks itself, so whether a click reaches
+ * our own handler would depend on how fast scripts.stay22.com answers from CI. Tests of
+ * OUR click handling must not race it. (Tests of the script's own behaviour opt back in:
+ * see e2e/mobile-view/stay22-script.spec.ts.)
+ */
+export async function blockStay22Script(page: Page) {
+  await page.route('**://scripts.stay22.com/**', route => route.abort())
+}
+
+/**
+ * Click only after React has hydrated the element. A server-rendered link is visible and
+ * clickable before its onClick is attached; clicking then is a plain navigation.
+ * Hydrated DOM nodes carry React's `__reactProps$…` key.
+ */
+export async function clickWhenHydrated(locator: Locator) {
+  await locator.waitFor({ state: 'visible' })
+  const handle = await locator.elementHandle()
+  if (!handle) throw new Error('clickWhenHydrated: element vanished')
+  await handle.evaluate(el => new Promise<void>((resolve, reject) => {
+    const hydrated = () => Object.keys(el).some(k => k.startsWith('__reactProps$'))
+    const t0 = Date.now()
+    const tick = () => hydrated() ? resolve() : Date.now() - t0 > 15_000 ? reject(new Error('element never hydrated')) : setTimeout(tick, 25)
+    tick()
+  }))
+  await locator.click()
+}
+
+/**
  * Capture window.open() calls. Stubs window.open BEFORE any app script runs and
  * records every requested URL into window.__opened. Returns a reader.
  *
@@ -75,6 +104,7 @@ export async function captureGaEvents(page: Page) {
  * — both the per-item booking drawer and the hotel "Reservar" CTA do this to
  * bypass the Stay22 anchor interceptor. Stubbing window.open lets us assert the
  * intended target (host, not Booking.com) without a real cross-site navigation.
+ * It also blocks the Stay22 LetMeAllez script (blockStay22Script).
  *
  * Usage:
  *   const opened = await captureWindowOpen(page)
@@ -83,6 +113,7 @@ export async function captureGaEvents(page: Page) {
  *   expect(await opened.last()).toContain('stay22.com')
  */
 export async function captureWindowOpen(page: Page) {
+  await blockStay22Script(page)   // see blockStay22Script: the script would take over the click
   await page.addInitScript(() => {
     ;(window as any).__opened = []
     ;(window as any).open = (url?: string | URL) => {
