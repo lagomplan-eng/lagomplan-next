@@ -25,7 +25,7 @@
  *   multi-city trips can confirm each segment independently.
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocale } from 'next-intl'
 import type {
   Accommodation,
@@ -34,6 +34,7 @@ import type {
 import { effectiveAccommodations } from '../../lib/planner/use-effective-accommodations'
 import { titleCaseCity } from '../../lib/planner/format'
 import { buildAffiliateLink } from '../../lib/affiliate'
+import { MANAGED_LINK_CLICK } from '../../lib/affiliate/stay22-click'
 import { events } from '../../lib/analytics'
 import StatusPill from './StatusPill'
 
@@ -393,7 +394,7 @@ function AccommodationCard({
   // on travel-card links through its own affiliate URL — even when our
   // `<a href>` points at a non-booking domain. preventDefault + manual
   // window.open routes around it.
-  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+  function trackClick() {
     events.plannerHotelClicked({
       tripId,
       accommodationId: acc.id,
@@ -404,6 +405,25 @@ function AccommodationCard({
     if (uiState === 'dismissed') {
       onUIStateChange('prompted')
     }
+  }
+
+  // The anchor is data-lma-managed: Stay22Guard opens its url in the capture phase and stops
+  // the event (LetMeAllez would otherwise take the click and rewrite the href), so this React
+  // onClick does not run then. The guard announces the click on the anchor instead.
+  const linkRef = useRef<HTMLAnchorElement>(null)
+  const trackRef = useRef(trackClick)
+  trackRef.current = trackClick
+  useEffect(() => {
+    const el = linkRef.current
+    if (!el) return
+    const onManaged = () => trackRef.current()
+    el.addEventListener(MANAGED_LINK_CLICK, onManaged)
+    return () => el.removeEventListener(MANAGED_LINK_CLICK, onManaged)
+  }, [])
+
+  // Fallback for a click before the guard is mounted (then this runs, the guard does not).
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    trackClick()
     if (customBookingUrl) {
       e.preventDefault()
       e.stopPropagation()
@@ -495,7 +515,9 @@ function AccommodationCard({
           </span>
         )}
         <a
+          ref={linkRef}
           href={href}
+          data-lma-managed={href}
           target="_blank"
           rel="noopener noreferrer sponsored"
           onClick={handleClick}
