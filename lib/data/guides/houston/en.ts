@@ -200,7 +200,7 @@ export const guide: FlatGuide = {
     {
       id: 'control-de-mision-historico-de-la-nasa-entrada-general',
       name: "NASA Historic Mission Control + general admission",
-      description: "GetYourGuide: 4.8/5 (177 reviews) · From US$150. Marked as top rated on GetYourGuide: general admission plus the tram ride to Historic Mission Control, the room from which the Apollo missions were directed. It lasts about eight hours in a small group. Tram availability is set by NASA and may vary; tickets arrive by email or message one hour before your entry time. If you only want the museum, general admission on GetYourGuide starts at US$30 (4.5/5, more than 3,800 reviews).",
+      description: "Marked as top rated on GetYourGuide: general admission plus the tram ride to Historic Mission Control, the room from which the Apollo missions were directed. It lasts about eight hours in a small group. Tram availability is set by NASA and may vary; tickets arrive by email or message one hour before your entry time. If you only want the museum, general admission on GetYourGuide starts at US$30 (4.5/5, more than 3,800 reviews).",
       tags: ["Science", "8 hours", "Small group", "Tram to Mission Control"],
       category: 'excursion',
       duration: 'completo',
@@ -209,7 +209,7 @@ export const guide: FlatGuide = {
     {
       id: 'downtown-aquarium-pase-de-todo-el-dia',
       name: "Downtown Aquarium: all-day pass",
-      description: "GetYourGuide: 4.4/5 (339 reviews) · From US$27 per person. An aquarium in downtown Houston with the Aquarium Adventure exhibit, Stingray Reef and unlimited rides, including the Shark Voyage train that runs through a shark tunnel. You can go in any time of day, with no ticket line. A good half-day plan or an alternative to the Sunday game.",
+      description: "An aquarium in downtown Houston with the Aquarium Adventure exhibit, Stingray Reef and unlimited rides, including the Shark Voyage train that runs through a shark tunnel. You can go in any time of day, with no ticket line. A good half-day plan or an alternative to the Sunday game.",
       tags: ["Aquarium", "Half day", "Unlimited rides", "Flexible entry"],
       category: 'naturaleza',
       duration: 'medio',
@@ -218,7 +218,7 @@ export const guide: FlatGuide = {
     {
       id: 'escape-room-de-una-hora-en-la-galleria',
       name: "One-hour escape room at the Galleria",
-      description: "GetYourGuide: 5.0/5 (4 reviews) · From US$43 per person. One hour to complete the mission in one of four themed rooms: recover a stolen painting, a special operation, an underwater lab or a train ride through time. Up to eight players, suggested age 13 and up. It is on the Galleria's lower level, next to the ice rink: it fits right into the middle of Black Friday.",
+      description: "One hour to complete the mission in one of four themed rooms: recover a stolen painting, a special operation, an underwater lab or a train ride through time. Up to eight players, suggested age 13 and up. It is on the Galleria's lower level, next to the ice rink: it fits right into the middle of Black Friday.",
       tags: ["Team game", "1 hour", "Up to 8 people", "At the Galleria"],
       duration: 'corto',
       affiliateUrl: "https://www.getyourguide.com/houston-l719/escape-rooms-tc357/?ref=lagomplan",
