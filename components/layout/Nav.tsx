@@ -178,7 +178,7 @@ export default function Nav() {
         // so the bar physically sits above the nav instead of overlaying
         // it. Once the user picks a path, the var is removed and Nav
         // snaps back to top: 0.
-        top:                'var(--cookie-banner-h, 0px)',
+        top:                'var(--cookie-banner-h, var(--cookie-banner-reserve, 0px))',
         height:             100,
         background:         'rgba(255,255,255,1)',
         backdropFilter:     'blur(14px)',

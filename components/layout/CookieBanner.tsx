@@ -22,6 +22,11 @@ import { useLocale }           from 'next-intl'
 import { Link }                from '../../lib/navigation'
 import { getConsent, setConsent, onConsentChange, isGPCEnabled } from '../../lib/consent'
 
+/** Drops the pre-paint reservation set by the inline script in app/[locale]/layout.tsx. */
+function clearPending() {
+  document.documentElement.classList.remove('consent-pending')
+}
+
 export default function CookieBanner() {
   const locale = useLocale()
   const isES   = locale === 'es'
@@ -40,16 +45,22 @@ export default function CookieBanner() {
       // for this user — they explicitly told us their preference via
       // the browser.
       if (isGPCEnabled()) {
+        clearPending()
         setConsent('essential')
         return
       }
       setVisible(true)
+    } else {
+      clearPending()
     }
     // React to clearConsent() from the footer link: when state goes back
     // to null, re-open the banner. The same subscription also catches
     // setConsent() events but those flip the state to a non-null value,
     // which means the user just chose — keep the banner hidden.
-    return onConsentChange(state => setVisible(state === null))
+    return onConsentChange(state => {
+      if (state !== null) clearPending()
+      setVisible(state === null)
+    })
   }, [])
 
   // While visible, publish the bar's height as a CSS variable on <html>.
@@ -76,6 +87,7 @@ export default function CookieBanner() {
   if (!visible) return null
 
   function decide(value: 'all' | 'essential') {
+    clearPending()
     setConsent(value)
     setVisible(false)
   }
