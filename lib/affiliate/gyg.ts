@@ -31,6 +31,14 @@ function parse(url: string | null | undefined): URL | null {
   }
 }
 
+/** True for any getyourguide.com URL (tour, search, location, supplier), www or bare host. */
+export function isGygUrl(url: string | null | undefined): boolean {
+  const u = parse(url)
+  if (!u) return false
+  const host = u.host.toLowerCase()
+  return host === GYG_HOST || host === 'getyourguide.com'
+}
+
 /** True for a GetYourGuide tour page, with or without a locale prefix or query params. */
 export function isGygTourUrl(url: string | null | undefined): boolean {
   const u = parse(url)
@@ -49,17 +57,29 @@ export function normalizeGygTourUrl(url: string | null | undefined): string | nu
 }
 
 /**
- * The link a visitor is sent to: the tour URL with any existing query params
- * (and locale prefix) stripped, then partner_id and cmp added. Idempotent, and
- * partner_id is never duplicated whatever the input carried.
+ * The link a visitor is sent to, always carrying partner_id and cmp.
  *
- * Only call for GYG tour URLs (see isGygTourUrl). Unparseable input is
+ *  - Tour page (-t<n>): any existing query params and locale prefix are stripped,
+ *    then partner_id and cmp added. Idempotent.
+ *  - Any other getyourguide.com page (search /s/?q=, location -l<n>, supplier -s<n>):
+ *    the path and its own params (e.g. q) are kept; our `ref` tag is dropped and
+ *    partner_id / cmp are set (replaced, never duplicated).
+ *
+ * partner_id is never duplicated whatever the input carried. Unparseable input is
  * returned as given rather than throwing in a render path.
  */
 export function buildGygBookingUrl(url: string, opts: { cmp: string }): string {
   const u = parse(url)
   if (!u) return url
+  if (isGygTourUrl(url)) {
+    const path = u.pathname.replace(LOCALE_PREFIX, '')
+    const qs = new URLSearchParams({ partner_id: GYG_PARTNER_ID, cmp: opts.cmp })
+    return `https://${u.host}${path}?${qs.toString()}`
+  }
   const path = u.pathname.replace(LOCALE_PREFIX, '')
-  const qs = new URLSearchParams({ partner_id: GYG_PARTNER_ID, cmp: opts.cmp })
+  const qs = new URLSearchParams(u.search)
+  qs.delete('ref')
+  qs.set('partner_id', GYG_PARTNER_ID)
+  qs.set('cmp', opts.cmp)
   return `https://${u.host}${path}?${qs.toString()}`
 }

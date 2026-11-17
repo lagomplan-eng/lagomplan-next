@@ -8,7 +8,7 @@
 
 import type { ExperiencesSection as ExperiencesSectionData } from '../../lib/data/guides/types'
 import { withRef } from '../../lib/affiliate'
-import { isGygTourUrl, buildGygBookingUrl } from '../../lib/affiliate/gyg'
+import { isGygUrl, isGygTourUrl, buildGygBookingUrl } from '../../lib/affiliate/gyg'
 import { getRoute } from '../../lib/routes'
 
 interface Props {
@@ -21,12 +21,12 @@ interface Props {
 
 export function ExperiencesSection({ data, onToast, locale, guideKey }: Props) {
   /**
-   * GYG tour links go direct with our partner ID + cmp; any other link (OpenTable,
-   * venue sites, GYG pages that aren't tours) renders as before. No link → null → no button.
+   * Every getyourguide.com link (tour, search, location) carries our partner ID + cmp;
+   * any other link (OpenTable, venue sites) renders as before. No link → null → no button.
    */
   function expHref(bookingUrl: string | undefined): string | null {
     if (!bookingUrl) return null
-    if (isGygTourUrl(bookingUrl)) return buildGygBookingUrl(bookingUrl, { cmp: `guia-${guideKey}` })
+    if (isGygUrl(bookingUrl)) return buildGygBookingUrl(bookingUrl, { cmp: `guia-${guideKey}` })
     return withRef(bookingUrl)
   }
 
