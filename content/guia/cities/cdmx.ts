@@ -211,7 +211,7 @@ export const cdmx: City = {
         //       traffic can double the trip.
         //   ES: Para el regreso, calcula al menos 1.5 horas; el tráfico
         //       de la tarde puede duplicar el trayecto.
-        { icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}.' },
+        { hold: 'confirm', icon: 'plane',     title: 'Aeropuerto',      body: 'La mayoría de los vuelos llegan al AICM (Terminal 1 o 2). De ahí, un taxi autorizado o Uber tarda 30–45 min a {neighborhood}.' },
         { icon: 'car',       title: 'Transporte',      body: 'Usa Uber, más barato y seguro que parar un taxi en la calle. El Metro es excelente si te sientes cómodo entre multitudes. Para transporte privado, te recomendamos ', link: { text: 'Insider', href: "https://wa.me/525539149062?text=%C2%A1Hola!%20Me%20interesa%20reservar%20una%20experiencia%20de%20Insider%20en%20la%20Ciudad%20de%20M%C3%A9xico.", after: ', una opción segura para quienes buscan comodidad y un transporte confiable.', linkName: 'insider' } },
         { icon: 'cloudSun',  title: 'Clima',           body: 'Templado todo el año, 18–25 °C. Las lluvias se concentran de junio a septiembre, casi siempre chubascos breves por la tarde. Lleva capas.' },
         { icon: 'banknote',  title: 'Dinero',          body: 'Las tarjetas se aceptan ampliamente. Lleva algo de efectivo en pesos para mercados, propinas y comida callejera. En restaurantes, la propina recomendada es 10–15%; redondea en taxis y puestos casuales.' },
@@ -219,7 +219,7 @@ export const cdmx: City = {
         { icon: 'shield',    title: 'Seguridad',       body: 'Aplica el sentido común habitual en ciudad, usa apps de transporte por la noche y mantén tus objetos de valor fuera de vista. En una emergencia, el 911 funciona en todo el país.' },
         // CONFIRM (Pili): revisar el texto contra la guía oficial de
         // Protección Civil.
-        { id: 'earthquakes', icon: 'alarmClock', title: 'Sismos', body: 'La Ciudad de México tiene un sistema de alerta sísmica: una sirena suena en los altavoces de la calle, a veces segundos antes de que empiece a temblar, y también puede llegar a tu celular. Mantén la calma, aléjate de las ventanas y no uses elevadores. Las réplicas son comunes; el 911 funciona en toda la ciudad.' },
+        { id: 'earthquakes', hold: 'confirm', icon: 'alarmClock', title: 'Sismos', body: 'La Ciudad de México tiene un sistema de alerta sísmica: una sirena suena en los altavoces de la calle, a veces segundos antes de que empiece a temblar, y también puede llegar a tu celular. Mantén la calma, aléjate de las ventanas y no uses elevadores. Las réplicas son comunes; el 911 funciona en toda la ciudad.' },
         { icon: 'briefcase', title: 'Equipaje',        body: 'Zapatos cómodos para caminar, ropa casual, y una capa ligera para las noches frescas.' },
         { icon: 'droplet',   title: 'Agua de la llave', body: 'Te recomendamos no tomar agua de la llave, es segura para bañarte, lavarte los dientes y lavar trastes. Si tu departamento cuenta con agua purificada, estará señalada claramente; si tienes duda, mejor usa agua embotellada.' },
         // TODO (Pili): preparar una versión por zona con tres ideas: usar
@@ -414,7 +414,7 @@ export const cdmx: City = {
         //       traffic can double the trip.
         //   ES: Para el regreso, calcula al menos 1.5 horas; el tráfico
         //       de la tarde puede duplicar el trayecto.
-        { icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}.' },
+        { hold: 'confirm', icon: 'plane',     title: 'Airport',        body: 'Most flights land at AICM (Terminal 1 or 2). From there, an authorized airport taxi or Uber takes 30–45 min to {neighborhood}.' },
         { icon: 'car',       title: 'Transportation', body: "Use Uber, cheaper and safer than hailing on the street. The Metro is excellent if you're comfortable with crowds. For private transportation, we recommend ", link: { text: 'Insider', href: "https://wa.me/525539149062?text=Hello!%20I'm%20interested%20in%20booking%20an%20Insider%20Mexico%20City%20experience.", after: ', a safe option for you looking for comfort, and reliable transport.', linkName: 'insider' } },
         { icon: 'cloudSun',  title: 'Weather',        body: 'Mild year-round, 18–25 °C. Rain concentrates June–September, mostly brief afternoon showers. Pack layers.' },
         { icon: 'banknote',  title: 'Money',          body: 'Cards are widely accepted. Keep some pesos in cash for markets, tips, and street food. In restaurants, 10–15% is the recommended tip; round up for taxis and casual spots.' },
@@ -422,7 +422,7 @@ export const cdmx: City = {
         { icon: 'shield',    title: 'Safety',         body: 'Standard city awareness applies, stick to rideshare apps at night and keep valuables out of sight. In an emergency, 911 works citywide.' },
         // CONFIRM (Pili): check this text against the official Protección
         // Civil guidance.
-        { id: 'earthquakes', icon: 'alarmClock', title: 'Earthquakes', body: "Mexico City has a seismic alert system: a siren plays through street loudspeakers, sometimes seconds before shaking starts, and it may also reach your phone. Stay calm, move away from windows and don't use elevators. Aftershocks are common; 911 works citywide." },
+        { id: 'earthquakes', hold: 'confirm', icon: 'alarmClock', title: 'Earthquakes', body: "Mexico City has a seismic alert system: a siren plays through street loudspeakers, sometimes seconds before shaking starts, and it may also reach your phone. Stay calm, move away from windows and don't use elevators. Aftershocks are common; 911 works citywide." },
         { icon: 'briefcase', title: 'Packing',        body: 'Comfortable walking shoes, casual clothes, and a light layer for cooler evenings.' },
         { icon: 'droplet',   title: 'Tap water',      body: "Please don't drink the tap water, it's fine for showering, brushing your teeth, and washing dishes. If your unit has purified water available, it will be clearly marked; when in doubt, stick to bottled." },
         // TODO (Pili): prepare a per-zone version with three ideas: using

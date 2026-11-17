@@ -91,6 +91,8 @@ export const roma: Zone = {
     },
 
     cashAtms: {
+      // Held for the hotel edition: the TODO below (no specific Banamex yet).
+      hold: 'confirm',
       body: {
         es:
           'Banamex es la mejor opción práctica: comisión baja y cajeros por ' +
