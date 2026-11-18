@@ -89,6 +89,11 @@ describe.each(HOTEL_ZONES)('%s guide HTML', (zone) => {
   test('the page really rendered the shown content (guards the negative checks above)', () => {
     for (const must of ['Tap water', 'airalo.tpm.li', 'data-hotel-section="practical"']) expect(html).toContain(must)
   })
+  test('no newsletter signup form (the Mailchimp one), in either language', () => {
+    expect(html).not.toContain('type="email"')
+    for (const lang of LANGS) expect(html).not.toContain(city.copy[lang].newsletterTitle)
+    expect(html).not.toContain('/api/subscribe')
+  })
   test('placeholder experiences have no booking button', () => {
     expect(html).not.toMatch(/Book via WhatsApp|Reservar por WhatsApp/)
     expect(html).not.toContain('expBookLink')

@@ -25,7 +25,6 @@ import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG, type HotelZone } from '../../
 import { Icon } from '../../[partner]/GuiaClient'
 import SectionHead from '../../[partner]/SectionHead'
 import WeatherCard from '../../[partner]/WeatherCard'
-import NewsletterSignup from '../../[partner]/NewsletterSignup'
 import styles from '../../[partner]/guia.module.css'
 
 const PINE = '#0F3A33'
@@ -373,12 +372,6 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
           <h2 className={styles.continueH2}>{t.continueH2}</h2>
           <p className={styles.continueLede}>{t.continueLede}</p>
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => track('planner', plannerHref)}>{t.continueCta}</a>
-          {edition.planner.newsletter && (
-            <>
-              <div className={styles.nlRule} />
-              <NewsletterSignup lang={lang} copy={{ title: t.newsletterTitle, body: t.newsletterBody, placeholder: t.newsletterPlaceholder, cta: t.newsletterCta, finePrint: t.newsletterFinePrint }} />
-            </>
-          )}
         </div>
       </section>
     ),

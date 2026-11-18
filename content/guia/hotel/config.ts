@@ -35,7 +35,7 @@ export interface HotelEdition {
     allowedLinkNames: string[]
   }
   experiences: { allowWhatsApp: boolean; ownPlanBanner: boolean }
-  planner: { utmCampaign: string; newsletter: boolean }
+  planner: { utmCampaign: string }
   share: boolean
   /** The tracking utm_source prefix; the hotel code is appended. */
   utmSourcePrefix: string
@@ -64,7 +64,7 @@ export const HOTEL_FREE_EDITION: HotelEdition = {
     allowedLinkNames: ['airalo'],
   },
   experiences: { allowWhatsApp: false, ownPlanBanner: false },
-  planner: { utmCampaign: 'hotel_free', newsletter: true },
+  planner: { utmCampaign: 'hotel_free' },
   share: true,
   utmSourcePrefix: 'hotel_',
 }
