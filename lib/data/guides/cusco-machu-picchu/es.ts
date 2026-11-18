@@ -282,7 +282,7 @@ export const guide: FlatGuide = {
     {
       id: 'camino-salkantay-4-dias-alternativa-al-camino-inca',
       name: 'Camino Salkantay (4 días / alternativa al Camino Inca)',
-      description: 'El Camino Inca está limitado a 500 personas por día y se agota con meses de anticipación. El Salkantay — que cruza la montaña nevada de 6,271 metros y desciende por la selva hasta Aguas Calientes — tiene las mismas vistas, más naturaleza y menos cola. Operadores como Salkantay Trekking y Peru Treks ofrecen el recorrido de 4 días con carpa, cocinero y guía por $300–450 USD. Para el viajero solo, el trekking en grupo organizado es la forma más eficiente de hacerlo y la más probable de terminar con amigos de viaje.',
+      description: 'El Camino Inca está limitado a 500 personas por día y se agota con meses de anticipación. El Salkantay — que cruza la montaña nevada de 6,271 metros y desciende por la selva hasta Aguas Calientes — tiene las mismas vistas, más naturaleza y menos cola. Operadores como Salkantay Trekking y Peru Treks ofrecen el recorrido de 4 días con carpa, cocinero y guía. Para el viajero solo, el trekking en grupo organizado es la forma más eficiente de hacerlo y la más probable de terminar con amigos de viaje.',
       tags: ['Trekking', 'Aventura', 'Grupo'],
       category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/cuzco-l359/cusco-caminata-salkantay-a-machu-picchu-y-tren-panoramico-5d-t183392/',
@@ -298,7 +298,7 @@ export const guide: FlatGuide = {
     {
       id: 'valle-sagrado-en-un-dia',
       name: 'Valle Sagrado en un día',
-      description: 'Pisac, Ollantaytambo y Moray en un solo recorrido en taxi compartido o tour organizado. El mercado de artesanías de Pisac los domingos es el más activo de la región; las ruinas circulares de Moray son las menos fotografiadas y las más sorprendentes. Tour de día completo desde Cusco: $20–35 USD.',
+      description: 'Pisac, Ollantaytambo y Moray en un solo recorrido en taxi compartido o tour organizado. El mercado de artesanías de Pisac los domingos es el más activo de la región; las ruinas circulares de Moray son las menos fotografiadas y las más sorprendentes.',
       tags: ['Valle Sagrado', 'Ruinas', 'Día completo'],
       category: 'cultura',
       duration: 'completo',

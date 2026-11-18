@@ -200,7 +200,7 @@ export const guide: FlatGuide = {
     {
       id: 'control-de-mision-historico-de-la-nasa-entrada-general',
       name: "Control de Misión Histórico de la NASA + entrada general",
-      description: "Marcada como mejor calificada en GetYourGuide: entrada general más el recorrido en tranvía al Control de Misión Histórico, la sala desde donde se dirigieron las misiones Apolo. Dura unas ocho horas en grupo pequeño. La disponibilidad del tranvía la define la NASA y puede variar; los boletos llegan por correo o mensaje una hora antes del horario de entrada. Si solo quieren el museo, la entrada general en GetYourGuide cuesta desde US$30 (4.5/5, más de 3,800 reseñas).",
+      description: "Entrada general más el recorrido en tranvía al Control de Misión Histórico, la sala desde donde se dirigieron las misiones Apolo. Dura unas ocho horas en grupo pequeño. La disponibilidad del tranvía la define la NASA y puede variar; los boletos llegan por correo o mensaje una hora antes del horario de entrada.",
       tags: ["Ciencia", "8 horas", "Grupo pequeño", "Tranvía al Control de Misión"],
       category: 'excursion',
       duration: 'completo',

@@ -156,7 +156,7 @@ export const guide: FlatGuide = {
     {
       id: 'surf-o-clases-de-surf-en-playa-tamarindo',
       name: 'Surf o clases de surf en Playa Tamarindo',
-      description: 'La ola de Tamarindo es larga, suave y perfecta para principiantes. Las escuelas de surf del pueblo (Witch\'s Rock Surf Camp, Tamarindo Surf School) ofrecen clases de dos horas por $60–80 USD con instructor privado. Para el grupo que nunca ha surfeado — o que lleva años queriendo intentarlo — este es el plan del sábado por la mañana.',
+      description: 'La ola de Tamarindo es larga, suave y perfecta para principiantes. Las escuelas de surf del pueblo (Witch\'s Rock Surf Camp, Tamarindo Surf School) ofrecen clases de dos horas con instructor privado. Para el grupo que nunca ha surfeado — o que lleva años queriendo intentarlo — este es el plan del sábado por la mañana.',
       tags: ['Surf', 'Principiantes', 'Playa'],
       category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/tamarindo-l995/tamarindo-surf-tours-clases-de-surf-para-todos-los-niveles-t561020/',

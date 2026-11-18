@@ -229,7 +229,7 @@ export const guide: FlatGuide = {
     {
       id: 'casa-ofrenda-y-taller-artesanal-de-dia-de-muertos-cdmx',
       name: "Ofrenda house and Day of the Dead craft workshop, Mexico City",
-      description: "A guided visit to a house with a traditional ofrenda that doubles as an artisans’ workshop: there they hand-paint bottles and shot glasses with skull motifs that are exported to more than 20 countries. The guide explains the origin of the celebration and the visit includes pan de muerto. It lasts 45 minutes and the house is 10 minutes from the Xochimilco docks. For kids it is a first contact with the tradition at their scale: short, with artists at work and something tasty at the end. From US$12 per person.",
+      description: "A guided visit to a house with a traditional ofrenda that doubles as an artisans’ workshop: there they hand-paint bottles and shot glasses with skull motifs that are exported to more than 20 countries. The guide explains the origin of the celebration and the visit includes pan de muerto. It lasts 45 minutes and the house is 10 minutes from the Xochimilco docks. For kids it is a first contact with the tradition at their scale: short, with artists at work and something tasty at the end.",
       tags: ["Workshop", "Families", "45 minutes", "South Mexico City"],
       category: 'cultura',
       duration: 'corto',
@@ -238,7 +238,7 @@ export const guide: FlatGuide = {
     {
       id: 'patzcuaro-de-dia-piramides-panteones-y-espiritus',
       name: "Pátzcuaro by day: pyramids, cemeteries and spirits",
-      description: "A full-day small-group tour around the lake, with an English-speaking guide. It starts at the Ihuatzio pyramids, the first Purépecha capital, continues to Tzintzuntzan, with its yácatas and 16th-century Franciscan convent, and explains the Night of the Dead with respect for each date. On November 1 you see families finishing their altars; on the 2nd, the cemeteries are still decorated. It does not include the night vigil. It suits anyone who prefers not to drive between communities or wants the historical context before the night. From US$147 per person.",
+      description: "A full-day small-group tour around the lake, with an English-speaking guide. It starts at the Ihuatzio pyramids, the first Purépecha capital, continues to Tzintzuntzan, with its yácatas and 16th-century Franciscan convent, and explains the Night of the Dead with respect for each date. On November 1 you see families finishing their altars; on the 2nd, the cemeteries are still decorated. It does not include the night vigil. It suits anyone who prefers not to drive between communities or wants the historical context before the night.",
       tags: ["Archaeology", "Small group", "Full day", "English-speaking guide"],
       category: 'cultura',
       duration: 'completo',
@@ -247,7 +247,7 @@ export const guide: FlatGuide = {
     {
       id: 'noche-de-muertos-en-michoacan-tour-nocturno-desde-morelia',
       name: "Night of the Dead in Michoacán: night tour from Morelia",
-      description: "For anyone staying in Morelia (Plan B) or who does not want to drive at night. It leaves on November 1 from the Jardín de las Rosas, in downtown Morelia, and visits the Tzurumútaro cemeteries, the Ihuatzio fair with music, tamales, corundas and atole, Pacanda island by boat with life jackets and the Cucuchucho cemetery. It lasts 10 hours, with a Spanish- and English-speaking guide, round-trip transport and travel insurance; food is not included. Free cancellation up to 24 hours before. Strollers are not allowed: it works best with older kids and teenagers. From US$136 per person.",
+      description: "For anyone staying in Morelia (Plan B) or who does not want to drive at night. It leaves on November 1 from the Jardín de las Rosas, in downtown Morelia, and visits the Tzurumútaro cemeteries, the Ihuatzio fair with music, tamales, corundas and atole, Pacanda island by boat with life jackets and the Cucuchucho cemetery. It lasts 10 hours, with a Spanish- and English-speaking guide, round-trip transport and travel insurance; food is not included. Free cancellation up to 24 hours before. Strollers are not allowed: it works best with older kids and teenagers.",
       tags: ["Night tour", "No driving", "10 hours", "Free cancellation"],
       category: 'cultura',
       duration: 'completo',

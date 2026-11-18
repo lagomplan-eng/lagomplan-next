@@ -200,7 +200,7 @@ export const guide: FlatGuide = {
     {
       id: 'control-de-mision-historico-de-la-nasa-entrada-general',
       name: "NASA Historic Mission Control + general admission",
-      description: "Marked as top rated on GetYourGuide: general admission plus the tram ride to Historic Mission Control, the room from which the Apollo missions were directed. It lasts about eight hours in a small group. Tram availability is set by NASA and may vary; tickets arrive by email or message one hour before your entry time. If you only want the museum, general admission on GetYourGuide starts at US$30 (4.5/5, more than 3,800 reviews).",
+      description: "General admission plus the tram ride to Historic Mission Control, the room from which the Apollo missions were directed. It lasts about eight hours in a small group. Tram availability is set by NASA and may vary; tickets arrive by email or message one hour before your entry time.",
       tags: ["Science", "8 hours", "Small group", "Tram to Mission Control"],
       category: 'excursion',
       duration: 'completo',
