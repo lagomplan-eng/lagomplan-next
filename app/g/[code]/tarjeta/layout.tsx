@@ -1,15 +1,14 @@
 // app/g/[code]/tarjeta/layout.tsx — own root layout for the printable card (no site chrome).
+// Fonts are self-hosted (lib/fonts, next/font/local): no build-time fetch from Google.
 import type { Metadata } from 'next'
-import { Manrope, DM_Mono } from 'next/font/google'
-
-const manrope = Manrope({ subsets: ['latin'], variable: '--font-sans', display: 'swap', weight: ['400', '500', '700', '800'] })
-const dmMono = DM_Mono({ subsets: ['latin'], variable: '--font-mono', display: 'swap', weight: ['400'] })
+import { fontVariables } from '../../../../lib/fonts'
+import '../../../globals.css'
 
 export const metadata: Metadata = { title: 'Tarjeta · Lagomplan', robots: { index: false, follow: false } }
 
 export default function CardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="es" className={`${manrope.variable} ${dmMono.variable}`}>
+    <html lang="es" className={fontVariables}>
       <body style={{ margin: 0 }}>{children}</body>
     </html>
   )

@@ -48,7 +48,7 @@ export default async function HotelCardPage({ params }: { params: Promise<{ code
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2.6mm' }}>
             <div style={{ fontFamily: MONO, fontSize: '3.2mm', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guía de barrio</div>
-            <h1 style={{ margin: 0, fontSize: '10mm', lineHeight: 1.05, fontWeight: 800, letterSpacing: '-0.025em', textWrap: 'balance' }}>Tu guía de {ZONE_LABEL[hotel.zone]}</h1>
+            <h1 style={{ margin: 0, fontSize: '10mm', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.025em', textWrap: 'balance' }}>Tu guía de {ZONE_LABEL[hotel.zone]}</h1>
             <p style={{ margin: 0, fontSize: '3.7mm', lineHeight: 1.5, fontWeight: 500 }}>Dónde comer, qué hacer y cómo moverte. Solo lugares verificados.</p>
             <p style={{ margin: 0, fontSize: '3.2mm', lineHeight: 1.5 }}>Where to eat, what to do and how to get around. Verified places only.</p>
           </div>
