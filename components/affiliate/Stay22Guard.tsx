@@ -36,50 +36,23 @@
  *   fires, so per-click analytics (events.affiliateClicked) keep
  *   working. We only neutralize the default navigation, which is what
  *   LetMeAllez piggybacks on.
- * - We skip clicks an anchor already manages itself (it calls
- *   window.open in its own handler) via the `data-lma-managed`
- *   attribute, so those don't open twice. Today only the mobile
- *   "Reservar" CTA needs it.
+ * - Anchors marked `data-lma-managed="<url>"` are the CTAs that must open
+ *   exactly our url. LetMeAllez rewrites such an anchor's href and handles
+ *   its click on the anchor itself, before React, so a React onClick never
+ *   runs (seen in production). The guard therefore opens the url from the
+ *   attribute and stops the event; see lib/affiliate/stay22-click.ts.
  * - Plain left-click only. Modifier-clicks and middle-clicks
  *   (open-in-new-tab/window) are left to the browser, matching the
  *   prior per-anchor behavior.
  */
 
 import { useEffect } from 'react'
-
-const STAY22_HOST = /(^|\.)stay22\.com$/i
+import { handleStay22Click } from '../../lib/affiliate/stay22-click'
 
 export default function Stay22Guard() {
   useEffect(() => {
-    function onClick(e: MouseEvent) {
-      // Another handler (or a modifier-click) already owns this click.
-      if (e.defaultPrevented) return
-      // Left button, no modifiers — let the browser handle the rest.
-      if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
-
-      const target = e.target as Element | null
-      const anchor = target?.closest?.('a[href]') as HTMLAnchorElement | null
-      if (!anchor) return
-      // The anchor opens itself in its own handler — don't double-open.
-      if (anchor.dataset.lmaManaged != null) return
-
-      let host: string
-      try {
-        host = new URL(anchor.href).hostname
-      } catch {
-        return
-      }
-      if (!STAY22_HOST.test(host)) return
-
-      // Take over: open our exact URL ourselves so LetMeAllez can't
-      // re-wrap the navigation. The anchor's own onClick still runs
-      // (we didn't stop propagation), so analytics fire normally.
-      e.preventDefault()
-      window.open(anchor.href, '_blank', 'noopener,noreferrer')
-    }
-
-    document.addEventListener('click', onClick, true)
-    return () => document.removeEventListener('click', onClick, true)
+    document.addEventListener('click', handleStay22Click, true)
+    return () => document.removeEventListener('click', handleStay22Click, true)
   }, [])
 
   return null

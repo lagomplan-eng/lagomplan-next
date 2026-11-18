@@ -1594,11 +1594,12 @@ function HotelCard(p: {
           )
         ) : (
           <>
-            {/* window.open bypasses the Stay22 anchor interceptor.
-                data-lma-managed tells Stay22Guard to skip this anchor so the
-                click doesn't open twice (this handler already opens it). */}
+            {/* data-lma-managed="<url>": Stay22Guard opens exactly this url (our campaign)
+                in the capture phase, before LetMeAllez can rewrite the href and take
+                the click. The onClick is the fallback for a click before the guard is
+                mounted; once the guard handles a click this never runs. */}
             <a href={reserveHref}
-               data-lma-managed
+               data-lma-managed={reserveHref}
                onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(reserveHref, '_blank', 'noopener,noreferrer') }}
                className="block text-center px-[14px] py-[11px] bg-[#0F3A33] text-white rounded-[9px] text-[13px] font-semibold hover:opacity-85 transition-opacity cursor-pointer">
               {t.reserve} →
