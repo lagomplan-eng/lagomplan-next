@@ -1,0 +1,93 @@
+name: GYG link check
+
+# Weekly check of every GetYourGuide affiliateUrl in the guides (es + en). Opens, updates, or closes ONE issue
+# (label `link-check`). It never edits the guides. See scripts/link-check/gyg-links.ts for how links are checked
+# and why it falls back to GetYourGuide's public sitemap (GetYourGuide answers automated page requests with 403).
+#
+# Triggers:
+#   schedule           Mondays 06:17 UTC
+#   workflow_dispatch  "Run workflow" button; tick dry_run to see the result in the run summary without touching the issue
+#   pull_request       only when this check itself changes: always a dry run (no issue is created or edited)
+
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run: report in the run summary only, do not open/update/close the issue'
+        type: boolean
+        default: false
+  pull_request:
+    paths:
+      - '.github/workflows/link-check.yml'
+      - 'scripts/link-check/**'
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: gyg-link-check
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LINK_CHECK_OUT: link-check-out
+      DRY_RUN: ${{ github.event_name == 'pull_request' || inputs.dry_run == true }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Check links
+        id: check
+        run: npx tsx scripts/link-check/run.ts
+
+      - name: Run summary
+        if: ${{ !cancelled() }}
+        run: |
+          if [ -f "$LINK_CHECK_OUT/summary.md" ]; then cat "$LINK_CHECK_OUT/summary.md" >> "$GITHUB_STEP_SUMMARY"; fi
+
+      - name: Upload report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: gyg-link-check
+          path: link-check-out/
+          if-no-files-found: ignore
+          retention-days: 30
+
+      # The issue is touched only when the check reached a conclusion (the step above succeeded) and this is not a dry run.
+      - name: Open, update or close the issue
+        if: ${{ success() && env.DRY_RUN != 'true' }}
+        env:
+          FINDINGS: ${{ steps.check.outputs.findings }}
+          TITLE: 'GetYourGuide experience links need attention'
+          LABEL: link-check
+        run: |
+          gh label create "$LABEL" --color FBCA04 --description "Weekly GetYourGuide link check" 2>/dev/null || true
+          existing=$(gh issue list --label "$LABEL" --state open --json number --jq '.[0].number // empty')
+          if [ "${FINDINGS:-0}" -gt 0 ]; then
+            if [ -n "$existing" ]; then
+              gh issue edit "$existing" --title "$TITLE" --body-file "$LINK_CHECK_OUT/issue.md"
+              gh issue comment "$existing" --body "Re-checked $(date -u +%F): ${FINDINGS} link(s) still need attention. The list above is current."
+              echo "updated issue #$existing"
+            else
+              gh issue create --title "$TITLE" --label "$LABEL" --body-file "$LINK_CHECK_OUT/issue.md"
+            fi
+          elif [ -n "$existing" ]; then
+            gh issue comment "$existing" --body "Re-checked $(date -u +%F): no links need attention any more. Closing."
+            gh issue close "$existing"
+          else
+            echo "no findings and no open issue: nothing to do"
+          fi
