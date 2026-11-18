@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import {
-  gotoTrip, seedTrip, deleteTrip, loginAs, captureWindowOpen,
+  gotoTrip, seedTrip, deleteTrip, loginAs, captureWindowOpen, clickWhenHydrated,
 } from '../support/helpers'
 import {
   TRIP_ANONYMOUS, TRIP_OWNER, TRIP_OWNER_BOOKED, TRIP_MULTICITY, TRIP_NO_ACCOMMODATIONS,
@@ -36,7 +36,8 @@ test.describe('mobile-view · hotel card', () => {
     const opened = await captureWindowOpen(page)   // stub window.open before navigation
     const id = await seed(TRIP_ANONYMOUS)
     await gotoTrip(page, id)
-    await page.getByRole('link', { name: /Reservar para este viaje/ }).click()
+    await clickWhenHydrated(page.getByRole('link', { name: /Reservar para este viaje/ }))
+    await expect.poll(() => opened.last()).not.toBeNull()
     const url = await opened.last()
     expect(url).toContain('stay22.com')
     expect(url).not.toContain('booking.com')
