@@ -57,17 +57,17 @@ export default function NeighborhoodsSection({ cities, locale }: Props) {
         {/* Section header */}
         <div style={{ marginBottom: 28 }}>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 11, fontWeight: 600,
+            fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
             letterSpacing: '1.5px', textTransform: 'uppercase',
             color: SAGE, marginBottom: 8,
           }}>{L.eyebrow}</p>
           <h2 style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
+            fontFamily: 'var(--font-sans)', fontSize: 30, fontWeight: 800,
             color: NK, marginBottom: 8, lineHeight: 1.1,
             maxWidth: 720,
           }}>{L.headline}</h2>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
+            fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
             lineHeight: 1.6, maxWidth: 560,
           }}>{L.sub}</p>
         </div>
@@ -103,13 +103,13 @@ function CityBlock({ city, kindLabel }: CityBlockProps) {
     }}>
       {/* City + optional intro */}
       <h3 style={{
-        fontFamily: "'Manrope', sans-serif", fontSize: 22, fontWeight: 800,
+        fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 800,
         color: NK, marginBottom: city.intro ? 10 : 18, lineHeight: 1.2,
       }}>{city.cityName}</h3>
 
       {city.intro && (
         <p style={{
-          fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
+          fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
           lineHeight: 1.6, marginBottom: 22, maxWidth: 720,
         }}>{city.intro}</p>
       )}
@@ -127,18 +127,18 @@ function CityBlock({ city, kindLabel }: CityBlockProps) {
             }}>
               {kindLabel[item.kind] && (
                 <span style={{
-                  fontFamily: "'Manrope', sans-serif", fontSize: 9, fontWeight: 700,
+                  fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
                   letterSpacing: '1.2px', textTransform: 'uppercase',
                   color: KIND_COLOR[item.kind],
                 }}>{kindLabel[item.kind]}</span>
               )}
               <h4 style={{
-                fontFamily: "'Manrope', sans-serif", fontSize: 15, fontWeight: 700,
+                fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 700,
                 color: NK, lineHeight: 1.3,
               }}>{item.title}</h4>
             </div>
             <p style={{
-              fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
+              fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
               lineHeight: 1.65,
             }}>{item.body}</p>
           </div>

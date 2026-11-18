@@ -55,9 +55,9 @@ export function TripCard({ title, destination, createdAt, href }: TripCardProps)
   const initial = destination ? destination[0].toUpperCase() : 'V'
 
   return (
-    <a href={href} className="group block bg-[#FDFCF9] border border-[#C8D9D3] rounded-[3px] overflow-hidden hover:border-[#1B4D3E] transition-colors">
+    <a href={href} className="group block bg-[#FDFCF9] border border-[#C8D9D3] rounded-[3px] overflow-hidden hover:border-pine transition-colors">
       {/* Green header with destination initial — matches existing pattern */}
-      <div className="bg-[#1B4D3E] h-16 flex items-center justify-center relative overflow-hidden">
+      <div className="bg-pine h-16 flex items-center justify-center relative overflow-hidden">
         <span className="font-sans text-[64px] font-bold text-[#F4F0E8] opacity-[0.15] leading-none select-none absolute">
           {initial}
         </span>
@@ -95,7 +95,7 @@ export function TestimonialCard({ quote, name, role, initial }: TestimonialCardP
         "{quote}"
       </p>
       <div className="flex items-center gap-2">
-        <div className="w-7 h-7 rounded-full bg-[#C8D9D3] flex items-center justify-center font-sans text-[12px] font-bold text-[#1B4D3E]">
+        <div className="w-7 h-7 rounded-full bg-[#C8D9D3] flex items-center justify-center font-sans text-[12px] font-bold text-pine">
           {initial}
         </div>
         <div>
@@ -120,9 +120,9 @@ export function Button({ variant = 'primary', children, className = '', ...props
   const base = 'font-mono text-[12px] tracking-[1.5px] px-6 py-3 transition-colors inline-block text-center'
 
   const variants: Record<ButtonVariant, string> = {
-    primary:   'bg-[#1B4D3E] text-[#F4F0E8] hover:bg-[#2D6B57]',
-    secondary: 'border border-[#1B4D3E] text-[#1B4D3E] hover:bg-[#1B4D3E] hover:text-[#F4F0E8]',
-    ghost:     'border border-[#C8D9D3] text-[#2D6B57] hover:border-[#1B4D3E]',
+    primary:   'bg-pine text-[#F4F0E8] hover:bg-[#2D6B57]',
+    secondary: 'border border-pine text-pine hover:bg-pine hover:text-[#F4F0E8]',
+    ghost:     'border border-[#C8D9D3] text-[#2D6B57] hover:border-pine',
   }
 
   return (

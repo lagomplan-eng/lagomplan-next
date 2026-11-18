@@ -5630,7 +5630,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, locale, onChange }: Mult
         <button
           type="button"
           onClick={addSegment}
-          className="mt-3 font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] hover:text-[#1B4D3E] transition-colors"
+          className="mt-3 font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33] hover:text-pine transition-colors"
         >
           {t.addCity}
         </button>

@@ -27,7 +27,7 @@ export default function PersonaBadge({ persona }: Props) {
       display:        'inline-block',
       background:     bg,
       color:          fg,
-      fontFamily:     "'Manrope',sans-serif",
+      fontFamily:     'var(--font-sans)',
       fontSize:       10,
       fontWeight:     700,
       letterSpacing:  '.1em',

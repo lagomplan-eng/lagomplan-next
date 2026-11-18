@@ -70,16 +70,16 @@ export default async function SmartFindsSection({ locale }: Props) {
         {/* Header */}
         <div style={{ marginBottom: 28 }}>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 11, fontWeight: 600,
+            fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
             letterSpacing: '1.5px', textTransform: 'uppercase',
             color: SAGE, marginBottom: 8,
           }}>{L.eyebrow}</p>
           <h2 style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 30, fontWeight: 800,
+            fontFamily: 'var(--font-sans)', fontSize: 30, fontWeight: 800,
             color: NK, marginBottom: 8, lineHeight: 1.1, maxWidth: 720,
           }}>{L.headline}</h2>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 14, color: MU,
+            fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
             lineHeight: 1.6, maxWidth: 560,
           }}>{L.sub}</p>
         </div>
@@ -130,7 +130,7 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
     >
       {/* Category */}
       <p style={{
-        fontFamily: "'Manrope', sans-serif", fontSize: 9, fontWeight: 700,
+        fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
         letterSpacing: '1.5px', textTransform: 'uppercase', color: SAGE,
         marginBottom: 14,
       }}>{categoryLabel}</p>
@@ -158,12 +158,12 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
         </div>
       ) : null}
       <p style={{
-        fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 700,
+        fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 700,
         letterSpacing: '1.2px', textTransform: 'uppercase', color: SAGE,
         marginBottom: 4,
       }}>{product.brand}</p>
       <h3 style={{
-        fontFamily: "'Manrope', sans-serif", fontSize: 17, fontWeight: 800,
+        fontFamily: 'var(--font-sans)', fontSize: 17, fontWeight: 800,
         color: NK, lineHeight: 1.25, marginBottom: 12,
       }}>{product.name}</h3>
 
@@ -171,7 +171,7 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
       <div style={{ marginBottom: 14 }}>
         <span style={{
           display: 'inline-block',
-          fontFamily: "'Manrope', sans-serif", fontSize: 11, fontWeight: 600,
+          fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
           padding: '4px 12px', borderRadius: 100,
           border: `1.5px solid ${BD}`, color: NK, background: 'transparent',
         }}>{product.tag}</span>
@@ -179,7 +179,7 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
 
       {/* Opinion — clamp to 5 lines so cards stay roughly the same height */}
       <p style={{
-        fontFamily: "'Manrope', sans-serif", fontSize: 13, color: MU,
+        fontFamily: 'var(--font-sans)', fontSize: 13, color: MU,
         lineHeight: 1.55, marginBottom: 16,
         display: '-webkit-box',
         WebkitLineClamp: 5, WebkitBoxOrient: 'vertical',
@@ -195,11 +195,11 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
       }}>
         <div style={{ minWidth: 0 }}>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 13, fontWeight: 700,
+            fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 700,
             color: NK, lineHeight: 1.2,
           }}>{product.price}</p>
           <p style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 10, fontWeight: 600,
+            fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 600,
             letterSpacing: '0.8px', textTransform: 'uppercase', color: MU,
             marginTop: 2,
           }}>{product.where}</p>
@@ -208,7 +208,7 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
           href={hasLink ? product.link : '#'}
           {...(hasLink ? { target: '_blank', rel: 'noopener noreferrer sponsored' } : {})}
           style={{
-            fontFamily: "'Manrope', sans-serif", fontSize: 12, fontWeight: 700,
+            fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700,
             color: PINE, textDecoration: 'none', whiteSpace: 'nowrap',
           }}
         >{cta}</a>

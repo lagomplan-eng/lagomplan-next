@@ -66,7 +66,7 @@ export default function StatusPill({ status, locale, size = 'sm', glyphless }: P
       border:         `1px solid ${palette.border}`,
       background:     palette.bg,
       color:          palette.fg,
-      fontFamily:     "'Manrope', sans-serif",
+      fontFamily:     'var(--font-sans)',
       fontSize:       sz.fontSize,
       fontWeight:     600,
       lineHeight:     1,

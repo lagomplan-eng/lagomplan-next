@@ -144,7 +144,7 @@ function applyClasses(
 
     // Hover feedback on regular days
     if (!isS && !isE) {
-      el.onmouseenter = () => { if (!isPast) el.style.background = '#E8F0EE'; el.style.color = '#1B4D3E' }
+      el.onmouseenter = () => { if (!isPast) el.style.background = '#E8F0EE'; el.style.color = 'var(--pine)' }
       el.onmouseleave = () => { if (!inRng) { el.style.background = ''; el.style.color = '#0F1A16' } }
     } else {
       el.onmouseenter = null
@@ -152,14 +152,14 @@ function applyClasses(
     }
 
     if (isS || isE) {
-      el.style.background  = '#1B4D3E'
+      el.style.background  = 'var(--pine)'
       el.style.color       = '#F4F0E8'
       el.style.fontWeight  = '500'
       el.style.borderRadius = '2px'
       el.style.zIndex      = '1'
     } else if (inRng) {
       el.style.background  = '#E8F0EE'
-      el.style.color       = '#1B4D3E'
+      el.style.color       = 'var(--pine)'
       el.style.borderRadius = '0'
     }
 
@@ -321,8 +321,8 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
     'w-full flex items-center gap-2 text-left font-sans text-[13px]',
     'border bg-white px-3 py-2 rounded-[2px] transition-all',
     open || (value.start && value.end)
-      ? 'border-[#1B4D3E] shadow-[0_0_0_3px_rgba(27,77,62,.06)]'
-      : 'border-[#C8D9D3] hover:border-[#1B4D3E]',
+      ? 'border-pine shadow-[0_0_0_3px_rgba(15,58,51,.06)]'
+      : 'border-[#C8D9D3] hover:border-pine',
   ].join(' ')
 
   return (
@@ -335,7 +335,7 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
             <span className="flex-1 text-[#0F1A16]">
               {fmtDate(value.start, MONTHS)} — {fmtDate(value.end, MONTHS)}
             </span>
-            <span className="font-mono text-[9px] text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(27,77,62,.2)] px-2 py-0.5 rounded-full whitespace-nowrap">
+            <span className="font-mono text-[9px] text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(15,58,51,.2)] px-2 py-0.5 rounded-full whitespace-nowrap">
               {value.nights} {value.nights === 1 ? t.nightShort : t.nightsShort}
             </span>
           </>
@@ -348,7 +348,7 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
         ) : (
           <span className="flex-1 text-[#BDBDBD]">{t.pickDates}</span>
         )}
-        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${open ? 'text-[#1B4D3E]' : 'text-[#C8D9D3]'}`} viewBox="0 0 16 16" fill="currentColor">
+        <svg className={`w-3.5 h-3.5 flex-shrink-0 transition-colors ${open ? 'text-pine' : 'text-[#C8D9D3]'}`} viewBox="0 0 16 16" fill="currentColor">
           <path d="M5 1a1 1 0 00-1 1v1H3a2 2 0 00-2 2v9a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2h-1V2a1 1 0 00-2 0v1H6V2a1 1 0 00-1-1zM2 7h12v7H2V7z"/>
         </svg>
       </button>
@@ -358,19 +358,19 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
         <div
           ref={popupRef}
           onClick={e => e.stopPropagation()}
-          className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-[#FDFCF9] border border-[#C8D9D3] rounded-[3px] shadow-[0_8px_28px_rgba(27,77,62,.14)] z-50 w-[560px] max-md:w-full max-md:left-0 max-md:translate-x-0"
+          className="absolute top-[calc(100%+4px)] left-1/2 -translate-x-1/2 bg-[#FDFCF9] border border-[#C8D9D3] rounded-[3px] shadow-[0_8px_28px_rgba(15,58,51,.14)] z-50 w-[560px] max-md:w-full max-md:left-0 max-md:translate-x-0"
         >
           {/* Nav */}
           <div className="flex items-center justify-between px-5 py-3 border-b border-[#E8E0D0]">
             <button type="button" onClick={() => navMonth(-1)}
-              className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-[#1B4D3E] hover:text-[#1B4D3E] transition-colors"
+              className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-pine hover:text-pine transition-colors"
             >‹</button>
             <div className="flex gap-6">
               <span className="font-sans text-[14px] font-semibold text-[#0F1A16]">{MONTHS[vm]} {vy}</span>
               <span className="font-sans text-[14px] font-semibold text-[#0F1A16] max-md:hidden">{MONTHS[vm2]} {vy2}</span>
             </div>
             <button type="button" onClick={() => navMonth(1)}
-              className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-[#1B4D3E] hover:text-[#1B4D3E] transition-colors"
+              className="w-7 h-7 border border-[#C8D9D3] bg-white rounded-[2px] flex items-center justify-center text-[14px] text-[#2D6B57] hover:border-pine hover:text-pine transition-colors"
             >›</button>
           </div>
 
@@ -385,10 +385,10 @@ export default function DateRangePicker({ value, onChange, minDate }: Props) {
             <span className="font-mono text-[9px] text-[#A0A0A0] tracking-[.3px]">{hint}</span>
             <div className="flex gap-2">
               <button type="button" onClick={clearDates}
-                className="font-mono text-[9px] tracking-[1px] text-[#2D6B57] border border-[#C8D9D3] px-3 py-1.5 rounded-[2px] hover:border-[#1B4D3E] transition-colors"
+                className="font-mono text-[9px] tracking-[1px] text-[#2D6B57] border border-[#C8D9D3] px-3 py-1.5 rounded-[2px] hover:border-pine transition-colors"
               >Borrar</button>
               <button type="button" onClick={() => setOpen(false)}
-                className="font-mono text-[9px] tracking-[1px] text-[#F4F0E8] bg-[#1B4D3E] px-4 py-1.5 rounded-[2px] hover:bg-[#2D6B57] transition-colors"
+                className="font-mono text-[9px] tracking-[1px] text-[#F4F0E8] bg-pine px-4 py-1.5 rounded-[2px] hover:bg-[#2D6B57] transition-colors"
               >Confirmar →</button>
             </div>
           </div>
