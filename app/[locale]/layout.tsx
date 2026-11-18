@@ -104,6 +104,20 @@ export default async function RootLayout({
       suppressHydrationWarning
     >
       <head>
+        {/* Reserve the cookie banner's space BEFORE first paint. The banner mounts
+            after hydration; without this it pushed the nav and all content down
+            by its height (the page's only layout shift, CLS ~0.13 on mobile).
+            Marks <html> when no decision is stored and GPC is off — the same
+            condition under which CookieBanner will show itself (lib/consent.ts).
+            globals.css reserves the space and draws an empty bar while pending;
+            CookieBanner removes the class once it has decided. */}
+        <script
+          id="consent-pending"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `try{var v=localStorage.getItem('lagomplan-consent');if(v!=='all'&&v!=='essential'&&navigator.globalPrivacyControl!==true)document.documentElement.classList.add('consent-pending')}catch(e){}`,
+          }}
+        />
         {/* Mailchimp connected-site script. Must be in the server-rendered
             HTML (not next/script, which injects client-side) or Mailchimp's
             "Check Connection" can't find the mcjs tag. */}

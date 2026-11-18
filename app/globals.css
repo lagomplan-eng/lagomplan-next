@@ -92,6 +92,31 @@ body {
   padding-top: var(--cookie-banner-h, 0px);
 }
 
+/* ── Cookie banner: reserve its space before it mounts (no layout shift) ──────
+   <html class="consent-pending"> is set by an inline script in <head> when the
+   banner is going to show. Until CookieBanner mounts and publishes its exact
+   height in --cookie-banner-h, the page reserves an estimate (the banner's real
+   height at that width, measured) and an empty white bar stands in for it, so
+   nothing moves when the banner text appears. CookieBanner removes the class
+   when it has decided (consent stored, GPC, or the user choosing). */
+html.consent-pending { --cookie-banner-reserve: 109px; }
+@media (max-width: 359px) { html.consent-pending { --cookie-banner-reserve: 126px; } }
+@media (min-width: 480px) { html.consent-pending { --cookie-banner-reserve: 91px; } }
+@media (min-width: 640px) { html.consent-pending { --cookie-banner-reserve: 75px; } }
+@media (min-width: 768px) { html.consent-pending { --cookie-banner-reserve: 66px; } }
+@media (min-width: 1024px) { html.consent-pending { --cookie-banner-reserve: 57px; } }
+html.consent-pending body { padding-top: var(--cookie-banner-h, var(--cookie-banner-reserve)); }
+html.consent-pending::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--cookie-banner-h, var(--cookie-banner-reserve));
+  background: #fff;
+  border-bottom: 1px solid rgba(107, 143, 134, .2);
+  z-index: 399;
+}
+@media print { html.consent-pending::before { display: none; } }
+
 /* ── Headings: design-system enforcement ───────────────────────────
    All titles/subtitles must be sans-serif and upright. Uses !important
    so this beats Tailwind utilities (font-display, font-serif, italic)

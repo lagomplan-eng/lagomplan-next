@@ -170,7 +170,7 @@ export const guide: FlatGuide = {
     {
       id: 'liberacion-de-tortugas-en-ixtapa-zihuatanejo',
       name: "Liberación de tortugas en Ixtapa-Zihuatanejo",
-      description: "GetYourGuide: 5.0/5 (4 reseñas) · Desde US$71 por persona. Cuatro horas en un campamento tortuguero a 40 minutos de Ixtapa. Los guías explican cómo se protege a la tortuga golfina, el proceso de los nidos, y los niños ayudan a liberar crías. Incluye transporte, refrigerio, bebida y comida. El guía habla inglés y francés; pregunta por español al reservar.",
+      description: "Cuatro horas en un campamento tortuguero a 40 minutos de Ixtapa. Los guías explican cómo se protege a la tortuga golfina, el proceso de los nidos, y los niños ayudan a liberar crías. Incluye transporte, refrigerio, bebida y comida. El guía habla inglés y francés; pregunta por español al reservar.",
       tags: ["Naturaleza", "4 horas", "Recogida en hotel", "Comida incluida"],
       category: 'naturaleza',
       duration: 'corto',
@@ -179,7 +179,7 @@ export const guide: FlatGuide = {
     {
       id: 'tirolesas-en-ixtapa-zihuatanejo',
       name: "Tirolesas en Ixtapa-Zihuatanejo",
-      description: "GetYourGuide: 4.5/5 (3 reseñas) · Desde US$68 por persona. Dos horas y media en un parque ecológico en la selva, con tirolesas, escaleras, puentes colgantes y obstáculos móviles. Incluye arnés, guías bilingües y transporte desde las zonas hoteleras de Ixtapa y Zihuatanejo. Pide zapato cerrado. Confirma la edad y estatura mínimas antes de reservar para los más chicos.",
+      description: "Dos horas y media en un parque ecológico en la selva, con tirolesas, escaleras, puentes colgantes y obstáculos móviles. Incluye arnés, guías bilingües y transporte desde las zonas hoteleras de Ixtapa y Zihuatanejo. Pide zapato cerrado. Confirma la edad y estatura mínimas antes de reservar para los más chicos.",
       tags: ["Aventura", "2.5 horas", "Grupo pequeño", "Transporte incluido"],
       category: 'aventura',
       duration: 'corto',
@@ -188,7 +188,7 @@ export const guide: FlatGuide = {
     {
       id: 'tour-por-el-campo-y-barra-de-potosi',
       name: "Tour por el campo y Barra de Potosí",
-      description: "GetYourGuide: 5.0/5 (1 reseña) · Desde US$103 por persona. Cinco horas con guía en español o inglés para conocer cómo se vive y se trabaja fuera de la zona hotelera: una huerta de cocos con degustación, un taller familiar de ladrillos y tejas, y comida de mariscos frente a la playa en el pueblo pesquero de Barra de Potosí. El paseo en lancha por la laguna es opcional y se paga aparte. También se puede tomar sin comida.",
+      description: "Cinco horas con guía en español o inglés para conocer cómo se vive y se trabaja fuera de la zona hotelera: una huerta de cocos con degustación, un taller familiar de ladrillos y tejas, y comida de mariscos frente a la playa en el pueblo pesquero de Barra de Potosí. El paseo en lancha por la laguna es opcional y se paga aparte. También se puede tomar sin comida.",
       tags: ["Cultura local", "5 horas", "Transporte con aire acondicionado", "Comida incluida"],
       category: 'excursion',
       duration: 'medio',

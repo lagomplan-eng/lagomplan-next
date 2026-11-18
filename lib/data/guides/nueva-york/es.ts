@@ -158,7 +158,7 @@ export const guide: FlatGuide = {
     {
       id: 'greenwich-village-food-tour-con-6-degustaciones',
       name: "Greenwich Village Food Tour con 6 degustaciones",
-      description: "GetYourGuide: 4.9/5 (116 reseñas) · Desde US$101 por persona. Tres horas por el barrio bohemio de Manhattan con un guía local: bagel con queso crema, pizza neoyorquina, cupcakes, donas gourmet y un platillo secreto que se revela ese día. Grupo de máximo 12 personas, cancelación gratis hasta 24 horas antes. Lo opera Secret Food Tours, en inglés.",
+      description: "Tres horas por el barrio bohemio de Manhattan con un guía local: bagel con queso crema, pizza neoyorquina, cupcakes, donas gourmet y un platillo secreto que se revela ese día. Grupo de máximo 12 personas, cancelación gratis hasta 24 horas antes. Lo opera Secret Food Tours, en inglés.",
       tags: ["Tour de comida", "3 horas", "Grupo pequeño", "Cancelación gratis"],
       category: 'comida',
       duration: 'corto',
@@ -167,7 +167,7 @@ export const guide: FlatGuide = {
     {
       id: 'chelsea-market-meatpacking-y-high-line-food-tour',
       name: "Chelsea Market, Meatpacking y High Line Food Tour",
-      description: "GetYourGuide: 4.7/5 (140 reseñas) · Desde US$88 por persona. Recorrido de tres horas con máximo 10 personas: una hora de degustaciones en Chelsea Market, otra en Market 57 frente al Hudson y la última caminando la High Line con historia de su arquitectura. Incluye un almuerzo completo. Punto de encuentro frente a Buddakan, 75 Ninth Avenue.",
+      description: "Recorrido de tres horas con máximo 10 personas: una hora de degustaciones en Chelsea Market, otra en Market 57 frente al Hudson y la última caminando la High Line con historia de su arquitectura. Incluye un almuerzo completo. Punto de encuentro frente a Buddakan, 75 Ninth Avenue.",
       tags: ["Tour de comida", "3 horas", "Máximo 10 personas", "Almuerzo incluido"],
       category: 'comida',
       duration: 'corto',
@@ -176,7 +176,7 @@ export const guide: FlatGuide = {
     {
       id: 'brunch-almuerzo-o-cena-a-bordo-del-bateaux-new-york',
       name: "Brunch, almuerzo o cena a bordo del Bateaux New York",
-      description: "GetYourGuide: 4.5/5 (1,055 reseñas) · Desde US$115 por persona. Crucero de City Cruises en un barco de cristal que sale de Chelsea Piers y recorre los ríos Hudson y East frente al skyline, con mesa privada, menú de tres tiempos y música en vivo. El brunch incluye mimosas ilimitadas; la cena pide ropa semiformal y cuesta más que el precio de entrada. Para una pareja es la forma de ver la Estatua de la Libertad sin filas.",
+      description: "Crucero de City Cruises en un barco de cristal que sale de Chelsea Piers y recorre los ríos Hudson y East frente al skyline, con mesa privada, menú de tres tiempos y música en vivo. El brunch incluye mimosas ilimitadas; la cena pide ropa semiformal y cuesta más que el precio de entrada. Para una pareja es la forma de ver la Estatua de la Libertad sin filas.",
       tags: ["Crucero", "2 a 3 horas", "Comida incluida", "Código de vestimenta en la cena"],
       category: 'comida',
       duration: 'corto',

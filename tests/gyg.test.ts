@@ -12,7 +12,7 @@
 
 import fs from 'fs'
 import path from 'path'
-import { GYG_PARTNER_ID, isGygTourUrl, normalizeGygTourUrl, buildGygBookingUrl } from '../lib/affiliate/gyg'
+import { GYG_PARTNER_ID, isGygUrl, isGygTourUrl, normalizeGygTourUrl, buildGygBookingUrl } from '../lib/affiliate/gyg'
 
 type Result = { name: string; pass: boolean; detail?: string }
 const results: Result[] = []
@@ -25,6 +25,25 @@ function expectEq<T>(name: string, got: T, expected: T) {
 }
 
 const TOUR = 'https://www.getyourguide.com/mexico-city-l194/casa-luis-barragan-t12345/'
+
+// ── isGygUrl / non-tour GYG pages ───────────────────────────────────────────────
+
+expectTrue('isGygUrl: tour', isGygUrl(TOUR))
+expectTrue('isGygUrl: search', isGygUrl('https://www.getyourguide.com/s/?q=Kayaking'))
+expectTrue('isGygUrl: location', isGygUrl('https://www.getyourguide.com/hong-kong-l174/'))
+expectTrue('isGygUrl: bare host', isGygUrl('https://getyourguide.com/hong-kong-l174/'))
+expectTrue('isGygUrl: not the Stay22 redirector', !isGygUrl('https://getyourguide.stay22.com/lagomplan/abc'))
+expectTrue('isGygUrl: not another site', !isGygUrl('https://www.opentable.com/'))
+expectTrue('isGygUrl: empty/garbage', !isGygUrl('') && !isGygUrl(undefined) && !isGygUrl('not a url'))
+{
+  const search = buildGygBookingUrl('https://www.getyourguide.com/s/?q=Farm+to+Table&ref=lagomplan', { cmp: 'guia-napa-sonoma' })
+  expectEq('search: q kept, ref dropped, partner_id + cmp added', search, `https://www.getyourguide.com/s/?q=Farm+to+Table&partner_id=${GYG_PARTNER_ID}&cmp=guia-napa-sonoma`)
+  const loc = buildGygBookingUrl('https://www.getyourguide.com/houston-l719/escape-rooms-tc357/?ref=lagomplan', { cmp: 'guia-houston' })
+  expectEq('category page: path kept, partner_id + cmp added', loc, `https://www.getyourguide.com/houston-l719/escape-rooms-tc357/?partner_id=${GYG_PARTNER_ID}&cmp=guia-houston`)
+  expectEq('non-tour: idempotent', buildGygBookingUrl(loc, { cmp: 'guia-houston' }), loc)
+  const dup = buildGygBookingUrl('https://www.getyourguide.com/s/?q=x&partner_id=OTHER&cmp=old', { cmp: 'guia-a' })
+  expectEq('non-tour: an existing partner_id / cmp is replaced, not duplicated', dup, `https://www.getyourguide.com/s/?q=x&partner_id=${GYG_PARTNER_ID}&cmp=guia-a`)
+}
 
 // ── isGygTourUrl ────────────────────────────────────────────────────────────────
 

@@ -291,6 +291,7 @@ A city that returns zero hits in `NEIGHBORHOOD_COORDS` AND `CITY_CENTROIDS` is a
 - Two buttons visible: "Solo esenciales" + "Aceptar todas"
 - Link to `/privacy` in the body text
 - Banner does NOT bump the nav-content out of position visually (CSS variable `--cookie-banner-h` shifts everything down cleanly)
+- No layout shift when the banner appears: `<html class="consent-pending">` (set pre-paint) already reserves its height and draws an empty bar; check CLS ≈ 0 in Lighthouse mobile on a fresh profile
 
 ---
 
