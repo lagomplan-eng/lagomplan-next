@@ -6,6 +6,7 @@ import { getHotelById } from '../../../../lib/hotels/db'
 import { loadHotelDetail } from '../../../../lib/hotels/stats'
 import { hotelCardPath, hotelQrUrl } from '../../../../lib/hotels/links'
 import { ZONE_LABEL } from '../../../../content/guia/hotel/zones'
+import { EDITION_LABEL, STATUS_LABEL } from '../../../../lib/hotels/labels'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,10 +28,10 @@ export default async function AdminHotelDetail({ params }: { params: Promise<{ i
       <p><a href="/admin/hoteles" style={{ color: '#0F3A33' }}>← Todos los hoteles</a></p>
       <h1 style={{ margin: '0 0 4px' }}>{hotel.hotel_name}</h1>
       <p style={{ margin: '0 0 20px', color: '#6B8F86' }}>
-        {hotel.zone ? ZONE_LABEL[hotel.zone] : `Lista de espera: ${hotel.requested_zone ?? '—'}`} · {hotel.status} · {hotel.edition}
+        {hotel.zone ? ZONE_LABEL[hotel.zone] : `Lista de espera: ${hotel.requested_zone ?? '—'}`} · {STATUS_LABEL[hotel.status] ?? hotel.status} · {EDITION_LABEL[hotel.edition] ?? hotel.edition}
       </p>
       <section style={card}>
-        <p style={{ margin: 0 }}>{hotel.contact_name} · {hotel.contact_email}</p>
+        <p style={{ margin: 0 }}>{hotel.contact_name}{hotel.contact_role ? ` (${hotel.contact_role})` : ''} · {hotel.contact_email}{hotel.contact_phone ? ` · ${hotel.contact_phone}` : ''}{hotel.rooms ? ` · ${hotel.rooms} habitaciones` : ''}</p>
         <p style={{ margin: '8px 0 0', fontSize: 14 }}>
           Enlace del QR: <code>{hotelQrUrl(hotel.code)}</code> · <a href={hotelCardPath(hotel.code)}>tarjeta</a>
           {hotel.maps_url && <> · <a href={hotel.maps_url} target="_blank" rel="noopener noreferrer">Maps</a></>}

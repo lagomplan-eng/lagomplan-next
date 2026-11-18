@@ -16,7 +16,7 @@ export default async function AdminHotelsPage() {
 
   const { hotels, totals } = await loadDashboard()
   return (
-    <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 20px 80px' }}>
+    <main style={{ maxWidth: 1600, margin: '0 auto', padding: '32px 24px 80px' }}>
       <h1 style={{ fontSize: 28, margin: '0 0 4px' }}>Hoteles · guía de barrio</h1>
       <p style={{ margin: '0 0 24px', color: '#6B8F86' }}>Edición gratuita con QR.</p>
       {experiencesArePlaceholders() && (

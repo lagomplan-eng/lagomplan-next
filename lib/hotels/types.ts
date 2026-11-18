@@ -16,10 +16,14 @@ export interface HotelRow {
   lang: 'es' | 'en'
   notes: string | null
   email_opt_out: boolean
+  /** Optional signup fields (migration 20261118000000); absent until it is applied. */
+  contact_phone?: string | null
+  rooms?: number | null
+  contact_role?: string | null
   terms_accepted_at: string
   created_at: string
   approved_at: string | null
 }
 
-export const HOTEL_COLUMNS =
-  'id, code, hotel_name, zone, requested_zone, contact_name, contact_email, maps_url, status, edition, lang, notes, email_opt_out, terms_accepted_at, created_at, approved_at'
+// '*' (not a column list) so reads keep working whether or not the optional-fields migration has been applied.
+export const HOTEL_COLUMNS = '*'

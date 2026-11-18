@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { HotelWithStats } from '../../../lib/hotels/stats'
 import { filterHotels } from '../../../lib/hotels/csv'
 import { hotelCardPath, hotelQrUrl } from '../../../lib/hotels/links'
 import { HOTEL_STATUSES } from '../../../lib/hotels/types'
+import { EDITION_LABEL, STATUS_LABEL } from '../../../lib/hotels/labels'
 import { ZONE_LABEL } from '../../../content/guia/hotel/zones'
 
 const th: React.CSSProperties = { textAlign: 'left', padding: '8px 10px', fontSize: 12, fontFamily: 'var(--font-mono, monospace)', whiteSpace: 'nowrap', borderBottom: '1px solid #cfd8d3' }
@@ -57,7 +58,7 @@ export default function HotelsTable({ hotels, totals }: {
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center', marginBottom: 12 }}>
         <input aria-label="Buscar hotel" placeholder="Buscar hotel" value={q} onChange={(e) => setQ(e.target.value)} style={{ padding: 8, borderRadius: 6, border: '1px solid #cfd8d3' }} />
         <select aria-label="Estado" value={status} onChange={(e) => setStatus(e.target.value)} style={{ padding: 8 }}>
-          <option value="">Todos los estados</option>{HOTEL_STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}
+          <option value="">Todos los estados</option>{HOTEL_STATUSES.map((s) => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}
         </select>
         <select aria-label="Zona" value={zone} onChange={(e) => setZone(e.target.value)} style={{ padding: 8 }}>
           <option value="">Todas las zonas</option>
@@ -68,43 +69,52 @@ export default function HotelsTable({ hotels, totals }: {
         <span role="status" style={{ fontSize: 13 }}>{msg}</span>
       </div>
       <div style={{ overflowX: 'auto', background: '#fff', borderRadius: 12 }}>
-        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 1100 }}>
+        <table style={{ borderCollapse: 'collapse', width: '100%', minWidth: 900 }}>
           <thead><tr>
-            {['Hotel', 'Zona', 'Estado', 'Edición', 'Contacto', 'Alta', 'Aprobación', 'Escaneos 30 d', 'Escaneos total', 'Último escaneo', 'Acciones'].map((h) => <th key={h} style={th}>{h}</th>)}
+            {['Hotel', 'Zona', 'Estado', 'Edición', 'Contacto', 'Alta', 'Aprobación', 'Escaneos 30 d', 'Escaneos total', 'Último escaneo'].map((h) => <th key={h} style={th}>{h}</th>)}
           </tr></thead>
           <tbody>
-            {rows.length === 0 && <tr><td style={td} colSpan={11}>Sin resultados.</td></tr>}
+            {rows.length === 0 && <tr><td style={td} colSpan={10}>Sin resultados.</td></tr>}
             {rows.map((h) => (
-              <tr key={h.id}>
-                <td style={td}><a href={`/admin/hoteles/${h.id}`} style={{ color: '#0F3A33', fontWeight: 700 }}>{h.hotel_name}</a></td>
-                <td style={td}>{h.zone ? ZONE_LABEL[h.zone] : <em>{h.requested_zone ?? '—'}</em>}</td>
-                <td style={td}>{h.status}</td>
-                <td style={td}>{h.edition}</td>
-                <td style={td}>{h.contact_name}<br /><span style={{ color: '#6B8F86' }}>{h.contact_email}</span></td>
-                <td style={td}>{date(h.created_at)}</td>
-                <td style={td}>{date(h.approved_at)}</td>
-                <td style={td}>{h.scans_30d}</td>
-                <td style={td}>{h.scans_total}</td>
-                <td style={td}>{date(h.last_scan)}</td>
-                <td style={{ ...td, minWidth: 330 }}>
-                  <button style={btn} onClick={() => copy(hotelQrUrl(h.code))}>Copiar enlace</button>
-                  <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={hotelCardPath(h.code)} target="_blank" rel="noopener noreferrer">Abrir tarjeta</a>
-                  {h.maps_url && <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={h.maps_url} target="_blank" rel="noopener noreferrer">Maps</a>}
-                  {h.zone && h.status !== 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'approve')}>Aprobar</button>}
-                  {h.status !== 'rejected' && <button style={btn} disabled={!!busy} onClick={() => confirm(`¿Rechazar ${h.hotel_name}?`) && act(h.id, 'reject')}>Rechazar</button>}
-                  {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'pause')}>Pausar</button>}
-                  {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'resend')}>Reenviar correo</button>}
-                  <button style={btn} onClick={() => setEditing({ id: h.id, notes: h.notes ?? '' })}>Notas</button>
-                  {editing?.id === h.id && (
-                    <div style={{ marginTop: 6 }}>
-                      <textarea aria-label="Notas" rows={3} value={editing.notes} onChange={(e) => setEditing({ id: h.id, notes: e.target.value })} style={{ width: '100%', boxSizing: 'border-box' }} />
-                      <button style={btn} onClick={() => act(h.id, 'notes', editing.notes)}>Guardar</button>
-                      <button style={btn} onClick={() => setEditing(null)}>Cancelar</button>
-                    </div>
-                  )}
-                  {h.notes && editing?.id !== h.id && <div style={{ fontSize: 12, color: '#6B8F86' }}>{h.notes}</div>}
-                </td>
-              </tr>
+              <Fragment key={h.id}>
+                <tr>
+                  <td style={{ ...td, borderBottom: 'none' }}><a href={`/admin/hoteles/${h.id}`} style={{ color: '#0F3A33', fontWeight: 700 }}>{h.hotel_name}</a>{h.rooms ? <div style={{ fontSize: 12, color: '#6B8F86' }}>{h.rooms} habitaciones</div> : null}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{h.zone ? ZONE_LABEL[h.zone] : <em>{h.requested_zone ?? '—'}</em>}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{STATUS_LABEL[h.status] ?? h.status}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{EDITION_LABEL[h.edition] ?? h.edition}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>
+                    {h.contact_name}{h.contact_role ? <span style={{ color: '#6B8F86' }}> · {h.contact_role}</span> : null}
+                    <br /><span style={{ color: '#6B8F86' }}>{h.contact_email}</span>
+                    {h.contact_phone ? <><br /><span style={{ color: '#6B8F86' }}>{h.contact_phone}</span></> : null}
+                  </td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{date(h.created_at)}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{date(h.approved_at)}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{h.scans_30d}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{h.scans_total}</td>
+                  <td style={{ ...td, borderBottom: 'none' }}>{date(h.last_scan)}</td>
+                </tr>
+                {/* Actions sit on their own row under the hotel, so no button depends on how wide the screen is. */}
+                <tr>
+                  <td colSpan={10} style={{ ...td, paddingTop: 0 }}>
+                    <button style={btn} onClick={() => copy(hotelQrUrl(h.code))}>Copiar enlace</button>
+                    <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={hotelCardPath(h.code)} target="_blank" rel="noopener noreferrer">Abrir tarjeta</a>
+                    {h.maps_url && <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={h.maps_url} target="_blank" rel="noopener noreferrer">Maps</a>}
+                    {h.zone && h.status !== 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'approve')}>Aprobar</button>}
+                    {h.status !== 'rejected' && <button style={btn} disabled={!!busy} onClick={() => confirm(`¿Rechazar ${h.hotel_name}?`) && act(h.id, 'reject')}>Rechazar</button>}
+                    {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'pause')}>Pausar</button>}
+                    {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'resend')}>Reenviar correo</button>}
+                    <button style={btn} onClick={() => setEditing({ id: h.id, notes: h.notes ?? '' })}>Notas</button>
+                    {editing?.id === h.id && (
+                      <div style={{ marginTop: 6, maxWidth: 560 }}>
+                        <textarea aria-label="Notas" rows={3} value={editing.notes} onChange={(e) => setEditing({ id: h.id, notes: e.target.value })} style={{ width: '100%', boxSizing: 'border-box' }} />
+                        <button style={btn} onClick={() => act(h.id, 'notes', editing.notes)}>Guardar</button>
+                        <button style={btn} onClick={() => setEditing(null)}>Cancelar</button>
+                      </div>
+                    )}
+                    {h.notes && editing?.id !== h.id && <span style={{ fontSize: 12, color: '#6B8F86', marginLeft: 6 }}>{h.notes}</span>}
+                  </td>
+                </tr>
+              </Fragment>
             ))}
           </tbody>
         </table>

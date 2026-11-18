@@ -43,7 +43,7 @@ export function sendSignupNotification(h: HotelRow) {
     `Nuevo hotel: ${h.hotel_name} · ${h.zone ? ZONE_LABEL[h.zone] : 'lista de espera'}`,
     [
       `<strong>${esc(h.hotel_name)}</strong> pidió la guía de barrio.`,
-      `Zona: ${esc(zoneText(h))}<br>Contacto: ${esc(h.contact_name)} · ${esc(h.contact_email)}${h.maps_url ? `<br>Maps: ${esc(h.maps_url)}` : ''}`,
+      `Zona: ${esc(zoneText(h))}<br>Contacto: ${esc(h.contact_name)}${h.contact_role ? ` (${esc(h.contact_role)})` : ''} · ${esc(h.contact_email)}${h.contact_phone ? ` · ${esc(h.contact_phone)}` : ''}${h.rooms ? `<br>Habitaciones: ${h.rooms}` : ''}${h.maps_url ? `<br>Maps: ${esc(h.maps_url)}` : ''}`,
     ],
     { label: 'Abrir en el panel', href: adminHotelUrl(h.id) },
   )

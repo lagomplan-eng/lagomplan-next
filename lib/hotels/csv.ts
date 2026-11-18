@@ -9,7 +9,7 @@ const esc = (v: unknown) => {
 }
 
 export const CSV_HEADER = [
-  'hotel', 'zone', 'requested_zone', 'status', 'edition', 'contact_name', 'contact_email',
+  'hotel', 'zone', 'requested_zone', 'status', 'edition', 'contact_name', 'contact_role', 'contact_email', 'contact_phone', 'rooms',
   'signup_date', 'approval_date', 'scans_30d', 'scans_total', 'last_scan', 'code', 'maps_url', 'notes',
 ]
 
@@ -17,7 +17,7 @@ export function hotelsToCsv(rows: HotelWithStats[]): string {
   const lines = [CSV_HEADER.join(',')]
   for (const h of rows) {
     lines.push([
-      h.hotel_name, h.zone, h.requested_zone, h.status, h.edition, h.contact_name, h.contact_email,
+      h.hotel_name, h.zone, h.requested_zone, h.status, h.edition, h.contact_name, h.contact_role, h.contact_email, h.contact_phone, h.rooms,
       h.created_at, h.approved_at, h.scans_30d, h.scans_total, h.last_scan, h.code, h.maps_url, h.notes,
     ].map(esc).join(','))
   }

@@ -13,6 +13,9 @@ const copy = {
     contact: 'Tu nombre',
     email: 'Correo electrónico',
     maps: 'Enlace de Google Maps (opcional)',
+    phone: 'WhatsApp o teléfono (opcional)',
+    rooms: 'Número de habitaciones (opcional)',
+    role: 'Tu cargo en el hotel (opcional)',
     terms1: 'Acepto los',
     terms2: 'términos',
     terms3: 'y la',
@@ -24,6 +27,7 @@ const copy = {
     error: 'Algo salió mal. Inténtalo de nuevo.',
     rate: 'Demasiados intentos. Inténtalo más tarde.',
     invalid: 'Revisa los campos marcados.',
+    tooFast: 'No pudimos enviar el formulario. Espera unos segundos e inténtalo de nuevo.',
   },
   en: {
     hotel: 'Hotel name',
@@ -34,6 +38,9 @@ const copy = {
     contact: 'Your name',
     email: 'Email',
     maps: 'Google Maps link (optional)',
+    phone: 'WhatsApp or phone (optional)',
+    rooms: 'Number of rooms (optional)',
+    role: 'Your role at the hotel (optional)',
     terms1: 'I accept the',
     terms2: 'terms',
     terms3: 'and the',
@@ -45,6 +52,7 @@ const copy = {
     error: 'Something went wrong. Please try again.',
     rate: 'Too many attempts. Please try again later.',
     invalid: 'Please check the marked fields.',
+    tooFast: 'We could not send the form. Wait a few seconds and try again.',
   },
 }
 
@@ -54,7 +62,7 @@ const label = 'block font-sans text-[13px] font-semibold text-[#0F3A33] mb-1.5'
 export default function HotelSignupForm({ locale }: { locale: 'es' | 'en' }) {
   const t = copy[locale]
   const openedAt = useRef(Date.now())
-  const [f, setF] = useState({ hotelName: '', zone: '', requestedZone: '', contactName: '', email: '', mapsUrl: '', terms: false, website: '' })
+  const [f, setF] = useState({ hotelName: '', zone: '', requestedZone: '', contactName: '', email: '', mapsUrl: '', contactPhone: '', rooms: '', contactRole: '', terms: false, website: '' })
   const [state, setState] = useState<'idle' | 'loading' | 'pending' | 'waitlist'>('idle')
   const [error, setError] = useState<string | null>(null)
   const [bad, setBad] = useState<string | null>(null)
@@ -72,6 +80,7 @@ export default function HotelSignupForm({ locale }: { locale: 'es' | 'en' }) {
       })
       const j = await res.json().catch(() => ({}))
       if (res.status === 429) { setError(t.rate); setState('idle'); return }
+      if (res.status === 422 && j.error === 'too_fast') { setError(t.tooFast); setState('idle'); return } // not a success: nothing was saved
       if (res.status === 422) { setBad(j.error ?? 'x'); setError(t.invalid); setState('idle'); return }
       if (!res.ok) throw new Error('failed')
       setState(f.zone === 'other' ? 'waitlist' : 'pending')
@@ -112,6 +121,13 @@ export default function HotelSignupForm({ locale }: { locale: 'es' | 'en' }) {
         <input id="h-email" type="email" className={input} required maxLength={254} autoComplete="email" value={f.email} onChange={set('email')} {...flag('email')} /></div>
       <div><label className={label} htmlFor="h-maps">{t.maps}</label>
         <input id="h-maps" type="url" className={input} maxLength={500} value={f.mapsUrl} onChange={set('mapsUrl')} {...flag('mapsUrl')} /></div>
+
+      <div><label className={label} htmlFor="h-role">{t.role}</label>
+        <input id="h-role" className={input} maxLength={120} autoComplete="organization-title" value={f.contactRole} onChange={set('contactRole')} {...flag('contactRole')} /></div>
+      <div><label className={label} htmlFor="h-phone">{t.phone}</label>
+        <input id="h-phone" type="tel" className={input} maxLength={40} autoComplete="tel" value={f.contactPhone} onChange={set('contactPhone')} {...flag('contactPhone')} /></div>
+      <div><label className={label} htmlFor="h-rooms">{t.rooms}</label>
+        <input id="h-rooms" type="number" inputMode="numeric" min={1} max={5000} className={input} value={f.rooms} onChange={set('rooms')} {...flag('rooms')} /></div>
 
       {/* Honeypot: invisible to people, tempting to bots. */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>

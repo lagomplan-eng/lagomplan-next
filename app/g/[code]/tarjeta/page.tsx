@@ -9,18 +9,25 @@ import QRCode from 'qrcode'
 import { getHotelByCode } from '../../../../lib/hotels/db'
 import { isValidHotelCode } from '../../../../lib/hotels/codes'
 import { hotelQrUrl } from '../../../../lib/hotels/links'
-import { ZONE_LABEL, isHotelZone } from '../../../../content/guia/hotel/zones'
+import { ZONE_LABEL, isHotelZone, type HotelZone } from '../../../../content/guia/hotel/zones'
 import PrintButton from './PrintButton'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store'
+export const revalidate = 0
 
 const MONO = "var(--font-mono), 'DM Mono', ui-monospace, monospace"
 
 export default async function HotelCardPage({ params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
-  if (!isValidHotelCode(code)) notFound()
+  // The reason goes to the server log (status and zone only: no name, email or code) so a 404 can be explained.
+  const gone = (reason: string): never => { console.error(`[card] not available: ${reason}`); notFound() }
+  if (!isValidHotelCode(code)) gone('bad_code')
   const hotel = await getHotelByCode(code)
-  if (!hotel || !isHotelZone(hotel.zone) || (hotel.status !== 'approved' && hotel.status !== 'paused')) notFound()
+  if (!hotel) gone('no_row')
+  if (!isHotelZone(hotel!.zone)) gone(`zone=${String(hotel!.zone)}`)
+  if (hotel!.status !== 'approved' && hotel!.status !== 'paused') gone(`status=${hotel!.status}`)
+  const zone = hotel!.zone as HotelZone
 
   const svg = await QRCode.toString(hotelQrUrl(code), { type: 'svg', margin: 0, errorCorrectionLevel: 'M' })
 
@@ -48,7 +55,7 @@ export default async function HotelCardPage({ params }: { params: Promise<{ code
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '2.6mm' }}>
             <div style={{ fontFamily: MONO, fontSize: '3.2mm', letterSpacing: '0.08em', textTransform: 'uppercase' }}>Guía de barrio</div>
-            <h1 style={{ margin: 0, fontSize: '10mm', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.025em', textWrap: 'balance' }}>Tu guía de {ZONE_LABEL[hotel.zone]}</h1>
+            <h1 style={{ margin: 0, fontSize: '10mm', lineHeight: 1.05, fontWeight: 700, letterSpacing: '-0.025em', textWrap: 'balance' }}>Tu guía de {ZONE_LABEL[zone]}</h1>
             <p style={{ margin: 0, fontSize: '3.7mm', lineHeight: 1.5, fontWeight: 500 }}>Dónde comer, qué hacer y cómo moverte. Solo lugares verificados.</p>
             <p style={{ margin: 0, fontSize: '3.2mm', lineHeight: 1.5 }}>Where to eat, what to do and how to get around. Verified places only.</p>
           </div>

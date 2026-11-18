@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
     status: v.zone ? 'pending' : 'waitlist',
     lang: v.lang,
     terms_accepted_at: new Date().toISOString(),
+    // Optional fields: only sent when filled, so signups without them work before migration 20261118000000.
+    ...(v.contactPhone ? { contact_phone: v.contactPhone } : {}),
+    ...(v.rooms ? { rooms: v.rooms } : {}),
+    ...(v.contactRole ? { contact_role: v.contactRole } : {}),
   }
 
   let inserted: HotelRow | null = null

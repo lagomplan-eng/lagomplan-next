@@ -56,12 +56,20 @@ const r2 = validateSignup({ ...form, zone: 'other', requestedZone: 'Coyoacán' }
 eq('other zone -> waitlist shape', r2.ok === true && r2.value.zone === null && r2.value.requestedZone === 'Coyoacán', true)
 eq('other zone needs the neighborhood', validateSignup({ ...form, zone: 'other' }, now), { ok: false, error: 'requestedZone' })
 eq('honeypot filled', validateSignup({ ...form, website: 'http://spam' }, now), { ok: 'bot' })
-eq('too fast', validateSignup({ ...form, openedAt: now - 500 }, now), { ok: 'bot' })
+eq('too fast is an error the form can show, not a success', validateSignup({ ...form, openedAt: now - 500 }, now), { ok: false, error: 'too_fast' })
+eq('missing openedAt is too_fast too', validateSignup({ ...form, openedAt: undefined }, now), { ok: false, error: 'too_fast' })
 eq('terms required', validateSignup({ ...form, terms: false }, now), { ok: false, error: 'terms' })
 eq('bad email', validateSignup({ ...form, email: 'nope' }, now), { ok: false, error: 'email' })
 eq('bad zone', validateSignup({ ...form, zone: 'centro' }, now), { ok: false, error: 'zone' })
 eq('javascript: maps url refused', validateSignup({ ...form, mapsUrl: 'javascript:alert(1)' }, now), { ok: false, error: 'mapsUrl' })
 eq('https maps ok', validateSignup({ ...form, mapsUrl: 'https://maps.app.goo.gl/abc' }, now).ok, true)
+
+// optional fields
+const opt = validateSignup({ ...form, contactPhone: '+52 55 1234 5678', rooms: '42', contactRole: ' Gerente ' }, now)
+eq('optional fields kept', opt.ok === true && opt.value.contactPhone === '+52 55 1234 5678' && opt.value.rooms === 42 && opt.value.contactRole === 'Gerente', true)
+eq('optional fields default to null', r1.ok === true && r1.value.contactPhone === null && r1.value.rooms === null && r1.value.contactRole === null, true)
+eq('bad phone', validateSignup({ ...form, contactPhone: 'call me' }, now), { ok: false, error: 'contactPhone' })
+eq('rooms must be a whole number 1..5000', ['0', '5001', '12.5', 'abc'].map((rooms) => (validateSignup({ ...form, rooms }, now) as { error?: string }).error), ['rooms', 'rooms', 'rooms', 'rooms'])
 
 // rate limit
 _resetForTests()
