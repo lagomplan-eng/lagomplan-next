@@ -45,7 +45,8 @@
 
   /* Brand */
   --pine-rgb:  15 58 51;      /* #0F3A33  primary: text, buttons, selected */
-  --sage-rgb:  107 143 134;   /* #6B8F86  eyebrows, quiet accents */
+  --sage-rgb:  107 143 134;   /* #6B8F86  decorative sage (dots, rules, icons); 3.4:1 on cream: NOT for text */
+  --sage-text-rgb: 90 120 113; /* #5A7871  sage for text: same hue 165° and saturation, darker. 4.61:1 on cream, 4.82:1 on white (WCAG AA) */
   --sand-rgb:  237 231 225;   /* #EDE7E1  tag/pill fill, soft panels */
   --cream-rgb: 255 249 243;   /* #FFF9F3  page background */
   --coral-rgb: 225 97 91;     /* #E1615B  CTA accent, alerts of interest */
@@ -70,6 +71,7 @@
   /* Ready-to-use colours */
   --pine:   rgb(var(--pine-rgb));
   --sage:   rgb(var(--sage-rgb));
+  --sage-text: rgb(var(--sage-text-rgb));
   --sand:   rgb(var(--sand-rgb));
   --cream:  rgb(var(--cream-rgb));
   --coral:  rgb(var(--coral-rgb));

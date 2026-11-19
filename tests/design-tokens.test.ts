@@ -25,11 +25,25 @@ const decl = (name: string): string | null => {
 
 // ── one source ────────────────────────────────────────────────────────────────────
 ok('Tailwind config has no hex colour literals', !/#[0-9a-fA-F]{3,8}\b/.test(tw.replace(/\/\*[\s\S]*?\*\//g, '')), 'a colour is written in tailwind.config.js')
-const BRAND = ['pine', 'sage', 'sand', 'cream', 'coral', 'fjord', 'mint', 'white', 'success', 'warning', 'error', 'ink-2', 'ink-3', 'label', 'line-soft', 'line-strong']
+const BRAND = ['pine', 'sage', 'sage-text', 'sand', 'cream', 'coral', 'fjord', 'mint', 'white', 'success', 'warning', 'error', 'ink-2', 'ink-3', 'label', 'line-soft', 'line-strong']
 for (const n of BRAND) ok(`colour --${n}-rgb is defined once, and --${n} derives from it`, (rootBlock.match(new RegExp(`--${n}-rgb:`, 'g')) ?? []).length === 1 && decl(n) === `rgb(var(--${n}-rgb))`, `${decl(n)}`)
 const channelUsed = (n: string) => new RegExp(`['"]?${n}['"]?:\\s*channel\\('${n}'\\)`).test(tw)
-for (const n of ['pine', 'sage', 'sand', 'cream', 'coral', 'fjord', 'mint', 'success', 'warning', 'error', 'ink-2', 'ink-3', 'label', 'line-soft', 'line-strong']) ok(`Tailwind colour ${n} reads --${n}-rgb`, channelUsed(n))
+for (const n of ['pine', 'sage', 'sage-text', 'sand', 'cream', 'coral', 'fjord', 'mint', 'success', 'warning', 'error', 'ink-2', 'ink-3', 'label', 'line-soft', 'line-strong']) ok(`Tailwind colour ${n} reads --${n}-rgb`, channelUsed(n))
 ok('brand RGB values are the brand (pine #0F3A33, cream #FFF9F3)', decl('pine-rgb') === '15 58 51' && decl('cream-rgb') === '255 249 243')
+
+// ── contrast: text colours must reach WCAG AA (4.5:1) on cream and on white ───────
+const rgbOf = (n: string) => (decl(`${n}-rgb`) ?? '0 0 0').split(/\s+/).map(Number) as [number, number, number]
+const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
+const lum = ([r, g, b]: number[]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+const contrast = (a: number[], b: number[]) => { const [hi, lo] = [lum(a), lum(b)].sort((x, y) => y - x); return (hi + 0.05) / (lo + 0.05) }
+for (const n of ['sage-text', 'label', 'ink-2', 'ink-3', 'pine'])
+  for (const bg of ['cream', 'white']) ok(`text colour ${n} on ${bg} is at least 4.5:1`, contrast(rgbOf(n), rgbOf(bg)) >= 4.5, `${contrast(rgbOf(n), rgbOf(bg)).toFixed(2)}:1`)
+ok('decorative --sage stays #6B8F86 (not for text: below 4.5:1 on cream)', decl('sage-rgb') === '107 143 134' && contrast(rgbOf('sage'), rgbOf('cream')) < 4.5)
+ok('sage-text is the same hue family as sage (hue within 2 degrees)', (() => {
+  const hue = ([r, g, b]: number[]) => { const [R, G, B] = [r, g, b].map(x => x / 255); const mx = Math.max(R, G, B), mn = Math.min(R, G, B), d = mx - mn; let h = mx === R ? ((G - B) / d) % 6 : mx === G ? (B - R) / d + 2 : (R - G) / d + 4; h *= 60; return h < 0 ? h + 360 : h }
+  return Math.abs(hue(rgbOf('sage')) - hue(rgbOf('sage-text'))) <= 2
+})())
+ok('Eyebrow uses sage-text', /text-eyebrow uppercase text-sage-text/.test(fs.readFileSync(path.join(root, 'components/design/Typography.tsx'), 'utf-8')))
 
 // ── stale aliases ─────────────────────────────────────────────────────────────────
 for (const a of ['forest', 'ink', 'accent', 'card', 'muted', 'border', 'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl'])
@@ -53,7 +67,7 @@ ok('no hardcoded #E4DFD8 (use border-line-soft / var(--line-soft))', hexLeft.len
 ok('page title = /guias H1: clamp(44px, 7vw, 72px), 800, -0.04em, line-height .92', decl('fs-title') === 'clamp(44px, 7vw, 72px)' && decl('fw-title') === '800' && decl('ls-title') === '-0.04em' && decl('lh-title') === '0.92')
 ok('H2 = /guias H2: 36px, 800, -0.02em, line-height 1.05', decl('fs-h2') === '36px' && decl('fw-h2') === '800' && decl('ls-h2') === '-0.02em' && decl('lh-h2') === '1.05')
 ok('H3 = /guias H3: 24px, 800, -0.02em, line-height 1.12', decl('fs-h3') === '24px' && decl('fw-h3') === '800' && decl('ls-h3') === '-0.02em' && decl('lh-h3') === '1.12')
-ok('eyebrow = /guias .sec-label: 11px, 500, 0.12em, line-height 1.55', decl('lh-eyebrow') === '1.55' && decl('fs-eyebrow') === '11px' && decl('fw-eyebrow') === '500' && decl('ls-eyebrow') === '0.12em')
+ok('eyebrow = /guias .sec-label metrics: 11px, 500, 0.12em, line-height 1.55 (colour is the darker sage-text for contrast)', decl('lh-eyebrow') === '1.55' && decl('fs-eyebrow') === '11px' && decl('fw-eyebrow') === '500' && decl('ls-eyebrow') === '0.12em')
 ok('Tailwind exposes title, h2, h3, eyebrow, lede, body, small, tiny type styles', ['title', 'h2', 'h3', 'eyebrow', 'lede', 'body', 'small', 'tiny'].every(n => new RegExp(`\\b${n}:\\s*\\['var\\(--fs-${n}\\)'`).test(tw)))
 ok('/guias title and H2 use the same values today (guards the source of the numbers)', (() => {
   const g = fs.readFileSync(path.join(root, 'components/guides/GuidesClient.tsx'), 'utf-8')

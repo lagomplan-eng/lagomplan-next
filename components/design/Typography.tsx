@@ -9,7 +9,7 @@ import type { ElementType, ReactNode } from 'react'
 import { cx } from './cx'
 
 export function Eyebrow({ children, className, as: Tag = 'p' }: { children: ReactNode; className?: string; as?: ElementType }) {
-  return <Tag className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage', className)}>{children}</Tag>
+  return <Tag className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage-text', className)}>{children}</Tag>
 }
 
 export function Lede({ children, className }: { children: ReactNode; className?: string }) {

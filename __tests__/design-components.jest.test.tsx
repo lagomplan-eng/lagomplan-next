@@ -61,7 +61,7 @@ describe('Typography', () => {
     render(<PageTitle eyebrow="Guías de viaje" title="Destinos" lede="Texto" />)
     const h1 = screen.getByRole('heading', { level: 1, name: 'Destinos' })
     expect(h1).toHaveClass('text-title', 'text-pine', 'font-sans')
-    expect(screen.getByText('Guías de viaje')).toHaveClass('text-eyebrow', 'uppercase', 'text-sage')
+    expect(screen.getByText('Guías de viaje')).toHaveClass('text-eyebrow', 'uppercase', 'text-sage-text')
     expect(screen.getByText('Texto')).toBeInTheDocument()
   })
   it('SectionTitle is an h2, CardTitle an h3 (or the level you pass)', () => {

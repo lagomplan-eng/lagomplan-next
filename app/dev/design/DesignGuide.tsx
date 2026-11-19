@@ -119,7 +119,7 @@ function SheetDemo() {
 
 // ── page ──────────────────────────────────────────────────────────────────────────
 
-const BRAND = ['pine', 'sage', 'sand', 'cream', 'coral', 'fjord', 'mint', 'white']
+const BRAND = ['pine', 'sage', 'sage-text', 'sand', 'cream', 'coral', 'fjord', 'mint', 'white']
 const FUNCTIONAL = ['success', 'warning', 'error']
 const TEXT = ['ink-2', 'ink-3', 'label']
 const LINES = ['line-soft', 'line-strong', 'line-card', 'line-panel', 'line-chip', 'line-btn']

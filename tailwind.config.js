@@ -24,6 +24,7 @@ module.exports = {
         // Brand
         pine: channel('pine'),
         sage: channel('sage'),
+        'sage-text': channel('sage-text'),
         sand: channel('sand'),
         cream: channel('cream'),
         coral: channel('coral'),

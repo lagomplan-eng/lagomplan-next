@@ -10,15 +10,17 @@ Colours are stored as RGB channels (`--pine-rgb: 15 58 51`) with a ready colour 
 |---|---|---|
 | Buttons | Pill, Manrope 14–15/700, 48px (small 40px); primary / secondary / ghost | `Button`, `--control-h`, `--control-h-sm`, `--pine-hover` |
 | Page title | The /guias H1: clamp(44px, 7vw, 72px), 800, −0.04em, line-height .92, pine | `PageTitle`, `--fs-title` `--lh-title` `--ls-title` `--fw-title` |
-| H2 / H3 / eyebrow | /guias: H2 36/800/−0.02em/1.05; H3 24/800/−0.02em/1.12; eyebrow 11/500/0.12em caps, sage | `SectionTitle`, `CardTitle`, `Eyebrow` |
+| H2 / H3 / eyebrow | /guias: H2 36/800/−0.02em/1.05; H3 24/800/−0.02em/1.12; eyebrow 11/500/0.12em caps, in `sage-text` (/guias uses #6B8F86, 3.4:1; the eyebrow here is the darker #5A7871, 4.6:1, same hue) | `SectionTitle`, `CardTitle`, `Eyebrow`, `--sage-text` |
 | Cards | Destination card (illustration on top, r24) for guides, experiences, hotels; Info card (r16) for everything else | `DestinationCard`, `InfoCard`, `--radius-destination`, `--radius-info` |
 | Filters | One pattern: inline chips on desktop; on mobile a "Filtros (n)" button opening a bottom sheet with live "Ver N resultados" and "Limpiar" | `FilterPanel`, `BottomSheet`, `Chip` |
+
+Text contrast: every text colour in the tokens is at least 4.5:1 on cream and on white (`tests/design-tokens.test.ts` checks it).
 
 Not decided by the brief, so chosen here (change freely): text inputs are 48px pills (same family as buttons and search), the search field is the /guias 56px pill, and the card shadow is the /guias shadow (`0 2px 8px rgb(0 0 0 / .04)`).
 
 ## Token groups
 
-- **Brand:** `pine` `sage` `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`.
+- **Brand:** `pine` `sage` (decorative only, 3.4:1 on cream) `sage-text` (#5A7871, sage for text: 4.61:1 on cream, 4.82:1 on white) `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`.
 - **Text neutrals:** `ink-2` (body), `ink-3` (green tertiary), `label` (small labels), plus pine and sage. Alpha tints used on /guias: `--text-lede` (pine 72%), `--text-soft` (pine 68%).
 - **Lines:** `line-soft` #E4DFD8 (info card, hairlines), `line-strong` #C8BFB5 (destination card, search), and the pine-alpha lines `line-card` `line-panel` `line-chip` `line-btn`.
 - **Radii:** `pill` 999, `destination` 24, `info` 16, `sheet` 24. Legacy, until the catalog pages migrate: `--radius-card` 20, `--radius-panel` 24.
