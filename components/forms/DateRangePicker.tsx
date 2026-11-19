@@ -71,7 +71,7 @@ function buildMonthGrid(
   days.forEach(d => {
     const s = document.createElement('span')
     s.textContent = d
-    s.style.cssText = 'font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;color:#A0A0A0;text-align:center;padding:3px 0;text-transform:uppercase;display:block;'
+    s.style.cssText = 'font-family:var(--font-mono);font-size:9px;letter-spacing:1px;color:#A0A0A0;text-align:center;padding:3px 0;text-transform:uppercase;display:block;'
     header.appendChild(s)
   })
   container.appendChild(header)
@@ -100,7 +100,7 @@ function buildMonthGrid(
     el.dataset.ts = String(date.getTime())
     el.style.cssText = [
       'height:30px;display:flex;align-items:center;justify-content:center;',
-      'font-family:"DM Mono",monospace;font-size:11px;border-radius:2px;',
+      'font-family:var(--font-mono);font-size:11px;border-radius:2px;',
       'position:relative;user-select:none;transition:background .08s,color .08s;',
       isPast ? 'color:#D0CBC2;cursor:default;' : 'color:#0F1A16;cursor:pointer;',
     ].join('')

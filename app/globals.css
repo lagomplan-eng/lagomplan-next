@@ -36,6 +36,7 @@
 
   /* Brand primaries */
   --pine:    #0F3A33;
+  --pine-hover: #12453D; /* hover/pressed shade of pine buttons (matches the cookie banner) */
   --sage:    #6B8F86;
   --sand:    #EDE7E1;
   --fjord:   #2D4F6C;

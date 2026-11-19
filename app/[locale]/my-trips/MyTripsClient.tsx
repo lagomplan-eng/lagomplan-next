@@ -147,7 +147,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
                 </p>
                 <button
                   onClick={(e) => { e.stopPropagation(); onClick() }}
-                  className="mt-2 w-full text-center bg-pine text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#163d31] transition"
+                  className="mt-2 w-full text-center bg-pine text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-pine-hover transition"
                 >
                   {locale === 'es' ? 'Continuar planeando →' : 'Continue planning →'}
                 </button>
@@ -228,7 +228,7 @@ export default function MyTripsClient() {
           <p className="text-[#6B7280] mb-6">Inicia sesión para ver tus viajes guardados.</p>
           <Link
             href="/login"
-            className="inline-block bg-pine text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#163d31] transition"
+            className="inline-block bg-pine text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-pine-hover transition"
           >
             Iniciar sesión
           </Link>
@@ -286,7 +286,7 @@ export default function MyTripsClient() {
             <p className="text-[#6B7280] mb-4">Aún no tienes viajes guardados.</p>
             <button
               onClick={goToNewTrip}
-              className="bg-pine text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#163d31] transition"
+              className="bg-pine text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-pine-hover transition"
             >
               + Crear mi primer viaje
             </button>
