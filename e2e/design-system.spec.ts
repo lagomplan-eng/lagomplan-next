@@ -67,6 +67,8 @@ test.describe('FilterPanel on mobile', () => {
     await expect(sheet.getByRole('button', { name: 'Ver 2 resultados' })).toBeVisible()
     await sheet.getByRole('button', { name: 'Limpiar' }).click()
     await expect(sheet.getByRole('button', { name: 'Ver 10 resultados' })).toBeVisible()
+    // "Limpiar" just became disabled; in some browsers that drops focus to <body>. Esc must still close the sheet.
+    await page.evaluate(() => (document.activeElement as HTMLElement | null)?.blur())
     await page.keyboard.press('Escape')
     await expect(sheet).toBeHidden()
     // the button now reflects nothing selected and is focusable again

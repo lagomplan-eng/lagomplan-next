@@ -196,6 +196,23 @@ describe('BottomSheet', () => {
     expect(document.body.style.overflow).not.toBe('hidden')
     expect(opener).toHaveFocus()
   })
+  it('Esc still closes it when focus has fallen to the body (a focused button became disabled)', async () => {
+    render(<Host />)
+    fireEvent.click(screen.getByText('open'))
+    await screen.findByRole('dialog')
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    expect(document.body).toHaveFocus()
+    fireEvent.keyDown(document.body, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
+  })
+  it('Tab with focus outside the sheet pulls it back in', async () => {
+    render(<Host />)
+    fireEvent.click(screen.getByText('open'))
+    const d = await screen.findByRole('dialog')
+    ;(document.activeElement as HTMLElement | null)?.blur()
+    fireEvent.keyDown(document.body, { key: 'Tab' })
+    expect(d.contains(document.activeElement)).toBe(true)
+  })
   it('the backdrop and the × button close it', async () => {
     render(<Host />)
     fireEvent.click(screen.getByText('open'))

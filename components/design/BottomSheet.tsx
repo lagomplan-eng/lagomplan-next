@@ -6,7 +6,7 @@
  * it; Tab is trapped inside; body scroll is locked; focus returns to the element that opened it.
  * Rendered in a portal so no ancestor can clip or transform it.
  */
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react'
+import { useCallback, useEffect, useId, useRef, useState, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { cx } from './cx'
 
@@ -45,20 +45,34 @@ export default function BottomSheet({ open, onClose, title, closeLabel, children
     }
   }, [open])
 
+  // Escape and Tab are handled on the document while the sheet is open, not on the dialog: when the focused
+  // button becomes disabled (e.g. "Limpiar" after clearing) focus falls to <body>, and a handler on the
+  // dialog would never see the key again.
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
+  const onKeyDown = useCallback((e: KeyboardEvent) => {
+    const panel = panelRef.current
+    if (!panel) return
+    if (e.key === 'Escape') { e.stopPropagation(); onCloseRef.current(); return }
+    if (e.key !== 'Tab') return
+    const items = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(el => el.offsetParent !== null || el === document.activeElement)
+    if (items.length === 0) { e.preventDefault(); panel.focus(); return }
+    const first = items[0], last = items[items.length - 1]
+    const active = document.activeElement
+    if (!panel.contains(active) || active === panel) { e.preventDefault(); (e.shiftKey ? last : first).focus(); return }
+    if (e.shiftKey && active === first) { e.preventDefault(); last.focus() }
+    else if (!e.shiftKey && active === last) { e.preventDefault(); first.focus() }
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    document.addEventListener('keydown', onKeyDown)
+    return () => document.removeEventListener('keydown', onKeyDown)
+  }, [open, onKeyDown])
+
   if (!mounted || !open) return null
 
-  const onKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') { e.stopPropagation(); onClose(); return }
-    if (e.key !== 'Tab') return
-    const items = Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []).filter(el => el.offsetParent !== null || el === document.activeElement)
-    if (items.length === 0) { e.preventDefault(); return }
-    const first = items[0], last = items[items.length - 1]
-    if (e.shiftKey && (document.activeElement === first || document.activeElement === panelRef.current)) { e.preventDefault(); last.focus() }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
-  }
-
   return createPortal(
-    <div className="fixed inset-0 z-[500]" onKeyDown={onKeyDown}>
+    <div className="fixed inset-0 z-[500]">
       <div
         data-testid="sheet-backdrop"
         aria-hidden="true"
