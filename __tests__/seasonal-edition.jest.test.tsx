@@ -67,7 +67,7 @@ describe('SeasonalEdition, active (server HTML)', () => {
     expect(h).not.toMatch(/box-shadow|shadow-/)
     expect(h).not.toMatch(/#000(?![0-9a-f])|#fff(?![0-9a-f])|#ffffff|#000000/i)
     expect(h).not.toMatch(/rounded-(md|lg|xl|2xl|3xl|full)/)
-    for (const t of ['#1B4D3E', '#F4F0E8', '#0F1A16', '#2D6B57', '#C8D9D3']) expect(h.toLowerCase()).toContain(t.toLowerCase())
+    for (const t of ['var(--pine)', '#F4F0E8', '#0F1A16', '#2D6B57', '#C8D9D3']) expect(h.toLowerCase()).toContain(t.toLowerCase())
   })
   test('English mirror', () => {
     const e = HTML.en

@@ -34,7 +34,7 @@ const COPY = {
 } as const
 
 // Brand tokens (strict): Forest Green, Warm Cream, Off-White, Near Black, Muted Green, Pale Sage.
-const FOREST = '#1B4D3E'
+const FOREST = 'var(--pine)'
 const CREAM = '#F4F0E8'
 const NEAR_BLACK = '#0F1A16'
 const MUTED = '#2D6B57'

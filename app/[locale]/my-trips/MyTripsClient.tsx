@@ -13,7 +13,7 @@ import { computeTripReadiness } from '../../../lib/planner/readiness'
 
 // ─── Brand cover gradient — single consistent tone ────────────────────────────
 
-const COVER_GRADIENT = 'linear-gradient(160deg, #2A6352 0%, #1B4D3E 55%, #0F3328 100%)'
+const COVER_GRADIENT = 'linear-gradient(160deg, #2A6352 0%, var(--pine) 55%, #0F3328 100%)'
 
 // ─── Chip derivation ──────────────────────────────────────────────────────────
 
@@ -62,12 +62,12 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
       onClick={onClick}
       className={`group flex flex-col rounded-2xl overflow-hidden bg-[#FDFCF9] border transition-all duration-200 cursor-pointer hover:-translate-y-0.5 hover:shadow-lg hover:border-[#A8C4BB] ${
         isActive
-          ? 'border-[#1B4D3E]/30 shadow-sm'
+          ? 'border-pine/30 shadow-sm'
           : 'border-[#C8D9D3] shadow-sm'
       }`}
     >
       {/* TOP LINE — active only */}
-      {isActive && <div className="h-[3px] w-full bg-[#1B4D3E]" />}
+      {isActive && <div className="h-[3px] w-full bg-pine" />}
 
       {/* COVER */}
       <div className="relative h-44 overflow-hidden">
@@ -92,7 +92,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
 
         {/* "Último viaje" badge */}
         {isActive && (
-          <div className="absolute top-3 right-3 bg-white text-[#1B4D3E] text-xs px-2 py-1 rounded-full shadow-sm">
+          <div className="absolute top-3 right-3 bg-white text-pine text-xs px-2 py-1 rounded-full shadow-sm">
             Último viaje
           </div>
         )}
@@ -102,7 +102,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
       <div className="p-5 flex flex-col gap-2">
         <h3 className="font-sans text-lg">{name}</h3>
         {(days || tagline) && (
-          <p className="text-xs text-[#1B4D3E]/70">
+          <p className="text-xs text-pine/70">
             {[days, tagline].filter(Boolean).join(' • ')}
           </p>
         )}
@@ -126,7 +126,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
         {readiness.total > 0 ? (
           <div className="mt-3">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-xs font-medium text-[#1B4D3E]">
+              <span className="text-xs font-medium text-pine">
                 {readiness.ready
                   ? (locale === 'es' ? '✓ Listo para viajar' : '✓ Ready to go')
                   : (locale === 'es' ? `${readiness.pct}% listo` : `${readiness.pct}% ready`)}
@@ -135,7 +135,7 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
             </div>
             <div className="h-[5px] bg-[#E5E0D6] rounded-full overflow-hidden">
               <div
-                className="h-full bg-[#1B4D3E] rounded-full transition-[width] duration-500"
+                className="h-full bg-pine rounded-full transition-[width] duration-500"
                 style={{ width: `${readiness.pct}%` }}
               />
             </div>
@@ -147,13 +147,13 @@ function TripCard({ trip, isActive, locale, onClick }: TripCardProps) {
                 </p>
                 <button
                   onClick={(e) => { e.stopPropagation(); onClick() }}
-                  className="mt-2 w-full text-center bg-[#1B4D3E] text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-[#163d31] transition"
+                  className="mt-2 w-full text-center bg-pine text-white text-sm font-medium px-4 py-2 rounded-xl hover:bg-pine-hover transition"
                 >
                   {locale === 'es' ? 'Continuar planeando →' : 'Continue planning →'}
                 </button>
               </>
             ) : (
-              <p className="text-sm text-[#1B4D3E]/70 mt-2">
+              <p className="text-sm text-pine/70 mt-2">
                 {locale === 'es' ? 'Ver itinerario →' : 'View itinerary →'}
               </p>
             )}
@@ -223,12 +223,12 @@ export default function MyTripsClient() {
   // ── Redirect to login if unauthenticated ──────────────────────────────────
   if (user === null) {
     return (
-      <div className="min-h-screen bg-[#F4F0E8] text-[#1B4D3E] font-sans">
+      <div className="min-h-screen bg-[#F4F0E8] text-pine font-sans">
         <div className="max-w-7xl mx-auto px-6 py-24 text-center">
           <p className="text-[#6B7280] mb-6">Inicia sesión para ver tus viajes guardados.</p>
           <Link
             href="/login"
-            className="inline-block bg-[#1B4D3E] text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-[#163d31] transition"
+            className="inline-block bg-pine text-white px-6 py-3 rounded-xl text-sm font-medium hover:bg-pine-hover transition"
           >
             Iniciar sesión
           </Link>
@@ -238,7 +238,7 @@ export default function MyTripsClient() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F4F0E8] text-[#1B4D3E] font-sans">
+    <div className="min-h-screen bg-[#F4F0E8] text-pine font-sans">
 
       {/* HEADER */}
       <div className="max-w-7xl mx-auto px-6 py-12">
@@ -286,7 +286,7 @@ export default function MyTripsClient() {
             <p className="text-[#6B7280] mb-4">Aún no tienes viajes guardados.</p>
             <button
               onClick={goToNewTrip}
-              className="bg-[#1B4D3E] text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-[#163d31] transition"
+              className="bg-pine text-white px-6 py-2.5 rounded-xl text-sm font-medium hover:bg-pine-hover transition"
             >
               + Crear mi primer viaje
             </button>

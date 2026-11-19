@@ -10,6 +10,7 @@ module.exports = {
     extend: {
       colors: {
         pine: '#0F3A33',
+        'pine-hover': 'var(--pine-hover)',
         sage: '#6B8F86',
         sand: '#EDE7E1',
         cream: '#FFF9F3',

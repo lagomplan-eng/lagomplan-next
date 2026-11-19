@@ -9,7 +9,7 @@
   bottom: 28px;
   right: 28px;
   width: 304px;
-  background: #1B4D3E;
+  background: var(--pine);
   border-radius: 6px;
   padding: 22px 20px 18px;
   z-index: 9999;
@@ -104,7 +104,7 @@
 
 .submit {
   background: #F4F0E8;
-  color: #1B4D3E;
+  color: var(--pine);
   font-family: var(--font-sans), 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 500;

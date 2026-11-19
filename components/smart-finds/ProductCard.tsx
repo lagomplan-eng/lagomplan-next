@@ -52,24 +52,24 @@ export default function ProductCard({ product }: Props) {
         display: 'flex', flexDirection: 'column', flex: 1,
       }}>
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+          fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
           letterSpacing: '.18em', color: SAGE, marginBottom: 6,
         }}>{product.brand}</div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontSize: 17, fontWeight: 700,
+          fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700,
           color: PINE, lineHeight: 1.2, marginBottom: 6,
         }}>{product.name}</div>
 
         {/* Tag — softer than the old "— ALL CAPS" treatment. Sentence
             case + Manrope reads as a product subtitle, not a marker. */}
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 11, fontWeight: 500,
+          fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500,
           color: MUTED, marginBottom: 12,
         }}>{toSentenceCase(product.tag)}</div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontSize: 13,
+          fontFamily: 'var(--font-display)', fontSize: 13,
           color: '#5A5754', lineHeight: 1.7, flex: 1, marginBottom: 16,
         }}>{product.opinion}</div>
 
@@ -82,11 +82,11 @@ export default function ProductCard({ product }: Props) {
         }}>
           <div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 13, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 700,
               color: PINE,
             }}>{product.price}</div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED,
+              fontFamily: 'var(--font-sans)', fontSize: 9, color: MUTED,
               marginTop: 2,
             }}>{product.where}</div>
           </div>
@@ -105,7 +105,7 @@ export default function ProductCard({ product }: Props) {
               color:      hov ? '#FFFFFF' : PINE,
               border: `1px solid ${PINE}`,
               borderRadius: 999,
-              fontFamily: "'Manrope',sans-serif",
+              fontFamily: 'var(--font-sans)',
               fontSize: 11, fontWeight: 600,
               padding: '8px 16px', textDecoration: 'none',
               transition: 'all .14s', whiteSpace: 'nowrap',

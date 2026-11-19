@@ -125,7 +125,7 @@ export default function NewsletterPdfPrompt({ open, onResolve }: Props) {
       <div
         className="relative w-full max-w-[420px] rounded-[6px] font-sans"
         style={{
-          background: '#1B4D3E',
+          background: 'var(--pine)',
           padding: '26px 22px 22px',
           boxShadow: '0 16px 48px rgba(15, 26, 22, 0.28)',
           animation: 'mIn 0.25s ease',

@@ -202,7 +202,7 @@ export default function PlacesInput({
     let cursor = 0
     matches.forEach(({ startOffset, endOffset }: { startOffset: number; endOffset: number }, i: number) => {
       if (startOffset > cursor) parts.push(<span key={`pre-${i}`}>{text.slice(cursor, startOffset)}</span>)
-      parts.push(<strong key={`match-${i}`} className="text-[#1B4D3E] font-semibold">{text.slice(startOffset, endOffset)}</strong>)
+      parts.push(<strong key={`match-${i}`} className="text-pine font-semibold">{text.slice(startOffset, endOffset)}</strong>)
       cursor = endOffset
     })
     if (cursor < text.length) parts.push(<span key="post">{text.slice(cursor)}</span>)
@@ -230,10 +230,10 @@ export default function PlacesInput({
   const baseInput = [
     'w-full font-sans text-[13px] border bg-white',
     'py-2 text-[#0F1A16] placeholder-[#BDBDBD]',
-    'focus:outline-none focus:shadow-[0_0_0_3px_rgba(27,77,62,0.06)]',
+    'focus:outline-none focus:shadow-[0_0_0_3px_rgba(15,58,51,0.06)]',
     'rounded-[2px] transition-all',
-    hasValue ? 'border-[#1B4D3E] pr-7 pl-3' : 'border-[#C8D9D3] pr-7 pl-3',
-    open     ? 'border-[#1B4D3E]'           : '',
+    hasValue ? 'border-pine pr-7 pl-3' : 'border-[#C8D9D3] pr-7 pl-3',
+    open     ? 'border-pine'           : '',
   ].join(' ')
 
   return (
@@ -261,7 +261,7 @@ export default function PlacesInput({
         className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-opacity ${hasValue ? 'opacity-60' : 'opacity-25'}`}
         viewBox="0 0 14 18" fill="none"
       >
-        <path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" fill="#1B4D3E"/>
+        <path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" style={{ fill: 'var(--pine)' }}/>
       </svg>
 
       {/* Clear button */}
@@ -277,7 +277,7 @@ export default function PlacesInput({
       {/* Loading indicator */}
       {loading && (
         <div className="absolute right-8 top-1/2 -translate-y-1/2">
-          <div className="w-3 h-3 border border-[#C8D9D3] border-t-[#1B4D3E] rounded-full animate-spin" />
+          <div className="w-3 h-3 border border-[#C8D9D3] border-t-pine rounded-full animate-spin" />
         </div>
       )}
 
@@ -285,7 +285,7 @@ export default function PlacesInput({
       {open && predictions.length > 0 && (
         <div
           ref={ddRef}
-          className="absolute top-[calc(100%+2px)] left-0 right-0 bg-[#FDFCF9] border border-[#C8D9D3] rounded-[2px] shadow-[0_4px_16px_rgba(27,77,62,0.10)] z-50 overflow-hidden"
+          className="absolute top-[calc(100%+2px)] left-0 right-0 bg-[#FDFCF9] border border-[#C8D9D3] rounded-[2px] shadow-[0_4px_16px_rgba(15,58,51,0.10)] z-50 overflow-hidden"
         >
           <div className="font-mono text-[8px] tracking-[2px] text-[#A0A0A0] uppercase px-3 py-2 border-b border-[#E8E0D0]">
             Sugerencias
@@ -314,7 +314,7 @@ export default function PlacesInput({
                 </div>
               </div>
 
-              <span className="font-mono text-[8px] tracking-[1px] uppercase text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(27,77,62,0.15)] px-1.5 py-0.5 rounded-full self-center flex-shrink-0">
+              <span className="font-mono text-[8px] tracking-[1px] uppercase text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(15,58,51,0.15)] px-1.5 py-0.5 rounded-full self-center flex-shrink-0">
                 {labelForTypes(s.placePrediction.types ?? [])}
               </span>
             </div>

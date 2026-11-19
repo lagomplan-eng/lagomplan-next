@@ -25,8 +25,8 @@ const CARD_BORDER = "rgba(28,28,26,0.09)";
 const CITY_ACCENT = "#2D4F6C";
 const SECTION_ALT_BG = "#F4F0EB"; // warm sand tint for alternating sections
 
-const df = (size, weight=400, style="normal") => ({ fontFamily:"'Fraunces',serif", fontSize:size, fontWeight:weight, fontStyle:style });
-const uf = (size, weight=400) => ({ fontFamily:"'Manrope',sans-serif", fontSize:size, fontWeight:weight });
+const df = (size, weight=400, style="normal") => ({ fontFamily:'var(--font-display)', fontSize:size, fontWeight:weight, fontStyle:style });
+const uf = (size, weight=400) => ({ fontFamily:'var(--font-sans)', fontSize:size, fontWeight:weight });
 const Label = ({ children, color=T.inkFaint, bg="transparent", style={} }) => (
   <span style={{ ...uf(10,600), letterSpacing:"0.13em", textTransform:"uppercase", color, background:bg, padding:bg!=="transparent"?"3px 9px":0, borderRadius:bg!=="transparent"?40:0, ...style }}>
     {children}
@@ -702,10 +702,9 @@ export default function App({ locale = "es" }) {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700;1,9..144,900&family=Manrope:wght@400;500;600;700&display=swap');
         *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
         html{scroll-behavior:smooth;}
-        button{font-family:'Manrope',sans-serif;}
+        button{font-family:var(--font-sans);}
         button:focus-visible{outline:2px solid ${T.coral};outline-offset:2px;}
         ::-webkit-scrollbar{width:5px;height:5px;}
         ::-webkit-scrollbar-track{background:${T.bg};}
