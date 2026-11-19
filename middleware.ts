@@ -52,6 +52,13 @@ export default function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // Design style guide (/dev/design): locale-agnostic, own root layout, never indexed.
+  if (pathname === '/dev' || pathname.startsWith('/dev/')) {
+    const res = NextResponse.next()
+    res.headers.set('X-Robots-Tag', 'noindex, nofollow')
+    return res
+  }
+
   // Lead-magnet landings — Spanish-only, locale-agnostic (own root layout).
   if (pathname === '/checklist-viajar-con-bebe' || pathname === '/puente-noviembre') {
     return NextResponse.next()
