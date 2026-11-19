@@ -55,7 +55,7 @@ export function GuideFreeIndicator({ slug }: { slug: string }) {
 
   if (state.kind === 'first-free') {
     return (
-      <div className="w-full bg-[#EDE7E1] border-b border-[#E4DFD8]">
+      <div className="w-full bg-[#EDE7E1] border-b border-line-soft">
         <div className="page-inner py-2 flex items-center justify-center gap-3 text-center">
           <span className="font-sans text-[12px] font-medium text-[#0F3A33]">
             {isES

@@ -37,7 +37,7 @@ export function GuideHotelsTeaser({ destination, locale }: Props) {
   ]
 
   return (
-    <section id="hoteles" className="py-10 border-t border-[#E4DFD8]" style={{ background: '#FAF8F5' }}>
+    <section id="hoteles" className="py-10 border-t border-line-soft" style={{ background: '#FAF8F5' }}>
       <div className="max-w-[900px] mx-auto px-7">
 
         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
@@ -57,7 +57,7 @@ export function GuideHotelsTeaser({ destination, locale }: Props) {
               href={p.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[12px] px-4 py-3.5 hover:shadow-[0_2px_8px_rgba(15,58,51,.09)] hover:-translate-y-px transition-all group flex-1 min-w-[200px] max-w-[280px]"
+              className="flex items-center gap-3 bg-white border border-line-soft rounded-[12px] px-4 py-3.5 hover:shadow-[0_2px_8px_rgba(15,58,51,.09)] hover:-translate-y-px transition-all group flex-1 min-w-[200px] max-w-[280px]"
             >
               {/* Provider logo pill */}
               <div

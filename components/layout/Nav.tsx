@@ -240,8 +240,8 @@ export default function Nav() {
                 {user.email?.[0] ?? '?'}
               </button>
               {dropdownOpen && (
-                <div className="absolute right-0 top-10 bg-white border border-[#E4DFD8] rounded-[8px] shadow-md min-w-[180px] py-2 z-50">
-                  <p className="px-4 py-2 text-[11px] text-[#6B8F86] truncate border-b border-[#E4DFD8]">{user.email}</p>
+                <div className="absolute right-0 top-10 bg-white border border-line-soft rounded-[8px] shadow-md min-w-[180px] py-2 z-50">
+                  <p className="px-4 py-2 text-[11px] text-[#6B8F86] truncate border-b border-line-soft">{user.email}</p>
                   <Link
                     href="/my-trips"
                     className="block px-4 py-2 text-[13px] text-[#0F3A33] hover:bg-[#F7F3EE]"

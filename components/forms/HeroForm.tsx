@@ -479,7 +479,7 @@ function submit(e: React.FormEvent) {
                   'px-3 py-2.5 rounded-[6px] border border-l-[3px]',
                   exceedsMax
                     ? 'bg-[rgba(218,165,32,.07)] border-[rgba(218,165,32,.28)] border-l-[#D4A35E]'
-                    : 'bg-[#F5F1EB] border-[#E4DFD8] border-l-[#B89F7D]',
+                    : 'bg-[#F5F1EB] border-line-soft border-l-[#B89F7D]',
                 ].join(' ')}
               >
                 <p className={`font-sans text-[12px] leading-[1.5] ${exceedsMax ? 'text-[#5A4423]' : 'text-[#5B4F3F]'}`}>

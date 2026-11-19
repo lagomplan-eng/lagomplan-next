@@ -141,14 +141,14 @@ export function GuideItinerary({ itineraries, locale, destination }: Props) {
             return (
               <div
                 key={it.day}
-                className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
+                className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
               >
                 {/* Day header — click to toggle */}
                 <button
                   type="button"
                   onClick={() => toggleDay(it.day)}
-                  className="w-full text-left px-[18px] py-3.5 border-b border-[#E4DFD8] flex items-center justify-between gap-3 transition-colors hover:bg-[rgba(237,231,225,.3)]"
-                  style={{ borderBottomColor: isOpen ? '#E4DFD8' : 'transparent' }}
+                  className="w-full text-left px-[18px] py-3.5 border-b border-line-soft flex items-center justify-between gap-3 transition-colors hover:bg-[rgba(237,231,225,.3)]"
+                  style={{ borderBottomColor: isOpen ? 'var(--line-soft)' : 'transparent' }}
                   aria-expanded={isOpen}
                 >
                   <div>
@@ -183,7 +183,7 @@ export function GuideItinerary({ itineraries, locale, destination }: Props) {
                       return (
                         <div
                           key={idx}
-                          className="py-3.5 border-b border-[#E4DFD8] last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
+                          className="py-3.5 border-b border-line-soft last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
                           style={{ borderLeftColor: tborder, background: trowbg }}
                         >
                           <div

@@ -183,7 +183,7 @@ function ItinerarioSection({
 
   if (itineraries.length === 0) {
     return (
-      <div className="bg-white border border-[#E4DFD8] rounded-[18px] p-8 text-center shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+      <div className="bg-white border border-line-soft rounded-[18px] p-8 text-center shadow-[0_1px_2px_rgba(15,58,51,.05)]">
         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-2">
           {isES ? 'Planificación' : 'Planning'}
         </div>
@@ -220,14 +220,14 @@ function ItinerarioSection({
         return (
           <div
             key={it.day}
-            className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
+            className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
           >
             {/* ── Day header ── */}
             <button
               type="button"
               onClick={() => toggleDay(it.day)}
               className="w-full text-left flex items-center justify-between px-[18px] py-3.5 transition-colors hover:bg-[rgba(237,231,225,.3)]"
-              style={{ borderBottom: isOpen ? '1px solid #E4DFD8' : 'none' }}
+              style={{ borderBottom: isOpen ? '1px solid var(--line-soft)' : 'none' }}
               aria-expanded={isOpen}
             >
               <div>
@@ -268,7 +268,7 @@ function ItinerarioSection({
                   return (
                     <div
                       key={idx}
-                      className="py-3.5 border-b border-[#E4DFD8] last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
+                      className="py-3.5 border-b border-line-soft last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
                       style={{ borderLeftColor: tborder, background: trowbg }}
                     >
                       <div
@@ -367,7 +367,7 @@ function AlojamientosSection({
             href={p.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[16px] px-4 py-4 hover:shadow-[0_2px_8px_rgba(15,58,51,.09)] hover:-translate-y-px transition-all group flex-1 min-w-[200px] max-w-[280px]"
+            className="flex items-center gap-3 bg-white border border-line-soft rounded-[16px] px-4 py-4 hover:shadow-[0_2px_8px_rgba(15,58,51,.09)] hover:-translate-y-px transition-all group flex-1 min-w-[200px] max-w-[280px]"
           >
             <div
               className="w-10 h-10 rounded-[8px] flex items-center justify-center text-center flex-shrink-0 font-bold whitespace-pre-line leading-tight"
@@ -400,7 +400,7 @@ function AlojamientosSection({
         return (
           <div
             key={i}
-            className="bg-white border border-[#E4DFD8] rounded-[18px] p-5 shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
+            className="bg-white border border-line-soft rounded-[18px] p-5 shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
           >
             {/* Header row */}
             <div className="flex items-start justify-between gap-3 mb-3">
@@ -457,7 +457,7 @@ function ExperienciasSection({
   if (experiences.length === 0) {
     const url = `https://www.viator.com/search/tours?q=${encodeURIComponent(destination)}&pid=P00165894&mcid=42383`
     return (
-      <div className="bg-white border border-[#E4DFD8] rounded-[18px] p-7 text-center shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+      <div className="bg-white border border-line-soft rounded-[18px] p-7 text-center shadow-[0_1px_2px_rgba(15,58,51,.05)]">
         <p className="font-sans text-[13px] text-[#7A7A76] mb-4">
           {isES ? `Descubre qué hacer en ${destination}` : `Discover things to do in ${destination}`}
         </p>
@@ -484,7 +484,7 @@ function ExperienciasSection({
         return (
           <div
             key={i}
-            className="bg-white rounded-[16px] p-5 border border-[#E4DFD8] shadow-[0_1px_2px_rgba(15,58,51,.05)] flex flex-col hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
+            className="bg-white rounded-[16px] p-5 border border-line-soft shadow-[0_1px_2px_rgba(15,58,51,.05)] flex flex-col hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
           >
             <span
               className="inline-block font-mono text-[9px] font-medium tracking-[.1em] uppercase px-[6px] py-[3px] rounded-[4px] mb-3 self-start"
@@ -536,7 +536,7 @@ function LogisticaSection({ sections, locale }: { sections: GuideSectionData[]; 
         return (
           <div
             key={i}
-            className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
+            className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
           >
             <div className="px-6 pt-5 pb-4">
               <h3
@@ -546,7 +546,7 @@ function LogisticaSection({ sections, locale }: { sections: GuideSectionData[]; 
                 {heading}
               </h3>
             </div>
-            <div className="border-t border-[#E4DFD8]" />
+            <div className="border-t border-line-soft" />
             <div className="px-6 pt-4 pb-5 font-sans text-[14px] leading-[1.8] text-[#4A4A46]">
               <p>{body}</p>
             </div>
@@ -641,7 +641,7 @@ function GuideSidebar({
       </div>
 
       {/* ── 3. Packing list ───────────────────────────────────────────────── */}
-      <div className="bg-white rounded-[18px] p-5 border border-[#E4DFD8] shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+      <div className="bg-white rounded-[18px] p-5 border border-line-soft shadow-[0_1px_2px_rgba(15,58,51,.05)]">
         <div className="flex items-center gap-2 mb-3">
           <span className="text-[15px]">🎒</span>
           <span className="font-mono text-[9px] font-semibold tracking-[.14em] uppercase text-[#0F3A33]">
@@ -726,7 +726,7 @@ export function GuidePageClient({ guide, locale }: Props) {
       />
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section className="border-b border-[#E4DFD8] pt-12 pb-9" style={{ background: '#FAF8F5' }}>
+      <section className="border-b border-line-soft pt-12 pb-9" style={{ background: '#FAF8F5' }}>
         <div className="max-w-[1160px] mx-auto px-7">
           <div className="grid grid-cols-[1fr_360px] gap-[52px] items-start max-[860px]:grid-cols-1">
 
@@ -756,7 +756,7 @@ export function GuidePageClient({ guide, locale }: Props) {
                 {tags.slice(0, 5).map(tag => (
                   <span
                     key={tag}
-                    className="font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full"
+                    className="font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full"
                   >
                     {tag}
                   </span>
@@ -764,7 +764,7 @@ export function GuidePageClient({ guide, locale }: Props) {
               </div>
 
               {/* Action row — matches TripResult style */}
-              <div className="flex items-center pt-[18px] border-t border-[#E4DFD8]">
+              <div className="flex items-center pt-[18px] border-t border-line-soft">
                 <button
                   className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${saved ? 'text-[#2D6B57] cursor-default' : 'text-[#7A7A76] hover:text-[#0F3A33]'}`}
                   onClick={() => setSaved(s => !s)}
@@ -866,7 +866,7 @@ export function GuidePageClient({ guide, locale }: Props) {
             </div>
 
             {/* 2. Alojamientos */}
-            <div id="hoteles" className="border-t border-[#E4DFD8] pt-8">
+            <div id="hoteles" className="border-t border-line-soft pt-8">
               <SectionHeader
                 eyebrow={isES ? 'Dónde quedarse' : 'Where to stay'}
                 title={isES ? `Alojamientos ideales en ${destination}` : `Best stays in ${destination}`}
@@ -879,7 +879,7 @@ export function GuidePageClient({ guide, locale }: Props) {
             </div>
 
             {/* 3. Experiencias */}
-            <div id="experiencias" className="border-t border-[#E4DFD8] pt-8">
+            <div id="experiencias" className="border-t border-line-soft pt-8">
               <SectionHeader
                 eyebrow={isES ? 'Qué hacer' : 'Things to do'}
                 title={isES ? `Experiencias en ${destination}` : `Experiences in ${destination}`}
@@ -892,7 +892,7 @@ export function GuidePageClient({ guide, locale }: Props) {
             </div>
 
             {/* 4. Logística */}
-            <div id="logistica" className="border-t border-[#E4DFD8] pt-8">
+            <div id="logistica" className="border-t border-line-soft pt-8">
               <SectionHeader
                 eyebrow={isES ? 'Planificación' : 'Getting there'}
                 title={isES ? 'Cómo llegar y moverse' : 'Getting around'}
@@ -902,7 +902,7 @@ export function GuidePageClient({ guide, locale }: Props) {
 
             {/* 5. Tips — mobile only (sidebar shows on desktop) */}
             {tips.length > 0 && (
-              <div id="tips" className="border-t border-[#E4DFD8] pt-8 lg:hidden">
+              <div id="tips" className="border-t border-line-soft pt-8 lg:hidden">
                 <SectionHeader
                   eyebrow={isES ? 'Consejos' : 'Tips'}
                   title={isES ? `Lagom Tips para ${destination}` : `Lagom Tips for ${destination}`}
@@ -927,7 +927,7 @@ export function GuidePageClient({ guide, locale }: Props) {
             )}
 
             {/* Mobile-only: Convert to trip CTA */}
-            <div className="lg:hidden border-t border-[#E4DFD8] pt-8">
+            <div className="lg:hidden border-t border-line-soft pt-8">
               <div
                 className="rounded-[18px] p-6 border"
                 style={{ background: '#0F3A33', borderColor: '#0F3A33' }}

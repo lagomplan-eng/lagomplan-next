@@ -31,7 +31,7 @@ export function GuideActions({ destination, locale }: Props) {
   const plannerHref = `/planner?destination=${encodeURIComponent(destination)}` as any
 
   return (
-    <div className="border-b border-[#E4DFD8] bg-white">
+    <div className="border-b border-line-soft bg-white">
       <div className="max-w-[900px] mx-auto px-7 py-3 flex items-center">
 
         <button

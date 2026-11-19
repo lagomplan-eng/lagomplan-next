@@ -40,7 +40,7 @@ export default function PlannerBridgeCTA({ locale }: Props) {
     <section style={{ padding: '56px 0 72px' }}>
       <div className="page-inner">
         <div style={{
-          padding: '32px', border: '1px solid var(--border)',
+          padding: '32px', border: '1px solid var(--line-strong)',
           borderRadius: '32px', background: '#FFFFFF',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
@@ -79,7 +79,7 @@ export default function PlannerBridgeCTA({ locale }: Props) {
             {/* Right — numbered "how it works" steps on a Sand panel */}
             <div style={{
               padding: '28px', borderRadius: '22px',
-              background: 'var(--sand)', border: '1px solid var(--border)',
+              background: 'var(--sand)', border: '1px solid var(--line-strong)',
             }}>
               <p className="sec-label" style={{ margin: 0 }}>
                 {isES ? 'Cómo funciona' : 'How it works'}

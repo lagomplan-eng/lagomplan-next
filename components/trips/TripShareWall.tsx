@@ -54,7 +54,7 @@ export default function TripShareWall({ locale, destination, duration, currentPa
           className="rounded-[28px] overflow-hidden"
           style={{
             background: '#FFFFFF',
-            border: '1px solid var(--border)',
+            border: '1px solid var(--line-strong)',
             boxShadow: '0 4px 32px rgba(15,58,51,0.09)',
           }}
         >
@@ -132,7 +132,7 @@ export default function TripShareWall({ locale, destination, duration, currentPa
               style={{
                 background: 'var(--sand)',
                 color: 'rgba(15,58,51,0.72)',
-                border: '1px solid var(--border)',
+                border: '1px solid var(--line-strong)',
                 transition: 'background .2s',
               }}
               onMouseEnter={e => (e.currentTarget.style.background = '#e8e1d9')}

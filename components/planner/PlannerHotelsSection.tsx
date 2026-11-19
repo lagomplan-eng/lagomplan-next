@@ -464,7 +464,7 @@ function AccommodationCard({
           ? 'border border-[#0F3A33]/60 hover:border-[#0F3A33]'
           : booked
             ? 'border border-[#0F3A33]/50 hover:border-[#0F3A33]'
-            : 'border border-[#E4DFD8] hover:border-[#0F3A33]/30',
+            : 'border border-line-soft hover:border-[#0F3A33]/30',
       ].join(' ')}
     >
       <div className="flex items-start justify-between gap-3 mb-3">
@@ -660,7 +660,7 @@ function PromptNudge({
         transition: 'max-height 0.35s ease, opacity 0.25s ease',
       }}
     >
-      <div className="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[8px] bg-[#F4F0E8] border border-[#E4DFD8]">
+      <div className="mt-4 flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-[8px] bg-[#F4F0E8] border border-line-soft">
         <p className="font-sans text-[12px] text-[#4A5568] leading-[1.4]">
           {locale === 'en'
             ? <>Already booked? <span className="text-[#9CA3AF]">Add your confirmation</span></>
@@ -841,7 +841,7 @@ function BookingConfirmForm({
         transition: 'max-height 0.4s ease, opacity 0.3s ease',
       }}
     >
-      <div className="mt-4 rounded-[10px] bg-[#FAF8F5] border border-[#E4DFD8] p-4">
+      <div className="mt-4 rounded-[10px] bg-[#FAF8F5] border border-line-soft p-4">
         <div className="grid grid-cols-1 sm:grid-cols-[2fr_1fr] gap-3 mb-3">
           <label className="block">
             <span className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] block mb-1">
@@ -853,7 +853,7 @@ function BookingConfirmForm({
               onChange={e => setCode(e.target.value)}
               placeholder={L.codePlaceholder}
               maxLength={50}
-              className="w-full font-mono text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
+              className="w-full font-mono text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
               required
             />
           </label>
@@ -867,7 +867,7 @@ function BookingConfirmForm({
               onChange={e => setCheckinTime(e.target.value)}
               placeholder={L.timePlaceholder}
               maxLength={10}
-              className="w-full font-mono text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
+              className="w-full font-mono text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
             />
           </label>
         </div>
@@ -881,7 +881,7 @@ function BookingConfirmForm({
             onChange={e => setNotes(e.target.value)}
             placeholder={L.notesPlaceholder}
             maxLength={280}
-            className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
+            className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
           />
         </label>
         <label className="block mb-3">
@@ -895,7 +895,7 @@ function BookingConfirmForm({
             onChange={e => setBookingUrl(e.target.value)}
             placeholder={L.urlPlaceholder}
             maxLength={500}
-            className="w-full font-mono text-[12px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
+            className="w-full font-mono text-[12px] text-[#1C1C1A] bg-white border border-line-soft rounded-md px-3 py-2 outline-none focus:border-[#0F3A33]"
           />
         </label>
 

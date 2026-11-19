@@ -19,7 +19,7 @@ interface Props {
 export function GuideSection({ label, heading, children, tip, className = '' }: Props) {
   return (
     <div
-      className={`bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow ${className}`}
+      className={`bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow ${className}`}
     >
       {/* Card header */}
       <div className="px-6 pt-5 pb-4">
@@ -37,7 +37,7 @@ export function GuideSection({ label, heading, children, tip, className = '' }: 
       </div>
 
       {/* Divider */}
-      <div className="border-t border-[#E4DFD8]" />
+      <div className="border-t border-line-soft" />
 
       {/* Body */}
       <div className="px-6 pt-4 pb-5 font-sans text-[14px] leading-[1.8] text-[#4A4A46]">
