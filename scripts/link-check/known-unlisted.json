@@ -1,0 +1,19 @@
+{
+  "_comment": "Tour ids (the number in -t<id>) that are missing from GetYourGuide's public sitemap-activity files but were reviewed by a human and are fine, or are accepted for now. The weekly check does not report these. Add an id here after opening its URL in a browser. Seeded 2026-11-18 with the 14 ids absent when the check was introduced: NOT verified dead or alive (GetYourGuide blocks automated page requests), so please open each once.",
+  "reviewed": {
+    "1075127": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "1184416": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "1275876": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "1505915": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "295260": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "431012": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "431145": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "462755": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "50328": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "819667": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "855901": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "867231": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "931275": "absent from the sitemap on 2026-11-18, not yet verified by a human",
+    "947430": "absent from the sitemap on 2026-11-18, not yet verified by a human"
+  }
+}
