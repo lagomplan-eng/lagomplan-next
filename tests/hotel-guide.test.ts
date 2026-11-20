@@ -49,7 +49,7 @@ eq('no extra fields kept', Object.keys(parseHotelEvent({ ...ok, ip: '1.1.1.1', u
 
 // signup
 const now = 1_000_000
-const form = { hotelName: ' Casa  Roma ', zone: 'roma', contactName: 'Ana', email: 'ANA@Hotel.com', terms: true, website: '', openedAt: now - 10_000, lang: 'es', mapsUrl: '' }
+const form = { hotelName: ' Casa  Roma ', zone: 'roma', contactName: 'Ana', email: 'ANA@Hotel.com', terms: true, website: '', openedAt: now - 10_000, lang: 'es', mapsUrl: '', contactPhone: '+52 55 1234 5678', rooms: '24' }
 const r1 = validateSignup(form, now)
 eq('valid pending', r1.ok === true && r1.value.zone === 'roma' && r1.value.email === 'ana@hotel.com' && r1.value.hotelName === 'Casa Roma', true)
 const r2 = validateSignup({ ...form, zone: 'other', requestedZone: 'Coyoacán' }, now)
@@ -64,12 +64,16 @@ eq('bad zone', validateSignup({ ...form, zone: 'centro' }, now), { ok: false, er
 eq('javascript: maps url refused', validateSignup({ ...form, mapsUrl: 'javascript:alert(1)' }, now), { ok: false, error: 'mapsUrl' })
 eq('https maps ok', validateSignup({ ...form, mapsUrl: 'https://maps.app.goo.gl/abc' }, now).ok, true)
 
-// optional fields
-const opt = validateSignup({ ...form, contactPhone: '+52 55 1234 5678', rooms: '42', contactRole: ' Gerente ' }, now)
-eq('optional fields kept', opt.ok === true && opt.value.contactPhone === '+52 55 1234 5678' && opt.value.rooms === 42 && opt.value.contactRole === 'Gerente', true)
-eq('optional fields default to null', r1.ok === true && r1.value.contactPhone === null && r1.value.rooms === null && r1.value.contactRole === null, true)
+// WhatsApp/phone and rooms are required; role is optional
+const withRole = validateSignup({ ...form, contactRole: ' Gerente ' }, now)
+eq('required fields kept', r1.ok === true && r1.value.contactPhone === '+52 55 1234 5678' && r1.value.rooms === 24 && r1.value.contactRole === null, true)
+eq('role is optional and trimmed', withRole.ok === true && withRole.value.contactRole === 'Gerente', true)
+eq('phone is required', validateSignup({ ...form, contactPhone: '' }, now), { ok: false, error: 'contactPhone' })
+eq('phone missing', validateSignup({ ...form, contactPhone: undefined }, now), { ok: false, error: 'contactPhone' })
 eq('bad phone', validateSignup({ ...form, contactPhone: 'call me' }, now), { ok: false, error: 'contactPhone' })
+eq('rooms is required', [''  , undefined].map((rooms) => (validateSignup({ ...form, rooms }, now) as { error?: string }).error), ['rooms', 'rooms'])
 eq('rooms must be a whole number 1..5000', ['0', '5001', '12.5', 'abc'].map((rooms) => (validateSignup({ ...form, rooms }, now) as { error?: string }).error), ['rooms', 'rooms', 'rooms', 'rooms'])
+eq('required fields also apply to the waitlist', validateSignup({ ...form, zone: 'other', requestedZone: 'Coyoacán', rooms: '' }, now), { ok: false, error: 'rooms' })
 
 // rate limit
 _resetForTests()

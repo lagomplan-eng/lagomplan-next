@@ -13,8 +13,8 @@ const copy = {
     contact: 'Tu nombre',
     email: 'Correo electrónico',
     maps: 'Enlace de Google Maps (opcional)',
-    phone: 'WhatsApp o teléfono (opcional)',
-    rooms: 'Número de habitaciones (opcional)',
+    phone: 'WhatsApp o teléfono',
+    rooms: 'Número de habitaciones',
     role: 'Tu cargo en el hotel (opcional)',
     terms1: 'Acepto los',
     terms2: 'términos',
@@ -38,8 +38,8 @@ const copy = {
     contact: 'Your name',
     email: 'Email',
     maps: 'Google Maps link (optional)',
-    phone: 'WhatsApp or phone (optional)',
-    rooms: 'Number of rooms (optional)',
+    phone: 'WhatsApp or phone',
+    rooms: 'Number of rooms',
     role: 'Your role at the hotel (optional)',
     terms1: 'I accept the',
     terms2: 'terms',
@@ -125,9 +125,9 @@ export default function HotelSignupForm({ locale }: { locale: 'es' | 'en' }) {
       <div><label className={label} htmlFor="h-role">{t.role}</label>
         <input id="h-role" className={input} maxLength={120} autoComplete="organization-title" value={f.contactRole} onChange={set('contactRole')} {...flag('contactRole')} /></div>
       <div><label className={label} htmlFor="h-phone">{t.phone}</label>
-        <input id="h-phone" type="tel" className={input} maxLength={40} autoComplete="tel" value={f.contactPhone} onChange={set('contactPhone')} {...flag('contactPhone')} /></div>
+        <input id="h-phone" type="tel" className={input} required maxLength={40} autoComplete="tel" value={f.contactPhone} onChange={set('contactPhone')} {...flag('contactPhone')} /></div>
       <div><label className={label} htmlFor="h-rooms">{t.rooms}</label>
-        <input id="h-rooms" type="number" inputMode="numeric" min={1} max={5000} className={input} value={f.rooms} onChange={set('rooms')} {...flag('rooms')} /></div>
+        <input id="h-rooms" type="number" inputMode="numeric" min={1} max={5000} className={input} required value={f.rooms} onChange={set('rooms')} {...flag('rooms')} /></div>
 
       {/* Honeypot: invisible to people, tempting to bots. */}
       <div aria-hidden="true" style={{ position: 'absolute', left: '-10000px', width: 1, height: 1, overflow: 'hidden' }}>

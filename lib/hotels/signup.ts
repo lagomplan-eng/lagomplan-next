@@ -8,9 +8,9 @@ export interface SignupInput {
   contactName: string
   email: string
   mapsUrl: string | null
-  contactPhone: string | null     // optional: WhatsApp or phone
-  rooms: number | null            // optional: number of rooms
-  contactRole: string | null      // optional: role of the contact at the hotel
+  contactPhone: string         // required: WhatsApp or phone
+  rooms: number                // required: number of rooms
+  contactRole: string | null   // optional: role of the contact at the hotel
   lang: 'es' | 'en'
 }
 
@@ -64,20 +64,13 @@ export function validateSignup(body: unknown, now = Date.now()): SignupResult {
     }
   }
 
-  let contactPhone: string | null = null
-  const rawPhone = clean(b.contactPhone, 40)
-  if (rawPhone) {
-    if (!/^[+\d][\d\s().-]{5,39}$/.test(rawPhone)) return { ok: false, error: 'contactPhone' }
-    contactPhone = rawPhone
-  }
+  // Required: WhatsApp or phone, and number of rooms (the table keeps both nullable for rows created before this).
+  const contactPhone = clean(b.contactPhone, 40)
+  if (!/^[+\d][\d\s().-]{5,39}$/.test(contactPhone)) return { ok: false, error: 'contactPhone' }
 
-  let rooms: number | null = null
   const rawRooms = clean(b.rooms, 6)
-  if (rawRooms) {
-    const n = Number(rawRooms)
-    if (!/^\d+$/.test(rawRooms) || n < 1 || n > 5000) return { ok: false, error: 'rooms' }
-    rooms = n
-  }
+  const rooms = Number(rawRooms)
+  if (!/^\d+$/.test(rawRooms) || rooms < 1 || rooms > 5000) return { ok: false, error: 'rooms' }
 
   const contactRole = clean(b.contactRole, 120) || null
 
