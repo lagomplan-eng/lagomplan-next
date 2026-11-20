@@ -154,6 +154,7 @@
     "links": {
       "guides": "Guías de viaje",
       "hotels": "Hoteles",
+      "experiences": "Experiencias",
       "planner": "Mi Viaje",
       "pricing": "Precios",
       "about": "Nosotras",
@@ -428,7 +429,7 @@
     "concierge": {
       "title": "¿Lo armamos por ti?",
       "body": "Dinos qué te gustó y lo convertimos en un plan día por día.",
-      "cta": "Planear con estas experiencias →"
+      "cta": "Planear mi viaje →"
     },
     "jsonld": {
       "home": "Inicio",

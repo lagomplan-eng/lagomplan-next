@@ -42,27 +42,27 @@ export default function KitSection({ kit, isLast, productsById }: Props) {
           marginBottom: 10,
         }}>
           <span style={{
-            fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+            fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
             letterSpacing: '.18em', color: SAGE,
           }}>KIT {kit.num}</span>
           <PersonaBadge persona={kit.persona} />
         </div>
 
         <h2 style={{
-          fontFamily: "'Fraunces',serif",
+          fontFamily: 'var(--font-display)',
           fontSize: 40, fontWeight: 700, color: PINE,
           lineHeight: 1, letterSpacing: '-.02em', marginBottom: 6,
         }}>{kit.title}</h2>
 
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 14,
+          fontFamily: 'var(--font-sans)', fontSize: 14,
           color: MUTED, marginBottom: 16,
         }}>{kit.subtitle}</div>
 
         {/* Scene — no left-bar, no italic. Sits as plain Fraunces
             body so it reads as editorial prose, not a pull-quote. */}
         <p style={{
-          fontFamily: "'Fraunces',serif",
+          fontFamily: 'var(--font-display)',
           fontSize: 15, color: '#5A5754', lineHeight: 1.7,
           maxWidth: 640,
           marginBottom: kit.omit ? 16 : 0,
@@ -75,12 +75,12 @@ export default function KitSection({ kit, isLast, productsById }: Props) {
             maxWidth: 600, marginTop: 0,
           }}>
             <span style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 8, fontWeight: 700,
               letterSpacing: '.14em', color: PINE,
               flexShrink: 0, marginTop: 1,
             }}>POR QUÉ NO INCLUIMOS:</span>
             <span style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 11,
+              fontFamily: 'var(--font-sans)', fontSize: 11,
               color: '#7A7773', lineHeight: 1.6,
             }}>{kit.omit}</span>
           </div>

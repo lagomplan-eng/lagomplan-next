@@ -56,7 +56,7 @@ function FeaturedGuideCard({ guide, isES }: { guide: GuideListing; isES: boolean
     <a href={guide.url} className="block no-underline" style={{ color: 'var(--pine)' }}>
       <article style={{
         overflow: 'hidden',
-        border: '1px solid var(--border)',
+        border: '1px solid var(--line-strong)',
         borderRadius: '30px',
         background: '#FFFFFF',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
@@ -133,7 +133,7 @@ function GuideCard({ guide }: { guide: GuideListing }) {
     <a href={guide.url} className="block no-underline group" style={{ color: 'var(--pine)', height: '100%' }}>
       <article style={{
         display: 'flex', flexDirection: 'column', height: '100%',
-        overflow: 'hidden', border: '1px solid var(--border)',
+        overflow: 'hidden', border: '1px solid var(--line-strong)',
         borderRadius: '28px', background: '#FFFFFF',
         boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         transition: 'transform .2s ease, box-shadow .2s ease',
@@ -179,7 +179,7 @@ function GuideCard({ guide }: { guide: GuideListing }) {
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: 'auto', paddingTop: '20px' }}>
             {guide.tags.map(tag => (
               <span key={tag} style={{
-                padding: '6px 10px', border: '1px solid var(--border)',
+                padding: '6px 10px', border: '1px solid var(--line-strong)',
                 borderRadius: '999px', background: 'var(--sand)',
                 color: 'rgba(15,58,51,0.72)', fontSize: '11px', fontWeight: 500,
               }}>
@@ -223,7 +223,7 @@ function CollectionsSection({ isES }: { isES: boolean }) {
           {collections.map(col => (
             <article key={col.title} style={{
               display: 'flex', flexDirection: 'column', height: '100%',
-              padding: '28px', border: '1px solid var(--border)',
+              padding: '28px', border: '1px solid var(--line-strong)',
               borderRadius: '28px', background: '#FFFFFF',
               boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
             }}>
@@ -278,7 +278,7 @@ function BridgeCTA({ isES }: { isES: boolean }) {
     <section style={{ padding: '56px 0 72px' }}>
       <div className="page-inner">
         <div style={{
-          padding: '32px', border: '1px solid var(--border)',
+          padding: '32px', border: '1px solid var(--line-strong)',
           borderRadius: '32px', background: '#FFFFFF',
           boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
         }}>
@@ -312,7 +312,7 @@ function BridgeCTA({ isES }: { isES: boolean }) {
               {stats.map(stat => (
                 <div key={stat.title} style={{
                   display: 'flex', flexDirection: 'column', height: '100%',
-                  padding: '20px', border: '1px solid var(--border)',
+                  padding: '20px', border: '1px solid var(--line-strong)',
                   borderRadius: '22px', background: 'var(--sand)',
                 }}>
                   <div style={{
@@ -386,7 +386,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
     <div className="bg-[#F7F4EF] min-h-screen">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section style={{ borderBottom: '1px solid var(--border)', paddingTop: '68px', paddingBottom: '76px' }}>
+      <section style={{ borderBottom: '1px solid var(--line-strong)', paddingTop: '68px', paddingBottom: '76px' }}>
         <div className="page-inner">
 
           {/* Two-column hero grid */}
@@ -419,14 +419,14 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
           {/* Filters bar */}
           <div style={{
             marginTop: '48px', padding: '20px',
-            border: '1px solid var(--border)', borderRadius: '26px',
+            border: '1px solid var(--line-strong)', borderRadius: '26px',
             background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
           }}>
             <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
               {/* Search */}
               <label style={{
                 display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '16px 20px', border: '1px solid var(--border)',
+                padding: '16px 20px', border: '1px solid var(--line-strong)',
                 borderRadius: '999px', background: '#FFFDF9', cursor: 'text',
               }}>
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--sage)', flexShrink: 0 }}>
@@ -453,7 +453,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
                     onClick={() => setActiveFilter(null)}
                     style={{
                       padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                      borderColor: activeFilter === null ? 'var(--pine)' : 'var(--border)',
+                      borderColor: activeFilter === null ? 'var(--pine)' : 'var(--line-strong)',
                       background: activeFilter === null ? 'var(--pine)' : 'var(--sand)',
                       color: activeFilter === null ? 'white' : 'rgba(15,58,51,0.8)',
                       fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
@@ -468,7 +468,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
                       onClick={() => setActiveFilter(activeFilter === f.id ? null : f.id)}
                       style={{
                         padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                        borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--border)',
+                        borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--line-strong)',
                         background: activeFilter === f.id ? 'var(--pine)' : 'var(--sand)',
                         color: activeFilter === f.id ? 'white' : 'rgba(15,58,51,0.8)',
                         fontSize: '13px', fontWeight: 700, cursor: 'pointer',
@@ -484,7 +484,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
                     onClick={() => setShowSecondary(v => !v)}
                     style={{
                       padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                      borderColor: showSecondary ? 'var(--pine)' : 'var(--border)',
+                      borderColor: showSecondary ? 'var(--pine)' : 'var(--line-strong)',
                       background: showSecondary ? 'rgba(15,58,51,0.07)' : 'var(--sand)',
                       color: 'rgba(15,58,51,0.8)',
                       fontSize: '13px', fontWeight: 700, cursor: 'pointer',
@@ -507,7 +507,7 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
                         onClick={() => setActiveFilter(activeFilter === f.id ? null : f.id)}
                         style={{
                           padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                          borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--border)',
+                          borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--line-strong)',
                           background: activeFilter === f.id ? 'var(--pine)' : 'var(--sand)',
                           color: activeFilter === f.id ? 'white' : 'rgba(15,58,51,0.8)',
                           fontSize: '13px', fontWeight: 700, cursor: 'pointer',

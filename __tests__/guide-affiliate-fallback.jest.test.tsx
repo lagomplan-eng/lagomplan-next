@@ -126,11 +126,16 @@ describe('ExperiencesSection links', () => {
     expect(screen.getByRole('link', { name: 'Reservar →' })).toHaveAttribute('href', 'https://www.opentable.com/?ref=lagomplan')
   })
 
-  it('a GYG page that is not a tour (search) is not rewritten', () => {
-    render(<ExperiencesSection data={experiencesData('https://www.getyourguide.com/s/?q=Torres%20del%20Paine')} locale="es" guideKey="torres-del-paine" />)
+  it('a GYG page that is not a tour (search) keeps its query and also carries partner_id + cmp (no ref tag)', () => {
+    render(<ExperiencesSection data={experiencesData('https://www.getyourguide.com/s/?q=Torres%20del%20Paine&ref=lagomplan')} locale="es" guideKey="torres-del-paine" />)
     const href = screen.getByRole('link', { name: 'Reservar →' }).getAttribute('href')!
-    expect(href).not.toContain('partner_id')
-    expect(href).toBe('https://www.getyourguide.com/s/?q=Torres+del+Paine&ref=lagomplan')
+    expect(href).toBe(`https://www.getyourguide.com/s/?q=Torres+del+Paine&partner_id=${GYG_PARTNER_ID}&cmp=guia-torres-del-paine`)
+  })
+
+  it('a GYG location page (-l<n>) carries partner_id + cmp too', () => {
+    render(<ExperiencesSection data={experiencesData('https://www.getyourguide.com/hong-kong-l174/?ref=lagomplan')} locale="en" guideKey="hong-kong" />)
+    expect(screen.getByRole('link', { name: 'Reservar →' }).getAttribute('href'))
+      .toBe(`https://www.getyourguide.com/hong-kong-l174/?partner_id=${GYG_PARTNER_ID}&cmp=guia-hong-kong`)
   })
 
   it('empty bookingUrl → no link and no button (no Stay22 fallback)', () => {

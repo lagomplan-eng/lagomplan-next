@@ -113,11 +113,11 @@ export default async function Page({ params }: Props) {
             gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
               letterSpacing: '.24em', color: SAGE,
             }}>{isES ? 'SMART FINDS / FAMILIAS' : 'SMART FINDS / FAMILIES'}</div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 9,
+              fontFamily: 'var(--font-sans)', fontSize: 9,
               letterSpacing: '.14em', color: MUTED,
             }}>VOL. 01 · 2026</div>
           </div>
@@ -131,7 +131,7 @@ export default async function Page({ params }: Props) {
           >
             <div>
               <h1 style={{
-                fontFamily: "'Fraunces',serif", fontWeight: 900,
+                fontFamily: 'var(--font-display)', fontWeight: 900,
                 color: PINE, lineHeight: .88, letterSpacing: '-.03em',
                 marginBottom: 20, fontSize: 76,
               }}
@@ -140,7 +140,7 @@ export default async function Page({ params }: Props) {
                 Smart<br />Finds
               </h1>
               <p style={{
-                fontFamily: "'Manrope',sans-serif", fontSize: 15,
+                fontFamily: 'var(--font-sans)', fontSize: 15,
                 color: '#7A7773', lineHeight: 1.65, maxWidth: 420,
               }}>
                 {isES
@@ -154,17 +154,17 @@ export default async function Page({ params }: Props) {
               borderLeft: `2px solid ${PINE}`, paddingLeft: 24, paddingBottom: 6,
             }}>
               <div style={{
-                fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
+                fontFamily: 'var(--font-sans)', fontSize: 8, fontWeight: 700,
                 letterSpacing: '.2em', color: PINE, opacity: .35, marginBottom: 12,
               }}>{isES ? 'NOTA DE LA EDITORA' : 'EDITOR’S NOTE'}</div>
               <p style={{
-                fontFamily: "'Fraunces',serif",
+                fontFamily: 'var(--font-display)',
                 fontSize: 14, color: PINE, lineHeight: 1.75, marginBottom: 14,
               }}>{isES
                 ? '“Viajar con un toddler y un bebé no es un viaje más difícil. Es una categoría distinta. Esta selección la construimos para eso.”'
                 : '“Traveling with a toddler and a baby isn’t a harder trip. It’s a different category. This selection was built for that.”'}</p>
               <div style={{
-                fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED,
+                fontFamily: 'var(--font-sans)', fontSize: 9, color: MUTED,
               }}>{isES
                 ? '✱ Usamos enlaces de afiliados. Sin costo para ti.'
                 : '✱ Affiliate links. No cost to you.'}</div>
@@ -184,10 +184,10 @@ export default async function Page({ params }: Props) {
             ] as const).map(([n, l]) => (
               <div key={l}>
                 <div style={{
-                  fontFamily: "'Fraunces',serif", fontSize: 28, fontWeight: 900, color: PINE,
+                  fontFamily: 'var(--font-display)', fontSize: 28, fontWeight: 900, color: PINE,
                 }}>{n}</div>
                 <div style={{
-                  fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED,
+                  fontFamily: 'var(--font-sans)', fontSize: 11, color: MUTED,
                   marginTop: 4,
                 }}>{l}</div>
               </div>
@@ -223,16 +223,16 @@ export default async function Page({ params }: Props) {
         >
           <div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 8, fontWeight: 700,
               letterSpacing: '.2em', color: SAGE, marginBottom: 12,
             }}>{isES ? 'ANTES DE EMPACAR' : 'BEFORE YOU PACK'}</div>
             <h3 style={{
-              fontFamily: "'Fraunces',serif",
+              fontFamily: 'var(--font-display)',
               fontSize: 28, fontWeight: 700, color: SAND,
               lineHeight: 1.1, marginBottom: 12,
             }}>{isES ? '¿Ya tienes el itinerario?' : 'Got the itinerary?'}</h3>
             <p style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 13,
+              fontFamily: 'var(--font-sans)', fontSize: 13,
               color: `${SAND}75`, lineHeight: 1.6, maxWidth: 440,
             }}>{isES
               ? 'El mejor kit de viaje no sirve de nada si no sabes adónde vas. Genera tu plan completo en 60 segundos.'
@@ -242,7 +242,7 @@ export default async function Page({ params }: Props) {
             href={isES ? '/es/planificador' : '/en/planner'}
             style={{
               background: SAND, color: PINE,
-              fontFamily: "'Manrope',sans-serif", fontSize: 10, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 700,
               letterSpacing: '.14em',
               padding: '16px 28px', whiteSpace: 'nowrap',
               textDecoration: 'none', display: 'inline-block',
@@ -260,18 +260,18 @@ export default async function Page({ params }: Props) {
         >
           <div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 8, fontWeight: 700,
               letterSpacing: '.2em', color: SAGE, marginBottom: 12,
             }}>{isES ? 'EL ITINERARIO' : 'THE NEWSLETTER'}</div>
             <h3 style={{
-              fontFamily: "'Fraunces',serif",
+              fontFamily: 'var(--font-display)',
               fontSize: 26, fontWeight: 700, color: PINE,
               lineHeight: 1.2, marginBottom: 10,
             }}>{isES
               ? <>Nuevos kits y guías,<br />directo a tu correo</>
               : <>New kits and guides,<br />straight to your inbox</>}</h3>
             <p style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 13,
+              fontFamily: 'var(--font-sans)', fontSize: 13,
               color: MUTED, lineHeight: 1.65,
             }}>{isES
               ? 'Sin spam. Una vez por semana, desde la perspectiva de alguien que viaja con niños.'

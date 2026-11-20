@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /**
- * globals.css — Lagomplan design tokens
+ * globals.css — Lagomplan design tokens (see the :root block below, docs/design/tokens.md)
  *
  * Brand guide corrections applied:
  *  --pine    #0F3A33   (was --forest #1B4D3E)
@@ -34,46 +34,103 @@
   --font-display: var(--font-display-vietnamese), var(--font-display-latin-ext), var(--font-display-latin), 'Fraunces Fallback';
   --font-mono:    var(--font-mono-latin-ext), var(--font-mono-latin), 'DM Mono Fallback';
 
-  /* Brand primaries */
-  --pine:    #0F3A33;
-  --sage:    #6B8F86;
-  --sand:    #EDE7E1;
-  --fjord:   #2D4F6C;
-  --coral:   #E1615B;
-  --cream:   #FFF9F3;
+  /* ══════════════════════════════════════════════════════════════════════════
+     DESIGN TOKENS: the one place a colour, radius, shadow, space or type value is written.
+     Tailwind (tailwind.config.js) and every component read these; nothing re-defines them.
+     Reference + legacy-value mapping: docs/design/tokens.md. Live specimen: /dev/design.
+
+     Colours are stored as RGB channels (--x-rgb) so Tailwind can add opacity (text-pine/70)
+     and plain CSS can use the ready-made colour (--x) or rgb(var(--x-rgb) / .5).
+     ══════════════════════════════════════════════════════════════════════════ */
+
+  /* Brand */
+  --pine-rgb:  15 58 51;      /* #0F3A33  primary: text, buttons, selected */
+  --sage-rgb:  107 143 134;   /* #6B8F86  decorative sage (dots, rules, icons); 3.4:1 on cream: NOT for text */
+  --sage-text-rgb: 90 120 113; /* #5A7871  sage for text: same hue 165° and saturation, darker. 4.61:1 on cream, 4.82:1 on white (WCAG AA) */
+  --sand-rgb:  237 231 225;   /* #EDE7E1  tag/pill fill, soft panels */
+  --cream-rgb: 255 249 243;   /* #FFF9F3  page background */
+  --coral-rgb: 225 97 91;     /* #E1615B  CTA accent, alerts of interest */
+  --fjord-rgb: 45 79 108;     /* #2D4F6C  links, info */
+  --mint-rgb:  228 239 236;   /* #E4EFEC  soft green tint (selected-soft, badges) */
+  --white-rgb: 255 255 255;
 
   /* Functional */
-  --success: #2F7D46;
-  --warning: #B07D2B;
-  --error:   #B33A3A;
+  --success-rgb: 47 125 70;   /* #2F7D46 */
+  --warning-rgb: 176 125 43;  /* #B07D2B */
+  --error-rgb:   179 58 58;   /* #B33A3A */
 
-  /* Migration aliases — remove after component color pass */
-  --forest:  #0F3A33;
-  --ink:     #0F3A33;
-  --muted:   #3D6B5C;
-  --mint:    #E4EFEC;
-  --accent:  #E1615B;
-  --card:    #FFF9F3;
-  --border:  #C8BFB5;
+  /* Text neutrals (green-tinted greys; the only text colours besides pine and sage) */
+  --ink-2-rgb:  62 86 80;     /* #3E5650  body / secondary text */
+  --ink-3-rgb:  61 107 92;    /* #3D6B5C  tertiary green text (agenda meta) */
+  --label-rgb:  79 107 100;   /* #4F6B64  labels, provider lines (4.9:1 on cream, use for small text) */
 
-  /* Catalog system (Experiencias · Hoteles · Smart Finds) */
-  --ink-2:        #3E5650;               /* secondary text */
-  --label:        #4F6B64;               /* eyebrows, labels, provider lines */
-  --line-card:    rgba(15, 58, 51, .12); /* card border */
-  --line-panel:   rgba(15, 58, 51, .14); /* filter panel border */
-  --line-chip:    rgba(15, 58, 51, .18); /* chip border */
-  --line-btn:     rgba(15, 58, 51, .22); /* outline button border */
-  --radius-card:  20px;
-  --radius-panel: 24px;
+  /* Line neutrals */
+  --line-soft-rgb:   228 223 216;  /* #E4DFD8  hairlines, info-card + guide borders */
+  --line-strong-rgb: 200 191 181;  /* #C8BFB5  destination-card + search borders */
 
-  /* Type scale */
-  --text-xs:   0.75rem;
-  --text-sm:   0.875rem;
-  --text-base: 1rem;
-  --text-lg:   1.125rem;
-  --text-xl:   1.375rem;
-  --text-2xl:  1.75rem;
-  --text-3xl:  2.25rem;
+  /* Ready-to-use colours */
+  --pine:   rgb(var(--pine-rgb));
+  --sage:   rgb(var(--sage-rgb));
+  --sage-text: rgb(var(--sage-text-rgb));
+  --sand:   rgb(var(--sand-rgb));
+  --cream:  rgb(var(--cream-rgb));
+  --coral:  rgb(var(--coral-rgb));
+  --fjord:  rgb(var(--fjord-rgb));
+  --mint:   rgb(var(--mint-rgb));
+  --white:  rgb(var(--white-rgb));
+  --success: rgb(var(--success-rgb));
+  --warning: rgb(var(--warning-rgb));
+  --error:   rgb(var(--error-rgb));
+  --ink-2:  rgb(var(--ink-2-rgb));
+  --ink-3:  rgb(var(--ink-3-rgb));
+  --label:  rgb(var(--label-rgb));
+  --line-soft:   rgb(var(--line-soft-rgb));
+  --line-strong: rgb(var(--line-strong-rgb));
+  --pine-hover:  #12453D;    /* pressed/hover shade of pine buttons (matches the cookie banner) */
+
+  /* Pine at fixed alphas (catalog hairlines + the /guias body-text tints) */
+  --line-card:  rgb(var(--pine-rgb) / .12);
+  --line-panel: rgb(var(--pine-rgb) / .14);
+  --line-chip:  rgb(var(--pine-rgb) / .18);
+  --line-btn:   rgb(var(--pine-rgb) / .22);
+  --text-lede:  rgb(var(--pine-rgb) / .72);   /* /guias lede */
+  --text-soft:  rgb(var(--pine-rgb) / .68);   /* /guias card body */
+
+  /* Radii */
+  --radius-pill:        999px;  /* buttons, chips, search, inputs */
+  --radius-destination: 24px;   /* DestinationCard: guides, experiences, hotels */
+  --radius-info:        16px;   /* InfoCard: everything else */
+  --radius-sheet:       24px;   /* bottom sheet top corners */
+  --radius-card:  20px;         /* LEGACY: catalog cards today; becomes --radius-destination when migrated */
+  --radius-panel: 24px;         /* LEGACY: catalog filter panel */
+
+  /* Shadows */
+  --shadow-soft:  0 2px 8px rgb(0 0 0 / .04);              /* DestinationCard (the /guias card) */
+  --shadow-pop:   0 12px 32px rgb(var(--pine-rgb) / .14);  /* menus, suggestion lists */
+  --shadow-sheet: 0 -8px 28px rgb(var(--pine-rgb) / .18);  /* bottom sheet */
+
+  /* Spacing (4px base) */
+  --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
+  --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px; --space-20: 80px;
+  --section-y: clamp(56px, 8vw, 96px);   /* vertical rhythm between page sections */
+  --page-gutter: 18px;                    /* horizontal page padding on mobile */
+
+  /* Type scale. Page title / H2 / H3 / eyebrow are the /guias values, measured. */
+  --fs-title:  clamp(44px, 7vw, 72px);   --lh-title: 0.92;  --ls-title: -0.04em;  --fw-title: 800;
+  --fs-h2:     36px; --lh-h2: 1.05; --ls-h2: -0.02em; --fw-h2: 800;
+  --fs-h3:     24px;                     --lh-h3: 1.12;   --ls-h3: -0.02em;     --fw-h3: 800;
+  --fs-eyebrow: 11px;                    --lh-eyebrow: 1.55; --ls-eyebrow: 0.12em; --fw-eyebrow: 500;
+  --fs-lede:   18px;                     --lh-lede: 1.75;
+  --fs-body:   16px;                     --lh-body: 1.6;
+  --fs-small:  14px;                     --lh-small: 1.7;
+  --fs-tiny:   12px;                     --lh-tiny: 1.5;
+  --fs-button: 15px;  --fs-button-sm: 14px;   /* buttons are Manrope 700 */
+
+  /* Controls */
+  --control-h:    48px;   /* button, input, secondary controls */
+  --control-h-sm: 40px;   /* small button */
+  --control-h-lg: 56px;   /* search field */
+  --chip-h:       44px;
 }
 
 /* ── Base ─────────────────────────────────────────────── */
@@ -91,6 +148,31 @@ body {
      a floating overlay. Falls back to 0 when no banner is mounted. */
   padding-top: var(--cookie-banner-h, 0px);
 }
+
+/* ── Cookie banner: reserve its space before it mounts (no layout shift) ──────
+   <html class="consent-pending"> is set by an inline script in <head> when the
+   banner is going to show. Until CookieBanner mounts and publishes its exact
+   height in --cookie-banner-h, the page reserves an estimate (the banner's real
+   height at that width, measured) and an empty white bar stands in for it, so
+   nothing moves when the banner text appears. CookieBanner removes the class
+   when it has decided (consent stored, GPC, or the user choosing). */
+html.consent-pending { --cookie-banner-reserve: 109px; }
+@media (max-width: 359px) { html.consent-pending { --cookie-banner-reserve: 126px; } }
+@media (min-width: 480px) { html.consent-pending { --cookie-banner-reserve: 91px; } }
+@media (min-width: 640px) { html.consent-pending { --cookie-banner-reserve: 75px; } }
+@media (min-width: 768px) { html.consent-pending { --cookie-banner-reserve: 66px; } }
+@media (min-width: 1024px) { html.consent-pending { --cookie-banner-reserve: 57px; } }
+html.consent-pending body { padding-top: var(--cookie-banner-h, var(--cookie-banner-reserve)); }
+html.consent-pending::before {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--cookie-banner-h, var(--cookie-banner-reserve));
+  background: #fff;
+  border-bottom: 1px solid rgba(107, 143, 134, .2);
+  z-index: 399;
+}
+@media print { html.consent-pending::before { display: none; } }
 
 /* ── Headings: design-system enforcement ───────────────────────────
    All titles/subtitles must be sans-serif and upright. Uses !important
@@ -1517,8 +1599,8 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   }
 
   /* Section labels ("Antes del viaje", "Por día") */
-  [data-trip="planning"] .border-t.border-\[\#E4DFD8\] > div:first-child,
-  [data-trip="planning"] .border-b.border-\[\#E4DFD8\].mt-1\.5 {
+  [data-trip="planning"] .border-t.border-line-soft > div:first-child,
+  [data-trip="planning"] .border-b.border-line-soft.mt-1\.5 {
     font-family: 'Space Mono', monospace !important;
     font-size: 6.5pt !important;
     letter-spacing: 0.16em !important;
@@ -1567,7 +1649,7 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   }
 
   /* Day sub-group rows (Día 01, Día 02 ...) */
-  [data-trip="planning"] .border-b.border-\[\#E4DFD8\]:not(:first-child) > div:first-child {
+  [data-trip="planning"] .border-b.border-line-soft:not(:first-child) > div:first-child {
     padding: 6pt 0 4pt !important;
   }
 
@@ -1758,7 +1840,7 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   }
 
   /* Category groups */
-  [data-trip="budget"] .border-b.border-\[\#E4DFD8\].last\:border-b-0 {
+  [data-trip="budget"] .border-b.border-line-soft.last\:border-b-0 {
     border-bottom: 0.5pt solid #F0EDE9 !important;
   }
 

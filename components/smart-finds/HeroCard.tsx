@@ -67,7 +67,7 @@ export default function HeroCard({ product }: Props) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <div style={{
-            fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+            fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
             letterSpacing: '.18em', color: SAGE,
           }}>{product.brand}</div>
           {/* DESTACADO — proper rounded pill instead of the square Pine-tinted
@@ -78,34 +78,34 @@ export default function HeroCard({ product }: Props) {
             padding: '3px 10px',
           }}>
             <span style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
               letterSpacing: '.12em', color: PINE,
             }}>Destacado</span>
           </div>
         </div>
 
         <div style={{
-          fontFamily: "'Fraunces',serif", fontSize: 24, fontWeight: 700,
+          fontFamily: 'var(--font-display)', fontSize: 24, fontWeight: 700,
           color: PINE, lineHeight: 1.15, marginBottom: 8,
         }}>{product.name}</div>
 
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 11, fontWeight: 500,
+          fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 500,
           color: MUTED, marginBottom: 14, letterSpacing: 0,
         }}>{toSentenceCase(product.tag)}</div>
 
         <p style={{
-          fontFamily: "'Fraunces',serif", fontSize: 15,
+          fontFamily: 'var(--font-display)', fontSize: 15,
           color: '#5A5754', lineHeight: 1.75, maxWidth: 480, marginBottom: 22,
         }}>{product.opinion}</p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
           <div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 16, fontWeight: 700, color: PINE,
+              fontFamily: 'var(--font-sans)', fontSize: 16, fontWeight: 700, color: PINE,
             }}>{product.price}</div>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED, marginTop: 2,
+              fontFamily: 'var(--font-sans)', fontSize: 11, color: MUTED, marginTop: 2,
             }}>{product.where}</div>
           </div>
           <a
@@ -123,7 +123,7 @@ export default function HeroCard({ product }: Props) {
               color:      hov ? '#FFFFFF' : PINE,
               border: `1px solid ${PINE}`,
               borderRadius: 999,
-              fontFamily: "'Manrope',sans-serif",
+              fontFamily: 'var(--font-sans)',
               fontSize: 13, fontWeight: 600,
               padding: '10px 22px', textDecoration: 'none',
               transition: 'all .14s', whiteSpace: 'nowrap',

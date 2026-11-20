@@ -58,7 +58,7 @@ export default function FilterableKits({ kits, productsById }: Props) {
               key={f.id}
               onClick={() => setActive(f.id)}
               style={{
-                fontFamily:    "'Manrope',sans-serif",
+                fontFamily:    'var(--font-sans)',
                 fontSize:      12,
                 fontWeight:    600,
                 padding:       '8px 18px',
@@ -78,7 +78,7 @@ export default function FilterableKits({ kits, productsById }: Props) {
 
       {/* Count label */}
       <div style={{
-        fontFamily:    "'Manrope',sans-serif",
+        fontFamily:    'var(--font-sans)',
         fontSize:      11,
         color:         MUTED,
         letterSpacing: '.04em',
@@ -91,7 +91,7 @@ export default function FilterableKits({ kits, productsById }: Props) {
       {visible.length === 0 ? (
         <div style={{
           padding: '48px 0', textAlign: 'center',
-          fontFamily: "'Fraunces',serif",
+          fontFamily: 'var(--font-display)',
           fontSize: 16, color: MUTED,
         }}>
           Sin kits para esta selección.
@@ -104,7 +104,7 @@ export default function FilterableKits({ kits, productsById }: Props) {
               <div style={{
                 display: 'flex', justifyContent: 'center',
                 margin: '80px 0',
-                fontFamily: "'Manrope',sans-serif", fontSize: 11, color: MUTED,
+                fontFamily: 'var(--font-sans)', fontSize: 11, color: MUTED,
               }}>✦</div>
             )}
           </div>

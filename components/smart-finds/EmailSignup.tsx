@@ -49,11 +49,11 @@ export default function EmailSignup({ locale }: Props) {
         borderRadius: 14,
       }}>
         <div style={{
-          fontFamily: "'Fraunces',serif",
+          fontFamily: 'var(--font-display)',
           fontSize: 17, fontWeight: 700, color: PINE, marginBottom: 5,
         }}>{isES ? 'Ya estás en la lista' : 'You’re on the list'}</div>
         <div style={{
-          fontFamily: "'Manrope',sans-serif", fontSize: 12, color: MUTED,
+          fontFamily: 'var(--font-sans)', fontSize: 12, color: MUTED,
         }}>{isES ? 'El próximo jueves, en tu correo' : 'See you in your inbox next Thursday'}</div>
       </div>
     )
@@ -71,7 +71,7 @@ export default function EmailSignup({ locale }: Props) {
           style={{
             flex: 1, padding: '13px 16px',
             border: `1px solid ${BORDER}`, borderRight: 'none',
-            fontFamily: "'Manrope',sans-serif", fontSize: 14,
+            fontFamily: 'var(--font-sans)', fontSize: 14,
             color: PINE, background: '#FDFCFA', outline: 'none',
           }}
         />
@@ -82,14 +82,14 @@ export default function EmailSignup({ locale }: Props) {
             background: PINE, color: SAND, border: 'none',
             cursor: submitting ? 'not-allowed' : 'pointer',
             opacity: submitting ? 0.7 : 1,
-            fontFamily: "'Manrope',sans-serif",
+            fontFamily: 'var(--font-sans)',
             fontSize: 9, fontWeight: 700, letterSpacing: '.12em',
             padding: '13px 22px',
           }}
         >{isES ? 'SUSCRIBIRME' : 'SUBSCRIBE'}</button>
       </div>
       <div style={{
-        fontFamily: "'Manrope',sans-serif", fontSize: 9, color: MUTED, marginTop: 8,
+        fontFamily: 'var(--font-sans)', fontSize: 9, color: MUTED, marginTop: 8,
       }}>
         {isES
           ? 'Al suscribirte aceptas la política de privacidad.'

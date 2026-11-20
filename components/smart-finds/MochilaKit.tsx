@@ -52,7 +52,7 @@ export default function MochilaKit({ kit, productsById }: Props) {
               style={{
                 padding: '12px 24px', border: 'none', background: 'transparent',
                 cursor: 'pointer',
-                fontFamily: "'Manrope',sans-serif", fontSize: 9, fontWeight: 700,
+                fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
                 letterSpacing: '.16em',
                 color: isActive ? PINE : MUTED,
                 borderBottom: isActive ? `2px solid ${PINE}` : '2px solid transparent',
@@ -95,7 +95,7 @@ function SystemContent({
     <div>
       {system.note && (
         <p style={{
-          fontFamily: "'Fraunces',serif",
+          fontFamily: 'var(--font-display)',
           fontSize: 13, color: MUTED, marginBottom: 20,
         }}>{system.note}</p>
       )}
@@ -109,7 +109,7 @@ function SystemContent({
         return (
           <div key={sub.label} style={{ marginBottom: 28 }}>
             <div style={{
-              fontFamily: "'Manrope',sans-serif", fontSize: 8, fontWeight: 700,
+              fontFamily: 'var(--font-sans)', fontSize: 8, fontWeight: 700,
               letterSpacing: '.16em', color: MUTED,
               paddingBottom: 10, marginBottom: 16,
               borderBottom: `1px solid ${BORDER}`,

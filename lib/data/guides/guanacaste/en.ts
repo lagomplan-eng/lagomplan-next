@@ -156,7 +156,7 @@ export const guide: FlatGuide = {
     {
       id: 'surf-o-clases-de-surf-en-playa-tamarindo',
       name: 'Surf or surf lessons at Playa Tamarindo',
-      description: 'Tamarindo\'s wave is long, gentle, and perfect for beginners. The town\'s surf schools (Witch\'s Rock Surf Camp, Tamarindo Surf School) offer two-hour lessons for $60–80 USD with a private instructor. For the group that has never surfed — or has been meaning to try for years — this is the Saturday morning plan.',
+      description: 'Tamarindo\'s wave is long, gentle, and perfect for beginners. The town\'s surf schools (Witch\'s Rock Surf Camp, Tamarindo Surf School) offer two-hour lessons with a private instructor. For the group that has never surfed — or has been meaning to try for years — this is the Saturday morning plan.',
       tags: ['Surf', 'Beginners', 'Beach'],
       category: 'aventura',
       affiliateUrl: 'https://www.getyourguide.com/tamarindo-l995/tamarindo-surf-tours-clases-de-surf-para-todos-los-niveles-t561020/',

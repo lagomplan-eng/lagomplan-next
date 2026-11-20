@@ -55,14 +55,14 @@ export default function PainStrip({ items, kits }: Props) {
             className="hover:bg-[rgba(237,231,225,0.04)]"
           >
             <div style={{
-              fontFamily: "'Fraunces',serif",
+              fontFamily: 'var(--font-display)',
               fontSize: 19, fontWeight: 700, color: SAND, lineHeight: 1.25,
             }}>
               &ldquo;{item.quote}&rdquo;
             </div>
             {kit && (
               <div style={{
-                fontFamily: "'Manrope',sans-serif", fontSize: 10, fontWeight: 700,
+                fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 700,
                 letterSpacing: '.14em', color: `${SAND}66`,
                 display: 'flex', alignItems: 'center', gap: 8,
               }}>
