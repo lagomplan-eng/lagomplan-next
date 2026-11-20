@@ -31,6 +31,7 @@ const LEGACY_REDIRECTS: Record<string, string> = {
   '/nosotros':        '/es/nosotras',
   '/nosotras':        '/es/nosotras',
   '/contacto':        '/es/contacto',
+  '/para-hoteles':    '/es/para-hoteles',
   '/mis-viajes':      '/es/mis-viajes',
   '/iniciar-sesion':  '/es/login',
   '/crear-cuenta':    '/es/crear-cuenta',
@@ -47,7 +48,11 @@ export default function middleware(req: NextRequest) {
   // Sales demos (/demo/[prospect]) are the same locale-agnostic guide.
   if (
     pathname === '/guia' || pathname.startsWith('/guia/') ||
-    pathname === '/demo' || pathname.startsWith('/demo/')
+    pathname === '/demo' || pathname.startsWith('/demo/') ||
+    // Hotel QR links (/g/{code}, /g/{code}/tarjeta) are printed on paper and must never be rewritten; /admin is
+    // locale-agnostic and internal.
+    pathname.startsWith('/g/') ||
+    pathname === '/admin' || pathname.startsWith('/admin/')
   ) {
     return NextResponse.next()
   }

@@ -109,6 +109,32 @@ deliberately left untouched** — it's a live affiliate short-link
 its redirect; it still fires `partner_link_click`, just with its original
 URL.
 
+## Hotel neighborhood guide (free QR edition) — `/guia/cdmx/[zone]`
+
+A separate guide for hotels (QR card → `/g/{code}` → `/guia/cdmx/{condesa|roma-norte|polanco}?h={code}&lang=`).
+It has its own renderer (`HotelGuideClient`) and does **not** fire any `host_guide_*` event, and it does not write
+`lagom_ref` or `guide_visits`. Two layers of measurement:
+
+**1. First-party table `hotel_guide_events`** (the numbers in `/admin/hoteles`). No consent needed: it stores
+`hotel_id`, `event_type`, `section`, `lang`, `created_at` and nothing that identifies a guest (no IP, no user agent,
+no cookie id). Rows exist only for codes of *approved* hotels.
+
+| `event_type` | Written by | `section` |
+|---|---|---|
+| `scan` | `GET /g/{code}` (not for bots, link-preview fetchers, prefetches or HEAD) | — |
+| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `neighborhoods` \| `food` \| `moods` \| `rhythm` \| `experiences` \| `practical` \| `itinerary` \| `planner` (the `blocks` of `content/guia/hotel/config.ts`) |
+| `outbound_click` | the guide, on click | `experience_book` \| `airalo` \| `map` \| `planner` \| `share` |
+
+**2. GA4, only after cookie consent (Consent Mode v2, as the rest of `/guia`):**
+
+| Event | Params |
+|---|---|
+| `hotel_guide_view` (new) | `partner_slug` = hotel code (`zone_<zone>` when opened without `?h=`), `zone` |
+| `partner_link_click` | `link_name` and `section` = the outbound id above (`experience_book` \| `airalo` \| `map` \| `planner` \| `share`; `link_name` values `map`, `planner`, `share` are new), `partner_slug` = hotel code, `zone`, `lang`, `destination` (hostname), `experience_name` (only `experience_book`) |
+
+Planner links from the hotel guide carry `utm_source=hotel_{code}` (`hotel_zone` without a code),
+`utm_medium=partner`, `utm_campaign=hotel_free`. Register `hotel_guide_view` and the new `link_name` values in GA4
+the same way as the existing ones.
 ## Catalog events (Experiencias hub, Hoteles, shared plan)
 
 Fired from `lib/experiences/analytics.ts` and `lib/catalog-analytics.ts` (one place, so event

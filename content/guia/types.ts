@@ -52,6 +52,8 @@ export interface InlineLink {
 }
 
 export interface ArrivalItem {
+  /** 'confirm' = content not verified yet. Ignored by the Livin/demo renderer; the hotel edition skips held items. */
+  hold?: 'confirm'
   /** Stable key for Partner.arrivalItemsOmit. Optional — only items a
    *  partner might need to omit need one. */
   id?: string

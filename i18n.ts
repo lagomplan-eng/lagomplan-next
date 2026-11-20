@@ -43,6 +43,7 @@ export const pathnames = {
   '/smart-finds/[slug]': '/smart-finds/[slug]',
   '/about': { es: '/nosotras', en: '/about' },
   '/contact': { es: '/contacto', en: '/contact' },
+  '/for-hotels': { es: '/para-hoteles', en: '/for-hotels' },
   '/my-trips': { es: '/mis-viajes', en: '/my-trips' },
   '/account': { es: '/cuenta', en: '/account' },
   '/signup': { es: '/crear-cuenta', en: '/signup' },

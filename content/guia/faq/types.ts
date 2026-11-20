@@ -32,6 +32,8 @@ export type FaqItemKey = PropertyFaqKey | ZoneFaqKey
 export type FaqGroupId = 'stay' | 'errands' | 'eating' | 'care'
 
 export interface FaqAnswer {
+  /** 'confirm' = content not verified yet. Ignored by resolveFaqModule (Livin/demo); the hotel edition skips held answers. */
+  hold?: 'confirm'
   body?: Partial<Record<Lang, string>>
   links?: Partial<Record<Lang, InlineLink[]>>
 }
