@@ -415,7 +415,7 @@ function CheckRow({
     <div
       data-check-row
       data-check-id={check.id}
-      className="flex items-center gap-[7px] py-[7px] border-b border-[#E4DFD8] last:border-b-0 transition-colors rounded-[6px] -mx-1 px-1"
+      className="flex items-center gap-[7px] py-[7px] border-b border-line-soft last:border-b-0 transition-colors rounded-[6px] -mx-1 px-1"
     >
       <button
         className="w-[15px] h-[15px] rounded-[3px] border-[1.5px] shrink-0 flex items-center justify-center transition-all"
@@ -959,7 +959,7 @@ function BudgetEditPanel({
   const [av, setAv] = useState(row.actual  != null ? String(row.actual)  : '')
   return (
     <div
-      className="px-4 py-[9px] bg-[#EDE7E1] border-b border-[#E4DFD8]"
+      className="px-4 py-[9px] bg-[#EDE7E1] border-b border-line-soft"
       style={{ borderLeft: '2px solid #0F3A33' }}
     >
       {row.note && (
@@ -975,7 +975,7 @@ function BudgetEditPanel({
           <input
             type="number"
             min="0"
-            className="w-full font-mono text-[12px] font-medium text-[#0F3A33] bg-white border border-[#E4DFD8] rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
+            className="w-full font-mono text-[12px] font-medium text-[#0F3A33] bg-white border border-line-soft rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
             placeholder={String(row.aiEst)}
             value={uv}
             onChange={e => setUv(e.target.value)}
@@ -988,7 +988,7 @@ function BudgetEditPanel({
           <input
             type="number"
             min="0"
-            className="w-full font-mono text-[12px] font-medium text-[#2D6B57] bg-white border border-[#E4DFD8] rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
+            className="w-full font-mono text-[12px] font-medium text-[#2D6B57] bg-white border border-line-soft rounded-[4px] px-2 py-[5px] outline-none focus:border-[#0F3A33] transition-colors"
             placeholder="0"
             value={av}
             onChange={e => setAv(e.target.value)}
@@ -1006,7 +1006,7 @@ function BudgetEditPanel({
         <button
           type="button"
           onClick={onClose}
-          className="font-mono text-[10px] text-[#7A7A76] bg-transparent border border-[#E4DFD8] rounded-[4px] px-2 py-[4px] cursor-pointer hover:border-[#0F3A33] transition-colors"
+          className="font-mono text-[10px] text-[#7A7A76] bg-transparent border border-line-soft rounded-[4px] px-2 py-[4px] cursor-pointer hover:border-[#0F3A33] transition-colors"
         >
           Cancelar
         </button>
@@ -3514,14 +3514,14 @@ export default function TripResult({ params }: Props) {
             // (zero layout shift on hand-off).
             <div data-loading="hydrating" className="animate-pulse">
               <div className="mb-7">
-                <div className="h-2.5 w-24 bg-[#E4DFD8] rounded mb-3" />
-                <div className="h-9 w-3/4 max-w-[420px] bg-[#E4DFD8] rounded mb-2.5" />
+                <div className="h-2.5 w-24 bg-line-soft rounded mb-3" />
+                <div className="h-9 w-3/4 max-w-[420px] bg-line-soft rounded mb-2.5" />
                 <div className="h-3.5 w-1/2 max-w-[280px] bg-[#EDE7E1] rounded" />
               </div>
               {[0, 1, 2].map(n => (
-                <div key={n} className="bg-white border border-[#E4DFD8] rounded-[18px] p-6 mb-3.5">
-                  <div className="h-2.5 w-20 bg-[#E4DFD8] rounded mb-3" />
-                  <div className="h-4 w-2/3 bg-[#E4DFD8] rounded mb-4" />
+                <div key={n} className="bg-white border border-line-soft rounded-[18px] p-6 mb-3.5">
+                  <div className="h-2.5 w-20 bg-line-soft rounded mb-3" />
+                  <div className="h-4 w-2/3 bg-line-soft rounded mb-4" />
                   <div className="h-3 w-full bg-[#EDE7E1] rounded mb-1.5" />
                   <div className="h-3 w-5/6 bg-[#EDE7E1] rounded" />
                 </div>
@@ -3692,7 +3692,7 @@ export default function TripResult({ params }: Props) {
       )}
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section data-trip="hero" className="border-b border-[#E4DFD8] pt-12 pb-9">
+      <section data-trip="hero" className="border-b border-line-soft pt-12 pb-9">
         <div className="max-w-[1160px] mx-auto px-7">
           <div className="grid grid-cols-[1fr_360px] gap-[52px] items-start max-[860px]:grid-cols-1">
 
@@ -3760,26 +3760,26 @@ export default function TripResult({ params }: Props) {
 
               {/* Meta pills — all from pref state so they reflect regeneration */}
               <div data-trip-hero="chips" className={`flex flex-wrap gap-1.5 ${showHeroReadiness ? 'mb-4' : 'mb-7'}`}>
-                <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
+                <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full">
                   <span>📅</span> {dateRange}
                 </span>
                 {prefDest && (
-                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
+                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full">
                     <span>📍</span> {titleCaseCity(prefDest)}
                   </span>
                 )}
                 {prefTraveler && (
-                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full capitalize">
+                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full capitalize">
                     <span>👥</span> {prefTraveler}
                   </span>
                 )}
                 {prefPace && (
-                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
+                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full">
                     <span>🧭</span> {PACE_DISPLAY[prefPace] ?? prefPace}
                   </span>
                 )}
                 {prefBudget && (
-                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-[#E4DFD8] rounded-full">
+                  <span className="flex items-center gap-[5px] font-mono text-[10px] tracking-[.04em] text-[#3D3D3A] px-2.5 py-1 bg-[#EDE7E1] border border-line-soft rounded-full">
                     <span>💰</span> {budgetLabel(prefBudget)}
                   </span>
                 )}
@@ -3808,7 +3808,7 @@ export default function TripResult({ params }: Props) {
               )}
 
               {/* Action row */}
-              <div data-trip="action-row" className="flex items-center pt-[18px] border-t border-[#E4DFD8]">
+              <div data-trip="action-row" className="flex items-center pt-[18px] border-t border-line-soft">
                 <button
                   className={`flex items-center gap-[5px] font-mono text-[11px] tracking-[.06em] pr-[15px] transition-colors ${
                     tripId && saveStatus === 'error'
@@ -3922,7 +3922,7 @@ export default function TripResult({ params }: Props) {
       </section>
 
       {/* ── PREF DRAWER ───────────────────────────────────────────────────── */}
-      <div data-trip="pref-drawer" className="border-b border-[#E4DFD8]">
+      <div data-trip="pref-drawer" className="border-b border-line-soft">
         <div
           style={{
             // Cap was 900 px — fine for single-city's 6-field grid. Multi-city
@@ -4078,7 +4078,7 @@ export default function TripResult({ params }: Props) {
                   type="text"
                   value={prefInterests}
                   onChange={e => setPrefInterests(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
+                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
                   placeholder={isES ? 'playa, gastronomía, cultura…' : 'beach, food, culture…'}
                 />
               </div>
@@ -4101,7 +4101,7 @@ export default function TripResult({ params }: Props) {
                       className="flex flex-col items-center gap-1 py-2.5 px-1.5 border-[1.5px] rounded-[6px] font-sans text-[11px] font-normal transition-all"
                       style={prefTraveler === chip.key
                         ? { borderColor: '#0F3A33', background: 'rgba(15,58,51,.04)', color: '#0F3A33' }
-                        : { borderColor: '#E4DFD8', background: '#fff', color: '#7A7A76' }
+                        : { borderColor: 'var(--line-soft)', background: '#fff', color: '#7A7A76' }
                       }
                     >
                       <span className="text-[18px]">{chip.icon}</span>
@@ -4114,7 +4114,7 @@ export default function TripResult({ params }: Props) {
                 {prefTraveler === 'familia' && (
                   <div className="mt-3 flex flex-col gap-2.5">
                     {/* Adults stepper */}
-                    <div className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[10px] px-3 py-2.5">
+                    <div className="flex items-center gap-3 bg-white border border-line-soft rounded-[10px] px-3 py-2.5">
                       <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">{isES ? 'Adultos' : 'Adults'}</span>
                       <div className="flex">
                         <button
@@ -4135,7 +4135,7 @@ export default function TripResult({ params }: Props) {
                       <p className="font-sans text-[12px] font-medium text-[#1C1C1A] mb-2">{isES ? 'Edades de los niños' : 'Children’s ages'}</p>
                       <div className="flex flex-wrap gap-1.5 items-center">
                         {prefChildren.map(child => (
-                          <div key={child.id} className="flex items-center gap-1.5 bg-white border border-[#E4DFD8] rounded-full px-3 py-1.5">
+                          <div key={child.id} className="flex items-center gap-1.5 bg-white border border-line-soft rounded-full px-3 py-1.5">
                             <span className="text-[12px]">{child.type === 'baby' ? '👶' : '🧒'}</span>
                             <select
                               value={child.age}
@@ -4179,7 +4179,7 @@ export default function TripResult({ params }: Props) {
                 {/* ── Amigos expanded ── */}
                 {prefTraveler === 'amigos' && (
                   <div className="mt-3">
-                    <div className="flex items-center gap-3 bg-white border border-[#E4DFD8] rounded-[10px] px-3 py-2.5">
+                    <div className="flex items-center gap-3 bg-white border border-line-soft rounded-[10px] px-3 py-2.5">
                       <span className="font-sans text-[12px] font-medium text-[#1C1C1A] flex-1">{isES ? '¿Cuántos viajan?' : 'How many?'}</span>
                       <div className="flex">
                         <button
@@ -4203,7 +4203,7 @@ export default function TripResult({ params }: Props) {
               <div className="col-span-3 max-[600px]:col-span-1 flex justify-end gap-2">
                 <button
                   onClick={() => setPrefOpen(false)}
-                  className="text-[13px] text-[#7A7A76] px-[15px] py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
+                  className="text-[13px] text-[#7A7A76] px-[15px] py-[7px] border border-line-soft rounded-[6px] bg-white"
                 >
                   {locale === 'es' ? 'Cancelar' : 'Cancel'}
                 </button>
@@ -4281,7 +4281,7 @@ export default function TripResult({ params }: Props) {
                     className="font-mono text-[9px] font-medium tracking-[.06em] uppercase px-[8px] py-[3px] rounded-full border transition-all"
                     style={i === activeVersionIdx
                       ? { color: '#0F3A33', background: 'rgba(15,58,51,.08)', borderColor: 'rgba(15,58,51,.3)' }
-                      : { color: '#B8B5AF', background: 'white', borderColor: '#E4DFD8' }
+                      : { color: '#B8B5AF', background: 'white', borderColor: 'var(--line-soft)' }
                     }
                   >
                     {v.label}
@@ -4410,7 +4410,7 @@ export default function TripResult({ params }: Props) {
                 // when the auth-state effect ticks `isAccessResolved`
                 // after the first POST is already in flight.
                 rawTripData ? (
-                  <div className="bg-white border border-[#E4DFD8] rounded-[18px] p-6">
+                  <div className="bg-white border border-line-soft rounded-[18px] p-6">
                     <p className="font-sans text-[15px] text-[#7A7A76]">
                       {locale === 'es'
                         ? 'La generación terminó pero no encontramos días en el formato esperado. Inténtalo de nuevo.'
@@ -4431,12 +4431,12 @@ export default function TripResult({ params }: Props) {
                     <div
                       key={day.n}
                       data-trip-day="card"
-                      className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
+                      className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)] hover:shadow-[0_2px_8px_rgba(15,58,51,.07)] transition-shadow"
                     >
                       {/* Day header */}
                       <div
                         data-trip-day="header"
-                        className="flex items-center justify-between px-[18px] py-3.5 cursor-pointer select-none border-b border-[#E4DFD8]"
+                        className="flex items-center justify-between px-[18px] py-3.5 cursor-pointer select-none border-b border-line-soft"
                         onClick={() => toggleDay(day.n)}
                       >
                         <div className="min-w-0">
@@ -4494,7 +4494,7 @@ export default function TripResult({ params }: Props) {
                               <div
                                 key={item.id}
                                 data-trip-item="row"
-                                className="grid grid-cols-[28px_1fr_auto] gap-3 items-start py-3.5 border-b border-[#E4DFD8] last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
+                                className="grid grid-cols-[28px_1fr_auto] gap-3 items-start py-3.5 border-b border-line-soft last:border-b-0 pl-2.5 -ml-2.5 border-l-[3px] hover:bg-[rgba(237,231,225,.3)] transition-colors"
                                 style={{ borderLeftColor: tborder, background: trowbg }}
                               >
                                 {/* Index — type-color anchors the left accent rail */}
@@ -4609,7 +4609,7 @@ export default function TripResult({ params }: Props) {
 
                         {/* Add item row */}
                         <button
-                          className="flex items-center gap-[7px] w-full px-[18px] py-3 bg-transparent border-t border-dashed border-[#E4DFD8] text-[#7A7A76] text-[12px] hover:bg-[#EDE7E1] hover:text-[#0F3A33] transition-colors"
+                          className="flex items-center gap-[7px] w-full px-[18px] py-3 bg-transparent border-t border-dashed border-line-soft text-[#7A7A76] text-[12px] hover:bg-[#EDE7E1] hover:text-[#0F3A33] transition-colors"
                           onClick={() => addItem(day.n)}
                         >
                           <span className="w-[17px] h-[17px] rounded-full bg-[#E2DAD2] flex items-center justify-center text-[12px] text-[#3D3D3A] shrink-0">
@@ -4662,7 +4662,7 @@ export default function TripResult({ params }: Props) {
             <div className="sticky top-[176px] flex flex-col gap-2.5">
 
               {/* Planea tu viaje — checks */}
-              <div data-trip="planning" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="planning" className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors gap-2.5"
                   onClick={() => toggleCard('planning')}
@@ -4698,11 +4698,11 @@ export default function TripResult({ params }: Props) {
                     transition: 'max-height 0.4s ease, opacity 0.3s',
                   }}
                 >
-                  <div className="border-t border-[#E4DFD8] px-4 pt-3 pb-4">
+                  <div className="border-t border-line-soft px-4 pt-3 pb-4">
 
                     {checksBefore.length > 0 && (
                       <>
-                        <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8]">
+                        <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-line-soft">
                           {isES ? 'Antes del viaje' : 'Before the trip'}
                         </div>
                         {checksBefore.map(check => (
@@ -4713,7 +4713,7 @@ export default function TripResult({ params }: Props) {
 
                     {dayNums.length > 0 && (
                       <>
-                        <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-[#E4DFD8] mt-1.5">
+                        <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] py-2 border-b border-line-soft mt-1.5">
                           {isES ? 'Por día' : 'By day'}
                         </div>
                         {dayNums.map(dayN => {
@@ -4723,7 +4723,7 @@ export default function TripResult({ params }: Props) {
                           const doneInDay = dayChecks.filter(c => c.done).length
 
                           return (
-                            <div key={dayN} className="border-b border-[#E4DFD8] last:border-b-0">
+                            <div key={dayN} className="border-b border-line-soft last:border-b-0">
                               <div
                                 className="flex items-center justify-between py-[7px] cursor-pointer select-none"
                                 onClick={() => toggleDiaGroup(dayN)}
@@ -4784,7 +4784,7 @@ export default function TripResult({ params }: Props) {
               </div>
 
               {/* Qué llevar — always rendered, empty state when no packing data */}
-              <div data-trip="packing" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="packing" className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
                 <div
                   className="flex items-center justify-between px-4 py-[13px] cursor-pointer select-none hover:bg-[#EDE7E1] transition-colors gap-2.5"
                   onClick={() => toggleCard('packing')}
@@ -4816,7 +4816,7 @@ export default function TripResult({ params }: Props) {
                     transition: 'max-height 0.4s ease, opacity 0.3s',
                   }}
                 >
-                  <div className="border-t border-[#E4DFD8]">
+                  <div className="border-t border-line-soft">
                     {/* Item list */}
                     <div className="px-4 pt-3 pb-2 flex flex-col gap-[5px]">
                       {packing.length === 0 && (
@@ -4857,7 +4857,7 @@ export default function TripResult({ params }: Props) {
                             type="button"
                             onClick={() => removePackingItem(i)}
                             aria-label={isES ? 'Eliminar item' : 'Remove item'}
-                            className="w-4 h-4 rounded-[3px] flex items-center justify-center text-[9px] text-[#B8B5AF] hover:bg-[#E4DFD8] hover:text-[#A32D2D] transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                            className="w-4 h-4 rounded-[3px] flex items-center justify-center text-[9px] text-[#B8B5AF] hover:bg-line-soft hover:text-[#A32D2D] transition-colors shrink-0 opacity-0 group-hover:opacity-100 focus:opacity-100"
                           >
                             ✕
                           </button>
@@ -4866,7 +4866,7 @@ export default function TripResult({ params }: Props) {
                     </div>
 
                     {/* Add item row */}
-                    <div className="px-4 pb-3 pt-1 border-t border-dashed border-[#E4DFD8]">
+                    <div className="px-4 pb-3 pt-1 border-t border-dashed border-line-soft">
                       <div className="flex items-center gap-2">
                         <input
                           type="text"
@@ -4891,7 +4891,7 @@ export default function TripResult({ params }: Props) {
               </div>
 
               {/* Presupuesto — planned vs actual budget tracker */}
-              <div data-trip="budget" className="bg-white border border-[#E4DFD8] rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
+              <div data-trip="budget" className="bg-white border border-line-soft rounded-[18px] overflow-hidden shadow-[0_1px_2px_rgba(15,58,51,.05)]">
 
                 {/* Header */}
                 <div
@@ -4929,7 +4929,7 @@ export default function TripResult({ params }: Props) {
                     transition: 'max-height 0.4s ease, opacity 0.3s',
                   }}
                 >
-                  <div className="border-t border-[#E4DFD8]">
+                  <div className="border-t border-line-soft">
                     {budgetRows.length === 0 ? (
                       <div className="px-4 py-3">
                         <p className="text-[11px] text-[#7A7A76]">
@@ -4939,7 +4939,7 @@ export default function TripResult({ params }: Props) {
                     ) : (
                       <>
                         {/* ── Currency toggle ── */}
-                        <div className="flex items-center justify-between px-4 py-[7px] border-b border-[#E4DFD8]">
+                        <div className="flex items-center justify-between px-4 py-[7px] border-b border-line-soft">
                           <span className="font-mono text-[9px] text-[#B8B5AF]">
                             {isES ? `Montos en ${budgetCurrency} · sin conversión` : `Amounts in ${budgetCurrency} · no conversion`}
                           </span>
@@ -4963,14 +4963,14 @@ export default function TripResult({ params }: Props) {
                         </div>
 
                         {/* ── Summary bar ── */}
-                        <div className="grid grid-cols-2 border-b border-[#E4DFD8]">
+                        <div className="grid grid-cols-2 border-b border-line-soft">
                           {[
                             { label: isES ? 'Estimado'   : 'Estimated', value: fmtAmt(userTotal),                          color: 'text-[#0F3A33]' },
                             { label: isES ? 'Confirmado' : 'Confirmed', value: hasActual ? fmtAmt(actualTotal) : '—',      color: hasActual ? 'text-[#2D6B57]' : 'text-[#B8B5AF]' },
                           ].map((col, ci) => (
                             <div
                               key={col.label}
-                              className={`px-[7px] py-[9px] text-center ${ci < 1 ? 'border-r border-[#E4DFD8]' : ''}`}
+                              className={`px-[7px] py-[9px] text-center ${ci < 1 ? 'border-r border-line-soft' : ''}`}
                             >
                               <span className="font-mono text-[8px] font-medium tracking-[.1em] uppercase text-[#B8B5AF] block mb-[4px]">
                                 {col.label}
@@ -4981,7 +4981,7 @@ export default function TripResult({ params }: Props) {
                             </div>
                           ))}
                         </div>
-                        <p className="font-mono text-[9px] text-[#B8B5AF] px-4 py-[6px] border-b border-[#E4DFD8]">
+                        <p className="font-mono text-[9px] text-[#B8B5AF] px-4 py-[6px] border-b border-line-soft">
                           {isES
                             ? 'Estimado alto — cubre el margen superior de precios típicos.'
                             : 'Upper-range estimate — covers the top of typical local pricing.'}
@@ -4991,7 +4991,7 @@ export default function TripResult({ params }: Props) {
                         {Object.entries(budgetByCategory).map(([cat, rows]) => {
                           const catTotal = rows.reduce((s, r) => s + activeAmount(r), 0)
                           return (
-                            <div key={cat} className="border-b border-[#E4DFD8] last:border-b-0">
+                            <div key={cat} className="border-b border-line-soft last:border-b-0">
 
                               {/* Category header */}
                               <div className="flex items-center justify-between px-4 py-[5px] bg-[#EDE7E1]">
@@ -5028,7 +5028,7 @@ export default function TripResult({ params }: Props) {
                                   <div key={row.id}>
                                     {/* Row */}
                                     <div
-                                      className="grid px-4 py-[8px] border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors cursor-pointer"
+                                      className="grid px-4 py-[8px] border-b border-line-soft last:border-b-0 hover:bg-[#EDE7E1] transition-colors cursor-pointer"
                                       style={{ gridTemplateColumns: '17px 1fr auto', gap: '7px', alignItems: 'start' }}
                                       onClick={() => setOpenBudgetEditId(isOpen ? null : row.id)}
                                     >
@@ -5103,7 +5103,7 @@ export default function TripResult({ params }: Props) {
                             </div>
                           </div>
                           {hasActual && (
-                            <div className="mt-[8px] pt-[7px] border-t border-dashed border-[#E4DFD8]">
+                            <div className="mt-[8px] pt-[7px] border-t border-dashed border-line-soft">
                               <span className="font-mono text-[9px] text-[#B8B5AF]">
                                 {actualTotal > userTotal
                                   ? `+${fmtAmt(actualTotal - userTotal)} sobre lo estimado`
@@ -5127,7 +5127,7 @@ export default function TripResult({ params }: Props) {
       </div>
 
       {/* ── PRINT FOOTER — logo, shown only in PDF/print ─────────────────── */}
-      <div className="hidden print:flex items-center justify-center gap-3 mt-10 pt-6 border-t border-[#E4DFD8]">
+      <div className="hidden print:flex items-center justify-center gap-3 mt-10 pt-6 border-t border-line-soft">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/images/logo.png" alt="Lagomplan" className="h-8 w-auto opacity-75" />
       </div>
@@ -5175,7 +5175,7 @@ export default function TripResult({ params }: Props) {
                       className="font-mono text-[9px] font-medium tracking-[.08em] uppercase px-[7px] py-[3px] rounded-[3px] border transition-all"
                       style={sel
                         ? { color: badge.color, background: badge.bg, borderColor: badge.color }
-                        : { color: '#B8B5AF', background: 'white', borderColor: '#E4DFD8' }
+                        : { color: '#B8B5AF', background: 'white', borderColor: 'var(--line-soft)' }
                       }
                     >
                       {info.icon} {info.label}
@@ -5192,7 +5192,7 @@ export default function TripResult({ params }: Props) {
               <input
                 value={editName}
                 onChange={e => setEditName(e.target.value)}
-                className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
+                className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
                 placeholder="Nombre de la actividad"
               />
             </div>
@@ -5204,7 +5204,7 @@ export default function TripResult({ params }: Props) {
               <textarea
                 value={editDesc}
                 onChange={e => setEditDesc(e.target.value)}
-                className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33] min-h-[65px] resize-y"
+                className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33] min-h-[65px] resize-y"
                 placeholder="Descripción breve"
               />
             </div>
@@ -5223,7 +5223,7 @@ export default function TripResult({ params }: Props) {
                 <input
                   value={editTime}
                   onChange={e => setEditTime(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
+                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
                   placeholder="09:00"
                 />
               </div>
@@ -5258,7 +5258,7 @@ export default function TripResult({ params }: Props) {
                   min="0"
                   value={editPrice}
                   onChange={e => setEditPrice(e.target.value)}
-                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-[#E4DFD8] rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
+                  className="w-full font-sans text-[13px] text-[#1C1C1A] bg-white border border-line-soft rounded-[6px] px-[11px] py-2 outline-none focus:border-[#0F3A33]"
                   placeholder="0"
                 />
               </div>
@@ -5267,7 +5267,7 @@ export default function TripResult({ params }: Props) {
             <div className="flex gap-2 justify-end mt-[18px]">
               <button
                 onClick={closeEditModal}
-                className="text-[13px] text-[#7A7A76] px-3.5 py-[7px] border border-[#E4DFD8] rounded-[6px] bg-white"
+                className="text-[13px] text-[#7A7A76] px-3.5 py-[7px] border border-line-soft rounded-[6px] bg-white"
               >
                 {locale === 'es' ? 'Cancelar' : 'Cancel'}
               </button>
@@ -5342,7 +5342,7 @@ export default function TripResult({ params }: Props) {
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="px-[22px] pt-[18px] pb-[14px] border-b border-[#E4DFD8]">
+            <div className="px-[22px] pt-[18px] pb-[14px] border-b border-line-soft">
               <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
                 {(isES ? BOOKING_EYEBROW_ES : BOOKING_EYEBROW_EN)[bookingModal.itemType] ?? (isES ? 'Reservar' : 'Book')}
               </div>
@@ -5364,7 +5364,7 @@ export default function TripResult({ params }: Props) {
                     href={opt.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-[#E4DFD8] last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
+                    className="flex items-center gap-[11px] px-[22px] py-[11px] bg-white border-b border-line-soft last:border-b-0 hover:bg-[#EDE7E1] transition-colors group"
                     onClick={() => {
                       // Unified affiliate click — fires to BOTH Meta + GA via
                       // events.affiliateClicked (canonical GA `affiliate_clicked`
@@ -5401,7 +5401,7 @@ export default function TripResult({ params }: Props) {
             </div>
 
             {/* Footer */}
-            <div className="px-[22px] pt-[11px] pb-[16px] border-t border-[#E4DFD8] flex items-center justify-between">
+            <div className="px-[22px] pt-[11px] pb-[16px] border-t border-line-soft flex items-center justify-between">
               <span className="text-[11px] font-light text-[#B8B5AF]">Sin costo extra para ti</span>
               <button
                 className="font-mono text-[10px] font-medium tracking-[.04em] text-[#7A7A76] bg-none border-none cursor-pointer px-[7px] py-[3px] hover:text-[#0F3A33] transition-colors"
@@ -5545,7 +5545,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, locale, onChange }: Mult
     d ? d.toISOString().slice(0, 10) : ''
 
   return (
-    <div className="mb-5 pb-5 border-b border-[#E4DFD8]">
+    <div className="mb-5 pb-5 border-b border-line-soft">
       <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#7A7A76] mb-3">
         {t.heading}
       </div>
@@ -5560,7 +5560,7 @@ function MultiCitySegmentEditor({ segments, tripOrigin, locale, onChange }: Mult
           const displayOrigin = seg.origin ?? defaultFrom
 
           return (
-            <div key={idx} className="bg-[#FAF8F5] border border-[#E4DFD8] rounded-[8px] p-3">
+            <div key={idx} className="bg-[#FAF8F5] border border-line-soft rounded-[8px] p-3">
               <div className="flex items-center justify-between mb-2">
                 <span className="font-mono text-[10px] font-medium tracking-[.08em] text-[#0F3A33]">
                   {t.leg(idx + 1)}

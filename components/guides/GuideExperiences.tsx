@@ -20,7 +20,7 @@ export function GuideExperiences({ experiences, locale, destination }: Props) {
   if (experiences.length === 0) return null
 
   return (
-    <section id="experiencias" className="py-12 max-[768px]:py-8 border-t border-[#E4DFD8]" style={{ background: '#EDE7E1' }}>
+    <section id="experiencias" className="py-12 max-[768px]:py-8 border-t border-line-soft" style={{ background: '#EDE7E1' }}>
       <div className="max-w-[900px] mx-auto px-7">
 
         <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-1">
@@ -43,7 +43,7 @@ export function GuideExperiences({ experiences, locale, destination }: Props) {
             return (
               <div
                 key={i}
-                className="bg-white rounded-[14px] p-5 border border-[#E4DFD8] shadow-[0_1px_2px_rgba(15,58,51,.05)] flex flex-col hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
+                className="bg-white rounded-[14px] p-5 border border-line-soft shadow-[0_1px_2px_rgba(15,58,51,.05)] flex flex-col hover:shadow-[0_2px_8px_rgba(15,58,51,.08)] transition-shadow"
               >
                 {/* Badge */}
                 <span
