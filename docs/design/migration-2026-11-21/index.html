@@ -1,0 +1,27 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Design foundation migration: before and after</title>
+<style>
+:root{--pine:#0F3A33;--cream:#FFF9F3;--line:#E4DFD8;--ink:#3E5650}
+body{margin:0;background:var(--cream);color:var(--pine);font:15px/1.55 system-ui,sans-serif;padding:32px 20px 80px}
+h1{font-size:28px;margin:0 0 6px}h2{font-size:20px;margin:48px 0 4px}p{margin:0 0 12px;color:var(--ink);max-width:70ch}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:16px 0 28px}
+figure{margin:0;background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+figcaption{padding:8px 12px;font-weight:700;border-bottom:1px solid var(--line)}
+img{display:block;width:100%;height:auto}
+.m{grid-template-columns:repeat(2,minmax(0,390px));justify-content:start}
+</style></head><body>
+<h1>Home, /guias and guide pages on the design foundation</h1>
+<p>Before = production on main (88b6633, #151 merged). After = this branch, same data. Each image is the top 4200px of the page. 1440px then 390px.</p>
+<h2>Home · /es</h2>
+<div class="row"><figure><figcaption>Before 1440</figcaption><img loading="lazy" src="before/home-1440.jpg" alt=""></figure><figure><figcaption>After 1440</figcaption><img loading="lazy" src="after/home-1440.jpg" alt=""></figure></div>
+<div class="row m"><figure><figcaption>Before 390</figcaption><img loading="lazy" src="before/home-390.jpg" alt=""></figure><figure><figcaption>After 390</figcaption><img loading="lazy" src="after/home-390.jpg" alt=""></figure></div>
+<h2>/guias · /es/guias</h2>
+<div class="row"><figure><figcaption>Before 1440</figcaption><img loading="lazy" src="before/guias-1440.jpg" alt=""></figure><figure><figcaption>After 1440</figcaption><img loading="lazy" src="after/guias-1440.jpg" alt=""></figure></div>
+<div class="row m"><figure><figcaption>Before 390</figcaption><img loading="lazy" src="before/guias-390.jpg" alt=""></figure><figure><figcaption>After 390</figcaption><img loading="lazy" src="after/guias-390.jpg" alt=""></figure></div>
+<h2>Guide page · /es/guias/roma</h2>
+<div class="row"><figure><figcaption>Before 1440</figcaption><img loading="lazy" src="before/roma-1440.jpg" alt=""></figure><figure><figcaption>After 1440</figcaption><img loading="lazy" src="after/roma-1440.jpg" alt=""></figure></div>
+<div class="row m"><figure><figcaption>Before 390</figcaption><img loading="lazy" src="before/roma-390.jpg" alt=""></figure><figure><figcaption>After 390</figcaption><img loading="lazy" src="after/roma-390.jpg" alt=""></figure></div>
+<h2>Guide page · /es/guias/cancun</h2>
+<div class="row"><figure><figcaption>Before 1440</figcaption><img loading="lazy" src="before/cancun-1440.jpg" alt=""></figure><figure><figcaption>After 1440</figcaption><img loading="lazy" src="after/cancun-1440.jpg" alt=""></figure></div>
+<div class="row m"><figure><figcaption>Before 390</figcaption><img loading="lazy" src="before/cancun-390.jpg" alt=""></figure><figure><figcaption>After 390</figcaption><img loading="lazy" src="after/cancun-390.jpg" alt=""></figure></div>
+</body></html>

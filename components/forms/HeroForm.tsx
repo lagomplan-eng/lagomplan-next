@@ -9,6 +9,7 @@ import DateRangePicker, { type DateRange } from './DateRangePicker'
 import { buildSegment, serializeSegments, type TripSegment } from '../../lib/planner/segments'
 import { FREE_TRIPS_LIMIT } from '../../lib/plan/limits'
 import { events } from '../../lib/analytics'
+import { Button, Chip, Eyebrow, InfoCard, Input, Textarea } from '../design'
 
 // Same 3 reviewer photos used in the bottom Reviews section of the
 // homepage. Kept inline (rather than imported from the page) so this
@@ -58,15 +59,32 @@ type HeroFormProps = {
 }
 
 // ── Inline helpers ─────────────────────────────────────────────────
+// Field label, required marker and error line: the shared form text styles.
+const LABEL = 'mb-2 block font-sans text-small font-semibold text-pine'
+
 function Req() {
-  return <span className="text-[#B94030] ml-0.5 font-normal" aria-hidden="true">*</span>
+  return <span className="ml-0.5 font-normal text-error" aria-hidden="true">*</span>
 }
 
 function FieldError({ msg }: { msg: string }) {
   return (
-    <p role="alert" className="font-sans text-[11px] text-[#B94030] mt-1.5 leading-snug">
+    <p role="alert" className="m-0 mt-2 font-sans text-tiny font-semibold text-error">
       {msg}
     </p>
+  )
+}
+
+// −/+ counter row (adults, friends in the group).
+function Stepper({ label, value, onMinus, onPlus }: { label: string; value: number; onMinus: () => void; onPlus: () => void }) {
+  return (
+    <div className="flex items-center gap-3 rounded-info border border-line-soft bg-white px-4 py-2.5">
+      <span className="flex-1 font-sans text-small font-semibold text-pine">{label}</span>
+      <div className="flex items-center gap-2">
+        <Button variant="secondary" size="sm" className="w-10 !px-0" onClick={onMinus}>−</Button>
+        <span className="w-8 text-center font-sans text-body font-bold text-pine">{value}</span>
+        <Button variant="secondary" size="sm" className="w-10 !px-0" onClick={onPlus}>+</Button>
+      </div>
+    </div>
   )
 }
 
@@ -346,48 +364,37 @@ function submit(e: React.FormEvent) {
     router.push(`/planner?${params}` as any)
   }
 
-  // ── Shared style tokens ──────────────────────────────────────────
-  const sectionLabel =
-    'font-sans text-[12px] font-semibold text-[#0F3A33] block mb-1.5'
-  const stepButton =
-    'w-8 h-8 border border-[rgba(107,143,134,.28)] bg-white flex items-center justify-center cursor-pointer text-[#0F3A33] text-[16px] hover:border-[#0F3A33] hover:bg-[#E4EFEC] transition-colors select-none'
-  const chipBase =
-    'font-sans text-[10px] rounded-full px-3 py-[6px] border transition-all leading-none'
   // Divider used between major form sections
-  const sectionDivider = 'border-t border-[#EDE9E4] pt-4 mt-2 mb-4'
+  const sectionDivider = 'border-t border-line-soft pt-4 mt-2 mb-4'
 
   return (
     <div className="w-full max-w-[920px] ml-auto max-[1024px]:max-w-full max-[1024px]:ml-0">
       <form onSubmit={submit} noValidate className="flex flex-col">
+        <InfoCard className="shadow-pop">
 
-        {/* ── Body ───────────────────────────────────────────────── */}
-        <div className="bg-white border border-[#E5E5E5] border-b-0 rounded-[12px_12px_0_0] px-6 pt-5 pb-4 shadow-[0_4px_24px_rgba(15,58,51,.06)]">
-
-          <span className="font-sans text-[10px] font-medium tracking-[1.5px] text-[#6B8F86] uppercase border-b border-[#E5E5E5] pb-3 mb-4 block">
-            {t('title')}
-          </span>
+          <Eyebrow className="!mb-4 border-b border-line-soft pb-3">{t('title')}</Eyebrow>
 
           {/* ── 1. Where ─────────────────────────────────────────── */}
           <div className="grid grid-cols-2 gap-2.5 mb-4 max-[560px]:grid-cols-1">
             <div>
-  <label htmlFor="origin" className={sectionLabel}>
-    {t('origin')}<Req />
-  </label>
-  <PlacesInput
-    id="origin"
-    locale={locale}
-    placeholder={t('originPlaceholder')}
-    value={originText}
-    onChange={(v) => { setOriginText(v); if (!v) setOriginPlace(null) }}
-    onSelect={setOriginPlace}
-  />
-  {submitted && !originValue && (
-    <FieldError msg={t('errorFrom')} />
-  )}
-</div>
+              <label htmlFor="origin" className={LABEL}>
+                {t('origin')}<Req />
+              </label>
+              <PlacesInput
+                id="origin"
+                locale={locale}
+                placeholder={t('originPlaceholder')}
+                value={originText}
+                onChange={(v) => { setOriginText(v); if (!v) setOriginPlace(null) }}
+                onSelect={setOriginPlace}
+              />
+              {submitted && !originValue && (
+                <FieldError msg={t('errorFrom')} />
+              )}
+            </div>
 
             <div>
-              <label htmlFor="destination" className={sectionLabel}>
+              <label htmlFor="destination" className={LABEL}>
                 {t('destination')}<Req />
               </label>
               <PlacesInput
@@ -406,7 +413,7 @@ function submit(e: React.FormEvent) {
 
           {/* ── 2. When ──────────────────────────────────────────── */}
           <div className={sectionDivider}>
-            <label className={sectionLabel}>
+            <label className={LABEL}>
               {t('dates')}<Req />
             </label>
             <DateRangePicker value={dates} onChange={setDates} />
@@ -422,23 +429,19 @@ function submit(e: React.FormEvent) {
               sits below. Empty array = single-city; nothing renders. */}
           {additionalSegments.map((seg, idx) => (
             <div key={idx} className={sectionDivider}>
-              <div className="flex items-baseline justify-between mb-3">
-                <span className={sectionLabel}>
+              <div className="flex items-center justify-between mb-3">
+                <span className={`${LABEL} !mb-0`}>
                   {locale === 'es' ? `Tramo ${idx + 2}` : `Segment ${idx + 2}`}
                 </span>
-                <button
-                  type="button"
-                  onClick={() => removeSegment(idx)}
-                  className="font-sans text-[11px] text-[#9A9690] hover:text-[#E1615B] transition-colors"
-                >
+                <Button variant="ghost" size="sm" onClick={() => removeSegment(idx)}>
                   {locale === 'es' ? '× Quitar' : '× Remove'}
-                </button>
+                </Button>
               </div>
               {/* From + To — same grid as Segment 1's "Where" row. From
                   defaults to the previous segment's To but is editable. */}
               <div className="grid grid-cols-2 gap-2.5 mb-3 max-[560px]:grid-cols-1">
                 <div>
-                  <label className={sectionLabel}>{t('origin')}</label>
+                  <label className={LABEL}>{t('origin')}</label>
                   <PlacesInput
                     id={`origin-segment-${idx + 2}`}
                     locale={locale}
@@ -449,7 +452,7 @@ function submit(e: React.FormEvent) {
                   />
                 </div>
                 <div>
-                  <label className={sectionLabel}>{t('destination')}</label>
+                  <label className={LABEL}>{t('destination')}</label>
                   <PlacesInput
                     id={`destination-segment-${idx + 2}`}
                     locale={locale}
@@ -467,22 +470,14 @@ function submit(e: React.FormEvent) {
             </div>
           ))}
           {/* Trip-total summary + over-cap warning. Lives below ALL segments so
-              the count is unambiguous about what it sums. Calm grey row when
-              under cap; amber when over. The trim affordance only renders for
+              the count is unambiguous about what it sums. Calm sand row when
+              under cap; warning border when over. The trim affordance only renders for
               single-city — multi-city users shorten an individual segment
               instead (auto-trimming would silently drop one). */}
           {datesValid && (additionalSegments.length > 0 || exceedsMax) && (
             <div className={sectionDivider}>
-              <div
-                role="status"
-                className={[
-                  'px-3 py-2.5 rounded-[6px] border border-l-[3px]',
-                  exceedsMax
-                    ? 'bg-[rgba(218,165,32,.07)] border-[rgba(218,165,32,.28)] border-l-[#D4A35E]'
-                    : 'bg-[#F5F1EB] border-line-soft border-l-[#B89F7D]',
-                ].join(' ')}
-              >
-                <p className={`font-sans text-[12px] leading-[1.5] ${exceedsMax ? 'text-[#5A4423]' : 'text-[#5B4F3F]'}`}>
+              <InfoCard size="sm" tone="sand" role="status" className={exceedsMax ? '!border-warning' : ''}>
+                <p className="m-0">
                   {locale === 'es'
                     ? (additionalSegments.length > 0
                         ? `Total del viaje: ${totalNights} ${totalNights === 1 ? 'noche' : 'noches'} sumando los ${additionalSegments.length + 1} tramos.`
@@ -492,72 +487,59 @@ function submit(e: React.FormEvent) {
                         : `Your range covers ${totalNights} ${totalNights === 1 ? 'night' : 'nights'}.`)}
                 </p>
                 {exceedsMax && (
-                  <p className="font-sans text-[12px] leading-[1.5] mt-1 text-[#5A4423]">
+                  <p className="m-0 mt-1">
                     {locale === 'es'
                       ? `Por ahora generamos itinerarios de hasta ${MAX_TRIP_DAYS} días${additionalSegments.length > 0 ? ' en total' : ''}. Ajusta las fechas para continuar.`
                       : `We currently plan trips of up to ${MAX_TRIP_DAYS} days${additionalSegments.length > 0 ? ' total' : ''}. Adjust your dates to continue.`}
                   </p>
                 )}
                 {exceedsMax && additionalSegments.length === 0 && dates.start && (
-                  <button
-                    type="button"
-                    onClick={trimToMax}
-                    className="mt-1.5 font-sans text-[12px] font-semibold text-[#0F3A33] underline underline-offset-2 hover:text-[#1A5247]"
-                  >
+                  <Button variant="secondary" size="sm" className="mt-3" onClick={trimToMax}>
                     {locale === 'es'
                       ? `Ajustar a ${MAX_TRIP_DAYS} días`
                       : `Trim to ${MAX_TRIP_DAYS} days`}
-                  </button>
+                  </Button>
                 )}
-              </div>
+              </InfoCard>
             </div>
           )}
           {additionalSegments.length < MAX_EXTRA_SEGMENTS && (
             <div className={sectionDivider}>
-              <button
-                type="button"
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={addSegment}
                 disabled={!destValue || !datesValid}
-                className="font-sans text-[13px] font-medium text-[#0F3A33] hover:text-[#1A5247] disabled:text-[#9A9690] disabled:cursor-not-allowed transition-colors"
                 title={!destValue || !datesValid
                   ? (locale === 'es' ? 'Completa destino y fechas primero' : 'Complete destination + dates first')
                   : undefined}
               >
                 + {locale === 'es' ? 'Añadir ciudad' : 'Add city'}
-              </button>
+              </Button>
             </div>
           )}
 
           {/* ── 3. Who ───────────────────────────────────────────── */}
           <div className="mb-4">
-            <label className={`${sectionLabel} mb-2`}>
+            <label className={LABEL}>
               {t('whoTravels')}<Req />
             </label>
 
             <div className="grid grid-cols-4 gap-2 max-[560px]:grid-cols-2">
               {([
-                ['solo',    '🧳', t('solo'),    1],
-                ['pareja',  '💑', t('pareja'),  2],
-                ['familia', '👨‍👩‍👧‍👦', t('familia'), null],
-                ['amigos',  '🙌', t('amigos'),  null],
-              ] as [Traveler, string, string, number | null][]).map(
-                ([id, icon, label, count]) => (
-                  <button
+                ['solo',    '🧳', t('solo')],
+                ['pareja',  '💑', t('pareja')],
+                ['familia', '👨‍👩‍👧‍👦', t('familia')],
+                ['amigos',  '🙌', t('amigos')],
+              ] as [Traveler, string, string][]).map(
+                ([id, icon, label]) => (
+                  <Chip
                     key={id}
-                    type="button"
+                    className="w-full justify-center !px-3"
+                    selected={traveler === id}
                     onClick={() => setTraveler(id)}
-                    className={[
-                      'relative flex flex-col items-center gap-1.5 py-2 px-2 border rounded-[12px] transition-all min-h-[68px]',
-                      traveler === id
-                        ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.2)] text-[#0F3A33]'
-                        : 'bg-white border-[rgba(107,143,134,.22)] hover:border-[rgba(15,58,51,.24)] hover:bg-[#F7F3EE]',
-                    ].join(' ')}
-                  >
-                    <span className="text-[18px] leading-none">{icon}</span>
-                    <span className={`font-sans text-[11px] font-medium ${traveler === id ? 'text-[#0F3A33]' : 'text-[#6B8F86]'}`}>
-                      {label}
-                    </span>
-                  </button>
+                    label={<><span aria-hidden="true">{icon}</span>{label}</>}
+                  />
                 )
               )}
             </div>
@@ -569,30 +551,26 @@ function submit(e: React.FormEvent) {
             {/* Family expanded */}
             {traveler === 'familia' && (
               <div className="mt-3 flex flex-col gap-3">
-                <div className="flex items-center gap-3 bg-white border border-[rgba(107,143,134,.22)] rounded-[10px] px-3 py-2.5">
-                  <span className="font-sans text-[12px] font-semibold text-[#0F3A33] flex-1">
-                    {t('adults')}
-                  </span>
-                  <div className="flex">
-                    <button type="button" onClick={() => setAdults(n => Math.max(1, n - 1))} className={`${stepButton} rounded-l-[4px]`}>−</button>
-                    <div className="w-9 h-8 border-y border-[rgba(107,143,134,.28)] bg-white flex items-center justify-center font-mono text-[12px] text-[#0F3A33]">{adults}</div>
-                    <button type="button" onClick={() => setAdults(n => Math.min(10, n + 1))} className={`${stepButton} rounded-r-[4px]`}>+</button>
-                  </div>
-                </div>
+                <Stepper
+                  label={t('adults')}
+                  value={adults}
+                  onMinus={() => setAdults(n => Math.max(1, n - 1))}
+                  onPlus={() => setAdults(n => Math.min(10, n + 1))}
+                />
 
                 <div>
-                  <p className="font-sans text-[12px] font-semibold text-[#0F3A33] mb-2">
+                  <p className="m-0 mb-2 font-sans text-small font-semibold text-pine">
                     {t('childrenAges')}
                   </p>
-                  <div className="flex flex-wrap gap-1.5 items-center">
+                  <div className="flex flex-wrap gap-2 items-center">
                     {children.map(child => (
-                      <div key={child.id} className="flex items-center gap-1.5 bg-white border border-[rgba(107,143,134,.22)] rounded-full px-3 py-1.5">
-                        <span className="text-[12px]">{child.type === 'baby' ? '👶' : '🧒'}</span>
+                      <div key={child.id} className="flex items-center gap-2 rounded-full border border-line-chip bg-white px-3 py-1.5">
+                        <span className="text-small">{child.type === 'baby' ? '👶' : '🧒'}</span>
                         <select
                           value={child.age}
                           title="age"
                           onChange={e => setChildren(prev => prev.map(c => c.id === child.id ? { ...c, age: e.target.value } : c))}
-                          className="font-sans text-[11px] text-[#0F3A33] border-none bg-transparent cursor-pointer outline-none appearance-none"
+                          className="cursor-pointer appearance-none border-none bg-transparent font-sans text-small text-pine outline-none"
                         >
                           {(child.type === 'baby' ? BABY_AGES : KID_AGES).map(age => (
                             <option key={age}>{age}</option>
@@ -601,30 +579,30 @@ function submit(e: React.FormEvent) {
                         <button
                           type="button"
                           onClick={() => setChildren(prev => prev.filter(c => c.id !== child.id))}
-                          className="text-[#BDBDBD] hover:text-[#4A4A4A] text-[13px] leading-none transition-colors"
+                          className="text-body leading-none text-label transition-colors hover:text-pine"
                         >×</button>
                       </div>
                     ))}
-                    <button
-                      type="button"
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => {
                         setChildren(prev => [...prev, { id: nextKidId, type: 'baby', age: '0-11 m' }])
                         setNextKidId(n => n + 1)
                       }}
-                      className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[#E4EFEC] transition-all"
                     >
                       {t('addBaby')}
-                    </button>
-                    <button
-                      type="button"
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
                       onClick={() => {
                         setChildren(prev => [...prev, { id: nextKidId, type: 'kid', age: '3 anos' }])
                         setNextKidId(n => n + 1)
                       }}
-                      className="font-mono text-[10px] text-[#0F3A33] border border-dashed border-[rgba(15,58,51,.25)] rounded-full px-3 py-1.5 hover:border-[#0F3A33] hover:bg-[#E4EFEC] transition-all"
                     >
                       {t('addChild')}
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </div>
@@ -633,82 +611,57 @@ function submit(e: React.FormEvent) {
             {/* Friends expanded */}
             {traveler === 'amigos' && (
               <div className="mt-3">
-                <div className="flex items-center gap-3 bg-white border border-[rgba(107,143,134,.22)] rounded-[10px] px-3 py-2.5">
-                  <span className="font-sans text-[12px] font-semibold text-[#0F3A33] flex-1">
-                    {t('groupCount')}
-                  </span>
-                  <div className="flex">
-                    <button type="button" onClick={() => setGroupCount(n => Math.max(2, n - 1))} className={`${stepButton} rounded-l-[4px]`}>−</button>
-                    <div className="w-9 h-8 border-y border-[rgba(107,143,134,.28)] bg-white flex items-center justify-center font-mono text-[12px] text-[#0F3A33]">{groupCount}</div>
-                    <button type="button" onClick={() => setGroupCount(n => Math.min(30, n + 1))} className={`${stepButton} rounded-r-[4px]`}>+</button>
-                  </div>
-                </div>
+                <Stepper
+                  label={t('groupCount')}
+                  value={groupCount}
+                  onMinus={() => setGroupCount(n => Math.max(2, n - 1))}
+                  onPlus={() => setGroupCount(n => Math.min(30, n + 1))}
+                />
               </div>
             )}
           </div>
 
           {/* ── 4. Interests + Pace ──────────────────────────────── */}
           <div className={sectionDivider}>
-            <label className={sectionLabel}>{t('interests')}</label>
-            <div className="flex flex-wrap gap-1.5 mb-2.5">
+            <label className={LABEL}>{t('interests')}</label>
+            <div className="flex flex-wrap gap-2 mb-3">
               {INTERESTS.map(item => (
-                <button
+                <Chip
                   key={item}
-                  type="button"
+                  label={interestLabel[item] ?? item}
+                  selected={interests.includes(item)}
                   onClick={() =>
                     setInterests(prev =>
                       prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
                     )
                   }
-                  className={[
-                    chipBase,
-                    interests.includes(item)
-                      ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.2)] text-[#0F3A33]'
-                      : 'bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)]',
-                  ].join(' ')}
-                >
-                  {interestLabel[item] ?? item}
-                </button>
+                />
               ))}
             </div>
 
-            <div className="relative">
-              <span className="absolute left-3 top-[11px] text-[10px] text-[#C8D9D3] pointer-events-none">✏</span>
-              <textarea
-                rows={2}
-                value={extra}
-                onChange={e => setExtra(e.target.value)}
-                placeholder={t('interestsPlaceholder')}
-                className="w-full font-sans text-[12px] border border-[rgba(107,143,134,.22)] bg-white pl-8 pr-3 py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] resize-none focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors leading-relaxed"
-              />
-            </div>
+            <Textarea
+              label={t('interests')}
+              hideLabel
+              rows={2}
+              value={extra}
+              onChange={e => setExtra(e.target.value)}
+              placeholder={t('interestsPlaceholder')}
+            />
           </div>
 
           {/* Pace */}
           <div className="mb-4">
-            <label className={sectionLabel}>
+            <label className={LABEL}>
               {t('pace')}<Req />
             </label>
-            <div className="flex gap-1.5 max-[560px]:flex-col">
+            <div className="flex flex-wrap gap-2">
               {([
-  ['Relajado', t('paceRelax')],
-  ['Equilibrado', t('paceBalance')],
-  ['Activo', t('paceActive')],
-] as [string, string][]).map(([id, label]) => (
-  <button
-    key={id}
-    type="button"
-    onClick={() => setPace(id)}
-    className={[
-      'flex-1 min-h-[44px] font-sans text-[13px] font-normal text-center py-2.5 px-4 border rounded-[10px] transition-all',
-      pace === id
-        ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.24)] text-[#0F3A33]'
-        : 'bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)] hover:bg-[#FAF8F4]',
-    ].join(' ')}
-  >
-    {label}
-  </button>
-))}
+                ['Relajado', t('paceRelax')],
+                ['Equilibrado', t('paceBalance')],
+                ['Activo', t('paceActive')],
+              ] as [string, string][]).map(([id, label]) => (
+                <Chip key={id} label={label} selected={pace === id} onClick={() => setPace(id)} />
+              ))}
             </div>
             {submitted && !pace && (
               <FieldError msg={t('errorPace')} />
@@ -722,128 +675,92 @@ function submit(e: React.FormEvent) {
               'medium' is pre-selected so users who skip get a sensible
               analysis instead of nothing. Same visual chrome as Pace. */}
           <div className="mb-4">
-            <label className={sectionLabel}>
+            <label className={LABEL}>
               {isES ? '¿Cuánto caminas en un día típico de turismo?' : 'How much do you walk on a typical sightseeing day?'}
             </label>
-            <div className="flex gap-1.5 max-[560px]:flex-col">
+            <div className="flex flex-wrap gap-2">
               {([
                 ['low',    isES ? 'Poco · menos de 30 min'  : 'Light · under 30 min'  ],
                 ['medium', isES ? 'Moderado · 30 – 60 min'  : 'Moderate · 30 – 60 min'],
                 ['high',   isES ? 'Mucho · más de 60 min'   : 'A lot · over 60 min'   ],
               ] as ['low' | 'medium' | 'high', string][]).map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => setWalkingTolerance(id)}
-                  className={[
-                    'flex-1 min-h-[44px] font-sans text-[13px] font-normal text-center py-2.5 px-4 border rounded-[10px] transition-all',
-                    walkingTolerance === id
-                      ? 'bg-[#E4EFEC] border-[rgba(15,58,51,.24)] text-[#0F3A33]'
-                      : 'bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)] hover:bg-[#FAF8F4]',
-                  ].join(' ')}
-                >
-                  {label}
-                </button>
+                <Chip key={id} label={label} selected={walkingTolerance === id} onClick={() => setWalkingTolerance(id)} />
               ))}
             </div>
           </div>
 
           {/* ── 5. Budget ────────────────────────────────────────── */}
-          <div className="border-t border-[#EDE9E4] pt-4 mb-1">
-            <label htmlFor="budget" className={sectionLabel}>
+          <div className="border-t border-line-soft pt-4">
+            <label htmlFor="budget" className={LABEL}>
               {t('budget')}
             </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 font-mono text-[13px] text-[#6B8F86] pointer-events-none">$</span>
-              <input
+            <div className="flex items-center gap-2 max-[560px]:flex-wrap">
+              <Input
                 id="budget"
+                label={t('budget')}
+                hideLabel
+                className="min-w-0 flex-1"
                 type="text"
                 value={budget}
                 onChange={e => setBudget(e.target.value.replace(/[^0-9,]/g, ''))}
                 placeholder={t('budgetPlaceholder')}
-                className="w-full font-mono text-[13px] border border-[rgba(107,143,134,.22)] bg-white pl-6 pr-[88px] py-2.5 text-[#0F3A33] placeholder-[#BDBDBD] focus:outline-none focus:border-[#0F3A33] rounded-[8px] transition-colors"
               />
-              {/* Currency toggle — same visual language as the budget-table toggle */}
-              <div
-                className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-[2px] bg-[#EDE7E1] rounded-[4px] p-[2px]"
-                role="group"
-                aria-label="Currency"
-              >
+              {/* Currency toggle */}
+              <div className="flex gap-2" role="group" aria-label="Currency">
                 {(['MXN', 'USD'] as const).map(c => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setBudgetCurrency(c)}
-                    className={[
-                      'font-mono text-[9px] font-medium tracking-[.04em] px-[8px] py-[3px] rounded-[3px] border-none cursor-pointer transition-all',
-                      budgetCurrency === c
-                        ? 'bg-[#0F3A33] text-white'
-                        : 'bg-transparent text-[#7A7A76] hover:text-[#0F3A33]',
-                    ].join(' ')}
-                    aria-pressed={budgetCurrency === c}
-                  >
-                    {c}
-                  </button>
+                  <Chip key={c} label={c} selected={budgetCurrency === c} onClick={() => setBudgetCurrency(c)} />
                 ))}
               </div>
             </div>
           </div>
-        </div>
 
-        {/* ── Footer / CTA ──────────────────────────────────────── */}
-        <div className="bg-white border border-[#E5E5E5] border-t-0 rounded-[0_0_12px_12px] px-5 py-3 shadow-[0_4px_24px_rgba(15,58,51,.06)]">
-          {/* Social proof — moved here from the hero left column so it sits
-              directly above the CTA the visitor is about to click. Copy and
-              avatar dimensions match the previous placement exactly. */}
-          <div className="flex items-center gap-3" style={{ marginTop: 0, marginBottom: 16 }}>
-            <div className="flex">
-              {HERO_AVATARS.map((r) => (
-                <div
-                  key={r.name}
-                  className="w-[30px] h-[30px] rounded-full border-[2.5px] overflow-hidden -mr-[9px] bg-[#C0D5CE] flex-shrink-0"
-                  style={{ borderColor: '#EDE7E1' }}
-                >
-                  <Image
-                    src={r.img}
-                    alt={r.name}
-                    width={30}
-                    height={30}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-              ))}
+          {/* ── Footer / CTA ──────────────────────────────────────── */}
+          <div className="mt-6 border-t border-line-soft pt-5">
+            {/* Social proof — sits directly above the CTA the visitor is about to click. */}
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex">
+                {HERO_AVATARS.map((r) => (
+                  <div
+                    key={r.name}
+                    className="-mr-[9px] h-[30px] w-[30px] flex-shrink-0 overflow-hidden rounded-full border-2 border-sand bg-mint"
+                  >
+                    <Image
+                      src={r.img}
+                      alt={r.name}
+                      width={30}
+                      height={30}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ))}
+              </div>
+              <p className="m-0 ml-3 font-sans text-tiny text-ink-2">
+                <strong className="font-semibold text-pine">
+                  {locale === 'es' ? '+400 itinerarios creados' : '+400 itineraries created'}
+                </strong>{' '}
+                {locale === 'es' ? 'este mes' : 'this month'}
+                <br />
+                {locale === 'es'
+                  ? 'parejas, familias y fans del Mundial'
+                  : 'couples, families, and World Cup fans'}
+              </p>
             </div>
-            <p className="font-sans text-[11px] text-[#3E5F58] tracking-[.2px] ml-3 leading-[1.55]">
-              <strong className="text-[#0F3A33] font-semibold">
-                {locale === 'es' ? '+400 itinerarios creados' : '+400 itineraries created'}
-              </strong>{' '}
-              {locale === 'es' ? 'este mes' : 'this month'}
-              <br />
-              {locale === 'es'
-                ? 'parejas, familias y fans del Mundial'
-                : 'couples, families, and World Cup fans'}
+            <Button type="submit" fullWidth disabled={generating}>
+              {generating ? (
+                <>
+                  <span className="inline-block size-3 animate-spin rounded-full border-2 border-cream/40 border-t-cream" />
+                  {locale === 'es' ? 'Generando...' : 'Generating...'}
+                </>
+              ) : (
+                t('submit')
+              )}
+            </Button>
+
+            <p className="m-0 mt-3 text-center font-sans text-tiny text-label">
+              {t('freeNote', { count: FREE_TRIPS_LIMIT })}
             </p>
           </div>
-          <button
-            type="submit"
-            disabled={generating}
-            className="w-full flex items-center justify-center gap-2 font-sans text-[12px] font-semibold tracking-[1.5px] bg-[#0F3A33] text-white py-3.5 rounded-[8px] hover:bg-[#1a4a42] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {generating ? (
-              <>
-                <span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin inline-block" />
-                {locale === 'es' ? 'Generando...' : 'Generating...'}
-              </>
-            ) : (
-              t('submit')
-            )}
-          </button>
-
-          <p className="font-sans text-[10px] text-[#6B8F86] text-center mt-2.5 tracking-[.3px]">
-            {t('freeNote', { count: FREE_TRIPS_LIMIT })}
-          </p>
-        </div>
-
+        </InfoCard>
       </form>
     </div>
   )

@@ -27,7 +27,8 @@ test('PageTitle, H2 and eyebrow have the same computed style as /guias', async (
   const read = () => page.evaluate(() => {
     const cs = (e: Element) => { const s = getComputedStyle(e); return { fontSize: s.fontSize, fontWeight: s.fontWeight, letterSpacing: s.letterSpacing, lineHeight: s.lineHeight, color: s.color } }
     const h1 = document.querySelector('h1')!
-    const h2 = [...document.querySelectorAll('h2')].find(e => (e as HTMLElement).offsetHeight > 0)!
+    // the section H2 (not a card title: the featured card's title is an h2 too)
+    const h2 = [...document.querySelectorAll('h2')].find(e => (e as HTMLElement).offsetHeight > 0 && !e.closest('[data-card="destination"]'))!
     return { h1: cs(h1), h2: cs(h2) }
   })
   await page.setViewportSize({ width: 1440, height: 900 })

@@ -56,6 +56,21 @@ Not applied yet, because snapping them changes how existing pages look. Apply pa
 | Chips 24–50px | `Chip` 44px | Home interest chips grow |
 | Mobile filters: /guias "+ Más", hub and hotels sideways rows | `FilterPanel` (sheet) | New mobile pattern |
 
-## Not migrated in this change
+## Migrated pages
 
-No existing page was changed. `components/catalog/*` (hub, hotels) and `components/guides/GuidesClient.tsx` keep their own markup until each is moved onto `components/design`.
+Home, `/guias` and the guide pages (`/es/guias/<slug>`, V2 guides) are built only from these tokens and components (before/after: `docs/design/migration-2026-11-21/index.html`). `tests/design-migration.test.ts` fails if any of those files gets a hex or rgb literal, a one-off font family, a legacy `btn-solid` / `btn-outline` / `sec-label` class, or loses its print hooks.
+
+Additions to the foundation that the migration needed:
+
+| Component | Addition |
+|---|---|
+| `Button` | `as` (render the locale-aware `Link`), `variant="inverse"` (cream fill for pine bands) |
+| `InfoCard` | `tone` (`white` / `sand` / `mint` / `pine`), `size="flush"` (the caller pads: accordions, row lists), forwards `id`, `role`, `data-*`; a card without title/eyebrow renders its children unwrapped |
+| `Input` | `Textarea` (same field rules, radius 16) |
+| `Eyebrow`, `CardTitle`, `Tag`, `SectionTitle` | forward `id` / `data-*` (print stylesheet hooks); `SectionTitle` takes `eyebrowProps` / `titleProps` |
+
+PDF export: the print stylesheet is its own editorial theme and still keys off `data-guide`, `data-hero`, `data-section`, `data-day`… and the nesting of the right-column modules. The migrated components keep those hooks; three print rules were added (the cover's `<header>` is not site chrome, the cover keeps full width, `InfoCard` radii are flattened like the old `rounded-2xl`).
+
+## Not migrated yet
+
+Everything else keeps its own markup until it moves onto `components/design`: `components/catalog/*` (hub, hotels), planner, trip pages, `/guia/<partner>` (guest guide, per-partner theme), the legacy `GuidePageClient` (no guide reaches it: 0 legacy-only slugs), and the print CSS palette.

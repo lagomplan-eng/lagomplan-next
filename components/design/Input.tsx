@@ -5,7 +5,7 @@
  * Input: single-line text field, 48px pill, visible label, hint and error.
  * SearchInput: the 56px search field (icon, clear button), as on /guias.
  */
-import { useId, type InputHTMLAttributes, type ReactNode } from 'react'
+import { useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react'
 import { cx } from './cx'
 
 const FIELD =
@@ -34,6 +34,35 @@ export function Input({ label, hint, error, hideLabel, id, className, ...rest }:
         aria-invalid={error ? true : undefined}
         aria-describedby={[errorId, hintId].filter(Boolean).join(' ') || undefined}
         className={cx(FIELD, 'h-control px-5', error ? 'border-error' : 'border-line-chip hover:border-pine/60')}
+      />
+      {hint && !error && <p id={hintId} className="m-0 font-sans text-tiny text-label">{hint}</p>}
+      {error && <p id={errorId} role="alert" className="m-0 font-sans text-tiny font-semibold text-error">{error}</p>}
+    </div>
+  )
+}
+
+interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
+  label: string
+  hint?: ReactNode
+  error?: ReactNode
+  hideLabel?: boolean
+}
+
+/** Multi-line sibling of Input (same border, focus ring and label rules; radius 16 instead of a pill). */
+export function Textarea({ label, hint, error, hideLabel, id, className, ...rest }: TextareaProps) {
+  const auto = useId()
+  const inputId = id ?? auto
+  const hintId = hint ? `${inputId}-hint` : undefined
+  const errorId = error ? `${inputId}-error` : undefined
+  return (
+    <div className={cx('flex flex-col gap-2', className)}>
+      <label htmlFor={inputId} className={cx('font-sans text-small font-semibold text-pine', hideLabel && 'sr-only')}>{label}</label>
+      <textarea
+        {...rest}
+        id={inputId}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={[errorId, hintId].filter(Boolean).join(' ') || undefined}
+        className={cx(FIELD.replace('rounded-full', 'rounded-info'), 'resize-none px-5 py-3', error ? 'border-error' : 'border-line-chip hover:border-pine/60')}
       />
       {hint && !error && <p id={hintId} className="m-0 font-sans text-tiny text-label">{hint}</p>}
       {error && <p id={errorId} role="alert" className="m-0 font-sans text-tiny font-semibold text-error">{error}</p>}

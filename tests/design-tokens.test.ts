@@ -69,9 +69,9 @@ ok('H2 = /guias H2: 36px, 800, -0.02em, line-height 1.05', decl('fs-h2') === '36
 ok('H3 = /guias H3: 24px, 800, -0.02em, line-height 1.12', decl('fs-h3') === '24px' && decl('fw-h3') === '800' && decl('ls-h3') === '-0.02em' && decl('lh-h3') === '1.12')
 ok('eyebrow = /guias .sec-label metrics: 11px, 500, 0.12em, line-height 1.55 (colour is the darker sage-text for contrast)', decl('lh-eyebrow') === '1.55' && decl('fs-eyebrow') === '11px' && decl('fw-eyebrow') === '500' && decl('ls-eyebrow') === '0.12em')
 ok('Tailwind exposes title, h2, h3, eyebrow, lede, body, small, tiny type styles', ['title', 'h2', 'h3', 'eyebrow', 'lede', 'body', 'small', 'tiny'].every(n => new RegExp(`\\b${n}:\\s*\\['var\\(--fs-${n}\\)'`).test(tw)))
-ok('/guias title and H2 use the same values today (guards the source of the numbers)', (() => {
+ok('/guias takes its title and H2 from the shared PageTitle / SectionTitle (no inline type values)', (() => {
   const g = fs.readFileSync(path.join(root, 'components/guides/GuidesClient.tsx'), 'utf-8')
-  return g.includes("fontSize: 'clamp(44px, 7vw, 72px)'") && g.includes("letterSpacing: '-0.04em'") && g.includes("lineHeight: 0.92") && /fontSize: '36px', lineHeight: 1\.05, letterSpacing: '-0\.02em', fontWeight: 800/.test(g)
+  return /PageTitle/.test(g) && /SectionTitle/.test(g) && !/clamp\(44px/.test(g) && !/fontSize:/.test(g)
 })())
 
 // ── decisions ────────────────────────────────────────────────────────────────────

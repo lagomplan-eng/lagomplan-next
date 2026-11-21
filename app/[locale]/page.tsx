@@ -12,6 +12,7 @@ import HeroForm from '../../components/forms/HeroForm'
 import NewsletterForm from '../../components/forms/NewsletterForm'
 import GuidesPreview from '../../components/GuidesPreview'
 import ExamplesCta from '../../components/examples/ExamplesCta'
+import { Button, CardTitle, InfoCard, PageTitle, SectionTitle } from '../../components/design'
 import { BookOpen, ListChecks, Sparkles, Focus } from 'lucide-react'
 
 // ── Metadata ───────────────────────────────────────────────
@@ -106,10 +107,7 @@ const FEATURE_LABELS: Record<
 }
 
 const FeatureIcon = ({ children }: { children: React.ReactNode }) => (
-  <div
-    className="w-12 h-12 rounded-[14px] flex items-center justify-center"
-    style={{ backgroundColor: '#0F3A33' }}
-  >
+  <div className="mb-4 flex size-12 items-center justify-center rounded-info bg-pine">
     {children}
   </div>
 )
@@ -126,27 +124,20 @@ export default async function HomePage({
   return (
     <main>
       {/* ① HERO — pt-[100px] because Nav is fixed */}
-      <section className="pt-[100px]" style={{ background: '#fff9f3' }}>
+      <section className="bg-cream pt-[100px]">
         <div className="page-inner">
           <div className="grid md:grid-cols-2 gap-14 items-start py-[72px] max-[768px]:grid-cols-1 max-[768px]:py-10 max-[768px]:gap-10">
-            <div>
-              <span className="sec-label">
-                {isES
-                  ? 'Planificador de viajes'
-                  : 'Trip planner'}
-              </span>
-              <h1 className="font-sans text-[60px] max-[768px]:text-[40px] font-bold text-[#0F3A33] leading-[1.05] tracking-[-1.5px] mb-5 [text-wrap:balance]">
-                {isES
-                  ? 'Viaja bien. Planea menos.'
-                  : 'Travel well. Plan less.'}
-              </h1>
-              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.75] mb-7 max-w-[360px] max-[768px]:max-w-full [text-wrap:balance]">
-                {isES
-                  ? 'Describe tu viaje: destino, días, quién va y en 60 segundos tienes el itinerario día por día, dónde quedarte y todo lo que falta reservar. Con lugares que no están en la lista de siempre.'
-                  : "Describe your trip: destination, days, who's going, and in 60 seconds you get the day-by-day itinerary, where to stay, and everything left to book. With places that aren't on the usual list."}
-              </p>
-              <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
-            </div>
+            <PageTitle
+              eyebrow={isES ? 'Planificador de viajes' : 'Trip planner'}
+              title={isES ? 'Viaja bien. Planea menos.' : 'Travel well. Plan less.'}
+              lede={isES
+                ? 'Describe tu viaje: destino, días, quién va y en 60 segundos tienes el itinerario día por día, dónde quedarte y todo lo que falta reservar. Con lugares que no están en la lista de siempre.'
+                : "Describe your trip: destination, days, who's going, and in 60 seconds you get the day-by-day itinerary, where to stay, and everything left to book. With places that aren't on the usual list."}
+            >
+              <div className="mt-7">
+                <ExamplesCta label={isES ? 'Mira un plan completo →' : 'See a full plan →'} />
+              </div>
+            </PageTitle>
 
             <HeroForm locale={locale} />
           </div>
@@ -154,64 +145,32 @@ export default async function HomePage({
       </section>
 
       {/* ② FEATURES */}
-      <section
-        className="py-24 max-[768px]:py-16"
-        style={{
-          background: '#FFFFFF',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
+      <section className="border-t border-line-soft bg-white py-24 max-[768px]:py-16">
         <div className="page-inner">
-          <span className="sec-label">
-            {isES ? 'Cómo funciona' : 'How it works'}
-          </span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.15] mb-4 [text-wrap:balance]">
+          <SectionTitle
+            className="mb-14"
+            eyebrow={isES ? 'Cómo funciona' : 'How it works'}
+            lede={isES
+              ? 'Sin pestañas abiertas, sin hojas de cálculo, sin horas de investigación.'
+              : 'No open tabs, no spreadsheets, no hours of research.'}
+          >
             {isES
               ? 'Del destino al itinerario en 60 segundos.'
               : 'From destination to itinerary in 60 seconds.'}
-          </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[520px] mb-14 [text-wrap:balance]">
-            {isES
-              ? 'Sin pestañas abiertas, sin hojas de cálculo, sin horas de investigación.'
-              : 'No open tabs, no spreadsheets, no hours of research.'}
-          </p>
+          </SectionTitle>
 
           <div className="grid grid-cols-4 max-[768px]:grid-cols-2 gap-6 max-[768px]:gap-6">
             {FEATURES.map((f) => {
               const labels = FEATURE_LABELS[f.key]
+              const Icon = { curated: BookOpen, itineraries: ListChecks, personalized: Sparkles, clarity: Focus }[f.key]!
 
               return (
-                <div key={f.key} className="flex flex-col items-start">
-                  <div className="mb-5">
-                    {f.key === 'curated' && (
-                      <FeatureIcon>
-                        <BookOpen size={22} color="white" />
-                      </FeatureIcon>
-                    )}
-                    {f.key === 'itineraries' && (
-                      <FeatureIcon>
-                        <ListChecks size={22} color="white" />
-                      </FeatureIcon>
-                    )}
-                    {f.key === 'personalized' && (
-                      <FeatureIcon>
-                        <Sparkles size={22} color="white" />
-                      </FeatureIcon>
-                    )}
-                    {f.key === 'clarity' && (
-                      <FeatureIcon>
-                        <Focus size={22} color="white" />
-                      </FeatureIcon>
-                    )}
-                  </div>
-
-                  <p className="font-sans text-[15px] font-semibold text-[#0F3A33] mt-1 mb-2">
-                    {isES ? labels.title_es : labels.title_en}
-                  </p>
-                  <p className="font-sans text-[13px] text-[#6B8F86] leading-[1.7] max-w-[240px] min-h-[72px] [text-wrap:pretty]">
-                    {isES ? labels.body_es : labels.body_en}
-                  </p>
-                </div>
+                <InfoCard key={f.key} title={isES ? labels.title_es : labels.title_en} className="h-full">
+                  <FeatureIcon>
+                    <Icon size={22} color="white" />
+                  </FeatureIcon>
+                  {isES ? labels.body_es : labels.body_en}
+                </InfoCard>
               )
             })}
           </div>
@@ -219,40 +178,34 @@ export default async function HomePage({
       </section>
 
       {/* ③ PHILOSOPHY */}
-      <section
-        className="py-24 max-[768px]:py-16"
-        style={{
-          background: '#FFF9F3',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
+      <section className="border-t border-line-soft bg-cream py-24 max-[768px]:py-16">
         <div className="page-inner">
           <div className="grid md:grid-cols-2 gap-20 items-center max-[768px]:grid-cols-1 max-[768px]:gap-9">
             <div>
-              <h2 className="font-sans text-[42px] max-[768px]:text-[32px] font-bold text-[#0F3A33] leading-[1.12] mb-6 [text-wrap:balance]">
+              <SectionTitle className="mb-6">
                 {isES ? 'Ni demasiado, ni muy poco.' : 'Not too much, not too little.'}
-              </h2>
-              <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-4 [text-wrap:pretty]">
+              </SectionTitle>
+              <p className="m-0 mb-4 text-body text-pine">
                 {isES
                   ? 'Planificar un viaje no debería tomar más tiempo que el viaje mismo. Creemos que el mejor plan es el que llega justo: suficiente estructura para no perderse nada, suficiente espacio para dejarse sorprender.'
                   : "Planning a trip shouldn't take longer than the trip itself. We believe the best plan is one that lands just right: enough structure to miss nothing, enough room to be surprised."}
               </p>
-              <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.8] [text-wrap:pretty]">
+              <p className="m-0 text-body text-ink-2">
                 {isES
                   ? 'El nombre viene del sueco: '
                   : 'The name comes from Swedish: '}
-                <strong className="text-[#0F3A33] font-semibold">lagom</strong>
+                <strong className="font-semibold text-pine">lagom</strong>
                 {isES
                   ? '. Ni mucho, ni poco: lo justo. Eso es lo que hacemos con cada viaje: encontrar el punto exacto entre explorar todo y no agotarse en el intento.'
                   : ". Not too much, not too little: just right. That's what we do with every trip: find the exact point between seeing everything and burning out trying."}
               </p>
               <div className="flex gap-3.5 mt-8 flex-wrap">
-                <Link href="/guides" className="btn-solid">
+                <Button as={Link} href="/guides">
                   {isES ? 'Explorar destinos' : 'Explore destinations'}
-                </Link>
-                <a href="#nosotras" className="btn-outline">
-  {isES ? 'Quiénes somos' : 'About us'}
-</a>
+                </Button>
+                <Button href="#nosotras" variant="secondary">
+                  {isES ? 'Quiénes somos' : 'About us'}
+                </Button>
               </div>
             </div>
 
@@ -263,7 +216,7 @@ export default async function HomePage({
                   alt={isES ? 'Teotihuacán, México' : 'Teotihuacan, Mexico'}
                   width={580}
                   height={725}
-                  className="w-full object-cover rounded-[12px] max-[768px]:aspect-[3/2]"
+                  className="w-full rounded-info object-cover max-[768px]:aspect-[3/2]"
                 />
               </div>
             </div>
@@ -275,20 +228,13 @@ export default async function HomePage({
       <GuidesPreview locale={locale} />
 
       {/* ⑤ NOSOTRAS */}
-      <section
-        id="nosotras"
-        className="py-24 max-[768px]:py-16"
-        style={{
-          background: '#FFF9F3',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
+      <section id="nosotras" className="border-t border-line-soft bg-cream py-24 max-[768px]:py-16">
         <div className="page-inner">
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-14 max-[768px]:mb-9 [text-wrap:balance]">
+          <SectionTitle className="mb-14 max-[768px]:mb-9">
             {isES ? 'Quiénes somos' : 'Who we are'}
-          </h2>
+          </SectionTitle>
 
-          <div className="grid md:grid-cols-2 gap-14 max-[768px]:grid-cols-1 max-[768px]:gap-10">
+          <div className="grid md:grid-cols-2 gap-6 max-[768px]:grid-cols-1">
             {[
               {
                 name: 'Elena',
@@ -307,62 +253,46 @@ export default async function HomePage({
                   'After living in 10 countries and exploring more than 90, Pilar learned that the perfect trip is not the one that covers the most ground, but the one that feels most balanced. With a career as an editor at Travel + Leisure México and contributor to various international media, she has devoted her work to understanding what makes a destination truly memorable. At LagomPlan, she uses that editorial eye to filter out the noise and design plans where style, culture, and logistics live in harmony.',
               },
             ].map((f) => (
-              <div
-                key={f.name}
-                className="flex items-start gap-6 max-[480px]:flex-col max-[480px]:items-center"
-              >
-                <div className="relative w-[96px] h-[96px] min-w-[96px] rounded-full overflow-hidden bg-[#EDE7E1] border border-[#EDE7E1]">
-                  <Image
-                    src={f.img}
-                    alt={f.name}
-                    fill
-                    className="object-cover"
-                  />
-                </div>
+              <InfoCard key={f.name}>
+                <div className="flex items-start gap-6 max-[480px]:flex-col max-[480px]:items-center">
+                  <div className="relative size-24 min-w-24 overflow-hidden rounded-full bg-sand">
+                    <Image
+                      src={f.img}
+                      alt={f.name}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
 
-                <div>
-                  <p className="font-sans text-[18px] font-semibold text-[#0F3A33] mb-3">
-                    {f.name}
-                  </p>
-                  <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] [text-wrap:pretty]">
-                    {isES ? f.bio_es : f.bio_en}
-                  </p>
+                  <div>
+                    <CardTitle className="mb-3">{f.name}</CardTitle>
+                    <p className="m-0 text-body text-pine [text-wrap:pretty]">
+                      {isES ? f.bio_es : f.bio_en}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </InfoCard>
             ))}
           </div>
         </div>
       </section>
 
       {/* ⑥ REVIEWS */}
-      <section
-        className="py-24 max-[768px]:py-16 relative"
-        style={{
-          background: '#FFFFFF',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
+      <section className="relative border-t border-line-soft bg-white py-24 max-[768px]:py-16">
         <div className="page-inner relative z-10">
-          <span className="sec-label">{isES ? 'Reseñas' : 'Reviews'}</span>
-          <h2 className="font-sans text-[40px] max-[768px]:text-[30px] font-bold text-[#0F3A33] leading-[1.1] mb-3 max-[768px]:mb-3 [text-wrap:balance]">
-            {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
-          </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] mb-12 max-[768px]:mb-8 [text-wrap:balance]">
-            {isES
+          <SectionTitle
+            className="mb-12 max-[768px]:mb-8"
+            eyebrow={isES ? 'Reseñas' : 'Reviews'}
+            lede={isES
               ? 'Más de 400 planes creados. Esto es lo que nos cuentan.'
               : "Over 400 plans created. Here's what people tell us."}
-          </p>
+          >
+            {isES ? 'Lo que dicen los viajeros' : 'What travelers say'}
+          </SectionTitle>
           <div className="grid grid-cols-3 gap-6 max-[768px]:grid-cols-1 max-[1024px]:grid-cols-2">
             {REVIEWS.map((r) => (
-              <div
-                key={r.name}
-                className="rounded-[12px] p-9 max-[768px]:p-7"
-                style={{
-                  background: '#FFF9F3',
-                  border: '1px solid rgba(200,191,181,.22)',
-                }}
-              >
-                <p className="font-sans text-[15px] text-[#0F3A33] leading-[1.8] mb-6 [text-wrap:pretty]">
+              <InfoCard key={r.name} tone="sand" className="h-full">
+                <p className="m-0 mb-6 text-body text-pine [text-wrap:pretty]">
                   &ldquo;{isES ? r.quote_es : r.quote_en}&rdquo;
                 </p>
                 <div className="flex items-center gap-3">
@@ -375,44 +305,31 @@ export default async function HomePage({
                       className="w-full h-full object-cover"
                     />
                   </div>
-                  <div>
-                    <p className="font-sans text-[13px] font-semibold text-[#0F3A33]">
-                      {r.name}
-                    </p>
-                  </div>
+                  <p className="m-0 text-small font-semibold text-pine">{r.name}</p>
                 </div>
-              </div>
+              </InfoCard>
             ))}
           </div>
         </div>
       </section>
 
       {/* ⑦ CTA */}
-      <section
-        className="py-24 max-[768px]:py-16 text-center"
-        style={{
-          background: '#FFF9F3',
-          borderTop: '1px solid rgba(200,191,181,.3)',
-        }}
-      >
+      <section className="border-t border-line-soft bg-cream py-24 text-center max-[768px]:py-16">
         <div className="page-inner">
-          <h2 className="font-sans text-[50px] max-[768px]:text-[34px] font-bold text-[#0F3A33] leading-[1.08] mb-4 [text-wrap:balance]">
+          <SectionTitle
+            className="mb-10 items-center"
+            lede={isES
+              ? 'Gratis, sin tarjeta. Describe a dónde vas y la plataforma hace el resto.'
+              : "Free, no card needed. Describe where you're going and the platform does the rest."}
+          >
             {isES
               ? 'Tu próximo viaje puede estar listo en 60 segundos.'
               : 'Your next trip can be ready in 60 seconds.'}
-          </h2>
-          <p className="font-sans text-[15px] text-[#3E5F58] leading-[1.7] max-w-[420px] mx-auto mb-10 [text-wrap:balance]">
-            {isES
-              ? 'Gratis, sin tarjeta. Describe a dónde vas y la plataforma hace el resto.'
-              : "Free, no card needed. Describe where you're going and the platform does the rest."}
-          </p>
+          </SectionTitle>
           <div className="flex gap-3.5 justify-center flex-wrap max-[768px]:flex-col max-[768px]:items-center">
-            <Link
-              href="/planner"
-              className="btn-solid max-[768px]:w-full max-[768px]:text-center"
-            >
+            <Button as={Link} href="/planner" className="max-[768px]:w-full">
               {isES ? 'Planear mi viaje gratis →' : 'Plan my trip free →'}
-            </Link>
+            </Button>
             {/* Sample-itinerary link. Set NEXT_PUBLIC_SAMPLE_TRIP_ID in Vercel
                 to any saved trip's UUID to feature it here. Anonymous visitors
                 can view it read-only because GET /api/trips/[trip_id] has no
@@ -427,12 +344,9 @@ export default async function HomePage({
                 ? `${plannerPath}?trip_id=${encodeURIComponent(sampleTripId)}`
                 : plannerPath
               return (
-                <a
-                  href={sampleHref}
-                  className="btn-outline max-[768px]:w-full max-[768px]:text-center"
-                >
+                <Button href={sampleHref} variant="secondary" className="max-[768px]:w-full">
                   {isES ? 'Ver ejemplo de itinerario' : 'See a sample itinerary'}
-                </a>
+                </Button>
               )
             })()}
           </div>
@@ -440,28 +354,14 @@ export default async function HomePage({
       </section>
 
       {/* ⑧ NEWSLETTER */}
-      <div className="py-14 max-[768px]:py-10" style={{ background: '#0F3A33' }}>
+      <div className="bg-pine py-14 max-[768px]:py-10">
         <div className="page-inner grid grid-cols-[1.1fr_1fr] gap-10 items-center max-[900px]:grid-cols-1 max-[900px]:gap-6">
           <div>
-            <h3 className="font-sans text-[30px] max-[768px]:text-[24px] font-bold text-[#FFF9F3] leading-[1.2] mb-3 [text-wrap:balance]">
-              {isES ? (
-                <>
-                  Tu escapada,{' '}
-                  <span className="font-sans">
-                    lista en minutos
-                  </span>
-                </>
-              ) : (
-                <>
-                  Your getaway,{' '}
-                  <span className="font-sans">
-                    ready in minutes
-                  </span>
-                </>
-              )}
-            </h3>
+            <CardTitle className="mb-3 !text-cream">
+              {isES ? 'Tu escapada, lista en minutos' : 'Your getaway, ready in minutes'}
+            </CardTitle>
 
-            <p className="font-sans text-[15px] text-[rgba(255,249,243,0.78)] leading-[1.7] max-w-[520px] [text-wrap:balance]">
+            <p className="m-0 max-w-[520px] text-body text-cream/80">
               {isES
                 ? 'Recibe ideas de viaje curadas, nuevas guías y tips útiles para planear mejor.'
                 : 'Get curated travel ideas, new guides, and useful planning tips.'}

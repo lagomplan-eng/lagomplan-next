@@ -47,7 +47,7 @@ describe('SeasonalEdition, active (server HTML)', () => {
   test('events sit in their day, nothing is invented for empty days', () => {
     for (const t of ['Houston Rockets contra Phoenix Suns', 'Desfile de Thanksgiving H-E-B', 'Black Friday', 'El Cascanueces, Houston Ballet', 'Houston Texans contra Baltimore Ravens']) expect(h).toContain(t)
     const cols = h.split('<li class="snap-start').slice(1)
-    const eventBlocks = (c: string) => (c.match(/text-\[13px\]/g) ?? []).length
+    const eventBlocks = (c: string) => (c.match(/last:mb-0/g) ?? []).length
     expect(cols.map(eventBlocks)).toEqual([1, 2, 2, 0, 1, 0]) // days 04 and 06 have no event block
   })
   test('"TODA LA TEMPORADA" with the three season-long lines', () => {
@@ -63,11 +63,11 @@ describe('SeasonalEdition, active (server HTML)', () => {
     expect(h).toContain('Reserva con las fechas sugeridas:')
     expect((h.match(/checkin=2026-11-25&amp;checkout=2026-11-30/g) ?? []).length).toBe(3)
   })
-  test('brand rules: tokens only, radius ≤ 4px, no shadows, no pure black/white', () => {
+  test('design tokens only: no hex or rgb literals, no shadows, no pill/rounded-xl chrome, the info-card and sand/pine/ink tokens', () => {
     expect(h).not.toMatch(/box-shadow|shadow-/)
-    expect(h).not.toMatch(/#000(?![0-9a-f])|#fff(?![0-9a-f])|#ffffff|#000000/i)
+    expect(h).not.toMatch(/#[0-9a-f]{3,8}\b|rgba?\(/i)
     expect(h).not.toMatch(/rounded-(md|lg|xl|2xl|3xl|full)/)
-    for (const t of ['var(--pine)', '#F4F0E8', '#0F1A16', '#2D6B57', '#C8D9D3']) expect(h.toLowerCase()).toContain(t.toLowerCase())
+    for (const t of ['data-card="info"', 'bg-sand', 'text-pine', 'text-ink-3', 'border-line-strong']) expect(h).toContain(t)
   })
   test('English mirror', () => {
     const e = HTML.en

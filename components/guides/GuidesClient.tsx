@@ -1,7 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
-import Image from 'next/image'
+import {
+  Button, Chip, CardTitle, DestinationCard, Eyebrow, FilterPanel, InfoCard, PageTitle, SearchInput, SectionTitle,
+} from '../design'
+import type { FilterGroup } from '../design'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -49,150 +52,6 @@ const SECONDARY_FILTERS: FilterDef[] = [
 
 const SHOW_COLLECTIONS = false
 
-// ── FeaturedGuideCard ─────────────────────────────────────────────────────────
-
-function FeaturedGuideCard({ guide, isES }: { guide: GuideListing; isES: boolean }) {
-  return (
-    <a href={guide.url} className="block no-underline" style={{ color: 'var(--pine)' }}>
-      <article style={{
-        overflow: 'hidden',
-        border: '1px solid var(--line-strong)',
-        borderRadius: '30px',
-        background: '#FFFFFF',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-      }}>
-        {/* Image */}
-        <div style={{
-          position: 'relative',
-          height: '250px',
-          background: 'linear-gradient(160deg, #7ab0be 0%, #2f6c87 35%, #4ca29b 65%, #fffff 100%)',
-          overflow: 'hidden',
-        }}>
-          <Image
-            src={guide.cover_img}
-            alt={guide.title}
-            fill
-            className="object-cover"
-            sizes="(max-width: 1180px) 100vw, 500px"
-          />
-          {/* bottom gradient */}
-          <div style={{
-            position: 'absolute', inset: 0, zIndex: 1,
-            background: 'linear-gradient(to top, rgba(15,58,51,0.45), rgba(15,58,51,0.03) 55%)',
-          }} />
-          {/* Badge */}
-          <div style={{
-            position: 'absolute', top: '20px', right: '20px', zIndex: 2,
-            padding: '8px 12px', borderRadius: '999px',
-            background: 'rgba(255,255,255,0.14)', backdropFilter: 'blur(8px)',
-            color: 'white', fontSize: '10px', fontWeight: 700,
-            letterSpacing: '0.16em', textTransform: 'uppercase',
-          }}>
-            {isES ? 'Guía destacada' : 'Featured guide'}
-          </div>
-          {/* Overlay text */}
-          <div style={{ position: 'absolute', left: '24px', right: '24px', bottom: '24px', zIndex: 2, color: 'white' }}>
-            <div style={{
-              fontSize: '10px', textTransform: 'uppercase',
-              letterSpacing: '0.16em', color: 'rgba(255,255,255,0.74)', fontWeight: 700,
-            }}>
-              {guide.destination}
-            </div>
-            <div style={{
-              marginTop: '8px', fontSize: '38px', lineHeight: 0.98,
-              fontWeight: 800, maxWidth: '10ch',
-            }}>
-              {guide.title}
-            </div>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div style={{ padding: '20px 24px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          <p style={{ margin: 0, maxWidth: '34ch', fontSize: '13px', lineHeight: 1.7, color: 'rgba(15,58,51,0.68)' }}>
-            {guide.excerpt}
-          </p>
-          <span style={{
-            display: 'inline-flex', alignItems: 'center', gap: '10px',
-            width: 'fit-content', borderRadius: '999px',
-            background: 'var(--pine)', color: 'white',
-            padding: '14px 20px', fontSize: '14px', fontWeight: 700,
-          }}>
-            {isES ? 'Ver guía destacada' : 'Read featured guide'} →
-          </span>
-        </div>
-      </article>
-    </a>
-  )
-}
-
-// ── GuideCard ─────────────────────────────────────────────────────────────────
-
-function GuideCard({ guide }: { guide: GuideListing }) {
-  return (
-    <a href={guide.url} className="block no-underline group" style={{ color: 'var(--pine)', height: '100%' }}>
-      <article style={{
-        display: 'flex', flexDirection: 'column', height: '100%',
-        overflow: 'hidden', border: '1px solid var(--line-strong)',
-        borderRadius: '28px', background: '#FFFFFF',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        transition: 'transform .2s ease, box-shadow .2s ease',
-      }}
-        className="hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(15,58,51,0.06)]"
-      >
-        {/* Image */}
-        <div style={{
-          position: 'relative', width: '100%', height: '220px', flexShrink: 0,
-          background: 'linear-gradient(180deg, #acd0e8 0%, #bfd1bc 58%, #4c6659 100%)',
-          overflow: 'hidden',
-        }}>
-          <Image
-            src={guide.cover_img}
-            alt={guide.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-[1.02]"
-            sizes="(max-width: 640px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          />
-        </div>
-
-        {/* Body */}
-        <div style={{ display: 'flex', flex: 1, flexDirection: 'column', padding: '22px 24px 24px' }}>
-          <div style={{
-            fontSize: '10px', textTransform: 'uppercase',
-            letterSpacing: '0.16em', color: 'var(--sage)', fontWeight: 700,
-          }}>
-            {guide.destination}
-          </div>
-          <h3 style={{
-            margin: '10px 0 0', fontSize: '22px', lineHeight: 1.15,
-            letterSpacing: '-0.02em', fontWeight: 800,
-          }}>
-            {guide.title}
-          </h3>
-          <p style={{
-            margin: '12px 0 0', minHeight: '50px',
-            fontSize: '14px', lineHeight: 1.75, color: 'rgba(15,58,51,0.68)',
-          }}>
-            {guide.excerpt}
-          </p>
-          {/* Tags */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: 'auto', paddingTop: '20px' }}>
-            {guide.tags.map(tag => (
-              <span key={tag} style={{
-                padding: '6px 10px', border: '1px solid var(--line-strong)',
-                borderRadius: '999px', background: 'var(--sand)',
-                color: 'rgba(15,58,51,0.72)', fontSize: '11px', fontWeight: 500,
-              }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-      </article>
-    </a>
-  )
-}
-
 // ── CollectionsSection (hidden behind flag) ────────────────────────────────────
 
 function CollectionsSection({ isES }: { isES: boolean }) {
@@ -211,39 +70,17 @@ function CollectionsSection({ isES }: { isES: boolean }) {
       ]
 
   return (
-    <section style={{ padding: '52px 0 0' }}>
+    <section className="pt-section">
       <div className="page-inner">
-        <div style={{ marginBottom: '32px' }}>
-          <p className="sec-label">{isES ? 'Explora por estado de ánimo' : 'Explore by mood'}</p>
-          <h2 style={{ margin: 0, fontSize: '36px', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 800 }}>
-            {isES ? 'Colecciones para explorar mejor' : 'Collections that make browsing easier'}
-          </h2>
-        </div>
+        <SectionTitle className="mb-8" eyebrow={isES ? 'Explora por estado de ánimo' : 'Explore by mood'}>
+          {isES ? 'Colecciones para explorar mejor' : 'Collections that make browsing easier'}
+        </SectionTitle>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {collections.map(col => (
-            <article key={col.title} style={{
-              display: 'flex', flexDirection: 'column', height: '100%',
-              padding: '28px', border: '1px solid var(--line-strong)',
-              borderRadius: '28px', background: '#FFFFFF',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-            }}>
-              <p className="sec-label" style={{ margin: 0 }}>
-                {isES ? 'Colección' : 'Collection'}
-              </p>
-              <h3 style={{ margin: '12px 0 0', fontSize: '24px', lineHeight: 1.12, letterSpacing: '-0.02em', fontWeight: 800 }}>
-                {col.title}
-              </h3>
-              <p style={{ margin: '12px 0 0', fontSize: '14px', lineHeight: 1.9, color: 'rgba(15,58,51,0.68)' }}>
-                {col.desc}
-              </p>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: '8px',
-                marginTop: 'auto', paddingTop: '24px',
-                color: 'var(--fjord)', fontSize: '14px', fontWeight: 700,
-              }}>
-                {isES ? 'Explorar' : 'Explore'} →
-              </span>
-            </article>
+            <InfoCard key={col.title} eyebrow={isES ? 'Colección' : 'Collection'} title={col.title} className="h-full">
+              {col.desc}
+              <span className="mt-6 block font-bold text-fjord">{isES ? 'Explorar' : 'Explore'} →</span>
+            </InfoCard>
           ))}
         </div>
       </div>
@@ -258,82 +95,48 @@ function BridgeCTA({ isES }: { isES: boolean }) {
 
   const stats = [
     {
-      icon: '✦',
       title: isES ? '3 hoteles' : '3 hotels',
       body: isES ? 'Más cerca de tu estilo de viaje' : 'Closer to your travel style',
     },
     {
-      icon: '✦',
       title: isES ? '2 experiencias' : '2 experiences',
       body: isES ? 'Buena combinación para el destino' : 'Good fit for this destination',
     },
     {
-      icon: '✦',
       title: isES ? '1 smart find' : '1 smart find',
       body: isES ? 'Útil para este tipo de viaje' : 'Useful for this type of trip',
     },
   ]
 
   return (
-    <section style={{ padding: '56px 0 72px' }}>
+    <section className="pb-section pt-14">
       <div className="page-inner">
-        <div style={{
-          padding: '32px', border: '1px solid var(--line-strong)',
-          borderRadius: '32px', background: '#FFFFFF',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        }}>
+        <InfoCard>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
             {/* Left */}
             <div>
-              <p className="sec-label">Lagom pick</p>
-              <h3 style={{ margin: '12px 0 0', fontSize: '30px', lineHeight: 1.1, letterSpacing: '-0.02em', fontWeight: 800 }}>
-                {isES ? 'Convierte una guía en un plan real' : 'Turn a guide into a real plan'}
-              </h3>
-              <p style={{ margin: '12px 0 0', fontSize: '14px', lineHeight: 1.9, color: 'rgba(15,58,51,0.68)' }}>
+              <Eyebrow>Lagom pick</Eyebrow>
+              <CardTitle>{isES ? 'Convierte una guía en un plan real' : 'Turn a guide into a real plan'}</CardTitle>
+              <p className="m-0 mt-3 text-body text-ink-2">
                 {isES
                   ? 'Cuando un destino ya suena bien, LagomPlan te ayuda a convertirlo en hospedaje, experiencias y un itinerario limpio.'
                   : 'Once a destination feels right, LagomPlan helps you move naturally into stays, experiences, and a cleaner itinerary.'}
               </p>
-              <a
-                href={plannerHref}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '10px',
-                  marginTop: '24px', borderRadius: '999px', background: 'var(--pine)',
-                  color: 'white', padding: '14px 22px', fontSize: '14px', fontWeight: 700,
-                  textDecoration: 'none',
-                }}
-              >
-                {isES ? 'Planear con IA' : 'Plan with AI'} →
-              </a>
+              <Button href={plannerHref} className="mt-6" iconAfter="→">
+                {isES ? 'Planear con IA' : 'Plan with AI'}
+              </Button>
             </div>
 
             {/* Right: stats */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               {stats.map(stat => (
-                <div key={stat.title} style={{
-                  display: 'flex', flexDirection: 'column', height: '100%',
-                  padding: '20px', border: '1px solid var(--line-strong)',
-                  borderRadius: '22px', background: 'var(--sand)',
-                }}>
-                  <div style={{
-                    width: '40px', height: '40px', display: 'flex',
-                    alignItems: 'center', justifyContent: 'center',
-                    borderRadius: '16px', background: '#FFFFFF',
-                    color: 'var(--pine)', fontWeight: 700,
-                  }}>
-                    {stat.icon}
-                  </div>
-                  <div style={{ marginTop: '14px', fontSize: '16px', fontWeight: 800, letterSpacing: '-0.01em' }}>
-                    {stat.title}
-                  </div>
-                  <div style={{ marginTop: '8px', fontSize: '14px', lineHeight: 1.7, color: 'rgba(15,58,51,0.65)' }}>
-                    {stat.body}
-                  </div>
-                </div>
+                <InfoCard key={stat.title} tone="sand" size="sm" title={stat.title} headingLevel={4} className="h-full">
+                  {stat.body}
+                </InfoCard>
               ))}
             </div>
           </div>
-        </div>
+        </InfoCard>
       </div>
     </section>
   )
@@ -352,7 +155,6 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
 
   const [search, setSearch] = useState('')
   const [activeFilter, setActiveFilter] = useState<string | null>(null)
-  const [showSecondary, setShowSecondary] = useState(false)
 
   // Resolve the active FilterDef (if any)
   const activeFilterDef = useMemo(() => {
@@ -382,176 +184,131 @@ export default function GuidesClient({ guides, featured, locale }: Props) {
     })
   }, [guides, search, activeFilterDef, isES])
 
+  const labelOf = (f: FilterDef) => (isES ? f.labelES : f.labelEN)
+  const toggle = (id: string) => setActiveFilter(activeFilter === id ? null : id)
+  const chip = (f: FilterDef) => (
+    <Chip key={f.id} label={labelOf(f)} selected={activeFilter === f.id} onClick={() => toggle(f.id)} />
+  )
+
+  // One filter at a time (as before): "Todos" clears it. Primary and secondary filters are two labelled rows.
+  const groups: FilterGroup[] = [
+    {
+      id: 'type',
+      label: isES ? 'Tipo de viaje' : 'Trip type',
+      activeCount: PRIMARY_FILTERS.some(f => f.id === activeFilter) ? 1 : 0,
+      chips: [
+        <Chip key="all" label={isES ? 'Todos' : 'All'} selected={activeFilter === null} onClick={() => setActiveFilter(null)} />,
+        ...PRIMARY_FILTERS.map(chip),
+      ],
+    },
+    {
+      id: 'interest',
+      label: isES ? 'Intereses' : 'Interests',
+      activeCount: SECONDARY_FILTERS.some(f => f.id === activeFilter) ? 1 : 0,
+      chips: SECONDARY_FILTERS.map(chip),
+    },
+  ]
+  const activeFilters = activeFilterDef
+    ? [{
+        key: activeFilterDef.id,
+        label: labelOf(activeFilterDef),
+        removeLabel: `${isES ? 'Quitar' : 'Remove'} ${labelOf(activeFilterDef)}`,
+        onRemove: () => setActiveFilter(null),
+      }]
+    : []
+
+  const noun = (n: number) => (isES ? (n === 1 ? 'destino' : 'destinos') : (n === 1 ? 'destination' : 'destinations'))
+
   return (
-    <div className="bg-[#F7F4EF] min-h-screen">
+    <div className="bg-cream min-h-screen">
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section style={{ borderBottom: '1px solid var(--line-strong)', paddingTop: '68px', paddingBottom: '76px' }}>
+      <section className="border-b border-line-strong pb-20 pt-16">
         <div className="page-inner">
 
           {/* Two-column hero grid */}
           <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_480px] gap-14 items-center">
             {/* Left: copy */}
-            <div>
-              <p className="sec-label">{isES ? 'Guías de viaje' : 'Travel guides'}</p>
-              <h1 style={{
-                margin: 0, lineHeight: 0.92,
-                letterSpacing: '-0.04em', fontWeight: 800,
-                fontSize: 'clamp(44px, 7vw, 72px)',
-              }}>
-                {isES
-                  ? <>Destinos que<br /><span style={{ fontWeight: 800 }}>conocemos bien</span></>
-                  : <>Destinations we<br /><span style={{ fontWeight: 800 }}>know well</span></>}
-              </h1>
-              <p style={{ margin: '28px 0 0', maxWidth: '36ch', fontSize: '18px', lineHeight: 1.75, color: 'rgba(15,58,51,0.72)' }}>
-                {isES
-                  ? 'Guías editoriales con criterio real — sin listas genéricas ni ads disfrazados de contenido.'
-                  : 'Editorial guides with real taste — no generic lists, no filler, and no ads disguised as recommendations.'}
-              </p>
-            </div>
+            <PageTitle
+              eyebrow={isES ? 'Guías de viaje' : 'Travel guides'}
+              title={isES
+                ? <>Destinos que<br />conocemos bien</>
+                : <>Destinations we<br />know well</>}
+              lede={isES
+                ? 'Guías editoriales con criterio real — sin listas genéricas ni ads disfrazados de contenido.'
+                : 'Editorial guides with real taste — no generic lists, no filler, and no ads disguised as recommendations.'}
+            />
 
             {/* Right: featured card */}
             <div className="mt-10 lg:mt-0">
-              <FeaturedGuideCard guide={featured} isES={isES} />
+              <DestinationCard
+                featured
+                headingLevel={2}
+                href={featured.url}
+                image={{ src: featured.cover_img, alt: featured.title }}
+                badge={isES ? 'Guía destacada' : 'Featured guide'}
+                eyebrow={featured.destination}
+                title={featured.title}
+                excerpt={featured.excerpt}
+                cta={isES ? 'Ver guía destacada' : 'Read featured guide'}
+              />
             </div>
           </div>
 
-          {/* Filters bar */}
-          <div style={{
-            marginTop: '48px', padding: '20px',
-            border: '1px solid var(--line-strong)', borderRadius: '26px',
-            background: '#FFFFFF', boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          }}>
-            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-4 items-center">
-              {/* Search */}
-              <label style={{
-                display: 'flex', alignItems: 'center', gap: '12px',
-                padding: '16px 20px', border: '1px solid var(--line-strong)',
-                borderRadius: '999px', background: '#FFFDF9', cursor: 'text',
-              }}>
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} style={{ color: 'var(--sage)', flexShrink: 0 }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
-                </svg>
-                <input
-                  type="text"
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  placeholder={isES ? 'Buscar destino, región o estilo' : 'Search destination, region, or style'}
-                  style={{
-                    flex: 1, border: 0, outline: 0, background: 'transparent',
-                    color: 'var(--pine)', fontFamily: 'inherit', fontSize: '14px',
-                  }}
-                />
-              </label>
-
-              {/* Filter chips */}
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {/* Primary filters (always visible) */}
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                  {/* All */}
-                  <button
-                    onClick={() => setActiveFilter(null)}
-                    style={{
-                      padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                      borderColor: activeFilter === null ? 'var(--pine)' : 'var(--line-strong)',
-                      background: activeFilter === null ? 'var(--pine)' : 'var(--sand)',
-                      color: activeFilter === null ? 'white' : 'rgba(15,58,51,0.8)',
-                      fontSize: '13px', fontWeight: 700, cursor: 'pointer', transition: 'all .15s',
-                    }}
-                  >
-                    {isES ? 'Todos' : 'All'}
-                  </button>
-
-                  {PRIMARY_FILTERS.map(f => (
-                    <button
-                      key={f.id}
-                      onClick={() => setActiveFilter(activeFilter === f.id ? null : f.id)}
-                      style={{
-                        padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                        borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--line-strong)',
-                        background: activeFilter === f.id ? 'var(--pine)' : 'var(--sand)',
-                        color: activeFilter === f.id ? 'white' : 'rgba(15,58,51,0.8)',
-                        fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                        whiteSpace: 'nowrap', transition: 'all .15s',
-                      }}
-                    >
-                      {isES ? f.labelES : f.labelEN}
-                    </button>
-                  ))}
-
-                  {/* More toggle */}
-                  <button
-                    onClick={() => setShowSecondary(v => !v)}
-                    style={{
-                      padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                      borderColor: showSecondary ? 'var(--pine)' : 'var(--line-strong)',
-                      background: showSecondary ? 'rgba(15,58,51,0.07)' : 'var(--sand)',
-                      color: 'rgba(15,58,51,0.8)',
-                      fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                      whiteSpace: 'nowrap', transition: 'all .15s',
-                      display: 'flex', alignItems: 'center', gap: '4px',
-                    }}
-                  >
-                    {showSecondary
-                      ? (isES ? '− Menos' : '− Less')
-                      : (isES ? '+ Más' : '+ More')}
-                  </button>
-                </div>
-
-                {/* Secondary filters (revealed on demand) */}
-                {showSecondary && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {SECONDARY_FILTERS.map(f => (
-                      <button
-                        key={f.id}
-                        onClick={() => setActiveFilter(activeFilter === f.id ? null : f.id)}
-                        style={{
-                          padding: '10px 16px', borderRadius: '999px', border: '1px solid',
-                          borderColor: activeFilter === f.id ? 'var(--pine)' : 'var(--line-strong)',
-                          background: activeFilter === f.id ? 'var(--pine)' : 'var(--sand)',
-                          color: activeFilter === f.id ? 'white' : 'rgba(15,58,51,0.8)',
-                          fontSize: '13px', fontWeight: 700, cursor: 'pointer',
-                          whiteSpace: 'nowrap', transition: 'all .15s',
-                        }}
-                      >
-                        {isES ? f.labelES : f.labelEN}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
+          {/* Search + filters: inline chips on desktop, "Filtros (n)" sheet on mobile */}
+          <div className="mt-12 flex flex-col gap-4">
+            <SearchInput
+              label={isES ? 'Buscar destino, región o estilo' : 'Search destination, region, or style'}
+              placeholder={isES ? 'Buscar destino, región o estilo' : 'Search destination, region, or style'}
+              value={search}
+              onChange={setSearch}
+              clearLabel={isES ? 'Borrar búsqueda' : 'Clear search'}
+            />
+            <FilterPanel
+              groups={groups}
+              activeFilters={activeFilters}
+              resultsCount={filtered.length}
+              onClear={() => setActiveFilter(null)}
+              labels={{
+                filters: isES ? 'Filtros' : 'Filters',
+                showResults: n => (isES ? `Ver ${n ?? ''} ${noun(n ?? 0)}` : `Show ${n ?? ''} ${noun(n ?? 0)}`).replace('  ', ' '),
+                clear: isES ? 'Limpiar' : 'Clear',
+                close: isES ? 'Cerrar' : 'Close',
+              }}
+            />
           </div>
 
         </div>
       </section>
 
       {/* ── Guides grid ───────────────────────────────────────────────────── */}
-      <section style={{ padding: '52px 0 0' }}>
+      <section className="pt-section">
         <div className="page-inner">
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-            <div>
-              <p className="sec-label">{isES ? 'Guías' : 'Guides'}</p>
-              <h2 style={{ margin: 0, fontSize: '36px', lineHeight: 1.05, letterSpacing: '-0.02em', fontWeight: 800 }}>
-                {isES ? 'Destinos curados' : 'Curated destinations'}
-              </h2>
-            </div>
-            <span style={{ fontSize: '14px', color: 'rgba(15,58,51,0.58)' }}>
-              {filtered.length} {isES ? (filtered.length === 1 ? 'destino' : 'destinos') : (filtered.length === 1 ? 'destination' : 'destinations')}
+          <div className="mb-8 flex flex-col gap-3">
+            <SectionTitle eyebrow={isES ? 'Guías' : 'Guides'}>
+              {isES ? 'Destinos curados' : 'Curated destinations'}
+            </SectionTitle>
+            <span className="text-small text-label">
+              {filtered.length} {noun(filtered.length)}
             </span>
           </div>
 
           {filtered.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-stretch">
               {filtered.map(guide => (
-                <GuideCard key={guide.slug} guide={guide} />
+                <DestinationCard
+                  key={guide.slug}
+                  href={guide.url}
+                  image={{ src: guide.cover_img, alt: guide.title }}
+                  eyebrow={guide.destination}
+                  title={guide.title}
+                  excerpt={guide.excerpt}
+                  tags={guide.tags}
+                />
               ))}
             </div>
           ) : (
-            <div style={{
-              padding: '64px 0', textAlign: 'center',
-              color: 'rgba(15,58,51,0.48)', fontSize: '15px',
-            }}>
+            <div className="py-16 text-center text-body text-label">
               {isES ? 'No hay guías que coincidan con tu búsqueda.' : 'No guides match your search.'}
             </div>
           )}

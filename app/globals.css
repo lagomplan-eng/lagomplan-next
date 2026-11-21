@@ -450,13 +450,16 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   body:has([data-guide="hero"]) .min-h-screen            { min-height: 0 !important; }
 
   /* Strip card chrome + cream/beige page backgrounds */
+  body:has([data-guide="hero"]) .rounded-info,
+  body:has([data-guide="hero"]) .rounded-destination,
   body:has([data-guide="hero"]) .rounded-2xl,
   body:has([data-guide="hero"]) .rounded-xl,
   body:has([data-guide="hero"]) .rounded-lg,
   body:has([data-guide="hero"]) .rounded-full            { border-radius: 0 !important; }
   body:has([data-guide="hero"]) .bg-white                { background: transparent !important; }
-  body:has([data-guide="hero"]) .bg-\[\#FFF9F3\]         { background: white !important; }
-  body:has([data-guide="hero"]) .bg-\[\#FDFCF9\]         { background: white !important; }
+  body:has([data-guide="hero"]) .bg-cream,
+  body:has([data-guide="hero"]) .bg-sand,
+  body:has([data-guide="hero"]) .bg-mint                 { background: white !important; }
 
   /* Collapse two-column grids to single column */
   body:has([data-guide="hero"]) .grid                    { display: block !important; }
@@ -1101,6 +1104,13 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   [role="dialog"] {
     display: none !important;
   }
+
+  /* The guide cover's title block is a <header> (PageTitle), not site chrome. */
+  [data-guide="hero"] header {
+    display: block !important;
+  }
+  [data-guide="hero"] > div { width: 100% !important; }
+  [data-guide="hero"] header p { max-width: none !important; }
 
   /* Collapse/expand arrows on day cards */
   [data-trip-day="header"] > div:last-child {

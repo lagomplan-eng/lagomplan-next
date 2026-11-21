@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button, Input } from '../design'
 
 const copy = {
   es: {
@@ -58,16 +59,12 @@ export default function NewsletterForm({ locale }: { locale: 'es' | 'en' }) {
     return (
       <div className="flex items-center gap-3 py-4">
         <span
-          className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-[11px]"
-          style={{ background: 'rgba(255,249,243,0.18)', color: '#FFF9F3' }}
+          className="flex size-5 flex-shrink-0 items-center justify-center rounded-full bg-cream/20 text-[11px] text-cream"
           aria-hidden="true"
         >
           ✓
         </span>
-        <p
-          className="font-sans text-[15px] leading-[1.6]"
-          style={{ color: 'rgba(255,249,243,0.92)' }}
-        >
+        <p className="m-0 font-sans text-body text-cream/90">
           {t.success}
         </p>
       </div>
@@ -81,37 +78,26 @@ export default function NewsletterForm({ locale }: { locale: 'es' | 'en' }) {
       noValidate
       className="flex flex-col w-full gap-3"
     >
-      <div className="flex w-full max-[640px]:flex-col max-[640px]:gap-3">
-        <input
+      <div className="flex w-full gap-3 max-[640px]:flex-col">
+        <Input
+          label={t.placeholder}
+          hideLabel
+          className="flex-1"
           type="email"
           value={email}
           onChange={e => setEmail(e.target.value)}
           required
           placeholder={t.placeholder}
           disabled={status === 'loading'}
-          className="flex-1 font-sans text-[15px] px-5 py-4 text-[#FFF9F3] placeholder-[rgba(255,249,243,0.58)] focus:outline-none disabled:opacity-60"
-          style={{
-            border:     '1px solid rgba(255,249,243,0.18)',
-            background: 'rgba(255,255,255,0.10)',
-          }}
         />
 
-        <button
-          type="submit"
-          disabled={status === 'loading'}
-          className="font-sans text-[15px] font-semibold px-6 py-4 whitespace-nowrap border-none cursor-pointer transition-opacity disabled:opacity-60"
-          style={{ background: '#FFF9F3', color: '#0F3A33' }}
-        >
+        <Button type="submit" variant="inverse" disabled={status === 'loading'}>
           {status === 'loading' ? t.submitting : t.submit}
-        </button>
+        </Button>
       </div>
 
       {status === 'error' && (
-        <p
-          className="font-sans text-[13px] leading-[1.5]"
-          style={{ color: 'rgba(255,249,243,0.70)' }}
-          role="alert"
-        >
+        <p className="m-0 font-sans text-small text-cream/70" role="alert">
           {errMsg || t.error}
         </p>
       )}

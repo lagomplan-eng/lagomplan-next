@@ -5,11 +5,14 @@
  * The page title is the /guias H1 (clamp 44-72px, 800, -0.04em, line-height .92, pine); H2, H3 and the
  * eyebrow are derived from the same page. Sizes come from the --fs-* / --lh-* / --ls-* tokens.
  */
-import type { ElementType, ReactNode } from 'react'
+import type { ElementType, HTMLAttributes, ReactNode } from 'react'
 import { cx } from './cx'
 
-export function Eyebrow({ children, className, as: Tag = 'p' }: { children: ReactNode; className?: string; as?: ElementType }) {
-  return <Tag className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage-text', className)}>{children}</Tag>
+/** Extra attributes a caller may need on the element itself (id, data-*, aria-*): print and analytics hooks. */
+type Passthrough = Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'>
+
+export function Eyebrow({ children, className, as: Tag = 'p', ...rest }: { children: ReactNode; className?: string; as?: ElementType } & Passthrough) {
+  return <Tag {...rest} className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage-text', className)}>{children}</Tag>
 }
 
 export function Lede({ children, className }: { children: ReactNode; className?: string }) {
@@ -42,20 +45,23 @@ interface SectionTitleProps {
   eyebrow?: ReactNode
   lede?: ReactNode
   className?: string
+  /** Attributes for the eyebrow / the h2 themselves (data-* hooks used by print CSS, ids). */
+  eyebrowProps?: Passthrough
+  titleProps?: Passthrough
 }
 
 /** Section heading (H2) with optional eyebrow and lede. */
-export function SectionTitle({ children, eyebrow, lede, className }: SectionTitleProps) {
+export function SectionTitle({ children, eyebrow, lede, className, eyebrowProps, titleProps }: SectionTitleProps) {
   return (
     <div className={cx('flex flex-col', className)}>
-      {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
-      <h2 className="m-0 font-sans text-h2 text-pine">{children}</h2>
+      {eyebrow && <Eyebrow {...eyebrowProps}>{eyebrow}</Eyebrow>}
+      <h2 {...titleProps} className="m-0 font-sans text-h2 text-pine">{children}</h2>
       {lede && <Lede className="mt-4">{lede}</Lede>}
     </div>
   )
 }
 
 /** Card / sub-section title (H3 by default; pass `as` to keep the outline correct). */
-export function CardTitle({ children, as: Tag = 'h3', className }: { children: ReactNode; as?: ElementType; className?: string }) {
-  return <Tag className={cx('m-0 font-sans text-h3 text-pine', className)}>{children}</Tag>
+export function CardTitle({ children, as: Tag = 'h3', className, ...rest }: { children: ReactNode; as?: ElementType; className?: string } & Passthrough) {
+  return <Tag {...rest} className={cx('m-0 font-sans text-h3 text-pine', className)}>{children}</Tag>
 }

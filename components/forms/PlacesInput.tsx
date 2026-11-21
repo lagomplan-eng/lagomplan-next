@@ -227,13 +227,11 @@ export default function PlacesInput({
     return 'Lugar'
   }
 
+  // Same field as design/Input: 48px pill, line-chip border, pine focus ring.
   const baseInput = [
-    'w-full font-sans text-[13px] border bg-white',
-    'py-2 text-[#0F1A16] placeholder-[#BDBDBD]',
-    'focus:outline-none focus:shadow-[0_0_0_3px_rgba(15,58,51,0.06)]',
-    'rounded-[2px] transition-all',
-    hasValue ? 'border-pine pr-7 pl-3' : 'border-[#C8D9D3] pr-7 pl-3',
-    open     ? 'border-pine'           : '',
+    'h-control w-full rounded-full border bg-white pl-5 pr-14 font-sans text-body text-pine placeholder:text-label transition-colors',
+    'focus:outline-none focus-visible:border-pine focus-visible:ring-2 focus-visible:ring-fjord/30',
+    hasValue || open ? 'border-pine' : 'border-line-chip hover:border-pine/60',
   ].join(' ')
 
   return (
@@ -258,7 +256,7 @@ export default function PlacesInput({
 
       {/* Pin icon */}
       <svg
-        className={`absolute right-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-opacity ${hasValue ? 'opacity-60' : 'opacity-25'}`}
+        className={`absolute right-5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none transition-opacity ${hasValue ? 'opacity-60' : 'opacity-25'}`}
         viewBox="0 0 14 18" fill="none"
       >
         <path d="M7 0C4.24 0 2 2.24 2 5c0 3.75 5 11 5 11s5-7.25 5-11c0-2.76-2.24-5-5-5zm0 6.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3z" style={{ fill: 'var(--pine)' }}/>
@@ -269,15 +267,15 @@ export default function PlacesInput({
         <button
           type="button"
           onClick={() => { onChange(''); setHasValue(false); setPredictions([]); setOpen(false); inputRef.current?.focus() }}
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-[#BDBDBD] hover:text-[#4A4A4A] text-[15px] leading-none transition-colors"
+          className="absolute right-4 top-1/2 -translate-y-1/2 text-body leading-none text-label transition-colors hover:text-pine"
           aria-label="Limpiar"
         >×</button>
       )}
 
       {/* Loading indicator */}
       {loading && (
-        <div className="absolute right-8 top-1/2 -translate-y-1/2">
-          <div className="w-3 h-3 border border-[#C8D9D3] border-t-pine rounded-full animate-spin" />
+        <div className="absolute right-12 top-1/2 -translate-y-1/2">
+          <div className="w-3 h-3 border border-line-chip border-t-pine rounded-full animate-spin" />
         </div>
       )}
 
@@ -285,9 +283,9 @@ export default function PlacesInput({
       {open && predictions.length > 0 && (
         <div
           ref={ddRef}
-          className="absolute top-[calc(100%+2px)] left-0 right-0 bg-[#FDFCF9] border border-[#C8D9D3] rounded-[2px] shadow-[0_4px_16px_rgba(15,58,51,0.10)] z-50 overflow-hidden"
+          className="absolute top-[calc(100%+8px)] left-0 right-0 z-50 overflow-hidden rounded-info border border-line-panel bg-white shadow-pop"
         >
-          <div className="font-mono text-[8px] tracking-[2px] text-[#A0A0A0] uppercase px-3 py-2 border-b border-[#E8E0D0]">
+          <div className="border-b border-line-soft px-4 py-2 font-sans text-eyebrow uppercase text-label">
             Sugerencias
           </div>
 
@@ -297,32 +295,32 @@ export default function PlacesInput({
               onMouseDown={() => selectPrediction(s)}
               onMouseEnter={() => setHighlighted(i)}
               className={[
-                'flex items-start gap-2.5 px-3 py-2.5 cursor-pointer border-b border-[#F0EDE6] last:border-0 transition-colors',
-                highlighted === i ? 'bg-[#F4F0E8]' : 'hover:bg-[#F4F0E8]',
+                'flex items-start gap-2.5 px-4 py-2.5 cursor-pointer border-b border-line-soft last:border-0 transition-colors',
+                highlighted === i ? 'bg-sand' : 'hover:bg-sand',
               ].join(' ')}
             >
-              <div className="w-7 h-7 rounded-[2px] bg-[#E8F0EE] flex items-center justify-center flex-shrink-0 mt-0.5 text-[13px]">
+              <div className="mt-0.5 flex size-7 flex-shrink-0 items-center justify-center rounded-lg bg-mint text-small">
                 {iconForTypes(s.placePrediction.types ?? [])}
               </div>
 
               <div className="flex-1 min-w-0">
-                <div className="font-sans text-[13px] text-[#0F1A16] truncate">
+                <div className="truncate font-sans text-small text-pine">
                   {renderMain(s)}
                 </div>
-                <div className="font-mono text-[10px] text-[#8A8A8A] mt-0.5 tracking-[0.3px]">
+                <div className="mt-0.5 font-sans text-tiny text-label">
                   {s.placePrediction.secondaryText?.text}
                 </div>
               </div>
 
-              <span className="font-mono text-[8px] tracking-[1px] uppercase text-[#2D6B57] bg-[#E8F0EE] border border-[rgba(15,58,51,0.15)] px-1.5 py-0.5 rounded-full self-center flex-shrink-0">
+              <span className="flex-shrink-0 self-center rounded-full border border-line-card bg-mint px-2 py-0.5 font-sans text-eyebrow uppercase text-ink-3">
                 {labelForTypes(s.placePrediction.types ?? [])}
               </span>
             </div>
           ))}
 
           {/* Google attribution — required by ToS */}
-          <div className="flex items-center justify-end gap-1.5 px-3 py-1.5 border-t border-[#E8E0D0]">
-            <span className="font-mono text-[8px] text-[#BDBDBD] tracking-[0.5px]">Impulsado por</span>
+          <div className="flex items-center justify-end gap-1.5 border-t border-line-soft px-4 py-1.5">
+            <span className="font-sans text-eyebrow text-label">Impulsado por</span>
             <img
               src="https://maps.gstatic.com/mapfiles/api-3/images/powered-by-google-on-white3_hdpi.png"
               alt="Powered by Google"

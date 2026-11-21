@@ -131,7 +131,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
       : `✓ Todo listo para ${data.hero.title}`
 
   return (
-    <div className="bg-[#FFF9F3] min-h-screen pt-[100px]">
+    <div className="bg-cream min-h-screen pt-[100px]">
 
       {/* Freemium transparency banner — anonymous users only */}
       <GuideFreeIndicator slug={data.slug} />
@@ -218,7 +218,7 @@ export function GuidePageClientV2({ data, locale, alternateLocaleUrl }: Props) {
       <div
         role="status"
         aria-live="polite"
-        className="fixed bottom-8 left-1/2 font-mono text-[12px] font-medium tracking-[.06em] text-white bg-[#0F3A33] px-5 py-2.5 rounded-full shadow-[0_8px_24px_rgba(15,58,51,.25)] pointer-events-none z-[9999] transition-all duration-250"
+        className="pointer-events-none fixed bottom-8 left-1/2 z-[9999] rounded-full bg-pine px-5 py-2.5 font-sans text-small font-semibold text-cream shadow-pop transition-all duration-250"
         style={{
           transform: `translateX(-50%) translateY(${toast.visible ? '0' : '12px'})`,
           opacity: toast.visible ? 1 : 0,

@@ -13,6 +13,7 @@
 
 import type { FlatSeasonalEdition } from '../../lib/data/guides/types'
 import { bandLabel, dayColumns, type SeasonalLocale, type SeasonalState } from '../../lib/data/guides/seasonal'
+import { Button, CardTitle, Eyebrow, InfoCard } from '../design'
 
 const COPY = {
   es: {
@@ -33,13 +34,6 @@ const COPY = {
   },
 } as const
 
-// Brand tokens (strict): Forest Green, Warm Cream, Off-White, Near Black, Muted Green, Pale Sage.
-const FOREST = 'var(--pine)'
-const CREAM = '#F4F0E8'
-const NEAR_BLACK = '#0F1A16'
-const MUTED = '#2D6B57'
-const SAGE = '#C8D9D3'
-
 export interface SeasonalEditionProps {
   edition: FlatSeasonalEdition
   state: SeasonalState
@@ -59,16 +53,13 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
     if (!edition.nextEditionNote) return null
     return (
       <section id="temporada" data-guide="seasonal" data-state="expired" className="px-5 sm:px-8" aria-label={edition.label}>
-        <div
-          className="max-w-[1200px] mx-auto flex flex-wrap items-baseline gap-x-4 gap-y-2 py-4 border-y font-sans text-[14px] leading-[1.6]"
-          style={{ borderColor: SAGE, color: NEAR_BLACK }}
-        >
+        <div className="max-w-[1200px] mx-auto flex flex-wrap items-center gap-x-4 gap-y-2 py-4 border-y border-line-strong font-sans text-body text-pine">
           <span>
-            <span className="font-medium">{c.expired}</span> {edition.nextEditionNote}
+            <span className="font-semibold">{c.expired}</span> {edition.nextEditionNote}
           </span>
-          <a href="#newsletter" className="font-mono text-[11px] tracking-[.08em] uppercase underline underline-offset-4" style={{ color: MUTED, textDecorationColor: SAGE }}>
+          <Button href="#newsletter" variant="ghost" size="sm" className="underline underline-offset-4">
             {c.notify}
-          </a>
+          </Button>
         </div>
       </section>
     )
@@ -82,16 +73,16 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
 
   return (
     <section id="temporada" data-guide="seasonal" data-state="active" className="px-5 sm:px-8" aria-label={edition.label}>
-      <div className="max-w-[1200px] mx-auto py-8 border-y" style={{ borderColor: SAGE, background: CREAM, borderRadius: 4 }}>
+      <InfoCard tone="sand" size="flush" className="max-w-[1200px] mx-auto py-8">
         <div className="px-4 sm:px-8">
-          <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-4" style={{ color: MUTED }}>
+          <Eyebrow className="!mb-4">
             {bandLabel(edition, l)}
-          </p>
+          </Eyebrow>
 
           {essentials.length > 0 && (
             <div className="mb-8">
-              <h3 className="font-sans font-medium text-[16px] mb-2" style={{ color: NEAR_BLACK }}>{c.essentials}</h3>
-              <ul className="list-disc pl-5 space-y-1 font-sans text-[14px] leading-[1.7]" style={{ color: NEAR_BLACK }}>
+              <CardTitle className="mb-2 !text-[20px] !leading-[1.2]">{c.essentials}</CardTitle>
+              <ul className="list-disc pl-5 space-y-1 font-sans text-body text-pine">
                 {essentials.map((e, i) => <li key={i}>{e}</li>)}
               </ul>
             </div>
@@ -99,19 +90,18 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
 
           <ol
             aria-label={c.strip}
-            className="flex lg:grid lg:grid-cols-6 gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none border-t border-l"
-            style={{ borderColor: SAGE }}
+            className="flex lg:grid lg:grid-cols-6 gap-0 overflow-x-auto lg:overflow-visible snap-x snap-mandatory lg:snap-none border-t border-l border-line-strong"
           >
             {columns.map((col) => (
-              <li key={col.n} className="snap-start shrink-0 w-[184px] lg:w-auto border-r border-b p-3 lg:p-4" style={{ borderColor: SAGE }}>
-                <a href={`#${col.id}`} className="block no-underline" style={{ color: NEAR_BLACK }}>
-                  <span className="block font-mono text-[18px] font-medium leading-none" style={{ color: FOREST }}>{col.label}</span>
-                  <span className="block font-mono text-[10px] tracking-[.1em] uppercase mt-1 mb-3" style={{ color: MUTED }}>{col.weekday} {col.date}</span>
+              <li key={col.n} className="snap-start shrink-0 w-[184px] lg:w-auto border-r border-b border-line-strong p-3 lg:p-4">
+                <a href={`#${col.id}`} className="block text-pine no-underline">
+                  <span className="block text-h3 leading-none text-pine">{col.label}</span>
+                  <Eyebrow as="span" className="!mb-3 mt-1">{col.weekday} {col.date}</Eyebrow>
                 </a>
                 {col.events.map((ev, i) => (
-                  <div key={i} className="mb-3 last:mb-0 font-sans text-[13px] leading-[1.5]" style={{ color: NEAR_BLACK }}>
-                    <div className="font-medium">{ev.title}</div>
-                    {ev.detail && <div style={{ color: MUTED }}>{ev.detail}</div>}
+                  <div key={i} className="mb-3 last:mb-0 font-sans text-small text-pine">
+                    <div className="font-semibold">{ev.title}</div>
+                    {ev.detail && <div className="text-ink-3">{ev.detail}</div>}
                   </div>
                 ))}
               </li>
@@ -120,12 +110,12 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
 
           {season.length > 0 && (
             <div className="mt-8">
-              <p className="font-mono text-[11px] font-medium tracking-[.12em] uppercase mb-2" style={{ color: MUTED }}>{c.season}</p>
-              <ul className="space-y-1 font-sans text-[14px] leading-[1.6]" style={{ color: NEAR_BLACK }}>
+              <Eyebrow className="!mb-2">{c.season}</Eyebrow>
+              <ul className="m-0 list-none space-y-1 p-0 font-sans text-body text-pine">
                 {season.map((s, i) => (
                   <li key={i}>
-                    <span className="font-medium">{s.title}</span>
-                    <span style={{ color: MUTED }}> · {s.dateRange}{s.detail ? ` · ${s.detail}` : ''}</span>
+                    <span className="font-semibold">{s.title}</span>
+                    <span className="text-ink-3"> · {s.dateRange}{s.detail ? ` · ${s.detail}` : ''}</span>
                   </li>
                 ))}
               </ul>
@@ -133,18 +123,18 @@ export function SeasonalEdition({ edition, state, locale, dayNumbers, hotels }: 
           )}
 
           {dated.length > 0 && (
-            <p className="mt-8 font-sans text-[14px] leading-[1.7]" style={{ color: NEAR_BLACK }}>
-              <span className="font-medium">{c.book} </span>
+            <p className="m-0 mt-8 font-sans text-body text-pine">
+              <span className="font-semibold">{c.book} </span>
               {dated.map((h, i) => (
                 <span key={h.name}>
                   {i > 0 && ' · '}
-                  <a href={h.bookingUrl} target="_blank" rel="noopener noreferrer sponsored" className="underline underline-offset-2" style={{ color: FOREST, textDecorationColor: SAGE }}>{h.name}</a>
+                  <a href={h.bookingUrl} target="_blank" rel="noopener noreferrer sponsored" className="text-pine underline underline-offset-2 decoration-line-strong">{h.name}</a>
                 </span>
               ))}
             </p>
           )}
         </div>
-      </div>
+      </InfoCard>
     </section>
   )
 }

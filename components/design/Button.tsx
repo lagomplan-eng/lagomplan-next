@@ -7,10 +7,10 @@
  *   ghost      no border, sand wash on hover
  * Pass `href` to render a link (same look). Tokens: tailwind.config.js / globals.css :root.
  */
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react'
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ElementType, ReactNode } from 'react'
 import { cx } from './cx'
 
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost'
+export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'inverse'
 export type ButtonSize = 'md' | 'sm'
 
 interface Common {
@@ -23,9 +23,12 @@ interface Common {
   children: ReactNode
 }
 
+/** Link-only: render another element for the anchor (the locale-aware `Link` from lib/navigation). */
+interface LinkAs { as?: ElementType }
+
 export type ButtonProps =
   | (Common & Omit<ButtonHTMLAttributes<HTMLButtonElement>, keyof Common> & { href?: undefined })
-  | (Common & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof Common> & { href: string; disabled?: boolean })
+  | (Common & LinkAs & Omit<AnchorHTMLAttributes<HTMLAnchorElement>, keyof Common> & { href: string; disabled?: boolean })
 
 const BASE =
   'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-sans font-bold no-underline transition-colors ' +
@@ -40,6 +43,8 @@ const VARIANT: Record<ButtonVariant, string> = {
   primary: 'border border-pine bg-pine text-cream hover:border-pine-hover hover:bg-pine-hover',
   secondary: 'border border-line-btn bg-transparent text-pine hover:border-pine',
   ghost: 'border border-transparent bg-transparent text-pine hover:bg-sand',
+  /** On a pine band: cream fill, pine text. */
+  inverse: 'border border-cream bg-cream text-pine hover:border-white hover:bg-white',
 }
 
 const DISABLED = 'cursor-not-allowed opacity-45 pointer-events-none'
@@ -56,9 +61,9 @@ export default function Button(props: ButtonProps) {
   )
 
   if ('href' in rest && rest.href !== undefined) {
-    const { href, disabled, ...anchor } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; disabled?: boolean }
+    const { href, disabled, as: Anchor = 'a', ...anchor } = rest as AnchorHTMLAttributes<HTMLAnchorElement> & { href: string; disabled?: boolean } & LinkAs
     return (
-      <a
+      <Anchor
         {...anchor}
         href={disabled ? undefined : href}
         aria-disabled={disabled || undefined}
@@ -68,7 +73,7 @@ export default function Button(props: ButtonProps) {
         className={cx(classes, disabled && DISABLED)}
       >
         {content}
-      </a>
+      </Anchor>
     )
   }
 

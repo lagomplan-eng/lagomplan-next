@@ -6,6 +6,7 @@
  */
 
 import Image from 'next/image'
+import { Button, PageTitle, Tag } from '../design'
 import type { HeroData } from '../../lib/data/guides/types'
 
 interface Props {
@@ -28,97 +29,54 @@ export function GuideHero({ data, locale, plannerHref, onSave, onShare, onPdf }:
   return (
     <section
       data-guide="hero"
-      className="pt-10 pb-12 border-b border-[#E2DDD5] bg-[#FDFCF9]"
+      className="border-b border-line-soft bg-white pb-12 pt-10"
     >
       <div className="max-w-[1200px] mx-auto px-8 max-[768px]:px-5">
         <div className="grid grid-cols-[1fr_400px] gap-16 items-start max-[900px]:grid-cols-1 max-[900px]:gap-10 print:block">
 
           {/* ── Left: text ── */}
           <div>
-            {/* Eyebrow */}
-            <div
-              data-hero="eyebrow"
-              className="font-mono text-[10px] font-medium tracking-[.14em] uppercase text-[#6B8F86] mb-5 flex items-center gap-2"
-            >
-              <span className="block w-5 h-px bg-[#6B8F86] flex-shrink-0" />
-              {data.eyebrow}
-            </div>
-
-            {/* Title */}
-            <h1
-              className="font-display font-normal leading-[1.05] tracking-[-0.02em] text-[#1A1A1A] mb-4"
-              style={{ fontSize: 'clamp(32px, 3.8vw, 52px)' }}
-            >
-              {data.title}
-            </h1>
-
-            {/* Subtitle */}
-            <p
-              data-hero="subtitle"
-              className="text-[15px] font-light leading-[1.7] text-[#4A4A4A] max-w-[400px] mb-7"
-            >
-              {data.subtitle}
-            </p>
+            <PageTitle
+              eyebrow={
+                // The rule span is hidden in print by the print stylesheet ([data-hero="eyebrow"] span).
+                <span data-hero="eyebrow" className="flex items-center gap-2">
+                  <span className="block h-px w-5 flex-shrink-0 bg-sage" />
+                  {data.eyebrow}
+                </span>
+              }
+              title={data.title}
+              lede={<span data-hero="subtitle" className="block">{data.subtitle}</span>}
+            />
 
             {/* Meta chips */}
-            <div data-hero="chips" className="flex flex-wrap gap-2 mb-7">
+            <div data-hero="chips" className="mt-7 flex flex-wrap gap-2">
               {data.chips.map((chip) => (
-                <span
-                  key={chip}
-                  className="flex items-center gap-1.5 font-mono text-[11px] tracking-[.04em] text-[#4A4A4A] px-3 py-1.5 bg-[#EDE7E1] border border-[#E2DDD5] rounded-full"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-[#6B8F86] flex-shrink-0" />
+                <Tag key={chip} className="gap-1.5">
+                  <span className="h-1.5 w-1.5 flex-shrink-0 rounded-full bg-sage" />
                   {chip}
-                </span>
+                </Tag>
               ))}
             </div>
 
             {/* Actions bar — hidden in print */}
-            <div className="flex items-center pt-5 border-t border-[#E2DDD5] print:hidden">
+            <div className="mt-7 flex flex-wrap items-center gap-2 border-t border-line-soft pt-5 print:hidden">
               {onSave && (
-                <button
-                  type="button"
-                  onClick={onSave}
-                  className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  {labels.save}
-                </button>
-              )}
-              {onSave && onShare && (
-                <span className="text-[#C8C2B8] text-[10px] pr-3.5 select-none">·</span>
+                <Button variant="ghost" size="sm" onClick={onSave}>{labels.save}</Button>
               )}
               {onShare && (
-                <button
-                  type="button"
-                  onClick={onShare}
-                  className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  {labels.share}
-                </button>
-              )}
-              {onShare && (
-                <span className="text-[#C8C2B8] text-[10px] pr-3.5 select-none">·</span>
+                <Button variant="ghost" size="sm" onClick={onShare}>{labels.share}</Button>
               )}
               {onPdf && (
-                <button
-                  type="button"
-                  onClick={onPdf}
-                  className="font-mono text-[11px] tracking-[.06em] text-[#8A8A8A] pr-3.5 hover:text-[#0F3A33] transition-colors flex items-center gap-1.5 cursor-pointer"
-                >
-                  {labels.savePdf}
-                </button>
+                <Button variant="ghost" size="sm" onClick={onPdf}>{labels.savePdf}</Button>
               )}
-              <a
-                href={plannerHref}
-                className="inline-flex items-center gap-2 font-mono text-[11px] font-medium tracking-[.08em] uppercase text-white bg-[#0F3A33] px-5 py-2.5 rounded-lg transition-all hover:bg-[#2D6B5A] hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(15,58,51,.25)] ml-auto"
-              >
+              <Button href={plannerHref} size="sm" className="ml-auto">
                 {labels.planTrip}
-              </a>
+              </Button>
             </div>
           </div>
 
           {/* ── Right: image — hidden in print ── */}
-          <div className="relative w-full aspect-[4/3] rounded-[24px] overflow-hidden max-[900px]:order-[-1] print:hidden">
+          <div className="relative w-full aspect-[4/3] rounded-destination overflow-hidden max-[900px]:order-[-1] print:hidden">
             {data.coverImage ? (
               <>
                 <Image
@@ -129,13 +87,13 @@ export function GuideHero({ data, locale, plannerHref, onSave, onShare, onPdf }:
                   priority
                   sizes="(max-width: 900px) 100vw, 400px"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-[rgba(15,58,51,.4)] to-transparent" />
+                <div className="absolute inset-0 bg-gradient-to-t from-pine/40 to-transparent" />
               </>
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#0F3A33] via-[#2D6B5A] to-[#6B8F86]" />
+              <div className="w-full h-full bg-gradient-to-br from-pine via-pine-hover to-sage" />
             )}
             {data.imageTag && (
-              <span className="absolute top-5 right-5 font-mono text-[10px] font-medium tracking-[.1em] uppercase text-white bg-[rgba(15,58,51,.7)] backdrop-blur-sm px-2.5 py-[5px] rounded-full">
+              <span className="absolute right-5 top-5 rounded-full bg-pine/70 px-3 py-2 font-sans text-[10px] font-bold uppercase tracking-[.16em] text-white backdrop-blur-sm">
                 {data.imageTag}
               </span>
             )}

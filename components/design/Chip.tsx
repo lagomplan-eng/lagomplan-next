@@ -5,7 +5,7 @@
  * Filter chip: a toggle (aria-pressed), 44px, pill. Selected = pine fill.
  * Tag (below) is its non-interactive sibling: the small label on cards.
  */
-import type { ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from './cx'
 
 interface ChipProps {
@@ -39,9 +39,9 @@ export default function Chip({ label, selected, onClick, count, disabled, classN
 }
 
 /** Small non-interactive label (card tags). */
-export function Tag({ children, className }: { children: ReactNode; className?: string }) {
+export function Tag({ children, className, ...rest }: { children: ReactNode; className?: string } & Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'children'>) {
   return (
-    <span className={cx('inline-flex items-center rounded-full border border-line-strong bg-sand px-2.5 py-1.5 font-sans text-[11px] font-medium leading-none text-pine/70', className)}>
+    <span {...rest} className={cx('inline-flex items-center rounded-full border border-line-strong bg-sand px-2.5 py-1.5 font-sans text-[11px] font-medium leading-none text-pine/70', className)}>
       {children}
     </span>
   )
