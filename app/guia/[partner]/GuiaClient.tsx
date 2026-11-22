@@ -38,6 +38,7 @@ import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import type { HotelMode, HotelOutboundId } from '../../../content/guia/hotel/config'
 import { HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
+import { HOTEL_HOST_NAME, hotelReword, zonesHeading } from '../../../content/guia/hotel/rewords'
 import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
@@ -406,7 +407,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
   const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
   const interp = (s: string) =>
-    s.replace(/\{host\}/g, partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
+    s.replace(/\{host\}/g, hotel ? HOTEL_HOST_NAME[lang] : partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
 
   // ── ?lang=es|en seeds the toggle ────────────────────────────────────────
   // Kept as a post-mount effect (not a useState lazy initializer) so the
@@ -559,7 +560,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
   // Tab order + lookup = partner's own "Your house" pick list, followed by
   // the zones shared across all partners in this city.
-  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
+  // Hotel edition: no "Your house" tab (that is the Livin property's address), only the city zones.
+  const nbOrder = hotel ? city.neighborhoodOrder : [HOME_TAB_ID, ...city.neighborhoodOrder]
   const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const ownTours = partner.ownTours?.[lang] ?? []
@@ -577,13 +579,23 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const faqZone = getZone(partner.zone)
   const faqGroupsAll = resolveFaqModule(partner, faqZone, lang)
   // Hotel edition: answers still on hold never render (a group left empty disappears with them).
+  // Hotel edition: private chefs and massages never render; copy about "the apartment", "your host" and the
+  // property is reworded for a hotel (content/guia/hotel/rewords.ts). A group left empty disappears with them.
+  const rw = (x: string) => (hotel ? hotelReword(x, lang) : x)
   const faqKept = hotel && faqGroupsAll
     ? faqGroupsAll
-        .map((g) => ({ ...g, items: g.items.filter((it) => !hotel.heldFaqKeys.includes(it.key)) }))
+        .map((g) => ({
+          ...g,
+          items: g.items
+            .filter((it) => !hotel.hiddenFaqKeys.includes(it.key))
+            .map((it) => ({ ...it, body: rw(it.body), links: it.links?.map((l) => ({ ...l, text: rw(l.text), after: l.after ? rw(l.after) : l.after })) })),
+        }))
         .filter((g) => g.items.length > 0)
     : faqGroupsAll
   const faqGroups = faqKept && faqKept.length > 0 ? faqKept : null
-  const resolvedFaqKeys = new Set(faqGroups?.flatMap((g) => g.items.map((it) => it.key)) ?? [])
+  // A group with a single item gets no panel (PracticalSection), so in the hotel edition its item does not count as
+  // "relocated": the arrival card it would replace stays.
+  const resolvedFaqKeys = new Set(faqGroups?.filter((g) => !hotel || g.items.length >= 2).flatMap((g) => g.items.map((it) => it.key)) ?? [])
   const visibleArrivalItems = t.arrivalItems
     .filter((item) => {
       if (!item.id || !partner.arrivalItemsOmit?.includes(item.id)) return true
@@ -593,7 +605,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       return !(counterpart && resolvedFaqKeys.has(counterpart))
     })
     .map((item) => applyArrivalOverride(item, partner.arrivalItemOverrides, lang))
-    .map((item) => ({ ...item, body: interp(item.body) }))
+    .map((item) => ({
+      ...item,
+      body: rw(interp(item.body)),
+      ...(hotel && item.link ? { link: { ...item.link, text: rw(item.link.text), after: item.link.after ? rw(item.link.after) : item.link.after } } : {}),
+    }))
 
   // Agenda layout (demos with display.agenda + agenda data, kill switch on): Experiences move under the
   // 48-hour itinerary and "A calm start to your trip" becomes collapsible. Everything else is unchanged.
@@ -938,7 +954,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           <div className={styles.secGrid}>
             <div className={styles.secHead}>
               <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
-              <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
+              <h2 className={styles.h2}>{hotel ? zonesHeading(lang, nbOrder.length) : t.neighborhoodH2}</h2>
               <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
               <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
             </div>

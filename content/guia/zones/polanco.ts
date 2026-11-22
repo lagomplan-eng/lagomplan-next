@@ -88,7 +88,7 @@ export const polanco: Zone = {
     },
 
     cashAtms: {
-      // Held for the hotel edition: the TODO below (no specific Banamex yet).
+      // Was held for the hotel edition (the TODO below: no specific Banamex yet); released, it renders like in the Livin guides.
       hold: 'confirm',
       body: {
         es:

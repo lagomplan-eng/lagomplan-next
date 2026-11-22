@@ -6,9 +6,9 @@
 //   2. experiences = the GetYourGuide tours in ./experiences.ts (no Insider)
 //   3. no newsletter form
 //   4. the hotel welcome banner (headline "Tu guía de {zona}")
-//   5. the five-zones tab that opens by default is the hotel's zone
-// plus the standing rules: no Insider link or number anywhere, held items never render, and scans and
-// section/click tracking go to the hotel (never to the Livin pilot).
+//   5. the five-zones tab that opens by default is the hotel's zone (no "Your house" tab; the title counts the tabs)
+// plus the standing rules: no Insider link or number anywhere, nothing specific to the Livin property
+// (see resolve.ts and rewords.ts), and scans and section/click tracking go to the hotel (never to the Livin pilot).
 //
 // Nothing here is a layout: section order and markup live in GuiaClient, so the hotel edition cannot drift.
 
@@ -41,8 +41,8 @@ export const HOTEL_FREE_EDITION: HotelEdition = {
 export interface HotelMode {
   zone: HotelZone
   edition: HotelEdition
-  /** FAQ answers still on hold (unconfirmed): they never render in the hotel edition. */
-  heldFaqKeys: FaqItemKey[]
+  /** Partner-style FAQ answers that do not belong in a hotel guide (private chefs, massages): never rendered. */
+  hiddenFaqKeys: FaqItemKey[]
 }
 
 /** Section ids accepted by /api/hotels/event for section_open: the sections of the guide, in order. */

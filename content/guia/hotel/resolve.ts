@@ -3,17 +3,18 @@
 // Server-side preparation for the hotel edition. The page is the Livin guide, so this only does what the
 // standing rules need, before anything reaches the browser (GuiaClient is a client component: whatever is
 // passed to it is serialized into the page source even when it never renders):
-//   - held items (hold: 'confirm') are dropped, so they never render;
 //   - the Insider link and number are removed from the arrival cards and from the experience cards;
-//   - the matching Livin partner (one per zone) supplies the partner layer.
+//   - everything that belongs to the Livin property is taken out of the partner layer (name, "Your house" address,
+//     check-out time, private chefs, massages, host letter, pilot id);
+//   - the matching Livin partner (one per zone) supplies the rest of the partner layer.
+// Items that were once held for confirmation (airport, earthquakes, cash and ATMs) now render like in the Livin guides.
 // Pure, no React.
 
 import type { ArrivalItem, City, CityCopy, InlineLink, Partner } from '../types'
 import type { FaqItemKey } from '../faq/types'
-import { getZone } from '../zones'
 import { getGuide } from '..'
 import { HOTEL_FREE_EDITION, type HotelMode } from './config'
-import type { HotelZone } from './zones'
+import { ZONE_NEIGHBORHOOD, type HotelZone } from './zones'
 
 /** The Livin guide each hotel zone is a copy of. */
 export const HOTEL_PARTNER_SLUG: Record<HotelZone, string> = {
@@ -21,6 +22,9 @@ export const HOTEL_PARTNER_SLUG: Record<HotelZone, string> = {
   roma: 'livin_roma',
   polanco: 'livin_polanco',
 }
+
+/** FAQ answers that only make sense for the Livin property. */
+export const HOTEL_HIDDEN_FAQ_KEYS: FaqItemKey[] = ['chefsAtHome', 'massages']
 
 const INSIDER_HREF = /wa\.me\/525539149062/i
 
@@ -39,11 +43,13 @@ function stripInsider(item: ArrivalItem): ArrivalItem {
 function sanitizeCopy(copy: CityCopy): CityCopy {
   return {
     ...copy,
-    arrivalItems: copy.arrivalItems.filter((i) => !i.hold).map(stripInsider),
+    arrivalItems: copy.arrivalItems.map(stripInsider),
     // The experiences block shows the GetYourGuide tours (content/guia/hotel/experiences.ts) instead.
     experiences: [],
     expPartnerNote: '',
     expBookCta: '',
+    // The host letter is not rendered in the hotel edition; its copy does not travel either.
+    hostLetter: { ...copy.hostLetter, quote: '', body: '' },
   }
 }
 
@@ -51,18 +57,36 @@ export function toHotelCity(city: City): City {
   return { ...city, copy: { es: sanitizeCopy(city.copy.es), en: sanitizeCopy(city.copy.en) } }
 }
 
-/** FAQ keys whose answer, at the layer the guide would use, is still on hold. */
-export function heldFaqKeys(partner: Partner, zone: HotelZone): FaqItemKey[] {
-  const zoneAnswers = getZone(zone)?.answers ?? {}
-  return (Object.keys(zoneAnswers) as FaqItemKey[]).filter((k) => zoneAnswers[k]?.hold && !partner.faqAnswers?.[k]?.body)
+/** The Livin partner layer without anything that belongs to the Livin property. */
+export function toHotelPartner(partner: Partner, city: City, zone: HotelZone): Partner {
+  const faqAnswers = { ...partner.faqAnswers }
+  for (const k of HOTEL_HIDDEN_FAQ_KEYS) delete faqAnswers[k]
+  return {
+    ...partner,
+    slug: `hotel_${zone}`,
+    displayName: 'Lagomplan',
+    hostName: 'Lagomplan',
+    // The "Your house" tab is not shown; this keeps the type satisfied with the zone's own data, not Livin's address.
+    yourHouse: city.neighborhoods[ZONE_NEIGHBORHOOD[zone]],
+    pilotId: HOTEL_FREE_EDITION.planner.utmCampaign,
+    edition: undefined,
+    atAGlance: undefined,
+    hostLetter: undefined,
+    hostLetterSignature: undefined,
+    stayGlance: undefined,
+    operatorWhatsApp: undefined,
+    ownTours: undefined,
+    insiders: undefined,
+    faqAnswers,
+  }
 }
 
 export function buildHotelGuideProps(zone: HotelZone): { partner: Partner; city: City; hotel: HotelMode } | null {
   const guide = getGuide(HOTEL_PARTNER_SLUG[zone])
   if (!guide) return null
   return {
-    partner: guide.partner,
+    partner: toHotelPartner(guide.partner, guide.city, zone),
     city: toHotelCity(guide.city),
-    hotel: { zone, edition: HOTEL_FREE_EDITION, heldFaqKeys: heldFaqKeys(guide.partner, zone) },
+    hotel: { zone, edition: HOTEL_FREE_EDITION, hiddenFaqKeys: HOTEL_HIDDEN_FAQ_KEYS },
   }
 }
