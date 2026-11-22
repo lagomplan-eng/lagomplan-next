@@ -192,6 +192,7 @@ export default function PracticalSection({
   lang,
   rhythm = false,
   toneClass = '',
+  hotelSection,
 }: {
   arrivalItems: ArrivalItem[]
   faqGroups: ResolvedFaqGroup[] | null
@@ -205,6 +206,8 @@ export default function PracticalSection({
   rhythm?: boolean
   /** Section background (alternating rhythm): '' = cream, the sectionAlt class = grey. */
   toneClass?: string
+  /** Hotel edition only: the section id reported by section_open. Absent = no attribute. */
+  hotelSection?: string
 }) {
   const copy = MODULE_COPY[lang]
   const subhead = practicalSubhead?.[lang] ?? copy.subhead
@@ -313,7 +316,7 @@ export default function PracticalSection({
   const activePanelData = panels.find((p) => p.id === activePanel) ?? panels[0]
 
   return (
-    <section id="practico" className={rhythm ? `${styles.section} ${styles.rhythm} ${toneClass}` : styles.section}>
+    <section id="practico" className={rhythm ? `${styles.section} ${styles.rhythm} ${toneClass}` : styles.section} data-hotel-section={hotelSection}>
       <div className={styles.container}>
         <div className={styles.secGrid}>
           <div className={styles.secHead}>

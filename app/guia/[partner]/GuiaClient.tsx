@@ -34,6 +34,11 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
+import { sendHotelEvent } from '../../../lib/hotels/client'
+import { isValidHotelCode } from '../../../lib/hotels/codes'
+import type { HotelMode, HotelOutboundId } from '../../../content/guia/hotel/config'
+import { HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
+import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
@@ -373,8 +378,10 @@ export interface DemoMeta { slug: string; prospectName: string }
 
 /** recordVisits: true only on production deployments (VERCEL_ENV, read on the
  *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
-export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false }: {
+export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false, hotel }: {
   partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
+  /** Hotel edition (/guia/cdmx/[zone]): this same guide with a short list of differences. Absent on every other guide. */
+  hotel?: HotelMode
   /** Validated agenda data (server-loaded). Used only when partner.agenda is set. */
   agenda?: Agenda
   /** Render events still "to_verify" (Preview / local on /demo). Default false: /guia/* and Production never show them. */
@@ -383,15 +390,21 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [stay, setStay] = useState<Stay>({})
-  const [browseNb, setBrowseNb] = useState<string>(partner.defaultNeighborhood ?? HOME_TAB_ID)
+  const [browseNb, setBrowseNb] = useState<string>(hotel ? ZONE_NEIGHBORHOOD[hotel.zone] : (partner.defaultNeighborhood ?? HOME_TAB_ID))
+  const [hotelCode, setHotelCode] = useState<string | null>(null)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
   const t = city.copy[lang]
   // Demo traffic must not pollute the real-partner pilot metrics, so every
   // host_guide_* event is renamed demo_guide_* on /demo.
+  // Hotel edition: the same events under hotel_guide_*, tagged with the hotel code, never with the Livin partner.
+  const trackSlug = hotel ? (hotelCode ?? `zone_${hotel.zone}`) : partner.slug
   const track = (name: string, params: Record<string, string | number | boolean | undefined>) =>
-    gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
+    hotel
+      ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
+      : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
+  const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
   const interp = (s: string) =>
     s.replace(/\{host\}/g, partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
 
@@ -405,6 +418,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     const requested = params.get('lang')
     if (requested === 'es' || requested === 'en') setLang(requested)
 
+    if (hotel) {
+      const h = params.get('h')
+      if (isValidHotelCode(h)) setHotelCode(h)
+    }
+
     // ?llegada&noches&adultos&ninos personalize the guide. Same post-mount
     // timing as ?lang for the same hydration reason. With no (or invalid)
     // params `stay` stays {} and nothing below changes.
@@ -416,6 +434,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
   // ── Attribution flag + view event (once on load) ──────────────────────────
   useEffect(() => {
+    if (hotel) {
+      // Hotel edition: no lagom_ref (the guest is not a Livin guest) and no host_guide_view.
+      gaTrack('hotel_guide_view', { partner_slug: trackSlug, zone: hotel.zone })
+      return
+    }
     const ref = demo ? `demo:${demo.slug}` : `host:${partner.slug}`
     try { window.localStorage.setItem('lagom_ref', ref) } catch { /* private mode */ }
     try {
@@ -423,7 +446,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       document.cookie = `lagom_ref=${encodeURIComponent(ref)}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`
     } catch { /* cookies disabled */ }
     track('host_guide_view', { partner: partner.slug, city: city.id })
-  }, [partner.slug, city.id])
+  }, [partner.slug, city.id, trackSlug])
 
   // ── Visit log (production only) ───────────────────────────────────────────
   // Fire-and-forget INSERT without .select(): anon has no SELECT privilege, so
@@ -446,6 +469,46 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
+
+  // ── Hotel edition: section_open + outbound_click per hotel (only when the URL carries ?h=) ──────────────
+  useEffect(() => {
+    if (!hotel || !hotelCode) return
+    const seen = new Set<string>()
+    const obs = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const id = (e.target as HTMLElement).dataset.hotelSection
+        if (e.isIntersecting && id && !seen.has(id)) {
+          seen.add(id)
+          sendHotelEvent({ code: hotelCode, type: 'section_open', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+        }
+      }
+    }, { threshold: 0.3 })
+    document.querySelectorAll('[data-hotel-section]').forEach((el) => obs.observe(el))
+    return () => obs.disconnect()
+  }, [hotel, hotelCode])
+
+  useEffect(() => {
+    if (!hotel || !hotelCode) return
+    const plannerPath = (l: Lang) => getRoute(l, 'planner')
+    const classify = (a: HTMLAnchorElement): HotelOutboundId | null => {
+      let u: URL
+      try { u = new URL(a.href, window.location.origin) } catch { return null }
+      const host = u.hostname.toLowerCase()
+      if (host.endsWith('getyourguide.com')) return 'experience_book'
+      if (host === 'airalo.tpm.li') return 'airalo'
+      if (host === 'maps.app.goo.gl' || (host.endsWith('google.com') && u.pathname.startsWith('/maps'))) return 'map'
+      if (host === 'wa.me' && u.pathname === '/') return 'share'
+      if (u.origin === window.location.origin && (u.pathname === plannerPath('es') || u.pathname === plannerPath('en'))) return 'planner'
+      return null
+    }
+    const onClick = (ev: MouseEvent) => {
+      const a = (ev.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
+      const id = a && classify(a)
+      if (id) sendHotelEvent({ code: hotelCode, type: 'outbound_click', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [hotel, hotelCode])
 
   // Reveal the sticky planner CTA once the guest scrolls past the hero.
   useEffect(() => {
@@ -482,12 +545,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // docs/analytics/mxcity-pilot-links.md). partner.utmContent existed as a
   // field with no reader until now — this was the missing wiring.
   const plannerBase = getRoute(lang, 'planner')
-  const plannerQuery = new URLSearchParams({
-    utm_source: partner.slug,
-    utm_medium: 'partner',
-    utm_campaign: partner.pilotId,
-    utm_content: partner.utmContent ?? 'guest_guide',
-  })
+  const plannerQuery = hotel
+    ? new URLSearchParams({ utm_source: `${hotel.edition.utmSourcePrefix}${hotelCode ?? 'zone'}`, utm_medium: 'partner', utm_campaign: hotel.edition.planner.utmCampaign })
+    : new URLSearchParams({
+        utm_source: partner.slug,
+        utm_medium: 'partner',
+        utm_campaign: partner.pilotId,
+        utm_content: partner.utmContent ?? 'guest_guide',
+      })
   const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
     track('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
@@ -510,7 +575,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
   // ── The practical part (arrival items + FAQ module, merged) ────────────
   const faqZone = getZone(partner.zone)
-  const faqGroups = resolveFaqModule(partner, faqZone, lang)
+  const faqGroupsAll = resolveFaqModule(partner, faqZone, lang)
+  // Hotel edition: answers still on hold never render (a group left empty disappears with them).
+  const faqKept = hotel && faqGroupsAll
+    ? faqGroupsAll
+        .map((g) => ({ ...g, items: g.items.filter((it) => !hotel.heldFaqKeys.includes(it.key)) }))
+        .filter((g) => g.items.length > 0)
+    : faqGroupsAll
+  const faqGroups = faqKept && faqKept.length > 0 ? faqKept : null
   const resolvedFaqKeys = new Set(faqGroups?.flatMap((g) => g.items.map((it) => it.key)) ?? [])
   const visibleArrivalItems = t.arrivalItems
     .filter((item) => {
@@ -563,9 +635,19 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
   )
 
+  // Hotel edition helpers. One or two experience cards: cap the grid so a lone card is not stretched across the page.
+  const HOTEL_BOOK: Record<Lang, string> = { es: 'Reservar', en: 'Book' }
+  const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
+  const hotelExpCount = HOTEL_EXPERIENCES.items.length
+  const hotelExpGridStyle = hotel && hotelExpCount < 3 ? { maxWidth: hotelExpCount * 400 + (hotelExpCount - 1) * 20 } : undefined
+  const hotelShareHref = hotel
+    ? `https://wa.me/?text=${encodeURIComponent(`${lang === 'es' ? `Mi guía de barrio de ${ZONE_LABEL[hotel.zone]}, de Lagomplan:` : `My ${ZONE_LABEL[hotel.zone]} neighborhood guide, from Lagomplan:`} ${typeof window === 'undefined' ? '' : `${window.location.origin}/guia/cdmx/${ZONE_SLUG[hotel.zone]}${hotelCode ? `?h=${hotelCode}` : ''}`}`.trim())}`
+    : ''
+
   const renderExperiences = (tone: string) => (
       <section
         {...(rhythm ? { id: 'experiencias', className: `${styles.section} ${styles.rhythm} ${tone}` } : { className: `${styles.section} ${styles.sectionAlt}`, style: { paddingTop: 88, paddingBottom: 88 } })}
+        {...hs('experiences')}
       >
         <div className={styles.container}>
           <div className={styles.secGrid}>
@@ -573,13 +655,37 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
               <span className={styles.eyebrow}>{t.expEyebrow}</span>
               <h2 className={styles.h2}>{t.expH2}</h2>
               <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
-              <p className={styles.expPartnerNote}>
-                {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
-              </p>
+              {!hotel && (
+                <p className={styles.expPartnerNote}>
+                  {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
+                </p>
+              )}
             </div>
             <div className={styles.secBody}>
-              <div className={styles.expGrid}>
-                {ownTours.length > 0
+              <div className={styles.expGrid} style={hotelExpGridStyle}>
+                {hotel
+                  ? HOTEL_EXPERIENCES.items.map((e) => (
+                      <div className={styles.expCard} key={e.id}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img className={styles.expImg} src={e.image} alt={e.title[lang]} />
+                        <div className={styles.expBody}>
+                          <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title[lang]}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
+                          <div className={styles.expActions}>
+                            <a
+                              className={styles.expBookLink}
+                              href={e.bookUrl}
+                              target="_blank"
+                              rel="sponsored noopener noreferrer"
+                              onClick={() => trackOutboundLink({
+                                linkName: 'gyg_experience', href: e.bookUrl, partnerSlug: trackSlug, zone: hotel.zone, lang,
+                                section: 'experience_book', experienceName: e.id,
+                              })}
+                            >{HOTEL_BOOK[lang]}</a>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  : ownTours.length > 0
                   ? ownTours.map((tour) => (
                       <ExperienceCard
                         exp={ownAsExperience(tour)} own={tour} t={t} lang={lang}
@@ -591,7 +697,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                       <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
                     ))}
               </div>
-              {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
+              {(hotel ? [] : t.experiences.filter((exp) => exp.id === 'exp-own-plan')).map((exp) => (
                 <ExperienceBanner
                   exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id}
                   operator={ownTours.length > 0 && partner.operatorWhatsApp
@@ -606,7 +712,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   )
 
   const moodOriginal = (
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }} {...hs('moods')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
@@ -721,6 +827,24 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </header>
 
       {/* ── 1. Welcome ─────────────────────────────────────── */}
+      {hotel ? (
+        <section className={styles.hero} {...hs('hero')}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
+          <div className={styles.heroOverlay} />
+          <div className={styles.heroContent}>
+            <span className={styles.heroEyebrow}>{hotel.edition.heroEyebrow[lang]}</span>
+            <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
+            <p className={styles.heroSub}>{interp(t.heroSub)}</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <a href="#practico" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
+              {hotel.edition.share && (
+                <a href={hotelShareHref} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
+              )}
+            </div>
+          </div>
+        </section>
+      ) : (
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
@@ -737,6 +861,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           </a>
         </div>
       </section>
+      )}
 
       {/* ── Host letter (renders when the partner provides a signature) ── */}
       {splitLetter && partner.hostLetter?.[lang]?.paragraphs && (
@@ -771,7 +896,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </section>
       )}
 
-      {partner.hostLetterSignature && !splitLetter && (
+      {partner.hostLetterSignature && !splitLetter && !hotel && (
         <section className={rhythm ? `${styles.section} ${styles.rhythm}` : styles.section}>
           <div className={styles.container}>
             <div className={styles.letterCard}>
@@ -798,16 +923,17 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         faqGroups={faqGroups}
         atAGlance={partner.atAGlance}
         practicalSubhead={partner.practicalSubhead}
-        partnerSlug={partner.slug}
+        partnerSlug={trackSlug}
         zone={partner.zone}
         pilotId={partner.pilotId}
         lang={lang}
         rhythm={rhythm}
         toneClass={rhythm ? nextTone() : ''}
+        hotelSection={hotel ? 'practical' : undefined}
       />
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
-      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })}>
+      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })} {...hs('neighborhoods')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <div className={styles.secHead}>
@@ -869,7 +995,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 4. 48-hour itinerary (dark) ────────────────────── */}
-      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('itinerary')}>
         <div className={styles.container}>
           <div className={styles.itinGrid}>
             <div className={styles.itinIntro}>
@@ -921,7 +1047,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
       ) : (
-      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('rhythm')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             {rhythm ? (
@@ -955,7 +1081,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       {!agendaLayout && renderExperiences(rhythm ? nextTone() : '')}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
-      <section {...(rhythm ? { id: 'comer', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { id: 'comer', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('food')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.foodEyebrow} title={t.foodH2} lede={t.foodLede} />
@@ -1013,7 +1139,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       {/* ── 9. Continue your trip (planner CTA) ────────────── */}
-      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })}>
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })} {...hs('planner')}>
         <div className={`${styles.container} ${styles.continueWrap}`}>
           <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
           <h2 className={styles.continueH2}>{t.continueH2}</h2>
@@ -1021,7 +1147,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
             {t.continueCta}
           </a>
-          {!partner.hideNewsletter && (
+          {!partner.hideNewsletter && !hotel && (
             <>
               <div className={styles.nlRule} />
               <NewsletterSignup
@@ -1040,7 +1166,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
 
       {/* ── 10. Discover more ──────────────────────────────── */}
-      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('discover')}>
         <div className={styles.containerWide}>
           <span className={styles.eyebrow}>{t.discoverEyebrow}</span>
           <h2 className={styles.h2}>{t.discoverH2}</h2>

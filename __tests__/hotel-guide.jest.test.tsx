@@ -1,160 +1,113 @@
 /**
  * @jest-environment node
  *
- * The hotel edition: held items never render, no Insider link or number anywhere, config-driven block order.
+ * The hotel edition IS the Livin guide (GuiaClient) with five differences: no host letter, GetYourGuide experiences
+ * (no Insider), no newsletter, the hotel welcome banner, and the hotel's zone as the default five-zones tab.
+ * Standing rules on top: held items never render, no Insider link or number anywhere.
  * (Livin and demo staying byte-identical is guia-unchanged.jest.test.tsx.)
  */
 import { renderToStaticMarkup } from 'react-dom/server'
-import HotelGuideClient from '../app/guia/cdmx/[zone]/HotelGuideClient'
-import { getCity } from '../content/guia'
-import { HOTEL_FREE_EDITION } from '../content/guia/hotel/config'
-import { buildHotelGuideProps, resolveHotelPractical } from '../content/guia/hotel/resolve'
-import { HOTEL_ZONES, ZONE_LABEL, type HotelZone } from '../content/guia/hotel/zones'
+import GuiaClient from '../app/guia/[partner]/GuiaClient'
+import { getGuide } from '../content/guia'
+import { HOTEL_FREE_EDITION, HOTEL_SECTION_IDS } from '../content/guia/hotel/config'
 import { HOTEL_EXPERIENCES } from '../content/guia/hotel/experiences'
+import { HOTEL_PARTNER_SLUG, buildHotelGuideProps } from '../content/guia/hotel/resolve'
+import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, type HotelZone } from '../content/guia/hotel/zones'
 import { GYG_PARTNER_ID, isGygTourUrl } from '../lib/affiliate/gyg'
-import { getZone } from '../content/guia/zones'
-import type { Lang } from '../content/guia/types'
 
-const city = getCity('cdmx')!
-const LANGS: Lang[] = ['es', 'en']
-const render = (zone: HotelZone) => renderToStaticMarkup(<HotelGuideClient {...buildHotelGuideProps(city, zone)} />)
-const titles = (zone: HotelZone, lang: Lang) => resolveHotelPractical(city, zone, lang).map((c) => c.title)
+const hotel = (zone: HotelZone) => renderToStaticMarkup(<GuiaClient {...buildHotelGuideProps(zone)!} />)
+const livin = (zone: HotelZone) => {
+  const g = getGuide(HOTEL_PARTNER_SLUG[zone])!
+  return renderToStaticMarkup(<GuiaClient partner={g.partner} city={g.city} />)
+}
+const headings = (html: string) => [...html.matchAll(/<h[12][^>]*>([^<]*)</g)].map((m) => m[1])
+const tabs = (html: string) => [...html.matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => ({ selected: m[1] === 'true', label: m[2] }))
 
-describe('held items do not render in the hotel edition', () => {
-  const heldArrival = city.copy.es.arrivalItems.concat(city.copy.en.arrivalItems).filter((i) => i.hold)
+describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
+  const html = hotel(zone)
+  const base = livin(zone)
 
-  test('the arrival cards held today are Airport and Earthquakes, in both languages', () => {
-    expect(heldArrival.map((i) => i.id ?? i.icon).sort()).toEqual(['earthquakes', 'earthquakes', 'plane', 'plane'])
+  test('same sections in the same order as the Livin guide (welcome banner aside)', () => {
+    expect(headings(html).slice(1)).toEqual(headings(base).slice(1))
   })
-
-  test.each(HOTEL_ZONES.flatMap((z) => LANGS.map((l) => [z, l] as const)))('%s/%s: no held arrival card', (zone, lang) => {
-    const resolved = titles(zone, lang)
-    for (const item of city.copy[lang].arrivalItems.filter((i) => i.hold)) expect(resolved).not.toContain(item.title)
-  })
-
-  test.each(HOTEL_ZONES.flatMap((z) => LANGS.map((l) => [z, l] as const)))('%s/%s: a held FAQ answer is skipped, others stay', (zone, lang) => {
-    const held = !!getZone(zone)?.answers?.cashAtms?.hold
-    const resolved = resolveHotelPractical(city, zone, lang).map((c) => c.key)
-    expect(resolved.includes('cashAtms')).toBe(!held)
-    expect(resolved).toContain('oddHours')
-  })
-
-  test('Cash & ATMs is held in Roma and Polanco (Banamex TODO) and shows in Condesa', () => {
-    expect(getZone('roma')?.answers?.cashAtms?.hold).toBe('confirm')
-    expect(getZone('polanco')?.answers?.cashAtms?.hold).toBe('confirm')
-    expect(getZone('condesa')?.answers?.cashAtms?.hold).toBeUndefined()
-  })
-
-  test('releasing a hold is the only thing that shows the item (config already lists it)', () => {
-    const plane = city.copy.en.arrivalItems.find((i) => i.icon === 'plane')!
-    expect(HOTEL_FREE_EDITION.practical.arrival).toContain('plane')
-    const released = { ...city, copy: { ...city.copy, en: { ...city.copy.en, arrivalItems: city.copy.en.arrivalItems.map((i) => (i === plane ? { ...i, hold: undefined } : i)) } } }
-    expect(resolveHotelPractical(released, 'condesa', 'en').map((c) => c.title)).toContain(plane.title)
-  })
-})
-
-describe('what the practical part shows', () => {
-  test('Money, Safety, Tap water, Altitude, Connectivity, Health once, Transportation, Cash (Condesa), Odd hours', () => {
-    const cards = resolveHotelPractical(city, 'condesa', 'en').map((c) => c.key)
-    expect(cards).toEqual(['car', 'banknote', 'wifi', 'shield', 'droplet', 'mountain', 'health-pharmacies', 'cashAtms', 'oddHours'])
-  })
-  test('weather, luggage, late return, parking, laundry, supermarkets, exchange, coworking, haircuts, gyms are off', () => {
-    const keys = HOTEL_ZONES.flatMap((z) => resolveHotelPractical(city, z, 'en').map((c) => c.key))
-    for (const off of ['cloudSun', 'briefcase', 'coming-back-late', 'parking', 'laundry', 'supermarkets', 'currencyExchange', 'coworking', 'haircuts', 'gyms', 'massages'])
-      expect(keys).not.toContain(off)
-  })
-  test('Transportation keeps its complete sentences and loses the Insider link', () => {
-    for (const lang of LANGS) {
-      const car = resolveHotelPractical(city, 'roma', lang).find((c) => c.key === 'car')!
-      expect(car.links).toBeUndefined()
-      expect(car.body.trim().endsWith('.')).toBe(true)
-      expect(car.body).not.toMatch(/Insider|recomendamos\s*$|recommend\s*$/i)
-    }
-  })
-  test('Connectivity keeps the Airalo link', () => {
-    const wifi = resolveHotelPractical(city, 'condesa', 'en').find((c) => c.key === 'wifi')!
-    expect(wifi.links?.[0].href).toContain('airalo')
-  })
-})
-
-describe.each(HOTEL_ZONES)('%s guide HTML', (zone) => {
-  const html = render(zone)
-  test('the props serialized to the browser (RSC payload) carry no Insider link, number or name either', () => {
-    const payload = JSON.stringify(buildHotelGuideProps(city, zone))
-    for (const bad of ['Insider', '525539149062', 'wa.me/', 'Livin', 'hostLetter'.length ? 'Veracruz 85' : ''])
-      expect(payload).not.toContain(bad)
-  })
-  test('no Insider, no Insider WhatsApp number, no partner name, no host letter', () => {
-    for (const bad of ['Insider', '525539149062', 'wa.me/52553', 'Livin', 'Veracruz 85', 'Curated by', 'Curado por', 'Your own plan', 'Tu propio plan'])
-      expect(html).not.toContain(bad)
-  })
-  test('the page really rendered the shown content (guards the negative checks above)', () => {
-    for (const must of ['Tap water', 'airalo.tpm.li', 'data-hotel-section="practical"']) expect(html).toContain(must)
-  })
-  test('no newsletter signup form (the Mailchimp one), in either language', () => {
-    expect(html).not.toContain('type="email"')
-    for (const lang of LANGS) expect(html).not.toContain(city.copy[lang].newsletterTitle)
-    expect(html).not.toContain('/api/subscribe')
-  })
-  test('the three real experiences have a booking button; the fourth card has none', () => {
-    expect(html.match(/expBookLink/g)?.length).toBe(HOTEL_EXPERIENCES.items.length)
-    expect(HOTEL_EXPERIENCES.items.length).toBe(3)
-    expect(html.match(/class="[^"]*expCard[^"]*"/g)?.length).toBe(4)
-    expect(html).not.toMatch(/Book via WhatsApp|Reservar por WhatsApp/)
-  })
-  test('blocks render in the configured order, hero first', () => {
-    const at = HOTEL_FREE_EDITION.blocks.map((b) => html.indexOf(`data-hotel-section="${b}"`))
-    expect(at.every((i) => i >= 0)).toBe(true)
-    expect([...at].sort((a, b) => a - b)).toEqual(at)
-  })
-  test('off blocks are absent: no stay-glance, no discover-more, no sticky planner CTA, no "your house" tab', () => {
-    expect(html).not.toContain('stickyCta')
-    expect(html).not.toContain('discoverGrid')
-    expect(html).not.toMatch(/Your house|Tu casa/)
-  })
-  test('opens on the zone: headline, then the zone section, then the city-wide zones below it', () => {
-    expect(html).toContain(`Your guide to ${ZONE_LABEL[zone]}`)
+  test('opens with the hotel welcome banner: "Your guide to {zone}", share button kept', () => {
+    expect(headings(html)[0]).toBe(`Your guide to ${ZONE_LABEL[zone]}`)
     expect(html).not.toContain('Welcome to Mexico City.')
-    const zoneAt = html.indexOf('data-hotel-section="zone"')
-    const cityAt = html.indexOf('data-hotel-section="neighborhoods"')
-    expect(html.indexOf(`Your guide to ${ZONE_LABEL[zone]}`)).toBeLessThan(zoneAt)
-    expect(zoneAt).toBeGreaterThan(0)
-    expect(zoneAt).toBeLessThan(cityAt)
-    expect(html).toContain('Five zones, five ways to experience the city')
-    expect(html.indexOf('Five zones, five ways to experience the city')).toBeGreaterThan(zoneAt)
-  })
-  test('headline in both languages, for every zone', () => {
-    expect(HOTEL_FREE_EDITION.zoneHeadline.es.replace('{zone}', 'Roma Norte')).toBe('Tu guía de Roma Norte')
-    expect(HOTEL_FREE_EDITION.zoneHeadline.en.replace('{zone}', 'Polanco')).toBe('Your guide to Polanco')
-    for (const z of HOTEL_ZONES) expect(render(z)).toContain(`Your guide to ${ZONE_LABEL[z]}`)
-  })
-  test('the city-wide tabs list the other zones, not the guest\'s own', () => {
-    const tabs = [...html.matchAll(/role="tab"[^>]*>([^<]*)</g)].map((m) => m[1])
-    expect(tabs.length).toBeGreaterThan(0)
-    expect(tabs).not.toContain(ZONE_LABEL[zone])
-  })
-  test('the share button and Lagomplan eyebrow are there', () => {
     expect(html).toContain('Send this guide to my phone')
     expect(html).toContain('Neighborhood guide · Lagomplan')
   })
+  test('the practical part is the Livin one, with the same groups', () => {
+    expect(html).toContain('A calm start to your trip')
+    const groups = ['Before you arrive', 'Everyday errands', 'Eating in', 'Take care']
+    expect(groups.filter((g) => html.includes(g))).toEqual(groups.filter((g) => base.includes(g)))
+    if (zone === 'condesa') for (const g of groups) expect(html).toContain(g)
+  })
+  test('five zones: the same five tabs as the Livin guide, and the hotel zone is the one selected', () => {
+    const t = tabs(html)
+    expect(t.map((x) => x.label)).toEqual(tabs(base).map((x) => x.label))
+    expect(t).toHaveLength(5)
+    const selected = t.filter((x) => x.selected)
+    expect(selected).toHaveLength(1)
+    expect(selected[0].label).toBe(ZONE_NEIGHBORHOOD[zone])
+  })
+  test('no separate "your zone" block', () => {
+    expect(html).not.toMatch(/Your area|Tu zona/)
+  })
+  test('the 48 hours section is there', () => {
+    expect(html).toContain('48 hours')
+  })
+  test('differences: no host letter, no newsletter form', () => {
+    expect(html).not.toContain('type="email"')
+    expect(html).not.toContain('/api/subscribe')
+    expect(base).toContain('type="email"') // the Livin guide has them, so the check above means something
+  })
+  test('no Insider link, number or entry anywhere (page source included)', () => {
+    for (const bad of ['Insider', '525539149062', 'wa.me/52553', 'Book via WhatsApp', 'Reservar por WhatsApp', 'Your own plan', 'Tu propio plan'])
+      expect(html).not.toContain(bad)
+    expect(JSON.stringify(buildHotelGuideProps(zone))).not.toMatch(/Insider|525539149062/)
+  })
+  test('held items never render (airport and earthquakes cards)', () => {
+    for (const held of ['Most flights land at AICM', 'seismic alert', 'La mayoría de los vuelos llegan al AICM'])
+      expect(html).not.toContain(held)
+    expect(base).toContain('Most flights land at AICM') // Livin still shows them
+  })
+  test('every tracked section is marked, in guide order', () => {
+    const at = HOTEL_SECTION_IDS.map((id) => html.indexOf(`data-hotel-section="${id}"`))
+    expect(at.every((i) => i >= 0)).toBe(true)
+    expect([...at].sort((a, b) => a - b)).toEqual(at)
+  })
+  test('the Livin guide itself carries no hotel markers', () => {
+    expect(base).not.toContain('data-hotel-section')
+  })
 })
 
-describe('GetYourGuide links in the hotel edition', () => {
-  const repoText = (() => {
-    const fs = require('fs'); const path = require('path')
-    const files = ['lib/data/guides/ciudad-de-mexico/en.ts', 'lib/data/guides/chile-en-nogada/en.ts', 'lib/data/guides/dia-de-muertos-cdmx-patzcuaro/en.ts']
-    return files.map((f) => fs.readFileSync(path.join(process.cwd(), f), 'utf8')).join('\n')
-  })()
-  test.each(HOTEL_EXPERIENCES.items.map((e) => [e.id, e] as const))('%s: an existing repo tour URL, carrying the partner ID', (_id, e) => {
-    expect(isGygTourUrl(e.tourUrl)).toBe(true)
-    expect(repoText).toContain(e.tourUrl)            // not invented: it is already in a guide
-    const u = new URL(e.bookUrl)
-    expect(u.searchParams.get('partner_id')).toBe(GYG_PARTNER_ID)
-    expect(u.searchParams.getAll('partner_id')).toHaveLength(1)
-    expect(`${u.origin}${u.pathname}`).toBe(e.tourUrl)
-    expect(render('condesa')).toContain(e.bookUrl.replace(/&/g, '&amp;'))
+describe('experiences: the GetYourGuide tours on this branch', () => {
+  const html = hotel('condesa')
+  test('only Casa Luis Barragán, with a booking button, in a width-capped grid', () => {
+    expect(HOTEL_EXPERIENCES.items.map((e) => e.id)).toEqual(['casa-luis-barragan'])
+    expect(html.match(/expBookLink/g)?.length).toBe(1)
+    expect(html).toMatch(/class="expGrid" style="max-width:400px"/)
+    for (const gone of ["Val'Quirico", 'Val&#x27;Quirico', 'Day of the Dead']) expect(html).not.toContain(gone)
   })
-  test('no Insider link in the experience data', () => {
-    expect(JSON.stringify(HOTEL_EXPERIENCES)).not.toMatch(/Insider|wa\.me/)
+  test.each(HOTEL_EXPERIENCES.items.map((e) => [e.id, e] as const))('%s: a repo tour URL with the partner ID', (_id, e) => {
+    expect(isGygTourUrl(e.tourUrl)).toBe(true)
+    const u = new URL(e.bookUrl)
+    expect(u.searchParams.getAll('partner_id')).toEqual([GYG_PARTNER_ID])
+    expect(u.searchParams.get('cmp')).toBe('hotel-guide')
+    expect(html).toContain(e.bookUrl.replace(/&/g, '&amp;'))
+  })
+})
+
+describe('hotel zone to Livin guide', () => {
+  test('each zone uses the matching Livin guide', () => {
+    expect(HOTEL_PARTNER_SLUG).toEqual({ condesa: 'livin_condesa', roma: 'livin_roma', polanco: 'livin_polanco' })
+  })
+  test('the edition config only holds the banner and tracking settings', () => {
+    expect(HOTEL_FREE_EDITION.zoneHeadline.es.replace('{zone}', 'Roma Norte')).toBe('Tu guía de Roma Norte')
+    expect(HOTEL_FREE_EDITION.zoneHeadline.en.replace('{zone}', 'Polanco')).toBe('Your guide to Polanco')
+  })
+  test('held FAQ answers are listed for the zones that have them (Roma, Polanco: cash and ATMs)', () => {
+    expect(buildHotelGuideProps('roma')!.hotel.heldFaqKeys).toContain('cashAtms')
+    expect(buildHotelGuideProps('polanco')!.hotel.heldFaqKeys).toContain('cashAtms')
   })
 })

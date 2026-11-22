@@ -111,9 +111,11 @@ URL.
 
 ## Hotel neighborhood guide (free QR edition) — `/guia/cdmx/[zone]`
 
-A separate guide for hotels (QR card → `/g/{code}` → `/guia/cdmx/{condesa|roma-norte|polanco}?h={code}&lang=`).
-It has its own renderer (`HotelGuideClient`) and does **not** fire any `host_guide_*` event, and it does not write
-`lagom_ref` or `guide_visits`. Two layers of measurement:
+The hotel edition of the Livin guide (QR card → `/g/{code}` → `/guia/cdmx/{condesa|roma-norte|polanco}?h={code}&lang=`).
+It renders `GuiaClient` itself (the Livin Condesa / Roma / Polanco guide for the zone) with the `hotel` prop, so it is the
+same page with a few differences (no host letter, no newsletter, GetYourGuide experiences, the hotel welcome banner,
+the hotel zone as the default tab). It never fires a `host_guide_*` event: those go out as `hotel_guide_*` with the hotel
+code, so the Livin pilot numbers stay clean. It does not write `lagom_ref` or `guide_visits`. Two layers of measurement:
 
 **1. First-party table `hotel_guide_events`** (the numbers in `/admin/hoteles`). No consent needed: it stores
 `hotel_id`, `event_type`, `section`, `lang`, `created_at` and nothing that identifies a guest (no IP, no user agent,
@@ -122,7 +124,7 @@ no cookie id). Rows exist only for codes of *approved* hotels.
 | `event_type` | Written by | `section` |
 |---|---|---|
 | `scan` | `GET /g/{code}` (not for bots, link-preview fetchers, prefetches or HEAD) | — |
-| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `zone` \| `neighborhoods` \| `food` \| `moods` \| `rhythm` \| `experiences` \| `practical` \| `itinerary` \| `planner` (the `blocks` of `content/guia/hotel/config.ts`) |
+| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `practical` \| `neighborhoods` \| `itinerary` \| `moods` \| `rhythm` \| `experiences` \| `food` \| `planner` \| `discover` (`HOTEL_SECTION_IDS` in `content/guia/hotel/config.ts`, in the guide's order) |
 | `outbound_click` | the guide, on click | `experience_book` \| `airalo` \| `map` \| `planner` \| `share` |
 
 **2. GA4, only after cookie consent (Consent Mode v2, as the rest of `/guia`):**

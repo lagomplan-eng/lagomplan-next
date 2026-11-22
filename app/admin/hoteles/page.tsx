@@ -21,8 +21,8 @@ export default async function AdminHotelsPage() {
       <p style={{ margin: '0 0 24px', color: '#6B8F86' }}>Edición gratuita con QR.</p>
       {experiencesArePlaceholders() && (
         <div role="alert" style={{ background: '#FFF1D6', border: '1px solid #E5B85C', borderRadius: 10, padding: '12px 16px', margin: '0 0 24px' }}>
-          Faltan enlaces de GetYourGuide para las experiencias de la guía de hoteles: hay {HOTEL_EXPERIENCES.items.length} de {HOTEL_EXPERIENCES_TARGET}.
-          La tarjeta que falta se muestra sin botón de reserva (content/guia/hotel/experiences.ts).
+          Solo {HOTEL_EXPERIENCES.items.length} de {HOTEL_EXPERIENCES_TARGET} tours de GetYourGuide tienen botón de reserva en la guía de hoteles.
+          La guía muestra únicamente los que tienen botón (content/guia/hotel/experiences.ts).
         </div>
       )}
       <HotelsTable hotels={hotels} totals={totals} />

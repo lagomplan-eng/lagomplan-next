@@ -10,7 +10,7 @@ import { notFound } from 'next/navigation'
 import { getCity } from '../../../../content/guia'
 import { HOTEL_ZONES, ZONE_LABEL, ZONE_SLUG, zoneFromSlug } from '../../../../content/guia/hotel/zones'
 import { buildHotelGuideProps } from '../../../../content/guia/hotel/resolve'
-import HotelGuideClient from './HotelGuideClient'
+import GuiaClient from '../../[partner]/GuiaClient'
 
 export const dynamicParams = false
 
@@ -34,7 +34,8 @@ export async function generateMetadata({ params }: { params: Promise<{ zone: str
 
 export default async function HotelZoneGuidePage({ params }: { params: Promise<{ zone: string }> }) {
   const zone = zoneFromSlug((await params).zone)
-  const city = getCity('cdmx')
-  if (!zone || !city) notFound()
-  return <HotelGuideClient {...buildHotelGuideProps(city, zone)} />
+  const props = zone ? buildHotelGuideProps(zone) : null
+  if (!props) notFound()
+  // The hotel edition IS the Livin guide (GuiaClient) with the `hotel` differences; recordVisits stays off.
+  return <GuiaClient {...props} />
 }
