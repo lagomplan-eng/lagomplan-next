@@ -9,7 +9,9 @@ import HotelGuideClient from '../app/guia/cdmx/[zone]/HotelGuideClient'
 import { getCity } from '../content/guia'
 import { HOTEL_FREE_EDITION } from '../content/guia/hotel/config'
 import { buildHotelGuideProps, resolveHotelPractical } from '../content/guia/hotel/resolve'
-import { HOTEL_ZONES, type HotelZone } from '../content/guia/hotel/zones'
+import { HOTEL_ZONES, ZONE_LABEL, type HotelZone } from '../content/guia/hotel/zones'
+import { HOTEL_EXPERIENCES } from '../content/guia/hotel/experiences'
+import { GYG_PARTNER_ID, isGygTourUrl } from '../lib/affiliate/gyg'
 import { getZone } from '../content/guia/zones'
 import type { Lang } from '../content/guia/types'
 
@@ -94,9 +96,11 @@ describe.each(HOTEL_ZONES)('%s guide HTML', (zone) => {
     for (const lang of LANGS) expect(html).not.toContain(city.copy[lang].newsletterTitle)
     expect(html).not.toContain('/api/subscribe')
   })
-  test('placeholder experiences have no booking button', () => {
+  test('the three real experiences have a booking button; the fourth card has none', () => {
+    expect(html.match(/expBookLink/g)?.length).toBe(HOTEL_EXPERIENCES.items.length)
+    expect(HOTEL_EXPERIENCES.items.length).toBe(3)
+    expect(html.match(/class="[^"]*expCard[^"]*"/g)?.length).toBe(4)
     expect(html).not.toMatch(/Book via WhatsApp|Reservar por WhatsApp/)
-    expect(html).not.toContain('expBookLink')
   })
   test('blocks render in the configured order, hero first', () => {
     const at = HOTEL_FREE_EDITION.blocks.map((b) => html.indexOf(`data-hotel-section="${b}"`))
@@ -108,13 +112,49 @@ describe.each(HOTEL_ZONES)('%s guide HTML', (zone) => {
     expect(html).not.toContain('discoverGrid')
     expect(html).not.toMatch(/Your house|Tu casa/)
   })
-  test('the hotel zone tab comes first and is the selected one', () => {
-    expect(html).toMatch(/role="tab"[^>]*aria-selected="true"/)
-    const first = html.match(/role="tab" aria-selected="(true|false)"/)
-    expect(first?.[1]).toBe('true')
+  test('opens on the zone: headline, then the zone section, then the city-wide zones below it', () => {
+    expect(html).toContain(`Your guide to ${ZONE_LABEL[zone]}`)
+    expect(html).not.toContain('Welcome to Mexico City.')
+    const zoneAt = html.indexOf('data-hotel-section="zone"')
+    const cityAt = html.indexOf('data-hotel-section="neighborhoods"')
+    expect(html.indexOf(`Your guide to ${ZONE_LABEL[zone]}`)).toBeLessThan(zoneAt)
+    expect(zoneAt).toBeGreaterThan(0)
+    expect(zoneAt).toBeLessThan(cityAt)
+    expect(html).toContain('Five zones, five ways to experience the city')
+    expect(html.indexOf('Five zones, five ways to experience the city')).toBeGreaterThan(zoneAt)
+  })
+  test('headline in both languages, for every zone', () => {
+    expect(HOTEL_FREE_EDITION.zoneHeadline.es.replace('{zone}', 'Roma Norte')).toBe('Tu guía de Roma Norte')
+    expect(HOTEL_FREE_EDITION.zoneHeadline.en.replace('{zone}', 'Polanco')).toBe('Your guide to Polanco')
+    for (const z of HOTEL_ZONES) expect(render(z)).toContain(`Your guide to ${ZONE_LABEL[z]}`)
+  })
+  test('the city-wide tabs list the other zones, not the guest\'s own', () => {
+    const tabs = [...html.matchAll(/role="tab"[^>]*>([^<]*)</g)].map((m) => m[1])
+    expect(tabs.length).toBeGreaterThan(0)
+    expect(tabs).not.toContain(ZONE_LABEL[zone])
   })
   test('the share button and Lagomplan eyebrow are there', () => {
     expect(html).toContain('Send this guide to my phone')
     expect(html).toContain('Neighborhood guide · Lagomplan')
+  })
+})
+
+describe('GetYourGuide links in the hotel edition', () => {
+  const repoText = (() => {
+    const fs = require('fs'); const path = require('path')
+    const files = ['lib/data/guides/ciudad-de-mexico/en.ts', 'lib/data/guides/chile-en-nogada/en.ts', 'lib/data/guides/dia-de-muertos-cdmx-patzcuaro/en.ts']
+    return files.map((f) => fs.readFileSync(path.join(process.cwd(), f), 'utf8')).join('\n')
+  })()
+  test.each(HOTEL_EXPERIENCES.items.map((e) => [e.id, e] as const))('%s: an existing repo tour URL, carrying the partner ID', (_id, e) => {
+    expect(isGygTourUrl(e.tourUrl)).toBe(true)
+    expect(repoText).toContain(e.tourUrl)            // not invented: it is already in a guide
+    const u = new URL(e.bookUrl)
+    expect(u.searchParams.get('partner_id')).toBe(GYG_PARTNER_ID)
+    expect(u.searchParams.getAll('partner_id')).toHaveLength(1)
+    expect(`${u.origin}${u.pathname}`).toBe(e.tourUrl)
+    expect(render('condesa')).toContain(e.bookUrl.replace(/&/g, '&amp;'))
+  })
+  test('no Insider link in the experience data', () => {
+    expect(JSON.stringify(HOTEL_EXPERIENCES)).not.toMatch(/Insider|wa\.me/)
   })
 })

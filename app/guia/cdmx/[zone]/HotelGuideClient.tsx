@@ -19,7 +19,7 @@ import { getRoute } from '../../../../lib/routes'
 import { sendHotelEvent } from '../../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../../lib/hotels/codes'
 import type { HotelPracticalCard } from '../../../../content/guia/hotel/resolve'
-import { HOTEL_EXPERIENCES, experiencesArePlaceholders } from '../../../../content/guia/hotel/experiences'
+import { HOTEL_EXPERIENCES, HOTEL_EXPERIENCES_TARGET } from '../../../../content/guia/hotel/experiences'
 import type { HotelBlockId, HotelEdition, HotelOutboundId } from '../../../../content/guia/hotel/config'
 import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG, type HotelZone } from '../../../../content/guia/hotel/zones'
 import { Icon } from '../../[partner]/GuiaClient'
@@ -51,7 +51,9 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
   const [code, setCode] = useState<string | null>(null)
   const [mood, setMood] = useState<string | null>(null)
   const ownNb = ZONE_NEIGHBORHOOD[zone]
-  const [browseNb, setBrowseNb] = useState<string>(ownNb)
+  // The own zone has its own section under the headline; the city-wide tabs below start on the first other zone.
+  const otherNbs = city.neighborhoodOrder.filter((n) => n !== ownNb && city.neighborhoods[n])
+  const [browseNb, setBrowseNb] = useState<string>(edition.neighborhoods.excludeOwnZone ? otherNbs[0] ?? ownNb : ownNb)
 
   const t = city.copy[lang]
   const zoneName = ZONE_LABEL[zone]
@@ -105,15 +107,19 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
     return `https://wa.me/?text=${encodeURIComponent(`${COPY[lang].shareText(zoneName)} ${url}`.trim())}`
   }, [lang, zone, zoneName, code])
 
-  const nbOrder = edition.neighborhoods.ownZoneFirst
-    ? [ownNb, ...city.neighborhoodOrder.filter((n) => n !== ownNb)]
-    : city.neighborhoodOrder
+  const nbOrder = edition.neighborhoods.excludeOwnZone
+    ? otherNbs
+    : edition.neighborhoods.ownZoneFirst
+      ? [ownNb, ...otherNbs]
+      : city.neighborhoodOrder
+  const ownNbData = city.neighborhoods[ownNb]
   const nb = city.neighborhoods[browseNb] ?? city.neighborhoods[ownNb]
   const spots = nb.spots[lang]
   const itin = city.itinerary[lang]
   const practical = practicalByLang[lang]
   const selectedMood = t.moods.find((m) => m.id === mood) ?? null
-  const placeholderExps = t.experiences.filter((e) => e.id !== 'exp-own-plan' && EXP_PHOTOS[e.id])
+  // The leftover slot uses the food card first: it suits all three zones.
+  const placeholderExps = [...t.experiences.filter((e) => e.id !== 'exp-own-plan' && EXP_PHOTOS[e.id])].sort((x, y) => (y.id === 'exp-tacos' ? 1 : 0) - (x.id === 'exp-tacos' ? 1 : 0))
 
   const sec = (id: HotelBlockId) => ({ 'data-hotel-section': id } as const)
 
@@ -125,10 +131,10 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
         <div className={styles.heroOverlay} />
         <div className={styles.heroContent}>
           <span className={styles.heroEyebrow}>{edition.heroEyebrow[lang]}</span>
-          <h1 className={styles.heroTitle}>{t.heroTitle}</h1>
+          <h1 className={styles.heroTitle}>{edition.zoneHeadline[lang].replace('{zone}', zoneName)}</h1>
           <p className={styles.heroSub}>{interp(t.heroSub)}</p>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <a href="#zonas" className={styles.ctaLight}>{COPY[lang].cta} <Icon name="arrowDown" size={15} color={PINE} /></a>
+            <a href="#zona" className={styles.ctaLight}>{COPY[lang].cta} <Icon name="arrowDown" size={15} color={PINE} /></a>
             {edition.share && (
               <a
                 href={shareHref}
@@ -143,12 +149,56 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
       </section>
     ),
 
-    neighborhoods: (
-      <section id="zonas" className={`${styles.section} ${styles.sectionAlt}`} {...sec('neighborhoods')} key="neighborhoods">
+    // The guest's own zone: the first thing under the headline. No tabs, only this zone.
+    zone: (
+      <section id="zona" className={`${styles.section} ${styles.sectionAlt}`} {...sec('zone')} key="zone">
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <div className={styles.secHead}>
-              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
+              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{edition.yourZoneEyebrow[lang]} · {zoneName}</span>
+              <h2 className={styles.h2}>{ownNbData.tagline[lang]}</h2>
+              <p className={styles.lede}>{ownNbData.orientation[lang]}</p>
+            </div>
+            <div className={styles.secBody}>
+              <div className={styles.nbControls}>
+                <a className={styles.nbMapCard} href={ownNbData.mapUrl || undefined} target="_blank" rel="noopener noreferrer"
+                  onClick={() => track('map', ownNbData.mapUrl)}>
+                  <span className={styles.nbMapThumb} aria-hidden>
+                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
+                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
+                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
+                  </span>
+                  <span className={styles.nbMapText}>
+                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(ownNbData.spots[lang].length))}</span>
+                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {ownNbData.tabLabel?.[lang] ?? ownNb}</span>
+                  </span>
+                  <span className={styles.nbMapArrow} aria-hidden>→</span>
+                </a>
+              </div>
+              <div className={styles.spotList}>
+                {ownNbData.spots[lang].map((spot, i) => (
+                  <div className={styles.spotRow} key={`own-${i}`}>
+                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
+                    <div>
+                      <div className={styles.spotHead}><h5 className={styles.h5}>{spot.name}</h5><span className={styles.spotDist}>{spot.distance}</span></div>
+                      <p className={styles.spotNote}>{spot.note}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    ),
+
+    // The city-wide part, below the own zone: the way into the rest of Mexico City.
+    neighborhoods: (
+      <section id="zonas" className={styles.section} {...sec('neighborhoods')} key="neighborhoods">
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{edition.exploreEyebrow[lang]}</span>
               <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
               <p className={styles.nbTagline}>{nb.tagline[lang]}</p>
               <p className={styles.lede}>{nb.orientation[lang]}</p>
@@ -277,29 +327,29 @@ export default function HotelGuideClient({ zone, city, edition, practical: pract
             <SectionHead eyebrow={t.expEyebrow} title={t.expH2} lede={t.expLede} />
             <div className={styles.secBody}>
               <div className={styles.expGrid}>
-                {experiencesArePlaceholders()
-                  ? placeholderExps.map((e) => (
-                      <div className={styles.expCard} key={e.id}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img className={styles.expImg} src={EXP_PHOTOS[e.id]} alt={e.title} />
-                        <div className={styles.expBody}>
-                          <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title}</h5><p className={styles.expNote}>{e.teaser}</p></div>
-                        </div>
+                {HOTEL_EXPERIENCES.items.map((e) => (
+                  <div className={styles.expCard} key={e.id}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className={styles.expImg} src={e.image} alt={e.title[lang]} />
+                    <div className={styles.expBody}>
+                      <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title[lang]}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
+                      <div className={styles.expActions}>
+                        <a className={styles.expBookLink} href={e.bookUrl} target="_blank" rel="sponsored noopener noreferrer"
+                          onClick={() => track('experience_book', e.bookUrl, { experience_name: e.id })}>{COPY[lang].book}</a>
                       </div>
-                    ))
-                  : HOTEL_EXPERIENCES.items.map((e) => (
-                      <div className={styles.expCard} key={e.id}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img className={styles.expImg} src={e.image} alt={e.title[lang]} />
-                        <div className={styles.expBody}>
-                          <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title[lang]}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
-                          <div className={styles.expActions}>
-                            <a className={styles.expBookLink} href={e.bookUrl} target="_blank" rel="sponsored noopener noreferrer"
-                              onClick={() => track('experience_book', e.bookUrl, { experience_name: e.id })}>{COPY[lang].book}</a>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
+                    </div>
+                  </div>
+                ))}
+                {/* Until there are four bookable experiences, the remaining slots keep the existing cards, with no button. */}
+                {placeholderExps.slice(0, Math.max(0, HOTEL_EXPERIENCES_TARGET - HOTEL_EXPERIENCES.items.length)).map((e) => (
+                  <div className={styles.expCard} key={e.id}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img className={styles.expImg} src={EXP_PHOTOS[e.id]} alt={e.title} />
+                    <div className={styles.expBody}>
+                      <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title}</h5><p className={styles.expNote}>{e.teaser}</p></div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           </div>

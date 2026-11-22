@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getSupabaseServer } from '../../../lib/supabase/server'
 import { getAdminEmail } from '../../../lib/hotels/admin'
 import { loadDashboard } from '../../../lib/hotels/stats'
-import { experiencesArePlaceholders } from '../../../content/guia/hotel/experiences'
+import { experiencesArePlaceholders, HOTEL_EXPERIENCES, HOTEL_EXPERIENCES_TARGET } from '../../../content/guia/hotel/experiences'
 import HotelsTable from './HotelsTable'
 
 export const dynamic = 'force-dynamic'
@@ -21,8 +21,8 @@ export default async function AdminHotelsPage() {
       <p style={{ margin: '0 0 24px', color: '#6B8F86' }}>Edición gratuita con QR.</p>
       {experiencesArePlaceholders() && (
         <div role="alert" style={{ background: '#FFF1D6', border: '1px solid #E5B85C', borderRadius: 10, padding: '12px 16px', margin: '0 0 24px' }}>
-          Las experiencias de la guía de hoteles son provisionales: se muestran las cuatro existentes sin botón de reserva.
-          Faltan los cuatro enlaces de GetYourGuide (content/guia/hotel/experiences.ts).
+          Faltan enlaces de GetYourGuide para las experiencias de la guía de hoteles: hay {HOTEL_EXPERIENCES.items.length} de {HOTEL_EXPERIENCES_TARGET}.
+          La tarjeta que falta se muestra sin botón de reserva (content/guia/hotel/experiences.ts).
         </div>
       )}
       <HotelsTable hotels={hotels} totals={totals} />

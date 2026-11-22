@@ -14,7 +14,7 @@ import type { Lang } from '../types'
 import type { FaqItemKey } from '../faq/types'
 
 export type HotelBlockId =
-  | 'hero' | 'neighborhoods' | 'food' | 'moods' | 'rhythm'
+  | 'hero' | 'zone' | 'neighborhoods' | 'food' | 'moods' | 'rhythm'
   | 'experiences' | 'practical' | 'itinerary' | 'planner'
 
 export interface HotelEdition {
@@ -22,8 +22,16 @@ export interface HotelEdition {
   /** Render order. A block that is not listed does not render. */
   blocks: HotelBlockId[]
   heroEyebrow: Record<Lang, string>
+  /** First-screen headline template ({zone} is replaced). The guest opens on their own zone, as the printed card says.
+   *  Plain strings, because this object is a prop of a client component. */
+  zoneHeadline: Record<Lang, string>
+  /** Eyebrow of the own-zone section (the one right under the hero). */
+  yourZoneEyebrow: Record<Lang, string>
+  /** Eyebrow of the city-wide zones section, shown below the own zone: the way into the rest of Mexico City. */
+  exploreEyebrow: Record<Lang, string>
   headerLabel: Record<Lang, string>
-  neighborhoods: { yourHouseTab: boolean; ownZoneFirst: boolean }
+  /** The city-wide zones section. ownZoneFirst = the guest's own zone leads the tabs. */
+  neighborhoods: { yourHouseTab: boolean; ownZoneFirst: boolean; /** the own zone has its own section above, so the tabs list only the others */ excludeOwnZone: boolean }
   practical: {
     /** Arrival cards to show, in order, keyed by `item.id ?? item.icon`. */
     arrival: string[]
@@ -43,10 +51,13 @@ export interface HotelEdition {
 
 export const HOTEL_FREE_EDITION: HotelEdition = {
   id: 'free',
-  blocks: ['hero', 'neighborhoods', 'food', 'moods', 'rhythm', 'experiences', 'practical', 'itinerary', 'planner'],
+  blocks: ['hero', 'zone', 'neighborhoods', 'food', 'moods', 'rhythm', 'experiences', 'practical', 'itinerary', 'planner'],
   heroEyebrow: { es: 'Guía de barrio · Lagomplan', en: 'Neighborhood guide · Lagomplan' },
+  zoneHeadline: { es: 'Tu guía de {zone}', en: 'Your guide to {zone}' },
+  yourZoneEyebrow: { es: 'Tu zona', en: 'Your area' },
+  exploreEyebrow: { es: 'Explora el resto de la ciudad', en: 'Explore the rest of Mexico City' },
   headerLabel: { es: 'Guía de barrio', en: 'Neighborhood guide' },
-  neighborhoods: { yourHouseTab: false, ownZoneFirst: true },
+  neighborhoods: { yourHouseTab: false, ownZoneFirst: true, excludeOwnZone: true },
   practical: {
     arrival: [
       'plane',              // Airport — HELD (cdmx.ts CONFIRM, per zone time)
