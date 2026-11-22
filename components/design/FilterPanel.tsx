@@ -75,7 +75,7 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
 
   const rows = (idPrefix: string) => groups.map(g => (
     <div key={g.id} role="group" aria-label={g.label} className="flex flex-col gap-2 md:flex-row md:items-start md:gap-4">
-      <p className="m-0 font-sans text-[12px] font-bold uppercase tracking-[.14em] text-label md:flex md:min-h-chip md:w-[104px] md:flex-none md:items-center" id={`${idPrefix}-${g.id}`}>{g.label}</p>
+      <p className="m-0 font-sans text-tiny font-semibold text-pine md:flex md:min-h-chip md:w-[104px] md:flex-none md:items-center" id={`${idPrefix}-${g.id}`}>{g.label}</p>
       <div aria-labelledby={`${idPrefix}-${g.id}`} className="flex flex-wrap gap-2">{g.chips}</div>
     </div>
   ))
@@ -86,9 +86,9 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
         <div className="relative">
           <div
             onClick={() => inputRef.current?.focus()}
-            className="flex min-h-control-lg cursor-text items-center gap-3 rounded-full border border-line-chip bg-white px-5 py-2 focus-within:border-pine focus-within:ring-2 focus-within:ring-fjord/30"
+            className="flex min-h-control cursor-text items-center gap-3 rounded-field border border-line-field bg-white px-3 py-1.5 focus-within:border-pine focus-within:shadow-[0_0_0_3px_rgb(var(--pine-rgb)/0.06)]"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-none text-label">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" className="flex-none text-sage">
               <circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" />
             </svg>
             {search.tokens?.map(tok => (
@@ -97,7 +97,7 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
                 type="button"
                 aria-label={tok.removeLabel}
                 onClick={e => { e.stopPropagation(); search.onRemoveToken?.(tok.key) }}
-                className="inline-flex h-control-sm flex-none items-center gap-2 whitespace-nowrap rounded-full bg-pine px-4 font-sans text-button-sm text-cream"
+                className="inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-btn bg-pine px-4 py-2 font-sans text-button-sm font-semibold text-white"
               >
                 {tok.label}<span aria-hidden="true">×</span>
               </button>
@@ -121,21 +121,21 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
                   if (first) { e.preventDefault(); pick(first.key) }
                 }
               }}
-              className="min-w-[120px] flex-1 border-0 bg-transparent p-0 font-sans text-body text-pine outline-none placeholder:text-label [&::-webkit-search-cancel-button]:hidden"
+              className="min-w-[120px] flex-1 border-0 bg-transparent p-0 font-sans text-small text-ink-input outline-none placeholder:text-placeholder [&::-webkit-search-cancel-button]:hidden"
             />
           </div>
-          <ul id={listId} hidden={!suggestOpen} className="absolute inset-x-0 top-[calc(100%+8px)] z-30 m-0 max-h-72 list-none overflow-y-auto rounded-info border border-line-panel bg-white p-2 shadow-pop">
-            {suggestOpen && search.suggestions?.length === 0 && <li className="px-4 py-3 font-sans text-small text-ink-2">{search.noResultsText}</li>}
+          <ul id={listId} hidden={!suggestOpen} className="absolute inset-x-0 top-[calc(100%+8px)] z-30 m-0 max-h-72 list-none overflow-y-auto rounded-info border border-line-form bg-white p-2 shadow-pop">
+            {suggestOpen && search.suggestions?.length === 0 && <li className="px-4 py-3 font-sans text-small text-ink-body">{search.noResultsText}</li>}
             {suggestOpen && search.suggestions?.map(s => (
               <li key={s.key}>
                 {s.link ? (
                   <div className="flex min-h-chip flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl px-4 py-2">
-                    <span className="font-sans text-[15px] text-pine"><span className="font-semibold">{s.label}</span>{s.hint && <span className="text-label"> · {s.hint}</span>}</span>
-                    <a href={s.link.href} className="inline-flex min-h-chip items-center font-sans text-[15px] font-bold text-pine underline underline-offset-4">{s.link.label}</a>
+                    <span className="font-sans text-small text-pine"><span className="font-semibold">{s.label}</span>{s.hint && <span className="text-sage"> · {s.hint}</span>}</span>
+                    <a href={s.link.href} className="inline-flex min-h-chip items-center font-sans text-small font-semibold text-pine underline underline-offset-4">{s.link.label}</a>
                   </div>
                 ) : (
-                  <button type="button" onClick={() => pick(s.key)} className="flex min-h-chip w-full items-center justify-between gap-3 rounded-xl px-4 text-left font-sans text-[15px] font-semibold text-pine hover:bg-sand">
-                    <span>{s.label}</span>{s.hint && <span className="text-[13px] font-medium text-label">{s.hint}</span>}
+                  <button type="button" onClick={() => pick(s.key)} className="flex min-h-chip w-full items-center justify-between gap-3 rounded-xl px-4 text-left font-sans text-small font-semibold text-pine hover:bg-mint">
+                    <span>{s.label}</span>{s.hint && <span className="text-tiny text-sage">{s.hint}</span>}
                   </button>
                 )}
               </li>
@@ -146,7 +146,7 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
 
       {/* Desktop: inline rows in one panel */}
       {groups.length > 0 && (
-        <div data-filter="inline" className="hidden flex-col gap-5 rounded-destination border border-line-panel bg-white px-6 py-5 md:flex">
+        <div data-filter="inline" className="hidden flex-col gap-5 rounded-info border border-line-form bg-white px-6 py-5 shadow-form md:flex">
           {rows('inline')}
         </div>
       )}
@@ -161,7 +161,7 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
               {labels.filters}{activeCount > 0 ? ` (${activeCount})` : ''}
             </Button>
             {activeFilters.map(f => (
-              <button key={f.key} type="button" aria-label={f.removeLabel} onClick={f.onRemove} className="inline-flex h-control-sm items-center gap-2 whitespace-nowrap rounded-full bg-pine px-4 font-sans text-button-sm text-cream">
+              <button key={f.key} type="button" aria-label={f.removeLabel} onClick={f.onRemove} className="inline-flex items-center gap-2 whitespace-nowrap rounded-btn bg-pine px-4 py-2 font-sans text-button-sm font-semibold text-white">
                 {f.label}<span aria-hidden="true">×</span>
               </button>
             ))}

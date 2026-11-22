@@ -2,10 +2,13 @@
 /**
  * components/design/Chip.tsx
  *
- * Filter chip: a toggle (aria-pressed), 44px, pill. Selected = pine fill.
- * Tag (below) is its non-interactive sibling: the small label on cards.
+ * Chip: a toggle (aria-pressed). Colours are home's chip: white fill, 1px sage/22% border, sage text, full radius;
+ * selected = mint fill, pine/20% border, pine text; hover darkens the border.
+ *   size="sm"  exactly home's interest chip (10px text, 24px high)
+ *   size="md"  DERIVED for filters and touch: same shape and colours at 13px text, 44px high (the home pace toggle's height)
+ * Tag (below) is DERIVED: the small non-interactive label on cards, in the chip colours.
  */
-import type { ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
 import { cx } from './cx'
 
 interface ChipProps {
@@ -14,10 +17,11 @@ interface ChipProps {
   onClick: () => void
   count?: number
   disabled?: boolean
+  size?: 'sm' | 'md'
   className?: string
 }
 
-export default function Chip({ label, selected, onClick, count, disabled, className }: ChipProps) {
+export default function Chip({ label, selected, onClick, count, disabled, size = 'md', className }: ChipProps) {
   return (
     <button
       type="button"
@@ -25,23 +29,24 @@ export default function Chip({ label, selected, onClick, count, disabled, classN
       disabled={disabled}
       onClick={onClick}
       className={cx(
-        'inline-flex h-chip flex-none items-center gap-2 whitespace-nowrap rounded-full border px-[18px] font-sans text-[15px] font-semibold transition-colors',
+        'inline-flex flex-none items-center gap-2 whitespace-nowrap rounded-full border font-sans transition-all',
         'focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fjord',
-        selected ? 'border-pine bg-pine text-cream' : 'border-line-chip bg-white text-pine hover:border-pine',
+        size === 'sm' ? 'px-3 py-1.5 text-micro leading-none' : 'h-chip px-4 text-small',
+        selected ? 'border-pine/20 bg-mint text-pine' : 'border-line-sage bg-white text-sage hover:border-pine/20',
         disabled && 'pointer-events-none opacity-45',
         className,
       )}
     >
       {label}
-      {count !== undefined && <span className={cx('text-[13px] font-bold', selected ? 'text-cream/80' : 'text-label')}>{count}</span>}
+      {count !== undefined && <span className={cx('font-semibold', selected ? 'text-pine/70' : 'text-label')}>{count}</span>}
     </button>
   )
 }
 
-/** Small non-interactive label (card tags). */
-export function Tag({ children, className }: { children: ReactNode; className?: string }) {
+/** Small non-interactive label (card tags): the chip, unselected, at the sm size. */
+export function Tag({ children, className, ...rest }: { children: ReactNode; className?: string } & Omit<HTMLAttributes<HTMLSpanElement>, 'className' | 'children'>) {
   return (
-    <span className={cx('inline-flex items-center rounded-full border border-line-strong bg-sand px-2.5 py-1.5 font-sans text-[11px] font-medium leading-none text-pine/70', className)}>
+    <span {...rest} className={cx('inline-flex items-center rounded-full border border-line-sage bg-white px-3 py-1.5 font-sans text-micro leading-none text-sage', className)}>
       {children}
     </span>
   )

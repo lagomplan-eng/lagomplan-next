@@ -1,31 +1,41 @@
 # Design tokens
 
-One source: the `:root` block of `app/globals.css`. `tailwind.config.js` only maps names to those variables and defines no value of its own. Live specimen of every token and component: **`/dev/design`** (noindex, not linked). Components: `components/design/`. Input: the look-and-feel audit (`docs/design/look-and-feel-audit-2026-11-18.html`, in PR #150).
+One source: the `:root` block of `app/globals.css`. `tailwind.config.js` only maps names to those variables and defines no value of its own. Live specimen of every token and component: **`/dev/design`** (noindex, not linked). Components: `components/design/`. Input: the look-and-feel audit (`docs/design/look-and-feel-audit-2026-11-18.html`) and the home measurements (`docs/design/home-canon.md`).
 
 Colours are stored as RGB channels (`--pine-rgb: 15 58 51`) with a ready colour next to them (`--pine: rgb(var(--pine-rgb))`), so `text-pine/70` works in Tailwind and `var(--pine)` works in plain CSS.
 
-## Decisions (final)
+## Decisions (final): the canon is the HOME page
 
-| Area | Decision | Token / component |
+Everything below equals what www.lagomplan.com/es renders today (measured values: `docs/design/home-canon.md`; `e2e/design-system.spec.ts` re-checks them against home's real markup and the live page). Where home has no example, the component is derived from home's colours, radii and type, and listed as derived in that file and on `/dev/design`.
+
+| Area | Value (home) | Token / component |
 |---|---|---|
-| Buttons | Pill, Manrope 14–15/700, 48px (small 40px); primary / secondary / ghost | `Button`, `--control-h`, `--control-h-sm`, `--pine-hover` |
-| Page title | The /guias H1: clamp(44px, 7vw, 72px), 800, −0.04em, line-height .92, pine | `PageTitle`, `--fs-title` `--lh-title` `--ls-title` `--fw-title` |
-| H2 / H3 / eyebrow | /guias: H2 36/800/−0.02em/1.05; H3 24/800/−0.02em/1.12; eyebrow 11/500/0.12em caps, in `sage-text` (/guias uses #6B8F86, 3.4:1; the eyebrow here is the darker #5A7871, 4.6:1, same hue) | `SectionTitle`, `CardTitle`, `Eyebrow`, `--sage-text` |
-| Cards | Destination card (illustration on top, r24) for guides, experiences, hotels; Info card (r16) for everything else | `DestinationCard`, `InfoCard`, `--radius-destination`, `--radius-info` |
-| Filters | One pattern: inline chips on desktop; on mobile a "Filtros (n)" button opening a bottom sheet with live "Ver N resultados" and "Limpiar" | `FilterPanel`, `BottomSheet`, `Chip` |
+| Buttons | 8px radius (not pills), Manrope 13px, tracking .03em, padding 12/24; solid 600 pine fill, hover #1A4A42 + 1px lift; outline 500 with a 1.5px pine border, mint hover | `Button`, `--radius-btn`, `--btn-solid-hover` |
+| Page title | 60px / 700 / −1.5px / 1.05, pine (40px on mobile) | `PageTitle`, `--fs-title` |
+| Section title | 40px / 700 / 1.15 (30px on mobile); closing title 50px (34px) | `SectionTitle`, `--fs-h2`, `--fs-h2-xl` |
+| Card title, names, feature titles | 22/400/−0.02em; 18/600; 15/600 | `CardTitle`, `--fs-h3`, `--fs-h4`, `--fs-h5` |
+| Eyebrow | 11px / 500 / 0.12em, uppercase, sage #6B8F86 | `Eyebrow`, `--fs-eyebrow` |
+| Body | 15px / 1.8, ink-body #3E5F58 (lede 15px / 1.7); card excerpt #35584F | `Body`, `Lede`, `--ink-body`, `--ink-card` |
+| Cards | Guide card: radius 22, no border, shadow-sm, image 4:3, body padding 24. Review card: radius 12, hairline border, cream, padding 36. Planner card: radius 12, #E5E5E5 border, shadow 0 4px 24px pine/6% | `DestinationCard`, `InfoCard` (tone cream / white) |
+| Chips | White, 1px sage/22% border, sage text, full radius; selected = mint fill, pine text. 10px / 24px high | `Chip size="sm"` |
+| Fields | Place / date: 13px, radius 2, #C8D9D3. Budget / textarea: radius 8, sage/22% border | `Input`, `Input variant="soft"`, `Textarea` |
+| Sections | 96px top and bottom (64 on mobile), cream / white alternating, hairline between, page 1280 with 24px gutter | `--section-y`, `--page-gutter` |
 
-Text contrast: every text colour in the tokens is at least 4.5:1 on cream and on white (`tests/design-tokens.test.ts` checks it).
+Derived (home has no example): filter chip size (`Chip` md), `Tag`, `SearchInput`, `FilterPanel`, `BottomSheet`, button `sm` / `ghost` / `inverse`, `Input variant="onDark"`, `InfoCard` mint / pine / sm / flush, `DestinationCard` eyebrow / badge / tags / cta / featured.
 
-Not decided by the brief, so chosen here (change freely): text inputs are 48px pills (same family as buttons and search), the search field is the /guias 56px pill, and the card shadow is the /guias shadow (`0 2px 8px rgb(0 0 0 / .04)`).
+Accessibility note inherited from home: sage text (#6B8F86) is 3.4:1 on cream and 3.6:1 on white, below WCAG AA 4.5:1. `--sage-text` (#5A7871, 4.6:1, same hue) stays defined but unused until that is decided.
+
+Not decided by home, so chosen: the two input styles both exist (see home-canon.md), the newsletter button / field use radius 8 (home's are square), and the 12-step spacing scale is a 4px base.
 
 ## Token groups
 
-- **Brand:** `pine` `sage` (decorative only, 3.4:1 on cream) `sage-text` (#5A7871, sage for text: 4.61:1 on cream, 4.82:1 on white) `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`.
-- **Text neutrals:** `ink-2` (body), `ink-3` (green tertiary), `label` (small labels), plus pine and sage. Alpha tints used on /guias: `--text-lede` (pine 72%), `--text-soft` (pine 68%).
-- **Lines:** `line-soft` #E4DFD8 (info card, hairlines), `line-strong` #C8BFB5 (destination card, search), and the pine-alpha lines `line-card` `line-panel` `line-chip` `line-btn`.
-- **Radii:** `pill` 999, `destination` 24, `info` 16, `sheet` 24. Legacy, until the catalog pages migrate: `--radius-card` 20, `--radius-panel` 24.
-- **Shadows:** `soft`, `pop`, `sheet`. **Spacing:** `--space-1…20` (4px base), `--section-y`, `--page-gutter`. **Controls:** `--control-h` 48, `--control-h-sm` 40, `--control-h-lg` 56, `--chip-h` 44.
-- **Type:** `--fs-*` / `--lh-*` / `--ls-*` / `--fw-*` for title, h2, h3, eyebrow, lede, body, small, tiny, button. In Tailwind: `text-title`, `text-h2`, `text-h3`, `text-eyebrow`, `text-lede`, `text-body`, `text-small`, `text-tiny`, `text-button`.
+- **Brand:** `pine` `sage` `sage-text` (unused) `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`, plus home's `field-error` #B94030.
+- **Text:** `ink-body` #3E5F58, `ink-card` #35584F, `ink-input` #0F1A16, `placeholder` #BDBDBD; older pages keep `ink-2`, `ink-3`, `label`.
+- **Lines:** home's `line-section`, `line-hair`, `line-field`, `line-sage`, `line-form`, `line-divider`; older pages keep `line-soft`, `line-strong` and the pine-alpha `line-card` / `line-panel` / `line-chip` / `line-btn`.
+- **Radii:** `btn` 8, `info` 12, `destination` 22, `field` 2, `sheet` 22 (derived), `pill` 9999; legacy `card` 20 / `panel` 24 stay for the catalog.
+- **Shadows:** `soft` (guide card), `lift` (its hover), `form` (planner card); derived `pop`, `sheet`.
+- **Type:** `--fs-*` / `--lh-*` / `--ls-*` / `--fw-*`; mobile step at 768px in a `:root` media query.
+- **Controls:** `--control-h` 46 (button), `--field-h` 38, `--chip-h` 44, `--chip-h-sm` 24.
 
 ## What was removed
 
@@ -45,17 +55,17 @@ Not applied yet, because snapping them changes how existing pages look. Apply pa
 
 | Legacy value (where) | Becomes | Visible change |
 |---|---|---|
-| Body text: home #3E5F58, hub #3E5650, planner #2D6B57, guides #4A4A4A (weight 300), familias #7A7773, /guias pine@72%, landings pine@80% | `text-ink-2` (body), `--text-lede` (lede) | Small shifts of green/grey; guides lose the weight-300 grey look |
-| `#7A7A76`, `#8A8A8A`, `#B8B5AF` (guide meta, placeholders) | `text-label` or `text-ink-2` | Greys become the green-tinted label colour |
+| Body text: home #3E5F58, hub #3E5650, planner #2D6B57, guides #4A4A4A (weight 300), familias #7A7773, /guias pine@72%, landings pine@80% | `text-ink-body` (#3E5F58: body and lede) | Small shifts of green/grey; guides lose the weight-300 grey look |
+| `#7A7A76`, `#8A8A8A`, `#B8B5AF` (guide meta, placeholders) | `text-label` or `text-ink-body` | Greys become the green-tinted label colour |
 | `#D8CFC1`, `#CEC8C0`, `#E2DDD5` (borders) | `line-soft` (hairline) or `line-strong` (card/search) | One-shade border changes |
 | `#1F3D37` (near-pine) | `pine` | Barely visible |
 | `#C8D9D3` (old sage, home form borders) | `line-chip` | Input borders get the shared line |
 | `#F4F0E8`, `#FDFCF9` (old sand/card) | `sand` / `white` | Slightly warmer/whiter |
-| Cards r30 (/guias), r20 (hub, hotels), r16 (guides, guest, landings) | `DestinationCard` r24 / `InfoCard` r16 | /guias and hub/hotels cards change radius |
+| Cards r30 (/guias), r20 (hub, hotels), r16 (guides, guest, landings) | `DestinationCard` r22 / `InfoCard` r12 | /guias and hub/hotels cards change radius and lose the /guias border |
 | 8px / mono-caps buttons (home, guide pages, login), pill buttons elsewhere | `Button` | Home, guides, planner, login get pill buttons |
 | Chips 24–50px | `Chip` 44px | Home interest chips grow |
 | Mobile filters: /guias "+ Más", hub and hotels sideways rows | `FilterPanel` (sheet) | New mobile pattern |
 
 ## Not migrated in this change
 
-No existing page was changed. `components/catalog/*` (hub, hotels) and `components/guides/GuidesClient.tsx` keep their own markup until each is moved onto `components/design`.
+No existing page was changed (pixel-diffed: home, /guias, /experiencias, /hoteles and a guide page at 1440 and 390, plus the guide's print render). `components/catalog/*` (hub, hotels) and `components/guides/GuidesClient.tsx` keep their own markup until each is moved onto `components/design`.
