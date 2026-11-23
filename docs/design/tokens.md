@@ -14,22 +14,22 @@ Everything below equals what www.lagomplan.com/es renders today (measured values
 | Page title | 60px / 700 / −1.5px / 1.05, pine (40px on mobile) | `PageTitle`, `--fs-title` |
 | Section title | 40px / 700 / 1.15 (30px on mobile); closing title 50px (34px) | `SectionTitle`, `--fs-h2`, `--fs-h2-xl` |
 | Card title, names, feature titles | 22/400/−0.02em; 18/600; 15/600 | `CardTitle`, `--fs-h3`, `--fs-h4`, `--fs-h5` |
-| Eyebrow | 11px / 500 / 0.12em, uppercase, sage #6B8F86 | `Eyebrow`, `--fs-eyebrow` |
+| Eyebrow | 11px / 500 / 0.12em, uppercase, sage-text #5A7871 (home's sage #6B8F86, darkened to AA) | `Eyebrow`, `--fs-eyebrow` |
 | Body | 15px / 1.8, ink-body #3E5F58 (lede 15px / 1.7); card excerpt #35584F | `Body`, `Lede`, `--ink-body`, `--ink-card` |
 | Cards | Guide card: radius 22, no border, shadow-sm, image 4:3, body padding 24. Review card: radius 12, hairline border, cream, padding 36. Planner card: radius 12, #E5E5E5 border, shadow 0 4px 24px pine/6% | `DestinationCard`, `InfoCard` (tone cream / white) |
-| Chips | White, 1px sage/22% border, sage text, full radius; selected = mint fill, pine text. 10px / 24px high | `Chip size="sm"` |
+| Chips | White, 1px sage/22% border, sage-text text, full radius; selected = mint fill, pine text. 10px / 24px high | `Chip size="sm"` |
 | Fields | Place / date: 13px, radius 2, #C8D9D3. Budget / textarea: radius 8, sage/22% border | `Input`, `Input variant="soft"`, `Textarea` |
 | Sections | 96px top and bottom (64 on mobile), cream / white alternating, hairline between, page 1280 with 24px gutter | `--section-y`, `--page-gutter` |
 
 Derived (home has no example): filter chip size (`Chip` md), `Tag`, `SearchInput`, `FilterPanel`, `BottomSheet`, button `sm` / `ghost` / `inverse`, `Input variant="onDark"`, `InfoCard` mint / pine / sm / flush, `DestinationCard` eyebrow / badge / tags / cta / featured.
 
-Accessibility note inherited from home: sage text (#6B8F86) is 3.4:1 on cream and 3.6:1 on white, below WCAG AA 4.5:1. `--sage-text` (#5A7871, 4.6:1, same hue) stays defined but unused until that is decided.
+Accessibility: home's sage text (#6B8F86) is 3.4:1 on cream and 3.6:1 on white, below WCAG AA 4.5:1. Decided: components use `--sage-text` (#5A7871, same hue, 4.61:1 on cream) for every piece of sage text; `--sage` is for icons, dots and rules only.
 
 Not decided by home, so chosen: the two input styles both exist (see home-canon.md), the newsletter button / field use radius 8 (home's are square), and the 12-step spacing scale is a 4px base.
 
 ## Token groups
 
-- **Brand:** `pine` `sage` `sage-text` (unused) `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`, plus home's `field-error` #B94030.
+- **Brand:** `pine` `sage` `sage-text` (all sage text) `sand` `cream` `coral` `fjord` `mint` `white`. **Functional:** `success` `warning` `error`, plus home's `field-error` #B94030.
 - **Text:** `ink-body` #3E5F58, `ink-card` #35584F, `ink-input` #0F1A16, `placeholder` #BDBDBD; older pages keep `ink-2`, `ink-3`, `label`.
 - **Lines:** home's `line-section`, `line-hair`, `line-field`, `line-sage`, `line-form`, `line-divider`; older pages keep `line-soft`, `line-strong` and the pine-alpha `line-card` / `line-panel` / `line-chip` / `line-btn`.
 - **Radii:** `btn` 8, `info` 12, `destination` 22, `field` 2, `sheet` 22 (derived), `pill` 9999; legacy `card` 20 / `panel` 24 stay for the catalog.

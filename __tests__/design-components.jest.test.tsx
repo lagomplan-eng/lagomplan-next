@@ -62,7 +62,7 @@ describe('Typography', () => {
     render(<PageTitle eyebrow="Guías de viaje" title="Destinos" lede="Texto" />)
     const h1 = screen.getByRole('heading', { level: 1, name: 'Destinos' })
     expect(h1).toHaveClass('text-title', 'text-pine', 'font-sans')
-    expect(screen.getByText('Guías de viaje')).toHaveClass('text-eyebrow', 'uppercase', 'text-sage')
+    expect(screen.getByText('Guías de viaje')).toHaveClass('text-eyebrow', 'uppercase', 'text-sage-text')
     expect(screen.getByText('Texto')).toBeInTheDocument()
   })
   it('SectionTitle is an h2, CardTitle an h3 (or the level you pass)', () => {
@@ -129,7 +129,7 @@ describe('Chip and Tag', () => {
     render(<Chip label="Europa" selected={false} onClick={fn} />)
     const c = screen.getByRole('button', { name: 'Europa' })
     expect(c).toHaveAttribute('aria-pressed', 'false')
-    expect(c).toHaveClass('h-chip', 'rounded-full', 'border-line-sage', 'text-sage')
+    expect(c).toHaveClass('h-chip', 'rounded-full', 'border-line-sage', 'text-sage-text')
     fireEvent.click(c)
     expect(fn).toHaveBeenCalledTimes(1)
   })
@@ -145,7 +145,7 @@ describe('Chip and Tag', () => {
   it('Tag is not interactive', () => {
     render(<Tag>Familia</Tag>)
     expect(screen.queryByRole('button')).toBeNull()
-    expect(screen.getByText('Familia')).toHaveClass('rounded-full', 'border-line-sage', 'text-sage')
+    expect(screen.getByText('Familia')).toHaveClass('rounded-full', 'border-line-sage', 'text-sage-text')
   })
 })
 

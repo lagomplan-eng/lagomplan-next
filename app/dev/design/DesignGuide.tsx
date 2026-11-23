@@ -128,7 +128,7 @@ function Pair({ id, name, status, bg = 'bg-white', home, component }: { id: stri
     <div data-pair={id} className="grid gap-4 md:grid-cols-2">
       <div className="md:col-span-2 flex items-center gap-3">
         <span className="font-sans text-small font-semibold text-pine">{name}</span>
-        <span data-status={status} className={`rounded-full border px-2.5 py-0.5 font-sans text-micro ${status === 'match' ? 'border-pine/20 bg-mint text-pine' : 'border-line-sage bg-white text-sage'}`}>{status === 'match' ? 'matches home' : 'derived from home'}</span>
+        <span data-status={status} className={`rounded-full border px-2.5 py-0.5 font-sans text-micro ${status === 'match' ? 'border-pine/20 bg-mint text-pine' : 'border-line-sage bg-white text-sage-text'}`}>{status === 'match' ? 'matches home' : 'derived from home'}</span>
       </div>
       <div className={`rounded-info border border-line-hair p-6 ${bg}`}>
         <p className="m-0 mb-3 font-mono text-[11px] uppercase tracking-[.08em] text-label">Home (real classes)</p>
@@ -192,7 +192,7 @@ function ComparePanel() {
         component={<InfoCard><p className="m-0 mb-6 font-sans text-body text-pine">&ldquo;Buen vino y arquitectura con historia.&rdquo;</p><p className="m-0 font-sans text-small font-semibold text-pine">Julia</p></InfoCard>} />
       <Pair id="form-card" name="Planner card (white InfoCard)" status="match" bg="bg-cream"
         home={<div className="bg-white border border-[#E5E5E5] rounded-[12px] px-6 pt-5 pb-4 shadow-[0_4px_24px_rgba(15,58,51,.06)]"><span className="font-sans text-[10px] font-medium tracking-[1.5px] text-[#6B8F86] uppercase block">Tu próximo viaje</span></div>}
-        component={<InfoCard tone="white"><span className="block font-sans text-micro font-medium uppercase tracking-[1.5px] text-sage">Tu próximo viaje</span></InfoCard>} />
+        component={<InfoCard tone="white"><span className="block font-sans text-micro font-medium uppercase tracking-[1.5px] text-sage-text">Tu próximo viaje</span></InfoCard>} />
       <Pair id="chip-sm" name="Chip (interest chip)" status="match"
         home={<div className="flex gap-2"><button type="button" className="font-sans text-[10px] rounded-full px-3 py-[6px] border transition-all leading-none bg-white border-[rgba(107,143,134,.22)] text-[#6B8F86] hover:border-[rgba(15,58,51,.2)]">Playa</button><button type="button" className="font-sans text-[10px] rounded-full px-3 py-[6px] border transition-all leading-none bg-[#E4EFEC] border-[rgba(15,58,51,.2)] text-[#0F3A33]">Cultura</button></div>}
         component={<div className="flex gap-2"><Chip size="sm" label="Playa" selected={false} onClick={() => {}} /><Chip size="sm" label="Cultura" selected onClick={() => {}} /></div>} />
@@ -285,7 +285,7 @@ export default function DesignGuide({ embed }: { embed: boolean }) {
         <Row label="SectionTitle (H2)"><SectionTitle eyebrow="Cómo funciona" lede="Sin pestañas abiertas, sin hojas de cálculo, sin horas de investigación.">Del destino al itinerario en 60 segundos.</SectionTitle></Row>
         <Row label="CardTitle (H3)"><CardTitle>Valle de Bravo / Avándaro</CardTitle></Row>
         <Row label="Eyebrow"><Eyebrow>Zonas de la ciudad</Eyebrow></Row>
-        <Row label="Body steps"><div className="flex flex-col gap-2"><Lede>Lede 15/1.7: the intro line under a title.</Lede><Body>Body 15/1.8, ink-body.</Body><p className="m-0 font-sans text-small text-ink-body">Small 13/1.55, secondary text.</p><p className="m-0 font-sans text-tiny text-sage">Tiny 12/1.55, labels and hints.</p></div></Row>
+        <Row label="Body steps"><div className="flex flex-col gap-2"><Lede>Lede 15/1.7: the intro line under a title.</Lede><Body>Body 15/1.8, ink-body.</Body><p className="m-0 font-sans text-small text-ink-body">Small 13/1.55, secondary text.</p><p className="m-0 font-sans text-tiny text-sage-text">Tiny 12/1.55, labels and hints.</p></div></Row>
       </Block>
 
       <Block id="buttons" title="Buttons" note="Home's: 8px radius, Manrope 13px, tracking .03em, padding 12/24. primary = .btn-solid, secondary = .btn-outline; ghost, inverse and sm are derived.">

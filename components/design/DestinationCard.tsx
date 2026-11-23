@@ -64,7 +64,7 @@ export default function DestinationCard({
         <div className="flex flex-1 flex-col gap-3 p-6">
           {!featured && (
             <div>
-              {eyebrow && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage">{eyebrow}</p>}
+              {eyebrow && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p>}
               <Heading className="m-0 font-sans text-h3 text-pine transition-colors group-hover:text-ink-3 [text-wrap:balance]">{title}</Heading>
             </div>
           )}

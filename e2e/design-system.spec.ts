@@ -13,7 +13,7 @@ const PROPS = ['fontFamily', 'fontSize', 'fontWeight', 'letterSpacing', 'lineHei
 
 // [pair id, selector inside home side, selector inside component side, extra props to skip]
 const PAIRS: Array<[string, string, string, string[]?]> = [
-  ['eyebrow', 'span', 'p'],
+  ['eyebrow', 'span', 'p', ['color']],
   ['h1', 'h1', 'h1'],
   ['lede', 'p', 'p'],
   ['h2', 'h2', 'h2'],
@@ -26,7 +26,7 @@ const PAIRS: Array<[string, string, string, string[]?]> = [
   ['guide-card', 'p', 'p'],
   ['review-card', ':scope > div', '[data-card="info"]'],
   ['form-card', ':scope > div', '[data-card="info"]', ['height']],
-  ['chip-sm', 'button:nth-child(1)', 'button:nth-child(1)'],
+  ['chip-sm', 'button:nth-child(1)', 'button:nth-child(1)', ['color']],
   ['chip-sm', 'button:nth-child(2)', 'button:nth-child(2)'],
   ['field', 'input', 'input'],
   ['field-soft', 'input', 'input', ['height']],
@@ -80,6 +80,14 @@ test.describe('components match home (desktop)', () => {
       for (const k of skip) { delete (home as any)[k]; delete (comp as any)[k] }
       expect(comp, `${id} ${homeSel}`).toEqual(home)
     }
+  })
+
+  test('sage text is the darker --sage-text (4.5:1), not home\'s #6B8F86', async ({ page }) => {
+    await page.goto('/dev/design')
+    const col = (sel: string) => page.locator(sel).first().evaluate(e => getComputedStyle(e).color)
+    expect(await col('[data-pair="eyebrow"] [data-side="component"] p')).toBe('rgb(90, 120, 113)')
+    expect(await col('[data-pair="chip-sm"] [data-side="component"] button')).toBe('rgb(90, 120, 113)')
+    expect(await col('[data-pair="eyebrow"] [data-side="home"] span')).toBe('rgb(107, 143, 134)')
   })
 
   test('the pairs marked "matches home" are exactly the ones compared here', async ({ page }) => {

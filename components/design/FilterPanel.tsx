@@ -130,12 +130,12 @@ export default function FilterPanel({ search, groups, activeFilters = [], result
               <li key={s.key}>
                 {s.link ? (
                   <div className="flex min-h-chip flex-wrap items-center justify-between gap-x-3 gap-y-1 rounded-xl px-4 py-2">
-                    <span className="font-sans text-small text-pine"><span className="font-semibold">{s.label}</span>{s.hint && <span className="text-sage"> · {s.hint}</span>}</span>
+                    <span className="font-sans text-small text-pine"><span className="font-semibold">{s.label}</span>{s.hint && <span className="text-sage-text"> · {s.hint}</span>}</span>
                     <a href={s.link.href} className="inline-flex min-h-chip items-center font-sans text-small font-semibold text-pine underline underline-offset-4">{s.link.label}</a>
                   </div>
                 ) : (
-                  <button type="button" onClick={() => pick(s.key)} className="flex min-h-chip w-full items-center justify-between gap-3 rounded-xl px-4 text-left font-sans text-small font-semibold text-pine hover:bg-mint">
-                    <span>{s.label}</span>{s.hint && <span className="text-tiny text-sage">{s.hint}</span>}
+                  <button type="button" onClick={() => pick(s.key)} className="flex min-h-chip w-full items-center justify-between gap-3 rounded-xl px-4 group text-left font-sans text-small font-semibold text-pine hover:bg-mint">
+                    <span>{s.label}</span>{s.hint && <span className="text-tiny text-sage-text group-hover:text-pine">{s.hint}</span>}
                   </button>
                 )}
               </li>

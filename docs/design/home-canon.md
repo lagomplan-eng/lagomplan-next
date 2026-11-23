@@ -43,13 +43,22 @@ Layout values (home): page width 1280 with 24px side padding (20px on mobile); s
 
 | Home has | Decision | Why |
 |---|---|---|
-| Two field styles: place / date fields (radius 2, #C8D9D3) and budget / textarea (radius 8, sage 22%) | Both kept: `Input` is the first, `Input variant="soft"` and `Textarea` the second | The first is on the most prominent fields (origin, destination, dates); neither is dropped, so the planner form can move over unchanged |
+| Two field styles: place / date fields (radius 2, #C8D9D3) and budget / textarea (radius 8, sage 22%) | Both kept (decided): `Input` is the first, `Input variant="soft"` and `Textarea` the second. When to use each is in the next section | Neither is dropped, so the planner form can move over unchanged |
 | Guides-row title at weight 400 / 34px, all other H2 at 700 / 40px | H2 = 40/700. The 400 weight is the card-title style (`CardTitle`) | Seven of eight section titles are 40/700 (42 and 50 on two) |
 | H2 sizes 40, 42 (philosophy), 50 (CTA) | 40 default, 50 as `size="xl"` for the closing title; the 42 one uses 40 | One step is enough; 50 is a distinct, repeated use |
 | Lede line-height 1.75 (hero) and 1.7 (sections) | 1.7 default, hero lede 1.75 | Both kept |
-| Newsletter field and button are square (radius 0) | Radius 8 like every other button | Buttons are 8px everywhere else; flagged |
+| Newsletter field and button are square (radius 0) | Radius 8 like every other button (decided) | Buttons are 8px everywhere else |
 | Chips at 10px / 24px high | `Chip size="sm"` is exactly that; `md` (13px, 44px) is the derived filter size | 24px is below touch-target size for a filter |
-| Sage text (#6B8F86) on cream/white is 3.4:1 | Kept (home is the canon). `--sage-text` (#5A7871, 4.6:1, same hue) stays defined, unused | Accessibility decision for you; one-line change in `Eyebrow` / `Chip` / `Tag` |
+| Sage text (#6B8F86) on cream/white is 3.4:1 | Decided: text uses `--sage-text` (#5A7871, same hue 165°, 4.61:1 on cream, 4.82:1 on white, 4.5:1+ on mint) in `Eyebrow`, `Chip`, `Tag`, `DestinationCard` eyebrow, `Input` hint and `FilterPanel` hints. `--sage` (#6B8F86) stays for icons, dots and rules | Elena's decision, reaches WCAG AA. Home's own markup on `/dev/design` stays #6B8F86, so the pair differs in text colour only, and a test asserts exactly that |
+
+## When to use each field style (from where home uses them)
+
+| Style | Component | Home uses it for | Use it for |
+|---|---|---|---|
+| Place / date field: 13px, 38px high, radius 2, 1px #C8D9D3 border, text #0F1A16, 3px pine/6% focus ring | `Input` (default) | The trip planner's "where from", "where to" (`PlacesInput`) and date range (`DateRangePicker`) | Short, structured lookups in a row of fields: places, dates, codes, search-like values, where the field sits beside a picker or suggestion list |
+| Soft field: 13px (12px in the textarea), radius 8, 1px sage 22% border, 10px vertical padding, pine text, #BDBDBD placeholder | `Input variant="soft"`, `Textarea` | The planner's budget field and the free-text "anything else" note | Free values and longer text: amounts, notes, messages, names and emails in a form. The newsletter field is `variant="onDark"` (soft's shape on the dark band, radius 8 by decision) |
+
+Rule of thumb: if it picks something from a list or a calendar, use `Input`; if the visitor types something free, use `soft` / `Textarea`. Never mix the two in one row. `SearchInput` (derived) is a search-like lookup, so it takes the place-field border and radius at 46px high.
 
 ## Derived (home has no example)
 

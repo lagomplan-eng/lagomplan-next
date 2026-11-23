@@ -11,9 +11,9 @@ import { cx } from './cx'
 /** Extra attributes a caller may need on the element itself (id, data-*, aria-*): print and analytics hooks. */
 type Passthrough = Omit<HTMLAttributes<HTMLElement>, 'className' | 'children'>
 
-/** Home's .sec-label: 11px, 500, 0.12em, uppercase, sage, 12px below. */
+/** Home's .sec-label: 11px, 500, 0.12em, uppercase, sage-text (home's sage, darkened to 4.5:1), 12px below. */
 export function Eyebrow({ children, className, as: Tag = 'p', ...rest }: { children: ReactNode; className?: string; as?: ElementType } & Passthrough) {
-  return <Tag {...rest} className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage', className)}>{children}</Tag>
+  return <Tag {...rest} className={cx('m-0 mb-3 block font-sans text-eyebrow uppercase text-sage-text', className)}>{children}</Tag>
 }
 
 /** Home's lede: 15px, ink-body, line-height 1.7 (1.75 under the H1). */

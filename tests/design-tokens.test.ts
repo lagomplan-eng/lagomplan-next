@@ -32,8 +32,8 @@ for (const n of ['pine', 'sage', 'sage-text', 'sand', 'cream', 'coral', 'fjord',
 ok('brand RGB values are the brand (pine #0F3A33, cream #FFF9F3)', decl('pine-rgb') === '15 58 51' && decl('cream-rgb') === '255 249 243')
 
 // ── contrast (informational): home's own text colours, measured on cream and white ─
-// Home is the canon, so these are not gates. They are printed so nobody is surprised: home's sage text
-// (eyebrows, chip text, hints) is below WCAG AA 4.5:1; --sage-text (same hue, darker) is kept for when that is decided.
+// Home's own sage (#6B8F86) is 3.4:1 on cream, below WCAG AA 4.5:1, so text uses --sage-text (same hue,
+// darker). --sage stays for decoration (dots, rules, icons) and for home's own markup in the /dev/design panel.
 const rgbOf = (n: string) => (decl(`${n}-rgb`) ?? '0 0 0').split(/\s+/).map(Number) as [number, number, number]
 const lin = (c: number) => { const v = c / 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4 }
 const lum = ([r, g, b]: number[]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
@@ -41,9 +41,17 @@ const contrast = (a: number[], b: number[]) => { const [hi, lo] = [lum(a), lum(b
 for (const n of ['pine', 'ink-body', 'ink-card', 'sage', 'sage-text'])
   console.log(`info contrast ${n}: ${contrast(rgbOf(n), rgbOf('cream')).toFixed(2)}:1 on cream, ${contrast(rgbOf(n), rgbOf('white')).toFixed(2)}:1 on white`)
 ok('pine and the body text colours reach 4.5:1 on cream and white', ['pine', 'ink-body', 'ink-card'].every(n => contrast(rgbOf(n), rgbOf('cream')) >= 4.5 && contrast(rgbOf(n), rgbOf('white')) >= 4.5))
-ok('--sage is home\'s #6B8F86 and --sage-text stays the darker same-hue option', decl('sage-rgb') === '107 143 134' && decl('sage-text-rgb') === '90 120 113')
+ok('--sage is home\'s #6B8F86 and --sage-text is the darker same-hue text colour', decl('sage-rgb') === '107 143 134' && decl('sage-text-rgb') === '90 120 113')
+ok('--sage-text reaches 4.5:1 on cream and white (on mint hover rows the hint turns pine)', ['cream', 'white'].every(b => contrast(rgbOf('sage-text'), rgbOf(b)) >= 4.5))
+ok('--sage-text keeps the hue of --sage', (() => { const hue = ([r, g, b]: number[]) => { const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn; const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; return Math.round(h * 60 + 360) % 360 }; return Math.abs(hue(rgbOf('sage')) - hue(rgbOf('sage-text'))) <= 2 })())
 ok('home colour values: body #3E5F58, card text #35584F, field text #0F1A16, error #B94030', decl('ink-body-rgb') === '62 95 88' && decl('ink-card-rgb') === '53 88 79' && decl('ink-input-rgb') === '15 26 22' && decl('field-error-rgb') === '185 64 48')
-ok('Eyebrow uses sage (home .sec-label), not sage-text', /text-eyebrow uppercase text-sage['"` ]/.test(fs.readFileSync(path.join(root, 'components/design/Typography.tsx'), 'utf-8')))
+for (const f of ['Typography', 'Chip', 'DestinationCard', 'FilterPanel', 'Input']) {
+  const src = fs.readFileSync(path.join(root, `components/design/${f}.tsx`), 'utf-8')
+  // text-sage (3.4:1) is for icons only; every piece of sage text uses text-sage-text
+  const textUses = (src.match(/text-sage(?![-\w])/g) ?? []).length
+  const iconUses = (src.match(/<svg[^\n]*text-sage(?![-\w])|<button[^\n]*text-sage(?![-\w])/g) ?? []).length
+  ok(`${f}: sage text uses text-sage-text (text-sage only on icons)`, textUses === iconUses, `${textUses} vs ${iconUses} icon uses`)
+}
 
 // ── stale aliases ─────────────────────────────────────────────────────────────────
 for (const a of ['forest', 'ink', 'accent', 'card', 'muted', 'border', 'text-xs', 'text-sm', 'text-base', 'text-lg', 'text-xl', 'text-2xl', 'text-3xl'])

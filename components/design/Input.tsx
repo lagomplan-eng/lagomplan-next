@@ -7,7 +7,7 @@
  *                         placeholder #BDBDBD, focus = pine border + 3px pine/6% ring.
  *   Input variant="soft"  home's budget field and textarea: radius 8, 1px sage/22% border, 10px vertical padding.
  *   Textarea              the soft field, multi-line.
- * Label: 12px / 600 / pine. Error: #B94030. Hint: 10px sage (the home note under the planner button).
+ * Label: 12px / 600 / pine. Error: #B94030. Hint: 10px sage-text (the home note under the planner button).
  * DERIVED (home has no example): `variant="onDark"` (home's newsletter field colours, radius 8), SearchInput.
  */
 import { useId, type InputHTMLAttributes, type ReactNode, type TextareaHTMLAttributes } from 'react'
@@ -38,7 +38,7 @@ function Wrapper({ label, hint, error, hideLabel, id, className, children }: Com
     <div className={cx('flex flex-col gap-1.5', className)}>
       <label htmlFor={id} className={cx('font-sans text-tiny font-semibold text-pine', hideLabel && 'sr-only')}>{label}</label>
       {children}
-      {hint && !error && <p id={hintId} className="m-0 font-sans text-micro text-sage">{hint}</p>}
+      {hint && !error && <p id={hintId} className="m-0 font-sans text-micro text-sage-text">{hint}</p>}
       {error && <p id={errorId} role="alert" className="m-0 font-sans text-[11px] leading-snug text-field-error">{error}</p>}
     </div>
   )
