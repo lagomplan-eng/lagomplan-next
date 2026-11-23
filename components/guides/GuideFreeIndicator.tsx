@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useLocale } from 'next-intl'
 import { Link } from '../../lib/navigation'
+import { Button } from '../design'
 import { useUser } from '../auth/SupabaseProvider'
 import { resolveCanonicalSlug } from '../../lib/data/guides'
 import {
@@ -55,19 +56,16 @@ export function GuideFreeIndicator({ slug }: { slug: string }) {
 
   if (state.kind === 'first-free') {
     return (
-      <div className="w-full bg-[#EDE7E1] border-b border-line-soft">
-        <div className="page-inner py-2 flex items-center justify-center gap-3 text-center">
-          <span className="font-sans text-[12px] font-medium text-[#0F3A33]">
+      <div className="w-full border-b border-line-soft bg-sand">
+        <div className="page-inner py-1 print:py-2 flex items-center justify-center gap-3 text-center">
+          <span data-pl="free-text" className="font-sans text-small font-semibold text-pine">
             {isES
               ? '🎒 1 guía gratis · Crea tu cuenta para acceder a todas'
               : '🎒 1 free guide · Create an account to unlock all guides'}
           </span>
-          <Link
-            href="/signup"
-            className="font-sans text-[11px] font-semibold text-[#0F3A33] underline underline-offset-2 hover:text-[#12453d] whitespace-nowrap"
-          >
+          <Button as={Link} href="/signup" variant="ghost" size="sm" data-pl="free-link" className="underline underline-offset-2">
             {isES ? 'Crear cuenta' : 'Sign up'}
-          </Link>
+          </Button>
         </div>
       </div>
     )
@@ -75,26 +73,20 @@ export function GuideFreeIndicator({ slug }: { slug: string }) {
 
   // over-limit
   return (
-    <div className="w-full bg-[#EDE7E1] border-b border-[#D8D0C8]">
-      <div className="page-inner py-2.5 flex items-center justify-center gap-3 flex-wrap">
-        <span className="font-sans text-[12px] font-medium text-[#0F3A33]">
+    <div className="w-full border-b border-line-strong bg-sand">
+      <div className="page-inner py-2 flex items-center justify-center gap-3 flex-wrap">
+        <span className="font-sans text-small font-semibold text-pine">
           {isES
             ? '🔒 Has usado tu guía gratis · Crea tu cuenta gratis para seguir explorando'
             : "🔒 You've used your free guide · Create a free account to keep exploring"}
         </span>
-        <div className="flex items-center gap-3 flex-shrink-0">
-          <Link
-            href="/signup"
-            className="font-sans text-[12px] font-semibold bg-[#0F3A33] text-white px-4 py-1.5 rounded-md hover:bg-[#12453d] transition-colors whitespace-nowrap"
-          >
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button as={Link} href="/signup" size="sm">
             {isES ? 'Crear cuenta gratis' : 'Sign up free'}
-          </Link>
-          <Link
-            href="/login"
-            className="font-sans text-[12px] font-medium text-[#6B8F86] hover:text-[#0F3A33] transition-colors whitespace-nowrap"
-          >
+          </Button>
+          <Button as={Link} href="/login" variant="ghost" size="sm">
             {isES ? 'Iniciar sesión' : 'Log in'}
-          </Link>
+          </Button>
         </div>
       </div>
     </div>

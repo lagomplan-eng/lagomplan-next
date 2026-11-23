@@ -6,6 +6,7 @@
  */
 
 import type { PlanCtaSection } from '../../../lib/data/guides/types'
+import { Button, CardTitle, Eyebrow, InfoCard } from '../../design'
 
 interface Props {
   data: PlanCtaSection
@@ -14,31 +15,28 @@ interface Props {
 
 export function PlanCTA({ data, plannerHref }: Props) {
   return (
-    <div data-guide="plan-cta" className="bg-[#0F3A33] border-transparent rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+    <InfoCard tone="pine" size="flush" data-guide="plan-cta">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 pb-[14px] border-b border-[rgba(255,255,255,.12)]">
+      <div className="flex items-center justify-between border-b border-cream/15 px-5 py-4">
         <div>
-          <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[rgba(255,255,255,.5)] mb-0.5">
+          <Eyebrow as="div" className="!mb-1 !text-cream/60">
             {data.eyebrow}
-          </div>
-          <div className="font-display text-[16px] font-normal tracking-[-0.01em] text-white">
+          </Eyebrow>
+          <CardTitle as="div" className="!text-[20px] !leading-[1.2] !text-white">
             {data.title}
-          </div>
+          </CardTitle>
         </div>
       </div>
 
       {/* Body */}
-      <div className="px-5 py-4 pb-5">
-        <p className="text-[12.5px] font-light text-[rgba(255,255,255,.7)] leading-[1.55] mb-4">
+      <div className="px-5 pb-5 pt-4">
+        <p className="m-0 mb-4 text-small text-cream/80">
           {data.description}
         </p>
-        <a
-          href={plannerHref}
-          className="flex items-center justify-center gap-2 w-full font-mono text-[11px] font-medium tracking-[.1em] uppercase text-[#0F3A33] bg-[#EDE7E1] px-5 py-3 rounded-lg transition-all hover:bg-white hover:-translate-y-px hover:shadow-[0_4px_12px_rgba(0,0,0,.12)]"
-        >
+        <Button href={plannerHref} variant="inverse" fullWidth>
           {data.buttonText}
-        </a>
+        </Button>
       </div>
-    </div>
+    </InfoCard>
   )
 }
