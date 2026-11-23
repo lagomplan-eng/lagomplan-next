@@ -14,27 +14,28 @@ import {
 } from '../components/design'
 
 describe('Button', () => {
-  it('is a pill, md = 48px token height, Manrope bold, primary by default', () => {
+  it('is home\'s 8px-radius button, Manrope, solid pine by default (.btn-solid)', () => {
     render(<Button>Go</Button>)
     const b = screen.getByRole('button', { name: 'Go' })
-    expect(b).toHaveClass('rounded-full', 'h-control', 'font-bold', 'font-sans', 'bg-pine', 'text-cream')
+    expect(b).toHaveClass('rounded-btn', 'px-6', 'py-3', 'text-button', 'font-semibold', 'font-sans', 'bg-pine', 'text-white')
+    expect(b.className).not.toMatch(/rounded-full/)
     expect(b).toHaveAttribute('type', 'button')
     expect(b).toHaveAttribute('data-variant', 'primary')
   })
-  it('sm is the 40px size', () => {
+  it('sm is the derived smaller size', () => {
     render(<Button size="sm">Small</Button>)
-    expect(screen.getByRole('button')).toHaveClass('h-control-sm')
+    expect(screen.getByRole('button')).toHaveClass('px-4', 'py-2', 'text-button-sm')
   })
-  it('secondary is an outline, ghost has no border colour', () => {
+  it('secondary is the 1.5px pine outline (.btn-outline), ghost has no border', () => {
     render(<><Button variant="secondary">S</Button><Button variant="ghost">G</Button></>)
-    expect(screen.getByRole('button', { name: 'S' })).toHaveClass('border-line-btn', 'text-pine')
-    expect(screen.getByRole('button', { name: 'G' })).toHaveClass('border-transparent')
+    expect(screen.getByRole('button', { name: 'S' })).toHaveClass('border-[1.5px]', 'border-pine', 'text-pine')
+    expect(screen.getByRole('button', { name: 'G' }).className).not.toMatch(/(^| )border-\[?/)
   })
   it('renders a link when href is given, same look', () => {
     render(<Button href="/x" variant="secondary">Link</Button>)
     const a = screen.getByRole('link', { name: 'Link' })
     expect(a).toHaveAttribute('href', '/x')
-    expect(a).toHaveClass('rounded-full', 'h-control')
+    expect(a).toHaveClass('rounded-btn', 'px-6', 'py-3')
   })
   it('a disabled link is not focusable and has no href', () => {
     render(<Button href="/x" disabled>Off</Button>)
@@ -57,7 +58,7 @@ describe('Button', () => {
 })
 
 describe('Typography', () => {
-  it('PageTitle renders one h1 with the /guias title classes, an eyebrow and a lede', () => {
+  it('PageTitle renders one h1 with home\'s title classes, an eyebrow and a lede', () => {
     render(<PageTitle eyebrow="Guías de viaje" title="Destinos" lede="Texto" />)
     const h1 = screen.getByRole('heading', { level: 1, name: 'Destinos' })
     expect(h1).toHaveClass('text-title', 'text-pine', 'font-sans')
@@ -78,15 +79,16 @@ describe('Typography', () => {
 
 describe('DestinationCard', () => {
   const props = { href: '/es/guias/cancun', image: { src: '/images/guides/cancun.jpg', alt: 'Cancún' }, title: 'Cancún', eyebrow: 'Riviera Maya', excerpt: 'Playa y resort.', tags: ['Playa', 'Familia'], cta: 'Ver guía' }
-  it('is one link with radius-24 card, image with alt, tags and a cta pill', () => {
+  it('is one link with home\'s radius-22 card (no border), image with alt, tags and a cta button', () => {
     render(<DestinationCard {...props} />)
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', '/es/guias/cancun')
-    expect(link.querySelector('article')).toHaveClass('rounded-destination', 'shadow-soft', 'border-line-strong')
+    expect(link.querySelector('article')).toHaveClass('rounded-destination', 'shadow-soft', 'bg-white')
+    expect(link.querySelector('article')!.className).not.toMatch(/border/)
     expect(screen.getByAltText('Cancún')).toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 3, name: 'Cancún' })).toBeInTheDocument()
     expect(screen.getByText('Playa')).toBeInTheDocument()
-    expect(screen.getByText(/Ver guía/)).toHaveClass('rounded-full')
+    expect(screen.getByText(/Ver guía/)).toHaveClass('rounded-btn', 'bg-pine')
     expect(within(link).queryAllByRole('link')).toHaveLength(0) // no nested links
   })
   it('featured puts the title over the image; badge shows', () => {
@@ -102,10 +104,10 @@ describe('DestinationCard', () => {
 })
 
 describe('InfoCard', () => {
-  it('is radius 16, soft border, no shadow, 24px padding', () => {
+  it('is home\'s review card: radius 12, hairline border, cream, 36px padding, no shadow', () => {
     const { container } = render(<InfoCard title="Tip">Body</InfoCard>)
     const card = container.firstElementChild!
-    expect(card).toHaveClass('rounded-info', 'border-line-soft', 'p-6', 'bg-white')
+    expect(card).toHaveClass('rounded-info', 'border-line-hair', 'p-9', 'bg-cream')
     expect(card.className).not.toMatch(/shadow/)
     expect(screen.getByRole('heading', { level: 3, name: 'Tip' })).toBeInTheDocument()
   })
@@ -113,9 +115,11 @@ describe('InfoCard', () => {
     render(<InfoCard href="/x" title="Go">Body</InfoCard>)
     expect(screen.getByRole('link')).toHaveAttribute('href', '/x')
   })
-  it('sm uses 20px padding', () => {
+  it('white tone is home\'s planner card: form border and shadow; sm uses 20px padding', () => {
     const { container } = render(<InfoCard size="sm">x</InfoCard>)
     expect(container.firstElementChild).toHaveClass('p-5')
+    const { container: w } = render(<InfoCard tone="white">x</InfoCard>)
+    expect(w.firstElementChild).toHaveClass('border-line-form', 'shadow-form', 'bg-white')
   })
 })
 
@@ -125,29 +129,33 @@ describe('Chip and Tag', () => {
     render(<Chip label="Europa" selected={false} onClick={fn} />)
     const c = screen.getByRole('button', { name: 'Europa' })
     expect(c).toHaveAttribute('aria-pressed', 'false')
-    expect(c).toHaveClass('h-chip', 'rounded-full')
+    expect(c).toHaveClass('h-chip', 'rounded-full', 'border-line-sage', 'text-sage-text')
     fireEvent.click(c)
     expect(fn).toHaveBeenCalledTimes(1)
   })
-  it('selected chip is pine-filled; count renders', () => {
+  it('selected chip is home\'s mint fill with pine text; sm is the 24px interest chip; count renders', () => {
     render(<Chip label="Asia" count={11} selected onClick={() => {}} />)
     const c = screen.getByRole('button', { name: /Asia/ })
     expect(c).toHaveAttribute('aria-pressed', 'true')
-    expect(c).toHaveClass('bg-pine', 'text-cream')
+    expect(c).toHaveClass('bg-mint', 'text-pine')
     expect(screen.getByText('11')).toBeInTheDocument()
+    render(<Chip size="sm" label="Playa" selected={false} onClick={() => {}} />)
+    expect(screen.getByRole('button', { name: 'Playa' })).toHaveClass('text-micro', 'py-1.5')
   })
   it('Tag is not interactive', () => {
     render(<Tag>Familia</Tag>)
     expect(screen.queryByRole('button')).toBeNull()
-    expect(screen.getByText('Familia')).toHaveClass('rounded-full', 'bg-sand')
+    expect(screen.getByText('Familia')).toHaveClass('rounded-full', 'border-line-sage', 'text-sage-text')
   })
 })
 
 describe('Input and SearchInput', () => {
-  it('Input has a label wired to the field, 48px pill', () => {
+  it('Input has a label wired to the field; default is home\'s 2px-radius place field, soft is the 8px budget field', () => {
     render(<Input label="Email" />)
     const f = screen.getByLabelText('Email')
-    expect(f).toHaveClass('h-control', 'rounded-full')
+    expect(f).toHaveClass('rounded-field', 'border-line-field', 'py-2')
+    render(<Input label="Soft" variant="soft" />)
+    expect(screen.getByLabelText('Soft')).toHaveClass('rounded-btn', 'border-line-sage')
   })
   it('error sets aria-invalid + describedby and is announced', () => {
     render(<Input label="Email" error="Inválido" hint="hint" />)
@@ -161,10 +169,10 @@ describe('Input and SearchInput', () => {
     render(<Input label="Nombre" hideLabel />)
     expect(screen.getByLabelText('Nombre')).toBeInTheDocument()
   })
-  it('SearchInput is a 56px search field with a clear button that empties it', () => {
+  it('SearchInput is a derived search field (home field style) with a clear button that empties it', () => {
     const fn = jest.fn()
     render(<SearchInput label="Buscar" value="Oax" onChange={fn} clearLabel="Limpiar" />)
-    expect(screen.getByRole('searchbox', { name: 'Buscar' }).parentElement).toHaveClass('h-control-lg', 'rounded-full')
+    expect(screen.getByRole('searchbox', { name: 'Buscar' }).parentElement).toHaveClass('h-control', 'rounded-field', 'border-line-field')
     fireEvent.click(screen.getByRole('button', { name: 'Limpiar' }))
     expect(fn).toHaveBeenCalledWith('')
   })

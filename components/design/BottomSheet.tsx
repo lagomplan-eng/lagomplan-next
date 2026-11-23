@@ -92,13 +92,13 @@ export default function BottomSheet({ open, onClose, title, closeLabel, children
       >
         <div aria-hidden="true" className="mx-auto mt-3 h-1 w-10 flex-none rounded-full bg-pine/20" />
         <div className="flex flex-none items-center justify-between gap-4 px-5 pb-2 pt-3">
-          <h2 id={titleId} className="m-0 font-sans text-[20px] font-extrabold tracking-[-0.01em] text-pine">{title}</h2>
-          <button type="button" onClick={onClose} aria-label={closeLabel} className="inline-flex size-10 flex-none items-center justify-center rounded-full text-pine hover:bg-sand">
+          <h2 id={titleId} className="m-0 font-sans text-h4 text-pine">{title}</h2>
+          <button type="button" onClick={onClose} aria-label={closeLabel} className="inline-flex size-10 flex-none items-center justify-center rounded-btn text-pine hover:bg-mint">
             <span aria-hidden="true" className="text-[22px] leading-none">×</span>
           </button>
         </div>
         <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">{children}</div>
-        {footer && <div className="flex-none border-t border-line-soft bg-cream px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">{footer}</div>}
+        {footer && <div className="flex-none border-t border-line-divider bg-cream px-5 pb-[max(16px,env(safe-area-inset-bottom))] pt-3">{footer}</div>}
       </div>
     </div>,
     document.body,

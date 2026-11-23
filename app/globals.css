@@ -88,49 +88,84 @@
   --line-strong: rgb(var(--line-strong-rgb));
   --pine-hover:  #12453D;    /* pressed/hover shade of pine buttons (matches the cookie banner) */
 
-  /* Pine at fixed alphas (catalog hairlines + the /guias body-text tints) */
+  /* Pine at fixed alphas (catalog hairlines) */
   --line-card:  rgb(var(--pine-rgb) / .12);
   --line-panel: rgb(var(--pine-rgb) / .14);
   --line-chip:  rgb(var(--pine-rgb) / .18);
   --line-btn:   rgb(var(--pine-rgb) / .22);
-  --text-lede:  rgb(var(--pine-rgb) / .72);   /* /guias lede */
-  --text-soft:  rgb(var(--pine-rgb) / .68);   /* /guias card body */
 
-  /* Radii */
-  --radius-pill:        999px;  /* buttons, chips, search, inputs */
-  --radius-destination: 24px;   /* DestinationCard: guides, experiences, hotels */
-  --radius-info:        16px;   /* InfoCard: everything else */
-  --radius-sheet:       24px;   /* bottom sheet top corners */
-  --radius-card:  20px;         /* LEGACY: catalog cards today; becomes --radius-destination when migrated */
-  --radius-panel: 24px;         /* LEGACY: catalog filter panel */
+  /* ── Home values (www.lagomplan.com/es is the canon; measured in docs/design/home-canon.md) ── */
+  --ink-body-rgb:  62 95 88;      /* #3E5F58  home body + lede text */
+  --ink-card-rgb:  53 88 79;      /* #35584F  home guide-card excerpt */
+  --ink-input-rgb: 15 26 22;      /* #0F1A16  text typed in a field */
+  --field-error-rgb: 185 64 48;   /* #B94030  home required marker + field error */
+  --ink-body:  rgb(var(--ink-body-rgb));
+  --ink-card:  rgb(var(--ink-card-rgb));
+  --ink-input: rgb(var(--ink-input-rgb));
+  --field-error: rgb(var(--field-error-rgb));
+  --btn-solid-hover: #1A4A42;     /* hover of home's solid button */
+  --line-section: rgb(var(--line-strong-rgb) / .3);    /* border between home sections */
+  --line-hair:    rgb(var(--line-strong-rgb) / .22);   /* home review-card border */
+  --line-field:   #C8D9D3;                             /* home place / date field border */
+  --line-sage:    rgb(var(--sage-rgb) / .22);          /* home chip, tile, budget + textarea border */
+  --line-form:    #E5E5E5;                             /* home planner-card border */
+  --line-divider: #EDE9E4;                             /* home planner-card section dividers */
+  --placeholder:  #BDBDBD;                             /* home field placeholder */
 
-  /* Shadows */
-  --shadow-soft:  0 2px 8px rgb(0 0 0 / .04);              /* DestinationCard (the /guias card) */
-  --shadow-pop:   0 12px 32px rgb(var(--pine-rgb) / .14);  /* menus, suggestion lists */
-  --shadow-sheet: 0 -8px 28px rgb(var(--pine-rgb) / .18);  /* bottom sheet */
+  /* Radii (home: buttons + textarea 8, cards + tiles 12, guide card 22, pace toggle 10, chips 9999, place fields 2) */
+  --radius-pill:        9999px;  /* chips */
+  --radius-btn:         8px;     /* buttons, textarea / budget field */
+  --radius-info:        12px;    /* InfoCard: review card, planner card, tiles */
+  --radius-destination: 22px;    /* DestinationCard: the home guide card */
+  --radius-field:       2px;     /* place + date fields */
+  --radius-sheet:       22px;    /* bottom sheet top corners (derived: the guide-card radius) */
+  --radius-card:  20px;          /* LEGACY: catalog cards today */
+  --radius-panel: 24px;          /* LEGACY: catalog filter panel */
 
-  /* Spacing (4px base) */
+  /* Shadows (home) */
+  --shadow-soft:  0 1px 2px 0 rgb(0 0 0 / .05);                  /* guide card (tailwind shadow-sm) */
+  --shadow-lift:  0 4px 6px -1px rgb(0 0 0 / .1), 0 2px 4px -2px rgb(0 0 0 / .1);  /* guide card hover (shadow-md) */
+  --shadow-form:  0 4px 24px rgb(var(--pine-rgb) / .06);         /* planner card */
+  --shadow-pop:   0 12px 32px rgb(var(--pine-rgb) / .14);        /* DERIVED: menus, suggestion lists */
+  --shadow-sheet: 0 -8px 28px rgb(var(--pine-rgb) / .18);        /* DERIVED: bottom sheet */
+
+  /* Spacing (4px base). Home: sections 96 (64 on mobile), page width 1280, gutter 24, grid gap 24 */
   --space-1: 4px;  --space-2: 8px;  --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px;
   --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-16: 64px; --space-20: 80px;
-  --section-y: clamp(56px, 8vw, 96px);   /* vertical rhythm between page sections */
-  --page-gutter: 18px;                    /* horizontal page padding on mobile */
+  --section-y: 96px;
+  --page-gutter: 24px;
 
-  /* Type scale. Page title / H2 / H3 / eyebrow are the /guias values, measured. */
-  --fs-title:  clamp(44px, 7vw, 72px);   --lh-title: 0.92;  --ls-title: -0.04em;  --fw-title: 800;
-  --fs-h2:     36px; --lh-h2: 1.05; --ls-h2: -0.02em; --fw-h2: 800;
-  --fs-h3:     24px;                     --lh-h3: 1.12;   --ls-h3: -0.02em;     --fw-h3: 800;
-  --fs-eyebrow: 11px;                    --lh-eyebrow: 1.55; --ls-eyebrow: 0.12em; --fw-eyebrow: 500;
-  --fs-lede:   18px;                     --lh-lede: 1.75;
-  --fs-body:   16px;                     --lh-body: 1.6;
-  --fs-small:  14px;                     --lh-small: 1.7;
-  --fs-tiny:   12px;                     --lh-tiny: 1.5;
-  --fs-button: 15px;  --fs-button-sm: 14px;   /* buttons are Manrope 700 */
+  /* Type scale: home values. Manrope throughout. */
+  --fs-title:  60px;  --lh-title: 1.05;  --ls-title: -1.5px;   --fw-title: 700;   /* H1 */
+  --fs-h2:     40px;  --lh-h2: 1.15;     --ls-h2: 0;           --fw-h2: 700;      /* section title */
+  --fs-h2-xl:  50px;  --lh-h2-xl: 1.08;                                           /* closing call-to-action title */
+  --fs-h3:     22px;  --lh-h3: 1.25;     --ls-h3: -0.02em;     --fw-h3: 400;      /* card title (guide card) */
+  --fs-h4:     18px;  --lh-h4: 1.55;     --fw-h4: 600;                            /* person name, card heading */
+  --fs-h5:     15px;  --lh-h5: 1.55;     --fw-h5: 600;                            /* feature title */
+  --fs-eyebrow: 11px; --lh-eyebrow: 1.55; --ls-eyebrow: 0.12em; --fw-eyebrow: 500; /* .sec-label */
+  --fs-lede:   15px;  --lh-lede: 1.75;                                            /* hero / section lede */
+  --fs-body:   15px;  --lh-body: 1.8;                                             /* paragraph */
+  --fs-small:  13px;  --lh-small: 1.55;
+  --fs-tiny:   12px;  --lh-tiny: 1.55;
+  --fs-micro:  10px;  --lh-micro: 1.55;
+  --fs-button: 13px;  --fs-button-sm: 12px;   /* .btn-solid / .btn-outline: 13px, tracking .03em */
 
-  /* Controls */
-  --control-h:    48px;   /* button, input, secondary controls */
-  --control-h-sm: 40px;   /* small button */
-  --control-h-lg: 56px;   /* search field */
-  --chip-h:       44px;
+  /* Controls (home: button 46 = 12px padding + 13px text; field 38; pace toggle / chip md 44) */
+  --control-h:    46px;   /* button */
+  --control-h-sm: 36px;   /* DERIVED small button */
+  --field-h:      38px;   /* place / date / search field */
+  --chip-h:       44px;   /* DERIVED filter chip: the home pace toggle's height */
+  --chip-h-sm:    24px;   /* the home interest chip */
+}
+
+/* Home's mobile steps (max-width 768px, the breakpoint home uses) */
+@media (max-width: 768px) {
+  :root {
+    --fs-title: 40px;
+    --fs-h2: 30px;
+    --fs-h2-xl: 34px;
+    --section-y: 64px;
+  }
 }
 
 /* ── Base ─────────────────────────────────────────────── */
