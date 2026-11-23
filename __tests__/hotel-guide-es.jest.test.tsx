@@ -136,8 +136,8 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     for (const [label] of links) expect(label).toBe('Mapa')
     expect(links[3][1]).toContain('Máximo, Av. Álvaro Obregón 65 Bis, Roma Norte, Ciudad de México')
     expect(view.container.textContent).not.toContain('Viajo con niños')
-    // every panel: one Map link per pick, and the size the plan says
-    const sizes = [7, 7, 5, 6, 6, 7]
+    // every panel: seven picks, one Map link each
+    const sizes = [7, 7, 7, 7, 7, 7]
     for (const [i, b] of buttons.entries()) {
       act(() => { fireEvent.click(b) })
       const p = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
@@ -154,7 +154,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const hidden = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
     expect(hidden.textContent).toContain(lang === 'es' ? 'Foro Shakespeare' : 'Foro Shakespeare')
     expect(hidden.textContent).not.toContain(label)
-    expect(hidden.querySelectorAll('[class*="moodItemName"]')).toHaveLength(6)
+    expect(hidden.querySelectorAll('[class*="moodItemName"]')).toHaveLength(7)
     // other panels: the mark sits inside the name line, soft green, at most once per place
     for (const name of lang === 'es' ? ['Quiero ir de compras', 'Tengo hambre', 'Una cena especial', 'Quiero cultura', 'Quiero vida nocturna'] : ["I want to shop", "I'm hungry", 'A special dinner', 'I want culture', 'I want nightlife']) {
       act(() => { fireEvent.click(button(name)) })

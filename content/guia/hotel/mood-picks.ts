@@ -96,7 +96,13 @@ export const NEW_PLACES: Record<string, NewPick> = {
     note: { en: "One of the city's leading contemporary art galleries.", es: 'Una de las galerías de arte contemporáneo más importantes de la ciudad.' } },
   'Casa Lamm': { name: 'Casa Lamm', address: 'Av. Álvaro Obregón 99', zone: 'Roma Norte', verify: [VERIFY_HOURS, VERIFY_OPEN],
     note: { en: 'A Porfirian mansion turned cultural centre, with galleries and a garden.', es: 'Una casona porfiriana convertida en centro cultural, con galerías y jardín.' } },
+  'Museo de Arte Popular': { name: 'Museo de Arte Popular', address: 'Revillagigedo 11', zone: 'Centro', verify: H,
+    note: { en: 'Mexican folk art from every region: masks, textiles, ceramics and alebrijes.', es: 'Arte popular mexicano de todas las regiones: máscaras, textiles, cerámica y alebrijes.' } },
+  'Museo Franz Mayer': { name: 'Museo Franz Mayer', address: 'Av. Hidalgo 45', zone: 'Centro', verify: H,
+    note: { en: 'Decorative arts and design in a former hospital with a quiet courtyard.', es: 'Artes decorativas y diseño en un antiguo hospital con un patio tranquilo.' } },
   // ── Hidden places
+  'Fonoteca Nacional': { name: 'Fonoteca Nacional', address: 'Av. Francisco Sosa 383', zone: 'Coyoacán', verify: H,
+    note: { en: 'The national sound archive, in an old house with a quiet garden. Weekdays only.', es: 'El archivo sonoro nacional, en una casona con un jardín tranquilo. Solo entre semana.' } },
   'Audiorama': { name: 'Audiorama', address: 'Calzada del Rey, Bosque de Chapultepec', zone: 'Chapultepec', verify: H,
     note: { en: 'A quiet garden inside Chapultepec with music, benches and books.', es: 'Un jardín tranquilo dentro de Chapultepec con música, bancas y libros.' } },
   'Museo Anahuacalli': { name: 'Museo Anahuacalli', address: 'Museo 150', zone: 'Coyoacán', verify: H,
@@ -104,6 +110,8 @@ export const NEW_PLACES: Record<string, NewPick> = {
   'Kiosko Morisco': { name: 'Kiosko Morisco', address: 'Jaime Torres Bodet 152', zone: 'Santa María la Ribera', verify: H,
     note: { en: 'A Moorish-style iron pavilion in the park of Santa María la Ribera.', es: 'Un pabellón de hierro de estilo morisco en la alameda de Santa María la Ribera.' } },
   // ── I'm hungry
+  'Botánico': { name: 'Botánico', address: 'Alfonso Reyes 217', zone: 'Condesa', verify: H,
+    note: { en: 'A garden restaurant in Condesa, good for a long dinner.', es: 'Un restaurante con jardín en la Condesa, para una cena larga.' } },
   'Maleza': { name: 'Maleza', address: 'Cuernavaca 4', zone: 'Condesa', badge: 'gem', verify: H,
     note: { en: 'Locally sourced cooking from small producers of the Valley of Mexico, and good drinks.', es: 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos.' } },
   'Baldío': { name: 'Baldío', address: 'Antonio Sola 26', zone: 'Condesa', badge: 'green', verify: H,
@@ -129,13 +137,14 @@ export const NEW_PLACES: Record<string, NewPick> = {
 export const MOODS_PLAN: Record<MoodId, string[]> = {
   dinner: ['Gaba', 'Esquina Común', 'Em', 'Máximo', 'Rosetta', 'Quintonil', 'Pujol'],
   shop: ['Proyecto Rufina', 'Librería El Péndulo', 'Bazar Sábado', 'Onora', 'Carla Fernández', 'Utilitario Mexicano', 'Mercado de Artesanías La Ciudadela'],
-  culture: ['Museo Tamayo', 'Casa Luis Barragán', 'Castillo de Chapultepec', 'OMR', 'Casa Lamm'],
-  hidden: ['Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco'],
-  hungry: ['Maleza', 'Baldío', 'Plonk', 'Mi Compa Chava', 'Taquería Orinoco', 'Café Nin'],
+  culture: ['Museo Tamayo', 'Casa Luis Barragán', 'Castillo de Chapultepec', 'OMR', 'Casa Lamm', 'Museo de Arte Popular', 'Museo Franz Mayer'],
+  hidden: ['Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco', 'Fonoteca Nacional'],
+  hungry: ['Maleza', 'Baldío', 'Plonk', 'Botánico', 'Mi Compa Chava', 'Taquería Orinoco', 'Café Nin'],
   nightlife: ['Licorería Limantour', 'Departamento', 'Baltra Bar', 'Tlecān', 'Bar Mauro', 'Hanky Panky', 'Handshake Speakeasy'],
 }
 
-/** A mood has 7 places. These NEW places were asked for but already appear in a zone tab or a plan, so they were not added. */
+/** A mood has exactly 7 places. These NEW places were asked for but already appear in a zone tab or a plan, so they were not added
+ *  (the owner filled the panels with other places instead). */
 export const MOOD_SIZE = 7
 export const SKIPPED_NEW_PLACES: { mood: MoodId; name: string; because: string }[] = [
   { mood: 'culture', name: 'Museo Jumex', because: 'already in the Polanco tab, in the card "Soumaya + Jumex"' },

@@ -541,7 +541,6 @@ describe('"Send this guide to my phone" always ends with the guide\'s address', 
 describe('moods: order, places, size, addresses', () => {
   const g = getGuide('livin_condesa')!
   const moodsOf = (lang: 'en' | 'es', z: HotelZone = 'condesa') => buildHotelGuideProps(z)!.city.copy[lang].moods
-  const skipped = (id: MoodId) => SKIPPED_NEW_PLACES.filter((x) => x.mood === id)
 
   test.each(['en', 'es'] as const)('%s: six moods in the agreed order; kids and "Only a few hours" are gone', (lang) => {
     expect(moodsOf(lang).map((m) => m.id)).toEqual(['dinner', 'shop', 'culture', 'hidden', 'hungry', 'nightlife'])
@@ -549,9 +548,11 @@ describe('moods: order, places, size, addresses', () => {
     expect(moodsOf(lang).find((m) => m.id === 'dinner')!.icon).toBe('chefHat')
     expect(moodsOf(lang).find((m) => m.id === 'dinner')!.label).toBe(lang === 'en' ? 'A special dinner' : 'Una cena especial')
   })
-  test('each panel has 7 places (fewer only by the new places skipped because they are already in a tab or a plan), every one with an address and a zone', () => {
+  test('each panel has exactly 7 places, in all three hotel zones and both languages, every one with an address and a zone', () => {
     for (const z of HOTEL_ZONES) for (const lang of ['en', 'es'] as const) for (const m of moodsOf(lang, z)) {
-      expect(m.items.length + skipped(m.id as MoodId).length).toBe(MOOD_SIZE)
+      expect(MOOD_SIZE).toBe(7)
+      expect(m.items).toHaveLength(7)
+      expect(new Set(m.items.map((i) => i.name)).size).toBe(7) // seven different places
       expect(m.items.map((i) => i.name)).toEqual(MOODS_PLAN[m.id as MoodId])
       for (const it of m.items) { expect(it.address).toBeTruthy(); expect(it.zone).toBeTruthy() }
     }
@@ -560,9 +561,9 @@ describe('moods: order, places, size, addresses', () => {
     const names = (id: string) => moodsOf('en').find((m) => m.id === id)!.items.map((i) => i.name)
     expect(names('dinner')).toEqual(['Gaba', 'Esquina Común', 'Em', 'Máximo', 'Rosetta', 'Quintonil', 'Pujol'])
     expect(names('shop')).toEqual(['Proyecto Rufina', 'Librería El Péndulo', 'Bazar Sábado', 'Onora', 'Carla Fernández', 'Utilitario Mexicano', 'Mercado de Artesanías La Ciudadela'])
-    expect(names('culture')).toEqual(['Museo Tamayo', 'Casa Luis Barragán', 'Castillo de Chapultepec', 'OMR', 'Casa Lamm'])
-    expect(names('hidden')).toEqual(['Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco'])
-    expect(names('hungry')).toEqual(['Maleza', 'Baldío', 'Plonk', 'Mi Compa Chava', 'Taquería Orinoco', 'Café Nin'])
+    expect(names('culture')).toEqual(['Museo Tamayo', 'Casa Luis Barragán', 'Castillo de Chapultepec', 'OMR', 'Casa Lamm', 'Museo de Arte Popular', 'Museo Franz Mayer'])
+    expect(names('hidden')).toEqual(['Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco', 'Fonoteca Nacional'])
+    expect(names('hungry')).toEqual(['Maleza', 'Baldío', 'Plonk', 'Botánico', 'Mi Compa Chava', 'Taquería Orinoco', 'Café Nin'])
     expect(names('nightlife')).toEqual(['Licorería Limantour', 'Departamento', 'Baltra Bar', 'Tlecān', 'Bar Mauro', 'Hanky Panky', 'Handshake Speakeasy'])
   })
   test('removed places are gone from the moods; LAGO left "I want to shop" but keeps its Polanco tab card', () => {
@@ -620,6 +621,11 @@ describe('moods: order, places, size, addresses', () => {
     expect(en('shop', 'Utilitario Mexicano')).toMatchObject({ address: 'Marsella 3A', zone: 'Juárez' })
     expect(es('culture', 'Castillo de Chapultepec').note).toBe('El castillo en lo alto de Chapultepec, con el museo nacional de historia y una gran vista de la ciudad.')
     expect(en('culture', 'Casa Lamm')).toMatchObject({ address: 'Av. Álvaro Obregón 99', zone: 'Roma Norte' })
+    expect(en('culture', 'Museo de Arte Popular')).toMatchObject({ address: 'Revillagigedo 11', zone: 'Centro', note: 'Mexican folk art from every region: masks, textiles, ceramics and alebrijes.' })
+    expect(es('culture', 'Museo Franz Mayer')).toMatchObject({ address: 'Av. Hidalgo 45', note: 'Artes decorativas y diseño en un antiguo hospital con un patio tranquilo.' })
+    expect(en('hidden', 'Fonoteca Nacional')).toMatchObject({ address: 'Av. Francisco Sosa 383', zone: 'Coyoacán', note: 'The national sound archive, in an old house with a quiet garden. Weekdays only.' })
+    expect(es('hungry', 'Botánico')).toMatchObject({ address: 'Alfonso Reyes 217', zone: 'Condesa', note: 'Un restaurante con jardín en la Condesa, para una cena larga.' })
+    expect(moodsOf('en').find((m) => m.id === 'culture')!.items.map((i) => i.name)).toContain('OMR')
     expect(es('hidden', 'Kiosko Morisco').note).toBe('Un pabellón de hierro de estilo morisco en la alameda de Santa María la Ribera.')
     expect(en('hungry', 'Mi Compa Chava').note).toBe('Sinaloa-style seafood for a long lunch. Expect a wait.')
     expect(es('nightlife', 'Hanky Panky').note).toBe('Un speakeasy escondido detrás de una taquería. Reserva con tiempo.')
@@ -632,7 +638,7 @@ describe('moods: order, places, size, addresses', () => {
     expect(VERIFY_OPEN).toBe('to verify: still open to the public')
     expect(MOOD_VERIFY).toBe('to verify: address, opening days and hours')
     for (const p of Object.values(NEW_PLACES)) expect(p.verify.length).toBeGreaterThan(0)
-    for (const n of ['Esquina Común', 'Em', 'Castillo de Chapultepec', 'OMR', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco', 'Baldío', 'Plonk', 'Mi Compa Chava', 'Baltra Bar', 'Tlecān', 'Bar Mauro', 'Hanky Panky', 'Handshake Speakeasy', 'Gaba', 'Maleza', 'Utilitario Mexicano'])
+    for (const n of ['Museo de Arte Popular', 'Museo Franz Mayer', 'Fonoteca Nacional', 'Botánico', 'Esquina Común', 'Em', 'Castillo de Chapultepec', 'OMR', 'Audiorama', 'Museo Anahuacalli', 'Kiosko Morisco', 'Baldío', 'Plonk', 'Mi Compa Chava', 'Baltra Bar', 'Tlecān', 'Bar Mauro', 'Hanky Panky', 'Handshake Speakeasy', 'Gaba', 'Maleza', 'Utilitario Mexicano'])
       expect(NEW_PLACES[n].verify).toContain(VERIFY_HOURS)
     expect(NEW_PLACES['Casa Lamm'].verify).toEqual([VERIFY_HOURS, VERIFY_OPEN])
     expect(Object.entries(ADDRESSES).filter(([, a]) => a.repo).map(([n]) => n).sort()).toEqual(['Foro Shakespeare', 'Museo Tamayo'])
