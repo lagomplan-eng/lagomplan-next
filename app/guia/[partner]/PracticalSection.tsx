@@ -326,7 +326,7 @@ export default function PracticalSection({
       <div className={styles.container}>
         <div className={styles.secGrid}>
           <div className={styles.secHead}>
-            <span className={styles.eyebrowMono} style={{ color: 'var(--pine)', display: 'block', marginBottom: 12 }}>{copy.eyebrow}</span>
+            <span className={hotelSection ? styles.eyebrow : styles.eyebrowMono} style={{ color: 'var(--pine)', display: 'block', marginBottom: 12 }}>{copy.eyebrow}</span>
             <h2 className={styles.h2}>{headingOverride ?? copy.heading}</h2>
             <p className={styles.lede}>{subhead}</p>
             {glanceBadges.length > 0 && (

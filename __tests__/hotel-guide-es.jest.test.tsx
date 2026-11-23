@@ -57,14 +57,8 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const tabs = [...zonesEl.querySelectorAll('[role="tab"]')] as HTMLElement[]
     expect(tabs.map((t) => t.firstChild?.textContent)).toEqual(ZONE_TAB_ORDER[zone])
     expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.firstChild?.textContent)).toEqual([ZONE_NEIGHBORHOOD[zone]])
-    const how = Object.fromEntries(tabs.map((t) => [t.firstChild?.textContent, t.querySelector('span')?.textContent ?? null]))
-    const [W, R, D] = ['A pie', 'Trayecto corto', 'Medio día']
-    const want = {
-      condesa: { Condesa: W, 'Roma Norte': W, 'San Miguel Chapultepec': W, Polanco: R, Centro: R, Coyoacán: D },
-      roma: { 'Roma Norte': W, Condesa: W, 'San Miguel Chapultepec': R, Centro: R, Polanco: R, Coyoacán: D },
-      polanco: { Polanco: W, 'San Miguel Chapultepec': R, Condesa: R, 'Roma Norte': R, Centro: D, Coyoacán: D },
-    }[zone]
-    expect(how).toEqual(want)
+    for (const t of tabs) expect(t.querySelector('span')).toBeNull() // zone name only: no how-far label on the chips
+    expect(text).not.toMatch(/A pie|Trayecto corto|Medio día/)
     expect(text).not.toMatch(/Tu casa/)
   })
   test('how much time: Condesa picks between two plans (short plan first), others show 48 horas directly', () => {
@@ -108,10 +102,27 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
     expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word
   })
+  test('Hidden gem / Joya escondida sits on the place name line in the mood panel', () => {
+    const { view } = open()
+    const btn = ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[]).find((b) => b.textContent === 'Lugares escondidos')!
+    act(() => { fireEvent.click(btn) })
+    const names = [...view.container.querySelectorAll('[class*="moodItemName"]')]
+    expect(names).toHaveLength(3)
+    for (const n of names) expect(n.textContent).toContain('Joya escondida')
+    expect(view.container.textContent).not.toMatch(/Arte\b(?! )|Comida y bebida/)
+  })
   test('jump menu, monday row, shop mood, footer line, destination cards (Spanish)', () => {
     const { view, text } = open()
-    const links = [...view.container.querySelectorAll('nav a')].map((a) => [a.getAttribute('href'), a.textContent])
+    const links = [...view.container.querySelectorAll('header nav a')].map((a) => [a.getAttribute('href'), a.textContent])
     expect(links).toEqual([['#zonas', 'Cerca de mí'], ['#planes', 'Planes'], ['#experiencias', 'Experiencias'], ['#bueno-saber', 'Bueno saber']])
+    expect(view.container.querySelector('header')!.textContent).not.toMatch(/Tu estancia|Guest Stay/)
+    expect([...view.container.querySelectorAll('nav[class*="hotelJumpMobile"] a')].map((a) => a.textContent)).toEqual(['Cerca de mí', 'Planes', 'Experiencias', 'Bueno saber'])
+    expect(text).toContain('lagomplan · guía de barrio')
+    expect(text).not.toContain('experiencia de huéspedes')
+    expect(text).not.toContain('Cuídate') // Take care is gone; Gyms and studios moved to Before you arrive
+    expect(text).toContain('Gyms and studios')
+    const rows = [...view.container.querySelectorAll('[class*="todayTitle"]')].map((x) => x.textContent)
+    expect(rows).toEqual(['La mayoría de los museos cierra.', 'Lucha libre, Arena México', 'Bazar Sábado, San Ángel', 'Muévete en Bici, Reforma', 'Mirador Torre Latinoamericana'])
     expect(text).toContain('Lunes')
     expect(text).toContain('La mayoría de los museos cierra.')
     expect(text).toContain('Buen día para parques, mercados y comer.')

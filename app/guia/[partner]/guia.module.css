@@ -694,3 +694,35 @@
 .agCards::-webkit-scrollbar { display: none; }
 .agCard { flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; }
 @media (min-width: 720px) { .agCards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); overflow: visible; margin-right: 0; padding-right: 0; } .agCard { flex: none; } }
+
+
+/* ── Hotel edition polish ────────────────────────────────────────────────────
+   Everything below applies only under .hotelCalm (the hotel page root) or to the hotel's own jump links, so the Livin,
+   Host Me Tender and demo guides render exactly as before. Existing tokens only. */
+.hotelCalm .eyebrow { color: var(--pine); }                 /* coral stays for the booking action only */
+.hotelCalm .link { color: var(--pine); }
+.hotelCalm .itinTime { color: var(--sage-soft); }
+.hotelCalm .section { padding: 88px 0; }
+.hotelCalm .secHead, .hotelCalm .secBody { min-width: 0; }
+.hotelCalm .tabRow { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+.hotelCalm .tabRow::-webkit-scrollbar { display: none; }
+.hotelCalm .tab { flex: none; white-space: nowrap; }
+.hotelCalm .nbControls { flex-direction: column; align-items: stretch; gap: 16px; max-width: 860px; }
+.hotelCalm .nbMapCard { align-self: flex-end; }
+.hotelCalm .moodGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hotelCalm .weatherCard { max-width: 860px; }
+@media (max-width: 640px) { .hotelCalm .moodGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Jump links: in the header on desktop (where the label was), one scrollable row under the header on phones. */
+.hotelJumpDesktop { display: flex; align-items: center; gap: 18px; }
+.hotelJumpDesktop a, .hotelJumpMobile a { text-decoration: none; color: var(--sage); white-space: nowrap; }
+.hotelJumpDesktop a:hover, .hotelJumpMobile a:hover { color: var(--pine); }
+.hotelJumpMobile { display: none; }
+@media (max-width: 768px) {
+  .hotelJumpDesktop { display: none; }
+  .hotelJumpMobile {
+    display: flex; gap: 22px; position: sticky; top: 68px; z-index: 40; overflow-x: auto; scrollbar-width: none;
+    padding: 12px 24px; background: rgba(255, 249, 243, .92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(107, 143, 134, .18);
+  }
+  .hotelJumpMobile::-webkit-scrollbar { display: none; }
+}

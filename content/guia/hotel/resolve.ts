@@ -81,6 +81,14 @@ function shopMood(city: City, copy: CityCopy, lang: Lang): Mood {
   return { id: 'shop', icon: 'basket', label: HOTEL_SHOP_MOOD[lang].label, title: HOTEL_SHOP_MOOD[lang].title, items: picks }
 }
 
+/** "Every week": Monday, Tues & Fri, Saturday, Sunday, Sunset. */
+function weeklyRows(copy: CityCopy, lang: Lang): CityCopy['todayItems'] {
+  const by = (start: string) => copy.todayItems.find((t) => t.title.startsWith(start))
+  const ordered = [by('Lucha libre'), by('Bazar Sábado'), by('Muévete en Bici'), by('Mirador')]
+  const rest = copy.todayItems.filter((t) => !ordered.includes(t))
+  return [HOTEL_MONDAY_ROW[lang], ...ordered.filter((t): t is NonNullable<typeof t> => !!t), ...rest]
+}
+
 function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>): CityCopy {
   const moods = copy.moods
     .filter((m) => m.id !== 'short')
@@ -102,7 +110,7 @@ function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>
     moods: HOTEL_MOOD_ORDER.map((id) => withShop.find((m) => m.id === id)).filter((m): m is Mood => !!m)
       .map((m) => ({ ...m, items: m.items.map((it) => ({ ...it, zone: HOTEL_PICK_ZONES[it.name] ?? it.zone ?? zoneOfPlace(city, it.name, lang) })) })),
     // "Every week": one more row, Monday.
-    todayItems: [HOTEL_MONDAY_ROW[lang], ...copy.todayItems],
+    todayItems: weeklyRows(copy, lang),
     // Only the four experience titles travel (the cards are in experiences.ts); nothing of the Insider copy does.
     experiences: copy.experiences
       .filter((e) => (HOTEL_EXPERIENCE_IDS as string[]).includes(e.id))

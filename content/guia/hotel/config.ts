@@ -136,6 +136,9 @@ export const HOTEL_MONDAY_ROW: Record<Lang, { tag: string; title: string; body: 
   es: { tag: 'Lunes', title: 'La mayoría de los museos cierra.', body: 'Buen día para parques, mercados y comer.' },
 }
 
+/** The small line at the very bottom of the page. */
+export const HOTEL_FOOTER_TEXT: Record<Lang, string> = { en: 'lagomplan · neighborhood guide', es: 'lagomplan · guía de barrio' }
+
 /** One line in the footer. */
 export const HOTEL_FOOTER_LINE: Record<Lang, string> = {
   en: 'We recommend places because we checked them. Nobody pays to be listed.',
