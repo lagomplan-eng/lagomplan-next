@@ -143,14 +143,32 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
       expect(p.querySelectorAll('a').length).toBe(p.querySelectorAll('[class*="moodItemName"]').length)
     }
   })
-  test('Hidden gem / Joya escondida sits on the place name line in the mood panel', () => {
-    const { view } = open()
-    const btn = ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[]).find((b) => b.textContent === 'Lugares escondidos')!
-    act(() => { fireEvent.click(btn) })
-    const names = [...view.container.querySelectorAll('[class*="moodItemName"]')]
-    expect(names).toHaveLength(3)
-    for (const n of names) expect(n.textContent).toContain('Joya escondida')
-    expect(view.container.textContent).not.toMatch(/Arte\b(?! )|Comida y bebida/)
+  test.each(['es', 'en'] as const)('%s: no Hidden gem mark inside the "Hidden places" panel; elsewhere quiet and at most once per panel', (lang) => {
+    window.history.pushState({}, '', `/guia/cdmx/${zone}?lang=${lang}`)
+    const view = render(<GuiaClient {...buildHotelGuideProps(zone)!} />)
+    const label = lang === 'es' ? 'Joya escondida' : 'Hidden gem'
+    const button = (name: string) => ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[]).find((b) => b.textContent === name)!
+    act(() => { fireEvent.click(button(lang === 'es' ? 'Lugares escondidos' : 'Hidden places')) })
+    const hidden = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
+    expect(hidden.textContent).toContain(lang === 'es' ? 'Foro Shakespeare' : 'Foro Shakespeare')
+    expect(hidden.textContent).not.toContain(label)
+    expect(hidden.querySelectorAll('[class*="moodItemName"]')).toHaveLength(3)
+    // other panels: the mark sits inside the name line, soft green, at most once per place
+    for (const name of lang === 'es' ? ['Quiero ir de compras', 'Tengo hambre', 'Una cena especial', 'Quiero cultura', 'Quiero vida nocturna'] : ["I want to shop", "I'm hungry", 'A special dinner', 'I want culture', 'I want nightlife']) {
+      act(() => { fireEvent.click(button(name)) })
+      const panel = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
+      for (const item of panel.querySelectorAll('[class*="moodItemName"]')) {
+        const marks = [...item.querySelectorAll('span')].filter((x) => x.textContent === label)
+        expect(marks.length).toBeLessThanOrEqual(1)
+        for (const m of marks) expect((m as HTMLElement).style.color).toBe('rgb(62, 95, 88)') // #3E5F58
+      }
+      if (name === (lang === 'es' ? 'Tengo hambre' : "I'm hungry")) {
+        // Maleza's label already says it: no inline mark on top
+        const maleza = [...panel.querySelectorAll('[class*="moodItemName"]')].find((x) => x.textContent?.startsWith('Maleza'))!
+        expect(maleza.textContent).toBe('Maleza')
+      }
+      if (name === (lang === 'es' ? 'Quiero ir de compras' : 'I want to shop')) expect(panel.textContent).toContain(label) // Proyecto Rufina
+    }
   })
   test('jump menu, monday row, shop mood, footer line, destination cards (Spanish)', () => {
     const { view, text } = open()

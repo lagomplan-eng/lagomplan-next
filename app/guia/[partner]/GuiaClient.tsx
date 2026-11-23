@@ -676,10 +676,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   )
 
   // Hotel edition helpers.
-  // The one mark a place card carries in the hotel edition: "Hidden gem", small capitals in the section-label green,
-  // on the same line as the place name and address.
+  // The one mark a place card carries in the hotel edition: "Hidden gem", quiet. Small text in the soft green, right after the
+  // place name on the same line (inside the name element, so it adds no line and the row keeps its height); no colour accent,
+  // pill, background or icon. Not shown inside the "Hidden places" panel (its title says it), nor where the pick's own label
+  // already says it.
   const gemMark = (name: string) => isHiddenGem(name)
-    ? <span className={styles.eyebrow} style={{ marginBottom: 0, marginLeft: 8 }}>{HIDDEN_GEM_LABEL[lang]}</span>
+    ? <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: '#3E5F58', whiteSpace: 'nowrap' }}>{HIDDEN_GEM_LABEL[lang]}</span>
     : null
   const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
   // The whole message ends with the guide's address (production host); built without window, see content/guia/hotel/share.ts.
@@ -785,7 +787,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     {selectedMood.items.map((it, i) => (
                       <div key={i}>
                         {it.tag && <span className={styles.eyebrowMono} style={{ color: 'var(--pine)' }}>{it.tag}</span>}
-                        <div className={styles.moodItemName}>{it.name}{hotel && !it.tag && gemMark(it.name)}</div>
+                        <div className={styles.moodItemName}>{it.name}{hotel && !it.tag && selectedMood?.id !== 'hidden' && gemMark(it.name)}</div>
                         <div className={styles.moodItemNote}>{it.note}</div>
                         {hotel && (
                           // Zone and address on one line, then a quiet Map link built from the name and address (name alone when there is none).
@@ -884,9 +886,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
                     <div>
                       <div className={styles.spotHead}>
-                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}</h5>
+                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}{hotel && gemMark(spot.name)}</h5>
                         <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
-                        {hotel && gemMark(spot.name)}
                       </div>
                       <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
                     </div>

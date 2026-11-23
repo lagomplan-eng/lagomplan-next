@@ -194,14 +194,19 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(text).toContain('We recommend places because we checked them. Nobody pays to be listed.')
     expect(html.indexOf('We recommend places because')).toBeGreaterThan(html.indexOf('data-hotel-section="discover"'))
   })
-  test('Hidden gem is the only mark, on the same line as the place name and address; Art and Food and drink are gone', () => {
+  test('Hidden gem is the only mark: quiet, right after the place name on its line, soft green, no pill or coral; Art and Food and drink are gone', () => {
     expect(html).not.toMatch(/>(Art|Food and drink)</)
     const heads = [...html.matchAll(/<div class="spotHead">(.*?)<\/div>/g)].map((m) => m[1])
     for (const h of heads) {
       const name = h.match(/<h5[^>]*>([^<]*)</)?.[1].replace(/&#x27;/g, "'") ?? ''
       expect(h.includes(`>${HIDDEN_GEM_LABEL.en}<`)).toBe(isHiddenGem(name))
     }
-    if (zone === 'condesa') expect(heads.some((h) => h.includes('Proyecto Rufina') && h.includes('Hidden gem'))).toBe(true)
+    for (const m of html.matchAll(/<h5 class="h5">[^<]*<span style="([^"]*)">Hidden gem<\/span><\/h5>/g)) {
+      expect(m[1]).toContain('color:#3E5F58')
+      expect(m[1]).not.toMatch(/coral|background|border|padding/)
+    }
+    expect(html).not.toMatch(/class="eyebrow"[^>]*>Hidden gem</) // no longer a section-label style
+    if (zone === 'condesa') expect(html).toMatch(/<h5 class="h5">Proyecto Rufina<span style="[^"]*">Hidden gem<\/span><\/h5>/)
   })
   test('quiet colour: coral only on the booking button; every section label in the same green; backgrounds alternate', () => {
     expect(html).not.toContain('var(--coral)')
@@ -439,7 +444,7 @@ describe('moods, theme marks and zone names', () => {
     expect(zones).toMatchObject({
       'Lalo!': 'Roma Norte', 'Taquería Orinoco': 'Roma Norte', 'El Vilsito': 'Narvarte', 'Quintonil': 'Polanco', 'Café Nin': 'Juárez',
       'Nevería Roxy': 'Condesa', 'Museo Tamayo': 'Chapultepec', 'Casa Luis Barragán': 'Tacubaya', 'Departamento': 'Roma Norte',
-      'Foro Shakespeare': 'Condesa', 'Bósforo': 'Centro', 'Casa Franca': 'Roma Norte', 'Gaba': 'Condesa', 'Máximo': 'Roma Norte', 'Rosetta': 'Roma Norte',
+      'Foro Shakespeare': 'Condesa', 'Bósforo': 'Centro', 'Casa Franca': 'Roma Norte', // Casa Franca: Roma Norte everywhere 'Gaba': 'Condesa', 'Máximo': 'Roma Norte', 'Rosetta': 'Roma Norte',
       'Pujol': 'Polanco', 'Onora': 'Polanco', 'Carla Fernández': 'Juárez', 'Utilitario Mexicano': 'Juárez', 'Mercado de Artesanías La Ciudadela': 'Centro',
       'Proyecto Rufina': 'Condesa', 'Librería El Péndulo': 'Roma Norte', 'LAGO': 'Polanco', 'Bazar Sábado': 'San Ángel', 'Licorería Limantour': 'Roma Norte',
     })
@@ -448,6 +453,7 @@ describe('moods, theme marks and zone names', () => {
   })
   test('hidden gem is exactly the six places left on the list, and nothing else is marked', () => {
     expect([...HIDDEN_GEMS].sort()).toEqual(['Bósforo', 'Casa Franca', 'Foro Shakespeare', 'Maleza', 'Mercado de San Juan', 'Proyecto Rufina'])
+    expect(HIDDEN_GEMS).not.toContain('Café Nin')
     const names = new Set<string>()
     for (const nb of Object.values(buildHotelGuideProps('condesa')!.city.neighborhoods)) nb.spots.en.forEach((s) => names.add(s.name))
     buildHotelGuideProps('condesa')!.city.copy.en.moods.forEach((m) => m.items.forEach((i) => names.add(i.name)))
