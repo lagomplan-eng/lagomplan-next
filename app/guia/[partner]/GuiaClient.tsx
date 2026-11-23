@@ -36,8 +36,9 @@ import {
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
-import type { HotelMode, HotelOutboundId } from '../../../content/guia/hotel/config'
-import { HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
+import { hotelUpdatedLine, type HotelMode, type HotelOutboundId } from '../../../content/guia/hotel/config'
+import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
+import { HOTEL_TIME_TITLE, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
 import { HOTEL_HOST_NAME, hotelReword, zonesHeading } from '../../../content/guia/hotel/rewords'
 import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
@@ -592,10 +593,18 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         }))
         .filter((g) => g.items.length > 0)
     : faqGroupsAll
-  const faqGroups = faqKept && faqKept.length > 0 ? faqKept : null
-  // A group with a single item gets no panel (PracticalSection), so in the hotel edition its item does not count as
-  // "relocated": the arrival card it would replace stays.
-  const resolvedFaqKeys = new Set(faqGroups?.filter((g) => !hotel || g.items.length >= 2).flatMap((g) => g.items.map((it) => it.key)) ?? [])
+  // Hotel edition: "Wine and liquor" moves from Eating in to Everyday errands, so it stays when Eating in empties out.
+  const faqMoved = hotel && faqKept
+    ? (() => {
+        const wine = faqKept.flatMap((g) => g.items).find((it) => it.key === 'wineLiquor')
+        if (!wine) return faqKept
+        return faqKept
+          .map((g) => g.id === 'errands' ? { ...g, items: [...g.items, wine] } : { ...g, items: g.items.filter((it) => it.key !== 'wineLiquor') })
+          .filter((g) => g.items.length > 0)
+      })()
+    : faqKept
+  const faqGroups = faqMoved && faqMoved.length > 0 ? faqMoved : null
+  const resolvedFaqKeys = new Set(faqGroups?.flatMap((g) => g.items.map((it) => it.key)) ?? [])
   const visibleArrivalItems = t.arrivalItems
     .filter((item) => {
       if (!item.id || !partner.arrivalItemsOmit?.includes(item.id)) return true
@@ -651,11 +660,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
   )
 
-  // Hotel edition helpers. One or two experience cards: cap the grid so a lone card is not stretched across the page.
-  const HOTEL_BOOK: Record<Lang, string> = { es: 'Reservar', en: 'Book' }
+  // Hotel edition helpers.
   const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
-  const hotelExpCount = HOTEL_EXPERIENCES.items.length
-  const hotelExpGridStyle = hotel && hotelExpCount < 3 ? { maxWidth: hotelExpCount * 400 + (hotelExpCount - 1) * 20 } : undefined
   const hotelShareHref = hotel
     ? `https://wa.me/?text=${encodeURIComponent(`${lang === 'es' ? `Mi guía de barrio de ${ZONE_LABEL[hotel.zone]}, de Lagomplan:` : `My ${ZONE_LABEL[hotel.zone]} neighborhood guide, from Lagomplan:`} ${typeof window === 'undefined' ? '' : `${window.location.origin}/guia/cdmx/${ZONE_SLUG[hotel.zone]}${hotelCode ? `?h=${hotelCode}` : ''}`}`.trim())}`
     : ''
@@ -678,29 +684,32 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
               )}
             </div>
             <div className={styles.secBody}>
-              <div className={styles.expGrid} style={hotelExpGridStyle}>
+              <div className={styles.expGrid}>
                 {hotel
-                  ? HOTEL_EXPERIENCES.items.map((e) => (
-                      <div className={styles.expCard} key={e.id}>
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img className={styles.expImg} src={e.image} alt={e.title[lang]} />
-                        <div className={styles.expBody}>
-                          <div className={styles.expTextBlock}><h5 className={styles.h5}>{e.title[lang]}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
-                          <div className={styles.expActions}>
-                            <a
-                              className={styles.expBookLink}
-                              href={e.bookUrl}
-                              target="_blank"
-                              rel="sponsored noopener noreferrer"
-                              onClick={() => trackOutboundLink({
-                                linkName: 'gyg_experience', href: e.bookUrl, partnerSlug: trackSlug, zone: hotel.zone, lang,
-                                section: 'experience_book', experienceName: e.id,
-                              })}
-                            >{HOTEL_BOOK[lang]}</a>
+                  ? HOTEL_EXPERIENCES.items.map((e) => {
+                      const title = t.experiences.find((x) => x.id === e.id)?.title ?? e.id
+                      return (
+                        <div className={styles.expCard} key={e.id}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img className={styles.expImg} src={e.image} alt={title} />
+                          <div className={styles.expBody}>
+                            <div className={styles.expTextBlock}><h5 className={styles.h5}>{title}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
+                            <div className={styles.expActions}>
+                              <a
+                                className={styles.expBookLink}
+                                href={e.bookUrl}
+                                target="_blank"
+                                rel="sponsored noopener noreferrer"
+                                onClick={() => trackOutboundLink({
+                                  linkName: 'gyg_experience', href: e.bookUrl, partnerSlug: trackSlug, zone: hotel.zone, lang,
+                                  section: 'experience_book', experienceName: e.id,
+                                })}
+                              >{HOTEL_BOOK_LABEL[lang]}</a>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))
+                      )
+                    })
                   : ownTours.length > 0
                   ? ownTours.map((tour) => (
                       <ExperienceCard
@@ -756,6 +765,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                   <div className={styles.moodItems}>
                     {selectedMood.items.map((it, i) => (
                       <div key={i}>
+                        {it.tag && <span className={styles.eyebrowMono} style={{ color: 'var(--coral)' }}>{it.tag}</span>}
                         <div className={styles.moodItemName}>{it.name}</div>
                         <div className={styles.moodItemNote}>{it.note}</div>
                       </div>
@@ -768,6 +778,251 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </div>
       </section>
   )
+
+  const HOTEL_PRACTICAL_TITLE: Record<Lang, string> = { es: 'Bueno saber', en: 'Good to know' }
+  const HOTEL_WHERE_NEXT: Record<Lang, string> = { es: '¿Cuál es tu próximo destino?', en: 'Where next?' }
+  const renderPractical = () => (
+      <PracticalSection
+        arrivalItems={visibleArrivalItems}
+        faqGroups={faqGroups}
+        atAGlance={partner.atAGlance}
+        practicalSubhead={partner.practicalSubhead}
+        partnerSlug={trackSlug}
+        zone={partner.zone}
+        pilotId={partner.pilotId}
+        lang={lang}
+        rhythm={rhythm}
+        toneClass={rhythm ? nextTone() : ''}
+        hotelSection={hotel ? 'practical' : undefined}
+        headingOverride={hotel ? HOTEL_PRACTICAL_TITLE[lang] : undefined}
+        keepSmallPanels={hotel ? true : undefined}
+      />
+  )
+  const renderZones = () => (
+      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })} {...hs('neighborhoods')}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
+              <h2 className={styles.h2}>{hotel ? zonesHeading(lang, nbOrder.length) : t.neighborhoodH2}</h2>
+              <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
+              <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
+            </div>
+            <div className={styles.secBody}>
+              <div className={styles.nbControls}>
+                <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
+                  {nbOrder.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      role="tab"
+                      aria-selected={name === browseNb}
+                      className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
+                      onClick={() => setBrowseNb(name)}
+                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
+                  ))}
+                </div>
+                <a
+                  className={styles.nbMapCard}
+                  href={browseNbData.mapUrl || undefined}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                >
+                  <span className={styles.nbMapThumb} aria-hidden>
+                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
+                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
+                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
+                  </span>
+                  <span className={styles.nbMapText}>
+                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
+                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
+                  </span>
+                  <span className={styles.nbMapArrow} aria-hidden>→</span>
+                </a>
+              </div>
+              <div className={styles.spotList}>
+                {spots.map((spot, i) => (
+                  <div className={styles.spotRow} key={`${browseNb}-${i}`}>
+                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
+                    <div>
+                      <div className={styles.spotHead}>
+                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}</h5>
+                        <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
+                      </div>
+                      <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+  const renderItinerary = () => (
+      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('itinerary')}>
+        <div className={styles.container}>
+          <div className={styles.itinGrid}>
+            <div className={styles.itinIntro}>
+              <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{itin.eyebrow}</span>
+              <h2 className={styles.itinTitle}>{itin.title}</h2>
+              <p className={styles.itinLede}>{itin.lede}</p>
+            </div>
+            {itin.days.map((day, di) => (
+              <div className={styles.itinDay} key={di}>
+                <h3 className={styles.itinDayTitle}>{day.title}</h3>
+                <div className={styles.itinList}>
+                  {day.items.map((it, ii) => (
+                    <div className={styles.itinRow} key={ii}>
+                      <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{it.time}</span>
+                      <p className={styles.itinText}>{it.text}</p>
+                    </div>
+                  ))}
+                </div>
+                {day.note && <p className={styles.itinNote}>{day.note}</p>}
+              </div>
+            ))}
+          </div>
+          <a
+            className={styles.itinMapsBtn}
+            href={itin.mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id })}
+          >
+            {itin.mapsCta}
+          </a>
+        </div>
+      </section>
+  )
+  const renderToday = () => (
+      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('rhythm')}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            {rhythm ? (
+              <div className={styles.secHead}>
+                <span className={styles.eyebrow}>{t.todayDateLabel}</span>
+                <h2 className={styles.h2}>{t.todayH2}</h2>
+                <WeatherInline lang={lang} />
+              </div>
+            ) : (
+              <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
+            )}
+            <div className={styles.secBody}>
+              {!rhythm && <WeatherCard lang={lang} />}
+              <div className={styles.spotList}>
+                {t.todayItems.map((ti, i) => (
+                  <div className={styles.todayRow} key={i}>
+                    <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
+                    <div>
+                      <div className={styles.todayTitle}>{ti.title}</div>
+                      <div className={styles.todayBody}>{interp(ti.body)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+  const renderPlanner = () => (
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })} {...hs('planner')}>
+        <div className={`${styles.container} ${styles.continueWrap}`}>
+          <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
+          <h2 className={styles.continueH2}>{t.continueH2}</h2>
+          <p className={styles.continueLede}>{t.continueLede}</p>
+          <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
+            {t.continueCta}
+          </a>
+          {hotel && (
+            <>
+              <div className={styles.nlRule} />
+              <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{HOTEL_WHERE_NEXT[lang]}</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 22px', justifyContent: 'center', marginTop: 14 }}>
+                {city.destinations.map((dest) => (
+                  <a
+                    className={styles.link}
+                    href={dest.url[lang]}
+                    key={dest.name}
+                    onClick={() => track('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
+                  >{dest.name}</a>
+                ))}
+              </div>
+            </>
+          )}
+          {!partner.hideNewsletter && !hotel && (
+            <>
+              <div className={styles.nlRule} />
+              <NewsletterSignup
+                lang={lang}
+                copy={{
+                  title: t.newsletterTitle,
+                  body: t.newsletterBody,
+                  placeholder: t.newsletterPlaceholder,
+                  cta: t.newsletterCta,
+                  finePrint: t.newsletterFinePrint,
+                }}
+              />
+            </>
+          )}
+        </div>
+      </section>
+  )
+  const heroHotel = hotel ? (
+        <section className={styles.hero} {...hs('hero')}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
+          <div className={styles.heroOverlay} />
+          <div className={styles.heroContent}>
+            <span className={styles.heroEyebrow}>{hotel.edition.heroEyebrow[lang]}</span>
+            <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
+            <p className={styles.heroSub}>{hotel.edition.heroSub[lang]}</p>
+            <p className={styles.heroSub} style={{ fontSize: 13, opacity: 0.8, marginTop: -8 }}>{hotelUpdatedLine(lang)}</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <a href="#zonas" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
+              {hotel.edition.share && (
+                <a href={hotelShareHref} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
+              )}
+            </div>
+          </div>
+        </section>
+  ) : null
+
+  // Hotel edition: "How much time do you have?" = the short plan (where written) + the 48 hours itinerary, unchanged.
+  const quick = hotel ? quickPlanFor(hotel.zone) : null
+  const timeSection = hotel ? (
+    <div {...hs('time')}>
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: quick ? 88 : 40 }}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <SectionHead eyebrow={quick ? quick.title[lang] : itin.eyebrow} title={HOTEL_TIME_TITLE[lang]} />
+            {quick && (
+              <div className={styles.secBody}>
+                <div className={styles.spotList}>
+                  {quick.stops.map((stop) => (
+                    <div className={styles.spotRow} key={stop.name}>
+                      <div className={styles.spotIcon}><Icon name={stop.icon} size={16} color={PINE} /></div>
+                      <div>
+                        <div className={styles.spotHead}><h5 className={styles.h5}>{stop.name}</h5><span className={styles.spotDist}>{stop.where}</span></div>
+                        <p className={styles.spotNote}>{stop.note[lang]}</p>
+                        <p className={styles.spotNote}>
+                          <a className={styles.link} href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <p className={styles.nbTagline} style={{ marginTop: 18 }}>{quick.line[lang]}</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </section>
+      {renderItinerary()}
+    </div>
+  ) : null
 
   return (
     <div
@@ -842,25 +1097,21 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </div>
       </header>
 
-      {/* ── 1. Welcome ─────────────────────────────────────── */}
       {hotel ? (
-        <section className={styles.hero} {...hs('hero')}>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
-          <div className={styles.heroOverlay} />
-          <div className={styles.heroContent}>
-            <span className={styles.heroEyebrow}>{hotel.edition.heroEyebrow[lang]}</span>
-            <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
-            <p className={styles.heroSub}>{interp(t.heroSub)}</p>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-              <a href="#practico" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
-              {hotel.edition.share && (
-                <a href={hotelShareHref} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
-              )}
-            </div>
-          </div>
-        </section>
+        <>
+          {/* Hotel order: welcome, zones, how much time, mood, weekly rhythm, experiences, good to know, one Lagomplan block. */}
+          {heroHotel}
+          {renderZones()}
+          {timeSection}
+          {moodOriginal}
+          {renderToday()}
+          {renderExperiences('')}
+          {renderPractical()}
+          {renderPlanner()}
+        </>
       ) : (
+        <>
+      {/* ── 1. Welcome ─────────────────────────────────────── */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
@@ -877,7 +1128,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           </a>
         </div>
       </section>
-      )}
 
       {/* ── Host letter (renders when the partner provides a signature) ── */}
       {splitLetter && partner.hostLetter?.[lang]?.paragraphs && (
@@ -934,117 +1184,13 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       {rhythm && !agendaLayout && renderMood(nextTone())}
 
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
-      <PracticalSection
-        arrivalItems={visibleArrivalItems}
-        faqGroups={faqGroups}
-        atAGlance={partner.atAGlance}
-        practicalSubhead={partner.practicalSubhead}
-        partnerSlug={trackSlug}
-        zone={partner.zone}
-        pilotId={partner.pilotId}
-        lang={lang}
-        rhythm={rhythm}
-        toneClass={rhythm ? nextTone() : ''}
-        hotelSection={hotel ? 'practical' : undefined}
-      />
+      {renderPractical()}
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
-      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })} {...hs('neighborhoods')}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <div className={styles.secHead}>
-              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
-              <h2 className={styles.h2}>{hotel ? zonesHeading(lang, nbOrder.length) : t.neighborhoodH2}</h2>
-              <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
-              <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
-            </div>
-            <div className={styles.secBody}>
-              <div className={styles.nbControls}>
-                <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
-                  {nbOrder.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      role="tab"
-                      aria-selected={name === browseNb}
-                      className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
-                      onClick={() => setBrowseNb(name)}
-                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
-                  ))}
-                </div>
-                <a
-                  className={styles.nbMapCard}
-                  href={browseNbData.mapUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
-                >
-                  <span className={styles.nbMapThumb} aria-hidden>
-                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
-                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
-                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
-                  </span>
-                  <span className={styles.nbMapText}>
-                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
-                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
-                  </span>
-                  <span className={styles.nbMapArrow} aria-hidden>→</span>
-                </a>
-              </div>
-              <div className={styles.spotList}>
-                {spots.map((spot, i) => (
-                  <div className={styles.spotRow} key={`${browseNb}-${i}`}>
-                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
-                    <div>
-                      <div className={styles.spotHead}>
-                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}</h5>
-                        <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
-                      </div>
-                      <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {renderZones()}
 
       {/* ── 4. 48-hour itinerary (dark) ────────────────────── */}
-      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('itinerary')}>
-        <div className={styles.container}>
-          <div className={styles.itinGrid}>
-            <div className={styles.itinIntro}>
-              <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{itin.eyebrow}</span>
-              <h2 className={styles.itinTitle}>{itin.title}</h2>
-              <p className={styles.itinLede}>{itin.lede}</p>
-            </div>
-            {itin.days.map((day, di) => (
-              <div className={styles.itinDay} key={di}>
-                <h3 className={styles.itinDayTitle}>{day.title}</h3>
-                <div className={styles.itinList}>
-                  {day.items.map((it, ii) => (
-                    <div className={styles.itinRow} key={ii}>
-                      <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{it.time}</span>
-                      <p className={styles.itinText}>{it.text}</p>
-                    </div>
-                  ))}
-                </div>
-                {day.note && <p className={styles.itinNote}>{day.note}</p>}
-              </div>
-            ))}
-          </div>
-          <a
-            className={styles.itinMapsBtn}
-            href={itin.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id })}
-          >
-            {itin.mapsCta}
-          </a>
-        </div>
-      </section>
+      {renderItinerary()}
 
       {/* Agenda layout: Experiences sit right under the 48-hour itinerary (otherwise they stay after the weekly/agenda section). */}
       {agendaLayout && renderExperiences(nextTone())}
@@ -1062,37 +1208,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           toneClass={nextTone()}
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
-      ) : (
-      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('rhythm')}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            {rhythm ? (
-              <div className={styles.secHead}>
-                <span className={styles.eyebrow}>{t.todayDateLabel}</span>
-                <h2 className={styles.h2}>{t.todayH2}</h2>
-                <WeatherInline lang={lang} />
-              </div>
-            ) : (
-              <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
-            )}
-            <div className={styles.secBody}>
-              {!rhythm && <WeatherCard lang={lang} />}
-              <div className={styles.spotList}>
-                {t.todayItems.map((ti, i) => (
-                  <div className={styles.todayRow} key={i}>
-                    <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
-                    <div>
-                      <div className={styles.todayTitle}>{ti.title}</div>
-                      <div className={styles.todayBody}>{interp(ti.body)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
+      ) : renderToday()}
 
       {!agendaLayout && renderExperiences(rhythm ? nextTone() : '')}
 
@@ -1155,31 +1271,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       {/* ── 9. Continue your trip (planner CTA) ────────────── */}
-      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })} {...hs('planner')}>
-        <div className={`${styles.container} ${styles.continueWrap}`}>
-          <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
-          <h2 className={styles.continueH2}>{t.continueH2}</h2>
-          <p className={styles.continueLede}>{t.continueLede}</p>
-          <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
-            {t.continueCta}
-          </a>
-          {!partner.hideNewsletter && !hotel && (
-            <>
-              <div className={styles.nlRule} />
-              <NewsletterSignup
-                lang={lang}
-                copy={{
-                  title: t.newsletterTitle,
-                  body: t.newsletterBody,
-                  placeholder: t.newsletterPlaceholder,
-                  cta: t.newsletterCta,
-                  finePrint: t.newsletterFinePrint,
-                }}
-              />
-            </>
-          )}
-        </div>
-      </section>
+      {renderPlanner()}
 
       {/* ── 10. Discover more ──────────────────────────────── */}
       <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('discover')}>
@@ -1203,23 +1295,27 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           </div>
         </div>
       </section>
+        </>
+      )}
 
       <div className={styles.footer}>
         <span className={styles.footerText}>{t.footer}</span>
       </div>
 
-      {/* ── Fixed planner CTA (carries the same attributed link) ────────── */}
-      <div className={`${styles.stickyWrap} ${showSticky ? '' : styles.stickyWrapHidden}`}>
-        <a
-          className={styles.stickyCta}
-          href={plannerHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => onPlannerClick('sticky_cta')}
-        >
-          {t.stickyCta}
-        </a>
-      </div>
+      {/* ── Fixed planner CTA (carries the same attributed link); the hotel edition has no floating button ── */}
+      {!hotel && (
+        <div className={`${styles.stickyWrap} ${showSticky ? '' : styles.stickyWrapHidden}`}>
+          <a
+            className={styles.stickyCta}
+            href={plannerHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onPlannerClick('sticky_cta')}
+          >
+            {t.stickyCta}
+          </a>
+        </div>
+      )}
     </div>
   )
 }

@@ -94,6 +94,8 @@ export interface Neighborhood {
 export interface MoodItem {
   name: string
   note: string
+  /** Optional small label above the name (the hotel edition's "I'm hungry" picks keep their craving label). */
+  tag?: string
 }
 
 export interface Mood {

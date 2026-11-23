@@ -22,16 +22,37 @@ export interface HotelEdition {
   heroEyebrow: Record<Lang, string>
   /** Welcome banner headline template ({zone} is replaced). Plain strings: this object is a prop of a client component. */
   zoneHeadline: Record<Lang, string>
+  /** Text under the banner title. */
+  heroSub: Record<Lang, string>
   share: boolean
   /** The tracking utm_source prefix; the hotel code is appended. */
   utmSourcePrefix: string
   planner: { utmCampaign: string }
 }
 
+/** The month the hotel content was last reviewed, "YYYY-MM". The banner line "Updated November 2026" is built from it:
+ *  change this one value when the content is reviewed. */
+export const HOTEL_CONTENT_UPDATED = '2026-11'
+
+const MONTHS: Record<Lang, string[]> = {
+  en: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+  es: ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'],
+}
+
+export function hotelUpdatedLine(lang: Lang, updated: string = HOTEL_CONTENT_UPDATED): string {
+  const [y, m] = updated.split('-')
+  const month = MONTHS[lang][Number(m) - 1]
+  return lang === 'es' ? `Actualizada en ${month} de ${y}` : `Updated ${month} ${y}`
+}
+
 export const HOTEL_FREE_EDITION: HotelEdition = {
   id: 'free',
   heroEyebrow: { es: 'Guía de barrio · Lagomplan', en: 'Neighborhood guide · Lagomplan' },
   zoneHeadline: { es: 'Tu guía de {zone}', en: 'Your guide to {zone}' },
+  heroSub: {
+    es: 'Preparada como la prepararía un amigo, no un buscador. Solo lugares verificados.',
+    en: 'Prepared like a friend would prepare it, not a search engine. Verified places only.',
+  },
   share: true,
   utmSourcePrefix: 'hotel_',
   planner: { utmCampaign: 'hotel_free' },
@@ -47,7 +68,7 @@ export interface HotelMode {
 
 /** Section ids accepted by /api/hotels/event for section_open: the sections of the guide, in order. */
 export const HOTEL_SECTION_IDS: readonly string[] = [
-  'hero', 'practical', 'neighborhoods', 'itinerary', 'moods', 'rhythm', 'experiences', 'food', 'planner', 'discover',
+  'hero', 'neighborhoods', 'time', 'itinerary', 'moods', 'rhythm', 'experiences', 'practical', 'planner',
 ]
 
 /** Outbound click ids accepted by /api/hotels/event for outbound_click. */

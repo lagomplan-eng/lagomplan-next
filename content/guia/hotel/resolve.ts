@@ -14,6 +14,7 @@ import type { ArrivalItem, City, CityCopy, InlineLink, Partner } from '../types'
 import type { FaqItemKey } from '../faq/types'
 import { getGuide } from '..'
 import { HOTEL_FREE_EDITION, type HotelMode } from './config'
+import { HOTEL_EXPERIENCE_IDS } from './experiences'
 import { ZONE_NEIGHBORHOOD, type HotelZone } from './zones'
 
 /** The Livin guide each hotel zone is a copy of. */
@@ -24,7 +25,16 @@ export const HOTEL_PARTNER_SLUG: Record<HotelZone, string> = {
 }
 
 /** FAQ answers that only make sense for the Livin property. */
-export const HOTEL_HIDDEN_FAQ_KEYS: FaqItemKey[] = ['chefsAtHome', 'massages']
+export const HOTEL_HIDDEN_FAQ_KEYS: FaqItemKey[] = [
+  'chefsAtHome', 'massages',                                  // belong to the Livin property
+  'laundry', 'groupRestaurants', 'cateringDelivery', 'lateReturn', // not for a hotel guide (content round, Nov 2026)
+]
+
+/** Arrival cards left out of the hotel edition (the matching FAQ answer, lateReturn, is hidden above). */
+export const HOTEL_HIDDEN_ARRIVAL_IDS = ['coming-back-late']
+
+/** "I'm hungry": the must-sees that have no other place in the guide move into this mood panel, keeping their label. */
+export const HOTEL_HUNGRY_PICKS = ['El Vilsito', 'Café Avellaneda', 'Quintonil', 'Café Nin', 'Nevería Roxy']
 
 const INSIDER_HREF = /wa\.me\/525539149062/i
 
@@ -43,9 +53,22 @@ function stripInsider(item: ArrivalItem): ArrivalItem {
 function sanitizeCopy(copy: CityCopy): CityCopy {
   return {
     ...copy,
-    arrivalItems: copy.arrivalItems.map(stripInsider),
-    // The experiences block shows the GetYourGuide tours (content/guia/hotel/experiences.ts) instead.
-    experiences: [],
+    arrivalItems: copy.arrivalItems.filter((i) => !HOTEL_HIDDEN_ARRIVAL_IDS.includes(i.id ?? '')).map(stripInsider),
+    // "Only a few hours" has its own section (time.ts); the five must-sees without another home join "I'm hungry".
+    moods: copy.moods
+      .filter((m) => m.id !== 'short')
+      .map((m) => m.id !== 'hungry' ? m : {
+        ...m,
+        items: [
+          ...m.items,
+          ...HOTEL_HUNGRY_PICKS.map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
+            .map((c) => ({ name: c.name, note: c.note, tag: c.tag })),
+        ],
+      }),
+    // Only the four experience titles travel (the cards are in experiences.ts); nothing of the Insider copy does.
+    experiences: copy.experiences
+      .filter((e) => (HOTEL_EXPERIENCE_IDS as string[]).includes(e.id))
+      .map((e) => ({ id: e.id, title: e.title, teaser: '', description: '', howToBookLinkText: '', howToBookLinkHref: '', howToBook: '', minBookingTime: '' })),
     expPartnerNote: '',
     expBookCta: '',
     // The host letter is not rendered in the hotel edition; its copy does not travel either.

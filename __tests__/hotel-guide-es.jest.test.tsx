@@ -26,6 +26,25 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
   // Rendered inside each test: Testing Library unmounts after every test.
   const open = () => { const o = openEverything(zone); return { view: o.view, text: o.pageText() + '\n' + o.practicalText } }
 
+  test('new order content: banner text and updated line, how much time, good to know, where next, GetYourGuide buttons', () => {
+    const { view, text } = open()
+    expect(text).toContain('Preparada como la prepararía un amigo, no un buscador. Solo lugares verificados.')
+    expect(text).toContain('Actualizada en noviembre de 2026')
+    expect(text).toContain('¿Cuánto tiempo tienes?')
+    expect(text).toContain('Bueno saber')
+    expect(text).not.toContain('Un comienzo tranquilo para tu viaje')
+    expect(text).toContain('¿Cuál es tu próximo destino?')
+    expect(text).not.toContain('Personalizar mi viaje en 60 segundos')
+    expect(text).not.toContain('Lagomplan va más allá de esta ciudad')
+    expect(text).not.toContain('Los imperdibles')
+    expect(view.container.querySelectorAll('a.expBookLink, a[class*="expBookLink"]')).toHaveLength(4)
+    expect((text.match(/Reservar en GetYourGuide/g) ?? []).length).toBe(4)
+    const quickEs = ['Solo unas horas', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos. Una joya escondida en la Condesa.', 'Mejor de miércoles a sábado. Entre paradas, un trayecto corto.']
+    for (const q of quickEs) zone === 'condesa' ? expect(text).toContain(q) : expect(text).not.toContain(q)
+    expect(view.container.querySelectorAll('.moodGrid button, [class*="moodBtn"]').length).toBe(5)
+    for (const hidden of ['Lavandería y tintorería', 'Restaurantes que reciben grupos', 'Catering y entrega a domicilio', 'Llegar tarde']) expect(text).not.toContain(hidden)
+    expect(text).toContain('Vino y licores')
+  })
   test('welcome banner and the zones title', () => {
     const { view, text } = open()
     expect(view.container.querySelector('h1')!.textContent).toBe(`Tu guía de ${ZONE_LABEL[zone]}`)

@@ -193,6 +193,8 @@ export default function PracticalSection({
   rhythm = false,
   toneClass = '',
   hotelSection,
+  headingOverride,
+  keepSmallPanels = false,
 }: {
   arrivalItems: ArrivalItem[]
   faqGroups: ResolvedFaqGroup[] | null
@@ -208,6 +210,10 @@ export default function PracticalSection({
   toneClass?: string
   /** Hotel edition only: the section id reported by section_open. Absent = no attribute. */
   hotelSection?: string
+  /** Hotel edition only: replaces the section title ("Good to know"). Absent = the usual title. */
+  headingOverride?: string
+  /** Hotel edition only: a group with a single item still gets its panel, so no item disappears. */
+  keepSmallPanels?: boolean
 }) {
   const copy = MODULE_COPY[lang]
   const subhead = practicalSubhead?.[lang] ?? copy.subhead
@@ -258,7 +264,7 @@ export default function PracticalSection({
   // content still lives in the underlying data (and the strip, if
   // applicable) — it just doesn't get a dedicated panel until there's
   // enough there to justify one.
-  const panels: Panel[] = allPanels.filter((p) => p.items.length >= 2)
+  const panels: Panel[] = keepSmallPanels ? allPanels : allPanels.filter((p) => p.items.length >= 2)
 
   const [hydrated, setHydrated] = useState(false)
   const [activePanel, setActivePanel] = useState<PanelId | null>(panels[0]?.id ?? null)
@@ -321,7 +327,7 @@ export default function PracticalSection({
         <div className={styles.secGrid}>
           <div className={styles.secHead}>
             <span className={styles.eyebrowMono} style={{ color: 'var(--pine)', display: 'block', marginBottom: 12 }}>{copy.eyebrow}</span>
-            <h2 className={styles.h2}>{copy.heading}</h2>
+            <h2 className={styles.h2}>{headingOverride ?? copy.heading}</h2>
             <p className={styles.lede}>{subhead}</p>
             {glanceBadges.length > 0 && (
               <div className={styles.glanceRow}>

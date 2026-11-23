@@ -124,7 +124,7 @@ no cookie id). Rows exist only for codes of *approved* hotels.
 | `event_type` | Written by | `section` |
 |---|---|---|
 | `scan` | `GET /g/{code}` (not for bots, link-preview fetchers, prefetches or HEAD) | — |
-| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `practical` \| `neighborhoods` \| `itinerary` \| `moods` \| `rhythm` \| `experiences` \| `food` \| `planner` \| `discover` (`HOTEL_SECTION_IDS` in `content/guia/hotel/config.ts`, in the guide's order) |
+| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `neighborhoods` \| `time` \| `itinerary` \| `moods` \| `rhythm` \| `experiences` \| `practical` \| `planner` (`HOTEL_SECTION_IDS` in `content/guia/hotel/config.ts`, in the hotel guide's order: welcome, zones, how much time, 48 hours, mood, weekly rhythm, experiences, good to know, Lagomplan block) |
 | `outbound_click` | the guide, on click | `experience_book` \| `airalo` \| `map` \| `planner` \| `share` |
 
 **2. GA4, only after cookie consent (Consent Mode v2, as the rest of `/guia`):**

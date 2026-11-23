@@ -3,7 +3,7 @@ import { notFound, redirect } from 'next/navigation'
 import { getSupabaseServer } from '../../../lib/supabase/server'
 import { getAdminEmail } from '../../../lib/hotels/admin'
 import { loadDashboard } from '../../../lib/hotels/stats'
-import { experiencesArePlaceholders, HOTEL_EXPERIENCES, HOTEL_EXPERIENCES_TARGET } from '../../../content/guia/hotel/experiences'
+import { experiencesArePlaceholders, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
 import HotelsTable from './HotelsTable'
 
 export const dynamic = 'force-dynamic'
@@ -21,8 +21,8 @@ export default async function AdminHotelsPage() {
       <p style={{ margin: '0 0 24px', color: '#6B8F86' }}>Edición gratuita con QR.</p>
       {experiencesArePlaceholders() && (
         <div role="alert" style={{ background: '#FFF1D6', border: '1px solid #E5B85C', borderRadius: 10, padding: '12px 16px', margin: '0 0 24px' }}>
-          Solo {HOTEL_EXPERIENCES.items.length} de {HOTEL_EXPERIENCES_TARGET} tours de GetYourGuide tienen botón de reserva en la guía de hoteles.
-          La guía muestra únicamente los que tienen botón (content/guia/hotel/experiences.ts).
+          Las experiencias de la guía de hoteles son provisionales (placeholders): los {HOTEL_EXPERIENCES.items.length} botones «Reservar en GetYourGuide»
+          abren una búsqueda de GetYourGuide, no un tour concreto (content/guia/hotel/experiences.ts).
         </div>
       )}
       <HotelsTable hotels={hotels} totals={totals} />

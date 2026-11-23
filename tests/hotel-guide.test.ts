@@ -37,12 +37,12 @@ eq('codes differ', new Set(Array.from({ length: 200 }, generateHotelCode)).size,
 eq('bad codes', ['', 'ABC', 'abc def', '../x', 'a'.repeat(30)].map(isValidHotelCode), [false, false, false, false, false])
 
 // events: approved-code format + whitelist only
-const ok = { code: c, type: 'section_open', section: 'food', lang: 'es' }
-eq('section_open ok', parseHotelEvent(ok)?.section, 'food')
+const ok = { code: c, type: 'section_open', section: 'time', lang: 'es' }
+eq('section_open ok', parseHotelEvent(ok)?.section, 'time')
 eq('every config block is accepted', HOTEL_SECTION_IDS.every((s) => parseHotelEvent({ ...ok, section: s }) !== null), true)
 eq('unknown section', parseHotelEvent({ ...ok, section: 'hero; drop table' }), null)
 eq('outbound ok', parseHotelEvent({ code: c, type: 'outbound_click', section: 'airalo', lang: 'en' })?.type, 'outbound_click')
-eq('outbound with a section id is refused', parseHotelEvent({ code: c, type: 'outbound_click', section: 'food', lang: 'en' }), null)
+eq('outbound with a section id is refused', parseHotelEvent({ code: c, type: 'outbound_click', section: 'time', lang: 'en' }), null)
 eq('bad lang', parseHotelEvent({ ...ok, lang: 'fr' }), null)
 eq('bad code', parseHotelEvent({ ...ok, code: 'x' }), null)
 eq('no extra fields kept', Object.keys(parseHotelEvent({ ...ok, ip: '1.1.1.1', ua: 'x' }) ?? {}).sort(), ['code', 'lang', 'section', 'type'])

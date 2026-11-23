@@ -1,59 +1,86 @@
 // content/guia/hotel/experiences.ts
 //
-// City-level experiences for the hotel edition. Up to 4 entries that book through GetYourGuide.
+// Experiences in the hotel edition: four cards with the guide's own illustrations and titles. Each button opens
+// GetYourGuide's SEARCH RESULTS for that theme in Mexico City, with the partner ID and cmp=hotel-guide added by
+// lib/affiliate/gyg.ts (the one place the ID lives). No specific tour, no tour ID, no Insider text, name or link.
 //
-// Every tour URL below already exists in this repo (source noted on each entry); none was invented. Stored
-// as the plain tour URL, like everywhere else in the repo, and given the partner ID at render time by the
-// same helper the Experiencias hub and the destination guides use (lib/affiliate/gyg.ts, the one place the
-// ID lives). Only `cmp` is new: it tags the clicks as coming from this edition.
-//
-// For launch only Casa Luis Barragán is listed. The Val'Quirico (Puebla day trip) and Día de Muertos workshop
-// tours were taken out of this edition; they stay untouched in their own guides. The guide shows exactly the
-// tours listed here, each with a booking button, and no filler cards. /admin/hoteles shows a warning until
-// there are HOTEL_EXPERIENCES_TARGET (4).
+// These are placeholders until Elena picks real tours: /admin/hoteles says so while any item here is a search.
+// To swap one for a tour, replace its `query` with a `tourUrl` that already exists in the repo.
 
 import type { Lang } from '../types'
 import { buildGygBookingUrl } from '../../../lib/affiliate/gyg'
 
 export const HOTEL_EXPERIENCES_TARGET = 4
+const CMP = 'hotel-guide'
 
 export interface HotelExperience {
-  id: string
-  title: Record<Lang, string>
+  /** Same id as the experience card in content/guia/cities/cdmx.ts: the title comes from there, in both languages. */
+  id: 'exp-teotihuacan' | 'exp-lucha' | 'exp-frida' | 'exp-tacos'
+  /** One line that promises nothing specific to one tour. */
   teaser: Record<Lang, string>
-  /** Public path under /public. */
+  /** The existing illustration. */
   image: string
-  /** The stored tour URL, as it already appears elsewhere in the repo (no partner ID). */
-  tourUrl: string
-  /** Where tourUrl comes from in the repo. Not shown to guests. */
-  source: string
-  /** The link guests are sent to: tourUrl + partner ID + cmp. */
+  /** GetYourGuide search text, in Mexico City. */
+  query: string
+  /** Search results with partner_id and cmp. */
   bookUrl: string
 }
 
-const CMP = 'hotel-guide'
-
-function exp(e: Omit<HotelExperience, 'bookUrl'>): HotelExperience {
-  return { ...e, bookUrl: buildGygBookingUrl(e.tourUrl, { cmp: CMP }) }
+export function gygSearchUrl(query: string): string {
+  return buildGygBookingUrl(`https://www.getyourguide.com/s/?q=${encodeURIComponent(query)}`, { cmp: CMP })
 }
 
-export const HOTEL_EXPERIENCES: { items: HotelExperience[] } = {
+function exp(e: Omit<HotelExperience, 'bookUrl'>): HotelExperience {
+  return { ...e, bookUrl: gygSearchUrl(e.query) }
+}
+
+export const HOTEL_EXPERIENCES: { status: 'placeholder'; items: HotelExperience[] } = {
+  status: 'placeholder',
   items: [
     exp({
-      id: 'casa-luis-barragan',
-      title: { es: 'Casa Luis Barragán', en: 'Casa Luis Barragán' },
+      id: 'exp-teotihuacan',
       teaser: {
-        es: 'Una lección de luz, color y silencio. Es indispensable reservar con meses de antelación.',
-        en: 'A lesson in light, color and silence. Essential to book months in advance.',
+        en: 'One of Mexico’s great archaeological sites, near Mexico City.',
+        es: 'Uno de los grandes sitios arqueológicos de México, cerca de la Ciudad de México.',
       },
-      image: '/images/guides/guides-headers/Bellas%20Artes.png',
-      tourUrl: 'https://www.getyourguide.com/mexico-city-l194/mexico-city-casa-ortega-by-luis-barragan-architectural-tour-t998831/',
-      source: 'lib/data/guides/ciudad-de-mexico/{es,en}.ts, experience "casa-luis-barragan" (the Experiencias hub reads it from there)',
+      image: '/images/guia/experiences/exp-teotihuacan.jpg',
+      query: 'Teotihuacan Mexico City',
+    }),
+    exp({
+      id: 'exp-lucha',
+      teaser: {
+        en: 'An evening of masks, acrobatics and electric atmosphere.',
+        es: 'Una noche de máscaras, acrobacias y mucha energía.',
+      },
+      image: '/images/guia/experiences/exp-lucha.jpg',
+      query: 'Lucha libre Mexico City',
+    }),
+    exp({
+      id: 'exp-frida',
+      teaser: {
+        en: 'Coyoacán’s bohemian streets and the world of Frida Kahlo.',
+        es: 'Las calles bohemias de Coyoacán y el mundo de Frida Kahlo.',
+      },
+      image: '/images/guia/experiences/exp-frida.jpg',
+      query: 'Frida Kahlo Coyoacan Mexico City',
+    }),
+    exp({
+      id: 'exp-tacos',
+      teaser: {
+        en: 'Neighborhood taquerías and the city’s street food culture.',
+        es: 'Taquerías de barrio y la cultura de la comida callejera de la ciudad.',
+      },
+      image: '/images/guia/experiences/exp-tacos.jpg',
+      query: 'Tacos food tour Mexico City',
     }),
   ],
 }
 
-/** True while fewer than four experiences have a booking link. Drives the admin warning. */
+export const HOTEL_EXPERIENCE_IDS = HOTEL_EXPERIENCES.items.map((e) => e.id)
+
+export const HOTEL_BOOK_LABEL: Record<Lang, string> = { en: 'Book on GetYourGuide', es: 'Reservar en GetYourGuide' }
+
+/** True while any card is a search, not a chosen tour. Drives the admin warning. */
 export function experiencesArePlaceholders(): boolean {
-  return HOTEL_EXPERIENCES.items.length < HOTEL_EXPERIENCES_TARGET
+  return HOTEL_EXPERIENCES.status === 'placeholder'
 }
