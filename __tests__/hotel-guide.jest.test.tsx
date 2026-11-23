@@ -89,12 +89,27 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(headings(html)).toContain(HEADING_6)
     expect(html).not.toMatch(/Your house|Tu casa|Your area|Tu zona/)
   })
-  test('zone chips show only the zone name (no how-far label), and the map card is at the right', () => {
+  test('zone chips show only the zone name; a compact map link on the same row replaces the map card', () => {
     const z = zonesPart(html)
     expect(z).not.toMatch(/On foot|Short ride|Half a day/)
     for (const chip of z.matchAll(/role="tab"[^>]*>(.*?)<\/button>/g)) expect(chip[1]).not.toContain('<span')
     expect(css).toMatch(/\.hotelCalm \.tabRow\s*{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/)
-    expect(css).toMatch(/\.hotelCalm \.nbMapCard\s*{[^}]*align-self:\s*flex-end/)
+    // the old card (title, subtitle, dotted thumbnail) is gone in this edition
+    for (const gone of ['nbMapCard', 'nbMapThumb', 'See all', 'Google Maps list']) expect(z).not.toContain(gone)
+    // one link, after the chips and before the places, to the open zone's own list, named after it
+    const links = [...z.matchAll(/<a class="hotelMapLink" href="([^"]*)"[^>]*>([^<]*)</g)]
+    expect(links).toHaveLength(1)
+    const own = buildHotelGuideProps(zone)!.city.neighborhoods[ZONE_NEIGHBORHOOD[zone]]
+    expect(links[0][1]).toBe(own.mapUrl)
+    expect(links[0][2]).toBe(`Map of ${ZONE_NEIGHBORHOOD[zone]} →`)
+    expect(z.indexOf('hotelMapLink')).toBeGreaterThan(z.lastIndexOf('role="tab"'))
+    expect(z.indexOf('hotelMapLink')).toBeLessThan(z.indexOf('class="spotList"'))
+    // same row as the chips, pushed right; drops to the next line when it does not fit; plain text link on phones
+    expect(css).toMatch(/\.hotelCalm \.nbControls\s*{[^}]*flex-direction:\s*row[^}]*flex-wrap:\s*wrap/)
+    expect(css).toMatch(/\.hotelMapLink\s*{[^}]*margin-left:\s*auto[^}]*}/)
+    expect(css).toMatch(/\.hotelMapLink\s*{[^}]*background:\s*transparent/)
+    expect(css).not.toMatch(/\.hotelMapLink\s*{[^}]*box-shadow/)
+    expect(css).toMatch(/max-width: 768px\)\s*{\s*\.hotelMapLink\s*{[^}]*margin-left:\s*0[^}]*flex:\s*0 0 100%[^}]*border:\s*0/)
   })
   test('the distance sentence of each tab, from the hotel zone\'s point of view', () => {
     const nbs = buildHotelGuideProps(zone)!.city.neighborhoods

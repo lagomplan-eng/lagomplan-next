@@ -81,23 +81,23 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     act(() => { fireEvent.click(tabs[0]) })
     expect(timeEl().textContent).toContain('Museo de Arte Moderno')
   })
-  test('the two new zones: Spanish text, map card without a number, link to the owner\'s list', () => {
+  test('the two new zones: Spanish text; the map link names the open zone and links to the owner\'s list', () => {
     const { view } = open()
     const zonesEl = () => view.container.querySelector('[data-hotel-section="neighborhoods"]')!
     const tab = (name: string) => ([...zonesEl().querySelectorAll('[role="tab"]')] as HTMLElement[]).find((t) => t.firstChild?.textContent === name)!
+    const link = () => zonesEl().querySelector('a[class*="hotelMapLink"]') as HTMLAnchorElement
+    expect(link().textContent).toBe(`Mapa de ${ZONE_NEIGHBORHOOD[zone]} →`)
     act(() => { fireEvent.click(tab('San Miguel Chapultepec')) })
-    let card = zonesEl().querySelector('a[href^="https://maps.app.goo.gl"]') as HTMLAnchorElement
-    expect(card.getAttribute('href')).toBe('https://maps.app.goo.gl/ZFKMj2iBMeL7fxHK7')
-    expect(card.textContent).toContain('Ver los lugares en el mapa')
-    expect(card.textContent).not.toMatch(/\d/)
-    expect(card.textContent).toContain('Lista de Google Maps · San Miguel Chapultepec')
+    expect(link().getAttribute('href')).toBe('https://maps.app.goo.gl/ZFKMj2iBMeL7fxHK7')
+    expect(link().textContent).toBe('Mapa de San Miguel Chapultepec →')
+    expect(zonesEl().textContent).not.toMatch(/Ver los lugares|Lista de Google Maps|Ver los \d+ lugares/)
+    expect(zonesEl().querySelector('a[class*="nbMapCard"]')).toBeNull()
     expect(zonesEl().textContent).toContain('Galerías tras muros antiguos, una casa de Barragán, la orilla del bosque.')
     expect(zonesEl().textContent).toContain('La última casa de Luis Barragán: color, luz y una alberca interior. Solo con cita.')
     expect(zonesEl().textContent).toContain(zone === 'condesa' ? 'Junto a la Condesa; casi todo queda a una caminata corta.' : 'A un trayecto corto; combínalo con Chapultepec.')
     act(() => { fireEvent.click(tab('Coyoacán')) })
-    card = zonesEl().querySelector('a[href^="https://maps.app.goo.gl"]') as HTMLAnchorElement
-    expect(card.getAttribute('href')).toBe('https://maps.app.goo.gl/fHKhCCToYVaqFmrEA')
-    expect(card.textContent).toContain('Ver los lugares en el mapa')
+    expect(link().getAttribute('href')).toBe('https://maps.app.goo.gl/fHKhCCToYVaqFmrEA')
+    expect(link().textContent).toBe('Mapa de Coyoacán →')
     expect(zonesEl().textContent).toContain('Un trayecto largo al sur; planea medio día.')
     expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
     expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word

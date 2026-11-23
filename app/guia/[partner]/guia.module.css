@@ -704,14 +704,25 @@
 .hotelCalm .itinTime { color: var(--sage-soft); }
 .hotelCalm .section { padding: 88px 0; }
 .hotelCalm .secHead, .hotelCalm .secBody { min-width: 0; }
-.hotelCalm .tabRow { flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
+.hotelCalm .tabRow { flex: 0 1 auto; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
 .hotelCalm .tabRow::-webkit-scrollbar { display: none; }
 .hotelCalm .tab { flex: none; white-space: nowrap; }
-.hotelCalm .nbControls { flex-direction: column; align-items: stretch; gap: 16px; max-width: 860px; }
-.hotelCalm .nbMapCard { align-self: flex-end; }
+.hotelCalm .nbControls { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 8px; max-width: 860px; }
 .hotelCalm .moodGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .hotelCalm .weatherCard { max-width: 860px; }
 @media (max-width: 640px) { .hotelCalm .moodGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Zone map link: a quiet pill on the chip row, pushed to the far right; drops to the next line (still right-aligned) when it
+   does not fit; on phones it is a plain text link on its own line under the chips. */
+.hotelMapLink {
+  margin-left: auto; display: inline-flex; align-items: center; white-space: nowrap;
+  font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+  border: 1.5px solid rgba(107, 143, 134, .3); background: transparent; color: var(--sage); text-decoration: none;
+}
+.hotelMapLink:hover { color: var(--pine); border-color: rgba(15, 58, 51, .3); }
+@media (max-width: 768px) {
+  .hotelMapLink { margin-left: 0; flex: 0 0 100%; justify-content: flex-start; padding: 0; border: 0; border-radius: 0; }
+}
 
 /* Jump links: in the header on desktop (where the label was), one scrollable row under the header on phones. */
 .hotelJumpDesktop { display: flex; align-items: center; gap: 18px; }

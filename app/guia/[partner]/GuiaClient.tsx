@@ -37,9 +37,8 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import {
-  HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_CARD_NO_COUNT, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
+  HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
 } from '../../../content/guia/hotel/config'
-import { EXTRA_ZONES } from '../../../content/guia/hotel/extra-zones'
 import { HIDDEN_GEM_LABEL, isHiddenGem } from '../../../content/guia/hotel/themes'
 import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
 import { HOTEL_TIME_TITLE, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
@@ -87,8 +86,6 @@ export function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKe
 }
 
 const PINE = '#0F3A33'
-/** Hotel edition: the zones that link to the owner's own Google Maps lists (no "N places" in the card). */
-const HOTEL_NO_COUNT_ZONES: string[] = EXTRA_ZONES.map((z) => z.key)
 const CREAM = '#FFF9F3'
 
 /** Synthetic key for the partner-specific "Your house" tab — kept out of
@@ -845,24 +842,35 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
                   ))}
                 </div>
-                <a
-                  className={styles.nbMapCard}
-                  href={browseNbData.mapUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
-                >
-                  <span className={styles.nbMapThumb} aria-hidden>
-                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
-                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: hotel ? 'var(--sage)' : 'var(--coral)' }} />
-                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
-                  </span>
-                  <span className={styles.nbMapText}>
-                    <span className={styles.nbMapPrimary}>{hotel && HOTEL_NO_COUNT_ZONES.includes(browseNb) ? HOTEL_MAP_CARD_NO_COUNT[lang] : t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
-                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
-                  </span>
-                  <span className={styles.nbMapArrow} aria-hidden>→</span>
-                </a>
+                {hotel ? (
+                  // Hotel edition: a compact link on the chip row (the card looked orphaned under the chips).
+                  <a
+                    className={styles.hotelMapLink}
+                    href={browseNbData.mapUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                  >{HOTEL_MAP_LINK[lang].replace('{zone}', browseNbData.tabLabel?.[lang] ?? browseNb)}</a>
+                ) : (
+                  <a
+                    className={styles.nbMapCard}
+                    href={browseNbData.mapUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                  >
+                    <span className={styles.nbMapThumb} aria-hidden>
+                      <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
+                      <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
+                      <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
+                    </span>
+                    <span className={styles.nbMapText}>
+                      <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
+                      <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
+                    </span>
+                    <span className={styles.nbMapArrow} aria-hidden>→</span>
+                  </a>
+                )}
               </div>
               <div className={styles.spotList}>
                 {spots.map((spot, i) => (
