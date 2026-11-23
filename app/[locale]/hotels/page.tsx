@@ -42,11 +42,8 @@ export default async function HotelsIndexPage({ params }: Props) {
   const neighborhoods = getRenderableCityNeighborhoods(locale)
 
   return (
-    // #FFF9F3 — same warm cream the planner, signup, and guide pages
-    // use. var(--sand) (#EDE7E1) was a different, darker bucket and
-    // made the Hotels page visually disconnected from the rest of
-    // the site. Set on <main> so bridge CTA + newsletter inherit.
-    <main className="pt-[100px] bg-[#FFF9F3]">
+    // Cream page background (token), set on <main> so the bridge CTA + newsletter inherit.
+    <main className="pt-[100px] bg-cream">
       <Suspense fallback={null}>
         <HotelsClient
           hotels={hotels}

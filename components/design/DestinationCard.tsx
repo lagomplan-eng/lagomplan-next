@@ -6,18 +6,24 @@
  * image 4:3 on sand that zooms 1.04 on hover, body padding 24, title 22/400/-0.02em, excerpt 15px in ink-card.
  * DERIVED (home has no example): the small eyebrow, `badge`, `tags`, `cta`, `footer`, and `featured` (title over the image).
  * The whole card is one link; the optional `cta` is a pill-looking span (never a nested link).
+ *
+ * DERIVED "catalog" mode (experiences, hotels): omit `href` and the card is a plain article that holds real
+ * actions (`actions`: booking / guide buttons with their own analytics), an `aside` next to the eyebrow
+ * (the plan button) and optional `image` (no image = compact card). `excerptLines` clamps the excerpt.
+ * Extra attributes (id, data-*) go on the article.
  */
 import Image from 'next/image'
-import type { ReactNode } from 'react'
+import type { HTMLAttributes, ReactNode } from 'react'
 import { Tag } from './Chip'
 import { cx } from './cx'
 
-export interface DestinationCardProps {
-  href: string
-  image: { src: string; alt: string }
+export interface DestinationCardProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'className' | 'children'> {
+  /** Omit for the catalog mode (a card with its own actions). */
+  href?: string
+  image?: { src: string; alt: string }
   title: string
-  /** Small caps line above the title (destination, region…). */
-  eyebrow?: string
+  /** Small caps line above the title (destination, region…). A node when it is itself a control. */
+  eyebrow?: ReactNode
   excerpt?: string
   tags?: string[]
   /** Top-right glass badge on the image (e.g. "Featured"). */
@@ -31,15 +37,26 @@ export interface DestinationCardProps {
   className?: string
   /** Extra footer content (price line, provider…). */
   footer?: ReactNode
+  /** Catalog mode: buttons at the end of the card. */
+  actions?: ReactNode
+  /** Catalog mode: shown at the right of the eyebrow row (the plan button). */
+  aside?: ReactNode
+  /** Clamp the excerpt to this many lines. */
+  excerptLines?: 3
 }
 
 export default function DestinationCard({
-  href, image, title, eyebrow, excerpt, tags, badge, cta, featured, headingLevel = 3, className, footer,
+  href, image, title, eyebrow, excerpt, tags, badge, cta, featured, headingLevel = 3, className, footer, actions, aside, excerptLines, ...rest
 }: DestinationCardProps) {
   const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4'
-  return (
-    <a href={href} className={cx('group block h-full text-pine no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-fjord rounded-destination', className)}>
-      <article data-card="destination" className="flex h-full flex-col overflow-hidden rounded-destination bg-white shadow-soft transition-shadow group-hover:shadow-lift">
+  const linked = href !== undefined
+  const card = (
+    <article
+      {...rest}
+      data-card="destination"
+      className={cx('flex h-full flex-col overflow-hidden rounded-destination bg-white shadow-soft transition-shadow', linked ? 'group-hover:shadow-lift' : 'hover:shadow-lift group', !linked && className)}
+    >
+      {image && (
         <div className={cx('relative overflow-hidden bg-sand', featured ? 'h-[250px]' : 'aspect-[4/3]')}>
           <Image
             src={image.src}
@@ -61,23 +78,36 @@ export default function DestinationCard({
             </div>
           )}
         </div>
-        <div className="flex flex-1 flex-col gap-3 p-6">
-          {!featured && (
-            <div>
-              {eyebrow && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p>}
-              <Heading className="m-0 font-sans text-h3 text-pine transition-colors group-hover:text-ink-3 [text-wrap:balance]">{title}</Heading>
-            </div>
-          )}
-          {excerpt && <p className="m-0 font-sans text-body leading-7 text-ink-card [text-wrap:pretty]">{excerpt}</p>}
-          {tags && tags.length > 0 && <ul className="m-0 flex list-none flex-wrap gap-2 p-0">{tags.map(t => <li key={t}><Tag>{t}</Tag></li>)}</ul>}
-          {footer}
-          {cta && (
-            <span className="mt-auto inline-flex w-fit items-center gap-2 rounded-btn bg-pine px-6 py-3 font-sans text-button font-semibold text-white">
-              {cta} <span aria-hidden="true">→</span>
-            </span>
-          )}
-        </div>
-      </article>
+      )}
+      <div className="flex flex-1 flex-col gap-3 p-6">
+        {!featured && (
+          <div>
+            {typeof eyebrow === 'string' && eyebrow && !aside && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p>}
+            {(aside || (eyebrow && typeof eyebrow !== 'string')) && (
+              <div className="mb-2 flex items-start justify-between gap-3">
+                {typeof eyebrow === 'string' ? <p className="m-0 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p> : (eyebrow ?? <span />)}
+                {aside}
+              </div>
+            )}
+            <Heading className="m-0 font-sans text-h3 text-pine transition-colors group-hover:text-ink-3 [text-wrap:balance]">{title}</Heading>
+          </div>
+        )}
+        {excerpt && <p className={cx('m-0 font-sans text-body leading-7 text-ink-card [text-wrap:pretty]', excerptLines === 3 && 'line-clamp-3')}>{excerpt}</p>}
+        {tags && tags.length > 0 && <ul className="m-0 flex list-none flex-wrap gap-2 p-0">{tags.map(t => <li key={t}><Tag>{t}</Tag></li>)}</ul>}
+        {footer}
+        {actions && <div className="mt-auto flex flex-wrap gap-2.5 pt-1">{actions}</div>}
+        {cta && (
+          <span className="mt-auto inline-flex w-fit items-center gap-2 rounded-btn bg-pine px-6 py-3 font-sans text-button font-semibold text-white">
+            {cta} <span aria-hidden="true">→</span>
+          </span>
+        )}
+      </div>
+    </article>
+  )
+  if (!linked) return card
+  return (
+    <a href={href} className={cx('group block h-full text-pine no-underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-fjord rounded-destination', className)}>
+      {card}
     </a>
   )
 }

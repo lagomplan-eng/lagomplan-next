@@ -25,9 +25,8 @@ import { searchCatalog } from '../../lib/catalog-search'
 import { resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
 import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
 import type { CityNeighborhoods } from '../../lib/hotels-neighborhoods'
-import {
-  CatalogCard, Chip, DestinationBanner, FilterPanel, PageHeader, PlanButton, ResultsBar, type FilterRow,
-} from '../catalog'
+import { Button, Chip, DestinationCard, FilterPanel, PageTitle, type ActiveFilter, type FilterGroup } from '../design'
+import { DestinationBanner, PlanButton, ResultsBar } from '../catalog'
 import PlanTray from '../catalog/PlanTray'
 import { usePlan } from '../catalog/usePlan'
 import { isSavedPlanEnabled } from '../../lib/feature-flags'
@@ -135,9 +134,10 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   }, [pendingScroll, visible])
 
   // ── filter rows ────────────────────────────────────────────────────────────
-  const rows: FilterRow[] = [{
+  const groups: FilterGroup[] = [{
     id: 'price',
     label: t('filters.price'),
+    activeCount: filters.price ? 1 : 0,
     chips: (
       <>
         <Chip label={t('filters.priceAll')} selected={filters.price === null} onClick={() => set({ price: null })} />
@@ -147,11 +147,18 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
       </>
     ),
   }]
+  const activeFilters: ActiveFilter[] = []
+  const remove = (name: string) => tc('sheet.remove', { name })
+  if (filters.price) {
+    const p = filters.price
+    activeFilters.push({ key: `price:${p}`, label: t(`filters.prices.${p}`), removeLabel: remove(t(`filters.prices.${p}`)), onRemove: () => set({ price: null }) })
+  }
   const travelers = travelerOptions(hotels, filters)
   if (travelers.length > 0) {
-    rows.push({
+    groups.push({
       id: 'traveler',
       label: t('filters.traveler'),
+      activeCount: filters.viajero ? 1 : 0,
       chips: (
         <>
           <Chip label={t('filters.travelerAll')} selected={filters.viajero === null} onClick={() => set({ viajero: null })} />
@@ -161,6 +168,10 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
         </>
       ),
     })
+  }
+  if (filters.viajero) {
+    const k = filters.viajero
+    activeFilters.push({ key: `viajero:${k}`, label: t(`filters.travelers.${k}`), removeLabel: remove(t(`filters.travelers.${k}`)), onRemove: () => set({ viajero: null }) })
   }
 
   // ── one destination chosen → banner, and cards drop the thumbnail + eyebrow ─
@@ -180,7 +191,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   return (
     <div className="bg-cream text-pine">
       <div className="mx-auto max-w-[1280px] px-[18px] pb-16 pt-8 md:px-6">
-        <PageHeader eyebrow={t('eyebrow')} title={t('title')} subtitle={t('subtitle')} />
+        <PageTitle eyebrow={t('eyebrow')} title={t('title')} lede={t('subtitle')} />
 
         <div className="mt-8 flex flex-col gap-6 md:mt-10">
           <section aria-label={t('filters.title')}>
@@ -196,7 +207,16 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                 onPick,
                 noResultsText: t('filters.searchNone'),
               }}
-              rows={rows}
+              groups={groups}
+              activeFilters={activeFilters}
+              resultsCount={visible.length}
+              onClear={() => set({ price: null, viajero: null })}
+              labels={{
+                filters: tc('sheet.filters'),
+                showResults: n => (n === undefined ? tc('sheet.showResultsNone') : tc('sheet.showResults', { count: n })),
+                clear: tc('sheet.clear'),
+                close: tc('sheet.close'),
+              }}
             />
           </section>
 
@@ -212,15 +232,9 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
             )}
 
             {visible.length === 0 ? (
-              <div className="flex flex-col items-center gap-3 rounded-card border border-dashed border-line-btn px-6 py-12 text-center">
-                <p className="m-0 text-[17px] font-bold">{t('empty.title')}</p>
-                <button
-                  type="button"
-                  onClick={() => setFilters(EMPTY_HOTEL_FILTERS)}
-                  className="inline-flex min-h-[48px] items-center rounded-full border border-line-btn bg-transparent px-6 text-[15px] font-semibold text-pine hover:border-pine"
-                >
-                  {t('empty.clear')}
-                </button>
+              <div className="flex flex-col items-center gap-3 rounded-info border border-dashed border-line-sage px-6 py-12 text-center">
+                <p className="m-0 font-sans text-h4">{t('empty.title')}</p>
+                <Button variant="secondary" onClick={() => setFilters(EMPTY_HOTEL_FILTERS)}>{t('empty.clear')}</Button>
               </div>
             ) : (
               <div className="grid grid-cols-1 gap-[14px] md:gap-6 md:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]">
@@ -229,25 +243,37 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                   const traveler = h.travelers[0] ? t(`filters.travelers.${h.travelers[0]}`) : undefined
                   const hasGuide = !!h.guideUrl && h.guideUrl !== '#'
                   return (
-                    <CatalogCard
+                    <DestinationCard
                       key={h.id}
                       id={`hotel-${h.id}`}
                       data-hotel={h.id}
                       className="scroll-mt-32"
-                      {...(single ? { meta: `${h.priceLevel} · ${tier}` } : {
-                        ...(h.cover_img ? { thumb: { src: h.cover_img } } : {}),
-                        eyebrow: `${h.destination} · ${h.priceLevel}`,
-                        onEyebrowClick: () => set({ destino: h.destinationKey }),
-                        eyebrowAriaLabel: t('card.filterByDestination', { name: h.destination }),
+                      {...(single ? { eyebrow: `${h.priceLevel} · ${tier}` } : {
+                        ...(h.cover_img ? { image: { src: h.cover_img, alt: '' } } : {}),
+                        eyebrow: (
+                          <button
+                            type="button"
+                            onClick={() => set({ destino: h.destinationKey })}
+                            aria-label={t('card.filterByDestination', { name: h.destination })}
+                            className="m-0 inline-flex min-h-chip items-center bg-transparent p-0 text-left font-sans text-eyebrow uppercase text-sage-text underline-offset-4 hover:underline"
+                          >
+                            {`${h.destination} · ${h.priceLevel}`}
+                          </button>
+                        ),
                       })}
                       title={h.name}
-                      titleAs={single ? 'h3' : 'h2'}
-                      description={h.description || undefined}
+                      headingLevel={single ? 3 : 2}
+                      excerpt={h.description || undefined}
+                      excerptLines={3}
                       tags={[h.tags[0], traveler].filter((x): x is string => !!x).slice(0, 2)}
-                      {...(h.bookingUrl ? { primary: { label: t('card.book'), href: h.bookingUrl, external: true, onClick: () => trackHotelBook(h, i + 1, lang) } } : {})}
-                      {...(hasGuide ? { secondary: { label: t('card.seeGuide'), href: h.guideUrl } } : {})}
-                      {...(h.bookingUrl ? { providerLine: t('card.provider', { provider: tc(`provider.${h.provider}`) }) } : {})}
-                      planButton={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}
+                      aside={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}
+                      actions={(h.bookingUrl || hasGuide) ? (
+                        <>
+                          {h.bookingUrl && <Button href={h.bookingUrl} target="_blank" rel="sponsored noopener" onClick={() => trackHotelBook(h, i + 1, lang)}>{t('card.book')}</Button>}
+                          {hasGuide && <Button variant="secondary" href={h.guideUrl}>{t('card.seeGuide')}</Button>}
+                          {h.bookingUrl && <p className="m-0 basis-full font-sans text-tiny text-label">{t('card.provider', { provider: tc(`provider.${h.provider}`) })}</p>}
+                        </>
+                      ) : undefined}
                     />
                   )
                 })}

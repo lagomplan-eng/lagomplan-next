@@ -19,13 +19,16 @@ interface ChipProps {
   disabled?: boolean
   size?: 'sm' | 'md'
   className?: string
+  /** Accessible name when the visible label is not enough (e.g. "+ Mi plan: Hotel X"). */
+  ariaLabel?: string
 }
 
-export default function Chip({ label, selected, onClick, count, disabled, size = 'md', className }: ChipProps) {
+export default function Chip({ label, selected, onClick, count, disabled, size = 'md', className, ariaLabel }: ChipProps) {
   return (
     <button
       type="button"
       aria-pressed={selected}
+      aria-label={ariaLabel}
       disabled={disabled}
       onClick={onClick}
       className={cx(

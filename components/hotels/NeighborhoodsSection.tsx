@@ -11,21 +11,20 @@
  */
 
 import type { CityNeighborhoods, NeighborhoodItem } from '../../lib/hotels-neighborhoods'
+import { CardTitle, InfoCard, SectionTitle } from '../design'
 
-const PINE  = '#0F3A33'
-const SAGE  = '#6B8F86'
-const NK    = '#131313'
-const MU    = '#8A8480'
-const BD    = '#DDD8D2'
-const WHITE = '#FFFFFF'
-
-// Color tokens for the three editorial kinds. `scaffold` items aren't
-// rendered (filtered upstream) but the type ships for completeness.
-const KIND_COLOR: Record<NeighborhoodItem['kind'], string> = {
-  recommended: '#1A6B5A',  // active pine — positive
-  alternative: '#6B8F86',  // sage — neutral
-  avoid:       '#B45A3C',  // warm red-brown — warning
-  scaffold:    '#BDB8B2',  // muted — should not render
+// The three editorial kinds, on the shared tokens (the `scaffold` kind is filtered upstream).
+const KIND_BORDER: Record<NeighborhoodItem['kind'], string> = {
+  recommended: 'border-pine',
+  alternative: 'border-sage',
+  avoid:       'border-coral',
+  scaffold:    'border-line-soft',
+}
+const KIND_TEXT: Record<NeighborhoodItem['kind'], string> = {
+  recommended: 'text-pine',
+  alternative: 'text-sage-text',
+  avoid:       'text-coral',
+  scaffold:    'text-label',
 }
 
 interface Props {
@@ -52,28 +51,13 @@ export default function NeighborhoodsSection({ cities, locale }: Props) {
   }
 
   return (
-    <section style={{ padding: '0 0 64px' }}>
+    <section className="pb-16">
       <div className="page-inner">
-        {/* Section header */}
-        <div style={{ marginBottom: 28 }}>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '1.5px', textTransform: 'uppercase',
-            color: SAGE, marginBottom: 8,
-          }}>{L.eyebrow}</p>
-          <h2 style={{
-            fontFamily: 'var(--font-sans)', fontSize: 30, fontWeight: 800,
-            color: NK, marginBottom: 8, lineHeight: 1.1,
-            maxWidth: 720,
-          }}>{L.headline}</h2>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
-            lineHeight: 1.6, maxWidth: 560,
-          }}>{L.sub}</p>
+        <div className="mb-7">
+          <SectionTitle eyebrow={L.eyebrow} lede={L.sub}>{L.headline}</SectionTitle>
         </div>
 
-        {/* Per-city blocks */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div className="flex flex-col gap-6">
           {cities.map(city => (
             <CityBlock key={city.cityId} city={city} kindLabel={L.kindLabel} />
           ))}
@@ -97,53 +81,24 @@ function CityBlock({ city, kindLabel }: CityBlockProps) {
   if (renderableItems.length === 0) return null
 
   return (
-    <article style={{
-      background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-      padding: '28px 28px 24px',
-    }}>
-      {/* City + optional intro */}
-      <h3 style={{
-        fontFamily: 'var(--font-sans)', fontSize: 22, fontWeight: 800,
-        color: NK, marginBottom: city.intro ? 10 : 18, lineHeight: 1.2,
-      }}>{city.cityName}</h3>
+    <InfoCard as="article" tone="white">
+      <CardTitle as="h3" className={city.intro ? 'mb-3' : 'mb-5'}>{city.cityName}</CardTitle>
 
-      {city.intro && (
-        <p style={{
-          fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
-          lineHeight: 1.6, marginBottom: 22, maxWidth: 720,
-        }}>{city.intro}</p>
-      )}
+      {city.intro && <p className="m-0 mb-6 max-w-[720px] font-sans text-small text-ink-body">{city.intro}</p>}
 
-      {/* Neighborhood items */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div className="flex flex-col gap-4">
         {renderableItems.map(item => (
-          <div key={item.id} style={{
-            paddingLeft: 16,
-            borderLeft: `3px solid ${KIND_COLOR[item.kind]}`,
-          }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6,
-              flexWrap: 'wrap',
-            }}>
+          <div key={item.id} className={`border-l-[3px] pl-4 ${KIND_BORDER[item.kind]}`}>
+            <div className="mb-1.5 flex flex-wrap items-center gap-2.5">
               {kindLabel[item.kind] && (
-                <span style={{
-                  fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
-                  letterSpacing: '1.2px', textTransform: 'uppercase',
-                  color: KIND_COLOR[item.kind],
-                }}>{kindLabel[item.kind]}</span>
+                <span className={`font-sans text-micro font-bold uppercase tracking-[.12em] ${KIND_TEXT[item.kind]}`}>{kindLabel[item.kind]}</span>
               )}
-              <h4 style={{
-                fontFamily: 'var(--font-sans)', fontSize: 15, fontWeight: 700,
-                color: NK, lineHeight: 1.3,
-              }}>{item.title}</h4>
+              <h4 className="m-0 font-sans text-h5 text-pine">{item.title}</h4>
             </div>
-            <p style={{
-              fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
-              lineHeight: 1.65,
-            }}>{item.body}</p>
+            <p className="m-0 font-sans text-small text-ink-body">{item.body}</p>
           </div>
         ))}
       </div>
-    </article>
+    </InfoCard>
   )
 }

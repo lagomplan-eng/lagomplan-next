@@ -26,13 +26,7 @@ import {
   type Product as SmartFind,
   type SmartFindCategory,
 } from '../../lib/smart-finds'
-
-const PINE  = '#0F3A33'
-const SAGE  = '#6B8F86'
-const NK    = '#131313'
-const MU    = '#8A8480'
-const BD    = '#DDD8D2'
-const WHITE = '#FFFFFF'
+import { CardTitle, Eyebrow, InfoCard, SectionTitle, Tag } from '../design'
 
 const CATEGORY_LABEL: Record<SmartFindCategory, { es: string; en: string }> = {
   avion:      { es: 'El kit del avión',          en: 'The flight kit'            },
@@ -65,33 +59,17 @@ export default async function SmartFindsSection({ locale }: Props) {
   }
 
   return (
-    <section style={{ padding: '0 0 64px' }}>
+    <section className="pb-16">
       <div className="page-inner">
-        {/* Header */}
-        <div style={{ marginBottom: 28 }}>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
-            letterSpacing: '1.5px', textTransform: 'uppercase',
-            color: SAGE, marginBottom: 8,
-          }}>{L.eyebrow}</p>
-          <h2 style={{
-            fontFamily: 'var(--font-sans)', fontSize: 30, fontWeight: 800,
-            color: NK, marginBottom: 8, lineHeight: 1.1, maxWidth: 720,
-          }}>{L.headline}</h2>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 14, color: MU,
-            lineHeight: 1.6, maxWidth: 560,
-          }}>{L.sub}</p>
+        <div className="mb-7">
+          <SectionTitle eyebrow={L.eyebrow} lede={L.sub}>{L.headline}</SectionTitle>
         </div>
 
         {/* Horizontal-scroll card row.
             Why horizontal: 9 products is too many for a grid without
             crowding the rest of the page. Scroll keeps the section
             compact + invites browsing. */}
-        <div style={{
-          display: 'flex', gap: 16, overflowX: 'auto',
-          paddingBottom: 12, scrollSnapType: 'x mandatory',
-        }}>
+        <div className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3">
           {SMART_FINDS.map(p => (
             <SmartFindCard
               key={p.id}
@@ -118,101 +96,47 @@ function SmartFindCard({ product, categoryLabel, cta }: CardProps) {
   const hasLink = product.link && product.link !== '#'
 
   return (
-    <article style={{
-      flex: '0 0 280px',
-      background: WHITE, borderRadius: 14, border: `1.5px solid ${BD}`,
-      padding: '20px 22px 22px',
-      display: 'flex', flexDirection: 'column',
-      scrollSnapAlign: 'start',
-      transition: 'border-color .2s, transform .2s',
-    }}
-      className="hover:-translate-y-[2px] hover:border-[#0F3A33]"
-    >
-      {/* Category */}
-      <p style={{
-        fontFamily: 'var(--font-sans)', fontSize: 9, fontWeight: 700,
-        letterSpacing: '1.5px', textTransform: 'uppercase', color: SAGE,
-        marginBottom: 14,
-      }}>{categoryLabel}</p>
+    <InfoCard as="article" size="sm" className="w-[280px] flex-none snap-start transition-transform hover:-translate-y-0.5">
+      <div className="flex h-full flex-col">
+        <Eyebrow className="!mb-3.5">{categoryLabel}</Eyebrow>
 
-      {/* Image / emoji glyph. New DB-seeded products carry `image`
-          (white-bg product shot); legacy hotels-strip products fall
-          back to the emoji glyph from the static catalog. */}
-      {product.image ? (
-        <div style={{
-          width: '100%', height: 140, position: 'relative',
-          background: WHITE, marginBottom: 14,
-          overflow: 'hidden',
-        }}>
-          <Image
-            src={product.image}
-            alt={`${product.brand} ${product.name}`}
-            fill
-            sizes="280px"
-            style={{ objectFit: 'contain', padding: 12 }}
-          />
-        </div>
-      ) : product.emoji ? (
-        <div style={{ fontSize: 32, marginBottom: 12, lineHeight: 1 }}>
-          {product.emoji}
-        </div>
-      ) : null}
-      <p style={{
-        fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 700,
-        letterSpacing: '1.2px', textTransform: 'uppercase', color: SAGE,
-        marginBottom: 4,
-      }}>{product.brand}</p>
-      <h3 style={{
-        fontFamily: 'var(--font-sans)', fontSize: 17, fontWeight: 800,
-        color: NK, lineHeight: 1.25, marginBottom: 12,
-      }}>{product.name}</h3>
+        {/* Image / emoji glyph. New DB-seeded products carry `image`
+            (white-bg product shot); legacy hotels-strip products fall
+            back to the emoji glyph from the static catalog. */}
+        {product.image ? (
+          <div className="relative mb-3.5 h-[140px] w-full overflow-hidden bg-white">
+            <Image
+              src={product.image}
+              alt={`${product.brand} ${product.name}`}
+              fill
+              sizes="280px"
+              className="object-contain p-3"
+            />
+          </div>
+        ) : product.emoji ? (
+          <div className="mb-3 text-[32px] leading-none">{product.emoji}</div>
+        ) : null}
+        <p className="m-0 mb-1 font-sans text-micro font-bold uppercase tracking-[.12em] text-sage-text">{product.brand}</p>
+        <CardTitle as="h3" className="mb-3 !text-h4">{product.name}</CardTitle>
 
-      {/* Tag pill */}
-      <div style={{ marginBottom: 14 }}>
-        <span style={{
-          display: 'inline-block',
-          fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600,
-          padding: '4px 12px', borderRadius: 100,
-          border: `1.5px solid ${BD}`, color: NK, background: 'transparent',
-        }}>{product.tag}</span>
+        <div className="mb-3.5"><Tag>{product.tag}</Tag></div>
+
+        {/* Opinion — clamp to 5 lines so cards stay roughly the same height */}
+        <p className="m-0 mb-4 line-clamp-5 font-sans text-small text-ink-body">{product.opinion}</p>
+
+        {/* Footer: price · where + CTA */}
+        <div className="mt-auto flex items-center justify-between gap-3 border-t border-line-soft pt-3">
+          <div className="min-w-0">
+            <p className="m-0 font-sans text-small font-semibold text-pine">{product.price}</p>
+            <p className="m-0 mt-0.5 font-sans text-micro font-semibold uppercase tracking-[.08em] text-label">{product.where}</p>
+          </div>
+          <a
+            href={hasLink ? product.link : '#'}
+            {...(hasLink ? { target: '_blank', rel: 'noopener noreferrer sponsored' } : {})}
+            className="whitespace-nowrap font-sans text-button-sm font-semibold text-pine no-underline"
+          >{cta}</a>
+        </div>
       </div>
-
-      {/* Opinion — clamp to 5 lines so cards stay roughly the same height */}
-      <p style={{
-        fontFamily: 'var(--font-sans)', fontSize: 13, color: MU,
-        lineHeight: 1.55, marginBottom: 16,
-        display: '-webkit-box',
-        WebkitLineClamp: 5, WebkitBoxOrient: 'vertical',
-        overflow: 'hidden',
-      }}>{product.opinion}</p>
-
-      {/* Footer: price · where + CTA */}
-      <div style={{
-        marginTop: 'auto', paddingTop: 12,
-        borderTop: `1px solid ${BD}`,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        gap: 12,
-      }}>
-        <div style={{ minWidth: 0 }}>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 13, fontWeight: 700,
-            color: NK, lineHeight: 1.2,
-          }}>{product.price}</p>
-          <p style={{
-            fontFamily: 'var(--font-sans)', fontSize: 10, fontWeight: 600,
-            letterSpacing: '0.8px', textTransform: 'uppercase', color: MU,
-            marginTop: 2,
-          }}>{product.where}</p>
-        </div>
-        <a
-          href={hasLink ? product.link : '#'}
-          {...(hasLink ? { target: '_blank', rel: 'noopener noreferrer sponsored' } : {})}
-          style={{
-            fontFamily: 'var(--font-sans)', fontSize: 12, fontWeight: 700,
-            color: PINE, textDecoration: 'none', whiteSpace: 'nowrap',
-          }}
-        >{cta}</a>
-      </div>
-    </article>
+    </InfoCard>
   )
 }
