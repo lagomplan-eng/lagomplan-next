@@ -96,6 +96,8 @@ export interface MoodItem {
   note: string
   /** Optional small label above the name (the hotel edition's "I'm hungry" picks keep their craving label). */
   tag?: string
+  /** Optional zone name shown under the pick (hotel edition), only where the repo holds the place's zone. */
+  zone?: string
 }
 
 export interface Mood {

@@ -5,7 +5,7 @@
 import { render, fireEvent, act } from '@testing-library/react'
 import GuiaClient from '../app/guia/[partner]/GuiaClient'
 import { buildHotelGuideProps } from '../content/guia/hotel/resolve'
-import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, type HotelZone } from '../content/guia/hotel/zones'
+import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_TAB_ORDER, type HotelZone } from '../content/guia/hotel/zones'
 import { CHEF_WHATSAPP_NUMBER } from '../lib/guia/links'
 
 beforeEach(() => { (global as { fetch?: unknown }).fetch = jest.fn(() => Promise.reject(new Error('offline'))) })
@@ -41,7 +41,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect((text.match(/Reservar en GetYourGuide/g) ?? []).length).toBe(4)
     const quickEs = ['Solo unas horas', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos. Una joya escondida en la Condesa.', 'Mejor de miércoles a sábado. Entre paradas, un trayecto corto.']
     for (const q of quickEs) zone === 'condesa' ? expect(text).toContain(q) : expect(text).not.toContain(q)
-    expect(view.container.querySelectorAll('.moodGrid button, [class*="moodBtn"]').length).toBe(5)
+    expect(view.container.querySelectorAll('.moodGrid button, [class*="moodBtn"]').length).toBe(6)
     for (const hidden of ['Lavandería y tintorería', 'Restaurantes que reciben grupos', 'Catering y entrega a domicilio', 'Llegar tarde']) expect(text).not.toContain(hidden)
     expect(text).toContain('Vino y licores')
   })
@@ -51,12 +51,53 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(text).toContain('Cuatro zonas, cuatro maneras de vivir la ciudad')
     expect(text).toContain('Enviar esta guía a mi teléfono')
   })
-  test('four tabs, no "Tu casa", the hotel zone open', () => {
+  test('zone tabs: own zone first and open, the others in order, no "Tu casa"; how far labels in Spanish', () => {
     const { view, text } = open()
-    const tabs = [...view.container.querySelectorAll('[role="tab"]')] as HTMLElement[]
-    expect(tabs.map((t) => t.textContent)).toEqual(['Roma Norte', 'Condesa', 'Polanco', 'Centro'])
-    expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.textContent)).toEqual([ZONE_NEIGHBORHOOD[zone]])
+    const zonesEl = view.container.querySelector('[data-hotel-section="neighborhoods"]')!
+    const tabs = [...zonesEl.querySelectorAll('[role="tab"]')] as HTMLElement[]
+    expect(tabs.map((t) => t.firstChild?.textContent)).toEqual(ZONE_TAB_ORDER[zone])
+    expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.firstChild?.textContent)).toEqual([ZONE_NEIGHBORHOOD[zone]])
+    const how = Object.fromEntries(tabs.map((t) => [t.firstChild?.textContent, t.querySelector('span')?.textContent ?? null]))
+    const want = {
+      condesa: { Condesa: 'A pie', 'Roma Norte': 'A pie', Polanco: 'Trayecto corto', Centro: 'Medio día' },
+      roma: { 'Roma Norte': 'A pie', Condesa: 'A pie', Centro: 'Medio día', Polanco: 'Trayecto corto' },
+      polanco: { Polanco: null, Condesa: null, 'Roma Norte': null, Centro: null },
+    }[zone]
+    expect(how).toEqual(want)
     expect(text).not.toMatch(/Tu casa/)
+  })
+  test('how much time: Condesa picks between two plans (short plan first), others show 48 horas directly', () => {
+    const { view } = open()
+    const timeEl = () => view.container.querySelector('[data-hotel-section="time"]')!
+    const tabs = [...timeEl().querySelectorAll('[role="tab"]')] as HTMLElement[]
+    if (zone !== 'condesa') {
+      expect(tabs).toHaveLength(0)
+      expect(view.container.textContent).toContain('48 horas')
+      expect(view.container.textContent).not.toContain('Solo unas horas')
+      return
+    }
+    expect(tabs.map((t) => [t.textContent, t.getAttribute('aria-selected')])).toEqual([['Solo unas horas', 'true'], ['48 horas', 'false']])
+    expect(timeEl().textContent).toContain('Museo de Arte Moderno')
+    expect(view.container.querySelector('[data-hotel-section="itinerary"]')).toBeNull()
+    act(() => { fireEvent.click(tabs[1]) })
+    expect(timeEl().textContent).not.toContain('Museo de Arte Moderno')
+    expect(view.container.querySelector('[data-hotel-section="itinerary"]')).not.toBeNull()
+    expect(view.container.textContent).toContain('48 horas')
+    act(() => { fireEvent.click(tabs[0]) })
+    expect(timeEl().textContent).toContain('Museo de Arte Moderno')
+  })
+  test('jump menu, monday row, shop mood, footer line, destination cards (Spanish)', () => {
+    const { view, text } = open()
+    const links = [...view.container.querySelectorAll('nav a')].map((a) => [a.getAttribute('href'), a.textContent])
+    expect(links).toEqual([['#zonas', 'Cerca de mí'], ['#planes', 'Planes'], ['#experiencias', 'Experiencias'], ['#bueno-saber', 'Bueno saber']])
+    expect(text).toContain('Lunes')
+    expect(text).toContain('La mayoría de los museos cierra.')
+    expect(text).toContain('Buen día para parques, mercados y comer.')
+    expect(text).toContain('Recomendamos lugares porque los revisamos. Nadie paga por aparecer.')
+    expect(text).toContain('Quiero ir de compras')
+    expect(text).not.toContain('Solo tengo unas horas')
+    expect(view.container.querySelectorAll('.discoverCard, [class*="discoverCard"]')).toHaveLength(5)
+    expect(text).toContain('¿Cuál es tu próximo destino?')
   })
   test('no check-out strip, no chefs, no massages', () => {
     const { view, text } = open()

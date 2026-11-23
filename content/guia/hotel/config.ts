@@ -58,6 +58,38 @@ export const HOTEL_FREE_EDITION: HotelEdition = {
   planner: { utmCampaign: 'hotel_free' },
 }
 
+/** Jump menu under the banner (existing chip style). */
+export const HOTEL_JUMP: { id: string; label: Record<Lang, string> }[] = [
+  { id: 'zonas', label: { en: 'Near me', es: 'Cerca de mí' } },
+  { id: 'planes', label: { en: 'Plans', es: 'Planes' } },
+  { id: 'experiencias', label: { en: 'Experiences', es: 'Experiencias' } },
+  { id: 'bueno-saber', label: { en: 'Good to know', es: 'Bueno saber' } },
+]
+
+/** "How much time do you have?": the two plan buttons. */
+export const HOTEL_PLAN_BUTTONS = { quick: { en: 'Only a few hours', es: 'Solo unas horas' }, full: { en: '48 hours', es: '48 horas' } }
+export const HOTEL_PLANS_EYEBROW: Record<Lang, string> = { en: 'Plans', es: 'Planes' }
+
+/** New mood and its panel title. The picks are places already in the guide (see resolve.ts). */
+export const HOTEL_SHOP_MOOD: Record<Lang, { label: string; title: string }> = {
+  en: { label: 'I want to shop', title: 'For shopping' },
+  es: { label: 'Quiero ir de compras', title: 'Para ir de compras' },
+}
+/** Mood buttons, in order. */
+export const HOTEL_MOOD_ORDER = ['hungry', 'culture', 'hidden', 'shop', 'nightlife', 'kids']
+
+/** One more row in "Every week in Mexico City". */
+export const HOTEL_MONDAY_ROW: Record<Lang, { tag: string; title: string; body: string }> = {
+  en: { tag: 'Monday', title: 'Most museums are closed.', body: 'A good day for parks, markets and food.' },
+  es: { tag: 'Lunes', title: 'La mayoría de los museos cierra.', body: 'Buen día para parques, mercados y comer.' },
+}
+
+/** One line in the footer. */
+export const HOTEL_FOOTER_LINE: Record<Lang, string> = {
+  en: 'We recommend places because we checked them. Nobody pays to be listed.',
+  es: 'Recomendamos lugares porque los revisamos. Nadie paga por aparecer.',
+}
+
 /** What GuiaClient receives to switch on the hotel edition. Absent = the guide renders exactly as before. */
 export interface HotelMode {
   zone: HotelZone
@@ -68,7 +100,7 @@ export interface HotelMode {
 
 /** Section ids accepted by /api/hotels/event for section_open: the sections of the guide, in order. */
 export const HOTEL_SECTION_IDS: readonly string[] = [
-  'hero', 'neighborhoods', 'time', 'itinerary', 'moods', 'rhythm', 'experiences', 'practical', 'planner',
+  'hero', 'neighborhoods', 'time', 'itinerary', 'moods', 'rhythm', 'experiences', 'practical', 'planner', 'discover',
 ]
 
 /** Outbound click ids accepted by /api/hotels/event for outbound_click. */

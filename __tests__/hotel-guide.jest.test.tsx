@@ -15,7 +15,10 @@ import { HOTEL_CONTENT_UPDATED, hotelUpdatedLine } from '../content/guia/hotel/c
 import { HOTEL_QUICK_PLAN } from '../content/guia/hotel/time'
 import { HOTEL_PARTNER_SLUG, buildHotelGuideProps } from '../content/guia/hotel/resolve'
 import { HOTEL_REWORDS, hotelReword, zonesHeading } from '../content/guia/hotel/rewords'
-import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, type HotelZone } from '../content/guia/hotel/zones'
+import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_TAB_ORDER, type HotelZone } from '../content/guia/hotel/zones'
+import { HIDDEN_GEMS, PLACE_THEME, THEME_LABEL, placeThemes } from '../content/guia/hotel/themes'
+import { DISTANCE_LABELS_FOR } from '../content/guia/hotel/distance'
+import { HOTEL_JUMP, HOTEL_MOOD_ORDER } from '../content/guia/hotel/config'
 import { GYG_PARTNER_ID, isGygUrl, isGygTourUrl } from '../lib/affiliate/gyg'
 import { CHEF_WHATSAPP_NUMBER } from '../lib/guia/links'
 
@@ -25,15 +28,18 @@ const livin = (zone: HotelZone) => {
   return renderToStaticMarkup(<GuiaClient partner={g.partner} city={g.city} />)
 }
 const headings = (html: string) => [...html.matchAll(/<h[12][^>]*>([^<]*)</g)].map((m) => m[1])
-const tabs = (html: string) => [...html.matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => ({ selected: m[1] === 'true', label: m[2] }))
+// Zone tabs only: the plan buttons in "How much time" are tabs too.
+const zonesPart = (html: string) => { const a = html.indexOf('data-hotel-section="neighborhoods"'); const b = html.indexOf('data-hotel-section="time"'); return a >= 0 && b > a ? html.slice(a, b) : html }
+const tabs = (html: string) => [...zonesPart(html).matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => ({ selected: m[1] === 'true', label: m[2] }))
 const visibleText = (html: string) => html.replace(/<[^>]+>/g, '\n').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').split('\n').map((x) => x.trim()).filter(Boolean).join('\n')
 const HEADING_4 = 'Four zones, four ways to experience the city'
 const HEADING_5 = 'Five zones, five ways to experience the city'
 const cardTitles = (html: string) => { const a = html.indexOf('id="practico"'); return [...html.slice(a).matchAll(/<h4[^>]*>([^<]*)<\/h4>/g)].map((m) => m[1].replace(/&#x27;/g, "'").replace(/&amp;/g, '&')) }
 const NOT_FOR_A_HOTEL = ['Laundry and dry cleaning', 'Restaurants that take groups', 'Catering and delivery', 'Coming back late']
 const LIVIN_PROPERTY = ['Chefs at home', 'Massages']
-const ORDER_EN = ['Your guide to {zone}', HEADING_4, 'How much time do you have?', '48 hours', 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
-
+// Condesa opens on its short plan, so the 48 hours heading is not on screen until that button is chosen.
+const orderEn = (zone: HotelZone) => ['Your guide to {zone}', HEADING_4, 'How much time do you have?', ...(zone === 'condesa' ? [] : ['48 hours']), 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
+const tabsWithLabels = (html: string) => [...zonesPart(html).matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)(?:<span[^>]*>([^<]*)<\/span>)?/g)].map((m) => ({ selected: m[1] === 'true', label: m[2], how: m[3] ?? null }))
 // Everything that identifies the Livin property: the three "Your house" addresses and map links, plus the spots that
 // only exist in a "Your house" list (a venue the city layer also names, such as Panadería Rosetta, is not Livin's).
 const livinAddresses = HOTEL_ZONES.flatMap((z) => {
@@ -51,8 +57,9 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
   const props = JSON.stringify(buildHotelGuideProps(zone))
 
   test('sections in the agreed order: welcome, zones, how much time, mood, weekly rhythm, experiences, good to know, Lagomplan block', () => {
-    expect(headings(html)).toEqual(ORDER_EN.map((h) => h.replace('{zone}', ZONE_LABEL[zone])))
-    const at = HOTEL_SECTION_IDS.map((id) => html.indexOf(`data-hotel-section="${id}"`))
+    expect(headings(html)).toEqual(orderEn(zone).map((h) => h.replace('{zone}', ZONE_LABEL[zone])))
+    const ids = HOTEL_SECTION_IDS.filter((id) => !(zone === 'condesa' && id === 'itinerary'))
+    const at = ids.map((id) => html.indexOf(`data-hotel-section="${id}"`))
     expect(at.every((i) => i >= 0)).toBe(true)
     expect([...at].sort((a, b) => a - b)).toEqual(at)
     expect(html.indexOf('class="footer"')).toBeGreaterThan(html.indexOf('data-hotel-section="planner"'))
@@ -69,27 +76,64 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(text).toContain('Send this guide to my phone')
     expect(html).not.toContain('Everything you need for your stay')
   })
-  test('the zones section: four tabs, no "Your house", the hotel zone open, title says four', () => {
+  test('the zones section: own zone first and open, the others nearest to farthest; title says four; no "Your house"', () => {
     const t = tabs(html)
-    expect(t.map((x) => x.label)).toEqual(['Roma Norte', 'Condesa', 'Polanco', 'Centro'])
+    expect(t.map((x) => x.label)).toEqual(ZONE_TAB_ORDER[zone])
+    expect(t[0].label).toBe(ZONE_NEIGHBORHOOD[zone])
     expect(t.filter((x) => x.selected).map((x) => x.label)).toEqual([ZONE_NEIGHBORHOOD[zone]])
     expect(headings(html)).toContain(HEADING_4)
     expect(html).not.toMatch(/Your house|Tu casa|Your area|Tu zona/)
   })
-  test('how much time: 48 hours everywhere; the short plan only in Condesa, never reused elsewhere', () => {
-    expect(headings(html)).toContain('48 hours')
-    const quick = ['Only a few hours', 'Museo de Arte Moderno', 'Niddo', 'Maleza', 'Best Wednesday to Saturday. Take a short ride between stops.']
-    for (const q of quick) zone === 'condesa' ? expect(html).toContain(q) : expect(html).not.toContain(q)
+  test('how far labels on the tabs, only where the sentences already in the guide make them clear', () => {
+    const t = tabsWithLabels(html)
+    const got = Object.fromEntries(t.map((x) => [x.label, x.how]))
+    const want: Record<HotelZone, Record<string, string | null>> = {
+      condesa: { Condesa: 'On foot', 'Roma Norte': 'On foot', Polanco: 'Short ride', Centro: 'Half a day' },
+      roma: { 'Roma Norte': 'On foot', Condesa: 'On foot', Centro: 'Half a day', Polanco: 'Short ride' },
+      polanco: { Polanco: null, Condesa: null, 'Roma Norte': null, Centro: null },
+    }
+    expect(got).toEqual(want[zone])
+    expect(DISTANCE_LABELS_FOR.includes(zone)).toBe(zone !== 'polanco')
+  })
+  test('jump menu under the banner: four chip links to sections that exist', () => {
+    const links = [...html.matchAll(/<a href="#([a-z-]+)" class="tab"[^>]*>([^<]*)</g)].map((m) => [m[1], m[2]])
+    expect(links).toEqual(HOTEL_JUMP.map((j) => [j.id, j.label.en]))
+    expect(links.map((l) => l[1])).toEqual(['Near me', 'Plans', 'Experiences', 'Good to know'])
+    for (const [id] of links) expect(html).toContain(`id="${id}"`)
+    expect(html.indexOf('class="tab"')).toBeGreaterThan(html.indexOf('class="hero"'))
+    expect(html.indexOf('href="#zonas"')).toBeLessThan(html.indexOf('data-hotel-section="neighborhoods"'))
+  })
+  test('how much time: Condesa has two buttons and opens the short plan; Roma Norte and Polanco show 48 hours directly, no buttons', () => {
+    const quick = ['Museo de Arte Moderno', 'Niddo', 'Maleza', 'Best Wednesday to Saturday. Take a short ride between stops.']
     if (zone === 'condesa') {
+      const plans = [...html.slice(html.indexOf('data-hotel-section="time"'), html.indexOf('data-hotel-section="moods"')).matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => [m[2], m[1] === 'true'])
+      expect(plans).toEqual([['Only a few hours', true], ['48 hours', false]])
+      for (const q of quick) expect(html).toContain(q)
+      expect(headings(html)).not.toContain('48 hours') // only the selected plan is visible
       const maps = [...html.matchAll(/href="(https:\/\/www\.google\.com\/maps\/search\/[^"]*)"/g)].map((m) => m[1])
-      expect(maps.length).toBeGreaterThanOrEqual(3)
       for (const stop of HOTEL_QUICK_PLAN.stops) expect(maps.some((m) => decodeURIComponent(m).includes(stop.name))).toBe(true)
+    } else {
+      expect(headings(html)).toContain('48 hours')
+      for (const q of [...quick, 'Only a few hours']) expect(html).not.toContain(q)
+      const timeBlock = html.slice(html.indexOf('data-hotel-section="time"'), html.indexOf('data-hotel-section="moods"'))
+      expect(timeBlock).not.toContain('role="tab"')
     }
   })
-  test('"Only a few hours" is not a mood button', () => {
+  test('mood buttons in the agreed order; "Only a few hours" is not one of them', () => {
     const buttons = [...html.matchAll(/aria-pressed="false" class="moodBtn[^"]*"[^>]*>.*?<div class="moodLabel">([^<]*)</g)].map((m) => m[1])
-    expect(buttons.length).toBe(5)
-    expect(buttons).not.toContain('Only a few hours')
+    expect(buttons).toEqual(["I'm hungry".replace("'", '&#x27;'), 'I want culture', 'Hidden places', 'I want to shop', 'I want nightlife', 'Traveling with kids'])
+  })
+  test('the weekly rhythm has a Monday row; the footer has the "we checked them" line', () => {
+    expect(text).toContain('Monday')
+    expect(text).toContain('Most museums are closed.')
+    expect(text).toContain('A good day for parks, markets and food.')
+    expect(text).toContain('We recommend places because we checked them. Nobody pays to be listed.')
+    expect(html.indexOf('We recommend places because')).toBeGreaterThan(html.indexOf('data-hotel-section="discover"'))
+  })
+  test('theme marks on the place cards of the zone tab and the short plan', () => {
+    const spots = getGuide('livin_condesa')!.city.neighborhoods[ZONE_NEIGHBORHOOD[zone]].spots.en
+    for (const sp of spots) for (const m of placeThemes(sp.name)) expect(html).toContain(`>${THEME_LABEL[m].en}</span>`)
+    if (zone === 'condesa') expect(html).toContain('>Hidden gem</span>') // Proyecto Rufina, Maleza
   })
   test('good to know: new title, the four hidden items gone, nothing else lost, Wine and liquor under Everyday errands', () => {
     expect(headings(html)).toContain('Good to know')
@@ -111,14 +155,17 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
   test('the airport, earthquakes and cash and ATMs answers show, like in the Livin guide', () => {
     for (const shown of ['Most flights land at AICM', 'Earthquakes', 'Cash and ATMs']) { expect(html).toContain(shown); expect(base).toContain(shown) }
   })
-  test('lagomplan: one invitation with the five destinations under "Where next?"; no floating or footer planner button', () => {
+  test('lagomplan: the invitation, then the destination cards (images and links) under "Where next?"; no floating or footer planner button', () => {
     expect(headings(html)).toContain('Ready to explore beyond your stay?')
     expect(text).toContain('Plan my next trip')
     expect(text).toContain('Where next?')
-    for (const d of ['Oaxaca', 'Tulum', 'San Miguel de Allende', 'Valle de Bravo', 'Mérida']) expect(html).toMatch(new RegExp(`<a class="link" href="[^"]*"[^>]*>${d}</a>`))
+    expect(html.indexOf('Where next?')).toBeGreaterThan(html.indexOf('Plan my next trip'))
+    const grid = html.slice(html.indexOf('class="discoverGrid"'))
+    for (const d of ['Oaxaca', 'Tulum', 'San Miguel de Allende', 'Valle de Bravo', 'Mérida']) expect(grid).toMatch(new RegExp(`<a class="discoverCard" href="[^"]*"[^>]*><img class="discoverImg" src="[^"]+" alt="${d}"/>`))
+    expect(grid.match(/class="discoverCard"/g)).toHaveLength(5)
+    expect(html).not.toContain('Lagomplan goes further than this city')
     expect(html).not.toContain('Personalize my trip in 60 seconds')
     expect(html).not.toContain('stickyWrap')
-    expect(html).not.toContain('discoverGrid')
   })
   test('experiences: the four cards, each opening a GetYourGuide search with the partner ID; no Insider, no tour, no Barragán', () => {
     const cards = html.slice(html.indexOf('data-hotel-section="experiences"'), html.indexOf('id="practico"'))
@@ -177,15 +224,16 @@ describe('the three zones cannot drift apart', () => {
   const groups = (html: string) => ['Before you arrive', 'Everyday errands', 'Eating in', 'Take care'].filter((g) => html.includes(g))
   const sections = (html: string) => [...html.matchAll(/data-hotel-section="([a-z]+)"/g)].map((m) => m[1])
   test('same sections in the same order (apart from the welcome headline)', () => {
-    const [a, ...rest] = HOTEL_ZONES.map((z) => headings(pages[z]).slice(1))
+    const noPlan = (x: string[]) => x.filter((h) => h !== '48 hours') // Condesa opens on its short plan
+    const [a, ...rest] = HOTEL_ZONES.map((z) => noPlan(headings(pages[z]).slice(1)))
     for (const r of rest) expect(r).toEqual(a)
-    const [m, ...others] = HOTEL_ZONES.map((z) => sections(pages[z]))
-    expect(m).toEqual([...HOTEL_SECTION_IDS])
+    const noIt = (x: string[]) => x.filter((id) => id !== 'itinerary')
+    const [m, ...others] = HOTEL_ZONES.map((z) => noIt(sections(pages[z])))
+    expect(m).toEqual(noIt([...HOTEL_SECTION_IDS]))
     for (const r of others) expect(r).toEqual(m)
   })
-  test('same four zone tabs', () => {
-    const [a, ...rest] = HOTEL_ZONES.map((z) => tabs(pages[z]).map((t) => t.label))
-    for (const r of rest) expect(r).toEqual(a)
+  test('same four zones as tabs, each in its own order', () => {
+    for (const z of HOTEL_ZONES) expect(tabs(pages[z]).map((t) => t.label).sort()).toEqual([...ZONE_TAB_ORDER[z]].sort())
   })
   // Differences that come from the content files, not from this edition. Listed so a change shows up here.
   test('the practical groups each zone has (documented, not padded)', () => {
@@ -196,7 +244,7 @@ describe('the three zones cannot drift apart', () => {
     })
   })
   test('the only difference in how much time: Condesa has the short plan', () => {
-    const h = (z: HotelZone) => headings(pages[z]).join('|')
+    const h = (z: HotelZone) => headings(pages[z]).filter((x) => x !== '48 hours').join('|')
     expect(h('condesa')).toBe(h('roma').replace('Roma Norte', 'Condesa'))
     expect(pages.condesa.includes('Museo de Arte Moderno')).toBe(true)
     expect(pages.roma.includes('Museo de Arte Moderno') || pages.polanco.includes('Museo de Arte Moderno')).toBe(false)
@@ -209,7 +257,7 @@ describe('"I\'m hungry" and the moods', () => {
     const g = getGuide('livin_condesa')!
     const moods = city.copy[lang].moods
     expect(moods.map((m) => m.id)).not.toContain('short')
-    expect(moods).toHaveLength(g.city.copy[lang].moods.length - 1)
+    expect(moods).toHaveLength(g.city.copy[lang].moods.length) // one removed (short), one added (shop)
     const hungry = moods.find((m) => m.id === 'hungry')!
     const picks = ['El Vilsito', 'Café Avellaneda', 'Quintonil', 'Café Nin', 'Nevería Roxy']
     const added = hungry.items.slice(g.city.copy[lang].moods.find((m) => m.id === 'hungry')!.items.length)
@@ -258,5 +306,40 @@ describe('hotel zone to Livin guide', () => {
     expect(HOTEL_FREE_EDITION.zoneHeadline.es.replace('{zone}', 'Roma Norte')).toBe('Tu guía de Roma Norte')
     expect(HOTEL_FREE_EDITION.zoneHeadline.en.replace('{zone}', 'Polanco')).toBe('Your guide to Polanco')
     expect(HOTEL_FREE_EDITION.heroSub.es).toBe('Preparada como la prepararía un amigo, no un buscador. Solo lugares verificados.')
+  })
+})
+
+describe('moods, theme marks and zone names', () => {
+  const g = getGuide('livin_condesa')!
+  test.each(['en', 'es'] as const)('%s: moods in the agreed order, the new shopping mood reuses four places word for word', (lang) => {
+    const moods = buildHotelGuideProps('condesa')!.city.copy[lang].moods
+    expect(moods.map((m) => m.id)).toEqual(HOTEL_MOOD_ORDER)
+    const shop = moods.find((m) => m.id === 'shop')!
+    expect(shop.items.map((i) => i.name)).toEqual(['Proyecto Rufina', 'Librería El Péndulo', 'LAGO', 'Bazar Sábado'])
+    const allSpots = Object.values(g.city.neighborhoods).flatMap((n) => n.spots[lang])
+    for (const it of shop.items.slice(0, 3)) expect(allSpots.find((s) => s.name === it.name)!.note).toBe(it.note)
+    const bazar = g.city.copy[lang].todayItems.find((t) => t.title.startsWith('Bazar Sábado'))!
+    expect(shop.items[3].note).toBe(bazar.body)
+    expect(shop.items[3].zone).toBe('San Ángel')
+  })
+  test('zone names under picks only where the repo holds the zone (a zone tab lists the place, or the title names it)', () => {
+    const moods = buildHotelGuideProps('condesa')!.city.copy.en.moods
+    const zones = Object.fromEntries(moods.flatMap((m) => m.items.map((i) => [i.name, i.zone ?? null])))
+    expect(zones).toMatchObject({
+      'Proyecto Rufina': 'Condesa', 'Librería El Péndulo': 'Roma Norte', 'LAGO': 'Polanco', 'Bazar Sábado': 'San Ángel',
+      'Parque México': 'Condesa', 'Licorería Limantour': 'Roma Norte',
+    })
+    const blank = Object.entries(zones).filter(([, z]) => z === null).map(([n]) => n).sort()
+    expect(blank).toEqual(['Bar Federalista', 'Bósforo', 'Café Avellaneda', 'Café Nin', 'Casa Franca', 'Casa Luis Barragán', 'Chapultepec Zoo', 'Departamento', 'El Vilsito', 'Foro Shakespeare', 'Kurimanzutto', 'Lalo!', 'Masala y Maíz', 'Museo Tamayo', 'Nevería Roxy', 'Papalote Museo del Niño', 'Quintonil', 'Taquería Orinoco'])
+  })
+  test('hidden gem is exactly the seven agreed places; every place on a card has a decision in themes.ts', () => {
+    expect([...HIDDEN_GEMS].sort()).toEqual(['Bósforo', 'Café Nin', 'Casa Franca', 'Foro Shakespeare', 'Maleza', 'Mercado de San Juan', 'Proyecto Rufina'])
+    const names = new Set<string>()
+    for (const nb of Object.values(g.city.neighborhoods)) nb.spots.en.forEach((s) => names.add(s.name))
+    buildHotelGuideProps('condesa')!.city.copy.en.moods.forEach((m) => m.items.forEach((i) => names.add(i.name)))
+    HOTEL_QUICK_PLAN.stops.forEach((s) => names.add(s.name))
+    for (const n of names) expect(Object.keys(PLACE_THEME)).toContain(n)
+    for (const n of HIDDEN_GEMS) expect(placeThemes(n)).toContain('gem')
+    for (const n of names) if (!HIDDEN_GEMS.includes(n)) expect(placeThemes(n)).not.toContain('gem')
   })
 })

@@ -36,3 +36,13 @@ export function isHotelZone(v: unknown): v is HotelZone {
 export function zoneFromSlug(slug: string): HotelZone | null {
   return HOTEL_ZONES.find((z) => ZONE_SLUG[z] === slug) ?? null
 }
+
+/**
+ * Zone tabs for each hotel zone: the hotel's own zone first (and open), then the others from nearest to farthest.
+ * Keys are the neighborhood names of the city layer (content/guia/cities/cdmx.ts).
+ */
+export const ZONE_TAB_ORDER: Record<HotelZone, string[]> = {
+  condesa: ['Condesa', 'Roma Norte', 'Polanco', 'Centro'],
+  roma: ['Roma Norte', 'Condesa', 'Centro', 'Polanco'],
+  polanco: ['Polanco', 'Condesa', 'Roma Norte', 'Centro'],
+}

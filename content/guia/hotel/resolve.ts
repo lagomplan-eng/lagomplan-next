@@ -10,10 +10,10 @@
 // Items that were once held for confirmation (airport, earthquakes, cash and ATMs) now render like in the Livin guides.
 // Pure, no React.
 
-import type { ArrivalItem, City, CityCopy, InlineLink, Partner } from '../types'
+import type { ArrivalItem, City, CityCopy, InlineLink, Lang, Mood, MoodItem, Partner } from '../types'
 import type { FaqItemKey } from '../faq/types'
 import { getGuide } from '..'
-import { HOTEL_FREE_EDITION, type HotelMode } from './config'
+import { HOTEL_FREE_EDITION, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_SHOP_MOOD, type HotelMode } from './config'
 import { HOTEL_EXPERIENCE_IDS } from './experiences'
 import { ZONE_NEIGHBORHOOD, type HotelZone } from './zones'
 
@@ -50,21 +50,54 @@ function stripInsider(item: ArrivalItem): ArrivalItem {
   return { ...rest, body: cut > 0 ? item.body.slice(0, cut + 1) : item.body }
 }
 
-function sanitizeCopy(copy: CityCopy): CityCopy {
+/** Zone name of a place that is listed in one of the city's zone tabs; undefined when the repo holds no zone for it. */
+function zoneOfPlace(city: City, name: string, lang: Lang): string | undefined {
+  for (const [key, nb] of Object.entries(city.neighborhoods)) {
+    if (nb.spots[lang].some((s) => s.name === name)) return nb.tabLabel?.[lang] ?? key
+  }
+  return undefined
+}
+
+function spotAsPick(city: City, name: string, lang: Lang): MoodItem | null {
+  for (const nb of Object.values(city.neighborhoods)) {
+    const spot = nb.spots[lang].find((s) => s.name === name)
+    if (spot) return { name: spot.name, note: spot.note, zone: zoneOfPlace(city, name, lang) }
+  }
+  return null
+}
+
+/** "I want to shop": four places already in the guide, with their existing texts. */
+function shopMood(city: City, copy: CityCopy, lang: Lang): Mood {
+  const picks = ['Proyecto Rufina', 'Librería El Péndulo', 'LAGO'].map((n) => spotAsPick(city, n, lang)).filter((x): x is MoodItem => !!x)
+  // Bazar Sábado comes from "Every week": the title names its zone ("Bazar Sábado, San Ángel"), the body is its text.
+  const bazar = copy.todayItems.find((t) => t.title.startsWith('Bazar Sábado'))
+  if (bazar) {
+    const [name, ...zone] = bazar.title.split(', ')
+    picks.push({ name, note: bazar.body, zone: zone.join(', ') || undefined })
+  }
+  return { id: 'shop', icon: 'basket', label: HOTEL_SHOP_MOOD[lang].label, title: HOTEL_SHOP_MOOD[lang].title, items: picks }
+}
+
+function sanitizeCopy(copy: CityCopy, city: City, lang: Lang): CityCopy {
+  const moods = copy.moods
+    .filter((m) => m.id !== 'short')
+    .map((m) => m.id !== 'hungry' ? m : {
+      ...m,
+      items: [
+        ...m.items,
+        ...HOTEL_HUNGRY_PICKS.map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
+          .map((c) => ({ name: c.name, note: c.note, tag: c.tag })),
+      ],
+    })
+  const withShop = [...moods, shopMood(city, copy, lang)]
   return {
     ...copy,
     arrivalItems: copy.arrivalItems.filter((i) => !HOTEL_HIDDEN_ARRIVAL_IDS.includes(i.id ?? '')).map(stripInsider),
-    // "Only a few hours" has its own section (time.ts); the five must-sees without another home join "I'm hungry".
-    moods: copy.moods
-      .filter((m) => m.id !== 'short')
-      .map((m) => m.id !== 'hungry' ? m : {
-        ...m,
-        items: [
-          ...m.items,
-          ...HOTEL_HUNGRY_PICKS.map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
-            .map((c) => ({ name: c.name, note: c.note, tag: c.tag })),
-        ],
-      }),
+    // Mood order is the hotel's; the zone name goes under a pick only where the repo holds the place's zone.
+    moods: HOTEL_MOOD_ORDER.map((id) => withShop.find((m) => m.id === id)).filter((m): m is Mood => !!m)
+      .map((m) => ({ ...m, items: m.items.map((it) => ({ ...it, zone: it.zone ?? zoneOfPlace(city, it.name, lang) })) })),
+    // "Every week": one more row, Monday.
+    todayItems: [HOTEL_MONDAY_ROW[lang], ...copy.todayItems],
     // Only the four experience titles travel (the cards are in experiences.ts); nothing of the Insider copy does.
     experiences: copy.experiences
       .filter((e) => (HOTEL_EXPERIENCE_IDS as string[]).includes(e.id))
@@ -77,7 +110,7 @@ function sanitizeCopy(copy: CityCopy): CityCopy {
 }
 
 export function toHotelCity(city: City): City {
-  return { ...city, copy: { es: sanitizeCopy(city.copy.es), en: sanitizeCopy(city.copy.en) } }
+  return { ...city, copy: { es: sanitizeCopy(city.copy.es, city, 'es'), en: sanitizeCopy(city.copy.en, city, 'en') } }
 }
 
 /** The Livin partner layer without anything that belongs to the Livin property. */

@@ -36,11 +36,15 @@ import {
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
-import { hotelUpdatedLine, type HotelMode, type HotelOutboundId } from '../../../content/guia/hotel/config'
+import {
+  HOTEL_FOOTER_LINE, HOTEL_JUMP, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
+} from '../../../content/guia/hotel/config'
+import { distanceLabel } from '../../../content/guia/hotel/distance'
+import { THEME_LABEL, placeThemes } from '../../../content/guia/hotel/themes'
 import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
 import { HOTEL_TIME_TITLE, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
 import { HOTEL_HOST_NAME, hotelReword, zonesHeading } from '../../../content/guia/hotel/rewords'
-import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG } from '../../../content/guia/hotel/zones'
+import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG, ZONE_TAB_ORDER } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
@@ -394,6 +398,9 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const [stay, setStay] = useState<Stay>({})
   const [browseNb, setBrowseNb] = useState<string>(hotel ? ZONE_NEIGHBORHOOD[hotel.zone] : (partner.defaultNeighborhood ?? HOME_TAB_ID))
   const [hotelCode, setHotelCode] = useState<string | null>(null)
+  // Hotel edition: which plan of "How much time do you have?" is open (the short one by default, where it exists).
+  const [plan, setPlan] = useState<'quick' | 'full'>(hotel && quickPlanFor(hotel.zone) ? 'quick' : 'full')
+  const seenSections = useRef(new Set<string>())
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
@@ -475,7 +482,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // ── Hotel edition: section_open + outbound_click per hotel (only when the URL carries ?h=) ──────────────
   useEffect(() => {
     if (!hotel || !hotelCode) return
-    const seen = new Set<string>()
+    const seen = seenSections.current // once per section per page view, even when a plan swap re-observes
     const obs = new IntersectionObserver((entries) => {
       for (const e of entries) {
         const id = (e.target as HTMLElement).dataset.hotelSection
@@ -487,7 +494,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     }, { threshold: 0.3 })
     document.querySelectorAll('[data-hotel-section]').forEach((el) => obs.observe(el))
     return () => obs.disconnect()
-  }, [hotel, hotelCode])
+  }, [hotel, hotelCode, plan])
 
   useEffect(() => {
     if (!hotel || !hotelCode) return
@@ -562,7 +569,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // Tab order + lookup = partner's own "Your house" pick list, followed by
   // the zones shared across all partners in this city.
   // Hotel edition: no "Your house" tab (that is the Livin property's address), only the city zones.
-  const nbOrder = hotel ? city.neighborhoodOrder : [HOME_TAB_ID, ...city.neighborhoodOrder]
+  const nbOrder = hotel ? ZONE_TAB_ORDER[hotel.zone].filter((n) => city.neighborhoods[n]) : [HOME_TAB_ID, ...city.neighborhoodOrder]
   const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const ownTours = partner.ownTours?.[lang] ?? []
@@ -661,6 +668,17 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   )
 
   // Hotel edition helpers.
+  // Theme marks (Art / Food and drink / Hidden gem) and, in a mood panel, the zone name: small labels in the guide's own style.
+  const themeMarks = (name: string, zoneName?: string) => {
+    const marks = placeThemes(name)
+    if (marks.length === 0 && !zoneName) return null
+    return (
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', marginTop: 6 }}>
+        {marks.map((m) => <span key={m} className={styles.eyebrowMono} style={{ color: 'var(--coral)' }}>{THEME_LABEL[m][lang]}</span>)}
+        {zoneName && <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{zoneName}</span>}
+      </div>
+    )
+  }
   const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
   const hotelShareHref = hotel
     ? `https://wa.me/?text=${encodeURIComponent(`${lang === 'es' ? `Mi guía de barrio de ${ZONE_LABEL[hotel.zone]}, de Lagomplan:` : `My ${ZONE_LABEL[hotel.zone]} neighborhood guide, from Lagomplan:`} ${typeof window === 'undefined' ? '' : `${window.location.origin}/guia/cdmx/${ZONE_SLUG[hotel.zone]}${hotelCode ? `?h=${hotelCode}` : ''}`}`.trim())}`
@@ -768,6 +786,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                         {it.tag && <span className={styles.eyebrowMono} style={{ color: 'var(--coral)' }}>{it.tag}</span>}
                         <div className={styles.moodItemName}>{it.name}</div>
                         <div className={styles.moodItemNote}>{it.note}</div>
+                        {hotel && themeMarks(it.name, it.zone)}
                       </div>
                     ))}
                   </div>
@@ -819,7 +838,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                       aria-selected={name === browseNb}
                       className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
                       onClick={() => setBrowseNb(name)}
-                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
+                    >
+                      {getNeighborhood(name).tabLabel?.[lang] ?? name}
+                      {hotel && distanceLabel(hotel.zone, getNeighborhood(name).orientation, lang) && (
+                        <span className={styles.eyebrowMono} style={{ marginLeft: 8 }}>{distanceLabel(hotel.zone, getNeighborhood(name).orientation, lang)}</span>
+                      )}
+                    </button>
                   ))}
                 </div>
                 <a
@@ -851,6 +875,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                         <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
                       </div>
                       <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
+                      {hotel && themeMarks(spot.name)}
                     </div>
                   </div>
                 ))}
@@ -936,22 +961,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
             {t.continueCta}
           </a>
-          {hotel && (
-            <>
-              <div className={styles.nlRule} />
-              <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{HOTEL_WHERE_NEXT[lang]}</span>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 22px', justifyContent: 'center', marginTop: 14 }}>
-                {city.destinations.map((dest) => (
-                  <a
-                    className={styles.link}
-                    href={dest.url[lang]}
-                    key={dest.name}
-                    onClick={() => track('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
-                  >{dest.name}</a>
-                ))}
-              </div>
-            </>
-          )}
           {!partner.hideNewsletter && !hotel && (
             <>
               <div className={styles.nlRule} />
@@ -990,38 +999,97 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </section>
   ) : null
 
-  // Hotel edition: "How much time do you have?" = the short plan (where written) + the 48 hours itinerary, unchanged.
+  // Hotel edition: "How much time do you have?" is a choice. With a short plan (Condesa) two buttons pick which plan is
+  // shown; without one (Roma Norte, Polanco) the 48 hours plan shows directly, no buttons.
   const quick = hotel ? quickPlanFor(hotel.zone) : null
+  const showQuick = !!quick && plan === 'quick'
   const timeSection = hotel ? (
     <div {...hs('time')}>
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: quick ? 88 : 40 }}>
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: showQuick ? 88 : 40 }}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
-            <SectionHead eyebrow={quick ? quick.title[lang] : itin.eyebrow} title={HOTEL_TIME_TITLE[lang]} />
-            {quick && (
-              <div className={styles.secBody}>
-                <div className={styles.spotList}>
-                  {quick.stops.map((stop) => (
-                    <div className={styles.spotRow} key={stop.name}>
-                      <div className={styles.spotIcon}><Icon name={stop.icon} size={16} color={PINE} /></div>
-                      <div>
-                        <div className={styles.spotHead}><h5 className={styles.h5}>{stop.name}</h5><span className={styles.spotDist}>{stop.where}</span></div>
-                        <p className={styles.spotNote}>{stop.note[lang]}</p>
-                        <p className={styles.spotNote}>
-                          <a className={styles.link} href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+            <SectionHead eyebrow={HOTEL_PLANS_EYEBROW[lang]} title={HOTEL_TIME_TITLE[lang]} />
+            <div className={styles.secBody}>
+              {quick && (
+                <div className={styles.nbControls}>
+                  <div className={styles.tabRow} role="tablist" aria-label={HOTEL_TIME_TITLE[lang]}>
+                    {([['quick', HOTEL_PLAN_BUTTONS.quick], ['full', HOTEL_PLAN_BUTTONS.full]] as const).map(([id, label]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        role="tab"
+                        aria-selected={plan === id}
+                        className={`${styles.tab} ${plan === id ? styles.tabActive : ''}`}
+                        onClick={() => setPlan(id)}
+                      >{label[lang]}</button>
+                    ))}
+                  </div>
                 </div>
-                <p className={styles.nbTagline} style={{ marginTop: 18 }}>{quick.line[lang]}</p>
-              </div>
-            )}
+              )}
+              {showQuick && quick && (
+                <>
+                  <div className={styles.spotList}>
+                    {quick.stops.map((stop) => (
+                      <div className={styles.spotRow} key={stop.name}>
+                        <div className={styles.spotIcon}><Icon name={stop.icon} size={16} color={PINE} /></div>
+                        <div>
+                          <div className={styles.spotHead}><h5 className={styles.h5}>{stop.name}</h5><span className={styles.spotDist}>{stop.where}</span></div>
+                          <p className={styles.spotNote}>{stop.note[lang]}</p>
+                          {themeMarks(stop.name)}
+                          <p className={styles.spotNote}>
+                            <a className={styles.link} href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <p className={styles.nbTagline} style={{ marginTop: 18 }}>{quick.line[lang]}</p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </section>
-      {renderItinerary()}
+      {!showQuick && renderItinerary()}
     </div>
+  ) : null
+
+  // Hotel edition: jump menu under the banner (chips) and the offset anchors it scrolls to (the header is sticky).
+  const anchor = (id: string) => <span id={id} aria-hidden="true" style={{ display: 'block', height: 0, position: 'relative', top: -96 }} />
+  const jumpMenu = hotel ? (
+    <div className={styles.container} style={{ paddingTop: 24, paddingBottom: 4 }}>
+      <nav aria-label={lang === 'es' ? 'Ir a' : 'Jump to'}>
+        <div className={styles.tabRow}>
+          {HOTEL_JUMP.map((j) => (
+            <a key={j.id} href={`#${j.id}`} className={styles.tab} style={{ display: 'inline-block', textDecoration: 'none' }}>{j.label[lang]}</a>
+          ))}
+        </div>
+      </nav>
+    </div>
+  ) : null
+
+  // Hotel edition: the destination guide cards (as in the old "Lagomplan goes further" section), right after the invitation.
+  const destinationsSection = hotel ? (
+    <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }} {...hs('discover')}>
+      <div className={styles.containerWide}>
+        <span className={styles.eyebrow}>{HOTEL_WHERE_NEXT[lang]}</span>
+        <div className={styles.discoverGrid}>
+          {city.destinations.map((dest) => (
+            <a
+              className={styles.discoverCard}
+              href={dest.url[lang]}
+              key={dest.name}
+              onClick={() => track('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={styles.discoverImg} src={dest.photoUrl} alt={dest.name} />
+              <div className={styles.discoverOverlay} />
+              <span className={styles.discoverLabel}>{dest.name}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
   ) : null
 
   return (
@@ -1101,13 +1169,19 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         <>
           {/* Hotel order: welcome, zones, how much time, mood, weekly rhythm, experiences, good to know, one Lagomplan block. */}
           {heroHotel}
+          {jumpMenu}
+          {anchor('zonas')}
           {renderZones()}
+          {anchor('planes')}
           {timeSection}
           {moodOriginal}
           {renderToday()}
+          {anchor('experiencias')}
           {renderExperiences('')}
+          {anchor('bueno-saber')}
           {renderPractical()}
           {renderPlanner()}
+          {destinationsSection}
         </>
       ) : (
         <>
@@ -1299,6 +1373,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       <div className={styles.footer}>
+        {hotel && <span className={styles.footerText} style={{ display: 'block', marginBottom: 6 }}>{HOTEL_FOOTER_LINE[lang]}</span>}
         <span className={styles.footerText}>{t.footer}</span>
       </div>
 
