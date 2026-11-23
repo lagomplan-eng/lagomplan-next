@@ -10,10 +10,13 @@
 // Items that were once held for confirmation (airport, earthquakes, cash and ATMs) now render like in the Livin guides.
 // Pure, no React.
 
-import type { ArrivalItem, City, CityCopy, InlineLink, Lang, Mood, MoodItem, Partner } from '../types'
+import type { ArrivalItem, City, CityCopy, InlineLink, Lang, Mood, MoodItem, Neighborhood, Partner, Spot } from '../types'
 import type { FaqItemKey } from '../faq/types'
 import { getGuide } from '..'
-import { HOTEL_FREE_EDITION, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_SHOP_MOOD, type HotelMode } from './config'
+import {
+  HOTEL_EXTRA_ZONES_ON, HOTEL_FREE_EDITION, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_ORIENTATION, HOTEL_PICK_ZONES, HOTEL_SHOP_MOOD, type HotelMode,
+} from './config'
+import { EXTRA_ZONES, type ExtraPlace, type ExtraZone } from './extra-zones'
 import { HOTEL_EXPERIENCE_IDS } from './experiences'
 import { ZONE_NEIGHBORHOOD, type HotelZone } from './zones'
 
@@ -78,14 +81,16 @@ function shopMood(city: City, copy: CityCopy, lang: Lang): Mood {
   return { id: 'shop', icon: 'basket', label: HOTEL_SHOP_MOOD[lang].label, title: HOTEL_SHOP_MOOD[lang].title, items: picks }
 }
 
-function sanitizeCopy(copy: CityCopy, city: City, lang: Lang): CityCopy {
+function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>): CityCopy {
   const moods = copy.moods
     .filter((m) => m.id !== 'short')
+    // A place that has a card in a hotel-only zone leaves the mood panel it was in, so it appears once.
+    .map((m) => ({ ...m, items: m.items.filter((it) => !moved.has(it.name)) }))
     .map((m) => m.id !== 'hungry' ? m : {
       ...m,
       items: [
         ...m.items,
-        ...HOTEL_HUNGRY_PICKS.map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
+        ...HOTEL_HUNGRY_PICKS.filter((n) => !moved.has(n)).map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
           .map((c) => ({ name: c.name, note: c.note, tag: c.tag })),
       ],
     })
@@ -95,7 +100,7 @@ function sanitizeCopy(copy: CityCopy, city: City, lang: Lang): CityCopy {
     arrivalItems: copy.arrivalItems.filter((i) => !HOTEL_HIDDEN_ARRIVAL_IDS.includes(i.id ?? '')).map(stripInsider),
     // Mood order is the hotel's; the zone name goes under a pick only where the repo holds the place's zone.
     moods: HOTEL_MOOD_ORDER.map((id) => withShop.find((m) => m.id === id)).filter((m): m is Mood => !!m)
-      .map((m) => ({ ...m, items: m.items.map((it) => ({ ...it, zone: it.zone ?? zoneOfPlace(city, it.name, lang) })) })),
+      .map((m) => ({ ...m, items: m.items.map((it) => ({ ...it, zone: HOTEL_PICK_ZONES[it.name] ?? it.zone ?? zoneOfPlace(city, it.name, lang) })) })),
     // "Every week": one more row, Monday.
     todayItems: [HOTEL_MONDAY_ROW[lang], ...copy.todayItems],
     // Only the four experience titles travel (the cards are in experiences.ts); nothing of the Insider copy does.
@@ -109,8 +114,42 @@ function sanitizeCopy(copy: CityCopy, city: City, lang: Lang): CityCopy {
   }
 }
 
-export function toHotelCity(city: City): City {
-  return { ...city, copy: { es: sanitizeCopy(city.copy.es, city, 'es'), en: sanitizeCopy(city.copy.en, city, 'en') } }
+/** The text of a place that already exists in the guide, to reuse word for word. */
+function existingNote(copy: CityCopy, name: string): string {
+  const fromMood = copy.moods.flatMap((m) => m.items).find((i) => i.name === name)
+  return (fromMood ?? copy.foodCollections.find((c) => c.name === name))?.note ?? ''
+}
+
+function extraNeighborhood(z: ExtraZone, city: City, hotelZone: HotelZone): Neighborhood {
+  const spots = (lang: Lang): Spot[] => z.places.map((p: ExtraPlace) => ({
+    icon: p.icon,
+    name: p.name[lang],
+    distance: p.where[lang],
+    note: p.reuse ? existingNote(city.copy[lang], p.reuse) : (p.note?.[lang] ?? ''),
+  }))
+  return {
+    name: z.key,
+    mapUrl: z.mapUrl,
+    tagline: z.tagline,
+    orientation: z.orientation[hotelZone] ?? z.orientation.default,
+    spots: { es: spots('es'), en: spots('en') },
+  }
+}
+
+/** Zones the hotel edition has on top of the city layer, and the places that move into them (switches in config.ts). */
+function enabledExtras(): ExtraZone[] {
+  return EXTRA_ZONES.filter((z) => HOTEL_EXTRA_ZONES_ON[z.key])
+}
+
+export function toHotelCity(city: City, hotelZone: HotelZone = 'condesa'): City {
+  const extras = enabledExtras()
+  const moved = new Set(extras.flatMap((z) => z.places.filter((p) => p.reuse).map((p) => p.reuse as string)))
+  const neighborhoods: Record<string, Neighborhood> = { ...city.neighborhoods }
+  // The city layer's distance sentences are written from Condesa's point of view; the hotel edition replaces them per hotel zone.
+  for (const [k, line] of Object.entries(HOTEL_ORIENTATION[hotelZone])) if (neighborhoods[k]) neighborhoods[k] = { ...neighborhoods[k], orientation: line }
+  for (const z of extras) neighborhoods[z.key] = extraNeighborhood(z, city, hotelZone)
+  const withZones: City = { ...city, neighborhoods, neighborhoodOrder: [...city.neighborhoodOrder, ...extras.map((z) => z.key)] }
+  return { ...withZones, copy: { es: sanitizeCopy(city.copy.es, withZones, 'es', moved), en: sanitizeCopy(city.copy.en, withZones, 'en', moved) } }
 }
 
 /** The Livin partner layer without anything that belongs to the Livin property. */
@@ -142,7 +181,7 @@ export function buildHotelGuideProps(zone: HotelZone): { partner: Partner; city:
   if (!guide) return null
   return {
     partner: toHotelPartner(guide.partner, guide.city, zone),
-    city: toHotelCity(guide.city),
+    city: toHotelCity(guide.city, zone),
     hotel: { zone, edition: HOTEL_FREE_EDITION, hiddenFaqKeys: HOTEL_HIDDEN_FAQ_KEYS },
   }
 }

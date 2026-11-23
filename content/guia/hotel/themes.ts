@@ -42,6 +42,11 @@ export const PLACE_THEME: Record<string, 'art' | 'food' | null> = {
   'Bazar Sábado': null,
   'Departamento': 'food', 'Bar Federalista': 'food',
   'Papalote Museo del Niño': 'art', 'Chapultepec Zoo': null,
+  // San Miguel Chapultepec (Kurimanzutto is above)
+  'Mesa': 'food', 'Madereros': 'food', 'Bosque de Chapultepec': null, 'Casa Gilardi': 'art', 'El Mirador de Chapultepec': 'food',
+  // Coyoacán (Café Avellaneda is above)
+  'Mercado de Coyoacán': 'food', 'Jardín Centenario and Plaza Hidalgo': null, 'Jardín Centenario y Plaza Hidalgo': null,
+  'Museo Frida Kahlo (Casa Azul)': 'art', 'Museo Casa de León Trotsky': 'art', 'La Coyoacana': 'food',
   // How much time: only a few hours (Condesa)
   'Museo de Arte Moderno': 'art', 'Niddo': 'food', 'Maleza': 'food',
 }

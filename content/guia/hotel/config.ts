@@ -58,6 +58,58 @@ export const HOTEL_FREE_EDITION: HotelEdition = {
   planner: { utmCampaign: 'hotel_free' },
 }
 
+/**
+ * The two zones only the hotel edition has. Turn one off (false) before launch if its content is not verified:
+ * its tab disappears, the "N zones" title drops with it, and the place that moved out of a mood panel goes back.
+ */
+export const HOTEL_EXTRA_ZONES_ON: Record<'San Miguel Chapultepec' | 'Coyoacán', boolean> = {
+  'San Miguel Chapultepec': true,
+  'Coyoacán': true,
+}
+
+/** These two zones link to the owner's own Google Maps lists, so their map card does not state a number of places. */
+export const HOTEL_MAP_CARD_NO_COUNT: Record<Lang, string> = { en: 'See the places on the map', es: 'Ver los lugares en el mapa' }
+
+/** Distance line of the two closest zones in the hotel edition (Roma Norte and Condesa tabs, for a Condesa or Roma Norte hotel). */
+export const HOTEL_CLOSE_ZONES_LINE: Record<Lang, string> = {
+  en: 'One of your closest zones; most of these are a 10-minute walk or less.',
+  es: 'Una de tus zonas más cercanas; casi todo queda a 10 minutos a pie o menos.',
+}
+
+/**
+ * Distance sentences that replace the city layer's (which are written from Condesa's point of view), per hotel zone and
+ * tab. Zones not listed keep the sentence they already have. The two hotel-only zones write theirs in extra-zones.ts.
+ */
+export const HOTEL_ORIENTATION: Record<'condesa' | 'roma' | 'polanco', Record<string, Record<Lang, string>>> = {
+  condesa: { 'Roma Norte': HOTEL_CLOSE_ZONES_LINE, 'Condesa': HOTEL_CLOSE_ZONES_LINE },
+  roma: { 'Roma Norte': HOTEL_CLOSE_ZONES_LINE, 'Condesa': HOTEL_CLOSE_ZONES_LINE },
+  polanco: {
+    'Polanco': { en: 'Your own neighbourhood; most of these are a short walk.', es: 'Tu propia zona; casi todo queda a una caminata corta.' },
+    'Condesa': { en: 'A short ride south; pair it with Roma Norte.', es: 'A un trayecto corto al sur; combínala con la Roma Norte.' },
+    'Roma Norte': { en: 'A short ride; best combined with Condesa in one outing.', es: 'A un trayecto corto; lo mejor es combinarla con la Condesa en una salida.' },
+    'Centro': { en: 'The historic core; plan half a day.', es: 'El centro histórico; planea medio día.' },
+  },
+}
+
+/** Zone name under a mood pick, from the owner's list. Places not listed (Masala y Maíz, Bar Federalista, Casa Franca) show none. */
+export const HOTEL_PICK_ZONES: Record<string, string> = {
+  'Lalo!': 'Roma Norte',
+  'Taquería Orinoco': 'Roma Norte',
+  'El Vilsito': 'Narvarte',
+  'Quintonil': 'Polanco',
+  'Café Nin': 'Juárez',
+  'Nevería Roxy': 'Condesa',
+  'Café Avellaneda': 'Coyoacán',
+  'Museo Tamayo': 'Chapultepec',
+  'Papalote Museo del Niño': 'Chapultepec',
+  'Chapultepec Zoo': 'Chapultepec',
+  'Casa Luis Barragán': 'Tacubaya',
+  'Kurimanzutto': 'San Miguel Chapultepec',
+  'Departamento': 'Roma Norte',
+  'Foro Shakespeare': 'Condesa',
+  'Bósforo': 'Centro',
+}
+
 /** Jump menu under the banner (existing chip style). */
 export const HOTEL_JUMP: { id: string; label: Record<Lang, string> }[] = [
   { id: 'zonas', label: { en: 'Near me', es: 'Cerca de mí' } },

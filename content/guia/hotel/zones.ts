@@ -39,10 +39,11 @@ export function zoneFromSlug(slug: string): HotelZone | null {
 
 /**
  * Zone tabs for each hotel zone: the hotel's own zone first (and open), then the others from nearest to farthest.
- * Keys are the neighborhood names of the city layer (content/guia/cities/cdmx.ts).
+ * Keys are the neighborhood names of the city layer (content/guia/cities/cdmx.ts) or of the hotel-only zones
+ * (content/guia/hotel/extra-zones.ts). A zone switched off in config.ts drops out of the tabs.
  */
 export const ZONE_TAB_ORDER: Record<HotelZone, string[]> = {
-  condesa: ['Condesa', 'Roma Norte', 'Polanco', 'Centro'],
-  roma: ['Roma Norte', 'Condesa', 'Centro', 'Polanco'],
-  polanco: ['Polanco', 'Condesa', 'Roma Norte', 'Centro'],
+  condesa: ['Condesa', 'Roma Norte', 'San Miguel Chapultepec', 'Polanco', 'Centro', 'Coyoacán'],
+  roma: ['Roma Norte', 'Condesa', 'San Miguel Chapultepec', 'Centro', 'Polanco', 'Coyoacán'],
+  polanco: ['Polanco', 'San Miguel Chapultepec', 'Condesa', 'Roma Norte', 'Centro', 'Coyoacán'],
 }

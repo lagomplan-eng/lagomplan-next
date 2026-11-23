@@ -37,9 +37,10 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import {
-  HOTEL_FOOTER_LINE, HOTEL_JUMP, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
+  HOTEL_FOOTER_LINE, HOTEL_JUMP, HOTEL_MAP_CARD_NO_COUNT, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
 } from '../../../content/guia/hotel/config'
 import { distanceLabel } from '../../../content/guia/hotel/distance'
+import { EXTRA_ZONES } from '../../../content/guia/hotel/extra-zones'
 import { THEME_LABEL, placeThemes } from '../../../content/guia/hotel/themes'
 import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
 import { HOTEL_TIME_TITLE, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
@@ -87,6 +88,8 @@ export function Icon({ name, size = 18, color = 'currentColor' }: { name: IconKe
 }
 
 const PINE = '#0F3A33'
+/** Hotel edition: the zones that link to the owner's own Google Maps lists (no "N places" in the card). */
+const HOTEL_NO_COUNT_ZONES: string[] = EXTRA_ZONES.map((z) => z.key)
 const CREAM = '#FFF9F3'
 
 /** Synthetic key for the partner-specific "Your house" tab — kept out of
@@ -840,8 +843,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                       onClick={() => setBrowseNb(name)}
                     >
                       {getNeighborhood(name).tabLabel?.[lang] ?? name}
-                      {hotel && distanceLabel(hotel.zone, getNeighborhood(name).orientation, lang) && (
-                        <span className={styles.eyebrowMono} style={{ marginLeft: 8 }}>{distanceLabel(hotel.zone, getNeighborhood(name).orientation, lang)}</span>
+                      {hotel && distanceLabel(hotel.zone, name, lang) && (
+                        <span className={styles.eyebrowMono} style={{ marginLeft: 8 }}>{distanceLabel(hotel.zone, name, lang)}</span>
                       )}
                     </button>
                   ))}
@@ -859,7 +862,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
                   </span>
                   <span className={styles.nbMapText}>
-                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
+                    <span className={styles.nbMapPrimary}>{hotel && HOTEL_NO_COUNT_ZONES.includes(browseNb) ? HOTEL_MAP_CARD_NO_COUNT[lang] : t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
                     <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
                   </span>
                   <span className={styles.nbMapArrow} aria-hidden>→</span>

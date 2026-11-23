@@ -17,7 +17,9 @@ import { HOTEL_PARTNER_SLUG, buildHotelGuideProps } from '../content/guia/hotel/
 import { HOTEL_REWORDS, hotelReword, zonesHeading } from '../content/guia/hotel/rewords'
 import { HOTEL_ZONES, ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_TAB_ORDER, type HotelZone } from '../content/guia/hotel/zones'
 import { HIDDEN_GEMS, PLACE_THEME, THEME_LABEL, placeThemes } from '../content/guia/hotel/themes'
-import { DISTANCE_LABELS_FOR } from '../content/guia/hotel/distance'
+import { HOW_FAR, HOW_FAR_LABEL } from '../content/guia/hotel/distance'
+import { EXTRA_ZONES, VERIFY } from '../content/guia/hotel/extra-zones'
+import { HOTEL_EXTRA_ZONES_ON, HOTEL_ORIENTATION, HOTEL_PICK_ZONES } from '../content/guia/hotel/config'
 import { HOTEL_JUMP, HOTEL_MOOD_ORDER } from '../content/guia/hotel/config'
 import { GYG_PARTNER_ID, isGygUrl, isGygTourUrl } from '../lib/affiliate/gyg'
 import { CHEF_WHATSAPP_NUMBER } from '../lib/guia/links'
@@ -32,13 +34,14 @@ const headings = (html: string) => [...html.matchAll(/<h[12][^>]*>([^<]*)</g)].m
 const zonesPart = (html: string) => { const a = html.indexOf('data-hotel-section="neighborhoods"'); const b = html.indexOf('data-hotel-section="time"'); return a >= 0 && b > a ? html.slice(a, b) : html }
 const tabs = (html: string) => [...zonesPart(html).matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => ({ selected: m[1] === 'true', label: m[2] }))
 const visibleText = (html: string) => html.replace(/<[^>]+>/g, '\n').replace(/&#x27;/g, "'").replace(/&amp;/g, '&').split('\n').map((x) => x.trim()).filter(Boolean).join('\n')
+const HEADING_6 = 'Six zones, six ways to experience the city'
 const HEADING_4 = 'Four zones, four ways to experience the city'
 const HEADING_5 = 'Five zones, five ways to experience the city'
 const cardTitles = (html: string) => { const a = html.indexOf('id="practico"'); return [...html.slice(a).matchAll(/<h4[^>]*>([^<]*)<\/h4>/g)].map((m) => m[1].replace(/&#x27;/g, "'").replace(/&amp;/g, '&')) }
 const NOT_FOR_A_HOTEL = ['Laundry and dry cleaning', 'Restaurants that take groups', 'Catering and delivery', 'Coming back late']
 const LIVIN_PROPERTY = ['Chefs at home', 'Massages']
 // Condesa opens on its short plan, so the 48 hours heading is not on screen until that button is chosen.
-const orderEn = (zone: HotelZone) => ['Your guide to {zone}', HEADING_4, 'How much time do you have?', ...(zone === 'condesa' ? [] : ['48 hours']), 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
+const orderEn = (zone: HotelZone) => ['Your guide to {zone}', HEADING_6, 'How much time do you have?', ...(zone === 'condesa' ? [] : ['48 hours']), 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
 const tabsWithLabels = (html: string) => [...zonesPart(html).matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)(?:<span[^>]*>([^<]*)<\/span>)?/g)].map((m) => ({ selected: m[1] === 'true', label: m[2], how: m[3] ?? null }))
 // Everything that identifies the Livin property: the three "Your house" addresses and map links, plus the spots that
 // only exist in a "Your house" list (a venue the city layer also names, such as Panadería Rosetta, is not Livin's).
@@ -76,24 +79,42 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(text).toContain('Send this guide to my phone')
     expect(html).not.toContain('Everything you need for your stay')
   })
-  test('the zones section: own zone first and open, the others nearest to farthest; title says four; no "Your house"', () => {
+  test('the zones section: own zone first and open, the others nearest to farthest; title says six; no "Your house"', () => {
     const t = tabs(html)
     expect(t.map((x) => x.label)).toEqual(ZONE_TAB_ORDER[zone])
     expect(t[0].label).toBe(ZONE_NEIGHBORHOOD[zone])
     expect(t.filter((x) => x.selected).map((x) => x.label)).toEqual([ZONE_NEIGHBORHOOD[zone]])
-    expect(headings(html)).toContain(HEADING_4)
+    expect(headings(html)).toContain(HEADING_6)
     expect(html).not.toMatch(/Your house|Tu casa|Your area|Tu zona/)
   })
-  test('how far labels on the tabs, only where the sentences already in the guide make them clear', () => {
-    const t = tabsWithLabels(html)
-    const got = Object.fromEntries(t.map((x) => [x.label, x.how]))
-    const want: Record<HotelZone, Record<string, string | null>> = {
-      condesa: { Condesa: 'On foot', 'Roma Norte': 'On foot', Polanco: 'Short ride', Centro: 'Half a day' },
-      roma: { 'Roma Norte': 'On foot', Condesa: 'On foot', Centro: 'Half a day', Polanco: 'Short ride' },
-      polanco: { Polanco: null, Condesa: null, 'Roma Norte': null, Centro: null },
+  test('how far labels on the tabs, from the owner\'s table (getting there, not how long to stay)', () => {
+    const got = Object.fromEntries(tabsWithLabels(html).map((x) => [x.label, x.how]))
+    const L = HOW_FAR_LABEL
+    const want: Record<HotelZone, Record<string, string>> = {
+      condesa: { Condesa: L.walk.en, 'Roma Norte': L.walk.en, 'San Miguel Chapultepec': L.walk.en, Polanco: L.ride.en, Centro: L.ride.en, Coyoacán: L.day.en },
+      roma: { 'Roma Norte': L.walk.en, Condesa: L.walk.en, 'San Miguel Chapultepec': L.ride.en, Centro: L.ride.en, Polanco: L.ride.en, Coyoacán: L.day.en },
+      polanco: { Polanco: L.walk.en, 'San Miguel Chapultepec': L.ride.en, Condesa: L.ride.en, 'Roma Norte': L.ride.en, Centro: L.day.en, Coyoacán: L.day.en },
     }
     expect(got).toEqual(want[zone])
-    expect(DISTANCE_LABELS_FOR.includes(zone)).toBe(zone !== 'polanco')
+    expect(Object.keys(HOW_FAR[zone]).sort()).toEqual([...ZONE_TAB_ORDER[zone]].sort())
+  })
+  test('the distance sentence of each tab, from the hotel zone\'s point of view', () => {
+    const nbs = buildHotelGuideProps(zone)!.city.neighborhoods
+    const says = (k: string) => nbs[k].orientation.en
+    if (zone === 'polanco') {
+      expect(says('Polanco')).toBe('Your own neighbourhood; most of these are a short walk.')
+      expect(says('Condesa')).toBe('A short ride south; pair it with Roma Norte.')
+      expect(says('Roma Norte')).toBe('A short ride; best combined with Condesa in one outing.')
+      expect(says('Centro')).toBe('The historic core; plan half a day.')
+      expect(says('San Miguel Chapultepec')).toBe('A short ride away; pair it with Chapultepec.')
+    } else {
+      expect(says('Roma Norte')).toBe('One of your closest zones; most of these are a 10-minute walk or less.')
+      expect(says('Condesa')).toBe('One of your closest zones; most of these are a 10-minute walk or less.')
+      expect(says('Centro')).toContain('plan half a day') // unchanged from the city layer
+      expect(says('San Miguel Chapultepec')).toBe(zone === 'condesa' ? 'Next door to Condesa; most of it is a short walk.' : 'A short ride away; pair it with Chapultepec.')
+    }
+    expect(says('Coyoacán')).toBe('A long ride south; plan half a day.')
+    expect(JSON.stringify(nbs)).not.toContain('two closest zones')
   })
   test('jump menu under the banner: four chip links to sections that exist', () => {
     const links = [...html.matchAll(/<a href="#([a-z-]+)" class="tab"[^>]*>([^<]*)</g)].map((m) => [m[1], m[2]])
@@ -258,8 +279,9 @@ describe('"I\'m hungry" and the moods', () => {
     const moods = city.copy[lang].moods
     expect(moods.map((m) => m.id)).not.toContain('short')
     expect(moods).toHaveLength(g.city.copy[lang].moods.length) // one removed (short), one added (shop)
+    expect(moods.find((m) => m.id === 'culture')!.items.map((i) => i.name)).not.toContain('Kurimanzutto') // its card is in San Miguel Chapultepec
     const hungry = moods.find((m) => m.id === 'hungry')!
-    const picks = ['El Vilsito', 'Café Avellaneda', 'Quintonil', 'Café Nin', 'Nevería Roxy']
+    const picks = ['El Vilsito', 'Quintonil', 'Café Nin', 'Nevería Roxy'] // Café Avellaneda has its own card in Coyoacán now
     const added = hungry.items.slice(g.city.copy[lang].moods.find((m) => m.id === 'hungry')!.items.length)
     expect(added.map((i) => i.name)).toEqual(picks)
     for (const i of added) {
@@ -267,7 +289,7 @@ describe('"I\'m hungry" and the moods', () => {
       expect({ note: i.note, tag: i.tag }).toEqual({ note: src.note, tag: src.tag })
     }
     const leftOut = g.city.copy[lang].foodCollections.map((c) => c.name).filter((n) => !picks.includes(n))
-    expect(leftOut).toEqual(['Panadería Rosetta', 'Licorería Limantour', 'El Turix']) // already elsewhere in the guide
+    expect(leftOut).toEqual(['Panadería Rosetta', 'Café Avellaneda', 'Licorería Limantour', 'El Turix']) // already elsewhere in the guide
   })
 })
 
@@ -322,24 +344,90 @@ describe('moods, theme marks and zone names', () => {
     expect(shop.items[3].note).toBe(bazar.body)
     expect(shop.items[3].zone).toBe('San Ángel')
   })
-  test('zone names under picks only where the repo holds the zone (a zone tab lists the place, or the title names it)', () => {
+  test('zone names under picks: the owner\'s list, plus the zone tabs that list a place; the rest blank', () => {
     const moods = buildHotelGuideProps('condesa')!.city.copy.en.moods
     const zones = Object.fromEntries(moods.flatMap((m) => m.items.map((i) => [i.name, i.zone ?? null])))
+    for (const [place, zone] of Object.entries(HOTEL_PICK_ZONES)) if (place in zones) expect(zones[place]).toBe(zone)
     expect(zones).toMatchObject({
+      'Lalo!': 'Roma Norte', 'Taquería Orinoco': 'Roma Norte', 'El Vilsito': 'Narvarte', 'Quintonil': 'Polanco', 'Café Nin': 'Juárez',
+      'Nevería Roxy': 'Condesa', 'Museo Tamayo': 'Chapultepec', 'Papalote Museo del Niño': 'Chapultepec', 'Chapultepec Zoo': 'Chapultepec',
+      'Casa Luis Barragán': 'Tacubaya', 'Departamento': 'Roma Norte', 'Foro Shakespeare': 'Condesa', 'Bósforo': 'Centro',
       'Proyecto Rufina': 'Condesa', 'Librería El Péndulo': 'Roma Norte', 'LAGO': 'Polanco', 'Bazar Sábado': 'San Ángel',
       'Parque México': 'Condesa', 'Licorería Limantour': 'Roma Norte',
     })
     const blank = Object.entries(zones).filter(([, z]) => z === null).map(([n]) => n).sort()
-    expect(blank).toEqual(['Bar Federalista', 'Bósforo', 'Café Avellaneda', 'Café Nin', 'Casa Franca', 'Casa Luis Barragán', 'Chapultepec Zoo', 'Departamento', 'El Vilsito', 'Foro Shakespeare', 'Kurimanzutto', 'Lalo!', 'Masala y Maíz', 'Museo Tamayo', 'Nevería Roxy', 'Papalote Museo del Niño', 'Quintonil', 'Taquería Orinoco'])
+    expect(blank).toEqual(['Bar Federalista', 'Casa Franca', 'Masala y Maíz'])
   })
   test('hidden gem is exactly the seven agreed places; every place on a card has a decision in themes.ts', () => {
     expect([...HIDDEN_GEMS].sort()).toEqual(['Bósforo', 'Café Nin', 'Casa Franca', 'Foro Shakespeare', 'Maleza', 'Mercado de San Juan', 'Proyecto Rufina'])
     const names = new Set<string>()
-    for (const nb of Object.values(g.city.neighborhoods)) nb.spots.en.forEach((s) => names.add(s.name))
+    for (const nb of Object.values(buildHotelGuideProps('condesa')!.city.neighborhoods)) nb.spots.en.forEach((s) => names.add(s.name))
     buildHotelGuideProps('condesa')!.city.copy.en.moods.forEach((m) => m.items.forEach((i) => names.add(i.name)))
     HOTEL_QUICK_PLAN.stops.forEach((s) => names.add(s.name))
     for (const n of names) expect(Object.keys(PLACE_THEME)).toContain(n)
     for (const n of HIDDEN_GEMS) expect(placeThemes(n)).toContain('gem')
     for (const n of names) if (!HIDDEN_GEMS.includes(n)) expect(placeThemes(n)).not.toContain('gem')
+  })
+})
+
+describe('the two hotel-only zones: San Miguel Chapultepec and Coyoacán', () => {
+  const nbs = (zone: HotelZone = 'condesa') => buildHotelGuideProps(zone)!.city.neighborhoods
+  test('map lists, taglines and the six places of each, in both languages', () => {
+    const smc = nbs()['San Miguel Chapultepec'], coy = nbs()['Coyoacán']
+    expect(smc.mapUrl).toBe('https://maps.app.goo.gl/ZFKMj2iBMeL7fxHK7')
+    expect(coy.mapUrl).toBe('https://maps.app.goo.gl/fHKhCCToYVaqFmrEA')
+    expect(smc.tagline.en).toBe('Galleries behind old walls, a Barragán house, the edge of the park.')
+    expect(smc.tagline.es).toBe('Galerías tras muros antiguos, una casa de Barragán, la orilla del bosque.')
+    expect(coy.tagline.es).toBe('Calles empedradas, dos plazas, la casa azul de Frida.')
+    expect(smc.spots.en.map((x) => [x.name, x.distance])).toEqual([
+      ['Mesa', 'Gobernador Protasio Tagle 132'], ['Madereros', 'General Antonio León 72'], ['Bosque de Chapultepec', 'Nearest entrance from the neighbourhood'],
+      ['Kurimanzutto', 'Gobernador Rafael Rebollar 94'], ['Casa Gilardi', 'General Antonio León 82'], ['El Mirador de Chapultepec', 'Avenida Chapultepec 606'],
+    ])
+    expect(coy.spots.en.map((x) => [x.name, x.distance])).toEqual([
+      ['Café Avellaneda', 'Higuera 40-A'], ['Mercado de Coyoacán', 'Ignacio Allende'], ['Jardín Centenario and Plaza Hidalgo', ''],
+      ['Museo Frida Kahlo (Casa Azul)', 'Londres 247'], ['Museo Casa de León Trotsky', 'Río Churubusco 410'], ['La Coyoacana', 'Higuera 14'],
+    ])
+    expect(coy.spots.es[2].name).toBe('Jardín Centenario y Plaza Hidalgo')
+  })
+  test('Kurimanzutto and Café Avellaneda reuse their existing text word for word, and appear once', () => {
+    const g = getGuide('livin_condesa')!
+    for (const lang of ['en', 'es'] as const) {
+      const kuri = g.city.copy[lang].moods.find((m) => m.id === 'culture')!.items.find((i) => i.name === 'Kurimanzutto')!.note
+      const avel = g.city.copy[lang].foodCollections.find((c) => c.name === 'Café Avellaneda')!.note
+      expect(nbs()['San Miguel Chapultepec'].spots[lang].find((x) => x.name === 'Kurimanzutto')!.note).toBe(kuri)
+      expect(nbs()['Coyoacán'].spots[lang].find((x) => x.name === 'Café Avellaneda')!.note).toBe(avel)
+      const copy = buildHotelGuideProps('condesa')!.city.copy[lang]
+      const inMoods = copy.moods.flatMap((m) => m.items).map((i) => i.name)
+      expect(inMoods).not.toContain('Kurimanzutto')
+      expect(inMoods).not.toContain('Café Avellaneda')
+    }
+  })
+  test('every new place is flagged "to verify: address, opening days and hours"; no hours, prices or Hidden gem marks', () => {
+    expect(VERIFY).toBe('to verify: address, opening days and hours')
+    const places = EXTRA_ZONES.flatMap((z) => z.places)
+    expect(places).toHaveLength(12)
+    for (const p of places) expect(p.verify).toBe(VERIFY)
+    for (const p of places) for (const n of [p.name.en, p.name.es]) expect(placeThemes(n)).not.toContain('gem')
+    expect(JSON.stringify(EXTRA_ZONES)).not.toMatch(/\d{1,2}[:.]\d{2}|\$|pesos|MXN|USD/i)
+  })
+  test('theme marks: Art for the galleries and museums, Food and drink for the restaurants, cafés and cantinas', () => {
+    for (const n of ['Kurimanzutto', 'Casa Gilardi', 'Museo Frida Kahlo (Casa Azul)', 'Museo Casa de León Trotsky']) expect(placeThemes(n)).toEqual(['art'])
+    for (const n of ['Mesa', 'Madereros', 'El Mirador de Chapultepec', 'Café Avellaneda', 'Mercado de Coyoacán', 'La Coyoacana']) expect(placeThemes(n)).toEqual(['food'])
+    for (const n of ['Bosque de Chapultepec', 'Jardín Centenario and Plaza Hidalgo']) expect(placeThemes(n)).toEqual([])
+  })
+  test('switches: a zone turned off drops its tab, the number in the title, and gives its moved place back', () => {
+    const was = { ...HOTEL_EXTRA_ZONES_ON }
+    try {
+      HOTEL_EXTRA_ZONES_ON['Coyoacán'] = false
+      let html = hotel('condesa')
+      expect(headings(html)).toContain('Five zones, five ways to experience the city')
+      expect(tabs(html).map((t) => t.label)).toEqual(['Condesa', 'Roma Norte', 'San Miguel Chapultepec', 'Polanco', 'Centro'])
+      expect(buildHotelGuideProps('condesa')!.city.copy.en.moods.find((m) => m.id === 'hungry')!.items.map((i) => i.name)).toContain('Café Avellaneda')
+      HOTEL_EXTRA_ZONES_ON['San Miguel Chapultepec'] = false
+      html = hotel('polanco')
+      expect(headings(html)).toContain(HEADING_4)
+      expect(tabs(html).map((t) => t.label)).toEqual(['Polanco', 'Condesa', 'Roma Norte', 'Centro'])
+      expect(buildHotelGuideProps('polanco')!.city.copy.en.moods.find((m) => m.id === 'culture')!.items.map((i) => i.name)).toContain('Kurimanzutto')
+    } finally { Object.assign(HOTEL_EXTRA_ZONES_ON, was) }
   })
 })

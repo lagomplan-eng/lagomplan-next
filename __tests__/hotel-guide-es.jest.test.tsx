@@ -48,7 +48,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
   test('welcome banner and the zones title', () => {
     const { view, text } = open()
     expect(view.container.querySelector('h1')!.textContent).toBe(`Tu guía de ${ZONE_LABEL[zone]}`)
-    expect(text).toContain('Cuatro zonas, cuatro maneras de vivir la ciudad')
+    expect(text).toContain('Seis zonas, seis maneras de vivir la ciudad')
     expect(text).toContain('Enviar esta guía a mi teléfono')
   })
   test('zone tabs: own zone first and open, the others in order, no "Tu casa"; how far labels in Spanish', () => {
@@ -58,10 +58,11 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(tabs.map((t) => t.firstChild?.textContent)).toEqual(ZONE_TAB_ORDER[zone])
     expect(tabs.filter((t) => t.getAttribute('aria-selected') === 'true').map((t) => t.firstChild?.textContent)).toEqual([ZONE_NEIGHBORHOOD[zone]])
     const how = Object.fromEntries(tabs.map((t) => [t.firstChild?.textContent, t.querySelector('span')?.textContent ?? null]))
+    const [W, R, D] = ['A pie', 'Trayecto corto', 'Medio día']
     const want = {
-      condesa: { Condesa: 'A pie', 'Roma Norte': 'A pie', Polanco: 'Trayecto corto', Centro: 'Medio día' },
-      roma: { 'Roma Norte': 'A pie', Condesa: 'A pie', Centro: 'Medio día', Polanco: 'Trayecto corto' },
-      polanco: { Polanco: null, Condesa: null, 'Roma Norte': null, Centro: null },
+      condesa: { Condesa: W, 'Roma Norte': W, 'San Miguel Chapultepec': W, Polanco: R, Centro: R, Coyoacán: D },
+      roma: { 'Roma Norte': W, Condesa: W, 'San Miguel Chapultepec': R, Centro: R, Polanco: R, Coyoacán: D },
+      polanco: { Polanco: W, 'San Miguel Chapultepec': R, Condesa: R, 'Roma Norte': R, Centro: D, Coyoacán: D },
     }[zone]
     expect(how).toEqual(want)
     expect(text).not.toMatch(/Tu casa/)
@@ -85,6 +86,27 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(view.container.textContent).toContain('48 horas')
     act(() => { fireEvent.click(tabs[0]) })
     expect(timeEl().textContent).toContain('Museo de Arte Moderno')
+  })
+  test('the two new zones: Spanish text, map card without a number, link to the owner\'s list', () => {
+    const { view } = open()
+    const zonesEl = () => view.container.querySelector('[data-hotel-section="neighborhoods"]')!
+    const tab = (name: string) => ([...zonesEl().querySelectorAll('[role="tab"]')] as HTMLElement[]).find((t) => t.firstChild?.textContent === name)!
+    act(() => { fireEvent.click(tab('San Miguel Chapultepec')) })
+    let card = zonesEl().querySelector('a[href^="https://maps.app.goo.gl"]') as HTMLAnchorElement
+    expect(card.getAttribute('href')).toBe('https://maps.app.goo.gl/ZFKMj2iBMeL7fxHK7')
+    expect(card.textContent).toContain('Ver los lugares en el mapa')
+    expect(card.textContent).not.toMatch(/\d/)
+    expect(card.textContent).toContain('Lista de Google Maps · San Miguel Chapultepec')
+    expect(zonesEl().textContent).toContain('Galerías tras muros antiguos, una casa de Barragán, la orilla del bosque.')
+    expect(zonesEl().textContent).toContain('La última casa de Luis Barragán: color, luz y una alberca interior. Solo con cita.')
+    expect(zonesEl().textContent).toContain(zone === 'condesa' ? 'Junto a la Condesa; casi todo queda a una caminata corta.' : 'A un trayecto corto; combínalo con Chapultepec.')
+    act(() => { fireEvent.click(tab('Coyoacán')) })
+    card = zonesEl().querySelector('a[href^="https://maps.app.goo.gl"]') as HTMLAnchorElement
+    expect(card.getAttribute('href')).toBe('https://maps.app.goo.gl/fHKhCCToYVaqFmrEA')
+    expect(card.textContent).toContain('Ver los lugares en el mapa')
+    expect(zonesEl().textContent).toContain('Un trayecto largo al sur; planea medio día.')
+    expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
+    expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word
   })
   test('jump menu, monday row, shop mood, footer line, destination cards (Spanish)', () => {
     const { view, text } = open()
