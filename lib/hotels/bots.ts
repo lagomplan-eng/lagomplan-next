@@ -21,3 +21,13 @@ export function isCountableScan(req: { method: string; headers: { get(name: stri
   if (/prefetch|prerender/i.test(purpose)) return false
   return true
 }
+
+/**
+ * A link a guest shared from the guide ("Send this guide to my phone") carries ?via=share. Opening it is not a new QR scan
+ * (the guest reopening their own guide, or a friend opening what they were sent), so /g/{code} redirects without writing a row.
+ * No cookie, no identifier, nothing about the visitor: only this marker in the address.
+ */
+export const SHARE_MARKER = { key: 'via', value: 'share' } as const
+export function isShareOpen(params: { get(name: string): string | null }): boolean {
+  return params.get(SHARE_MARKER.key) === SHARE_MARKER.value
+}

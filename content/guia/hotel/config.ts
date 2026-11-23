@@ -99,7 +99,7 @@ export const HOTEL_MALEZA_PICK: Record<Lang, { name: string; tag: string; note: 
 /** Craving labels the hotel edition changes (so the panel has one "Hidden gem"). */
 export const HOTEL_CRAVING_LABEL: Record<string, string> = { 'Café Nin': 'Brunch' }
 
-/** Zone name under a mood pick, from the owner's list. Places not listed (Masala y Maíz, Bar Federalista, Casa Franca) show none. */
+/** Zone name under a mood pick, from the owner's list. Places not listed (Masala y Maíz, Bar Federalista) show none. */
 export const HOTEL_PICK_ZONES: Record<string, string> = {
   'Lalo!': 'Roma Norte',
   'Taquería Orinoco': 'Roma Norte',
@@ -107,6 +107,8 @@ export const HOTEL_PICK_ZONES: Record<string, string> = {
   'Quintonil': 'Polanco',
   'Café Nin': 'Juárez',
   'Maleza': 'Condesa',
+  'Casa Franca': 'Roma Norte',
+  'Gaba': 'Condesa',
   'Nevería Roxy': 'Condesa',
   'Café Avellaneda': 'Coyoacán',
   'Museo Tamayo': 'Chapultepec',
@@ -137,7 +139,7 @@ export const HOTEL_SHOP_MOOD: Record<Lang, { label: string; title: string }> = {
   es: { label: 'Quiero ir de compras', title: 'Para ir de compras' },
 }
 /** Mood buttons, in order. */
-export const HOTEL_MOOD_ORDER = ['hungry', 'culture', 'hidden', 'shop', 'nightlife', 'kids']
+export const HOTEL_MOOD_ORDER = ['dinner', 'shop', 'culture', 'hidden', 'hungry', 'nightlife']
 
 /** One more row in "Every week in Mexico City". */
 export const HOTEL_MONDAY_ROW: Record<Lang, { tag: string; title: string; body: string }> = {

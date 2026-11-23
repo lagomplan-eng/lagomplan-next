@@ -42,7 +42,7 @@ import {
 import { HIDDEN_GEM_LABEL, isHiddenGem } from '../../../content/guia/hotel/themes'
 import { hotelShareHref } from '../../../content/guia/hotel/share'
 import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
-import { HOTEL_TIME_TITLE, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
+import { HOTEL_TIME_TITLE, placeMapUrl, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
 import { HOTEL_HOST_NAME, hotelReword, zonesHeading } from '../../../content/guia/hotel/rewords'
 import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG, ZONE_TAB_ORDER } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
@@ -787,7 +787,13 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                         {it.tag && <span className={styles.eyebrowMono} style={{ color: 'var(--pine)' }}>{it.tag}</span>}
                         <div className={styles.moodItemName}>{it.name}{hotel && !it.tag && gemMark(it.name)}</div>
                         <div className={styles.moodItemNote}>{it.note}</div>
-                        {hotel && it.zone && <span className={styles.eyebrowMono} style={{ color: 'var(--sage)', display: 'block', marginTop: 6 }}>{it.zone}</span>}
+                        {hotel && (
+                          // Zone and address on one line, then a quiet Map link built from the name and address (name alone when there is none).
+                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '2px 8px', marginTop: 6 }}>
+                            {(it.zone || it.address) && <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{[it.zone, it.address].filter(Boolean).join(' · ')}</span>}
+                            <a className={styles.link} style={{ fontSize: 12 }} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>

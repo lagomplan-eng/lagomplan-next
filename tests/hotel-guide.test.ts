@@ -1,6 +1,6 @@
 /** tests/hotel-guide.test.ts — pure logic of the hotel guide. Run: npx tsx tests/hotel-guide.test.ts */
 import { langFromAcceptLanguage } from '../lib/hotels/lang'
-import { isCountableScan } from '../lib/hotels/bots'
+import { isCountableScan, isShareOpen } from '../lib/hotels/bots'
 import { generateHotelCode, isValidHotelCode } from '../lib/hotels/codes'
 import { parseHotelEvent } from '../lib/hotels/events'
 import { validateSignup } from '../lib/hotels/signup'
@@ -109,6 +109,8 @@ eq('lang param en beats a Spanish phone', resolveLang('en', 'es-MX,es;q=0.9'), '
 eq('no param: the phone decides', resolveLang(null, 'es-MX,es;q=0.9'), 'es')
 eq('bad param is ignored', resolveLang('fr', 'es-MX'), 'es')
 eq('no param, no header', resolveLang(undefined, undefined), 'en')
+
+eq('?via=share marks a shared link', [isShareOpen(new URLSearchParams('lang=es&via=share')), isShareOpen(new URLSearchParams('lang=es')), isShareOpen(new URLSearchParams('via=qr'))], [true, false, false])
 
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('hotel-guide: all passed')

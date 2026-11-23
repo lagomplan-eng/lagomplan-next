@@ -119,8 +119,11 @@ export const EXTRA_ZONES: ExtraZone[] = [
         },
       },
       {
-        name: same('La Coyoacana'), where: same('Higuera 14'), icon: 'martini', verify: VERIFY,
-        note: { en: 'A traditional cantina just off the square.', es: 'Una cantina tradicional a un paso de la plaza.' },
+        name: same('Los Danzantes'), where: same('Plaza Jardín Centenario 12'), icon: 'utensilsSm', verify: VERIFY,
+        note: {
+          en: 'Oaxacan-inspired cooking and mezcal on the terrace over the plaza.',
+          es: 'Cocina de inspiración oaxaqueña y mezcal en la terraza sobre la plaza.',
+        },
       },
     ],
   },

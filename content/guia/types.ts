@@ -98,6 +98,8 @@ export interface MoodItem {
   tag?: string
   /** Optional zone name shown under the pick (hotel edition), only where the repo holds the place's zone. */
   zone?: string
+  /** Optional street address shown on the zone line (hotel edition); the Map link is built from name + address. */
+  address?: string
 }
 
 export interface Mood {

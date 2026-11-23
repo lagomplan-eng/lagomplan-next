@@ -17,6 +17,8 @@ import {
   HOTEL_CRAVING_LABEL, HOTEL_EXTRA_ZONES_ON, HOTEL_FREE_EDITION, HOTEL_MALEZA_PICK, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_ORIENTATION, HOTEL_PICK_ZONES, HOTEL_SHOP_MOOD, type HotelMode,
 } from './config'
 import { EXTRA_ZONES, type ExtraPlace, type ExtraZone } from './extra-zones'
+import { CENTRO_ADDITION, POLANCO_SWAP, type TabSpot } from './tab-spots'
+import { ADDRESSES, DINNER_PICKS, HOTEL_DINNER_MOOD, HOTEL_MICHELIN, SHOP_NEW_PICKS, type NewPick } from './mood-picks'
 import { HOTEL_EXPERIENCE_IDS } from './experiences'
 import { ZONE_NEIGHBORHOOD, type HotelZone } from './zones'
 
@@ -37,7 +39,8 @@ export const HOTEL_HIDDEN_FAQ_KEYS: FaqItemKey[] = [
 export const HOTEL_HIDDEN_ARRIVAL_IDS = ['coming-back-late']
 
 /** "I'm hungry": the must-sees that have no other place in the guide move into this mood panel, keeping their label. */
-export const HOTEL_HUNGRY_PICKS = ['El Vilsito', 'Café Avellaneda', 'Quintonil', 'Café Nin', 'Nevería Roxy']
+// (Quintonil moved to "A special dinner"; Café Avellaneda has its own card in Coyoacán.)
+export const HOTEL_HUNGRY_PICKS = ['El Vilsito', 'Café Avellaneda', 'Café Nin', 'Nevería Roxy']
 
 const INSIDER_HREF = /wa\.me\/525539149062/i
 
@@ -69,7 +72,27 @@ function spotAsPick(city: City, name: string, lang: Lang): MoodItem | null {
   return null
 }
 
-/** "I want to shop": four places already in the guide, with their existing texts. */
+/** A new pick as a mood item: its own text, or (Quintonil) the existing text of the place word for word. */
+function newPick(p: NewPick, copy: CityCopy, lang: Lang): MoodItem {
+  const note = p.note?.[lang] ?? copy.foodCollections.find((c) => c.name === p.name)?.note ?? ''
+  return { name: p.name, note, zone: p.zone, address: p.address || undefined, ...(p.stars ? { tag: HOTEL_MICHELIN.labels[p.stars][lang] } : {}) }
+}
+
+/** Street address already in the repo for a place listed in a zone tab. */
+function repoAddress(city: City, name: string, lang: Lang): string | undefined {
+  for (const nb of Object.values(city.neighborhoods)) {
+    const spot = nb.spots[lang].find((s) => s.name === name)
+    if (spot) return spot.distance
+  }
+  return undefined
+}
+
+/** "A special dinner": five places, the Michelin rating in the small label slot. */
+function dinnerMood(copy: CityCopy, lang: Lang): Mood {
+  return { id: 'dinner', icon: 'chefHat', label: HOTEL_DINNER_MOOD[lang].label, title: HOTEL_DINNER_MOOD[lang].title, items: DINNER_PICKS.map((p) => newPick(p, copy, lang)) }
+}
+
+/** "I want to shop": four places already in the guide, with their existing texts, then three new ones. */
 function shopMood(city: City, copy: CityCopy, lang: Lang): Mood {
   const picks = ['Proyecto Rufina', 'Librería El Péndulo', 'LAGO'].map((n) => spotAsPick(city, n, lang)).filter((x): x is MoodItem => !!x)
   // Bazar Sábado comes from "Every week": the title names its zone ("Bazar Sábado, San Ángel"), the body is its text.
@@ -78,6 +101,7 @@ function shopMood(city: City, copy: CityCopy, lang: Lang): Mood {
     const [name, ...zone] = bazar.title.split(', ')
     picks.push({ name, note: bazar.body, zone: zone.join(', ') || undefined })
   }
+  picks.push(...SHOP_NEW_PICKS.map((p) => newPick(p, copy, lang)))
   return { id: 'shop', icon: 'basket', label: HOTEL_SHOP_MOOD[lang].label, title: HOTEL_SHOP_MOOD[lang].title, items: picks }
 }
 
@@ -91,7 +115,7 @@ function weeklyRows(copy: CityCopy, lang: Lang): CityCopy['todayItems'] {
 
 function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>): CityCopy {
   const moods = copy.moods
-    .filter((m) => m.id !== 'short')
+    .filter((m) => m.id !== 'short' && m.id !== 'kids') // "Traveling with kids" gives way to "A special dinner" in the hotel edition
     // A place that has a card in a hotel-only zone leaves the mood panel it was in, so it appears once.
     .map((m) => ({ ...m, items: m.items.filter((it) => !moved.has(it.name)) }))
     .map((m) => m.id !== 'hungry' ? m : {
@@ -103,13 +127,20 @@ function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>
         { name: HOTEL_MALEZA_PICK[lang].name, note: HOTEL_MALEZA_PICK[lang].note, tag: HOTEL_MALEZA_PICK[lang].tag },
       ],
     })
-  const withShop = [...moods, shopMood(city, copy, lang)]
+  const withShop = [...moods, shopMood(city, copy, lang), dinnerMood(copy, lang)]
   return {
     ...copy,
     arrivalItems: copy.arrivalItems.filter((i) => !HOTEL_HIDDEN_ARRIVAL_IDS.includes(i.id ?? '')).map(stripInsider),
     // Mood order is the hotel's; the zone name goes under a pick only where the repo holds the place's zone.
     moods: HOTEL_MOOD_ORDER.map((id) => withShop.find((m) => m.id === id)).filter((m): m is Mood => !!m)
-      .map((m) => ({ ...m, items: m.items.map((it) => ({ ...it, zone: HOTEL_PICK_ZONES[it.name] ?? it.zone ?? zoneOfPlace(city, it.name, lang) })) })),
+      .map((m) => ({
+        ...m,
+        items: m.items.map((it) => ({
+          ...it,
+          zone: HOTEL_PICK_ZONES[it.name] ?? it.zone ?? zoneOfPlace(city, it.name, lang),
+          address: it.address ?? ADDRESSES[it.name]?.address ?? repoAddress(city, it.name, lang),
+        })),
+      })),
     // "Every week": one more row, Monday.
     todayItems: weeklyRows(copy, lang),
     // Only the four experience titles travel (the cards are in experiences.ts); nothing of the Insider copy does.
@@ -157,6 +188,14 @@ export function toHotelCity(city: City, hotelZone: HotelZone = 'condesa'): City 
   // The city layer's distance sentences are written from Condesa's point of view; the hotel edition replaces them per hotel zone.
   for (const [k, line] of Object.entries(HOTEL_ORIENTATION[hotelZone])) if (neighborhoods[k]) neighborhoods[k] = { ...neighborhoods[k], orientation: line }
   for (const z of extras) neighborhoods[z.key] = extraNeighborhood(z, city, hotelZone)
+  // Tab edits for the hotel edition only (tab-spots.ts): Siembra replaces El Turix (not in the Polanco hotel); La Ciudadela joins Centro.
+  const asSpot = (t: TabSpot, lang: Lang): Spot => ({ icon: t.icon, name: t.name, distance: t.where, note: t.note[lang] })
+  const editSpots = (key: string, edit: (spots: Spot[], lang: Lang) => Spot[]) => {
+    if (!neighborhoods[key]) return
+    neighborhoods[key] = { ...neighborhoods[key], spots: { es: edit(neighborhoods[key].spots.es, 'es'), en: edit(neighborhoods[key].spots.en, 'en') } }
+  }
+  if (hotelZone !== POLANCO_SWAP.except) editSpots('Polanco', (spots, lang) => spots.map((sp) => (sp.name === POLANCO_SWAP.replace ? asSpot(POLANCO_SWAP.spot, lang) : sp)))
+  editSpots('Centro', (spots, lang) => spots.flatMap((sp) => (sp.name === CENTRO_ADDITION.after ? [sp, asSpot(CENTRO_ADDITION.spot, lang)] : [sp])))
   const withZones: City = { ...city, neighborhoods, neighborhoodOrder: [...city.neighborhoodOrder, ...extras.map((z) => z.key)] }
   return { ...withZones, copy: { es: sanitizeCopy(city.copy.es, withZones, 'es', moved), en: sanitizeCopy(city.copy.en, withZones, 'en', moved) } }
 }

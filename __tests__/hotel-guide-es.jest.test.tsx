@@ -39,7 +39,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(text).not.toContain('Los imperdibles')
     expect(view.container.querySelectorAll('a.expBookLink, a[class*="expBookLink"]')).toHaveLength(4)
     expect((text.match(/Reservar en GetYourGuide/g) ?? []).length).toBe(4)
-    const quickEs = ['Solo unas horas', 'Cuatro paradas, una tarde.', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Un bar de coctelería pequeño y tranquilo, del equipo de Limantour.', 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.']
+    const quickEs = ['Solo unas horas', 'Cuatro paradas, una tarde.', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Una copa frente al Parque México. Arriba está Lucky, el bar de la azotea.', 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas están a unos pasos.']
     for (const q of quickEs) zone === 'condesa' ? expect(text).toContain(q) : expect(text).not.toContain(q)
     expect(view.container.querySelectorAll('.moodGrid button, [class*="moodBtn"]').length).toBe(6)
     for (const hidden of ['Lavandería y tintorería', 'Restaurantes que reciben grupos', 'Catering y entrega a domicilio', 'Llegar tarde']) expect(text).not.toContain(hidden)
@@ -76,16 +76,16 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const band = () => bandEl().textContent ?? ''
     expect(band()).toContain('Unas horas')
     expect(band()).toContain('Cuatro paradas, una tarde.')
-    for (const n of ['Museo de Arte Moderno', 'Niddo', 'Avenida Ámsterdam', 'Baltra Bar']) expect(band()).toContain(n)
+    for (const n of ['Museo de Arte Moderno', 'Niddo', 'Avenida Ámsterdam', 'Lindy']) expect(band()).toContain(n)
     expect(band()).toContain('La avenida ovalada bajo los árboles, trazada sobre un antiguo hipódromo. Camina una vuelta al atardecer.')
-    expect(band()).toContain('No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.')
+    expect(band()).toContain('No en lunes. Trayectos cortos al inicio; las dos últimas paradas están a unos pasos.')
     expect(band()).not.toContain('Maleza')
     expect([...bandEl().querySelectorAll('[class*="itinTime"]')].map((x) => x.textContent)).toEqual(['01', '02', '03', '04'])
     act(() => { fireEvent.click(tabs[1]) })
     expect(band()).toContain('48 horas')
-    expect(band()).not.toContain('Baltra Bar')
+    expect(band()).not.toContain('Lindy')
     act(() => { fireEvent.click(tabs[0]) })
-    expect(band()).toContain('Baltra Bar')
+    expect(band()).toContain('Lindy')
     // one band is visible at a time; the other is hidden but keeps the section's height
     expect(timeEl().querySelectorAll('[aria-hidden="true"] section[class*="sectionPine"]')).toHaveLength(1)
   })
@@ -97,7 +97,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const link = container.querySelector('a[href^="https://wa.me/"]') as HTMLAnchorElement
     const msg = decodeURIComponent(link.getAttribute('href')!.replace('https://wa.me/?text=', ''))
     expect(msg).toMatch(/https?:\/\/\S+$/)
-    expect(msg).toBe(`Mi guía de barrio de ${ZONE_LABEL[zone]}, de Lagomplan: https://www.lagomplan.com/g/abcd2345wxyz?lang=es`)
+    expect(msg).toBe(`Mi guía de barrio de ${ZONE_LABEL[zone]}, de Lagomplan: https://www.lagomplan.com/g/abcd2345wxyz?lang=es&via=share`)
     expect(link.getAttribute('href')).not.toMatch(/localhost|vercel\.app/)
   })
   test('the two new zones: Spanish text; the map link names the open zone and links to the owner\'s list', () => {
@@ -120,6 +120,28 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(zonesEl().textContent).toContain('Un trayecto largo al sur; planea medio día.')
     expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
     expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word
+  })
+  test('moods in Spanish: A special dinner first (Michelin label, zone, address, Map link), no kids; every pick has a Map link', () => {
+    const { view } = open()
+    const buttons = ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[])
+    expect(buttons.map((b) => b.textContent)).toEqual(['Una cena especial', 'Quiero ir de compras', 'Quiero cultura', 'Lugares escondidos', 'Tengo hambre', 'Quiero vida nocturna'])
+    act(() => { fireEvent.click(buttons[0]) })
+    const panel = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
+    const text = panel.textContent ?? ''
+    for (const t of ['Una estrella Michelin', 'Dos estrellas Michelin', 'Gaba', 'Máximo', 'Rosetta', 'Quintonil', 'Pujol', 'Roma Norte · Av. Álvaro Obregón 65 Bis', 'Polanco · Tennyson 133',
+      'El menú degustación de Enrique Olvera, la mesa más conocida de la ciudad. Reserva con semanas de anticipación.']) expect(text).toContain(t)
+    const links = [...panel.querySelectorAll('a')].map((a) => [a.textContent, decodeURIComponent(a.getAttribute('href')!)])
+    expect(links).toHaveLength(5)
+    for (const [label] of links) expect(label).toBe('Mapa')
+    expect(links[1][1]).toContain('Máximo, Av. Álvaro Obregón 65 Bis, Roma Norte, Ciudad de México')
+    expect(links[0][1]).toContain('query=Gaba, Ciudad de México') // no address yet: the name alone
+    expect(view.container.textContent).not.toContain('Viajo con niños')
+    // every other panel: one Map link per pick
+    for (const b of buttons.slice(1)) {
+      act(() => { fireEvent.click(b) })
+      const p = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
+      expect(p.querySelectorAll('a').length).toBe(p.querySelectorAll('[class*="moodItemName"]').length)
+    }
   })
   test('Hidden gem / Joya escondida sits on the place name line in the mood panel', () => {
     const { view } = open()

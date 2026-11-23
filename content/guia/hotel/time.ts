@@ -70,18 +70,18 @@ export const HOTEL_QUICK_PLAN: QuickPlan = {
       },
     },
     {
-      name: 'Baltra Bar',
-      where: 'Iztaccíhuatl 36, Condesa',
+      name: 'Lindy',
+      where: 'Av. México 31, Condesa',
       verify: VERIFY_NEW,
       note: {
-        en: 'A small, calm cocktail bar from the Limantour team.',
-        es: 'Un bar de coctelería pequeño y tranquilo, del equipo de Limantour.',
+        en: 'A drink across from Parque México. Lucky, the rooftop bar, is upstairs.',
+        es: 'Una copa frente al Parque México. Arriba está Lucky, el bar de la azotea.',
       },
     },
   ],
   note: {
     en: 'Not on Mondays. Short rides at the start; the last two stops are a walk apart.',
-    es: 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.',
+    es: 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas están a unos pasos.',
   },
 }
 
@@ -92,4 +92,9 @@ export function quickPlanFor(zone: HotelZone): QuickPlan | null {
 /** Google Maps search link for a stop, in the format the repo already uses for place links. */
 export function stopMapUrl(stop: QuickStop): string {
   return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${stop.name}, ${stop.where}, Ciudad de México`)}`
+}
+
+/** Google Maps search link from a place name and, when there is one, its address (name alone otherwise). */
+export function placeMapUrl(name: string, where?: string): string {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([name, where, 'Ciudad de México'].filter(Boolean).join(', '))}`
 }
