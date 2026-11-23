@@ -36,7 +36,7 @@ const livin = (zone: HotelZone) => {
   return renderToStaticMarkup(<GuiaClient partner={g.partner} city={g.city} />)
 }
 // With two plans both bands are in the page and only the selected one is visible (the other layer is hidden and aria-hidden).
-const stripHidden = (html: string) => html.replace(/<div style="grid-area:1 \/ 1;visibility:hidden[^"]*"[^>]*>[\s\S]*?<\/section><\/div>/g, '')
+const stripHidden = (html: string) => html.replace(/<div class="hotelBandLayer"[^>]*data-hidden[^>]*>[\s\S]*?<\/section><\/div>/g, '')
 const headings = (html: string) => [...stripHidden(html).matchAll(/<h[12][^>]*>([^<]*)</g)].map((m) => m[1])
 // Zone tabs only: the plan buttons in "How much time" are tabs too.
 const zonesPart = (html: string) => { const a = html.indexOf('data-hotel-section="neighborhoods"'); const b = html.indexOf('data-hotel-section="time"'); return a >= 0 && b > a ? html.slice(a, b) : html }
@@ -49,7 +49,8 @@ const cardTitles = (html: string) => { const a = html.indexOf('id="practico"'); 
 const NOT_FOR_A_HOTEL = ['Laundry and dry cleaning', 'Restaurants that take groups', 'Catering and delivery', 'Coming back late']
 const LIVIN_PROPERTY = ['Chefs at home', 'Massages']
 // Condesa opens on its short plan, so the 48 hours heading is not on screen until that button is chosen.
-const orderEn = (zone: HotelZone) => ['Your guide to {zone}', HEADING_6, 'How much time do you have?', ...(zone === 'condesa' ? ['A few hours'] : ['48 hours']), 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
+// The plans band has one heading; the plan buttons and the short line sit under it (no second heading inside).
+const orderEn = (_zone: HotelZone) => ['Your guide to {zone}', HEADING_6, 'How much time do you have?', 'What are you in the mood for?', 'Every week in Mexico City', 'Worth the time', 'Good to know', 'Ready to explore beyond your stay?']
 const css = fs.readFileSync(path.join(process.cwd(), 'app/guia/[partner]/guia.module.css'), 'utf8')
 const classOf = (html: string, id: string) => html.match(new RegExp(`<section class="([^"]*)"[^>]*data-hotel-section="${id}"`))?.[1] ?? null
 // Everything that identifies the Livin property: the three "Your house" addresses and map links, plus the spots that
@@ -100,23 +101,23 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     const z = zonesPart(html)
     expect(z).not.toMatch(/On foot|Short ride|Half a day/)
     for (const chip of z.matchAll(/role="tab"[^>]*>(.*?)<\/button>/g)) expect(chip[1]).not.toContain('<span')
-    expect(css).toMatch(/\.hotelCalm \.tabRow\s*{[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/)
     // the old card (title, subtitle, dotted thumbnail) is gone in this edition
     for (const gone of ['nbMapCard', 'nbMapThumb', 'See all', 'Google Maps list']) expect(z).not.toContain(gone)
-    // one link, after the chips and before the places, to the open zone's own list, named after it
-    const links = [...z.matchAll(/<a class="hotelMapLink" href="([^"]*)"[^>]*>([^<]*)</g)]
+    // one link, "Map →", in the same row as the chips (inside the one-line row), at its right end, named after the open zone in its aria-label
+    const links = [...z.matchAll(/<a class="hotelMapLink" href="([^"]*)" target="_blank" rel="noopener noreferrer" aria-label="([^"]*)"[^>]*>([^<]*)</g)]
     expect(links).toHaveLength(1)
     const own = buildHotelGuideProps(zone)!.city.neighborhoods[ZONE_NEIGHBORHOOD[zone]]
     expect(links[0][1]).toBe(own.mapUrl)
-    expect(links[0][2]).toBe(`Map of ${ZONE_NEIGHBORHOOD[zone]} →`)
+    expect(links[0][2]).toBe(`Map of ${ZONE_NEIGHBORHOOD[zone]}`)
+    expect(links[0][3]).toBe('Map →')
     expect(z.indexOf('hotelMapLink')).toBeGreaterThan(z.lastIndexOf('role="tab"'))
     expect(z.indexOf('hotelMapLink')).toBeLessThan(z.indexOf('class="spotList"'))
-    // same row as the chips, pushed right; drops to the next line when it does not fit; plain text link on phones
-    expect(css).toMatch(/\.hotelCalm \.nbControls\s*{[^}]*flex-direction:\s*row[^}]*flex-wrap:\s*wrap/)
-    expect(css).toMatch(/\.hotelMapLink\s*{[^}]*margin-left:\s*auto[^}]*}/)
+    expect(z.slice(z.indexOf('class="nbControls"'), z.indexOf('class="spotList"'))).toContain('hotelMapLink') // same row container
+    // one line, never wrapping on desktop; the whole row scrolls on phones with the link as its last item
+    expect(css).toMatch(/\.hotelCalm \.nbControls\s*{[^}]*flex-direction:\s*row[^}]*flex-wrap:\s*nowrap[^}]*overflow-x:\s*auto/)
+    expect(css).toMatch(/\.hotelMapLink\s*{[^}]*margin-left:\s*auto[^}]*flex:\s*none[^}]*white-space:\s*nowrap/)
     expect(css).toMatch(/\.hotelMapLink\s*{[^}]*background:\s*transparent/)
     expect(css).not.toMatch(/\.hotelMapLink\s*{[^}]*box-shadow/)
-    expect(css).toMatch(/max-width: 768px\)\s*{\s*\.hotelMapLink\s*{[^}]*margin-left:\s*0[^}]*flex:\s*0 0 100%[^}]*border:\s*0/)
   })
   test('the distance sentence of each tab, from the hotel zone\'s point of view', () => {
     const nbs = buildHotelGuideProps(zone)!.city.neighborhoods
@@ -150,36 +151,39 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(css).toMatch(/\.hotelJumpMobile\s*{\s*display:\s*none/)
     expect(css).toMatch(/position:\s*sticky;\s*top:\s*68px/)
   })
-  test('how much time: Condesa has two buttons and opens the short plan in the dark band; Roma Norte and Polanco show 48 hours directly, no buttons', () => {
-    const stops = HOTEL_QUICK_PLAN.stops.map((x) => x.name)
+  test('plans: ONE dark band with the eyebrow, the title, the two buttons (Condesa) and the short line, then the stops; no cream block, no second heading', () => {
+    const block = html.slice(html.indexOf('data-hotel-section="time"'), html.indexOf('data-hotel-section="moods"'))
+    const visible = stripHidden(block)
+    // the first section of the block is the dark band (nothing cream above it)
+    expect(block.match(/<section class="([^"]*)"/)![1]).toBe('section sectionPine')
+    expect(visible).toContain('>Plans<') // shown uppercase by the label style
+    expect(visible).toContain('>How much time do you have?<')
+    expect(visible).not.toMatch(/>(ITINERARY|Itinerary)</)
+    expect(visible).not.toContain('>48 hours</h2>')
+    expect(visible).not.toContain('>A few hours<')
     if (zone === 'condesa') {
-      const block = html.slice(html.indexOf('data-hotel-section="time"'), html.indexOf('data-hotel-section="moods"'))
-      const plans = [...block.matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => [m[2], m[1] === 'true'])
+      const plans = [...visible.matchAll(/role="tab" aria-selected="(true|false)"[^>]*>([^<]*)</g)].map((m) => [m[2], m[1] === 'true'])
       expect(plans).toEqual([['Only a few hours', true], ['48 hours', false]])
-      const visible = stripHidden(block)
-      // the short plan is drawn with the same dark band as the 48 hours: title, line, numbered rows, note
-      expect(visible).toContain('class="section sectionPine"')
-      expect(visible).toContain('>A few hours<')
+      // selected: light fill with dark text; unselected: outline in light text
+      expect(visible).toMatch(/aria-selected="true"[^>]*style="[^"]*background:var\(--cream\);color:var\(--pine\)/)
+      expect(visible).toMatch(/aria-selected="false"[^>]*style="[^"]*background:transparent;color:var\(--cream\)/)
       expect(visible).toContain('Four stops, one afternoon.')
       expect([...visible.matchAll(/class="eyebrowMono itinTime">(\d\d)</g)].map((m) => m[1])).toEqual(['01', '02', '03', '04'])
-      for (const n of stops) expect(visible).toContain(n)
+      for (const n of HOTEL_QUICK_PLAN.stops.map((x) => x.name)) expect(visible).toContain(n)
       expect(visible).not.toContain('Maleza')
       expect(visible).toContain('<p class="itinNote">Not on Mondays. Short rides at the start; the last two stops are a walk apart.</p>')
-      expect(visible).not.toContain('Best Wednesday')
-      expect(visible).not.toContain('class="spotList"') // the light list version is gone
       const maps = [...visible.matchAll(/href="(https:\/\/www\.google\.com\/maps\/search\/[^"]*)"[^>]*>Map</g)].map((m) => decodeURIComponent(m[1]))
       expect(maps).toHaveLength(4)
-      for (const n of stops) expect(maps.some((m) => m.includes(n))).toBe(true)
-      // the 48 hours band is in the page but hidden, so the section keeps one height
-      expect(block).toContain('visibility:hidden')
+      // the 48 hours band is in the page but hidden (desktop keeps one height; phones drop it)
+      expect(block).toContain('data-hidden')
       expect(block).toContain('aria-hidden="true"')
-      expect(headings(html)).not.toContain('48 hours')
+      expect(css).toMatch(/\.hotelBandLayer\[data-hidden\]\s*{\s*visibility:\s*hidden/)
+      expect(css).toMatch(/max-width: 768px\)\s*{\s*\.hotelBandLayer\[data-hidden\]\s*{\s*display:\s*none/)
     } else {
-      expect(headings(html)).toContain('48 hours')
-      for (const q of [...stops, 'Only a few hours', 'A few hours']) expect(html).not.toContain(q)
-      const timeBlock = html.slice(html.indexOf('data-hotel-section="time"'), html.indexOf('data-hotel-section="moods"'))
-      expect(timeBlock).not.toContain('role="tab"')
-      expect(timeBlock).not.toContain('visibility:hidden')
+      expect(visible).toContain('Two days, walked and checked.') // the short line
+      expect(visible).not.toContain('role="tab"')
+      expect(block).not.toContain('data-hidden')
+      for (const q of ['Only a few hours', 'Four stops']) expect(html).not.toContain(q)
     }
   })
   test('mood buttons in the agreed order; kids and "Only a few hours" are not among them', () => {
@@ -215,10 +219,10 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(css).toMatch(/\.hotelCalm \.itinTime\s*{\s*color:\s*var\(--sage-soft\)/)
     const alt = (id: string) => /sectionAlt/.test(classOf(html, id) ?? '')
     expect([alt('neighborhoods'), alt('moods'), alt('rhythm'), alt('experiences'), alt('practical')]).toEqual([true, true, false, true, false])
-    const timeHeader = html.slice(html.indexOf('data-hotel-section="time"')).match(/<section class="([^"]*)"/)![1]
-    expect(timeHeader).not.toContain('sectionAlt') // Plans: cream, between two sand sections
+    const timeFirst = html.slice(html.indexOf('data-hotel-section="time"')).match(/<section class="([^"]*)"/)![1]
+    expect(timeFirst).toBe('section sectionPine') // Plans: one dark band between the two sand sections, no strip of another colour
     // the section labels all use the one label style; the practical one too
-    expect(html.match(/class="eyebrow"[^>]*>(Plans|Explore by mood|The city&#x27;s weekly rhythm|Experiences|Where next\?|THE PRACTICAL PART|City zones)</g)?.length).toBe(7)
+    expect(html.match(/class="eyebrow"[^>]*>(Explore by mood|The city&#x27;s weekly rhythm|Experiences|Where next\?|THE PRACTICAL PART|City zones)</g)?.length).toBe(6)
   })
   test('spacing: one vertical padding for every section, and the how-much-time block has no big gaps', () => {
     expect(css).toMatch(/\.hotelCalm \.section\s*{\s*padding:\s*88px 0/)
@@ -234,6 +238,14 @@ describe.each(HOTEL_ZONES)('%s hotel guide', (zone) => {
     expect(css).toMatch(/max-width: 640px\)\s*{\s*\.hotelCalm \.moodGrid\s*{\s*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/)
     expect(css).toMatch(/\.hotelCalm \.weatherCard\s*{\s*max-width:\s*860px/)
     expect(css).toMatch(/\.spotList\s*{[^}]*max-width:\s*860px/)
+  })
+  test('mood panel: two columns on desktop with a generous gap, one on phones; a thin #C8BFB5 rule between places and none after the last', () => {
+    expect(css).toMatch(/\.hotelCalm \.hotelMoodItems\s*{[^}]*grid-auto-flow:\s*column[^}]*repeat\(var\(--rows, 4\), auto\)[^}]*column-gap:\s*64px/)
+    expect(css).toMatch(/\.hotelCalm \.hotelMoodItem\s*{[^}]*border-top:\s*1px solid #C8BFB5[^}]*padding:\s*22px 0/)
+    expect(css).not.toMatch(/\.hotelMoodItem[^{]*{[^}]*border-bottom/)
+    expect(css).toMatch(/\.hotelCalm \.hotelMoodItem\[data-colfirst\]\s*{[^}]*border-top:\s*0/)
+    expect(css).toMatch(/\.hotelCalm \.hotelMoodItem:last-child\s*{[^}]*padding-bottom:\s*0/)
+    expect(css).toMatch(/max-width: 768px\)\s*{[^@]*\.hotelCalm \.hotelMoodItems\s*{[^}]*grid-auto-flow:\s*row[^}]*grid-template-columns:\s*minmax\(0, 1fr\)/)
   })
   test('weekly order: Monday, Tues & Fri, Saturday, Sunday, Sunset; footer line', () => {
     const rows = buildHotelGuideProps(zone)!.city.copy.en.todayItems.map((t) => t.tag)

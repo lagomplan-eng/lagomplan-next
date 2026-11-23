@@ -37,7 +37,7 @@ import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import {
-  HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
+  HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_ARIA, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
 } from '../../../content/guia/hotel/config'
 import { HIDDEN_GEM_LABEL, isHiddenGem } from '../../../content/guia/hotel/themes'
 import { hotelShareHref } from '../../../content/guia/hotel/share'
@@ -783,19 +783,34 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     <h4 className={styles.h4}>{selectedMood.title}</h4>
                     <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
                   </div>
-                  <div className={styles.moodItems}>
-                    {selectedMood.items.map((it, i) => (
-                      <div key={i}>
-                        {it.tag && <span className={styles.eyebrowMono} style={{ color: 'var(--pine)' }}>{it.tag}</span>}
-                        <div className={styles.moodItemName}>{it.name}{hotel && !it.tag && selectedMood?.id !== 'hidden' && gemMark(it.name)}</div>
+                  <div
+                    className={hotel ? `${styles.moodItems} ${styles.hotelMoodItems}` : styles.moodItems}
+                    {...(hotel ? { style: { '--rows': Math.ceil(selectedMood.items.length / 2) } as React.CSSProperties } : {})}
+                  >
+                    {selectedMood.items.map((it, i) => hotel ? (
+                      // Hotel edition: three lines. Name with its label right after it; the description; zone · address · Map.
+                      <div
+                        key={i}
+                        className={styles.hotelMoodItem}
+                        {...(i % Math.ceil(selectedMood.items.length / 2) === 0 ? { 'data-colfirst': '' } : {})}
+                        {...(i === 0 ? { 'data-first': '' } : {})}
+                      >
+                        <div className={styles.moodItemName}>
+                          {it.name}
+                          {it.tag
+                            ? <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: '#3E5F58', whiteSpace: 'nowrap' }}>{it.tag}</span>
+                            : selectedMood?.id !== 'hidden' && gemMark(it.name)}
+                        </div>
                         <div className={styles.moodItemNote}>{it.note}</div>
-                        {hotel && (
-                          // Zone and address on one line, then a quiet Map link built from the name and address (name alone when there is none).
-                          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: '2px 8px', marginTop: 6 }}>
-                            {(it.zone || it.address) && <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{[it.zone, it.address].filter(Boolean).join(' · ')}</span>}
-                            <a className={styles.link} style={{ fontSize: 12 }} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
-                          </div>
-                        )}
+                        <div className={styles.moodItemNote} style={{ marginTop: 6 }}>
+                          {[it.zone, it.address].filter(Boolean).join(' · ')}{(it.zone || it.address) ? ' · ' : ''}
+                          <a className={styles.link} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                        </div>
+                      </div>
+                    ) : (
+                      <div key={i}>
+                        <div className={styles.moodItemName}>{it.name}</div>
+                        <div className={styles.moodItemNote}>{it.note}</div>
                       </div>
                     ))}
                   </div>
@@ -851,14 +866,15 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                   ))}
                 </div>
                 {hotel ? (
-                  // Hotel edition: a compact link on the chip row (the card looked orphaned under the chips).
+                  // Hotel edition: a compact "Map →" link at the right end of the chip row, same line (it scrolls with the chips on phones).
                   <a
                     className={styles.hotelMapLink}
                     href={browseNbData.mapUrl || undefined}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-label={HOTEL_MAP_ARIA[lang].replace('{zone}', browseNbData.tabLabel?.[lang] ?? browseNb)}
                     onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
-                  >{HOTEL_MAP_LINK[lang].replace('{zone}', browseNbData.tabLabel?.[lang] ?? browseNb)}</a>
+                  >{HOTEL_MAP_LINK[lang]}</a>
                 ) : (
                   <a
                     className={styles.nbMapCard}
@@ -901,13 +917,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   )
   // The dark band: eyebrow / title / line on the left, the rows on the right, an optional button underneath.
   // The 48 hours plan and (hotel edition) the short plan are both drawn with it, so switching only changes the content.
-  const renderBand = (b: { eyebrow: string; title: string; lede: string; days: React.ReactNode; footer?: React.ReactNode; compactTop?: boolean; mark: string | null }) => (
+  const renderBand = (b: { eyebrow: string; title: string; lede: string; days: React.ReactNode; footer?: React.ReactNode; buttons?: React.ReactNode; compactTop?: boolean; mark: string | null }) => (
       <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: b.compactTop ? 40 : 88, paddingBottom: 88 } })} {...(b.mark ? hs(b.mark) : {})}>
         <div className={styles.container}>
           <div className={styles.itinGrid}>
             <div className={styles.itinIntro}>
               <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{b.eyebrow}</span>
               <h2 className={styles.itinTitle}>{b.title}</h2>
+              {b.buttons}
               <p className={styles.itinLede}>{b.lede}</p>
             </div>
             {b.days}
@@ -916,8 +933,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </div>
       </section>
   )
-  const renderItinerary = (compactTop = false, mark: string | null = 'itinerary') => renderBand({
-    eyebrow: itin.eyebrow, title: itin.title, lede: itin.lede, compactTop, mark,
+  const renderItinerary = (compactTop = false, mark: string | null = 'itinerary', intro?: { eyebrow: string; title: string; buttons?: React.ReactNode }) => renderBand({
+    eyebrow: intro?.eyebrow ?? itin.eyebrow, title: intro?.title ?? itin.title, lede: itin.lede, buttons: intro?.buttons, compactTop, mark,
     days: itin.days.map((day, di) => (
       <div className={styles.itinDay} key={di}>
         <h3 className={styles.itinDayTitle}>{day.title}</h3>
@@ -1027,8 +1044,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const quick = hotel ? quickPlanFor(hotel.zone) : null
   const showQuick = !!quick && plan === 'quick'
   // Hotel edition, short plan: the same dark band as the 48 hours (rows numbered 01..04, the note in the band's italic note style).
-  const quickBand = (compactTop: boolean, mark: string | null) => quick ? renderBand({
-    eyebrow: itin.eyebrow, title: quick.band.title[lang], lede: quick.band.line[lang], compactTop, mark,
+  const quickBand = (compactTop: boolean, mark: string | null, intro: { eyebrow: string; title: string; buttons?: React.ReactNode }) => quick ? renderBand({
+    eyebrow: intro.eyebrow, title: intro.title, lede: quick.band.line[lang], buttons: intro.buttons, compactTop, mark,
     days: (
       <div className={styles.itinDay}>
         <div className={styles.itinList}>
@@ -1050,44 +1067,40 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </div>
     ),
   }) : null
-  // With two plans both bands sit in one grid cell and only the selected one is visible, so the section keeps the height of
-  // the taller one and the page does not jump when switching. Roma Norte and Polanco have the 48 hours band only.
+  // With two plans both bands sit in one grid cell on desktop and only the selected one is visible, so the section keeps the
+  // height of the taller one and the page does not jump when switching (on phones the hidden one is removed, so no empty space).
+  // Roma Norte and Polanco have the 48 hours band only.
   const layer = (shown: boolean, band: React.ReactNode) => (
-    <div style={{ gridArea: '1 / 1', ...(shown ? {} : { visibility: 'hidden', pointerEvents: 'none' as const }) }} aria-hidden={shown ? undefined : true} {...(shown ? {} : ({ inert: '' } as object))}>{band}</div>
+    <div className={styles.hotelBandLayer} {...(shown ? {} : { 'data-hidden': '', 'aria-hidden': true, ...({ inert: '' } as object) })}>{band}</div>
   )
+  // The whole section is one dark band: eyebrow "Plans", the title, the two buttons (when there are two plans) and the short line,
+  // then the stops. No cream block above it, no second heading inside.
+  const planButtons = quick ? (
+    <div className={styles.tabRow} role="tablist" aria-label={HOTEL_TIME_TITLE[lang]} style={{ margin: '4px 0 18px' }}>
+      {([['quick', HOTEL_PLAN_BUTTONS.quick], ['full', HOTEL_PLAN_BUTTONS.full]] as const).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={plan === id}
+          className={styles.tab}
+          style={plan === id
+            ? { background: 'var(--cream)', color: 'var(--pine)', borderColor: 'var(--cream)' }
+            : { background: 'transparent', color: 'var(--cream)', borderColor: 'rgba(255, 249, 243, .55)' }}
+          onClick={() => setPlan(id)}
+        >{label[lang]}</button>
+      ))}
+    </div>
+  ) : undefined
+  const bandIntro = { eyebrow: HOTEL_PLANS_EYEBROW[lang], title: HOTEL_TIME_TITLE[lang], buttons: planButtons }
   const timeSection = hotel ? (
     <div {...hs('time')}>
-      <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 24 }}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <SectionHead eyebrow={HOTEL_PLANS_EYEBROW[lang]} title={HOTEL_TIME_TITLE[lang]} />
-            <div className={styles.secBody}>
-              {quick && (
-                <div className={styles.nbControls}>
-                  <div className={styles.tabRow} role="tablist" aria-label={HOTEL_TIME_TITLE[lang]}>
-                    {([['quick', HOTEL_PLAN_BUTTONS.quick], ['full', HOTEL_PLAN_BUTTONS.full]] as const).map(([id, label]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        role="tab"
-                        aria-selected={plan === id}
-                        className={`${styles.tab} ${plan === id ? styles.tabActive : ''}`}
-                        onClick={() => setPlan(id)}
-                      >{label[lang]}</button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
       {quick ? (
-        <div style={{ display: 'grid' }}>
-          {layer(showQuick, quickBand(true, showQuick ? 'itinerary' : null))}
-          {layer(!showQuick, renderItinerary(true, showQuick ? null : 'itinerary'))}
+        <div className={styles.hotelBandStack}>
+          {layer(showQuick, quickBand(false, showQuick ? 'itinerary' : null, bandIntro))}
+          {layer(!showQuick, renderItinerary(false, showQuick ? null : 'itinerary', bandIntro))}
         </div>
-      ) : renderItinerary(true)}
+      ) : renderItinerary(false, 'itinerary', bandIntro)}
     </div>
   ) : null
 

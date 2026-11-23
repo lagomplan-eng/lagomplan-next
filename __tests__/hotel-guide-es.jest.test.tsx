@@ -61,32 +61,38 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(text).not.toMatch(/A pie|Trayecto corto|Medio día/)
     expect(text).not.toMatch(/Tu casa/)
   })
-  test('how much time: Condesa picks between two plans in the same dark band (short plan first), others show 48 horas directly', () => {
+  test('plans: one dark band with eyebrow, title, the two buttons (Condesa) and the short line; same layout for both plans', () => {
     const { view } = open()
-    const timeEl = () => view.container.querySelector('[data-hotel-section="time"], [data-hotel-section="time"]')!
+    const timeEl = () => view.container.querySelector('[data-hotel-section="time"]')!
     const bandEl = () => [...view.container.querySelectorAll('[data-hotel-section="time"] section[class*="sectionPine"]')].find((el) => !el.closest('[aria-hidden="true"]'))!
-    const tabs = [...timeEl().querySelectorAll('[role="tab"]')] as HTMLElement[]
+    const tabs = () => [...bandEl().querySelectorAll('[role="tab"]')] as HTMLElement[]
+    expect(timeEl().querySelector('section[class*="sectionAlt"]')).toBeNull() // no cream/sand block above the band
+    const band = () => bandEl().textContent ?? ''
+    expect(band()).toContain('Planes')
+    expect(band()).toContain('¿Cuánto tiempo tienes?')
+    expect(band()).not.toContain('Itinerario') // no second heading inside the band
+    expect(bandEl().querySelectorAll('h2')).toHaveLength(1)
     if (zone !== 'condesa') {
-      expect(tabs).toHaveLength(0)
-      expect(bandEl().textContent).toContain('48 horas')
+      expect(tabs()).toHaveLength(0)
+      expect(band()).toContain('Dos días, caminados y comprobados.')
       expect(view.container.textContent).not.toContain('Solo unas horas')
       return
     }
-    expect(tabs.map((t) => [t.textContent, t.getAttribute('aria-selected')])).toEqual([['Solo unas horas', 'true'], ['48 horas', 'false']])
-    const band = () => bandEl().textContent ?? ''
-    expect(band()).toContain('Unas horas')
+    expect(tabs().map((t) => [t.textContent, t.getAttribute('aria-selected')])).toEqual([['Solo unas horas', 'true'], ['48 horas', 'false']])
     expect(band()).toContain('Cuatro paradas, una tarde.')
     for (const n of ['Museo de Arte Moderno', 'Niddo', 'Avenida Ámsterdam', 'Lindy']) expect(band()).toContain(n)
     expect(band()).toContain('La avenida ovalada bajo los árboles, trazada sobre un antiguo hipódromo. Camina una vuelta al atardecer.')
     expect(band()).toContain('No en lunes. Trayectos cortos al inicio; las dos últimas paradas están a unos pasos.')
     expect(band()).not.toContain('Maleza')
     expect([...bandEl().querySelectorAll('[class*="itinTime"]')].map((x) => x.textContent)).toEqual(['01', '02', '03', '04'])
-    act(() => { fireEvent.click(tabs[1]) })
-    expect(band()).toContain('48 horas')
+    act(() => { fireEvent.click(tabs()[1]) })
+    expect(tabs().map((t) => t.getAttribute('aria-selected'))).toEqual(['false', 'true'])
+    expect(band()).toContain('Dos días, caminados y comprobados.')
     expect(band()).not.toContain('Lindy')
-    act(() => { fireEvent.click(tabs[0]) })
+    expect(bandEl().querySelectorAll('h2')).toHaveLength(1)
+    act(() => { fireEvent.click(tabs()[0]) })
     expect(band()).toContain('Lindy')
-    // one band is visible at a time; the other is hidden but keeps the section's height
+    // one band is visible at a time; the other is hidden (and gone on phones)
     expect(timeEl().querySelectorAll('[aria-hidden="true"] section[class*="sectionPine"]')).toHaveLength(1)
   })
   test('the share message ends with the guide address: the hotel short link in the guest\'s language, or the zone page', () => {
@@ -105,10 +111,12 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const zonesEl = () => view.container.querySelector('[data-hotel-section="neighborhoods"]')!
     const tab = (name: string) => ([...zonesEl().querySelectorAll('[role="tab"]')] as HTMLElement[]).find((t) => t.firstChild?.textContent === name)!
     const link = () => zonesEl().querySelector('a[class*="hotelMapLink"]') as HTMLAnchorElement
-    expect(link().textContent).toBe(`Mapa de ${ZONE_NEIGHBORHOOD[zone]} →`)
+    expect(link().textContent).toBe('Mapa →')
+    expect(link().getAttribute('aria-label')).toBe(`Mapa de ${ZONE_NEIGHBORHOOD[zone]}`)
     act(() => { fireEvent.click(tab('San Miguel Chapultepec')) })
     expect(link().getAttribute('href')).toBe('https://maps.app.goo.gl/ZFKMj2iBMeL7fxHK7')
-    expect(link().textContent).toBe('Mapa de San Miguel Chapultepec →')
+    expect(link().textContent).toBe('Mapa →')
+    expect(link().getAttribute('aria-label')).toBe('Mapa de San Miguel Chapultepec')
     expect(zonesEl().textContent).not.toMatch(/Ver los lugares|Lista de Google Maps|Ver los \d+ lugares/)
     expect(zonesEl().querySelector('a[class*="nbMapCard"]')).toBeNull()
     expect(zonesEl().textContent).toContain('Galerías tras muros antiguos, una casa de Barragán, la orilla del bosque.')
@@ -116,7 +124,8 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(zonesEl().textContent).toContain(zone === 'condesa' ? 'Junto a la Condesa; casi todo queda a una caminata corta.' : 'A un trayecto corto; combínalo con Chapultepec.')
     act(() => { fireEvent.click(tab('Coyoacán')) })
     expect(link().getAttribute('href')).toBe('https://maps.app.goo.gl/fHKhCCToYVaqFmrEA')
-    expect(link().textContent).toBe('Mapa de Coyoacán →')
+    expect(link().textContent).toBe('Mapa →')
+    expect(link().getAttribute('aria-label')).toBe('Mapa de Coyoacán')
     expect(zonesEl().textContent).toContain('Un trayecto largo al sur; planea medio día.')
     expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
     expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word
@@ -145,6 +154,29 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
       expect(p.querySelectorAll('a')).toHaveLength(sizes[i])
     }
   })
+  test('mood panel: each place is three lines (name + label, description, zone · address · Map), in quiet sentence case', () => {
+    const { view } = open()
+    const dinner = ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[])[0]
+    act(() => { fireEvent.click(dinner) })
+    const list = view.container.querySelector('[class*="hotelMoodItems"]') as HTMLElement
+    expect(list.style.getPropertyValue('--rows')).toBe('4') // 7 places: 4 + 3 in two columns
+    const items = [...list.querySelectorAll('[class*="hotelMoodItem"]')] as HTMLElement[]
+    expect(items).toHaveLength(7)
+    expect(items.filter((i) => i.hasAttribute('data-colfirst')).map((i) => items.indexOf(i))).toEqual([0, 4])
+    expect(items.filter((i) => i.hasAttribute('data-first')).map((i) => items.indexOf(i))).toEqual([0])
+    for (const it of items) {
+      expect(it.children).toHaveLength(3)
+      const [name, note, where] = [...it.children] as HTMLElement[]
+      const label = name.querySelector('span') as HTMLElement
+      expect(label).not.toBeNull()
+      expect(label.style.color).toBe('rgb(62, 95, 88)') // #3E5F58
+      expect(label.className).not.toMatch(/eyebrow/) // not uppercase, not mono
+      expect(note.textContent!.length).toBeGreaterThan(10)
+      expect(where.className).not.toMatch(/eyebrow/)
+      expect(where.textContent).toMatch(/ · .* · Mapa$| · Mapa$/)
+      expect(where.querySelector('a')!.textContent).toBe('Mapa')
+    }
+  })
   test.each(['es', 'en'] as const)('%s: no Hidden gem mark inside the "Hidden places" panel; elsewhere quiet and at most once per panel', (lang) => {
     window.history.pushState({}, '', `/guia/cdmx/${zone}?lang=${lang}`)
     const view = render(<GuiaClient {...buildHotelGuideProps(zone)!} />)
@@ -167,7 +199,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
       if (name === (lang === 'es' ? 'Tengo hambre' : "I'm hungry")) {
         // Maleza's label already says it: no inline mark on top
         const maleza = [...panel.querySelectorAll('[class*="moodItemName"]')].find((x) => x.textContent?.startsWith('Maleza'))!
-        expect(maleza.textContent).toBe('Maleza')
+        expect(maleza.textContent).toBe(`Maleza${label}`) // the pick's own label, once; no second mark on top
       }
       if (name === (lang === 'es' ? 'Quiero ir de compras' : 'I want to shop')) expect(panel.textContent).toContain(label) // Proyecto Rufina
     }

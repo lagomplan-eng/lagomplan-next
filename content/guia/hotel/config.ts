@@ -67,8 +67,9 @@ export const HOTEL_EXTRA_ZONES_ON: Record<'San Miguel Chapultepec' | 'Coyoacán'
   'Coyoacán': true,
 }
 
-/** The map link on the zone chip row, with the open zone's name. It links to that zone's Google Maps list. */
-export const HOTEL_MAP_LINK: Record<Lang, string> = { en: 'Map of {zone} →', es: 'Mapa de {zone} →' }
+/** The map link on the zone chip row: just "Map →"; the open zone's name is in its aria-label. It links to that zone's Google Maps list. */
+export const HOTEL_MAP_LINK: Record<Lang, string> = { en: 'Map →', es: 'Mapa →' }
+export const HOTEL_MAP_ARIA: Record<Lang, string> = { en: 'Map of {zone}', es: 'Mapa de {zone}' }
 
 /** Distance line of the two closest zones in the hotel edition (Roma Norte and Condesa tabs, for a Condesa or Roma Norte hotel). */
 export const HOTEL_CLOSE_ZONES_LINE: Record<Lang, string> = {
