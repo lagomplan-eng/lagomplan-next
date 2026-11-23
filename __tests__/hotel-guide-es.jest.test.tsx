@@ -121,26 +121,28 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(zonesEl().textContent).toContain('Jardín Centenario y Plaza Hidalgo')
     expect(zonesEl().textContent).toContain('De lote pequeño, sin prisa.') // Café Avellaneda, reused word for word
   })
-  test('moods in Spanish: A special dinner first (Michelin label, zone, address, Map link), no kids; every pick has a Map link', () => {
+  test('moods in Spanish: A special dinner first (Michelin label, zone, address, Map link); every pick has a Map link', () => {
     const { view } = open()
     const buttons = ([...view.container.querySelectorAll('[class*="moodBtn"]')] as HTMLElement[])
     expect(buttons.map((b) => b.textContent)).toEqual(['Una cena especial', 'Quiero ir de compras', 'Quiero cultura', 'Lugares escondidos', 'Tengo hambre', 'Quiero vida nocturna'])
     act(() => { fireEvent.click(buttons[0]) })
     const panel = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
     const text = panel.textContent ?? ''
-    for (const t of ['Una estrella Michelin', 'Dos estrellas Michelin', 'Gaba', 'Máximo', 'Rosetta', 'Quintonil', 'Pujol', 'Roma Norte · Av. Álvaro Obregón 65 Bis', 'Polanco · Tennyson 133',
+    for (const t of ['Una estrella Michelin', 'Dos estrellas Michelin', 'Gaba', 'Esquina Común', 'Em', 'Máximo', 'Rosetta', 'Quintonil', 'Pujol', 'Condesa · Av. Mazatlán 190', 'Roma Norte · Av. Álvaro Obregón 65 Bis', 'Polanco · Tennyson 133',
+      'El menú degustación de Lucho Martínez en una casa pequeña sobre Ámsterdam. Reserva con tiempo.',
       'El menú degustación de Enrique Olvera, la mesa más conocida de la ciudad. Reserva con semanas de anticipación.']) expect(text).toContain(t)
     const links = [...panel.querySelectorAll('a')].map((a) => [a.textContent, decodeURIComponent(a.getAttribute('href')!)])
-    expect(links).toHaveLength(5)
+    expect(links).toHaveLength(7)
     for (const [label] of links) expect(label).toBe('Mapa')
-    expect(links[1][1]).toContain('Máximo, Av. Álvaro Obregón 65 Bis, Roma Norte, Ciudad de México')
-    expect(links[0][1]).toContain('query=Gaba, Ciudad de México') // no address yet: the name alone
+    expect(links[3][1]).toContain('Máximo, Av. Álvaro Obregón 65 Bis, Roma Norte, Ciudad de México')
     expect(view.container.textContent).not.toContain('Viajo con niños')
-    // every other panel: one Map link per pick
-    for (const b of buttons.slice(1)) {
+    // every panel: one Map link per pick, and the size the plan says
+    const sizes = [7, 7, 5, 6, 6, 7]
+    for (const [i, b] of buttons.entries()) {
       act(() => { fireEvent.click(b) })
       const p = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
-      expect(p.querySelectorAll('a').length).toBe(p.querySelectorAll('[class*="moodItemName"]').length)
+      expect(p.querySelectorAll('[class*="moodItemName"]')).toHaveLength(sizes[i])
+      expect(p.querySelectorAll('a')).toHaveLength(sizes[i])
     }
   })
   test.each(['es', 'en'] as const)('%s: no Hidden gem mark inside the "Hidden places" panel; elsewhere quiet and at most once per panel', (lang) => {
@@ -152,7 +154,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     const hidden = view.container.querySelector('[class*="moodPanel"]') as HTMLElement
     expect(hidden.textContent).toContain(lang === 'es' ? 'Foro Shakespeare' : 'Foro Shakespeare')
     expect(hidden.textContent).not.toContain(label)
-    expect(hidden.querySelectorAll('[class*="moodItemName"]')).toHaveLength(3)
+    expect(hidden.querySelectorAll('[class*="moodItemName"]')).toHaveLength(6)
     // other panels: the mark sits inside the name line, soft green, at most once per place
     for (const name of lang === 'es' ? ['Quiero ir de compras', 'Tengo hambre', 'Una cena especial', 'Quiero cultura', 'Quiero vida nocturna'] : ["I want to shop", "I'm hungry", 'A special dinner', 'I want culture', 'I want nightlife']) {
       act(() => { fireEvent.click(button(name)) })
