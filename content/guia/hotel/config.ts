@@ -91,6 +91,14 @@ export const HOTEL_ORIENTATION: Record<'condesa' | 'roma' | 'polanco', Record<st
   },
 }
 
+/** Maleza leaves the short plan and joins "I'm hungry", with "Hidden gem" as its craving label. */
+export const HOTEL_MALEZA_PICK: Record<Lang, { name: string; tag: string; note: string }> = {
+  en: { name: 'Maleza', tag: 'Hidden gem', note: 'Locally sourced cooking from small producers of the Valley of Mexico, and good drinks.' },
+  es: { name: 'Maleza', tag: 'Joya escondida', note: 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos.' },
+}
+/** Craving labels the hotel edition changes (so the panel has one "Hidden gem"). */
+export const HOTEL_CRAVING_LABEL: Record<string, string> = { 'Café Nin': 'Brunch' }
+
 /** Zone name under a mood pick, from the owner's list. Places not listed (Masala y Maíz, Bar Federalista, Casa Franca) show none. */
 export const HOTEL_PICK_ZONES: Record<string, string> = {
   'Lalo!': 'Roma Norte',
@@ -98,6 +106,7 @@ export const HOTEL_PICK_ZONES: Record<string, string> = {
   'El Vilsito': 'Narvarte',
   'Quintonil': 'Polanco',
   'Café Nin': 'Juárez',
+  'Maleza': 'Condesa',
   'Nevería Roxy': 'Condesa',
   'Café Avellaneda': 'Coyoacán',
   'Museo Tamayo': 'Chapultepec',

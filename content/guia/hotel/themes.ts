@@ -7,7 +7,8 @@ import type { Lang } from '../types'
 
 export const HIDDEN_GEM_LABEL: Record<Lang, string> = { en: 'Hidden gem', es: 'Joya escondida' }
 
-export const HIDDEN_GEMS = ['Maleza', 'Café Nin', 'Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Proyecto Rufina', 'Mercado de San Juan']
+// Café Nin was on this list only through its craving label; its label is now "Brunch" (Maleza carries "Hidden gem").
+export const HIDDEN_GEMS = ['Maleza', 'Foro Shakespeare', 'Bósforo', 'Casa Franca', 'Proyecto Rufina', 'Mercado de San Juan']
 
 export function isHiddenGem(name: string): boolean {
   return HIDDEN_GEMS.includes(name)

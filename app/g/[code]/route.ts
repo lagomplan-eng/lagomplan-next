@@ -10,7 +10,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { hotelsDb } from '../../../lib/hotels/db'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import { isCountableScan } from '../../../lib/hotels/bots'
-import { langFromAcceptLanguage } from '../../../lib/hotels/lang'
+import { resolveLang } from '../../../lib/hotels/lang'
 import { zoneGuidePath } from '../../../lib/hotels/links'
 import { isHotelZone } from '../../../content/guia/hotel/zones'
 
@@ -18,7 +18,8 @@ export const dynamic = 'force-dynamic'
 
 async function handle(req: NextRequest, params: Promise<{ code: string }>) {
   const { code } = await params
-  const lang = langFromAcceptLanguage(req.headers.get('accept-language'))
+  // ?lang=es|en (a link the guest shared from the guide) wins over the phone's language.
+  const lang = resolveLang(req.nextUrl.searchParams.get('lang'), req.headers.get('accept-language'))
   let target = '/'
 
   if (isValidHotelCode(code)) {

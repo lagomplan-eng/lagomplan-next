@@ -5,38 +5,48 @@
 //
 // The short plan exists for Condesa only. Roma Norte and Polanco show only the 48 hours plan; do not reuse this one there.
 
-import type { IconKey, Lang } from '../types'
+import type { Lang } from '../types'
 import type { HotelZone } from './zones'
 
 export interface QuickStop {
   name: string
-  /** Street address as given, or the area for a park/museum. */
+  /** Street address as given, or the area for a park/museum/avenue. */
   where: string
-  icon: IconKey
   note: Record<Lang, string>
+  /** Per-stop flag, when it differs from the plan's. */
+  verify?: string
 }
 
 export interface QuickPlan {
   zones: HotelZone[]
+  /** Button label. */
   title: Record<Lang, string>
+  /** Left column of the dark band, same structure as the 48 hours one: eyebrow (the itinerary's), title, line. */
+  band: { title: Record<Lang, string>; line: Record<Lang, string> }
   stops: QuickStop[]
-  line: Record<Lang, string>
+  /** Closing note, in the band's italic note style. */
+  note: Record<Lang, string>
   /** Not shown to guests. Anything here has not been checked yet. */
   verify: string
 }
 
 export const HOTEL_TIME_TITLE: Record<Lang, string> = { es: '¿Cuánto tiempo tienes?', en: 'How much time do you have?' }
 
+const VERIFY_NEW = 'to verify: address, opening days and hours'
+
 export const HOTEL_QUICK_PLAN: QuickPlan = {
   zones: ['condesa'],
   title: { es: 'Solo unas horas', en: 'Only a few hours' },
-  // to verify: opening days and hours (all three stops)
+  band: {
+    title: { es: 'Unas horas', en: 'A few hours' },
+    line: { es: 'Cuatro paradas, una tarde.', en: 'Four stops, one afternoon.' },
+  },
+  // to verify: opening days and hours (all four stops; the last two also the address)
   verify: 'to verify: opening days and hours',
   stops: [
     {
       name: 'Museo de Arte Moderno',
       where: 'Chapultepec',
-      icon: 'landmark',
       note: {
         en: 'Mexican modern art and a sculpture garden, inside Chapultepec.',
         es: 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.',
@@ -45,25 +55,33 @@ export const HOTEL_QUICK_PLAN: QuickPlan = {
     {
       name: 'Niddo',
       where: 'Dresde 2, Juárez',
-      icon: 'coffee',
       note: {
         en: 'Coffee from Chiapas and fresh baked goods on a quiet, tree-lined street a block behind Reforma.',
         es: 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.',
       },
     },
     {
-      name: 'Maleza',
-      where: 'Cuernavaca 4, Condesa',
-      icon: 'utensilsSm',
+      name: 'Avenida Ámsterdam',
+      where: 'Condesa',
+      verify: VERIFY_NEW,
       note: {
-        en: 'Locally sourced cooking from small producers of the Valley of Mexico, and good drinks. A hidden gem in Condesa.',
-        es: 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos. Una joya escondida en la Condesa.',
+        en: 'The oval avenue under the trees, laid out on an old racetrack. Walk a loop at golden hour.',
+        es: 'La avenida ovalada bajo los árboles, trazada sobre un antiguo hipódromo. Camina una vuelta al atardecer.',
+      },
+    },
+    {
+      name: 'Baltra Bar',
+      where: 'Iztaccíhuatl 36, Condesa',
+      verify: VERIFY_NEW,
+      note: {
+        en: 'A small, calm cocktail bar from the Limantour team.',
+        es: 'Un bar de coctelería pequeño y tranquilo, del equipo de Limantour.',
       },
     },
   ],
-  line: {
-    en: 'Best Wednesday to Saturday. Take a short ride between stops.',
-    es: 'Mejor de miércoles a sábado. Entre paradas, un trayecto corto.',
+  note: {
+    en: 'Not on Mondays. Short rides at the start; the last two stops are a walk apart.',
+    es: 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.',
   },
 }
 

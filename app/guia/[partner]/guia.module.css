@@ -707,6 +707,7 @@
 .hotelCalm .tabRow { flex: 0 1 auto; flex-wrap: nowrap; overflow-x: auto; max-width: 100%; scrollbar-width: none; }
 .hotelCalm .tabRow::-webkit-scrollbar { display: none; }
 .hotelCalm .tab { flex: none; white-space: nowrap; }
+.hotelCalm .sectionPine .eyebrow { color: var(--sage-soft); }   /* "Hidden gem" in the dark band's light label tone */
 .hotelCalm .nbControls { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 8px; max-width: 860px; }
 .hotelCalm .moodGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .hotelCalm .weatherCard { max-width: 860px; }

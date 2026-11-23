@@ -102,5 +102,13 @@ eq('qr url is the www host (apex redirects)', hotelQrUrl('abcdefghjk'), 'https:/
 eq('zone guide path', zoneGuidePath('roma', { h: 'abcdefghjk', lang: 'es' }), '/guia/cdmx/roma-norte?h=abcdefghjk&lang=es')
 eq('slugs', [zoneFromSlug('roma-norte'), zoneFromSlug('roma'), zoneFromSlug('condesa'), ZONE_SLUG.polanco], ['roma', null, 'condesa', 'polanco'])
 
+// ?lang on the short link wins over the phone's language (a link the guest shared keeps their language)
+import { resolveLang } from '../lib/hotels/lang'
+eq('lang param es beats an English phone', resolveLang('es', 'en-US,en;q=0.9'), 'es')
+eq('lang param en beats a Spanish phone', resolveLang('en', 'es-MX,es;q=0.9'), 'en')
+eq('no param: the phone decides', resolveLang(null, 'es-MX,es;q=0.9'), 'es')
+eq('bad param is ignored', resolveLang('fr', 'es-MX'), 'es')
+eq('no param, no header', resolveLang(undefined, undefined), 'en')
+
 if (failed) { console.error(`\n${failed} failed`); process.exit(1) }
 console.log('hotel-guide: all passed')

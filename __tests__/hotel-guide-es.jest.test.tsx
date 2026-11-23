@@ -39,7 +39,7 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(text).not.toContain('Los imperdibles')
     expect(view.container.querySelectorAll('a.expBookLink, a[class*="expBookLink"]')).toHaveLength(4)
     expect((text.match(/Reservar en GetYourGuide/g) ?? []).length).toBe(4)
-    const quickEs = ['Solo unas horas', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Cocina con ingredientes de pequeños productores del Valle de México y buenos tragos. Una joya escondida en la Condesa.', 'Mejor de miércoles a sábado. Entre paradas, un trayecto corto.']
+    const quickEs = ['Solo unas horas', 'Cuatro paradas, una tarde.', 'Arte moderno mexicano y un jardín de esculturas, dentro de Chapultepec.', 'Café de Chiapas y pan recién horneado en una calle tranquila y arbolada, a una cuadra de Reforma.', 'Un bar de coctelería pequeño y tranquilo, del equipo de Limantour.', 'No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.']
     for (const q of quickEs) zone === 'condesa' ? expect(text).toContain(q) : expect(text).not.toContain(q)
     expect(view.container.querySelectorAll('.moodGrid button, [class*="moodBtn"]').length).toBe(6)
     for (const hidden of ['Lavandería y tintorería', 'Restaurantes que reciben grupos', 'Catering y entrega a domicilio', 'Llegar tarde']) expect(text).not.toContain(hidden)
@@ -61,25 +61,44 @@ describe.each(HOTEL_ZONES)('%s hotel guide, Spanish', (zone) => {
     expect(text).not.toMatch(/A pie|Trayecto corto|Medio día/)
     expect(text).not.toMatch(/Tu casa/)
   })
-  test('how much time: Condesa picks between two plans (short plan first), others show 48 horas directly', () => {
+  test('how much time: Condesa picks between two plans in the same dark band (short plan first), others show 48 horas directly', () => {
     const { view } = open()
-    const timeEl = () => view.container.querySelector('[data-hotel-section="time"]')!
+    const timeEl = () => view.container.querySelector('[data-hotel-section="time"], [data-hotel-section="time"]')!
+    const bandEl = () => [...view.container.querySelectorAll('[data-hotel-section="time"] section[class*="sectionPine"]')].find((el) => !el.closest('[aria-hidden="true"]'))!
     const tabs = [...timeEl().querySelectorAll('[role="tab"]')] as HTMLElement[]
     if (zone !== 'condesa') {
       expect(tabs).toHaveLength(0)
-      expect(view.container.textContent).toContain('48 horas')
+      expect(bandEl().textContent).toContain('48 horas')
       expect(view.container.textContent).not.toContain('Solo unas horas')
       return
     }
     expect(tabs.map((t) => [t.textContent, t.getAttribute('aria-selected')])).toEqual([['Solo unas horas', 'true'], ['48 horas', 'false']])
-    expect(timeEl().textContent).toContain('Museo de Arte Moderno')
-    expect(view.container.querySelector('[data-hotel-section="itinerary"]')).toBeNull()
+    const band = () => bandEl().textContent ?? ''
+    expect(band()).toContain('Unas horas')
+    expect(band()).toContain('Cuatro paradas, una tarde.')
+    for (const n of ['Museo de Arte Moderno', 'Niddo', 'Avenida Ámsterdam', 'Baltra Bar']) expect(band()).toContain(n)
+    expect(band()).toContain('La avenida ovalada bajo los árboles, trazada sobre un antiguo hipódromo. Camina una vuelta al atardecer.')
+    expect(band()).toContain('No en lunes. Trayectos cortos al inicio; las dos últimas paradas se recorren a pie.')
+    expect(band()).not.toContain('Maleza')
+    expect([...bandEl().querySelectorAll('[class*="itinTime"]')].map((x) => x.textContent)).toEqual(['01', '02', '03', '04'])
     act(() => { fireEvent.click(tabs[1]) })
-    expect(timeEl().textContent).not.toContain('Museo de Arte Moderno')
-    expect(view.container.querySelector('[data-hotel-section="itinerary"]')).not.toBeNull()
-    expect(view.container.textContent).toContain('48 horas')
+    expect(band()).toContain('48 horas')
+    expect(band()).not.toContain('Baltra Bar')
     act(() => { fireEvent.click(tabs[0]) })
-    expect(timeEl().textContent).toContain('Museo de Arte Moderno')
+    expect(band()).toContain('Baltra Bar')
+    // one band is visible at a time; the other is hidden but keeps the section's height
+    expect(timeEl().querySelectorAll('[aria-hidden="true"] section[class*="sectionPine"]')).toHaveLength(1)
+  })
+  test('the share message ends with the guide address: the hotel short link in the guest\'s language, or the zone page', () => {
+    // a hotel code starts the section/click tracking, which needs IntersectionObserver (not in jsdom)
+    ;(window as unknown as { IntersectionObserver: unknown }).IntersectionObserver = class { observe() {} unobserve() {} disconnect() {} }
+    window.history.pushState({}, '', `/guia/cdmx/${zone}?lang=es&h=abcd2345wxyz`)
+    const { container } = render(<GuiaClient {...buildHotelGuideProps(zone)!} />)
+    const link = container.querySelector('a[href^="https://wa.me/"]') as HTMLAnchorElement
+    const msg = decodeURIComponent(link.getAttribute('href')!.replace('https://wa.me/?text=', ''))
+    expect(msg).toMatch(/https?:\/\/\S+$/)
+    expect(msg).toBe(`Mi guía de barrio de ${ZONE_LABEL[zone]}, de Lagomplan: https://www.lagomplan.com/g/abcd2345wxyz?lang=es`)
+    expect(link.getAttribute('href')).not.toMatch(/localhost|vercel\.app/)
   })
   test('the two new zones: Spanish text; the map link names the open zone and links to the owner\'s list', () => {
     const { view } = open()

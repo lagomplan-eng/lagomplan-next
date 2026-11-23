@@ -14,7 +14,7 @@ import type { ArrivalItem, City, CityCopy, InlineLink, Lang, Mood, MoodItem, Nei
 import type { FaqItemKey } from '../faq/types'
 import { getGuide } from '..'
 import {
-  HOTEL_EXTRA_ZONES_ON, HOTEL_FREE_EDITION, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_ORIENTATION, HOTEL_PICK_ZONES, HOTEL_SHOP_MOOD, type HotelMode,
+  HOTEL_CRAVING_LABEL, HOTEL_EXTRA_ZONES_ON, HOTEL_FREE_EDITION, HOTEL_MALEZA_PICK, HOTEL_MONDAY_ROW, HOTEL_MOOD_ORDER, HOTEL_ORIENTATION, HOTEL_PICK_ZONES, HOTEL_SHOP_MOOD, type HotelMode,
 } from './config'
 import { EXTRA_ZONES, type ExtraPlace, type ExtraZone } from './extra-zones'
 import { HOTEL_EXPERIENCE_IDS } from './experiences'
@@ -99,7 +99,8 @@ function sanitizeCopy(copy: CityCopy, city: City, lang: Lang, moved: Set<string>
       items: [
         ...m.items,
         ...HOTEL_HUNGRY_PICKS.filter((n) => !moved.has(n)).map((n) => copy.foodCollections.find((c) => c.name === n)).filter((c): c is NonNullable<typeof c> => !!c)
-          .map((c) => ({ name: c.name, note: c.note, tag: c.tag })),
+          .map((c) => ({ name: c.name, note: c.note, tag: HOTEL_CRAVING_LABEL[c.name] ?? c.tag })),
+        { name: HOTEL_MALEZA_PICK[lang].name, note: HOTEL_MALEZA_PICK[lang].note, tag: HOTEL_MALEZA_PICK[lang].tag },
       ],
     })
   const withShop = [...moods, shopMood(city, copy, lang)]

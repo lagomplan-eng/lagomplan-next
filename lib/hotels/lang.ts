@@ -13,3 +13,8 @@ export function langFromAcceptLanguage(header: string | null | undefined): 'es' 
     .sort((a, b) => b.q - a.q || a.i - b.i)
   return ranked[0]?.tag.split('-')[0] === 'es' ? 'es' : 'en'
 }
+
+/** ?lang=es|en on the short link wins (a shared link keeps the guest's language); otherwise the phone's preference. */
+export function resolveLang(param: string | null | undefined, acceptLanguage: string | null | undefined): 'es' | 'en' {
+  return param === 'es' || param === 'en' ? param : langFromAcceptLanguage(acceptLanguage)
+}
