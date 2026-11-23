@@ -9,6 +9,7 @@
 
 import { useState, useCallback } from 'react'
 import type { ChecklistSection } from '../../../lib/data/guides/types'
+import { Button, CardTitle, Eyebrow, InfoCard } from '../../design'
 
 interface Props {
   data: ChecklistSection
@@ -43,39 +44,35 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
   const progress = total > 0 ? (doneCount / total) * 100 : 0
 
   return (
-    <div data-guide="checklist" className="bg-white border border-[#E2DDD5] rounded-2xl overflow-hidden shadow-[0_1px_3px_rgba(15,58,51,.06)]">
+    <InfoCard size="flush" data-guide="checklist">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-4 pb-[14px] border-b border-[#E2DDD5]">
+      <div className="flex items-center justify-between border-b border-line-soft px-5 py-4">
         <div>
-          <div className="font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#BDBDBD] mb-0.5">
+          <Eyebrow as="div" data-pl="mod-eyebrow" className="!mb-1">
             {data.eyebrow}
-          </div>
-          <div className="font-display text-[16px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
+          </Eyebrow>
+          <CardTitle as="div" data-pl="mod-title" className="!text-[20px] !leading-[1.2]">
             {data.title}
-          </div>
+          </CardTitle>
         </div>
       </div>
 
       {/* Body */}
-      <div className="px-5 py-4 pb-5">
+      <div className="px-5 pb-5 pt-4">
         {/* Progress bar */}
-        <div className="flex items-center gap-2.5 mb-3.5 pb-3 border-b border-[#E2DDD5]">
-          <span className="font-mono text-[11px] font-medium text-[#0F3A33] tracking-[.04em]">
+        <div className="mb-3.5 flex items-center gap-2.5 border-b border-line-soft pb-3">
+          <span className="text-tiny font-bold text-pine">
             {doneCount} / {total}
           </span>
-          <div className="flex-1 h-[3px] bg-[#E2DDD5] rounded-full overflow-hidden">
+          <div className="h-[3px] flex-1 overflow-hidden rounded-full bg-line-soft">
             <div
-              className="h-full bg-[#6EBD9F] rounded-full"
+              className="h-full rounded-full bg-sage"
               style={{ width: `${progress}%`, transition: 'width 0.4s ease' }}
             />
           </div>
-          <button
-            type="button"
-            onClick={reset}
-            className="font-mono text-[9px] font-medium tracking-[.08em] uppercase text-[#BDBDBD] hover:text-[#8A8A8A] transition-colors py-[3px]"
-          >
+          <Button variant="ghost" size="sm" onClick={reset}>
             Reset
-          </button>
+          </Button>
         </div>
 
         {/* Items */}
@@ -91,27 +88,25 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
                 tabIndex={0}
                 onClick={() => toggle(i)}
                 onKeyDown={(e) => e.key === ' ' || e.key === 'Enter' ? toggle(i) : undefined}
-                className="flex items-center gap-2.5 py-[9px] border-b border-[#E2DDD5] last:border-0 cursor-pointer select-none hover:bg-[rgba(15,58,51,.03)] rounded-sm -mx-1 px-1 transition-colors"
+                className="-mx-1 flex cursor-pointer select-none items-center gap-2.5 rounded-sm border-b border-line-soft px-1 py-[9px] transition-colors last:border-0 hover:bg-sand/40"
               >
                 {/* Checkbox */}
                 <div
                   data-check="box"
-                  className="w-[17px] h-[17px] rounded-[4px] border border-[#C8C2B8] flex items-center justify-center flex-shrink-0 transition-all"
-                  style={done ? { background: '#0F3A33', borderColor: '#0F3A33' } : { background: 'white' }}
+                  className={`flex size-[17px] flex-shrink-0 items-center justify-center rounded-[4px] border transition-all ${done ? 'border-pine bg-pine' : 'border-line-strong bg-white'}`}
                 >
                   {done && (
-                    <span className="text-[9px] text-white font-bold leading-none">✓</span>
+                    <span className="text-[9px] font-bold leading-none text-white">✓</span>
                   )}
                 </div>
                 {/* Emoji */}
-                <span data-check="emoji" className="text-[13px] flex-shrink-0 w-[18px] text-center">
+                <span data-check="emoji" className="w-[18px] flex-shrink-0 text-center text-small">
                   {item.emoji}
                 </span>
                 {/* Label */}
                 <span
                   data-check="label"
-                  className="text-[12.5px] font-light flex-1 leading-[1.35] transition-colors"
-                  style={done ? { color: '#BDBDBD', textDecoration: 'line-through' } : { color: '#4A4A4A' }}
+                  className={`flex-1 text-small transition-colors ${done ? 'text-label line-through' : 'text-ink-2'}`}
                 >
                   {item.label}
                 </span>
@@ -120,6 +115,6 @@ export function Checklist({ data, onToast, completionMessage }: Props) {
           })}
         </div>
       </div>
-    </div>
+    </InfoCard>
   )
 }

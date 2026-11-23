@@ -7,6 +7,7 @@
 
 import type { ItinerarySection } from '../../lib/data/guides/types'
 import { DayCard } from './DayCard'
+import { GuideSectionHeader } from './GuideSectionHeader'
 
 interface Props {
   data: ItinerarySection
@@ -24,20 +25,7 @@ function dayLabel(n: number, locale: string): string {
 export function Itinerary({ data, locale }: Props) {
   return (
     <div data-guide="itinerary" className="mb-14">
-      {/* Section header */}
-      <div className="mb-6">
-        <div data-section="eyebrow" className="font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5">
-          {data.eyebrow}
-        </div>
-        <div data-section="title" className="font-display text-[22px] font-normal tracking-[-0.01em] text-[#1A1A1A]">
-          {data.title}
-        </div>
-        {data.description && (
-          <div className="text-[13px] font-light text-[#4A4A4A] leading-[1.6] mt-1.5">
-            {data.description}
-          </div>
-        )}
-      </div>
+      <GuideSectionHeader eyebrow={data.eyebrow} title={data.title} description={data.description} />
 
       {/* Day cards */}
       <div className="flex flex-col gap-4">

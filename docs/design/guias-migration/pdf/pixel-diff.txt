@@ -1,0 +1,49 @@
+roma page 01: 0 px differ
+roma page 02: 0 px differ
+roma page 03: 0 px differ
+roma page 04: 0 px differ
+roma page 05: 0 px differ
+roma page 06: 0 px differ
+roma page 07: 0 px differ
+roma page 08: 0 px differ
+roma page 09: 0 px differ
+== roma: 9 pages, total 0 px different
+nueva-york page 01: 0 px differ
+nueva-york page 02: 0 px differ
+nueva-york page 03: 0 px differ
+nueva-york page 04: 0 px differ
+nueva-york page 05: 0 px differ
+nueva-york page 06: 0 px differ
+nueva-york page 07: 0 px differ
+nueva-york page 08: 0 px differ
+nueva-york page 09: 0 px differ
+== nueva-york: 9 pages, total 0 px different
+_en_guides_roma page 01: 0 px differ
+_en_guides_roma page 02: 0 px differ
+_en_guides_roma page 03: 0 px differ
+_en_guides_roma page 04: 0 px differ
+_en_guides_roma page 05: 0 px differ
+_en_guides_roma page 06: 0 px differ
+_en_guides_roma page 07: 0 px differ
+_en_guides_roma page 08: 0 px differ
+_en_guides_roma page 09: 0 px differ
+== _en_guides_roma: 9 pages, total 0 px different
+_en_guides_nueva-york page 01: 0 px differ
+_en_guides_nueva-york page 02: 0 px differ
+_en_guides_nueva-york page 03: 0 px differ
+_en_guides_nueva-york page 04: 0 px differ
+_en_guides_nueva-york page 05: 0 px differ
+_en_guides_nueva-york page 06: 0 px differ
+_en_guides_nueva-york page 07: 0 px differ
+_en_guides_nueva-york page 08: 0 px differ
+_en_guides_nueva-york page 09: 0 px differ
+== _en_guides_nueva-york: 9 pages, total 0 px different
+cancun page 01: 0 px differ
+cancun page 02: 0 px differ
+cancun page 03: 0 px differ
+cancun page 04: 0 px differ
+cancun page 05: 0 px differ
+cancun page 06: 0 px differ
+cancun page 07: 0 px differ
+cancun page 08: 0 px differ
+== cancun: 8 pages, total 0 px different

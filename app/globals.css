@@ -485,6 +485,8 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   body:has([data-guide="hero"]) .min-h-screen            { min-height: 0 !important; }
 
   /* Strip card chrome + cream/beige page backgrounds */
+  body:has([data-guide="hero"]) .rounded-info,
+  body:has([data-guide="hero"]) .rounded-destination,
   body:has([data-guide="hero"]) .rounded-2xl,
   body:has([data-guide="hero"]) .rounded-xl,
   body:has([data-guide="hero"]) .rounded-lg,
@@ -492,6 +494,7 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   body:has([data-guide="hero"]) .bg-white                { background: transparent !important; }
   body:has([data-guide="hero"]) .bg-\[\#FFF9F3\]         { background: white !important; }
   body:has([data-guide="hero"]) .bg-\[\#FDFCF9\]         { background: white !important; }
+  body:has([data-guide="hero"]) .bg-cream                { background: white !important; }
 
   /* Collapse two-column grids to single column */
   body:has([data-guide="hero"]) .grid                    { display: block !important; }
@@ -539,6 +542,63 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   [data-guide="hero"] > div > div    { display: block !important; }
 
   /* Eyebrow */
+  /* ══════════════════════════════════════════════════════════
+     FROZEN PDF LOOK
+     The guide PDF must stay exactly as it printed before the guide pages moved onto the design
+     foundation. The shared components now carry the home-based screen styles; these rules put each
+     printed site back to the values it printed with (its old classes, via @apply, so rem and px
+     resolve as before). The hooks are data-pl="..." plus the existing data-hero / data-day /
+     data-hotel / data-exp / data-tip / data-check / data-transport attributes.
+     Re-render the PDFs and compare page by page (docs/design/guias-migration/pdf/) before editing.
+     ════════════════════════════════════════════════════════ */
+
+  [data-pl="free-text"]  { @apply text-[12px] font-medium !important; line-height: 1.65 !important; }
+  /* The old text never balanced its wraps. */
+  body:has([data-guide="hero"]) * { text-wrap: wrap !important; }
+  body:has([data-guide="hero"]) section[data-guide="hero"] { border-color: #E2DDD5 !important; background: white !important; }
+  [data-pl="free-link"]  { @apply text-[11px] font-semibold !important; display: block !important; height: auto !important; min-height: 0 !important; letter-spacing: normal !important; line-height: 1.65 !important; padding: 0 !important; border-radius: 0 !important; gap: normal !important; text-decoration-line: underline !important; text-underline-offset: 2px !important; }
+
+  [data-hero="eyebrow"], [data-section="eyebrow"], [data-day="ordinal"], [data-pl="mod-eyebrow"], [data-tip="funfact-eyebrow"] { line-height: 1.65 !important; }
+  [data-hero="subtitle"], [data-day="item-desc"], [data-hotel="description"], [data-exp="description"],
+  [data-tip="item"], [data-tip="funfact-text"], [data-check="label"], [data-transport="description"] { font-weight: 300 !important; }
+  [data-hero="chips"] > span { @apply font-mono !important; line-height: 1.65 !important; }
+
+  [data-section="title"] { letter-spacing: -0.01em !important; }
+  [data-day="title"]     { letter-spacing: -0.01em !important; line-height: 1.65 !important; }
+  [data-day="time"]      { line-height: 1.65 !important; }
+  [data-pl="section-desc"] { @apply text-[13px] font-light text-[#4A4A4A] leading-[1.6] mt-1.5 !important; }
+
+  [data-hotel="number"]  { font-weight: 500 !important; line-height: 1.65 !important; }
+  [data-hotel="name"]    { line-height: inherit !important; }
+  [data-hotel="price"]   { @apply font-mono text-[11px] font-medium text-[#0F3A33] bg-[rgba(15,58,51,.07)] px-2 py-[2px] rounded-full tracking-[.04em] ml-2 !important; display: inline !important; border: 0 !important; line-height: inherit !important; }
+  [data-hotel="type"]    { @apply font-mono text-[10px] text-[#8A8A8A] tracking-[.06em] !important; line-height: 1.65 !important; }
+  [data-hotel="book-link"] { @apply font-mono rounded-md gap-1.5 !important; line-height: 1.65 !important; }
+
+  [data-pl="sec-eyebrow"] { @apply font-mono text-[10px] font-medium tracking-[.12em] uppercase text-[#8A8A8A] mb-1.5 !important; line-height: 1.65 !important; }
+  [data-pl="sec-title"]   { @apply font-display text-[22px] font-normal tracking-[-0.01em] text-[#1A1A1A] !important; line-height: 1.65 !important; margin: 0 !important; }
+  [data-exp="number"]    { font-weight: 500 !important; line-height: 1.65 !important; }
+  [data-exp="name"]      { line-height: 1.4 !important; }
+  [data-pl="exp-more"]   { @apply text-[13px] font-medium text-[#2D4F6C] !important; text-decoration-line: underline !important; text-underline-offset: 2px !important; padding: 0 !important; border-radius: 0 !important; gap: normal !important; letter-spacing: normal !important; line-height: 1.65 !important; min-height: 44px !important; }
+
+  body:has([data-guide="hero"]) [data-guide="timely"] { border-radius: 18px !important; border-color: #E4DFD8 !important; }
+  body:has([data-guide="hero"]) [data-guide="timely"] > div:last-child .rounded-info { border-radius: 12px !important; }
+  [data-pl="timely-eyebrow"] { @apply font-mono text-[9px] font-medium tracking-[.12em] uppercase text-[#B8B5AF] mb-[5px] !important; line-height: 1.65 !important; }
+  [data-pl="timely-title"]   { @apply font-sans font-bold text-[#0F3A33] leading-[1.1] tracking-[-0.4px] !important; font-size: clamp(16px, 2.2vw, 20px) !important; margin: 0 !important; }
+  [data-pl="timely-note"]    { @apply font-mono text-[11px] text-[#6B8F86] leading-[1.6] mt-2 !important; }
+  [data-pl="timely-body"]    { font-size: 14px !important; line-height: 1.8 !important; color: #4A4A46 !important; }
+  [data-pl="timely-body"] .text-ink-2 { color: #4A4A46 !important; }
+  [data-pl="timely-body"] .font-semibold { font-weight: 500 !important; }
+  [data-pl="timely-thead"]   { @apply font-mono text-[10px] tracking-[.08em] uppercase text-[#6B8F86] !important; font-weight: 400 !important; line-height: 1.8 !important; }
+
+  [data-pl="mod-title"]  { letter-spacing: -0.01em !important; }
+  [data-guide="transport"] [data-pl="mod-title"] { line-height: 1.65 !important; }
+  [data-tip="item"]      { border-color: #E2DDD5 !important; }
+  [data-check="emoji"]   { color: #1F1F1F !important; line-height: 1.65 !important; }
+  [data-check="label"]   { line-height: 1.35 !important; }
+  [data-transport="icon"] { color: #1F1F1F !important; line-height: 1.65 !important; }
+  [data-transport="name"] { line-height: 1.65 !important; }
+  [data-transport="badge"] { @apply font-mono !important; display: block !important; align-items: normal !important; line-height: 1.65 !important; }
+
   [data-hero="eyebrow"] {
     font-family: 'Space Mono', 'Courier New', monospace !important;
     font-size: 7pt !important;
@@ -1136,6 +1196,13 @@ h4::marker, h5::marker, h6::marker { content: none !important; }
   [role="dialog"] {
     display: none !important;
   }
+
+  /* The guide cover's title block is a <header> (PageTitle), not site chrome. */
+  [data-guide="hero"] header {
+    display: block !important;
+  }
+  [data-guide="hero"] > div { width: 100% !important; }
+  [data-guide="hero"] header p { max-width: none !important; }
 
   /* Collapse/expand arrows on day cards */
   [data-trip-day="header"] > div:last-child {
