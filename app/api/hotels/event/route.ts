@@ -9,6 +9,8 @@ import { parseHotelEvent } from '../../../../lib/hotels/events'
 import { allow, clientKey } from '../../../../lib/hotels/ratelimit'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 const NO_CONTENT = () => new NextResponse(null, { status: 204 })
 
 export async function POST(req: NextRequest) {

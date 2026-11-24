@@ -9,6 +9,8 @@ import { ZONE_LABEL } from '../../../../content/guia/hotel/zones'
 import { EDITION_LABEL, STATUS_LABEL } from '../../../../lib/hotels/labels'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 
 export default async function AdminHotelDetail({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await getSupabaseServer()

@@ -7,6 +7,8 @@ import { experiencesArePlaceholders, HOTEL_EXPERIENCES } from '../../../content/
 import HotelsTable from './HotelsTable'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 
 export default async function AdminHotelsPage() {
   const supabase = await getSupabaseServer()

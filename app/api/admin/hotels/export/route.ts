@@ -5,6 +5,8 @@ import { loadDashboard } from '../../../../../lib/hotels/stats'
 import { filterHotels, hotelsToCsv } from '../../../../../lib/hotels/csv'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 
 export async function GET(req: NextRequest) {
   if (!(await getAdminEmail())) return new NextResponse(null, { status: 404 })

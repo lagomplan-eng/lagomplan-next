@@ -14,6 +14,8 @@ import { sendSignupNotification, sendWaitlistConfirmation } from '../../../../li
 import { HOTEL_COLUMNS, type HotelRow } from '../../../../lib/hotels/types'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 
 export async function POST(req: NextRequest) {
   if (!allow(clientKey(req.headers, 'hotel-signup'), 5, 60 * 60 * 1000)) {

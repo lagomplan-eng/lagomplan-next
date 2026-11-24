@@ -10,6 +10,8 @@ import { sendApprovalEmail, sendRejectionEmail } from '../../../../../../lib/hot
 import { HOTEL_COLUMNS } from '../../../../../../lib/hotels/types'
 
 export const dynamic = 'force-dynamic'
+export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
+export const revalidate = 0
 const UUID = /^[0-9a-f-]{36}$/i
 
 export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string }> }) {
