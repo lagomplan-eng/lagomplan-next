@@ -52,6 +52,8 @@ export interface InlineLink {
 }
 
 export interface ArrivalItem {
+  /** 'confirm' = content not verified yet. Ignored by every renderer today (the hotel edition showed them held at first, and has released them). */
+  hold?: 'confirm'
   /** Stable key for Partner.arrivalItemsOmit. Optional — only items a
    *  partner might need to omit need one. */
   id?: string
@@ -92,6 +94,12 @@ export interface Neighborhood {
 export interface MoodItem {
   name: string
   note: string
+  /** Optional small label above the name (the hotel edition's "I'm hungry" picks keep their craving label). */
+  tag?: string
+  /** Optional zone name shown under the pick (hotel edition), only where the repo holds the place's zone. */
+  zone?: string
+  /** Optional street address shown on the zone line (hotel edition); the Map link is built from name + address. */
+  address?: string
 }
 
 export interface Mood {

@@ -192,6 +192,9 @@ export default function PracticalSection({
   lang,
   rhythm = false,
   toneClass = '',
+  hotelSection,
+  headingOverride,
+  keepSmallPanels = false,
 }: {
   arrivalItems: ArrivalItem[]
   faqGroups: ResolvedFaqGroup[] | null
@@ -205,6 +208,12 @@ export default function PracticalSection({
   rhythm?: boolean
   /** Section background (alternating rhythm): '' = cream, the sectionAlt class = grey. */
   toneClass?: string
+  /** Hotel edition only: the section id reported by section_open. Absent = no attribute. */
+  hotelSection?: string
+  /** Hotel edition only: replaces the section title ("Good to know"). Absent = the usual title. */
+  headingOverride?: string
+  /** Hotel edition only: a group with a single item still gets its panel, so no item disappears. */
+  keepSmallPanels?: boolean
 }) {
   const copy = MODULE_COPY[lang]
   const subhead = practicalSubhead?.[lang] ?? copy.subhead
@@ -255,7 +264,7 @@ export default function PracticalSection({
   // content still lives in the underlying data (and the strip, if
   // applicable) — it just doesn't get a dedicated panel until there's
   // enough there to justify one.
-  const panels: Panel[] = allPanels.filter((p) => p.items.length >= 2)
+  const panels: Panel[] = keepSmallPanels ? allPanels : allPanels.filter((p) => p.items.length >= 2)
 
   const [hydrated, setHydrated] = useState(false)
   const [activePanel, setActivePanel] = useState<PanelId | null>(panels[0]?.id ?? null)
@@ -313,12 +322,12 @@ export default function PracticalSection({
   const activePanelData = panels.find((p) => p.id === activePanel) ?? panels[0]
 
   return (
-    <section id="practico" className={rhythm ? `${styles.section} ${styles.rhythm} ${toneClass}` : styles.section}>
+    <section id="practico" className={rhythm ? `${styles.section} ${styles.rhythm} ${toneClass}` : styles.section} data-hotel-section={hotelSection}>
       <div className={styles.container}>
         <div className={styles.secGrid}>
           <div className={styles.secHead}>
-            <span className={styles.eyebrowMono} style={{ color: 'var(--pine)', display: 'block', marginBottom: 12 }}>{copy.eyebrow}</span>
-            <h2 className={styles.h2}>{copy.heading}</h2>
+            <span className={hotelSection ? styles.eyebrow : styles.eyebrowMono} style={{ color: 'var(--pine)', display: 'block', marginBottom: 12 }}>{copy.eyebrow}</span>
+            <h2 className={styles.h2}>{headingOverride ?? copy.heading}</h2>
             <p className={styles.lede}>{subhead}</p>
             {glanceBadges.length > 0 && (
               <div className={styles.glanceRow}>

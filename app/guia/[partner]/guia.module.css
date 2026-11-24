@@ -694,3 +694,61 @@
 .agCards::-webkit-scrollbar { display: none; }
 .agCard { flex: 0 0 200px; display: flex; flex-direction: column; gap: 4px; padding: 14px; background: var(--paper); border: 1px solid rgba(107, 143, 134, .25); border-radius: 12px; }
 @media (min-width: 720px) { .agCards { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); overflow: visible; margin-right: 0; padding-right: 0; } .agCard { flex: none; } }
+
+
+/* ── Hotel edition polish ────────────────────────────────────────────────────
+   Everything below applies only under .hotelCalm (the hotel page root) or to the hotel's own jump links, so the Livin,
+   Host Me Tender and demo guides render exactly as before. Existing tokens only. */
+.hotelCalm .eyebrow { color: var(--pine); }                 /* coral stays for the booking action only */
+.hotelCalm .link { color: var(--pine); }
+.hotelCalm .itinTime { color: var(--sage-soft); }
+.hotelCalm .section { padding: 88px 0; }
+.hotelCalm .secHead, .hotelCalm .secBody { min-width: 0; }
+.hotelCalm .tabRow { flex: 0 0 auto; flex-wrap: nowrap; }
+.hotelCalm .nbControls::-webkit-scrollbar { display: none; }
+.hotelCalm .tab { flex: none; white-space: nowrap; }
+.hotelCalm .sectionPine .eyebrow { color: var(--sage-soft); }   /* "Hidden gem" in the dark band's light label tone */
+.hotelCalm .nbControls { flex-direction: row; flex-wrap: nowrap; align-items: center; justify-content: flex-start; gap: 8px; max-width: 860px; overflow-x: auto; scrollbar-width: none; }
+.hotelCalm .moodGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hotelCalm .weatherCard { max-width: 860px; }
+@media (max-width: 640px) { .hotelCalm .moodGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* Zone map link: a quiet pill, same height as a chip, at the right end of the one-line chip row (the row scrolls on phones, the
+   link is its last item). */
+.hotelMapLink {
+  margin-left: auto; flex: none; display: inline-flex; align-items: center; white-space: nowrap;
+  font-size: 12px; font-weight: 600; padding: 8px 16px; border-radius: 999px;
+  border: 1.5px solid rgba(107, 143, 134, .3); background: transparent; color: var(--sage); text-decoration: none;
+}
+.hotelMapLink:hover { color: var(--pine); border-color: rgba(15, 58, 51, .3); }
+
+/* Jump links: in the header on desktop (where the label was), one scrollable row under the header on phones. */
+.hotelJumpDesktop { display: flex; align-items: center; gap: 18px; }
+.hotelJumpDesktop a, .hotelJumpMobile a { text-decoration: none; color: var(--sage); white-space: nowrap; }
+.hotelJumpDesktop a:hover, .hotelJumpMobile a:hover { color: var(--pine); }
+.hotelJumpMobile { display: none; }
+@media (max-width: 768px) {
+  .hotelJumpDesktop { display: none; }
+  .hotelJumpMobile {
+    display: flex; gap: 22px; position: sticky; top: 68px; z-index: 40; overflow-x: auto; scrollbar-width: none;
+    padding: 12px 24px; background: rgba(255, 249, 243, .92); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(107, 143, 134, .18);
+  }
+  .hotelJumpMobile::-webkit-scrollbar { display: none; }
+}
+
+/* Hotel edition mood panel: two columns on desktop, one on phones; each place three lines; a thin rule between places. */
+.hotelCalm .hotelMoodItems { display: grid; grid-auto-flow: column; grid-template-rows: repeat(var(--rows, 4), auto); column-gap: 64px; row-gap: 0; }
+.hotelCalm .hotelMoodItem { border-top: 1px solid #C8BFB5; padding: 22px 0; min-width: 0; }
+.hotelCalm .hotelMoodItem[data-colfirst] { border-top: 0; padding-top: 0; }
+.hotelCalm .hotelMoodItem:last-child { padding-bottom: 0; }
+@media (max-width: 768px) {
+  .hotelCalm .hotelMoodItems { grid-auto-flow: row; grid-template-rows: none; grid-template-columns: minmax(0, 1fr); }
+  .hotelCalm .hotelMoodItem[data-colfirst] { border-top: 1px solid #C8BFB5; padding-top: 22px; }
+  .hotelCalm .hotelMoodItem[data-first] { border-top: 0; padding-top: 0; }
+}
+
+/* Plans: both plan bands in one grid cell on desktop (the section keeps the taller height, no jump); the hidden one is gone on phones. */
+.hotelBandStack { display: grid; }
+.hotelBandLayer { grid-area: 1 / 1; background: var(--pine); }
+.hotelBandLayer[data-hidden] { visibility: hidden; pointer-events: none; }
+@media (max-width: 768px) { .hotelBandLayer[data-hidden] { display: none; } }

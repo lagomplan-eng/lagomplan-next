@@ -109,6 +109,34 @@ deliberately left untouched** — it's a live affiliate short-link
 its redirect; it still fires `partner_link_click`, just with its original
 URL.
 
+## Hotel neighborhood guide (free QR edition) — `/guia/cdmx/[zone]`
+
+The hotel edition of the Livin guide (QR card → `/g/{code}` → `/guia/cdmx/{condesa|roma-norte|polanco}?h={code}&lang=`).
+It renders `GuiaClient` itself (the Livin Condesa / Roma / Polanco guide for the zone) with the `hotel` prop, so it is the
+same page with a few differences (no host letter, no newsletter, GetYourGuide experiences, the hotel welcome banner,
+the hotel zone as the default tab). It never fires a `host_guide_*` event: those go out as `hotel_guide_*` with the hotel
+code, so the Livin pilot numbers stay clean. It does not write `lagom_ref` or `guide_visits`. Two layers of measurement:
+
+**1. First-party table `hotel_guide_events`** (the numbers in `/admin/hoteles`). No consent needed: it stores
+`hotel_id`, `event_type`, `section`, `lang`, `created_at` and nothing that identifies a guest (no IP, no user agent,
+no cookie id). Rows exist only for codes of *approved* hotels.
+
+| `event_type` | Written by | `section` |
+|---|---|---|
+| `scan` | `GET /g/{code}` (not for bots, link-preview fetchers, prefetches or HEAD) | — |
+| `section_open` | the guide, once per block per page view, when 30% of it is visible | `hero` \| `neighborhoods` \| `time` \| `itinerary` \| `moods` \| `rhythm` \| `experiences` \| `practical` \| `planner` \| `discover` (`HOTEL_SECTION_IDS` in `content/guia/hotel/config.ts`, in the hotel guide's order: welcome, zones, how much time, 48 hours, mood, weekly rhythm, experiences, good to know, Lagomplan block, destination cards; `itinerary` is the dark plan band: the short plan or the 48 hours, whichever is selected) |
+| `outbound_click` | the guide, on click | `experience_book` \| `airalo` \| `map` \| `planner` \| `share` |
+
+**2. GA4, only after cookie consent (Consent Mode v2, as the rest of `/guia`):**
+
+| Event | Params |
+|---|---|
+| `hotel_guide_view` (new) | `partner_slug` = hotel code (`zone_<zone>` when opened without `?h=`), `zone` |
+| `partner_link_click` | `link_name` and `section` = the outbound id above (`experience_book` \| `airalo` \| `map` \| `planner` \| `share`; `link_name` values `map`, `planner`, `share` are new), `partner_slug` = hotel code, `zone`, `lang`, `destination` (hostname), `experience_name` (only `experience_book`) |
+
+Planner links from the hotel guide carry `utm_source=hotel_{code}` (`hotel_zone` without a code),
+`utm_medium=partner`, `utm_campaign=hotel_free`. Register `hotel_guide_view` and the new `link_name` values in GA4
+the same way as the existing ones.
 ## Catalog events (Experiencias hub, Hoteles, shared plan)
 
 Fired from `lib/experiences/analytics.ts` and `lib/catalog-analytics.ts` (one place, so event

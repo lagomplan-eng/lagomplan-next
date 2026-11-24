@@ -88,6 +88,8 @@ export const polanco: Zone = {
     },
 
     cashAtms: {
+      // Was held for the hotel edition (the TODO below: no specific Banamex yet); released, it renders like in the Livin guides.
+      hold: 'confirm',
       body: {
         es:
           'Banamex es la mejor opción práctica: comisión baja y cajeros por ' +

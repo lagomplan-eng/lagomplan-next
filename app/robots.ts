@@ -34,6 +34,8 @@ export default function robots(): MetadataRoute.Robots {
         allow:     '/',
         disallow: [
           '/api/',
+          '/admin/',
+          '/g/',
           '/trips/',
           '/es/mis-viajes',
           '/en/my-trips',

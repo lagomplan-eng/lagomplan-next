@@ -34,6 +34,17 @@ import {
   type LucideIcon,
 } from 'lucide-react'
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
+import { sendHotelEvent } from '../../../lib/hotels/client'
+import { isValidHotelCode } from '../../../lib/hotels/codes'
+import {
+  HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_ARIA, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
+} from '../../../content/guia/hotel/config'
+import { HIDDEN_GEM_LABEL, isHiddenGem } from '../../../content/guia/hotel/themes'
+import { hotelShareHref } from '../../../content/guia/hotel/share'
+import { HOTEL_BOOK_LABEL, HOTEL_EXPERIENCES } from '../../../content/guia/hotel/experiences'
+import { HOTEL_TIME_TITLE, placeMapUrl, quickPlanFor, stopMapUrl } from '../../../content/guia/hotel/time'
+import { HOTEL_HOST_NAME, hotelReword, zonesHeading } from '../../../content/guia/hotel/rewords'
+import { ZONE_LABEL, ZONE_NEIGHBORHOOD, ZONE_SLUG, ZONE_TAB_ORDER } from '../../../content/guia/hotel/zones'
 import { withPilotUtm } from '../../../lib/guia/links'
 import { getRoute } from '../../../lib/routes'
 import { parseStay, stayHeading, type Stay } from '../../../lib/guia/stay'
@@ -373,8 +384,10 @@ export interface DemoMeta { slug: string; prospectName: string }
 
 /** recordVisits: true only on production deployments (VERCEL_ENV, read on the
  *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
-export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false }: {
+export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false, hotel }: {
   partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
+  /** Hotel edition (/guia/cdmx/[zone]): this same guide with a short list of differences. Absent on every other guide. */
+  hotel?: HotelMode
   /** Validated agenda data (server-loaded). Used only when partner.agenda is set. */
   agenda?: Agenda
   /** Render events still "to_verify" (Preview / local on /demo). Default false: /guia/* and Production never show them. */
@@ -383,17 +396,26 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   const [lang, setLang] = useState<Lang>('en')
   const [mood, setMood] = useState<string | null>(null)
   const [stay, setStay] = useState<Stay>({})
-  const [browseNb, setBrowseNb] = useState<string>(partner.defaultNeighborhood ?? HOME_TAB_ID)
+  const [browseNb, setBrowseNb] = useState<string>(hotel ? ZONE_NEIGHBORHOOD[hotel.zone] : (partner.defaultNeighborhood ?? HOME_TAB_ID))
+  const [hotelCode, setHotelCode] = useState<string | null>(null)
+  // Hotel edition: which plan of "How much time do you have?" is open (the short one by default, where it exists).
+  const [plan, setPlan] = useState<'quick' | 'full'>(hotel && quickPlanFor(hotel.zone) ? 'quick' : 'full')
+  const seenSections = useRef(new Set<string>())
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
   const t = city.copy[lang]
   // Demo traffic must not pollute the real-partner pilot metrics, so every
   // host_guide_* event is renamed demo_guide_* on /demo.
+  // Hotel edition: the same events under hotel_guide_*, tagged with the hotel code, never with the Livin partner.
+  const trackSlug = hotel ? (hotelCode ?? `zone_${hotel.zone}`) : partner.slug
   const track = (name: string, params: Record<string, string | number | boolean | undefined>) =>
-    gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
+    hotel
+      ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
+      : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
+  const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
   const interp = (s: string) =>
-    s.replace(/\{host\}/g, partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
+    s.replace(/\{host\}/g, hotel ? HOTEL_HOST_NAME[lang] : partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
 
   // ── ?lang=es|en seeds the toggle ────────────────────────────────────────
   // Kept as a post-mount effect (not a useState lazy initializer) so the
@@ -404,6 +426,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     const params = new URLSearchParams(window.location.search)
     const requested = params.get('lang')
     if (requested === 'es' || requested === 'en') setLang(requested)
+
+    if (hotel) {
+      const h = params.get('h')
+      if (isValidHotelCode(h)) setHotelCode(h)
+    }
 
     // ?llegada&noches&adultos&ninos personalize the guide. Same post-mount
     // timing as ?lang for the same hydration reason. With no (or invalid)
@@ -416,6 +443,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
   // ── Attribution flag + view event (once on load) ──────────────────────────
   useEffect(() => {
+    if (hotel) {
+      // Hotel edition: no lagom_ref (the guest is not a Livin guest) and no host_guide_view.
+      gaTrack('hotel_guide_view', { partner_slug: trackSlug, zone: hotel.zone })
+      return
+    }
     const ref = demo ? `demo:${demo.slug}` : `host:${partner.slug}`
     try { window.localStorage.setItem('lagom_ref', ref) } catch { /* private mode */ }
     try {
@@ -423,7 +455,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       document.cookie = `lagom_ref=${encodeURIComponent(ref)}; Path=/; Max-Age=15552000; SameSite=Lax${secure}`
     } catch { /* cookies disabled */ }
     track('host_guide_view', { partner: partner.slug, city: city.id })
-  }, [partner.slug, city.id])
+  }, [partner.slug, city.id, trackSlug])
 
   // ── Visit log (production only) ───────────────────────────────────────────
   // Fire-and-forget INSERT without .select(): anon has no SELECT privilege, so
@@ -446,6 +478,46 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   useEffect(() => {
     document.documentElement.lang = lang
   }, [lang])
+
+  // ── Hotel edition: section_open + outbound_click per hotel (only when the URL carries ?h=) ──────────────
+  useEffect(() => {
+    if (!hotel || !hotelCode) return
+    const seen = seenSections.current // once per section per page view, even when a plan swap re-observes
+    const obs = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        const id = (e.target as HTMLElement).dataset.hotelSection
+        if (e.isIntersecting && id && !seen.has(id)) {
+          seen.add(id)
+          sendHotelEvent({ code: hotelCode, type: 'section_open', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+        }
+      }
+    }, { threshold: 0.3 })
+    document.querySelectorAll('[data-hotel-section]').forEach((el) => obs.observe(el))
+    return () => obs.disconnect()
+  }, [hotel, hotelCode, plan])
+
+  useEffect(() => {
+    if (!hotel || !hotelCode) return
+    const plannerPath = (l: Lang) => getRoute(l, 'planner')
+    const classify = (a: HTMLAnchorElement): HotelOutboundId | null => {
+      let u: URL
+      try { u = new URL(a.href, window.location.origin) } catch { return null }
+      const host = u.hostname.toLowerCase()
+      if (host.endsWith('getyourguide.com')) return 'experience_book'
+      if (host === 'airalo.tpm.li') return 'airalo'
+      if (host === 'maps.app.goo.gl' || (host.endsWith('google.com') && u.pathname.startsWith('/maps'))) return 'map'
+      if (host === 'wa.me' && u.pathname === '/') return 'share'
+      if (u.origin === window.location.origin && (u.pathname === plannerPath('es') || u.pathname === plannerPath('en'))) return 'planner'
+      return null
+    }
+    const onClick = (ev: MouseEvent) => {
+      const a = (ev.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
+      const id = a && classify(a)
+      if (id) sendHotelEvent({ code: hotelCode, type: 'outbound_click', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+    }
+    document.addEventListener('click', onClick, true)
+    return () => document.removeEventListener('click', onClick, true)
+  }, [hotel, hotelCode])
 
   // Reveal the sticky planner CTA once the guest scrolls past the hero.
   useEffect(() => {
@@ -482,19 +554,22 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // docs/analytics/mxcity-pilot-links.md). partner.utmContent existed as a
   // field with no reader until now — this was the missing wiring.
   const plannerBase = getRoute(lang, 'planner')
-  const plannerQuery = new URLSearchParams({
-    utm_source: partner.slug,
-    utm_medium: 'partner',
-    utm_campaign: partner.pilotId,
-    utm_content: partner.utmContent ?? 'guest_guide',
-  })
+  const plannerQuery = hotel
+    ? new URLSearchParams({ utm_source: `${hotel.edition.utmSourcePrefix}${hotelCode ?? 'zone'}`, utm_medium: 'partner', utm_campaign: hotel.edition.planner.utmCampaign })
+    : new URLSearchParams({
+        utm_source: partner.slug,
+        utm_medium: 'partner',
+        utm_campaign: partner.pilotId,
+        utm_content: partner.utmContent ?? 'guest_guide',
+      })
   const plannerHref = `${plannerBase}?${plannerQuery}`
   const onPlannerClick = (placement: string) =>
     track('host_guide_planner_click', { placement, partner: partner.slug, city: city.id })
 
   // Tab order + lookup = partner's own "Your house" pick list, followed by
   // the zones shared across all partners in this city.
-  const nbOrder = [HOME_TAB_ID, ...city.neighborhoodOrder]
+  // Hotel edition: no "Your house" tab (that is the Livin property's address), only the city zones.
+  const nbOrder = hotel ? ZONE_TAB_ORDER[hotel.zone].filter((n) => city.neighborhoods[n]) : [HOME_TAB_ID, ...city.neighborhoodOrder]
   const getNeighborhood = (key: string) => (key === HOME_TAB_ID ? partner.yourHouse : city.neighborhoods[key])
   const browseNbData = getNeighborhood(browseNb) ?? partner.yourHouse
   const ownTours = partner.ownTours?.[lang] ?? []
@@ -510,9 +585,39 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
   // ── The practical part (arrival items + FAQ module, merged) ────────────
   const faqZone = getZone(partner.zone)
-  const faqGroups = resolveFaqModule(partner, faqZone, lang)
+  const faqGroupsAll = resolveFaqModule(partner, faqZone, lang)
+  // Hotel edition: answers still on hold never render (a group left empty disappears with them).
+  // Hotel edition: private chefs and massages never render; copy about "the apartment", "your host" and the
+  // property is reworded for a hotel (content/guia/hotel/rewords.ts). A group left empty disappears with them.
+  const rw = (x: string) => (hotel ? hotelReword(x, lang) : x)
+  const faqKept = hotel && faqGroupsAll
+    ? faqGroupsAll
+        .map((g) => ({
+          ...g,
+          items: g.items
+            .filter((it) => !hotel.hiddenFaqKeys.includes(it.key))
+            .map((it) => ({ ...it, body: rw(it.body), links: it.links?.map((l) => ({ ...l, text: rw(l.text), after: l.after ? rw(l.after) : l.after })) })),
+        }))
+        .filter((g) => g.items.length > 0)
+    : faqGroupsAll
+  // Hotel edition: "Wine and liquor" moves from Eating in to Everyday errands, so it stays when Eating in empties out.
+  const faqMoved = hotel && faqKept
+    ? (() => {
+        const wine = faqKept.flatMap((g) => g.items).find((it) => it.key === 'wineLiquor')
+        if (!wine) return faqKept
+        return faqKept
+          .map((g) => g.id === 'errands' ? { ...g, items: [...g.items, wine] } : { ...g, items: g.items.filter((it) => it.key !== 'wineLiquor') })
+          .filter((g) => g.items.length > 0)
+      })()
+    : faqKept
+  // Hotel edition: "Gyms and studios" moves into Before you arrive and the Take care tab goes away.
+  const gymsFaq = hotel && faqMoved ? faqMoved.flatMap((g) => g.items).find((it) => it.key === 'gyms') : undefined
+  const faqNoGyms = gymsFaq && faqMoved
+    ? faqMoved.map((g) => ({ ...g, items: g.items.filter((it) => it.key !== 'gyms') })).filter((g) => g.items.length > 0)
+    : faqMoved
+  const faqGroups = faqNoGyms && faqNoGyms.length > 0 ? faqNoGyms : null
   const resolvedFaqKeys = new Set(faqGroups?.flatMap((g) => g.items.map((it) => it.key)) ?? [])
-  const visibleArrivalItems = t.arrivalItems
+  const visibleArrivalItemsBase = t.arrivalItems
     .filter((item) => {
       if (!item.id || !partner.arrivalItemsOmit?.includes(item.id)) return true
       const counterpart = ARRIVAL_FAQ_COUNTERPART[item.id]
@@ -521,7 +626,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       return !(counterpart && resolvedFaqKeys.has(counterpart))
     })
     .map((item) => applyArrivalOverride(item, partner.arrivalItemOverrides, lang))
-    .map((item) => ({ ...item, body: interp(item.body) }))
+    .map((item) => ({
+      ...item,
+      body: rw(interp(item.body)),
+      ...(hotel && item.link ? { link: { ...item.link, text: rw(item.link.text), after: item.link.after ? rw(item.link.after) : item.link.after } } : {}),
+    }))
+  const visibleArrivalItems = gymsFaq
+    ? [...visibleArrivalItemsBase, { id: 'gyms', icon: 'dumbbell' as const, title: gymsFaq.label, body: gymsFaq.body }]
+    : visibleArrivalItemsBase
 
   // Agenda layout (demos with display.agenda + agenda data, kill switch on): Experiences move under the
   // 48-hour itinerary and "A calm start to your trip" becomes collapsible. Everything else is unchanged.
@@ -563,9 +675,22 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
   )
 
+  // Hotel edition helpers.
+  // The one mark a place card carries in the hotel edition: "Hidden gem", quiet. Small text in the soft green, right after the
+  // place name on the same line (inside the name element, so it adds no line and the row keeps its height); no colour accent,
+  // pill, background or icon. Not shown inside the "Hidden places" panel (its title says it), nor where the pick's own label
+  // already says it.
+  const gemMark = (name: string) => isHiddenGem(name)
+    ? <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: '#3E5F58', whiteSpace: 'nowrap' }}>{HIDDEN_GEM_LABEL[lang]}</span>
+    : null
+  const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
+  // The whole message ends with the guide's address (production host); built without window, see content/guia/hotel/share.ts.
+  const hotelShareLink = hotel ? hotelShareHref({ code: hotelCode, zone: hotel.zone, lang }) : ''
+
   const renderExperiences = (tone: string) => (
       <section
         {...(rhythm ? { id: 'experiencias', className: `${styles.section} ${styles.rhythm} ${tone}` } : { className: `${styles.section} ${styles.sectionAlt}`, style: { paddingTop: 88, paddingBottom: 88 } })}
+        {...hs('experiences')}
       >
         <div className={styles.container}>
           <div className={styles.secGrid}>
@@ -573,13 +698,40 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
               <span className={styles.eyebrow}>{t.expEyebrow}</span>
               <h2 className={styles.h2}>{t.expH2}</h2>
               <p className={styles.lede} style={{ marginBottom: 8 }}>{t.expLede}</p>
-              <p className={styles.expPartnerNote}>
-                {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
-              </p>
+              {!hotel && (
+                <p className={styles.expPartnerNote}>
+                  {ownTours.length > 0 ? (partner.experiencesPartnerNote?.[lang] ?? t.expPartnerNote) : t.expPartnerNote}
+                </p>
+              )}
             </div>
             <div className={styles.secBody}>
               <div className={styles.expGrid}>
-                {ownTours.length > 0
+                {hotel
+                  ? HOTEL_EXPERIENCES.items.map((e) => {
+                      const title = t.experiences.find((x) => x.id === e.id)?.title ?? e.id
+                      return (
+                        <div className={styles.expCard} key={e.id}>
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img className={styles.expImg} src={e.image} alt={title} />
+                          <div className={styles.expBody}>
+                            <div className={styles.expTextBlock}><h5 className={styles.h5}>{title}</h5><p className={styles.expNote}>{e.teaser[lang]}</p></div>
+                            <div className={styles.expActions}>
+                              <a
+                                className={styles.expBookLink}
+                                href={e.bookUrl}
+                                target="_blank"
+                                rel="sponsored noopener noreferrer"
+                                onClick={() => trackOutboundLink({
+                                  linkName: 'gyg_experience', href: e.bookUrl, partnerSlug: trackSlug, zone: hotel.zone, lang,
+                                  section: 'experience_book', experienceName: e.id,
+                                })}
+                              >{HOTEL_BOOK_LABEL[lang]}</a>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  : ownTours.length > 0
                   ? ownTours.map((tour) => (
                       <ExperienceCard
                         exp={ownAsExperience(tour)} own={tour} t={t} lang={lang}
@@ -591,7 +743,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                       <ExperienceCard exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id} />
                     ))}
               </div>
-              {t.experiences.filter((exp) => exp.id === 'exp-own-plan').map((exp) => (
+              {(hotel ? [] : t.experiences.filter((exp) => exp.id === 'exp-own-plan')).map((exp) => (
                 <ExperienceBanner
                   exp={exp} t={t} lang={lang} partnerSlug={partner.slug} zone={partner.zone} pilotId={partner.pilotId} key={exp.id}
                   operator={ownTours.length > 0 && partner.operatorWhatsApp
@@ -606,7 +758,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   )
 
   const moodOriginal = (
-      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }}>
+      <section className={`${styles.section} ${styles.sectionAlt}`} style={{ paddingTop: 88, paddingBottom: 88 }} {...hs('moods')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.moodEyebrow} title={t.moodH2} lede={t.moodLede} />
@@ -631,8 +783,31 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     <h4 className={styles.h4}>{selectedMood.title}</h4>
                     <button type="button" className={styles.moodClose} onClick={() => setMood(null)}>{t.closeLabel}</button>
                   </div>
-                  <div className={styles.moodItems}>
-                    {selectedMood.items.map((it, i) => (
+                  <div
+                    className={hotel ? `${styles.moodItems} ${styles.hotelMoodItems}` : styles.moodItems}
+                    {...(hotel ? { style: { '--rows': Math.ceil(selectedMood.items.length / 2) } as React.CSSProperties } : {})}
+                  >
+                    {selectedMood.items.map((it, i) => hotel ? (
+                      // Hotel edition: three lines. Name with its label right after it; the description; zone · address · Map.
+                      <div
+                        key={i}
+                        className={styles.hotelMoodItem}
+                        {...(i % Math.ceil(selectedMood.items.length / 2) === 0 ? { 'data-colfirst': '' } : {})}
+                        {...(i === 0 ? { 'data-first': '' } : {})}
+                      >
+                        <div className={styles.moodItemName}>
+                          {it.name}
+                          {it.tag
+                            ? <span style={{ marginLeft: 8, fontSize: 12, fontWeight: 400, color: '#3E5F58', whiteSpace: 'nowrap' }}>{it.tag}</span>
+                            : selectedMood?.id !== 'hidden' && gemMark(it.name)}
+                        </div>
+                        <div className={styles.moodItemNote}>{it.note}</div>
+                        <div className={styles.moodItemNote} style={{ marginTop: 6 }}>
+                          {[it.zone, it.address].filter(Boolean).join(' · ')}{(it.zone || it.address) ? ' · ' : ''}
+                          <a className={styles.link} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                        </div>
+                      </div>
+                    ) : (
                       <div key={i}>
                         <div className={styles.moodItemName}>{it.name}</div>
                         <div className={styles.moodItemNote}>{it.note}</div>
@@ -647,9 +822,326 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       </section>
   )
 
+  const HOTEL_PRACTICAL_TITLE: Record<Lang, string> = { es: 'Bueno saber', en: 'Good to know' }
+  const HOTEL_WHERE_NEXT: Record<Lang, string> = { es: '¿Cuál es tu próximo destino?', en: 'Where next?' }
+  const renderPractical = () => (
+      <PracticalSection
+        arrivalItems={visibleArrivalItems}
+        faqGroups={faqGroups}
+        atAGlance={partner.atAGlance}
+        practicalSubhead={partner.practicalSubhead}
+        partnerSlug={trackSlug}
+        zone={partner.zone}
+        pilotId={partner.pilotId}
+        lang={lang}
+        rhythm={rhythm}
+        toneClass={rhythm ? nextTone() : ''}
+        hotelSection={hotel ? 'practical' : undefined}
+        headingOverride={hotel ? HOTEL_PRACTICAL_TITLE[lang] : undefined}
+        keepSmallPanels={hotel ? true : undefined}
+      />
+  )
+  const renderZones = () => (
+      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })} {...hs('neighborhoods')}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            <div className={styles.secHead}>
+              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
+              <h2 className={styles.h2}>{hotel ? zonesHeading(lang, nbOrder.length) : t.neighborhoodH2}</h2>
+              <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
+              <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
+            </div>
+            <div className={styles.secBody}>
+              <div className={styles.nbControls}>
+                <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
+                  {nbOrder.map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      role="tab"
+                      aria-selected={name === browseNb}
+                      className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
+                      onClick={() => setBrowseNb(name)}
+                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
+                  ))}
+                </div>
+                {hotel ? (
+                  // Hotel edition: a compact "Map →" link at the right end of the chip row, same line (it scrolls with the chips on phones).
+                  <a
+                    className={styles.hotelMapLink}
+                    href={browseNbData.mapUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={HOTEL_MAP_ARIA[lang].replace('{zone}', browseNbData.tabLabel?.[lang] ?? browseNb)}
+                    onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                  >{HOTEL_MAP_LINK[lang]}</a>
+                ) : (
+                  <a
+                    className={styles.nbMapCard}
+                    href={browseNbData.mapUrl || undefined}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
+                  >
+                    <span className={styles.nbMapThumb} aria-hidden>
+                      <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
+                      <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
+                      <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
+                    </span>
+                    <span className={styles.nbMapText}>
+                      <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
+                      <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
+                    </span>
+                    <span className={styles.nbMapArrow} aria-hidden>→</span>
+                  </a>
+                )}
+              </div>
+              <div className={styles.spotList}>
+                {spots.map((spot, i) => (
+                  <div className={styles.spotRow} key={`${browseNb}-${i}`}>
+                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
+                    <div>
+                      <div className={styles.spotHead}>
+                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}{hotel && gemMark(spot.name)}</h5>
+                        <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
+                      </div>
+                      <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+  // The dark band: eyebrow / title / line on the left, the rows on the right, an optional button underneath.
+  // The 48 hours plan and (hotel edition) the short plan are both drawn with it, so switching only changes the content.
+  const renderBand = (b: { eyebrow: string; title: string; lede: string; days: React.ReactNode; footer?: React.ReactNode; buttons?: React.ReactNode; compactTop?: boolean; mark: string | null }) => (
+      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: b.compactTop ? 40 : 88, paddingBottom: 88 } })} {...(b.mark ? hs(b.mark) : {})}>
+        <div className={styles.container}>
+          <div className={styles.itinGrid}>
+            <div className={styles.itinIntro}>
+              <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{b.eyebrow}</span>
+              <h2 className={styles.itinTitle}>{b.title}</h2>
+              {b.buttons}
+              <p className={styles.itinLede}>{b.lede}</p>
+            </div>
+            {b.days}
+          </div>
+          {b.footer}
+        </div>
+      </section>
+  )
+  const renderItinerary = (compactTop = false, mark: string | null = 'itinerary', intro?: { eyebrow: string; title: string; buttons?: React.ReactNode }) => renderBand({
+    eyebrow: intro?.eyebrow ?? itin.eyebrow, title: intro?.title ?? itin.title, lede: itin.lede, buttons: intro?.buttons, compactTop, mark,
+    days: itin.days.map((day, di) => (
+      <div className={styles.itinDay} key={di}>
+        <h3 className={styles.itinDayTitle}>{day.title}</h3>
+        <div className={styles.itinList}>
+          {day.items.map((it, ii) => (
+            <div className={styles.itinRow} key={ii}>
+              <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{it.time}</span>
+              <p className={styles.itinText}>{it.text}</p>
+            </div>
+          ))}
+        </div>
+        {day.note && <p className={styles.itinNote}>{day.note}</p>}
+      </div>
+    )),
+    footer: (
+      <a
+        className={styles.itinMapsBtn}
+        href={itin.mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id })}
+      >
+        {itin.mapsCta}
+      </a>
+    ),
+  })
+  const renderToday = () => (
+      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('rhythm')}>
+        <div className={styles.container}>
+          <div className={styles.secGrid}>
+            {rhythm ? (
+              <div className={styles.secHead}>
+                <span className={styles.eyebrow}>{t.todayDateLabel}</span>
+                <h2 className={styles.h2}>{t.todayH2}</h2>
+                <WeatherInline lang={lang} />
+              </div>
+            ) : (
+              <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
+            )}
+            <div className={styles.secBody}>
+              {!rhythm && <WeatherCard lang={lang} />}
+              <div className={styles.spotList}>
+                {t.todayItems.map((ti, i) => (
+                  <div className={styles.todayRow} key={i}>
+                    <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
+                    <div>
+                      <div className={styles.todayTitle}>{ti.title}</div>
+                      <div className={styles.todayBody}>{interp(ti.body)}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+  )
+  const renderPlanner = () => (
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: hotel ? 88 : 96, paddingBottom: hotel ? 88 : 96 } })} {...hs('planner')}>
+        <div className={`${styles.container} ${styles.continueWrap}`}>
+          <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
+          <h2 className={styles.continueH2}>{t.continueH2}</h2>
+          <p className={styles.continueLede}>{t.continueLede}</p>
+          <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
+            {t.continueCta}
+          </a>
+          {!partner.hideNewsletter && !hotel && (
+            <>
+              <div className={styles.nlRule} />
+              <NewsletterSignup
+                lang={lang}
+                copy={{
+                  title: t.newsletterTitle,
+                  body: t.newsletterBody,
+                  placeholder: t.newsletterPlaceholder,
+                  cta: t.newsletterCta,
+                  finePrint: t.newsletterFinePrint,
+                }}
+              />
+            </>
+          )}
+        </div>
+      </section>
+  )
+  const heroHotel = hotel ? (
+        <section className={styles.hero} {...hs('hero')}>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
+          <div className={styles.heroOverlay} />
+          <div className={styles.heroContent}>
+            <span className={styles.heroEyebrow}>{hotel.edition.heroEyebrow[lang]}</span>
+            <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
+            <p className={styles.heroSub}>{hotel.edition.heroSub[lang]}</p>
+            <p className={styles.heroSub} style={{ fontSize: 13, opacity: 0.8, marginTop: -8 }}>{hotelUpdatedLine(lang)}</p>
+            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+              <a href="#zonas" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
+              {hotel.edition.share && (
+                <a href={hotelShareLink} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
+              )}
+            </div>
+          </div>
+        </section>
+  ) : null
+
+  // Hotel edition: "How much time do you have?" is a choice. With a short plan (Condesa) two buttons pick which plan is
+  // shown; without one (Roma Norte, Polanco) the 48 hours plan shows directly, no buttons.
+  const quick = hotel ? quickPlanFor(hotel.zone) : null
+  const showQuick = !!quick && plan === 'quick'
+  // Hotel edition, short plan: the same dark band as the 48 hours (rows numbered 01..04, the note in the band's italic note style).
+  const quickBand = (compactTop: boolean, mark: string | null, intro: { eyebrow: string; title: string; buttons?: React.ReactNode }) => quick ? renderBand({
+    eyebrow: intro.eyebrow, title: intro.title, lede: quick.band.line[lang], buttons: intro.buttons, compactTop, mark,
+    days: (
+      <div className={styles.itinDay}>
+        <div className={styles.itinList}>
+          {quick.stops.map((stop, i) => (
+            <div className={styles.itinRow} key={stop.name}>
+              <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{String(i + 1).padStart(2, '0')}</span>
+              <p className={styles.itinText}>
+                <span style={{ display: 'block', fontWeight: 600 }}>{stop.name}{gemMark(stop.name)}</span>
+                <span style={{ display: 'block' }}>{stop.note[lang]}</span>
+                <span style={{ display: 'block', color: 'rgba(255, 249, 243, .6)' }}>
+                  {stop.where}{' · '}
+                  <a href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--sage-soft)', textDecoration: 'underline' }}>{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                </span>
+              </p>
+            </div>
+          ))}
+        </div>
+        <p className={styles.itinNote}>{quick.note[lang]}</p>
+      </div>
+    ),
+  }) : null
+  // With two plans both bands sit in one grid cell on desktop and only the selected one is visible, so the section keeps the
+  // height of the taller one and the page does not jump when switching (on phones the hidden one is removed, so no empty space).
+  // Roma Norte and Polanco have the 48 hours band only.
+  const layer = (shown: boolean, band: React.ReactNode) => (
+    <div className={styles.hotelBandLayer} {...(shown ? {} : { 'data-hidden': '', 'aria-hidden': true, ...({ inert: '' } as object) })}>{band}</div>
+  )
+  // The whole section is one dark band: eyebrow "Plans", the title, the two buttons (when there are two plans) and the short line,
+  // then the stops. No cream block above it, no second heading inside.
+  const planButtons = quick ? (
+    <div className={styles.tabRow} role="tablist" aria-label={HOTEL_TIME_TITLE[lang]} style={{ margin: '4px 0 18px' }}>
+      {([['quick', HOTEL_PLAN_BUTTONS.quick], ['full', HOTEL_PLAN_BUTTONS.full]] as const).map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={plan === id}
+          className={styles.tab}
+          style={plan === id
+            ? { background: 'var(--cream)', color: 'var(--pine)', borderColor: 'var(--cream)' }
+            : { background: 'transparent', color: 'var(--cream)', borderColor: 'rgba(255, 249, 243, .55)' }}
+          onClick={() => setPlan(id)}
+        >{label[lang]}</button>
+      ))}
+    </div>
+  ) : undefined
+  const bandIntro = { eyebrow: HOTEL_PLANS_EYEBROW[lang], title: HOTEL_TIME_TITLE[lang], buttons: planButtons }
+  const timeSection = hotel ? (
+    <div {...hs('time')}>
+      {quick ? (
+        <div className={styles.hotelBandStack}>
+          {layer(showQuick, quickBand(false, showQuick ? 'itinerary' : null, bandIntro))}
+          {layer(!showQuick, renderItinerary(false, showQuick ? null : 'itinerary', bandIntro))}
+        </div>
+      ) : renderItinerary(false, 'itinerary', bandIntro)}
+    </div>
+  ) : null
+
+  // Hotel edition: jump menu under the banner (chips) and the offset anchors it scrolls to (the header is sticky).
+  const anchor = (id: string) => <span id={id} aria-hidden="true" style={{ display: 'block', height: 0, position: 'relative', top: -120 }} />
+  // Hotel edition: the four jump links live in the header (desktop, where the label was) and, on phones, in one scrollable row
+  // under it. Same links twice; CSS shows one of them.
+  const jumpLinks = (cls?: string) => HOTEL_JUMP.map((j) => (
+    <a key={j.id} href={`#${j.id}`} className={styles.eyebrowMono + (cls ? ` ${cls}` : '')}>{j.label[lang]}</a>
+  ))
+  const jumpMobile = hotel ? (
+    <nav className={styles.hotelJumpMobile} aria-label={lang === 'es' ? 'Ir a' : 'Jump to'}>{jumpLinks()}</nav>
+  ) : null
+
+  // Hotel edition: the destination guide cards (as in the old "Lagomplan goes further" section), right after the invitation.
+  const destinationsSection = hotel ? (
+    <section className={styles.section} style={{ paddingTop: 88, paddingBottom: 88 }} {...hs('discover')}>
+      <div className={styles.containerWide}>
+        <span className={styles.eyebrow}>{HOTEL_WHERE_NEXT[lang]}</span>
+        <div className={styles.discoverGrid}>
+          {city.destinations.map((dest) => (
+            <a
+              className={styles.discoverCard}
+              href={dest.url[lang]}
+              key={dest.name}
+              onClick={() => track('host_guide_discover_click', { partner: partner.slug, city: city.id, destination: dest.name })}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img className={styles.discoverImg} src={dest.photoUrl} alt={dest.name} />
+              <div className={styles.discoverOverlay} />
+              <span className={styles.discoverLabel}>{dest.name}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+    </section>
+  ) : null
+
   return (
     <div
-      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}`}
+      className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}${hotel ? ` ${styles.hotelCalm}` : ''}`}
       style={partner.brand?.accent || partner.placeholderPill
         ? ({
             ...(partner.brand?.accent ? { '--accent': partner.brand.accent } : {}),
@@ -701,7 +1193,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           </>
           )}
           <div className={styles.navRight}>
-            <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.navLabel}</span>
+            {hotel ? (
+              <nav className={styles.hotelJumpDesktop} aria-label={lang === 'es' ? 'Ir a' : 'Jump to'}>{jumpLinks()}</nav>
+            ) : (
+              <span className={styles.eyebrowMono} style={{ color: 'var(--sage)' }}>{t.navLabel}</span>
+            )}
             <div className={styles.langGroup} role="group" aria-label={lang === 'es' ? 'Idioma' : 'Language'}>
               <button
                 type="button"
@@ -720,6 +1216,26 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </div>
       </header>
 
+      {hotel ? (
+        <>
+          {/* Hotel order: welcome, zones, how much time, mood, weekly rhythm, experiences, good to know, one Lagomplan block. */}
+          {jumpMobile}
+          {heroHotel}
+          {anchor('zonas')}
+          {renderZones()}
+          {anchor('planes')}
+          {timeSection}
+          {moodOriginal}
+          {renderToday()}
+          {anchor('experiencias')}
+          {renderExperiences('')}
+          {anchor('bueno-saber')}
+          {renderPractical()}
+          {renderPlanner()}
+          {destinationsSection}
+        </>
+      ) : (
+        <>
       {/* ── 1. Welcome ─────────────────────────────────────── */}
       <section className={styles.hero}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -771,7 +1287,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
         </section>
       )}
 
-      {partner.hostLetterSignature && !splitLetter && (
+      {partner.hostLetterSignature && !splitLetter && !hotel && (
         <section className={rhythm ? `${styles.section} ${styles.rhythm}` : styles.section}>
           <div className={styles.container}>
             <div className={styles.letterCard}>
@@ -793,116 +1309,13 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       {rhythm && !agendaLayout && renderMood(nextTone())}
 
       {/* ── 2. The practical part (arrival items + FAQ, merged) ── */}
-      <PracticalSection
-        arrivalItems={visibleArrivalItems}
-        faqGroups={faqGroups}
-        atAGlance={partner.atAGlance}
-        practicalSubhead={partner.practicalSubhead}
-        partnerSlug={partner.slug}
-        zone={partner.zone}
-        pilotId={partner.pilotId}
-        lang={lang}
-        rhythm={rhythm}
-        toneClass={rhythm ? nextTone() : ''}
-      />
+      {renderPractical()}
 
       {/* ── 3. Your neighborhood ───────────────────────────── */}
-      <section {...(rhythm ? { id: 'zonas', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionAlt}` })}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            <div className={styles.secHead}>
-              <span className={styles.eyebrow} style={{ color: 'var(--pine)' }}>{t.neighborhoodEyebrow}</span>
-              <h2 className={styles.h2}>{t.neighborhoodH2}</h2>
-              <p className={styles.nbTagline}>{withPlaceholders(browseNbData.tagline[lang])}</p>
-              <p className={styles.lede}>{withPlaceholders(browseNbData.orientation[lang])}</p>
-            </div>
-            <div className={styles.secBody}>
-              <div className={styles.nbControls}>
-                <div className={styles.tabRow} role="tablist" aria-label={t.neighborhoodEyebrow}>
-                  {nbOrder.map((name) => (
-                    <button
-                      key={name}
-                      type="button"
-                      role="tab"
-                      aria-selected={name === browseNb}
-                      className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
-                      onClick={() => setBrowseNb(name)}
-                    >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
-                  ))}
-                </div>
-                <a
-                  className={styles.nbMapCard}
-                  href={browseNbData.mapUrl || undefined}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id, placement: 'neighborhood' })}
-                >
-                  <span className={styles.nbMapThumb} aria-hidden>
-                    <span className={styles.nbMapDot} style={{ top: 13, left: 15 }} />
-                    <span className={styles.nbMapDot} style={{ top: 29, left: 32, background: 'var(--coral)' }} />
-                    <span className={styles.nbMapDot} style={{ top: 35, left: 18 }} />
-                  </span>
-                  <span className={styles.nbMapText}>
-                    <span className={styles.nbMapPrimary}>{t.mapCardPrimary.replace('{n}', String(spots.length))}</span>
-                    <span className={styles.nbMapSecondary}>{t.mapCardSecondary} · {browseNbData.tabLabel?.[lang] ?? browseNb}</span>
-                  </span>
-                  <span className={styles.nbMapArrow} aria-hidden>→</span>
-                </a>
-              </div>
-              <div className={styles.spotList}>
-                {spots.map((spot, i) => (
-                  <div className={styles.spotRow} key={`${browseNb}-${i}`}>
-                    <div className={styles.spotIcon}><Icon name={spot.icon} size={16} color={PINE} /></div>
-                    <div>
-                      <div className={styles.spotHead}>
-                        <h5 className={styles.h5}>{withPlaceholders(spot.name)}</h5>
-                        <span className={styles.spotDist}>{withPlaceholders(spot.distance)}</span>
-                      </div>
-                      <p className={styles.spotNote}>{withPlaceholders(spot.note)}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {renderZones()}
 
       {/* ── 4. 48-hour itinerary (dark) ────────────────────── */}
-      <section {...(rhythm ? { id: 'itinerario', className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 88, paddingBottom: 88 } })}>
-        <div className={styles.container}>
-          <div className={styles.itinGrid}>
-            <div className={styles.itinIntro}>
-              <span className={styles.eyebrowMono} style={{ color: rhythm ? 'var(--sage)' : 'var(--sage-soft)' }}>{itin.eyebrow}</span>
-              <h2 className={styles.itinTitle}>{itin.title}</h2>
-              <p className={styles.itinLede}>{itin.lede}</p>
-            </div>
-            {itin.days.map((day, di) => (
-              <div className={styles.itinDay} key={di}>
-                <h3 className={styles.itinDayTitle}>{day.title}</h3>
-                <div className={styles.itinList}>
-                  {day.items.map((it, ii) => (
-                    <div className={styles.itinRow} key={ii}>
-                      <span className={`${styles.eyebrowMono} ${styles.itinTime}`}>{it.time}</span>
-                      <p className={styles.itinText}>{it.text}</p>
-                    </div>
-                  ))}
-                </div>
-                {day.note && <p className={styles.itinNote}>{day.note}</p>}
-              </div>
-            ))}
-          </div>
-          <a
-            className={styles.itinMapsBtn}
-            href={itin.mapsUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => track('host_guide_map_click', { partner: partner.slug, city: city.id })}
-          >
-            {itin.mapsCta}
-          </a>
-        </div>
-      </section>
+      {renderItinerary()}
 
       {/* Agenda layout: Experiences sit right under the 48-hour itinerary (otherwise they stay after the weekly/agenda section). */}
       {agendaLayout && renderExperiences(nextTone())}
@@ -920,42 +1333,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           toneClass={nextTone()}
           onTrack={(name, params) => track(name, { partner: partner.slug, city: city.id, ...params })}
         />
-      ) : (
-      <section {...(rhythm ? { id: 'aqui', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
-        <div className={styles.container}>
-          <div className={styles.secGrid}>
-            {rhythm ? (
-              <div className={styles.secHead}>
-                <span className={styles.eyebrow}>{t.todayDateLabel}</span>
-                <h2 className={styles.h2}>{t.todayH2}</h2>
-                <WeatherInline lang={lang} />
-              </div>
-            ) : (
-              <SectionHead eyebrow={t.todayDateLabel} title={t.todayH2} />
-            )}
-            <div className={styles.secBody}>
-              {!rhythm && <WeatherCard lang={lang} />}
-              <div className={styles.spotList}>
-                {t.todayItems.map((ti, i) => (
-                  <div className={styles.todayRow} key={i}>
-                    <span className={`${styles.eyebrowMono} ${styles.tag}`}>{ti.tag}</span>
-                    <div>
-                      <div className={styles.todayTitle}>{ti.title}</div>
-                      <div className={styles.todayBody}>{interp(ti.body)}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      )}
+      ) : renderToday()}
 
       {!agendaLayout && renderExperiences(rhythm ? nextTone() : '')}
 
       {/* ── 8. Food ────────────────────────────────────────── */}
-      <section {...(rhythm ? { id: 'comer', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { id: 'comer', className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('food')}>
         <div className={styles.container}>
           <div className={styles.secGrid}>
             <SectionHead eyebrow={t.foodEyebrow} title={t.foodH2} lede={t.foodLede} />
@@ -1013,34 +1396,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       )}
 
       {/* ── 9. Continue your trip (planner CTA) ────────────── */}
-      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${styles.lightBand} ${nextTone()}` } : { className: `${styles.section} ${styles.sectionPine}`, style: { paddingTop: 96, paddingBottom: 96 } })}>
-        <div className={`${styles.container} ${styles.continueWrap}`}>
-          <span className={`${styles.eyebrowMono} ${styles.continueEyebrow}`}>{t.continueEyebrow}</span>
-          <h2 className={styles.continueH2}>{t.continueH2}</h2>
-          <p className={styles.continueLede}>{t.continueLede}</p>
-          <a className={styles.ctaPlanner} href={plannerHref} onClick={() => onPlannerClick('continue_section')}>
-            {t.continueCta}
-          </a>
-          {!partner.hideNewsletter && (
-            <>
-              <div className={styles.nlRule} />
-              <NewsletterSignup
-                lang={lang}
-                copy={{
-                  title: t.newsletterTitle,
-                  body: t.newsletterBody,
-                  placeholder: t.newsletterPlaceholder,
-                  cta: t.newsletterCta,
-                  finePrint: t.newsletterFinePrint,
-                }}
-              />
-            </>
-          )}
-        </div>
-      </section>
+      {renderPlanner()}
 
       {/* ── 10. Discover more ──────────────────────────────── */}
-      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })}>
+      <section {...(rhythm ? { className: `${styles.section} ${styles.rhythm} ${nextTone()}` } : { className: styles.section, style: { paddingTop: 88, paddingBottom: 88 } })} {...hs('discover')}>
         <div className={styles.containerWide}>
           <span className={styles.eyebrow}>{t.discoverEyebrow}</span>
           <h2 className={styles.h2}>{t.discoverH2}</h2>
@@ -1061,23 +1420,28 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           </div>
         </div>
       </section>
+        </>
+      )}
 
       <div className={styles.footer}>
-        <span className={styles.footerText}>{t.footer}</span>
+        {hotel && <span className={styles.footerText} style={{ display: 'block', marginBottom: 6 }}>{HOTEL_FOOTER_LINE[lang]}</span>}
+        <span className={styles.footerText}>{hotel ? HOTEL_FOOTER_TEXT[lang] : t.footer}</span>
       </div>
 
-      {/* ── Fixed planner CTA (carries the same attributed link) ────────── */}
-      <div className={`${styles.stickyWrap} ${showSticky ? '' : styles.stickyWrapHidden}`}>
-        <a
-          className={styles.stickyCta}
-          href={plannerHref}
-          target="_blank"
-          rel="noopener noreferrer"
-          onClick={() => onPlannerClick('sticky_cta')}
-        >
-          {t.stickyCta}
-        </a>
-      </div>
+      {/* ── Fixed planner CTA (carries the same attributed link); the hotel edition has no floating button ── */}
+      {!hotel && (
+        <div className={`${styles.stickyWrap} ${showSticky ? '' : styles.stickyWrapHidden}`}>
+          <a
+            className={styles.stickyCta}
+            href={plannerHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => onPlannerClick('sticky_cta')}
+          >
+            {t.stickyCta}
+          </a>
+        </div>
+      )}
     </div>
   )
 }
