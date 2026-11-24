@@ -58,6 +58,10 @@ import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
 import PracticalSection from './PracticalSection'
 import { withPlaceholders } from './placeholders'
+import { PaidBrandMark, PaidGuestLine, PaidHouse, PaidLetter, PaidReviewStandalone, PaidServices, PaidTopBars, showsGuest, showsHouse } from './PaidLayer'
+import { paidShareHref } from '../../../content/guia/paid/share'
+import type { PaidClient } from '../../../content/guia/paid/types'
+import { PAID_FOOTER_TEXT } from '../../../content/guia/paid/edition'
 import { WhatsAppIcon } from './WhatsAppIcon'
 import StayGlance from './StayGlance'
 import SectionHead from './SectionHead'
@@ -384,10 +388,12 @@ export interface DemoMeta { slug: string; prospectName: string }
 
 /** recordVisits: true only on production deployments (VERCEL_ENV, read on the
  *  server by the page). Local and Preview never write to guide_visits/demo_visits. */
-export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false, hotel }: {
+export default function GuiaClient({ partner, city, demo, recordVisits = false, agenda, showUnverified = false, hotel, paid }: {
   partner: Partner; city: City; demo?: DemoMeta; recordVisits?: boolean
   /** Hotel edition (/guia/cdmx/[zone]): this same guide with a short list of differences. Absent on every other guide. */
   hotel?: HotelMode
+  /** Paid white-label edition: the hotel edition plus the client layer (PaidLayer.tsx). Needs `hotel`; absent everywhere else. */
+  paid?: PaidClient
   /** Validated agenda data (server-loaded). Used only when partner.agenda is set. */
   agenda?: Agenda
   /** Render events still "to_verify" (Preview / local on /demo). Default false: /guia/* and Production never show them. */
@@ -408,9 +414,12 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // Demo traffic must not pollute the real-partner pilot metrics, so every
   // host_guide_* event is renamed demo_guide_* on /demo.
   // Hotel edition: the same events under hotel_guide_*, tagged with the hotel code, never with the Livin partner.
-  const trackSlug = hotel ? (hotelCode ?? `zone_${hotel.zone}`) : partner.slug
+  // Paid edition: its own events (paid_guide_*) tagged with the client, so the free hotel metrics stay clean.
+  const trackSlug = paid ? `paid_${paid.id}` : hotel ? (hotelCode ?? `zone_${hotel.zone}`) : partner.slug
   const track = (name: string, params: Record<string, string | number | boolean | undefined>) =>
-    hotel
+    paid && hotel
+      ? gaTrack(name.replace(/^host_guide_/, 'paid_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
+      : hotel
       ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
       : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
   const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
@@ -445,7 +454,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   useEffect(() => {
     if (hotel) {
       // Hotel edition: no lagom_ref (the guest is not a Livin guest) and no host_guide_view.
-      gaTrack('hotel_guide_view', { partner_slug: trackSlug, zone: hotel.zone })
+      gaTrack(paid ? 'paid_guide_view' : 'hotel_guide_view', { partner_slug: trackSlug, zone: hotel.zone })
       return
     }
     const ref = demo ? `demo:${demo.slug}` : `host:${partner.slug}`
@@ -685,7 +694,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     : null
   const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
   // The whole message ends with the guide's address (production host); built without window, see content/guia/hotel/share.ts.
-  const hotelShareLink = hotel ? hotelShareHref({ code: hotelCode, zone: hotel.zone, lang }) : ''
+  // Paid edition: the property's own link (paid/share.ts), never the free zone link; '' = no honest link, so no button.
+  const hotelShareLink = paid && hotel ? (paidShareHref({ code: hotelCode, ownUrl: paid.shareUrl, lang, name: paid.name }) ?? '') : hotel ? hotelShareHref({ code: hotelCode, zone: hotel.zone, lang }) : ''
 
   const renderExperiences = (tone: string) => (
       <section
@@ -1025,13 +1035,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           <img className={styles.heroImg} src={city.heroImage} alt={lang === 'es' ? 'Ciudad de México' : 'Mexico City'} />
           <div className={styles.heroOverlay} />
           <div className={styles.heroContent}>
-            <span className={styles.heroEyebrow}>{hotel.edition.heroEyebrow[lang]}</span>
+            <span className={styles.heroEyebrow}>{paid ? `${paid.name} · ${hotel.edition.heroEyebrow[lang]}` : hotel.edition.heroEyebrow[lang]}</span>
             <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
             <p className={styles.heroSub}>{hotel.edition.heroSub[lang]}</p>
             <p className={styles.heroSub} style={{ fontSize: 13, opacity: 0.8, marginTop: -8 }}>{hotelUpdatedLine(lang)}</p>
+            {paid && showsGuest(paid) && <PaidGuestLine paid={paid} lang={lang} />}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <a href="#zonas" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
-              {hotel.edition.share && (
+              {hotel.edition.share && hotelShareLink && (
                 <a href={hotelShareLink} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
               )}
             </div>
@@ -1142,13 +1153,15 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   return (
     <div
       className={`${styles.page} ${partner.brand?.accent ? styles.accented : ''}${partner.placeholderPill ? ` ${styles.phPill}` : ''}${hotel ? ` ${styles.hotelCalm}` : ''}`}
-      style={partner.brand?.accent || partner.placeholderPill
+      style={partner.brand?.accent || partner.placeholderPill || paid
         ? ({
+            ...(paid ? { '--brand': paid.brandColor } : {}),
             ...(partner.brand?.accent ? { '--accent': partner.brand.accent } : {}),
             ...(partner.placeholderPill ? { '--ph-label': JSON.stringify(partner.placeholderPill[lang]) } : {}),
           } as React.CSSProperties)
         : undefined}
     >
+      {paid && <PaidTopBars paid={paid} lang={lang} />}
       {demo && (
         <div className={styles.demoBanner} role="note">
           <span>{lang === 'es' ? `Demo preparada para ${demo.prospectName}` : `Demo prepared for ${demo.prospectName}`}</span>
@@ -1158,7 +1171,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       {/* ── Header ─────────────────────────────────────────── */}
       <header className={styles.header}>
         <div className={styles.headerRow}>
-          {cobrand ? (
+          {paid ? (
+            // Paid edition: the client's logo (or name) alone, on the left; "powered by Lagomplan" is in the footer.
+            <span className={styles.brand}><PaidBrandMark paid={paid} /></span>
+          ) : cobrand ? (
             // Demo co-brand option: the prospect's logo alone, on the left.
             <span className={styles.brand}>
               <BrandLogo src={partner.brand!.logo!} alt={partner.displayName} className={styles.hmtLogo} />
@@ -1221,18 +1237,24 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           {/* Hotel order: welcome, zones, how much time, mood, weekly rhythm, experiences, good to know, one Lagomplan block. */}
           {jumpMobile}
           {heroHotel}
+          {paid && <PaidLetter paid={paid} lang={lang} />}
+          {paid && showsHouse(paid) && <PaidHouse paid={paid} lang={lang} />}
           {anchor('zonas')}
           {renderZones()}
           {anchor('planes')}
           {timeSection}
           {moodOriginal}
           {renderToday()}
+          {paid && <PaidServices paid={paid} lang={lang} />}
           {anchor('experiencias')}
           {renderExperiences('')}
           {anchor('bueno-saber')}
           {renderPractical()}
-          {renderPlanner()}
-          {destinationsSection}
+          {/* Paid edition: with "Your house" off, the review request closes Good to know (otherwise it sits under check-out). */}
+          {paid && !showsHouse(paid) && <PaidReviewStandalone paid={paid} lang={lang} />}
+          {/* Paid edition switch C: the planner invitation and the destination cards after it can be turned off per client. */}
+          {(!paid || paid.switches.plannerInvite) && renderPlanner()}
+          {(!paid || paid.switches.plannerInvite) && destinationsSection}
         </>
       ) : (
         <>
@@ -1425,7 +1447,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
 
       <div className={styles.footer}>
         {hotel && <span className={styles.footerText} style={{ display: 'block', marginBottom: 6 }}>{HOTEL_FOOTER_LINE[lang]}</span>}
-        <span className={styles.footerText}>{hotel ? HOTEL_FOOTER_TEXT[lang] : t.footer}</span>
+        <span className={styles.footerText}>{paid ? PAID_FOOTER_TEXT[lang] : hotel ? HOTEL_FOOTER_TEXT[lang] : t.footer}</span>
       </div>
 
       {/* ── Fixed planner CTA (carries the same attributed link); the hotel edition has no floating button ── */}
