@@ -1,8 +1,7 @@
 // content/guia/paid/edition.ts
 //
 // The paid edition of the hotel guide. Same shape as HOTEL_FREE_EDITION (content/guia/hotel/config.ts, untouched).
-// `share` is off: the free edition's "send this guide to my phone" shares the plain Lagomplan zone link, not the
-// client's own link (its own link and QR come with the property registration).
+// `share` is on, but the paid page shares the PROPERTY's own link (content/guia/paid/share.ts), never the free zone link.
 
 import type { HotelEdition } from '../hotel/config'
 
@@ -14,7 +13,7 @@ export const HOTEL_PAID_EDITION: HotelEdition = {
     es: 'Preparada como la prepararía un amigo, no un buscador. Solo lugares verificados.',
     en: 'Prepared like a friend would prepare it, not a search engine. Verified places only.',
   },
-  share: false,
+  share: true,
   utmSourcePrefix: 'paid_',
   planner: { utmCampaign: 'hotel_paid' },
 }

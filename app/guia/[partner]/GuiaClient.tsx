@@ -58,7 +58,8 @@ import WeatherCard from './WeatherCard'
 import NewsletterSignup from './NewsletterSignup'
 import PracticalSection from './PracticalSection'
 import { withPlaceholders } from './placeholders'
-import { PaidBrandMark, PaidLetter, PaidTopBars } from './PaidLayer'
+import { PaidBrandMark, PaidGuestLine, PaidHouse, PaidLetter, PaidReviewStandalone, PaidServices, PaidTopBars, showsGuest, showsHouse } from './PaidLayer'
+import { paidShareHref } from '../../../content/guia/paid/share'
 import type { PaidClient } from '../../../content/guia/paid/types'
 import { PAID_FOOTER_TEXT } from '../../../content/guia/paid/edition'
 import { WhatsAppIcon } from './WhatsAppIcon'
@@ -693,7 +694,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     : null
   const HOTEL_SHARE: Record<Lang, string> = { es: 'Enviar esta guía a mi teléfono', en: 'Send this guide to my phone' }
   // The whole message ends with the guide's address (production host); built without window, see content/guia/hotel/share.ts.
-  const hotelShareLink = hotel ? hotelShareHref({ code: hotelCode, zone: hotel.zone, lang }) : ''
+  // Paid edition: the property's own link (paid/share.ts), never the free zone link; '' = no honest link, so no button.
+  const hotelShareLink = paid && hotel ? (paidShareHref({ code: hotelCode, ownUrl: paid.shareUrl, lang, name: paid.name }) ?? '') : hotel ? hotelShareHref({ code: hotelCode, zone: hotel.zone, lang }) : ''
 
   const renderExperiences = (tone: string) => (
       <section
@@ -1037,9 +1039,10 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
             <h1 className={styles.heroTitle}>{hotel.edition.zoneHeadline[lang].replace('{zone}', ZONE_LABEL[hotel.zone])}</h1>
             <p className={styles.heroSub}>{hotel.edition.heroSub[lang]}</p>
             <p className={styles.heroSub} style={{ fontSize: 13, opacity: 0.8, marginTop: -8 }}>{hotelUpdatedLine(lang)}</p>
+            {paid && showsGuest(paid) && <PaidGuestLine paid={paid} lang={lang} />}
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
               <a href="#zonas" className={styles.ctaLight}>{t.beginExploring} <Icon name="arrowDown" size={15} color={PINE} /></a>
-              {hotel.edition.share && (
+              {hotel.edition.share && hotelShareLink && (
                 <a href={hotelShareLink} target="_blank" rel="noopener noreferrer" className={styles.ctaLight}>{HOTEL_SHARE[lang]}</a>
               )}
             </div>
@@ -1235,16 +1238,20 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           {jumpMobile}
           {heroHotel}
           {paid && <PaidLetter paid={paid} lang={lang} />}
+          {paid && showsHouse(paid) && <PaidHouse paid={paid} lang={lang} />}
           {anchor('zonas')}
           {renderZones()}
           {anchor('planes')}
           {timeSection}
           {moodOriginal}
           {renderToday()}
+          {paid && <PaidServices paid={paid} lang={lang} />}
           {anchor('experiencias')}
           {renderExperiences('')}
           {anchor('bueno-saber')}
           {renderPractical()}
+          {/* Paid edition: with "Your house" off, the review request closes Good to know (otherwise it sits under check-out). */}
+          {paid && !showsHouse(paid) && <PaidReviewStandalone paid={paid} lang={lang} />}
           {/* Paid edition switch C: the planner invitation and the destination cards after it can be turned off per client. */}
           {(!paid || paid.switches.plannerInvite) && renderPlanner()}
           {(!paid || paid.switches.plannerInvite) && destinationsSection}

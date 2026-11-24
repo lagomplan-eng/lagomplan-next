@@ -27,6 +27,38 @@ export interface PaidLetter {
   roleLabel: string
 }
 
+/** "Your house": the property's own facts, FIXED fields only (no free-form sections). One set per property (one QR and link each). */
+export interface HouseFacts {
+  wifi: { network: string; password: string }
+  /** Times as the guest reads them, e.g. "15:00". */
+  checkIn: string
+  checkOut: string
+  /** Keys or access: how the guest gets in. */
+  access: Record<Lang, string>
+  luggage: Record<Lang, string>
+  rules: Record<Lang, string>
+  /** Who to call, and when. */
+  whoToCall: Record<Lang, string>
+}
+
+/** A service the host offers (late check-out, airport transfer, breakfast, massage...). */
+export interface PaidService {
+  id: string
+  title: Record<Lang, string>
+  /** One or two short sentences. */
+  text: Record<Lang, string>
+  /** The message the WhatsApp button pre-fills. */
+  request: Record<Lang, string>
+}
+
+/** PMS link (switch B): what a personal, per-reservation link would add. Sample data only in the demo; no PMS connection exists. */
+export interface PaidGuest {
+  name: string
+  /** ISO dates (YYYY-MM-DD). */
+  arrive: string
+  depart: string
+}
+
 export interface PaidClient {
   /** Client id (the demo is 'casa-lagom'). */
   id: string
@@ -40,6 +72,18 @@ export interface PaidClient {
   /** True while ALL host-supplied content on the page is sample content (the demo): it is labelled as such. */
   sample: boolean
   letter: Record<Lang, PaidLetter>
-  /** Contact button to the host. Without `href` it renders disabled (the demo never carries a real number). */
+  /** Contact button to the host. Without `href` or `whatsapp` it renders disabled (the demo never carries a real number). */
   contact: { label: Record<Lang, string>; href?: string }
+  /** The host's WhatsApp number, digits only with country code. Powers the contact button and the service requests. Absent in the demo. */
+  whatsapp?: string
+  /** Switch A: the property's own facts. */
+  house?: HouseFacts
+  /** Services and upsells. */
+  services: PaidService[]
+  /** Review request link (Google, TripAdvisor...). Absent = the button is disabled / sample. */
+  review?: { href?: string }
+  /** Switch B: the guest this link is for (PMS). Only used when switches.pmsLink is on. */
+  guest?: PaidGuest
+  /** The property's own address, used by "Send this guide to my phone" when the page has no ?h= code. Never the free zone link. */
+  shareUrl?: string
 }
