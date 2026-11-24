@@ -104,6 +104,9 @@ test.describe('/hoteles', () => {
   })
 
   test('search picks a destination; booking keeps its event', async ({ page }) => {
+    // The Stay22 affiliate script rewrites hotel links and takes over their clicks when it loads (as in CI);
+    // this test is about the card's own handler, so keep the third party out.
+    await page.route(/stay22/i, r => r.abort())
     await setup(page, '/es/hoteles')
     await page.getByRole('combobox').fill('Canc')
     await page.locator('ul[id] button').first().click()
