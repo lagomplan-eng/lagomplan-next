@@ -13,3 +13,8 @@ export function resolveHotelCode(fromAddress: string): string {
   const key = fromAddress.toLowerCase()
   return Object.prototype.hasOwnProperty.call(HOTEL_ALIASES, key) ? HOTEL_ALIASES[key] : fromAddress
 }
+
+/** The readable alias of a hotel code, or null when it has none (the first one listed, if there are several). */
+export function aliasForCode(code: string): string | null {
+  return Object.keys(HOTEL_ALIASES).find((alias) => HOTEL_ALIASES[alias] === code) ?? null
+}

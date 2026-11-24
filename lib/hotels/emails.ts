@@ -7,7 +7,7 @@
 
 import { Resend } from 'resend'
 import { ZONE_LABEL } from '../../content/guia/hotel/zones'
-import { adminHotelUrl, hotelCardUrl, hotelQrUrl } from './links'
+import { adminHotelUrl, hotelShownCardUrl, hotelShownUrl } from './links'
 import type { HotelRow } from './types'
 
 const FROM = 'Elena de Lagomplan <elena@lagomplan.com>'
@@ -64,8 +64,9 @@ export function sendWaitlistConfirmation(h: HotelRow) {
 
 /** To the hotel, on approval: a short thank-you, the printable card, and the guide link. */
 export function sendApprovalEmail(h: HotelRow) {
-  const card = hotelCardUrl(h.code)
-  const guide = hotelQrUrl(h.code)
+  // Links a person reads: the readable address when the hotel has one (lib/hotels/aliases.ts), else the random code.
+  const card = hotelShownCardUrl(h.code)
+  const guide = hotelShownUrl(h.code)
   return h.lang === 'en'
     ? send(h.contact_email, 'Your Lagomplan neighborhood guide is ready', [
         `Hi ${esc(h.contact_name)}, thank you for joining.`,

@@ -4,7 +4,7 @@ import { Fragment, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import type { HotelWithStats } from '../../../lib/hotels/stats'
 import { filterHotels } from '../../../lib/hotels/csv'
-import { hotelCardPath, hotelQrUrl } from '../../../lib/hotels/links'
+import { hotelCardPath, hotelShownUrl } from '../../../lib/hotels/links'
 import { HOTEL_STATUSES } from '../../../lib/hotels/types'
 import { EDITION_LABEL, STATUS_LABEL } from '../../../lib/hotels/labels'
 import { ZONE_LABEL } from '../../../content/guia/hotel/zones'
@@ -96,7 +96,7 @@ export default function HotelsTable({ hotels, totals }: {
                 {/* Actions sit on their own row under the hotel, so no button depends on how wide the screen is. */}
                 <tr>
                   <td colSpan={10} style={{ ...td, paddingTop: 0 }}>
-                    <button style={btn} onClick={() => copy(hotelQrUrl(h.code))}>Copiar enlace</button>
+                    <button style={btn} onClick={() => copy(hotelShownUrl(h.code))}>Copiar enlace</button>
                     <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={hotelCardPath(h.code)} target="_blank" rel="noopener noreferrer">Abrir tarjeta</a>
                     {h.maps_url && <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={h.maps_url} target="_blank" rel="noopener noreferrer">Maps</a>}
                     {h.zone && h.status !== 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'approve')}>Aprobar</button>}
