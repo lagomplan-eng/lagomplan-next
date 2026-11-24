@@ -8,6 +8,7 @@ import { notFound } from 'next/navigation'
 import QRCode from 'qrcode'
 import { getHotelByCode } from '../../../../lib/hotels/db'
 import { isValidHotelCode } from '../../../../lib/hotels/codes'
+import { resolveHotelCode } from '../../../../lib/hotels/aliases'
 import { hotelQrUrl } from '../../../../lib/hotels/links'
 import { ZONE_LABEL, isHotelZone, type HotelZone } from '../../../../content/guia/hotel/zones'
 import PrintButton from './PrintButton'
@@ -19,7 +20,8 @@ export const revalidate = 0
 const MONO = "var(--font-mono), 'DM Mono', ui-monospace, monospace"
 
 export default async function HotelCardPage({ params }: { params: Promise<{ code: string }> }) {
-  const { code } = await params
+  // /g/casa-cuenca/tarjeta is the same card as /g/<random code>/tarjeta; the QR below always encodes the random code.
+  const code = resolveHotelCode((await params).code)
   // The reason goes to the server log (status and zone only: no name, email or code) so a 404 can be explained.
   const gone = (reason: string): never => { console.error(`[card] not available: ${reason}`); notFound() }
   if (!isValidHotelCode(code)) gone('bad_code')
