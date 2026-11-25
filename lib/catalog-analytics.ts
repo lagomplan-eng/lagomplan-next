@@ -14,7 +14,9 @@
  *   partner_link_click      link_name=hotel_booking, section=hotels_index (card) or hotels_plan (plan
  *                           panel), hotel_id, position, provider, destination_slug (destination stays
  *                           the hostname). Plan-panel clicks on experiences use link_name=gyg_experience
- *                           with section=experience_plan.
+ *                           with section=experience_plan. On a guide page's hotel section: section=guide_hotels,
+ *                           destination_slug = the guide key, hotel_id = slug of the hotel name, position = its place in
+ *                           the section.
  */
 
 import { gaTrack, trackOutboundLink } from './analytics/ga'
@@ -46,8 +48,8 @@ export function trackPlannerCta(destinationSlug: string | null, section: Planner
   gaTrack('planner_cta_click', { lang, section, ...(destinationSlug ? { destination_slug: destinationSlug } : {}) })
 }
 
-/** Where the click happened: a hotel card, or the plan panel. Position is within that list. */
-export type HotelBookSection = 'hotels_index' | 'hotels_plan'
+/** Where the click happened: a hotel card, the plan panel, or a guide's hotel section. Position is within that list. */
+export type HotelBookSection = 'hotels_index' | 'hotels_plan' | 'guide_hotels'
 
 export function trackHotelBook(
   h: Pick<HotelListing, 'id' | 'bookingUrl' | 'provider' | 'destinationKey'>,

@@ -72,13 +72,13 @@ function experiencesData(bookingUrl: string | undefined): ExperiencesSectionData
 
 describe('HotelsSection affiliate link fallback', () => {
   it('uses withRef(bookingUrl) when a real bookingUrl is present', () => {
-    render(<HotelsSection data={hotelsData('https://www.booking.com/hotel/it/casa-monti-roma-roma.html')} locale="es" destination="Roma" />)
+    render(<HotelsSection data={hotelsData('https://www.booking.com/hotel/it/casa-monti-roma-roma.html')} guideKey="test-guide" locale="es" destination="Roma" />)
     const link = screen.getByRole('link')
     expect(link).toHaveAttribute('href', 'https://www.booking.com/hotel/it/casa-monti-roma-roma.html?ref=lagomplan')
   })
 
   it('falls back to buildAffiliateLink("booking", ...) when bookingUrl is empty', () => {
-    render(<HotelsSection data={hotelsData('')} locale="es" destination="Roma" />)
+    render(<HotelsSection data={hotelsData('')} guideKey="test-guide" locale="es" destination="Roma" />)
     const link = screen.getByRole('link')
     const expected = buildAffiliateLink('booking', { city: 'Roma', locale: 'es', surface: 'guide' })
     expect(link).toHaveAttribute('href', expected)
@@ -87,21 +87,21 @@ describe('HotelsSection affiliate link fallback', () => {
   })
 
   it('falls back to buildAffiliateLink("booking", ...) when bookingUrl is undefined', () => {
-    render(<HotelsSection data={hotelsData(undefined)} locale="en" destination="Mauritius" />)
+    render(<HotelsSection data={hotelsData(undefined)} guideKey="test-guide" locale="en" destination="Mauritius" />)
     const link = screen.getByRole('link')
     const expected = buildAffiliateLink('booking', { city: 'Mauritius', locale: 'en', surface: 'guide' })
     expect(link).toHaveAttribute('href', expected)
   })
 
   it('never renders href="#", with or without a bookingUrl', () => {
-    const { rerender } = render(<HotelsSection data={hotelsData(undefined)} locale="es" destination="Roma" />)
+    const { rerender } = render(<HotelsSection data={hotelsData(undefined)} guideKey="test-guide" locale="es" destination="Roma" />)
     expect(screen.getByRole('link')).not.toHaveAttribute('href', '#')
-    rerender(<HotelsSection data={hotelsData('https://www.booking.com/x')} locale="es" destination="Roma" />)
+    rerender(<HotelsSection data={hotelsData('https://www.booking.com/x')} guideKey="test-guide" locale="es" destination="Roma" />)
     expect(screen.getByRole('link')).not.toHaveAttribute('href', '#')
   })
 
   it('threads locale into the fallback campaign (es vs en)', () => {
-    render(<HotelsSection data={hotelsData(undefined)} locale="en" destination="Udaipur" />)
+    render(<HotelsSection data={hotelsData(undefined)} guideKey="test-guide" locale="en" destination="Udaipur" />)
     const link = screen.getByRole('link')
     expect(link.getAttribute('href')).toContain('campaign=lagomplan-guide-en')
   })
