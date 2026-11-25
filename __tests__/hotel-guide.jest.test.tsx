@@ -719,7 +719,7 @@ describe('a shared link is not a scan', () => {
   test('the /g route skips the scan when the marker is present (and only then)', () => {
     const route = fs.readFileSync(path.join(process.cwd(), 'app/g/[code]/route.ts'), 'utf8')
     expect(route).toMatch(/isCountableScan\(req\) && !isShareOpen\(req\.nextUrl\.searchParams\)/)
-    // the redirect itself is unchanged: same target with ?h and ?lang
-    expect(route).toMatch(/zoneGuidePath\(hotel\.zone, \{ h: code, lang \}\)/)
+    // the redirect: same target with ?h and ?lang; a shared link also keeps ?via=share so the guide records no opens (hotel-opens-api test)
+    expect(route).toMatch(/zoneGuidePath\(hotel\.zone, \{ h: code, lang, \.\.\.\(isShareOpen\(req\.nextUrl\.searchParams\) \? \{ via: 'share' \} : \{\}\) \}\)/)
   })
 })

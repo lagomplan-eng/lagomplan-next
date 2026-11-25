@@ -33,7 +33,8 @@ async function handle(req: NextRequest, params: Promise<{ code: string }>) {
       const { data: hotel } = await db.from('hotel_partners').select('id, zone, status').eq('code', code).maybeSingle()
       if (hotel && isHotelZone(hotel.zone)) {
         if (hotel.status === 'approved') {
-          target = zoneGuidePath(hotel.zone, { h: code, lang })
+          // A shared link keeps ?via=share in the guide's address, so the guide records no opens (mood, zone, plan) for that visit.
+          target = zoneGuidePath(hotel.zone, { h: code, lang, ...(isShareOpen(req.nextUrl.searchParams) ? { via: 'share' } : {}) })
           // A link shared from the guide (?via=share) is not a new scan; everything else about the redirect is the same.
           if (isCountableScan(req) && !isShareOpen(req.nextUrl.searchParams)) {
             const { error } = await db.from('hotel_guide_events').insert({ hotel_id: hotel.id, event_type: 'scan', lang })
