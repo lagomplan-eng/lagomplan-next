@@ -402,10 +402,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // Hotel edition: which plan of "How much time do you have?" is open (the short one by default, where it exists).
   const [plan, setPlan] = useState<'quick' | 'full'>(hotel && quickPlanFor(hotel.zone) ? 'quick' : 'full')
   const seenSections = useRef(new Set<string>())
-  // Hotel edition: the moods, zone tabs and plans a guest has OPENED in this page view (a tap, never the default), and whether
-  // this visit came from a shared link (?via=share), which records no opens.
+  // Hotel edition: the moods, zone tabs and plans a guest has OPENED in this page view (a tap, never the default).
   const openedRef = useRef(new Set<string>())
-  const sharedVisitRef = useRef(false)
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
@@ -418,9 +416,9 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     hotel
       ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
       : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
-  // One event per mood / zone / plan per page view, only for an approved hotel's link (?h=), never for a shared link.
+  // One event per mood / zone / plan per page view, only for an approved hotel's link (?h=), (a shared-link visitor is a real guest and counts).
   const trackOpen = (kind: OpenKind, source: string) => {
-    if (!hotel || !hotelCode || sharedVisitRef.current) return
+    if (!hotel || !hotelCode) return
     const key = `${kind}:${source}`
     if (openedRef.current.has(key)) return
     openedRef.current.add(key)
@@ -448,7 +446,6 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     if (hotel) {
       const h = params.get('h')
       if (isValidHotelCode(h)) setHotelCode(h)
-      sharedVisitRef.current = params.get('via') === 'share'
     }
 
     // ?llegada&noches&adultos&ninos personalize the guide. Same post-mount

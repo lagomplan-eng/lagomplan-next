@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  *
- * Which mood, zone tab or plan a guest opened: the events API and the shared-link redirect. Stored as section_open with
+ * Which mood, zone tab or plan a guest opened: the events API. Stored as section_open with
  * section = mood | zone | plan and source = the id from a fixed list. Existing columns only (no migration).
  */
 import { NextRequest } from 'next/server'
@@ -19,7 +19,6 @@ jest.mock('../lib/hotels/db', () => {
 })
 
 import { POST } from '../app/api/hotels/event/route'
-import { GET as scanRoute } from '../app/g/[code]/route'
 import { parseHotelEvent } from '../lib/hotels/events'
 import { HOTEL_OPEN_SOURCES, OPEN_KINDS } from '../content/guia/hotel/places'
 
@@ -89,17 +88,5 @@ describe('POST /api/hotels/event: opens', () => {
   test('nothing about the guest is stored', async () => {
     await post(open('mood', 'mood_hungry', { ip: '9.9.9.9', ua: 'x', cookie: 'y' }))
     expect(Object.keys(inserts[0].row).sort()).toEqual(['event_type', 'hotel_id', 'lang', 'section', 'source'])
-  })
-})
-
-describe('/g/{code} with ?via=share', () => {
-  const hit = (q: string) => scanRoute(new NextRequest(`https://www.lagomplan.com/g/${CODE}${q}`, { headers: { 'user-agent': CHROME } }), { params: Promise.resolve({ code: CODE }) })
-  test('a shared link records no scan and the guide keeps ?via=share (so it records no opens); a normal visit does not carry it', async () => {
-    const shared = await hit('?lang=es&via=share')
-    expect(new URL(shared.headers.get('location')!).search).toBe('?h=tjc9ckzteq&lang=es&via=share')
-    expect(inserts).toEqual([])
-    const normal = await hit('?lang=es')
-    expect(new URL(normal.headers.get('location')!).search).toBe('?h=tjc9ckzteq&lang=es')
-    expect(inserts).toEqual([{ table: 'hotel_guide_events', row: { hotel_id: 'hid-1', event_type: 'scan', lang: 'es' } }])
   })
 })

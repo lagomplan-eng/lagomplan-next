@@ -1,6 +1,6 @@
 /**
  * Opens in the hotel guide (browser): which mood, zone tab or plan a guest opened. One event per id per page view, only a tap
- * counts (never the default), closing counts nothing, and a visit with no ?h= or with ?via=share sends nothing.
+ * counts (never the default), closing counts nothing, a visit with no ?h= sends nothing, and a shared-link visit (?via=share) counts like any other.
  */
 import { render, fireEvent, act, screen } from '@testing-library/react'
 import GuiaClient from '../app/guia/[partner]/GuiaClient'
@@ -102,10 +102,10 @@ describe('the same rules as today', () => {
     click(mood(/hungry/i)); click(tab(container, 'Roma Norte')); click(screen.getByRole('tab', { name: '48 hours' }))
     expect(sent).toEqual([])
   })
-  test('with ?via=share (a shared link) no opens are sent', () => {
+  test('with ?via=share (a shared link) the opens count like anyone else\'s', () => {
     const { container } = open('condesa', `?h=${CODE}&lang=en&via=share`)
     click(mood(/hungry/i)); click(tab(container, 'Roma Norte')); click(screen.getByRole('tab', { name: '48 hours' }))
-    expect(opens()).toEqual([])
+    expect(opens().map((o: any) => `${o.section}:${o.source}`)).toEqual(['mood:mood_hungry', 'zone:zone_roma_norte', 'plan:plan_48h'])
   })
   test('an invalid code in ?h= sends nothing', () => {
     open('condesa', '?h=not-a-code&lang=en')

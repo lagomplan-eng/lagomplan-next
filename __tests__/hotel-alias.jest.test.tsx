@@ -68,7 +68,7 @@ describe('hotel alias: /g/casa-cuenca', () => {
     expect(inserts).toEqual([{ hotel_id: 'hid-1', event_type: 'scan', lang: 'es' }])
     inserts.length = 0
     const shared = await visit('/g/casa-cuenca?lang=es&via=share')
-    expect(where(shared)).toBe('/guia/cdmx/condesa?h=tjc9ckzteq&lang=es&via=share') // the marker stays, so the guide records no opens
+    expect(where(shared)).toBe('/guia/cdmx/condesa?h=tjc9ckzteq&lang=es')
     expect(inserts).toEqual([])
     const sharedCode = await visit('/g/tjc9ckzteq?lang=es&via=share')
     expect(where(sharedCode)).toBe(where(shared))
