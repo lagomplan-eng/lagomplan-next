@@ -287,8 +287,8 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
                         excerpt={t('results.countIn', { count: g.items.length, name: first.destinationName })}
                         actions={
                           <>
-                            <Button size="sm" href={guideHref(first.guideSlug)}>{tc('banner.guide')}</Button>
-                            {!single && <Button size="sm" variant="secondary" onClick={() => pickDestination(g.slug)}>{t('card.filterByDestination', { name: first.destinationName })}</Button>}
+                            <Button size="sm" className="!whitespace-normal !px-3 !py-1.5 text-left" href={guideHref(first.guideSlug)}>{tc('banner.guide')}</Button>
+                            {!single && <Button size="sm" variant="ghost" className="!whitespace-normal !px-3 !py-1.5 text-left" onClick={() => pickDestination(g.slug)}>{t('card.filterByDestination', { name: first.destinationName })}</Button>}
                           </>
                         }
                       />

@@ -43,7 +43,7 @@ export interface DestinationCardProps extends Omit<HTMLAttributes<HTMLElement>, 
   aside?: ReactNode
   /** Clamp the excerpt to this many lines. */
   excerptLines?: 3
-  /** Catalog header: image at the left, text at the right from md up (stacked below md). */
+  /** Catalog header: a low horizontal card, small illustration at the side, on every viewport. */
   row?: boolean
 }
 
@@ -56,10 +56,10 @@ export default function DestinationCard({
     <article
       {...rest}
       data-card="destination"
-      className={cx('flex h-full flex-col overflow-hidden rounded-destination bg-white shadow-soft transition-shadow', row && 'md:flex-row', linked ? 'group-hover:shadow-lift' : 'hover:shadow-lift group', !linked && className)}
+      className={cx('flex h-full overflow-hidden rounded-destination bg-white shadow-soft transition-shadow', row ? 'flex-row' : 'flex-col', linked ? 'group-hover:shadow-lift' : 'hover:shadow-lift group', !linked && className)}
     >
       {image && (
-        <div className={cx('relative overflow-hidden bg-sand', featured ? 'h-[250px]' : 'aspect-[4/3]', row && 'max-md:aspect-[16/7] md:w-[220px] md:flex-none')}>
+        <div className={cx('relative overflow-hidden bg-sand', featured ? 'h-[250px]' : (row ? 'w-24 flex-none md:w-36' : 'aspect-[4/3]'))}>
           <Image
             src={image.src}
             alt={image.alt}
@@ -81,23 +81,23 @@ export default function DestinationCard({
           )}
         </div>
       )}
-      <div className={cx('flex flex-1 flex-col gap-3 p-6', row && 'md:justify-center')}>
+      <div className={cx('flex flex-1 flex-col gap-3 p-6', row && 'min-w-0 justify-center !gap-2 !p-4')}>
         {!featured && (
           <div>
-            {typeof eyebrow === 'string' && eyebrow && !aside && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p>}
+            {typeof eyebrow === 'string' && eyebrow && !aside && <p className={cx('m-0 font-sans text-eyebrow uppercase text-sage-text', row ? 'mb-1 max-md:hidden' : 'mb-2')}>{eyebrow}</p>}
             {(aside || (eyebrow && typeof eyebrow !== 'string')) && (
               <div className="mb-2 flex items-start justify-between gap-3">
                 {typeof eyebrow === 'string' ? <p className="m-0 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p> : (eyebrow ?? <span />)}
                 {aside}
               </div>
             )}
-            <Heading className="m-0 font-sans text-h3 text-pine transition-colors group-hover:text-ink-3 [text-wrap:balance]">{title}</Heading>
+            <Heading className={cx('m-0 font-sans text-pine transition-colors group-hover:text-ink-3 [text-wrap:balance]', row ? 'text-h4' : 'text-h3')}>{title}</Heading>
           </div>
         )}
-        {excerpt && <p className={cx('m-0 font-sans text-body leading-7 text-ink-card [text-wrap:pretty]', excerptLines === 3 && 'line-clamp-3')}>{excerpt}</p>}
+        {excerpt && <p className={cx('m-0 font-sans text-ink-card [text-wrap:pretty]', row ? 'text-small' : 'text-body leading-7', excerptLines === 3 && 'line-clamp-3')}>{excerpt}</p>}
         {tags && tags.length > 0 && <ul className="m-0 flex list-none flex-wrap gap-2 p-0">{tags.map(t => <li key={t}><Tag>{t}</Tag></li>)}</ul>}
         {footer}
-        {actions && <div className="mt-auto flex flex-wrap gap-2.5 pt-1">{actions}</div>}
+        {actions && <div className={cx('mt-auto flex flex-wrap pt-1', row ? 'gap-x-2 gap-y-1' : 'gap-2.5')}>{actions}</div>}
         {cta && (
           <span className="mt-auto inline-flex w-fit items-center gap-2 rounded-btn bg-pine px-6 py-3 font-sans text-button font-semibold text-white">
             {cta} <span aria-hidden="true">→</span>

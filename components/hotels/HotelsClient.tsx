@@ -259,8 +259,8 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                         excerpt={t('results.countIn', { count: g.items.length, name: first.destination })}
                         actions={(guide || !single) ? (
                           <>
-                            {guide && <Button size="sm" href={guide}>{tc('banner.guide')}</Button>}
-                            {!single && <Button size="sm" variant="secondary" onClick={() => set({ destino: g.key })}>{t('card.filterByDestination', { name: first.destination })}</Button>}
+                            {guide && <Button size="sm" className="!whitespace-normal !px-3 !py-1.5 text-left" href={guide}>{tc('banner.guide')}</Button>}
+                            {!single && <Button size="sm" variant="ghost" className="!whitespace-normal !px-3 !py-1.5 text-left" onClick={() => set({ destino: g.key })}>{t('card.filterByDestination', { name: first.destination })}</Button>}
                           </>
                         ) : undefined}
                       />
