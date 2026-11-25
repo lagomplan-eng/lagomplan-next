@@ -13,7 +13,7 @@
  * scrolls to its card) and guides without hotels. The plan is shared with Experiencias.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 import { getPathname } from '../../lib/navigation'
@@ -22,6 +22,7 @@ import {
   type HotelDestination, type HotelFilters, type HotelListing, type TravelerKey,
 } from '../../lib/hotels-catalog'
 import { searchCatalog } from '../../lib/catalog-search'
+import { onLinkClickFirst } from '../../lib/analytics/capture-click'
 import { resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
 import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
 import type { CityNeighborhoods } from '../../lib/hotels-neighborhoods'
@@ -51,6 +52,20 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   const validDestinations = useMemo(() => new Set(destinations.filter(d => d.hotels > 0).map(d => d.key)), [destinations])
   const filters = useMemo(() => parseHotelFilters(searchParams, validDestinations), [searchParams, validDestinations])
   const visible = useMemo(() => filterHotels(hotels, filters), [hotels, filters])
+
+  // Booking clicks are recorded in the capture phase on window, before Stay22's script (which takes over the
+  // click on these links) can swallow them. The handler reads the latest list and language from a ref.
+  const bookRef = useRef({ visible, lang })
+  bookRef.current = { visible, lang }
+  useEffect(() => onLinkClickFirst(
+    t => t.closest('[data-hotel] a[rel~="sponsored"]'),
+    a => {
+      const id = a.closest('[data-hotel]')?.getAttribute('data-hotel')
+      const { visible: list, lang: l } = bookRef.current
+      const i = list.findIndex(x => x.id === id)
+      if (i >= 0) trackHotelBook(list[i], i + 1, l)
+    },
+  ), [])
 
   const setFilters = useCallback((next: HotelFilters) => {
     const qs = serializeHotelFilters(next)
@@ -244,7 +259,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                       titleAs={single ? 'h3' : 'h2'}
                       description={h.description || undefined}
                       tags={[h.tags[0], traveler].filter((x): x is string => !!x).slice(0, 2)}
-                      {...(h.bookingUrl ? { primary: { label: t('card.book'), href: h.bookingUrl, external: true, onClick: () => trackHotelBook(h, i + 1, lang) } } : {})}
+                      {...(h.bookingUrl ? { primary: { label: t('card.book'), href: h.bookingUrl, external: true } } : {})}
                       {...(hasGuide ? { secondary: { label: t('card.seeGuide'), href: h.guideUrl } } : {})}
                       {...(h.bookingUrl ? { providerLine: t('card.provider', { provider: tc(`provider.${h.provider}`) }) } : {})}
                       planButton={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}

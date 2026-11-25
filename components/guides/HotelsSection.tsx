@@ -5,7 +5,13 @@
  * optional affiliate URL appended via withRef().
  */
 
+'use client'
+
+import { useEffect, useRef } from 'react'
 import type { HotelsSection as HotelsSectionData } from '../../lib/data/guides/types'
+import { onLinkClickFirst } from '../../lib/analytics/capture-click'
+import { trackHotelBook } from '../../lib/catalog-analytics'
+import { hotelProviderFromUrl, slugifyHotelName } from '../../lib/hotels-catalog'
 import { withRef, buildAffiliateLink } from '../../lib/affiliate'
 import { Button, InfoCard, Tag } from '../design'
 import { GuideSectionHeader } from './GuideSectionHeader'
@@ -16,6 +22,8 @@ interface Props {
   locale: string
   /** City/destination name, used as the fallback search-link target when a hotel has no pre-resolved bookingUrl. */
   destination: string
+  /** The guide's key (its slug), reported as destination_slug on the booking click. */
+  guideKey: string
 }
 
 const BOOK_LABEL: Record<string, string> = {
@@ -23,7 +31,7 @@ const BOOK_LABEL: Record<string, string> = {
   en: 'Book →',
 }
 
-export function HotelsSection({ data, onToast, locale, destination }: Props) {
+export function HotelsSection({ data, onToast, locale, destination, guideKey }: Props) {
   const bookLabel = BOOK_LABEL[locale] ?? BOOK_LABEL.es
   const ctxLocale = locale === 'en' ? 'en' : 'es'
 
@@ -32,13 +40,32 @@ export function HotelsSection({ data, onToast, locale, destination }: Props) {
     return buildAffiliateLink('booking', { city: destination, locale: ctxLocale, surface: 'guide' })
   }
 
+  // Booking clicks are recorded in the capture phase on window, before Stay22's script (which takes over the
+  // click on these links) can swallow them. Section guide_hotels; destination_slug = the guide key.
+  const track = useRef({ data, locale, guideKey, hotelHref })
+  track.current = { data, locale, guideKey, hotelHref }
+  useEffect(() => onLinkClickFirst(
+    t => t.closest('[data-hotel="book-link"]'),
+    a => {
+      const { data: d, locale: l, guideKey: key, hotelHref: href } = track.current
+      const i = Number(a.getAttribute('data-hotel-index'))
+      const hotel = d.items[i]
+      if (!hotel) return
+      const url = href(hotel.bookingUrl)
+      trackHotelBook(
+        { id: slugifyHotelName(hotel.name), bookingUrl: url, provider: hotelProviderFromUrl(url), destinationKey: key },
+        i + 1, l === 'en' ? 'en' : 'es', 'guide_hotels',
+      )
+    },
+  ), [])
+
   return (
     <div data-guide="hotels" className="mb-14">
       <GuideSectionHeader eyebrow={data.eyebrow} title={data.title} description={data.description} />
 
       {/* Hotel cards */}
       <div className="flex flex-col gap-4">
-        {data.items.map((hotel) => (
+        {data.items.map((hotel, hotelIndex) => (
           <InfoCard key={hotel.number} data-hotel="card">
             <div className="grid grid-cols-[1fr_auto] items-start gap-4 max-[640px]:grid-cols-1">
               {/* Info */}
@@ -72,6 +99,7 @@ export function HotelsSection({ data, onToast, locale, destination }: Props) {
                 <Button
                   size="sm"
                   data-hotel="book-link"
+                  data-hotel-index={hotelIndex}
                   href={hotelHref(hotel.bookingUrl)}
                   target="_blank"
                   rel="noopener noreferrer"

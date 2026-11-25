@@ -83,7 +83,8 @@ export function gaPageView(path: string, title?: string): void {
 //   experience_plan booking link inside the plan panel, for an experience
 //   hotels_index    booking link on a card of the Hoteles page
 //   hotels_plan     booking link inside the plan panel, for a hotel
-export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact' | 'experience_hub' | 'experience_plan' | 'hotels_index' | 'hotels_plan'
+//   guide_hotels    booking link on a hotel of a guide page's hotel section
+export type PartnerLinkSection = 'before_you_arrive' | 'experience_book' | 'experience_details' | 'services_contact' | 'experience_hub' | 'experience_plan' | 'hotels_index' | 'hotels_plan' | 'guide_hotels'
 
 /**
  * Fires partner_link_click for any of the four tracked render sites

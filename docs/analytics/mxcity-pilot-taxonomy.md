@@ -84,7 +84,7 @@ sections below, plus the catalog pages: see "Catalog events"):
 | `partner_slug` | `livin_condesa` \| `livin_roma` \| `livin_polanco` \| `demo`; catalog: `getyourguide`, or the hotel booking provider (`booking`, `expedia`, `hotelscom`, `kayak`, `hotel-site`, `other`) | Explicit param, not inferred from `page_location` — that URL carries the inbound distribution UTMs from Livin and is unreliable to segment on |
 | `zone` | `condesa` \| `roma` \| `polanco` | Absent when the partner has no zone |
 | `lang` | `es` \| `en` | |
-| `section` | `before_you_arrive` \| `experience_book` \| `experience_details` \| `services_contact` \| `experience_hub` \| `experience_plan` \| `hotels_index` \| `hotels_plan` | `before_you_arrive` = the Transportation/Connectivity arrival-item link; `experience_book` = the experience card's "Book" button (highest-intent action on the page); `experience_details` = the how-to-book link inside an expanded experience card; `services_contact` (added 2026-09-28) = the Take care tab's chef and massage links (WhatsApp, Book online, Mapa, Take a Chef) — `link_name` distinguishes which action within this section; the four catalog values are in "Catalog events" |
+| `section` | `before_you_arrive` \| `experience_book` \| `experience_details` \| `services_contact` \| `experience_hub` \| `experience_plan` \| `hotels_index` \| `hotels_plan` \| `guide_hotels` | `before_you_arrive` = the Transportation/Connectivity arrival-item link; `experience_book` = the experience card's "Book" button (highest-intent action on the page); `experience_details` = the how-to-book link inside an expanded experience card; `services_contact` (added 2026-09-28) = the Take care tab's chef and massage links (WhatsApp, Book online, Mapa, Take a Chef) — `link_name` distinguishes which action within this section; the catalog values and `guide_hotels` (added with the 2026-11 hotel click fix: the booking link on a hotel of a guide page's hotel section, `link_name=hotel_booking`) are in "Catalog events" |
 | `destination` | e.g. `wa.me`, `airalo.tpm.li`, `www.getyourguide.com` | Hostname only, never the full URL (for every `link_name`) |
 | `experience_name` | e.g. `exp-teotihuacan`'s title | Only present on `experience_book` / `experience_details` — absent on `before_you_arrive` / `services_contact` and on the catalog sections |
 | `experience_id` | e.g. `parque-xcaret` | Catalog only, `link_name=gyg_experience`. Stable id from the guide file |
@@ -178,11 +178,30 @@ signal. Don't read a drop to zero in `plan_*` as a tracking fault. Card-level bo
 | `experience_plan` | `gyg_experience` | Booking link for an experience, inside the plan panel |
 | `hotels_index` | `hotel_booking` | Booking link on a card of the Hoteles page |
 | `hotels_plan` | `hotel_booking` | Booking link for a hotel, inside the plan panel |
+| `guide_hotels` | `hotel_booking` | Booking link on a hotel of a guide page's hotel section (`/es/guias/<guide>`, `/en/guides/<guide>`) |
 
 Parameters, experiences: `link_name`, `partner_slug` (`getyourguide`), `lang`, `section`, `destination`
 (`www.getyourguide.com`), `experience_id`, `position`, `provider` (`gyg`), `destination_slug`.
 Hotels: the same with `partner_slug` and `provider` set to the booking provider, and `hotel_id` instead
 of `experience_id`.
+
+`guide_hotels` carries the same hotel parameters: `destination_slug` is the guide key (`roma`), `hotel_id` is the
+slug of the hotel's name (`casa-monti-roma`), `position` is the hotel's place in that guide's hotel section,
+`partner_slug` / `provider` come from the link's host (`booking`, `expedia`, … `hotel-site`, `other`) and `lang` is
+the page language. Nothing new to register: every parameter already has a custom dimension (or is a built-in one).
+
+**How these clicks are recorded, and why counts will rise once.** The Stay22 LetMeAllez script is loaded on the
+Hoteles page and on the guides. It listens for clicks at the very start of the capture phase and takes over the booking
+links (that is how Stay22 earns the commission), which stopped our own click handler from ever running: measured in
+production before this fix, `hotel_booking` fired on **0 of 32** taps/clicks on `/es/hoteles` and on a guide's hotel
+section, desktop and mobile (with Stay22 blocked it fired every time on Hoteles; the guide section had no tracking at
+all). Since the 2026-11 hotel click fix the click is recorded by a listener on `window` in the capture phase
+(`lib/analytics/capture-click.ts`), ahead of Stay22; it only observes and changes nothing about the link, so Stay22's
+handling and commission are untouched. Consequence for reporting: `hotel_booking` with `section=hotels_index` was
+(almost) absent before and shows up from that date, and `guide_hotels` is new. **Read the first appearance as a
+one-time rise caused by the fix, not as a jump in traffic or in booking intent**; there is no comparable history to
+trend against. Before-fix `hotel_booking` counts, where any exist (for example visitors for whom Stay22 did not load),
+are an undercount.
 
 ### Custom dimensions to register for the catalog events
 
