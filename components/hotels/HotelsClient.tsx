@@ -26,7 +26,7 @@ import { resolvePlan, type PlanEntry, type PlanRef } from '../../lib/plan'
 import { trackHotelBook, trackHotelFilter, trackPlanBook, trackPlanChange, trackPlanHandoff } from '../../lib/catalog-analytics'
 import type { CityNeighborhoods } from '../../lib/hotels-neighborhoods'
 import { Button, Chip, DestinationCard, FilterPanel, PageTitle, type ActiveFilter, type FilterGroup } from '../design'
-import { DestinationBanner, PlanButton, ResultsBar } from '../catalog'
+import { PlanButton, ResultsBar } from '../catalog'
 import PlanTray from '../catalog/PlanTray'
 import { usePlan } from '../catalog/usePlan'
 import { isSavedPlanEnabled } from '../../lib/feature-flags'
@@ -50,6 +50,20 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   const validDestinations = useMemo(() => new Set(destinations.filter(d => d.hotels > 0).map(d => d.key)), [destinations])
   const filters = useMemo(() => parseHotelFilters(searchParams, validDestinations), [searchParams, validDestinations])
   const visible = useMemo(() => filterHotels(hotels, filters), [hotels, filters])
+
+  // The visible list grouped by destination. Destinations follow the order of the `destinations` list (guides, then
+  // World Cup), hotels keep their order inside a destination; `pos` stays the 1-based index in the overall visible
+  // list (it is what the analytics report), whatever the grouping.
+  const groups = useMemo(() => {
+    const rank = new Map(destinations.map((d, i) => [d.key, i]))
+    const by = new Map<string, { key: string; items: { h: HotelListing; pos: number }[] }>()
+    visible.forEach((h, i) => {
+      const g = by.get(h.destinationKey) ?? { key: h.destinationKey, items: [] }
+      g.items.push({ h, pos: i + 1 })
+      by.set(h.destinationKey, g)
+    })
+    return [...by.values()].sort((a, b) => (rank.get(a.key) ?? 1e6) - (rank.get(b.key) ?? 1e6))
+  }, [visible, destinations])
 
   const setFilters = useCallback((next: HotelFilters) => {
     const qs = serializeHotelFilters(next)
@@ -134,7 +148,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   }, [pendingScroll, visible])
 
   // ── filter rows ────────────────────────────────────────────────────────────
-  const groups: FilterGroup[] = [{
+  const filterGroups: FilterGroup[] = [{
     id: 'price',
     label: t('filters.price'),
     activeCount: filters.price ? 1 : 0,
@@ -155,7 +169,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
   }
   const travelers = travelerOptions(hotels, filters)
   if (travelers.length > 0) {
-    groups.push({
+    filterGroups.push({
       id: 'traveler',
       label: t('filters.traveler'),
       activeCount: filters.viajero ? 1 : 0,
@@ -207,7 +221,7 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
                 onPick,
                 noResultsText: t('filters.searchNone'),
               }}
-              groups={groups}
+              groups={filterGroups}
               activeFilters={activeFilters}
               resultsCount={visible.length}
               onClear={() => set({ price: null, viajero: null })}
@@ -223,58 +237,63 @@ export default function HotelsClient({ hotels, destinations, neighborhoods, loca
           <section aria-label={t('results.count', { count: visible.length })} className="flex flex-col gap-5">
             <ResultsBar count={countLabel} orderLabel={t('results.order')} trustText={t('trust')} />
 
-            {single && single.cover_img && (
-              <DestinationBanner
-                name={single.destination}
-                illustration={single.cover_img}
-                {...(single.guideUrl !== '#' ? { guideHref: single.guideUrl } : {})}
-              />
-            )}
-
             {visible.length === 0 ? (
               <div className="flex flex-col items-center gap-3 rounded-info border border-dashed border-line-sage px-6 py-12 text-center">
                 <p className="m-0 font-sans text-h4">{t('empty.title')}</p>
                 <Button variant="secondary" onClick={() => setFilters(EMPTY_HOTEL_FILTERS)}>{t('empty.clear')}</Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-[14px] md:gap-6 md:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]">
-                {visible.map((h, i) => {
-                  const tier = t(`filters.tier.${priceBucket(h.priceLevel)}`)
-                  const traveler = h.travelers[0] ? t(`filters.travelers.${h.travelers[0]}`) : undefined
-                  const hasGuide = !!h.guideUrl && h.guideUrl !== '#'
+              <div className="flex flex-col gap-10">
+                {groups.map(g => {
+                  const first = g.items[0].h
+                  const guide = first.guideUrl && first.guideUrl !== '#' ? first.guideUrl : null
                   return (
-                    <DestinationCard
-                      key={h.id}
-                      id={`hotel-${h.id}`}
-                      data-hotel={h.id}
-                      className="scroll-mt-32"
-                      {...(single ? { eyebrow: `${h.priceLevel} · ${tier}` } : {
-                        ...(h.cover_img ? { image: { src: h.cover_img, alt: '' } } : {}),
-                        eyebrow: (
-                          <button
-                            type="button"
-                            onClick={() => set({ destino: h.destinationKey })}
-                            aria-label={t('card.filterByDestination', { name: h.destination })}
-                            className="m-0 inline-flex min-h-chip items-center bg-transparent p-0 text-left font-sans text-eyebrow uppercase text-sage-text underline-offset-4 hover:underline"
-                          >
-                            {`${h.destination} · ${h.priceLevel}`}
-                          </button>
-                        ),
-                      })}
-                      title={h.name}
-                      headingLevel={single ? 3 : 2}
-                      excerpt={h.description || undefined}
-                      excerptLines={3}
-                      tags={[h.tags[0], traveler].filter((x): x is string => !!x).slice(0, 2)}
-                      aside={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}
-                      actions={(h.bookingUrl || hasGuide) ? (
-                        <>
-                          {h.bookingUrl && <Button href={h.bookingUrl} target="_blank" rel="sponsored noopener" onClick={() => trackHotelBook(h, i + 1, lang)}>{t('card.book')}</Button>}
-                          {hasGuide && <Button variant="secondary" href={h.guideUrl}>{t('card.seeGuide')}</Button>}
-                          {h.bookingUrl && <p className="m-0 basis-full font-sans text-tiny text-label">{t('card.provider', { provider: tc(`provider.${h.provider}`) })}</p>}
-                        </>
-                      ) : undefined}
-                    />
+                    <section key={g.key} aria-label={first.destination} className="flex flex-col gap-4">
+                      <DestinationCard
+                        data-destination={g.key}
+                        headingLevel={2}
+                        row
+                        {...(first.cover_img ? { image: { src: first.cover_img, alt: '' } } : {})}
+                        eyebrow={tc('banner.eyebrow')}
+                        title={first.destination}
+                        excerpt={t('results.countIn', { count: g.items.length, name: first.destination })}
+                        actions={(guide || !single) ? (
+                          <>
+                            {guide && <Button size="sm" href={guide}>{tc('banner.guide')}</Button>}
+                            {!single && <Button size="sm" variant="secondary" onClick={() => set({ destino: g.key })}>{t('card.filterByDestination', { name: first.destination })}</Button>}
+                          </>
+                        ) : undefined}
+                      />
+                      <div className="grid grid-cols-1 gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
+                        {g.items.map(({ h, pos }) => {
+                          const tier = t(`filters.tier.${priceBucket(h.priceLevel)}`)
+                          const traveler = h.travelers[0] ? t(`filters.travelers.${h.travelers[0]}`) : undefined
+                          const hasGuide = !!h.guideUrl && h.guideUrl !== '#'
+                          return (
+                            <DestinationCard
+                              key={h.id}
+                              id={`hotel-${h.id}`}
+                              data-hotel={h.id}
+                              className="scroll-mt-32"
+                              eyebrow={`${h.priceLevel} · ${tier}`}
+                              title={h.name}
+                              headingLevel={3}
+                              excerpt={h.description || undefined}
+                              excerptLines={3}
+                              tags={[h.tags[0], traveler].filter((x): x is string => !!x).slice(0, 2)}
+                              aside={planEnabled ? <PlanButton pressed={inPlan.has(h.id)} onClick={() => togglePlan(h.id)} name={h.name} /> : undefined}
+                              actions={(h.bookingUrl || hasGuide) ? (
+                                <>
+                                  {h.bookingUrl && <Button href={h.bookingUrl} target="_blank" rel="sponsored noopener" onClick={() => trackHotelBook(h, pos, lang)}>{t('card.book')}</Button>}
+                                  {hasGuide && <Button variant="secondary" href={h.guideUrl}>{t('card.seeGuide')}</Button>}
+                                  {h.bookingUrl && <p className="m-0 basis-full font-sans text-tiny text-label">{t('card.provider', { provider: tc(`provider.${h.provider}`) })}</p>}
+                                </>
+                              ) : undefined}
+                            />
+                          )
+                        })}
+                      </div>
+                    </section>
                   )
                 })}
               </div>

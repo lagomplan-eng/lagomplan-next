@@ -72,7 +72,7 @@ export default function BottomSheet({ open, onClose, title, closeLabel, children
   if (!mounted || !open) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[500]">
+    <div className="fixed inset-0 z-[10000]">
       <div
         data-testid="sheet-backdrop"
         aria-hidden="true"

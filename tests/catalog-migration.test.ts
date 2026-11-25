@@ -22,7 +22,6 @@ const FILES = [
   'components/hotels/SmartFindsSection.tsx',
   'components/hotels/PlannerBridgeCTA.tsx',
   'components/catalog/ResultsBar.tsx',
-  'components/catalog/DestinationBanner.tsx',
   'components/catalog/PlanButton.tsx',
   'components/catalog/PlanTray.tsx',
   'app/[locale]/hotels/page.tsx',
@@ -30,7 +29,7 @@ const FILES = [
 ]
 const bad = (re: RegExp) => FILES.filter(f => re.test(strip(read(f))))
 
-ok('replaced catalog components are deleted', ['CatalogCard', 'Chip', 'FilterPanel', 'PageHeader'].every(n => !fs.existsSync(path.join(root, `components/catalog/${n}.tsx`))))
+ok('replaced catalog components are deleted', ['CatalogCard', 'Chip', 'FilterPanel', 'PageHeader', 'DestinationBanner'].every(n => !fs.existsSync(path.join(root, `components/catalog/${n}.tsx`))))
 ok('no hex colour literals', bad(/#[0-9a-fA-F]{3,8}\b/).length === 0, bad(/#[0-9a-fA-F]{3,8}\b/).join(', '))
 ok('no rgb()/rgba() colour numbers', bad(/rgba?\(\s*\d/).length === 0, bad(/rgba?\(\s*\d/).join(', '))
 ok('no inline style colours or fonts', bad(/style=\{\{[^}]*(?:color|background|fontFamily|border)/i).length === 0, bad(/style=\{\{[^}]*(?:color|background|fontFamily|border)/i).join(', '))
@@ -42,16 +41,21 @@ ok('Experiencias uses PageTitle, FilterPanel, Chip, DestinationCard, Button, Inf
 ok('Hoteles uses PageTitle, FilterPanel, Chip, DestinationCard, Button', uses('components/hotels/HotelsClient.tsx', ['PageTitle', 'FilterPanel', 'Chip', 'DestinationCard', 'Button']))
 ok('both pages feed the mobile filter sheet (activeFilters + resultsCount + labels)', ['components/experiences/ExperiencesHub.tsx', 'components/hotels/HotelsClient.tsx'].every(f => /activeFilters=\{activeFilters\}/.test(read(f)) && /resultsCount=\{visible\.length\}/.test(read(f)) && /sheet\.showResults/.test(read(f))))
 
+// Both lists are grouped by destination: one header card per destination, its items below; position stays the
+// index in the overall visible list.
+for (const f of ['components/experiences/ExperiencesHub.tsx', 'components/hotels/HotelsClient.tsx'])
+  ok(`${path.basename(f)} groups by destination and keeps the overall position`, /pos: i \+ 1/.test(read(f)) && /groups\.map\(g =>/.test(read(f)) && /\brow\b\n/.test(read(f)) && /rank\.get/.test(read(f)))
+
 // GA4: the exact tracking calls of the pages before the migration (copied from main).
 const CALLS: Record<string, string[]> = {
   'components/experiences/ExperiencesHub.tsx': [
-    'trackBookClick(e, i + 1, lang)', 'trackGuideClick(e, i + 1, lang)', 'trackListView(lang, experiences.length)',
+    'trackBookClick(e, pos, lang)', 'trackGuideClick(e, pos, lang)', 'trackListView(lang, experiences.length)',
     'trackPlanBook(x, pos, lang)', 'trackPlanChange(now ? \'add\' : \'remove\', entry, next.length, lang)',
     "trackPlanHandoff(slug, count, mixed, 'panel', lang)", "trackPlannerCta(conciergeDestination?.slug ?? null, 'experience_hub', lang)",
     'trackFilterChange(lang, filters, clean, filterExperiences(experiences, clean).length)',
   ],
   'components/hotels/HotelsClient.tsx': [
-    'trackHotelBook(h, i + 1, lang)', 'trackHotelFilter(lang, filters, next, filterHotels(hotels, next).length)',
+    'trackHotelBook(h, pos, lang)', 'trackHotelFilter(lang, filters, next, filterHotels(hotels, next).length)',
     'trackPlanBook(x, pos, lang)', "trackPlanChange(now ? 'add' : 'remove', entry, next.length, lang)",
     "trackPlanHandoff(slug, count, mixed, 'panel', lang)",
   ],

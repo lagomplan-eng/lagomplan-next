@@ -43,10 +43,12 @@ export interface DestinationCardProps extends Omit<HTMLAttributes<HTMLElement>, 
   aside?: ReactNode
   /** Clamp the excerpt to this many lines. */
   excerptLines?: 3
+  /** Catalog header: image at the left, text at the right from md up (stacked below md). */
+  row?: boolean
 }
 
 export default function DestinationCard({
-  href, image, title, eyebrow, excerpt, tags, badge, cta, featured, headingLevel = 3, className, footer, actions, aside, excerptLines, ...rest
+  href, image, title, eyebrow, excerpt, tags, badge, cta, featured, headingLevel = 3, className, footer, actions, aside, excerptLines, row, ...rest
 }: DestinationCardProps) {
   const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4'
   const linked = href !== undefined
@@ -54,10 +56,10 @@ export default function DestinationCard({
     <article
       {...rest}
       data-card="destination"
-      className={cx('flex h-full flex-col overflow-hidden rounded-destination bg-white shadow-soft transition-shadow', linked ? 'group-hover:shadow-lift' : 'hover:shadow-lift group', !linked && className)}
+      className={cx('flex h-full flex-col overflow-hidden rounded-destination bg-white shadow-soft transition-shadow', row && 'md:flex-row', linked ? 'group-hover:shadow-lift' : 'hover:shadow-lift group', !linked && className)}
     >
       {image && (
-        <div className={cx('relative overflow-hidden bg-sand', featured ? 'h-[250px]' : 'aspect-[4/3]')}>
+        <div className={cx('relative overflow-hidden bg-sand', featured ? 'h-[250px]' : 'aspect-[4/3]', row && 'max-md:aspect-[16/7] md:w-[220px] md:flex-none')}>
           <Image
             src={image.src}
             alt={image.alt}
@@ -79,7 +81,7 @@ export default function DestinationCard({
           )}
         </div>
       )}
-      <div className="flex flex-1 flex-col gap-3 p-6">
+      <div className={cx('flex flex-1 flex-col gap-3 p-6', row && 'md:justify-center')}>
         {!featured && (
           <div>
             {typeof eyebrow === 'string' && eyebrow && !aside && <p className="m-0 mb-2 font-sans text-eyebrow uppercase text-sage-text">{eyebrow}</p>}

@@ -25,7 +25,7 @@ import {
   parseFilters, sanitizeFilters, searchHub, serializeFilters, type FilterState,
 } from '../../lib/experiences/filters'
 import { Button, CardTitle, Chip, DestinationCard, FilterPanel, InfoCard, PageTitle, type ActiveFilter, type FilterGroup } from '../design'
-import { DestinationBanner, PlanButton, ResultsBar } from '../catalog'
+import { PlanButton, ResultsBar } from '../catalog'
 import PlanTray from '../catalog/PlanTray'
 import { usePlan } from '../catalog/usePlan'
 import { isSavedPlanEnabled } from '../../lib/feature-flags'
@@ -55,6 +55,20 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
     [searchParams, experiences],
   )
   const visible = useMemo(() => filterExperiences(experiences, filters), [experiences, filters])
+
+  // The visible list grouped by destination. Destinations follow guide order (the `destinations` list), items keep
+  // their guide order inside a destination; `pos` stays the 1-based index in the overall visible list (it is what
+  // the analytics report), whatever the grouping.
+  const groups = useMemo(() => {
+    const rank = new Map(destinations.map((d, i) => [d.slug, i]))
+    const by = new Map<string, { slug: string; items: { e: Experience; pos: number }[] }>()
+    visible.forEach((e, i) => {
+      const g = by.get(e.destinationSlug) ?? { slug: e.destinationSlug, items: [] }
+      g.items.push({ e, pos: i + 1 })
+      by.set(e.destinationSlug, g)
+    })
+    return [...by.values()].sort((a, b) => (rank.get(a.slug) ?? 1e6) - (rank.get(b.slug) ?? 1e6))
+  }, [visible, destinations])
 
   // ── plan ───────────────────────────────────────────────────────────────────
   const planEnabled = isSavedPlanEnabled()
@@ -144,12 +158,12 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
   const toggleTipo = (c: (typeof CATEGORIES)[number]) =>
     set({ tipos: filters.tipos.includes(c) ? filters.tipos.filter(x => x !== c) : [...filters.tipos, c] })
 
-  const groups: FilterGroup[] = []
+  const filterGroups: FilterGroup[] = []
   const activeFilters: ActiveFilter[] = []
   const remove = (name: string) => tc('sheet.remove', { name })
   if (new Set(experiences.map(e => e.region)).size >= 2) {
     const counts = facetCounts(experiences, filters, 'region')
-    groups.push({
+    filterGroups.push({
       id: 'region',
       label: t('filters.region'),
       activeCount: filters.region ? 1 : 0,
@@ -169,7 +183,7 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
   }
   if (groupVisible(experiences, 'personas')) {
     const counts = facetCounts(experiences, filters, 'para')
-    groups.push({
+    filterGroups.push({
       id: 'para',
       label: t('filters.para'),
       activeCount: filters.para ? 1 : 0,
@@ -189,7 +203,7 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
   }
   if (groupVisible(experiences, 'category')) {
     const counts = facetCounts(experiences, filters, 'tipo')
-    groups.push({
+    filterGroups.push({
       id: 'tipo',
       label: t('filters.tipo'),
       activeCount: filters.tipos.length,
@@ -236,7 +250,7 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
                 },
                 noResultsText: t('filters.destinoNone'),
               }}
-              groups={groups}
+              groups={filterGroups}
               activeFilters={activeFilters}
               resultsCount={visible.length}
               onClear={() => set({ region: null, para: null, tipos: [] })}
@@ -252,56 +266,59 @@ export default function ExperiencesHub({ experiences, destinations, regionNames,
           <section aria-label={t('results.count', { count: visible.length })} className="flex flex-col gap-5">
             <ResultsBar count={countLabel} orderLabel={t('results.order')} trustText={t('trust')} />
 
-            {single && single.destinationImage && (
-              <DestinationBanner
-                name={single.destinationName}
-                illustration={single.destinationImage}
-                guideHref={guideHref(single.guideSlug)}
-              />
-            )}
-
             {visible.length === 0 ? (
               <div className="flex flex-col items-center gap-3 rounded-info border border-dashed border-line-sage px-6 py-12 text-center">
                 <p className="m-0 font-sans text-h4">{t('empty.title')}</p>
                 <Button variant="secondary" onClick={() => setFilters(EMPTY_FILTERS)}>{t('empty.clear')}</Button>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-[14px] md:gap-6 md:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]">
-                {visible.map((e, i) => (
-                  <DestinationCard
-                    key={e.id}
-                    data-experience={e.id}
-                    {...(single ? {} : {
-                      ...(e.destinationImage ? { image: { src: e.destinationImage, alt: '' } } : {}),
-                      eyebrow: (
-                        <button
-                          type="button"
-                          onClick={() => pickDestination(e.destinationSlug)}
-                          aria-label={t('card.filterByDestination', { name: e.destinationName })}
-                          className="m-0 inline-flex min-h-chip items-center bg-transparent p-0 text-left font-sans text-eyebrow uppercase text-sage-text underline-offset-4 hover:underline"
-                        >
-                          {e.destinationName}
-                        </button>
-                      ),
-                    })}
-                    title={e.name}
-                    headingLevel={single ? 3 : 2}
-                    excerpt={e.description || undefined}
-                    excerptLines={3}
-                    tags={[
-                      ...e.personas.map(p => t(`card.personas.${p}`)),
-                      ...(e.category ? [t(`filters.categories.${e.category}`)] : []),
-                    ]}
-                    aside={planEnabled ? <PlanButton pressed={inPlan.has(e.id)} onClick={() => togglePlan(e.id)} name={e.name} /> : undefined}
-                    actions={
-                      <>
-                        <Button href={e.bookingUrl} target="_blank" rel="sponsored noopener" onClick={() => trackBookClick(e, i + 1, lang)}>{t('card.book')}</Button>
-                        <Button variant="secondary" href={guideHref(e.guideSlug, e.guideAnchor)} onClick={() => trackGuideClick(e, i + 1, lang)}>{t('card.seeGuide')}</Button>
-                        <p className="m-0 basis-full font-sans text-tiny text-label">{t('card.provider')}</p>
-                      </>
-                    }
-                  />
-                ))}
+              <div className="flex flex-col gap-10">
+                {groups.map(g => {
+                  const first = g.items[0].e
+                  return (
+                    <section key={g.slug} aria-label={first.destinationName} className="flex flex-col gap-4">
+                      <DestinationCard
+                        data-destination={g.slug}
+                        headingLevel={2}
+                        row
+                        {...(first.destinationImage ? { image: { src: first.destinationImage, alt: '' } } : {})}
+                        eyebrow={tc('banner.eyebrow')}
+                        title={first.destinationName}
+                        excerpt={t('results.countIn', { count: g.items.length, name: first.destinationName })}
+                        actions={
+                          <>
+                            <Button size="sm" href={guideHref(first.guideSlug)}>{tc('banner.guide')}</Button>
+                            {!single && <Button size="sm" variant="secondary" onClick={() => pickDestination(g.slug)}>{t('card.filterByDestination', { name: first.destinationName })}</Button>}
+                          </>
+                        }
+                      />
+                      <div className="grid grid-cols-1 gap-4 md:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]">
+                        {g.items.map(({ e, pos }) => (
+                          <DestinationCard
+                            key={e.id}
+                            data-experience={e.id}
+                            title={e.name}
+                            headingLevel={3}
+                            excerpt={e.description || undefined}
+                            excerptLines={3}
+                            tags={[
+                              ...e.personas.map(p => t(`card.personas.${p}`)),
+                              ...(e.category ? [t(`filters.categories.${e.category}`)] : []),
+                            ]}
+                            aside={planEnabled ? <PlanButton pressed={inPlan.has(e.id)} onClick={() => togglePlan(e.id)} name={e.name} /> : undefined}
+                            actions={
+                              <>
+                                <Button href={e.bookingUrl} target="_blank" rel="sponsored noopener" onClick={() => trackBookClick(e, pos, lang)}>{t('card.book')}</Button>
+                                <Button variant="secondary" href={guideHref(e.guideSlug, e.guideAnchor)} onClick={() => trackGuideClick(e, pos, lang)}>{t('card.seeGuide')}</Button>
+                                <p className="m-0 basis-full font-sans text-tiny text-label">{t('card.provider')}</p>
+                              </>
+                            }
+                          />
+                        ))}
+                      </div>
+                    </section>
+                  )
+                })}
               </div>
             )}
 
