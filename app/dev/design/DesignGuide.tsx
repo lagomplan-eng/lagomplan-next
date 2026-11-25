@@ -130,11 +130,11 @@ function Pair({ id, name, status, bg = 'bg-white', home, component }: { id: stri
         <span className="font-sans text-small font-semibold text-pine">{name}</span>
         <span data-status={status} className={`rounded-full border px-2.5 py-0.5 font-sans text-micro ${status === 'match' ? 'border-pine/20 bg-mint text-pine' : 'border-line-sage bg-white text-sage-text'}`}>{status === 'match' ? 'matches home' : 'derived from home'}</span>
       </div>
-      <div className={`rounded-info border border-line-hair p-6 ${bg}`}>
+      <div className={`min-w-0 rounded-info border border-line-hair p-6 ${bg}`}>
         <p className="m-0 mb-3 font-mono text-[11px] uppercase tracking-[.08em] text-label">Home (real classes)</p>
         <div data-side="home">{home ?? <p className="m-0 font-sans text-small text-label">Home has no example of this.</p>}</div>
       </div>
-      <div className={`rounded-info border border-line-hair p-6 ${bg}`}>
+      <div className={`min-w-0 rounded-info border border-line-hair p-6 ${bg}`}>
         <p className="m-0 mb-3 font-mono text-[11px] uppercase tracking-[.08em] text-label">Component</p>
         <div data-side="component">{component}</div>
       </div>
@@ -212,8 +212,8 @@ function ComparePanel() {
       <Pair id="search" name="SearchInput" status="derived" component={<SearchInput label="Buscar" placeholder="Busca un destino" value="" onChange={() => {}} />} />
       <Pair id="on-dark" name="Newsletter field + button" status="derived"
         bg="bg-pine"
-        home={<div className="flex"><input readOnly placeholder="Tu correo electrónico" className="flex-1 font-sans text-[15px] px-5 py-4 text-[#FFF9F3] placeholder-[rgba(255,249,243,0.58)]" style={{ border: '1px solid rgba(255,249,243,0.18)', background: 'rgba(255,255,255,0.10)' }} /><button type="button" className="font-sans text-[15px] font-semibold px-6 py-4 whitespace-nowrap border-none" style={{ background: '#FFF9F3', color: '#0F3A33' }}>Suscribirme</button></div>}
-        component={<div className="flex gap-3"><Input variant="onDark" label="Correo" hideLabel className="flex-1" placeholder="Tu correo electrónico" /><Button variant="inverse">Suscribirme</Button></div>} />
+        home={<div className="flex"><input readOnly placeholder="Tu correo electrónico" className="min-w-0 flex-1 font-sans text-[15px] px-5 py-4 text-[#FFF9F3] placeholder-[rgba(255,249,243,0.58)]" style={{ border: '1px solid rgba(255,249,243,0.18)', background: 'rgba(255,255,255,0.10)' }} /><button type="button" className="font-sans text-[15px] font-semibold px-6 py-4 whitespace-nowrap border-none" style={{ background: '#FFF9F3', color: '#0F3A33' }}>Suscribirme</button></div>}
+        component={<div className="flex gap-3"><Input variant="onDark" label="Correo" hideLabel className="min-w-0 flex-1" placeholder="Tu correo electrónico" /><Button variant="inverse">Suscribirme</Button></div>} />
     </div>
   )
 }
@@ -345,7 +345,7 @@ export default function DesignGuide({ embed }: { embed: boolean }) {
 
       {!embed && (
         <Block id="mobile" title="Mobile preview (390 px)" note="The same page inside a 390px frame, so the mobile layout and the filter bottom sheet can be checked from a desktop screen.">
-          <iframe title="Mobile preview" src="/dev/design?embed=1" width={390} height={780} className="rounded-sheet border-2 border-pine bg-cream" />
+          <iframe title="Mobile preview" src="/dev/design?embed=1" width={390} height={780} className="max-w-full rounded-sheet border-2 border-pine bg-cream" />
         </Block>
       )}
     </div>

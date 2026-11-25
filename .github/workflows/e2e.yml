@@ -70,8 +70,8 @@ jobs:
       - name: Build (against local Supabase)
         run: npm run build
 
-      - name: E2E (desktop-chrome) — prod build + local Supabase
-        run: npx playwright test --project=desktop-chrome
+      - name: E2E (desktop-chrome + mobile-chrome) — prod build + local Supabase
+        run: npx playwright test --project=desktop-chrome --project=mobile-chrome
         env:
           CI: 'true'
 
