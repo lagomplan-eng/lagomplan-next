@@ -35,6 +35,12 @@ jobs:
 
       - run: npm ci
 
+      # `next start` falls back to a WebAssembly image optimizer when `sharp` is missing; on Node 24 that path
+      # crashed the server (V8 "jit_page_->allocations_.erase" fatal error) under the mobile project's many image
+      # sizes, taking every later spec down with ERR_CONNECTION_REFUSED. Not saved to package.json: Vercel has its own.
+      - name: Install sharp for the e2e server (not saved)
+        run: npm install --no-save sharp
+
       - name: Set up Supabase CLI
         uses: supabase/setup-cli@v1
         with:
