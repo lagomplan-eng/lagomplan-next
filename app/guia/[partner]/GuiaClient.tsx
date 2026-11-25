@@ -35,6 +35,7 @@ import {
 } from 'lucide-react'
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
+import { PLAN_QUICK_SOURCE, moodSource, placeIdOf } from '../../../content/guia/hotel/places'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import {
   HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_ARIA, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
@@ -414,6 +415,11 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
       ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
       : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
   const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
+  // Hotel edition: the place id and where-in-the-guide marks of a link that belongs to a place (read by the click handler below).
+  const placeAttrs = (name: string, source: string) => {
+    const place = hotel ? placeIdOf(name) : null
+    return place ? ({ 'data-place': place, 'data-place-source': source } as const) : {}
+  }
   const interp = (s: string) =>
     s.replace(/\{host\}/g, hotel ? HOTEL_HOST_NAME[lang] : partner.hostName).replace(/\{neighborhood\}/g, partner.homeNeighborhood)
 
@@ -513,7 +519,9 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     const onClick = (ev: MouseEvent) => {
       const a = (ev.target as Element | null)?.closest?.('a[href]') as HTMLAnchorElement | null
       const id = a && classify(a)
-      if (id) sendHotelEvent({ code: hotelCode, type: 'outbound_click', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+      // A link that belongs to a place carries its stable id and where in the guide it sits (data-place / data-place-source); the server checks both.
+      const place = a?.dataset.place, source = a?.dataset.placeSource
+      if (id) sendHotelEvent({ code: hotelCode, type: 'outbound_click', section: id, lang: document.documentElement.lang === 'es' ? 'es' : 'en', ...(place ? { place } : {}), ...(source ? { source } : {}) })
     }
     document.addEventListener('click', onClick, true)
     return () => document.removeEventListener('click', onClick, true)
@@ -804,7 +812,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                         <div className={styles.moodItemNote}>{it.note}</div>
                         <div className={styles.moodItemNote} style={{ marginTop: 6 }}>
                           {[it.zone, it.address].filter(Boolean).join(' · ')}{(it.zone || it.address) ? ' · ' : ''}
-                          <a className={styles.link} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer">{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                          <a className={styles.link} href={placeMapUrl(it.name, it.address ? [it.address, it.zone].filter(Boolean).join(', ') : undefined)} target="_blank" rel="noopener noreferrer" {...placeAttrs(it.name, moodSource(selectedMood.id))}>{lang === 'es' ? 'Mapa' : 'Map'}</a>
                         </div>
                       </div>
                     ) : (
@@ -1057,7 +1065,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                 <span style={{ display: 'block' }}>{stop.note[lang]}</span>
                 <span style={{ display: 'block', color: 'rgba(255, 249, 243, .6)' }}>
                   {stop.where}{' · '}
-                  <a href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--sage-soft)', textDecoration: 'underline' }}>{lang === 'es' ? 'Mapa' : 'Map'}</a>
+                  <a href={stopMapUrl(stop)} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--sage-soft)', textDecoration: 'underline' }} {...placeAttrs(stop.name, PLAN_QUICK_SOURCE)}>{lang === 'es' ? 'Mapa' : 'Map'}</a>
                 </span>
               </p>
             </div>

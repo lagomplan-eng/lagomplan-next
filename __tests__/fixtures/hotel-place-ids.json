@@ -1,0 +1,322 @@
+[
+  {
+    "id": "alameda_central",
+    "name": "Alameda Central"
+  },
+  {
+    "id": "audiorama",
+    "name": "Audiorama"
+  },
+  {
+    "id": "avenida_amsterdam",
+    "name": "Avenida Ámsterdam"
+  },
+  {
+    "id": "azul_historico",
+    "name": "Azul Histórico"
+  },
+  {
+    "id": "baldio",
+    "name": "Baldío"
+  },
+  {
+    "id": "baltra_bar",
+    "name": "Baltra Bar"
+  },
+  {
+    "id": "bar_la_opera",
+    "name": "Bar La Ópera"
+  },
+  {
+    "id": "bar_mauro",
+    "name": "Bar Mauro"
+  },
+  {
+    "id": "bazar_sabado",
+    "name": "Bazar Sábado"
+  },
+  {
+    "id": "bosforo",
+    "name": "Bósforo"
+  },
+  {
+    "id": "bosque_de_chapultepec",
+    "name": "Bosque de Chapultepec"
+  },
+  {
+    "id": "botanico",
+    "name": "Botánico"
+  },
+  {
+    "id": "cafe_avellaneda",
+    "name": "Café Avellaneda"
+  },
+  {
+    "id": "cafe_de_tacuba",
+    "name": "Café de Tacuba"
+  },
+  {
+    "id": "cafe_nin",
+    "name": "Café Nin"
+  },
+  {
+    "id": "carla_fernandez",
+    "name": "Carla Fernández"
+  },
+  {
+    "id": "casa_franca",
+    "name": "Casa Franca"
+  },
+  {
+    "id": "casa_gilardi",
+    "name": "Casa Gilardi"
+  },
+  {
+    "id": "casa_lamm",
+    "name": "Casa Lamm"
+  },
+  {
+    "id": "casa_luis_barragan",
+    "name": "Casa Luis Barragán"
+  },
+  {
+    "id": "castillo_de_chapultepec",
+    "name": "Castillo de Chapultepec"
+  },
+  {
+    "id": "centro_cultural_bella_epoca_libreria_rosario_castellanos",
+    "name": "Centro Cultural Bella Época / Librería Rosario Castellanos"
+  },
+  {
+    "id": "ciena",
+    "name": "Ciena"
+  },
+  {
+    "id": "contramar",
+    "name": "Contramar"
+  },
+  {
+    "id": "departamento",
+    "name": "Departamento"
+  },
+  {
+    "id": "el_mirador_de_chapultepec",
+    "name": "El Mirador de Chapultepec"
+  },
+  {
+    "id": "el_turix",
+    "name": "El Turix"
+  },
+  {
+    "id": "em",
+    "name": "Em"
+  },
+  {
+    "id": "eno",
+    "name": "ENO"
+  },
+  {
+    "id": "esquina_comun",
+    "name": "Esquina Común"
+  },
+  {
+    "id": "fonoteca_nacional",
+    "name": "Fonoteca Nacional"
+  },
+  {
+    "id": "foro_shakespeare",
+    "name": "Foro Shakespeare"
+  },
+  {
+    "id": "gaba",
+    "name": "Gaba"
+  },
+  {
+    "id": "handshake_speakeasy",
+    "name": "Handshake Speakeasy"
+  },
+  {
+    "id": "hanky_panky",
+    "name": "Hanky Panky"
+  },
+  {
+    "id": "jardin_centenario_y_plaza_hidalgo",
+    "name": "Jardín Centenario y Plaza Hidalgo"
+  },
+  {
+    "id": "kiosko_morisco",
+    "name": "Kiosko Morisco"
+  },
+  {
+    "id": "kurimanzutto",
+    "name": "Kurimanzutto"
+  },
+  {
+    "id": "la_botica_mezcaleria",
+    "name": "La Botica Mezcalería"
+  },
+  {
+    "id": "lago",
+    "name": "LAGO"
+  },
+  {
+    "id": "lardo",
+    "name": "Lardo"
+  },
+  {
+    "id": "libreria_el_pendulo",
+    "name": "Librería El Péndulo"
+  },
+  {
+    "id": "licoreria_limantour",
+    "name": "Licorería Limantour"
+  },
+  {
+    "id": "lindy",
+    "name": "Lindy"
+  },
+  {
+    "id": "los_danzantes",
+    "name": "Los Danzantes"
+  },
+  {
+    "id": "madereros",
+    "name": "Madereros"
+  },
+  {
+    "id": "maleza",
+    "name": "Maleza"
+  },
+  {
+    "id": "maximo",
+    "name": "Máximo"
+  },
+  {
+    "id": "mercado_de_artesanias_la_ciudadela",
+    "name": "Mercado de Artesanías La Ciudadela"
+  },
+  {
+    "id": "mercado_de_coyoacan",
+    "name": "Mercado de Coyoacán"
+  },
+  {
+    "id": "mercado_de_san_juan",
+    "name": "Mercado de San Juan"
+  },
+  {
+    "id": "mesa",
+    "name": "Mesa"
+  },
+  {
+    "id": "mi_compa_chava",
+    "name": "Mi Compa Chava"
+  },
+  {
+    "id": "modo_museo_del_objeto_del_objeto",
+    "name": "MODO, Museo del Objeto del Objeto"
+  },
+  {
+    "id": "museo_anahuacalli",
+    "name": "Museo Anahuacalli"
+  },
+  {
+    "id": "museo_casa_de_leon_trotsky",
+    "name": "Museo Casa de León Trotsky"
+  },
+  {
+    "id": "museo_de_arte_moderno",
+    "name": "Museo de Arte Moderno"
+  },
+  {
+    "id": "museo_de_arte_popular",
+    "name": "Museo de Arte Popular"
+  },
+  {
+    "id": "museo_franz_mayer",
+    "name": "Museo Franz Mayer"
+  },
+  {
+    "id": "museo_frida_kahlo_casa_azul",
+    "name": "Museo Frida Kahlo (Casa Azul)"
+  },
+  {
+    "id": "museo_tamayo",
+    "name": "Museo Tamayo"
+  },
+  {
+    "id": "niddo",
+    "name": "Niddo"
+  },
+  {
+    "id": "omr",
+    "name": "OMR"
+  },
+  {
+    "id": "onora",
+    "name": "Onora"
+  },
+  {
+    "id": "panaderia_gala",
+    "name": "Panadería Gala"
+  },
+  {
+    "id": "parque_lincoln",
+    "name": "Parque Lincoln"
+  },
+  {
+    "id": "parque_mexico",
+    "name": "Parque México"
+  },
+  {
+    "id": "plaza_rio_de_janeiro",
+    "name": "Plaza Río de Janeiro"
+  },
+  {
+    "id": "plonk",
+    "name": "Plonk"
+  },
+  {
+    "id": "proyecto_rufina",
+    "name": "Proyecto Rufina"
+  },
+  {
+    "id": "pujol",
+    "name": "Pujol"
+  },
+  {
+    "id": "quintonil",
+    "name": "Quintonil"
+  },
+  {
+    "id": "rosetta",
+    "name": "Rosetta"
+  },
+  {
+    "id": "siembra_tortilleria",
+    "name": "Siembra Tortillería"
+  },
+  {
+    "id": "soumaya_jumex",
+    "name": "Soumaya + Jumex"
+  },
+  {
+    "id": "taqueria_orinoco",
+    "name": "Taquería Orinoco"
+  },
+  {
+    "id": "templo_mayor_bellas_artes",
+    "name": "Templo Mayor + Bellas Artes"
+  },
+  {
+    "id": "ticuchi",
+    "name": "Ticuchi"
+  },
+  {
+    "id": "tlecan",
+    "name": "Tlecān"
+  },
+  {
+    "id": "utilitario_mexicano",
+    "name": "Utilitario Mexicano"
+  }
+]
