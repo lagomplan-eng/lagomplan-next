@@ -327,6 +327,14 @@
     "tripTooLarge": "Los viajes de más de {threshold} días o con varias ciudades necesitan una cuenta — así podemos generarlos por partes sin que se corten a la mitad."
   },
   "catalog": {
+    "sheet": {
+      "filters": "Filtros",
+      "showResults": "Ver {count} resultados",
+      "showResultsNone": "Ver resultados",
+      "clear": "Limpiar",
+      "close": "Cerrar",
+      "remove": "Quitar filtro: {name}"
+    },
     "plan": {
       "add": "+ Mi plan",
       "added": "✓ En mi plan",

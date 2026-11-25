@@ -16,6 +16,8 @@
  * Bilingual via the same isES pattern other client components use.
  */
 
+import { Button, CardTitle, Eyebrow, InfoCard } from '../design'
+
 interface Props {
   locale: 'es' | 'en'
 }
@@ -37,77 +39,43 @@ export default function PlannerBridgeCTA({ locale }: Props) {
       ]
 
   return (
-    <section style={{ padding: '56px 0 72px' }}>
+    <section className="pb-[72px] pt-14">
       <div className="page-inner">
-        <div style={{
-          padding: '32px', border: '1px solid var(--line-strong)',
-          borderRadius: '32px', background: '#FFFFFF',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        }}>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+        <InfoCard tone="white">
+          <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2">
             {/* Left — pitch + CTA */}
             <div>
-              <p className="sec-label">Lagom pick</p>
-              <h3 style={{
-                margin: '12px 0 0', fontSize: '30px', lineHeight: 1.1,
-                letterSpacing: '-0.02em', fontWeight: 800,
-              }}>
+              <Eyebrow>Lagom pick</Eyebrow>
+              <CardTitle as="h3" className="!text-[30px]">
                 {isES ? 'Convierte una guía en un plan real' : 'Turn a guide into a real plan'}
-              </h3>
-              <p style={{
-                margin: '12px 0 0', fontSize: '14px', lineHeight: 1.9,
-                color: 'rgba(15,58,51,0.68)',
-              }}>
+              </CardTitle>
+              <p className="m-0 mt-3 font-sans text-small text-ink-body">
                 {isES
                   ? 'Cuando un destino ya suena bien, LagomPlan te ayuda a convertirlo en hospedaje, experiencias y un itinerario limpio.'
                   : 'Once a destination feels right, LagomPlan helps you move naturally into stays, experiences, and a cleaner itinerary.'}
               </p>
-              <a
-                href={plannerHref}
-                style={{
-                  display: 'inline-flex', alignItems: 'center', gap: '10px',
-                  marginTop: '24px', borderRadius: '999px',
-                  background: 'var(--pine)', color: 'white',
-                  padding: '14px 22px', fontSize: '14px', fontWeight: 700,
-                  textDecoration: 'none',
-                }}
-              >
+              <Button href={plannerHref} className="mt-6">
                 {isES ? 'Planear con IA' : 'Plan with AI'} →
-              </a>
+              </Button>
             </div>
 
-            {/* Right — numbered "how it works" steps on a Sand panel */}
-            <div style={{
-              padding: '28px', borderRadius: '22px',
-              background: 'var(--sand)', border: '1px solid var(--line-strong)',
-            }}>
-              <p className="sec-label" style={{ margin: 0 }}>
-                {isES ? 'Cómo funciona' : 'How it works'}
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '18px', marginTop: '22px' }}>
+            {/* Right — numbered "how it works" steps */}
+            <InfoCard tone="mint">
+              <Eyebrow className="!mb-0">{isES ? 'Cómo funciona' : 'How it works'}</Eyebrow>
+              <div className="mt-5 flex flex-col gap-[18px]">
                 {steps.map(s => (
-                  <div key={s.n} style={{ display: 'flex', gap: '16px', alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: '32px', height: '32px', borderRadius: '10px', flexShrink: 0,
-                      background: '#FFFFFF',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '11px', fontWeight: 800, color: 'var(--pine)',
-                    }}>
-                      {s.n}
-                    </div>
+                  <div key={s.n} className="flex items-start gap-4">
+                    <div className="flex size-8 flex-none items-center justify-center rounded-btn bg-white font-sans text-micro font-bold text-pine">{s.n}</div>
                     <div>
-                      <div style={{ fontSize: '14px', fontWeight: 700 }}>{s.t}</div>
-                      <div style={{
-                        fontSize: '13px', color: 'rgba(15,58,51,0.65)',
-                        marginTop: '2px', lineHeight: 1.6,
-                      }}>{s.d}</div>
+                      <div className="font-sans text-small font-semibold text-pine">{s.t}</div>
+                      <div className="mt-0.5 font-sans text-tiny text-ink-body">{s.d}</div>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
+            </InfoCard>
           </div>
-        </div>
+        </InfoCard>
       </div>
     </section>
   )

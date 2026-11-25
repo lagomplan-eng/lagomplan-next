@@ -327,6 +327,14 @@
     "tripTooLarge": "Trips longer than {threshold} days or with multiple cities need an account — that's how we generate them in pieces instead of cutting them off."
   },
   "catalog": {
+    "sheet": {
+      "filters": "Filters",
+      "showResults": "Show {count} results",
+      "showResultsNone": "Show results",
+      "clear": "Clear",
+      "close": "Close",
+      "remove": "Remove filter: {name}"
+    },
     "plan": {
       "add": "+ My plan",
       "added": "✓ In my plan",
