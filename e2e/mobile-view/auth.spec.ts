@@ -37,6 +37,9 @@ test.describe('mobile-view · auth (anonymous)', () => {
   test('E-52: nudge focuses the newsletter on Itinerario, navigates to login elsewhere', async ({ page }) => {
     await page.getByRole('button', { name: 'Inicia sesión' }).click()
     await expect(page.getByPlaceholder('tu@email.com')).toBeFocused()      // Itinerario → scroll+focus
+    // That scroll reveals the newsletter popup (≥ 50% of the page), which on a phone covers the nudge: close it, as a visitor would.
+    const popup = page.getByRole('dialog', { name: 'Newsletter de Lagomplan' })
+    if (await popup.isVisible()) await popup.getByRole('button', { name: 'Cerrar', exact: true }).click()
     await page.getByRole('button', { name: 'Presupuesto' }).click()
     await page.getByRole('button', { name: 'Inicia sesión' }).click()
     await page.waitForURL(/\/login/)                                       // off Itinerario → login
