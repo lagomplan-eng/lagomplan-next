@@ -12,6 +12,11 @@ const BOT_RE = new RegExp(
   'i',
 )
 
+/** True when the user agent is missing, too short or a known crawler / preview fetcher / monitor. */
+export function isBotUserAgent(ua: string | null): boolean {
+  return !ua || ua.length < 8 || BOT_RE.test(ua)
+}
+
 export function isCountableScan(req: { method: string; headers: { get(name: string): string | null } }): boolean {
   if (req.method !== 'GET') return false
   const ua = req.headers.get('user-agent')

@@ -3,11 +3,14 @@
  * Accepts only the codes of APPROVED hotels and whitelisted section ids (content/guia/hotel/config.ts),
  * rate limited. Stores hotel_id, event_type, section, lang and a timestamp — nothing about the guest. A tap on a place's link
  * also stores which place (a known id from our own content) and where in the guide (a fixed list); both optional.
+ * Opening a mood, zone tab or plan is a section_open whose section is mood | zone | plan and whose source is the id.
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { hotelsDb } from '../../../../lib/hotels/db'
 import { parseHotelEvent } from '../../../../lib/hotels/events'
 import { allow, clientKey } from '../../../../lib/hotels/ratelimit'
+import { isBotUserAgent } from '../../../../lib/hotels/bots'
+import { isOpenKind } from '../../../../content/guia/hotel/places'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
@@ -20,6 +23,8 @@ export async function POST(req: NextRequest) {
   try { body = JSON.parse(await req.text()) } catch { return new NextResponse(null, { status: 400 }) }
   const ev = parseHotelEvent(body)
   if (!ev) return new NextResponse(null, { status: 400 })
+  // An open (mood, zone, plan) from a crawler or monitor that runs the page's script counts for nothing.
+  if (ev.type === 'section_open' && isOpenKind(ev.section) && isBotUserAgent(req.headers.get('user-agent'))) return NO_CONTENT()
 
   const db = hotelsDb()
   const { data: hotel } = await db.from('hotel_partners').select('id').eq('code', ev.code).eq('status', 'approved').maybeSingle()
@@ -28,7 +33,7 @@ export async function POST(req: NextRequest) {
   const withPlace = ev.place || ev.source ? { ...base, ...(ev.place ? { place: ev.place } : {}), ...(ev.source ? { source: ev.source } : {}) } : null
   let { error } = await db.from('hotel_guide_events').insert(withPlace ?? base)
   // Code live before the place/source migration is applied: keep the click, drop the two details (never lose the event).
-  if (error && withPlace && (error.code === 'PGRST204' || error.code === '42703')) ({ error } = await db.from('hotel_guide_events').insert(base))
+  if (error && withPlace && ev.type === 'outbound_click' && (error.code === 'PGRST204' || error.code === '42703')) ({ error } = await db.from('hotel_guide_events').insert(base))
   if (error) console.error('[hotels/event] insert failed:', error.code)
   return NO_CONTENT()
 }

@@ -35,7 +35,7 @@ import {
 } from 'lucide-react'
 import { gaTrack, trackOutboundLink } from '../../../lib/analytics/ga'
 import { sendHotelEvent } from '../../../lib/hotels/client'
-import { PLAN_QUICK_SOURCE, moodSource, placeIdOf } from '../../../content/guia/hotel/places'
+import { PLAN_48H_SOURCE, PLAN_QUICK_SOURCE, moodSource, placeIdOf, zoneSource, type OpenKind } from '../../../content/guia/hotel/places'
 import { isValidHotelCode } from '../../../lib/hotels/codes'
 import {
   HOTEL_FOOTER_LINE, HOTEL_FOOTER_TEXT, HOTEL_JUMP, HOTEL_MAP_ARIA, HOTEL_MAP_LINK, HOTEL_PLAN_BUTTONS, HOTEL_PLANS_EYEBROW, hotelUpdatedLine, type HotelMode, type HotelOutboundId,
@@ -402,6 +402,8 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
   // Hotel edition: which plan of "How much time do you have?" is open (the short one by default, where it exists).
   const [plan, setPlan] = useState<'quick' | 'full'>(hotel && quickPlanFor(hotel.zone) ? 'quick' : 'full')
   const seenSections = useRef(new Set<string>())
+  // Hotel edition: the moods, zone tabs and plans a guest has OPENED in this page view (a tap, never the default).
+  const openedRef = useRef(new Set<string>())
   const [showSticky, setShowSticky] = useState(false)
   const insidersRef = useRef<HTMLElement | null>(null)
 
@@ -414,6 +416,14 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
     hotel
       ? gaTrack(name.replace(/^host_guide_/, 'hotel_guide_'), { ...params, partner: trackSlug, partner_slug: trackSlug, zone: hotel.zone })
       : gaTrack(demo ? name.replace(/^host_guide_/, 'demo_guide_') : name, params)
+  // One event per mood / zone / plan per page view, only for an approved hotel's link (?h=), (a shared-link visitor is a real guest and counts).
+  const trackOpen = (kind: OpenKind, source: string) => {
+    if (!hotel || !hotelCode) return
+    const key = `${kind}:${source}`
+    if (openedRef.current.has(key)) return
+    openedRef.current.add(key)
+    sendHotelEvent({ code: hotelCode, type: 'section_open', section: kind, source, lang: document.documentElement.lang === 'es' ? 'es' : 'en' })
+  }
   const hs = (id: string) => (hotel ? ({ 'data-hotel-section': id } as const) : {})
   // Hotel edition: the place id and where-in-the-guide marks of a link that belongs to a place (read by the click handler below).
   const placeAttrs = (name: string, source: string) => {
@@ -778,7 +788,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                     type="button"
                     aria-pressed={mood === m.id}
                     className={`${styles.moodBtn} ${mood === m.id ? styles.moodBtnActive : ''}`}
-                    onClick={() => setMood(m.id)}
+                    onClick={() => { setMood(m.id); trackOpen('mood', moodSource(m.id)) }}
                   >
                     <Icon name={m.icon} color={PINE} />
                     <div className={styles.moodLabel}>{m.label}</div>
@@ -869,7 +879,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
                       role="tab"
                       aria-selected={name === browseNb}
                       className={`${styles.tab} ${name === browseNb ? styles.tabActive : ''}`}
-                      onClick={() => setBrowseNb(name)}
+                      onClick={() => { if (name !== browseNb) trackOpen('zone', zoneSource(name)); setBrowseNb(name) }}
                     >{getNeighborhood(name).tabLabel?.[lang] ?? name}</button>
                   ))}
                 </div>
@@ -1095,7 +1105,7 @@ export default function GuiaClient({ partner, city, demo, recordVisits = false, 
           style={plan === id
             ? { background: 'var(--cream)', color: 'var(--pine)', borderColor: 'var(--cream)' }
             : { background: 'transparent', color: 'var(--cream)', borderColor: 'rgba(255, 249, 243, .55)' }}
-          onClick={() => setPlan(id)}
+          onClick={() => { if (id !== plan) trackOpen('plan', id === 'quick' ? PLAN_QUICK_SOURCE : PLAN_48H_SOURCE); setPlan(id) }}
         >{label[lang]}</button>
       ))}
     </div>

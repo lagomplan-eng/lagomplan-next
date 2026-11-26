@@ -57,3 +57,20 @@ export const HOTEL_PLACE_SOURCES: readonly string[] = [
   PLAN_QUICK_SOURCE,
   PLAN_48H_SOURCE,
 ]
+
+// ── opens: which mood, zone tab or plan a guest opened ─────────────────────────────────────────────────────────────
+// Stored as a section_open row whose `section` is the KIND (mood | zone | plan: letters only, as the column requires) and whose
+// `source` is the id from the lists above ("mood_hungry", "zone_roma_norte", "plan_48h": the column accepts digits).
+
+export const OPEN_KINDS = ['mood', 'zone', 'plan'] as const
+export type OpenKind = (typeof OPEN_KINDS)[number]
+
+export const HOTEL_OPEN_SOURCES: Record<OpenKind, readonly string[]> = {
+  mood: HOTEL_MOOD_ORDER.map(moodSource),
+  zone: [...new Set(Object.values(ZONE_TAB_ORDER).flat())].map(zoneSource),
+  plan: [PLAN_QUICK_SOURCE, PLAN_48H_SOURCE],
+}
+
+export function isOpenKind(v: unknown): v is OpenKind {
+  return typeof v === 'string' && (OPEN_KINDS as readonly string[]).includes(v)
+}
