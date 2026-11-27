@@ -49,7 +49,7 @@ export default function ReportDoc({ doc }: { doc: Doc }) {
 }
 
 const CSS = `
-.rp{font-family:Manrope,system-ui,sans-serif;color:${PALETTE.pine};background:${PALETTE.cream};max-width:780px;margin:0 auto;padding:36px 40px;border:1px solid ${PALETTE.rule}}
+.rp{font-family:var(--font-sans),system-ui,sans-serif;color:${PALETTE.pine};background:${PALETTE.cream};max-width:780px;margin:0 auto;padding:36px 40px;border:1px solid ${PALETTE.rule}}
 .rp h1{font-size:30px;line-height:1.15;margin:0 0 4px}
 .rp h2{font-size:18px;margin:0 0 10px;padding:0 0 6px;border-bottom:1px solid ${PALETTE.rule}}
 .rp-head{padding-bottom:16px;border-bottom:2px solid ${PALETTE.pine};margin-bottom:8px}

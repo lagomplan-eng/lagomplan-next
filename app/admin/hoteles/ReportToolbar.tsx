@@ -26,7 +26,7 @@ export default function ReportToolbar({ base, month, months, lang, view, hotelId
     else setMsg(j.error === 'migration_missing' ? 'Primero aplica la migración 20261127000000 (columna count_from).' : `No se pudo: ${j.error ?? res.status}`)
   }
   return (
-    <div className="rp-noprint" style={{ maxWidth: 780, margin: '0 auto 20px', fontFamily: 'Manrope, system-ui, sans-serif' }}>
+    <div className="rp-noprint" style={{ maxWidth: 780, margin: '0 auto 20px', fontFamily: 'var(--font-sans), system-ui, sans-serif' }}>
       <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
         {months && month && (
           <select aria-label="Mes" value={month} onChange={(e) => go({ m: e.target.value })} style={sel}>
