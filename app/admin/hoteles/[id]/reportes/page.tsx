@@ -42,11 +42,11 @@ export default async function HotelReportPage({ params, searchParams }: { params
   const doc = toDoc(report)
   const countFrom = hotel.count_from ?? null
   return (
-    <main style={{ padding: '24px 16px 80px', background: '#EDE7E1', minHeight: '100vh' }}>
+    <main className="rp-page" style={{ padding: '24px 16px 80px', background: '#EDE7E1', minHeight: '100vh' }}>
       <p className="rp-noprint" style={{ maxWidth: 780, margin: '0 auto 12px' }}><a href="/admin/hoteles" style={{ color: '#0F3A33' }}>← Todos los hoteles</a></p>
       <ReportToolbar base={`/admin/hoteles/${id}/reportes`} month={month} months={months} lang={lang} view={view} hotelId={hotel.id} countFrom={countFrom} approvedDate={hotel.approved_at ? dateOfMx(Date.parse(hotel.approved_at)) : null} />
       {view === 'email'
-        ? <iframe title="Versión para correo" srcDoc={renderEmail(doc)} style={{ display: 'block', width: '100%', maxWidth: 780, height: 1500, margin: '0 auto', border: '1px solid #C8BFB5', background: '#fff' }} />
+        ? <iframe title="Versión para correo" srcDoc={renderEmail(doc, { assetBase: '' })} style={{ display: 'block', width: '100%', maxWidth: 780, height: 1500, margin: '0 auto', border: '1px solid #C8BFB5', background: '#fff' }} />
         : <ReportDoc doc={doc} />}
     </main>
   )

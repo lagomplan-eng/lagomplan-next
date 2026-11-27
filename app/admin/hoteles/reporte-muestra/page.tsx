@@ -20,11 +20,11 @@ export default async function SampleReportPage({ searchParams }: { searchParams:
   const view = q.v === 'email' ? 'email' : 'page'
   const doc = toDoc(sampleReport(lang), { sample: true })
   return (
-    <main style={{ padding: '24px 16px 80px', background: '#EDE7E1', minHeight: '100vh' }}>
+    <main className="rp-page" style={{ padding: '24px 16px 80px', background: '#EDE7E1', minHeight: '100vh' }}>
       <p className="rp-noprint" style={{ maxWidth: 780, margin: '0 auto 12px' }}><a href="/admin/hoteles" style={{ color: '#0F3A33' }}>← Todos los hoteles</a></p>
       <ReportToolbar base="/admin/hoteles/reporte-muestra" lang={lang} view={view} />
       {view === 'email'
-        ? <iframe title="Versión para correo (muestra)" srcDoc={renderEmail(doc)} style={{ display: 'block', width: '100%', maxWidth: 780, height: 1700, margin: '0 auto', border: '1px solid #C8BFB5', background: '#fff' }} />
+        ? <iframe title="Versión para correo (muestra)" srcDoc={renderEmail(doc, { assetBase: '' })} style={{ display: 'block', width: '100%', maxWidth: 780, height: 1700, margin: '0 auto', border: '1px solid #C8BFB5', background: '#fff' }} />
         : <ReportDoc doc={doc} />}
     </main>
   )

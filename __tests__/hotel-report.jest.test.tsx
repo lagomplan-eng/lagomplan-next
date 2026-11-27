@@ -5,8 +5,10 @@
  * The monthly hotel report: numbers against a fixture of events, "counted from" notes, the under-20 rule, the empty-section line,
  * the count-from date, a paid report with two properties, the email version and the sample.
  */
+import { renderToStaticMarkup } from 'react-dom/server'
+import ReportDoc from '../app/admin/hoteles/ReportDoc'
 import { buildReport, buildProperty, canPercent } from '../lib/hotels/report/build'
-import { toDoc } from '../lib/hotels/report/doc'
+import { toDoc, type Block, type Doc } from '../lib/hotels/report/doc'
 import { renderEmail } from '../lib/hotels/report/email'
 import { monthRange } from '../lib/hotels/report/period'
 import { sampleReport, SAMPLE_MONTH } from '../lib/hotels/report/sample'
@@ -69,33 +71,39 @@ describe('the numbers of a month match the events exactly', () => {
   test('actions', () => { expect(r.actions).toEqual({ experience: 2, planner: 1, share: 1 }) })
 })
 
-describe('"counted from" notes', () => {
-  test('November starts before the opens and places were counted: both notes, with their dates', () => {
+
+// ── layout: how the numbers are laid out. (The numbers above and the "what this tells you" rules below do not depend on layout.)
+const sec = (d: Doc, id: string) => d.sections.find((s) => s.id === id)
+const bars = (d: Doc, id: string) => (sec(d, id)?.blocks ?? []).filter((b): b is Extract<Block, { t: 'bars' }> => b.t === 'bars')
+const aboutText = (d: Doc) => (d.about?.lines ?? []).join(' ')
+const doc = (r: ReturnType<typeof free>, o = {}) => toDoc(r, { now: NOW, ...o })
+
+describe('"counted from" and "not counted": said once, near the end', () => {
+  test('November starts before places (25 Nov) and moods/zones/plans (26 Nov) were counted: one line, both dates', () => {
     const r = free().properties[0]
     expect(r.opens.state).toEqual({ kind: 'counted', from: '2026-11-26' })
     expect(r.places.state).toEqual({ kind: 'counted', from: '2026-11-25' })
-    const text = JSON.stringify(toDoc(free()))
-    expect(text).toContain('Contado desde el 26 de noviembre de 2026')
-    expect(text).toContain('Contado desde el 25 de noviembre de 2026')
+    const d = doc(free())
+    expect(aboutText(d)).toContain('Contado desde: lugares, el 25 de noviembre de 2026; zonas, ánimos y planes, el 26 de noviembre de 2026.')
+    expect(JSON.stringify(d.sections)).not.toMatch(/Contado desde|counted from/i) // never inside a section
   })
-  test('December is fully counted: no note', () => {
+  test('December is fully counted: no counting line', () => {
     const r = free(hotel(), '2026-12').properties[0]
     expect(r.opens.state).toEqual({ kind: 'counted', from: null })
     expect(r.places.state).toEqual({ kind: 'counted', from: null })
-    expect(JSON.stringify(toDoc(free(hotel(), '2026-12')))).not.toContain('Contado desde')
+    expect(aboutText(doc(free(hotel(), '2026-12')))).not.toContain('Contado desde')
   })
-  test('a month before counting began says so and never shows a zero or a table', () => {
-    const r = free(hotel({ countFrom: '2026-10-01', approvedAt: '2026-10-01T18:00:00Z' }), '2026-10').properties[0]
+  test('a month before counting began: those sections are not shown, never a zero, and the about block says why', () => {
+    const o = hotel({ countFrom: '2026-10-01', approvedAt: '2026-10-01T18:00:00Z' })
+    const r = free(o, '2026-10').properties[0]
     expect(r.opens.state).toEqual({ kind: 'not_counted', from: '2026-11-26' })
     expect(r.places.state).toEqual({ kind: 'not_counted', from: '2026-11-25' })
-    const doc = toDoc(free(hotel({ countFrom: '2026-10-01', approvedAt: '2026-10-01T18:00:00Z' }), '2026-10'))
-    const looked = doc.sections.find((s) => s.id === 'looked')!
-    expect(looked.blocks.map((b) => b.t)).toEqual(['note'])
-    expect(JSON.stringify(looked)).toContain('todavía no se registraba')
-    expect(doc.sections.find((s) => s.id === 'places')!.blocks.map((b) => b.t)).toEqual(['note'])
+    const d = doc(free(o, '2026-10'))
+    expect(sec(d, 'looked')).toBeUndefined(); expect(sec(d, 'places')).toBeUndefined()
+    expect(aboutText(d)).toContain('Todavía no se contaba este mes: lugares (se cuentan desde el 25 de noviembre de 2026); zonas, ánimos y planes (se cuentan desde el 26 de noviembre de 2026).')
   })
   test('English', () => {
-    expect(JSON.stringify(toDoc(free(hotel(), '2026-11', 'en')))).toContain('Counted from November 26, 2026')
+    expect(aboutText(doc(free(hotel(), '2026-11', 'en')))).toContain('Counted since: places, November 25, 2026; zones, moods and plans, November 26, 2026.')
   })
 })
 
@@ -103,17 +111,16 @@ describe('the under-20 rule', () => {
   test('percentages need a base of 20', () => { expect(canPercent(19)).toBe(false); expect(canPercent(20)).toBe(true) })
   const many = (n: number) => Array.from({ length: n }, (_, i) => scan(`2026-12-${String(2 + (i % 20)).padStart(2, '0')}T18:00:00Z`, i % 2 ? 'en' : 'es'))
   const langRows = (events: ReportEvent[]) => {
-    const doc = toDoc(buildReport([hotel({ events })], { edition: 'free', lang: 'es', month: '2026-12', now: NOW }))
-    const t = doc.sections.find((s) => s.id === 'visits')!.blocks.find((b) => b.t === 'table' && b.head[0] === 'Idioma')!
-    return t.t === 'table' ? t.rows : []
+    const d = toDoc(buildReport([hotel({ events })], { edition: 'free', lang: 'es', month: '2026-12', now: NOW }), { now: NOW })
+    return bars(d, 'visits').find((b) => b.title === 'Por idioma')!.rows.map((r) => r.text)
   }
-  test('19 scans: counts only', () => { expect(langRows(many(19)).flat().join(' ')).not.toContain('%') })
-  test('20 scans: counts and percentages', () => { expect(langRows(many(20)).flat().join(' ')).toContain('%') })
+  test('19 scans: counts only', () => { expect(langRows(many(19)).join(' ')).not.toContain('%') })
+  test('20 scans: counts and percentages', () => { expect(langRows(many(20)).join(' ')).toContain('%') })
   test('the change against last month shows a percentage only when last month had 20 or more', () => {
     const run = (before: number) => {
       const events = [...many(3), ...Array.from({ length: before }, (_, i) => scan(`2026-11-${String(1 + (i % 28)).padStart(2, '0')}T18:00:00Z`))]
-      const doc = toDoc(buildReport([hotel({ events, prevEvents: events, countFrom: '2026-11-01' })], { edition: 'paid', lang: 'es', month: '2026-12', now: NOW }))
-      return JSON.stringify(doc.sections.find((s) => s.id === 'change'))
+      const d = toDoc(buildReport([hotel({ events, prevEvents: events, countFrom: '2026-11-01' })], { edition: 'paid', lang: 'es', month: '2026-12', now: NOW }), { now: NOW })
+      return JSON.stringify(sec(d, 'change'))
     }
     expect(run(10)).not.toContain('%')
     expect(run(25)).toContain('%')
@@ -123,32 +130,86 @@ describe('the under-20 rule', () => {
   })
 })
 
-describe('empty sections show one calm line', () => {
-  const empty = (month = '2026-12') => toDoc(buildReport([hotel({ events: [] })], { edition: 'free', lang: 'es', month, now: NOW }))
-  test('no taps, no opens, no actions, no scans', () => {
+describe('a section with no data is not shown; the about block says which had no activity', () => {
+  const empty = (lang: 'es' | 'en' = 'es') => toDoc(buildReport([hotel({ events: [] })], { edition: 'free', lang, month: '2026-12', now: NOW }), { now: NOW })
+  test('no scans, opens, taps or actions: only "what this tells you" is left, with the calm line', () => {
     const d = empty()
-    expect(d.sections.find((s) => s.id === 'places')!.blocks).toEqual([{ t: 'p', text: 'Ningún toque en lugares este mes.' }])
-    expect(d.sections.find((s) => s.id === 'looked')!.blocks).toEqual([{ t: 'p', text: 'Ninguna zona, ánimo ni plan abierto este mes.' }])
-    expect(d.sections.find((s) => s.id === 'actions')!.blocks.map((b) => b.t)).toEqual(['p'])
-    expect(d.sections.find((s) => s.id === 'visits')!.blocks.some((b) => b.t === 'table')).toBe(false)
-    expect(d.sections.find((s) => s.id === 'tells')!.blocks).toHaveLength(1)
+    expect(d.sections.map((s) => s.id)).toEqual(['tells'])
+    expect(d.figures).toEqual([])
+    expect(aboutText(d)).toBe('Sin actividad este mes: visitas, zonas, ánimos y planes abiertos, lugares tocados, acciones.')
+    expect(JSON.stringify(d.sections)).not.toMatch(/Ningún|No taps|este mes\./) // no per-section "none this month"
   })
-  test('English line', () => {
-    const d = toDoc(buildReport([hotel({ events: [] })], { edition: 'free', lang: 'en', month: '2026-12', now: NOW }))
-    expect(d.sections.find((s) => s.id === 'places')!.blocks).toEqual([{ t: 'p', text: 'No taps on places this month.' }])
+  test('English', () => { expect(aboutText(empty('en'))).toBe('No activity this month: visits, zones, moods and plans opened, places tapped, actions.') })
+  test('a bar group is never empty', () => {
+    for (const d of [empty(), doc(free()), toDoc(sampleReport('es'), { now: Date.UTC(2027, 1, 3) })]) for (const s of d.sections) for (const b of s.blocks) if (b.t === 'bars') expect(b.rows.length).toBeGreaterThan(0)
   })
-  test('no table is ever empty', () => {
-    for (const d of [empty(), toDoc(free()), toDoc(sampleReport('es'))]) for (const s of d.sections) for (const b of s.blocks) if (b.t === 'table') expect(b.rows.length).toBeGreaterThan(0)
+})
+
+describe('bars', () => {
+  const d = toDoc(sampleReport('es'), { now: Date.UTC(2027, 1, 3) })
+  test('sorted by count, highest first (weeks stay in date order)', () => {
+    for (const id of ['looked', 'places']) for (const b of bars(d, id)) expect(b.rows.map((r) => r.value)).toEqual([...b.rows.map((r) => r.value)].sort((a, c) => c - a))
+    expect(bars(d, 'visits').find((b) => b.title === 'Por semana')!.rows.map((r) => r.label)[0]).toMatch(/^Semana del 1 ene/)
+  })
+  test('up to 8 rows, then "and N more"', () => {
+    const many = Array.from({ length: 11 }, (_, i) => map('2026-12-05T18:00:00Z', `place${i}`, 'mood_dinner'))
+    const ev = many.flatMap((e, i) => Array.from({ length: 11 - i }, () => ({ ...e })))
+    const r = buildReport([hotel({ events: ev })], { edition: 'free', lang: 'en', month: '2026-12', now: NOW })
+    // place ids that are not in the registry still print (their id); the cap is what matters here
+    const b = bars(toDoc(r, { now: NOW }), 'places')[0]
+    expect(b.rows).toHaveLength(8); expect(b.more).toBe(3); expect(b.moreText).toBe('and 3 more')
+  })
+  test('a week that has not started yet is not shown', () => {
+    const half = toDoc(buildReport([hotel()], { edition: 'free', lang: 'en', month: '2026-11', now: Date.UTC(2026, 10, 12, 18) }), { now: Date.UTC(2026, 10, 12, 18) })
+    const weeks = bars(half, 'visits').find((b) => b.title === 'By week')!.rows.map((r) => r.label)
+    expect(weeks).toEqual(['Week of Nov 1', 'Week of Nov 2', 'Week of Nov 9']) // 16, 23 and 30 Nov have not started
+  })
+  test('bars scale to the largest value of their group', () => {
+    const html = renderToStaticMarkup(<ReportDoc doc={d} />)
+    expect(html).toContain('width:100%') // the largest row of a group fills its track
+  })
+})
+
+describe('the band, the key figures and the order', () => {
+  test('free: band figures are only the ones with data; "what this tells you" comes first; invitation, about, then the footer', () => {
+    const d = doc(free())
+    expect(d.eyebrow).toBe('Informe mensual'); expect(d.hotel).toBe('Casa Cuenca'); expect(d.monthLabel).toBe('noviembre de 2026')
+    expect(d.figures).toEqual([
+      { value: '7', label: 'Visitas' }, { value: '1', label: 'Guías enviadas a un teléfono' },
+      { value: '2', label: 'Ánimo más abierto', sub: 'Tengo hambre' }, { value: '3', label: 'Lugar más tocado', sub: 'Maleza' },
+    ])
+    expect(d.sections.map((s) => [s.num, s.id])).toEqual([['01', 'tells'], ['02', 'visits'], ['03', 'looked'], ['04', 'places'], ['05', 'actions']])
+    expect(d.invite!.title).toBe('Haz esta guía tuya'); expect(d.invite!.link.label).toBe('Hablemos')
+    expect(d.preparedBy).toBe('Preparado por Lagomplan'); expect(d.verified).toBe('Solo lugares verificados. Nadie paga por aparecer.')
+    expect(d.partial).toBeNull()
+  })
+  test('with little data the band shows only what exists, and a month in progress says so', () => {
+    const r = buildReport([hotel({ events: [scan('2026-11-03T18:00:00Z')] })], { edition: 'free', lang: 'en', month: '2026-11', now: Date.UTC(2026, 10, 12) })
+    const d = toDoc(r, { now: Date.UTC(2026, 10, 12) })
+    expect(d.figures).toEqual([{ value: '1', label: 'Visits' }])
+    expect(d.partial).toBe('Numbers up to today.')
+    expect(d.eyebrow).toBe('Monthly report'); expect(d.verified).toBe('Verified places only. Nobody pays to be listed.')
+  })
+  test('actions stay three large figures', () => {
+    const a = sec(doc(free()), 'actions')!.blocks[0]
+    expect(a.t).toBe('figures')
+    expect(a.t === 'figures' && a.items.map((i) => i.value)).toEqual(['2', '1', '1'])
+  })
+  test('the page prints the band, eyebrows 01.. and the A4 print rules', () => {
+    const html = renderToStaticMarkup(<ReportDoc doc={doc(free())} />)
+    expect(html).toContain('rp-band'); expect(html).toContain('>01<'); expect(html).toContain('@page{size:A4')
+    expect(html).toContain('break-inside:avoid'); expect(html).toContain('.rp-noprint{display:none')
+    expect(html).not.toMatch(/coral|#E8/i)
   })
 })
 
 describe('the count-from date', () => {
-  test('visits before it are excluded and the report says where it starts', () => {
+  test('visits before it are excluded and the about block says where it starts', () => {
     const r = buildProperty(hotel({ countFrom: '2026-11-10' }), '2026-11', 'es', NOW)
     expect(r.visits.total).toBe(4) // Nov 10, Nov 18, Nov 25, Nov 30
     expect(r.windowFrom).toBe('2026-11-10')
     expect(r.windowNote).toBe('2026-11-10')
-    expect(JSON.stringify(toDoc(free(hotel({ countFrom: '2026-11-10' }))))).toContain('Este informe cuenta desde el 10 de noviembre de 2026')
+    expect(aboutText(doc(free(hotel({ countFrom: '2026-11-10' }))))).toContain('Este informe cuenta desde el 10 de noviembre de 2026')
   })
   test('by default it is the approval day (Mexico City)', () => {
     const r = buildProperty(hotel({ countFrom: null, approvedAt: '2026-11-18T03:00:00Z' }), '2026-11', 'es', NOW) // 17 Nov 21:00 MX
@@ -159,12 +220,13 @@ describe('the count-from date', () => {
     const r = buildProperty(hotel({ countFrom: '2026-12-15' }), '2026-11', 'es', NOW)
     expect(r.empty).toBe(true)
     expect(r.visits.total).toBe(0)
-    expect(JSON.stringify(toDoc(free(hotel({ countFrom: '2026-12-15' }))))).toContain('todavía no se contaba para este hotel')
+    expect(aboutText(doc(free(hotel({ countFrom: '2026-12-15' }))))).toContain('todavía no se contaba para este hotel')
   })
 })
 
 describe('a paid report with two properties adds up to its total', () => {
   const r = sampleReport('es')
+  const d = toDoc(r, { sample: true, now: Date.UTC(2027, 1, 3) })
   test('totals are the sum of the properties', () => {
     expect(r.properties).toHaveLength(2)
     const sum = (f: (p: (typeof r.properties)[number]) => number) => r.properties.reduce((n, p) => n + f(p), 0)
@@ -173,20 +235,16 @@ describe('a paid report with two properties adds up to its total', () => {
     expect(r.totals!.actions).toBe(sum((p) => p.actions.experience + p.actions.planner + p.actions.share))
     expect(r.totals!.visits).toBeGreaterThan(0)
   })
-  test('the page: one line per property, then a total row that matches', () => {
-    const props = toDoc(r, { sample: true }).sections.find((s) => s.id === 'properties')!
-    const t = props.blocks[0]
-    if (t.t !== 'table') throw new Error('table expected')
+  test('one line per property, then a total row that matches', () => {
+    const t = sec(d, 'properties')!.blocks[0]
+    if (t.t !== 'grid') throw new Error('grid expected')
     expect(t.rows.map((x) => x[0])).toEqual(['Casa Lagom Condesa', 'Casa Lagom Roma'])
     for (const col of [1, 2, 3, 4]) expect(t.rows.reduce((n, x) => n + Number(x[col]), 0)).toBe(Number(t.foot![col]))
   })
-  test('the merged sections add up too (visits by week and by language)', () => {
-    const doc = toDoc(r, { sample: true })
-    const visits = doc.sections.find((s) => s.id === 'visits')!
-    const stats = visits.blocks.find((b) => b.t === 'stats')!
-    expect(stats.t === 'stats' && stats.items[0].value).toBe(String(r.totals!.visits))
-    const week = visits.blocks.find((b) => b.t === 'table' && b.head[0] === 'Semana del')!
-    expect(week.t === 'table' && week.rows.reduce((n, x) => n + Number(x[1]), 0)).toBe(r.totals!.visits)
+  test('the merged sections add up too: the band figure and the weeks equal the total', () => {
+    expect(d.figures[0]).toEqual({ value: String(r.totals!.visits), label: 'Visitas' })
+    const weeks = bars(d, 'visits').find((b) => b.title === 'Por semana')!
+    expect(weeks.rows.reduce((n, x) => n + x.value, 0)).toBe(r.totals!.visits)
   })
   test('change against the previous month exists and is comparable', () => {
     expect(r.change!.map((c) => c.metric)).toEqual(['visits', 'opens', 'places', 'actions'])
@@ -194,20 +252,18 @@ describe('a paid report with two properties adds up to its total', () => {
 })
 
 describe('free and paid differ where they should', () => {
-  const pf = toDoc(free())
-  const pd = toDoc(buildReport([hotel({ events: FIXTURE, prevEvents: FIXTURE })], { edition: 'paid', lang: 'es', month: '2026-12', now: NOW, brand: { name: 'Casa Cuenca', colour: '#3D4F7C' } }))
-  test('free ends with the invitation, no brand, no paid sections', () => {
-    expect(pf.sections.map((s) => s.id)).toEqual(['visits', 'looked', 'places', 'actions', 'tells', 'invite'])
-    expect(pf.brand).toBeNull(); expect(pf.poweredBy).toBeNull()
-    expect(pf.preparedBy).toBe('Preparado por Lagomplan')
+  const pd = toDoc(buildReport([hotel({ events: FIXTURE, prevEvents: FIXTURE })], { edition: 'paid', lang: 'es', month: '2026-12', now: NOW, brand: { name: 'Casa Cuenca', colour: '#3D4F7C' } }), { now: NOW })
+  test('free has the invitation and no brand or paid sections', () => {
+    const d = doc(free())
+    expect(d.invite).not.toBeNull(); expect(d.brand).toBeNull(); expect(d.poweredBy).toBeNull()
+    expect(d.sections.some((s) => ['paid', 'change', 'properties'].includes(s.id))).toBe(false)
   })
-  test('paid has the change section, brand, "powered by", no invitation; contacts only when that data exists', () => {
-    expect(pd.sections.map((s) => s.id)).toEqual(['visits', 'looked', 'places', 'actions', 'tells', 'change'])
-    expect(pd.poweredBy).toBe('con tecnología de Lagomplan')
+  test('paid has the change section, brand and "powered by", no invitation; contacts only when that data exists', () => {
+    expect(pd.invite).toBeNull(); expect(pd.poweredBy).toBe('con tecnología de Lagomplan'); expect(sec(pd, 'change')).toBeDefined(); expect(sec(pd, 'paid')).toBeUndefined()
     expect(sampleReport('es').properties.every((p) => p.paid)).toBe(true)
-    expect(toDoc(sampleReport('es')).sections.map((s) => s.id)).toContain('paid')
+    expect(sec(toDoc(sampleReport('es'), { now: Date.UTC(2027, 1, 3) }), 'paid')).toBeDefined()
   })
-  test('one property: no per-property section', () => { expect(pd.sections.some((s) => s.id === 'properties')).toBe(false) })
+  test('one property: no per-property section', () => { expect(sec(pd, 'properties')).toBeUndefined() })
 })
 
 describe('what this tells you', () => {
@@ -226,28 +282,49 @@ describe('what this tells you', () => {
   })
 })
 
-describe('the email version', () => {
-  const html = renderEmail(toDoc(free()))
-  test('is plain, email-safe HTML with the same content', () => {
+describe('the email version: the same report', () => {
+  const d = doc(free())
+  const html = renderEmail(d)
+  test('is plain, email-safe HTML: tables and inline styles, system fonts, no coral', () => {
     expect(html).toMatch(/^<!doctype html>/)
-    expect(html).not.toMatch(/<script|<style|class=|@import|<link/i)
-    expect(html).toContain('Casa Cuenca'); expect(html).toContain('noviembre de 2026'); expect(html).toContain('Preparado por Lagomplan')
-    expect(html).toContain('Maleza')
-    expect(html).not.toContain('#E8') // no coral
+    expect(html).not.toMatch(/<script|<style|class=|@import|<link|Manrope/i)
+    expect(html).toContain('Helvetica'); expect(html).not.toMatch(/#E8|coral/i)
+  })
+  test('same structure and order as the page: band, figures, what this tells you, numbered sections, about, invitation, footer', () => {
+    const at = (s: string) => html.indexOf(s)
+    const order = ['Informe mensual', 'Casa Cuenca', 'noviembre de 2026', 'Ánimo más abierto', 'Lo que esto te dice', '>02<', 'Lo que miraron los huéspedes', 'Lugares que tocaron los huéspedes', 'Acciones', 'Sobre estas cifras', 'Haz esta guía tuya', 'Solo lugares verificados']
+    const idx = order.map(at)
+    expect(idx.every((i) => i >= 0)).toBe(true)
+    expect([...idx].sort((a, b) => a - b)).toEqual(idx)
+    for (const num of ['>01<', '>02<', '>03<', '>04<', '>05<']) expect(html).toContain(num)
+  })
+  test('bars are table cells with a background colour; the largest fills its track', () => {
+    expect(html).toContain('bgcolor="#0F3A33"'); expect(html).toContain('bgcolor="#EDE7E1"'); expect(html).toContain('width="100%" height="10" bgcolor="#0F3A33"')
+  })
+  test('the same text as the page', () => {
+    for (const s of d.sections) expect(html).toContain(s.title.replace(/&/g, '&amp;'))
+    for (const f of d.figures) expect(html).toContain(f.label)
+    expect(html).toContain(d.about!.lines[0])
   })
   test('escapes what it prints', () => {
-    expect(renderEmail(toDoc(free(hotel({ name: 'A <b>&"' })))).includes('A &lt;b&gt;&amp;&quot;')).toBe(true)
+    expect(renderEmail(doc(free(hotel({ name: 'A <b>&"' })))).includes('A &lt;b&gt;&amp;&quot;')).toBe(true)
   })
-  test('a paid report carries the logo and the brand colour', () => {
-    const h = renderEmail(toDoc(sampleReport('es'), { sample: true }))
+  test('images: absolute addresses when sent, relative inside the admin preview', () => {
+    expect(html).toContain('src="https://www.lagomplan.com/images/report/lagomplan-logo-light.png"')
+    expect(renderEmail(d, { assetBase: '' })).toContain('src="/images/report/lagomplan-logo-light.png"')
+  })
+  test('a paid report carries the client logo, the brand colour and "powered by Lagomplan"', () => {
+    const h = renderEmail(toDoc(sampleReport('es'), { sample: true, now: Date.UTC(2027, 1, 3) }))
     expect(h).toContain('casa-lagom-sample.svg'); expect(h).toContain('#3D4F7C'); expect(h).toContain('con tecnología de Lagomplan'); expect(h).toContain('MUESTRA')
   })
 })
 
 describe('the sample', () => {
   test('is Casa Lagom, two invented properties, labelled as a sample in both languages', () => {
-    const es = toDoc(sampleReport('es'), { sample: true }), en = toDoc(sampleReport('en'), { sample: true })
+    const now = Date.UTC(2027, 1, 3)
+    const es = toDoc(sampleReport('es'), { sample: true, now }), en = toDoc(sampleReport('en'), { sample: true, now })
     expect(es.sample).toMatch(/MUESTRA/); expect(en.sample).toMatch(/SAMPLE/)
     expect(es.hotel).toBe('Casa Lagom'); expect(es.monthLabel).toBe('enero de 2027'); expect(SAMPLE_MONTH).toBe('2027-01')
+    expect(en.figures.length).toBe(4)
   })
 })
