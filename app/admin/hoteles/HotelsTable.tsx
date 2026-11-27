@@ -103,6 +103,7 @@ export default function HotelsTable({ hotels, totals }: {
                     {h.status !== 'rejected' && <button style={btn} disabled={!!busy} onClick={() => confirm(`¿Rechazar ${h.hotel_name}?`) && act(h.id, 'reject')}>Rechazar</button>}
                     {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'pause')}>Pausar</button>}
                     {h.status === 'approved' && <button style={btn} disabled={!!busy} onClick={() => act(h.id, 'resend')}>Reenviar correo</button>}
+                    <a style={{ ...btn, textDecoration: 'none', display: 'inline-block' }} href={`/admin/hoteles/${h.id}/reportes`}>Informes</a>
                     <button style={btn} onClick={() => setEditing({ id: h.id, notes: h.notes ?? '' })}>Notas</button>
                     {editing?.id === h.id && (
                       <div style={{ marginTop: 6, maxWidth: 560 }}>

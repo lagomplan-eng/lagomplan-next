@@ -20,6 +20,8 @@ export interface HotelRow {
   contact_phone?: string | null
   rooms?: number | null
   contact_role?: string | null
+  /** Report "count from" date, set in /admin/hoteles (migration 20261127000000); absent until it is applied. "YYYY-MM-DD". */
+  count_from?: string | null
   terms_accepted_at: string
   created_at: string
   approved_at: string | null

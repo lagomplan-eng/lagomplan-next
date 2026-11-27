@@ -1,5 +1,5 @@
 /**
- * POST /api/admin/hotels/[id]/action — approve | reject | pause | resend | notes. Admin only (ADMIN_EMAILS).
+ * POST /api/admin/hotels/[id]/action — approve | reject | pause | resend | notes | count_from. Admin only (ADMIN_EMAILS).
  * Approval is manual. On the FIRST approval the hotel gets one email with its printable card and the guide link;
  * re-approving a paused hotel does not email again (use "resend"). Rejection sends one polite email.
  */
@@ -8,6 +8,7 @@ import { getAdminEmail } from '../../../../../../lib/hotels/admin'
 import { getHotelById, hotelsDb } from '../../../../../../lib/hotels/db'
 import { sendApprovalEmail, sendRejectionEmail } from '../../../../../../lib/hotels/emails'
 import { HOTEL_COLUMNS } from '../../../../../../lib/hotels/types'
+import { isDate } from '../../../../../../lib/hotels/report/period'
 
 export const dynamic = 'force-dynamic'
 export const fetchCache = 'force-no-store' // never serve a hotel lookup from the Data Cache (see lib/hotels/db.ts)
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   if (!(await getAdminEmail())) return new NextResponse(null, { status: 404 })
   const { id } = await ctx.params
   if (!UUID.test(id)) return NextResponse.json({ error: 'bad_id' }, { status: 400 })
-  let body: { action?: string; notes?: string }
+  let body: { action?: string; notes?: string; count_from?: string }
   try { body = await req.json() } catch { return NextResponse.json({ error: 'invalid_json' }, { status: 400 }) }
 
   const hotel = await getHotelById(id)
@@ -50,6 +51,12 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
       patch = { notes: notes || null }
       break
     }
+    case 'count_from': {
+      // The day the hotel's reports start counting ('' = back to the approval date).
+      if (body.count_from !== '' && !isDate(body.count_from)) return NextResponse.json({ error: 'bad_date' }, { status: 400 })
+      patch = { count_from: body.count_from || null }
+      break
+    }
     default:
       return NextResponse.json({ error: 'bad_action' }, { status: 400 })
   }
@@ -57,6 +64,7 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ id: string
   let updated = hotel
   if (patch) {
     const { data, error } = await db.from('hotel_partners').update(patch).eq('id', id).select(HOTEL_COLUMNS).single()
+    if (error && body.action === 'count_from' && (error.code === 'PGRST204' || error.code === '42703')) return NextResponse.json({ error: 'migration_missing' }, { status: 409 })
     if (error) { console.error('[admin/hotels] update failed:', error.code); return NextResponse.json({ error: 'server_error' }, { status: 500 }) }
     updated = data
   }
